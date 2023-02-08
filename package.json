@@ -1,7 +1,7 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5js",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A re-implementation of the p5.js 2D API that's smaller and faster",
 	"main": "q5.js",
 	"scripts": {
@@ -15,7 +15,13 @@
 		"url": "git+https://github.com/quinton-ashley/q5js.git"
 	},
 	"keywords": [
-		"p5js"
+		"p5",
+		"p5js",
+		"p5.js",
+		"p5xjs",
+		"q5",
+		"q5xjs",
+		"q5.js"
 	],
 	"license": "GPL-3.0-only",
 	"bugs": {

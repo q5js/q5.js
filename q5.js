@@ -767,29 +767,61 @@ function Q5(scope) {
 		$._colorMode = mode;
 	};
 
+	let basicColors = {
+		black: [0, 0, 0],
+		blue: [0, 0, 255],
+		brown: [165, 42, 42],
+		crimson: [220, 20, 60],
+		gold: [255, 215, 0],
+		green: [0, 128, 0],
+		grey: [128, 128, 128],
+		orange: [255, 165, 0],
+		pink: [255, 192, 203],
+		purple: [128, 0, 128],
+		red: [255, 0, 0],
+		white: [255, 255, 255],
+		yellow: [255, 255, 0]
+	};
+
 	$.color = function () {
-		if (arguments.length == 1 && arguments[0].MAGIC == 0xc010a) {
-			return arguments[0];
+		let args = arguments;
+		if (args.length == 1) {
+			if (args[0].MAGIC == 0xc010a) return args[0];
+			if (typeof args[0] == 'string') {
+				if (args[0][0] == '#') {
+					return new Color(
+						parseInt(args[0].slice(1, 3), 16),
+						parseInt(args[0].slice(3, 5), 16),
+						parseInt(args[0].slice(5, 7), 16),
+						1
+					);
+				} else {
+					if (basicColors[args[0]]) {
+						return new Color(...basicColors[args[0]], 1);
+					}
+					return new Color(0, 0, 0, 1);
+				}
+			}
 		}
 		if ($._colorMode == $.RGB) {
-			if (arguments.length == 1) {
-				return new Color(arguments[0], arguments[0], arguments[0], 1);
-			} else if (arguments.length == 2) {
-				return new Color(arguments[0], arguments[0], arguments[0], arguments[1] / 255);
-			} else if (arguments.length == 3) {
-				return new Color(arguments[0], arguments[1], arguments[2], 1);
-			} else if (arguments.length == 4) {
-				return new Color(arguments[0], arguments[1], arguments[2], arguments[3] / 255);
+			if (args.length == 1) {
+				return new Color(args[0], args[0], args[0], 1);
+			} else if (args.length == 2) {
+				return new Color(args[0], args[0], args[0], args[1] / 255);
+			} else if (args.length == 3) {
+				return new Color(args[0], args[1], args[2], 1);
+			} else if (args.length == 4) {
+				return new Color(args[0], args[1], args[2], args[3] / 255);
 			}
 		} else {
-			if (arguments.length == 1) {
-				return new Color(...hsv2rgb(0, 0, arguments[0] / 100), 1);
-			} else if (arguments.length == 2) {
-				return new Color(...hsv2rgb(0, 0, arguments[0] / 100), arguments[1] / 255);
-			} else if (arguments.length == 3) {
-				return new Color(...hsv2rgb(arguments[0], arguments[1] / 100, arguments[2] / 100), 1);
-			} else if (arguments.length == 4) {
-				return new Color(...hsv2rgb(arguments[0], arguments[1] / 100, arguments[2] / 100), arguments[3]);
+			if (args.length == 1) {
+				return new Color(...hsv2rgb(0, 0, args[0] / 100), 1);
+			} else if (args.length == 2) {
+				return new Color(...hsv2rgb(0, 0, args[0] / 100), args[1] / 255);
+			} else if (args.length == 3) {
+				return new Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), 1);
+			} else if (args.length == 4) {
+				return new Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), args[3]);
 			}
 		}
 		return null;
@@ -1641,11 +1673,15 @@ function Q5(scope) {
 			$._tint = old;
 			return;
 		}
-		let idx = 4 * (y * $._pixelDensity * ctx.canvas.width + x * $._pixelDensity);
-		$.pixels[idx] = c._r;
-		$.pixels[idx + 1] = c._g;
-		$.pixels[idx + 2] = c._b;
-		$.pixels[idx + 3] = c._a * 255;
+		for (let i = 0; i < $._pixelDensity; i++) {
+			for (let j = 0; j < $._pixelDensity; j++) {
+				let idx = 4 * ((y * $._pixelDensity + i) * ctx.canvas.width + x * $._pixelDensity + j);
+				$.pixels[idx] = c._r;
+				$.pixels[idx + 1] = c._g;
+				$.pixels[idx + 2] = c._b;
+				$.pixels[idx + 3] = c._a * 255;
+			}
+		}
 	};
 
 	$.tinted = function () {
@@ -2203,60 +2239,59 @@ function Q5(scope) {
 		}
 	});
 
-	$.canvas.onmousemove = (event) => {
+	updateMouse = (e) => {
 		$.pmouseX = $.mouseX;
 		$.pmouseY = $.mouseY;
-		$.mouseX = event.offsetX;
-		$.mouseY = event.offsetY;
+
+		let rect = $.canvas.getBoundingClientRect();
+		let sx = canvas.scrollWidth / $.width || 1;
+		let sy = canvas.scrollHeight / $.height || 1;
+		$.mouseX = (e.clientX - rect.left) / sx;
+		$.mouseY = (e.clientY - rect.top) / sy;
+	};
+
+	document.onmousemove = (e) => {
+		updateMouse(e);
 
 		if ($.mouseIsPressed) {
-			$._mouseDraggedFn(event);
+			$._mouseDraggedFn(e);
 		} else {
-			$._mouseMovedFn(event);
+			$._mouseMovedFn(e);
 		}
 	};
-	$.canvas.onmousedown = (event) => {
-		$.pmouseX = $.mouseX;
-		$.pmouseY = $.mouseY;
-		$.mouseX = event.offsetX;
-		$.mouseY = event.offsetY;
+	$.canvas.onmousedown = (e) => {
+		updateMouse(e);
 		$.mouseIsPressed = true;
-		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][event.button];
-		$._mousePressedFn(event);
+		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][e.button];
+		$._mousePressedFn(e);
 	};
-	$.canvas.onmouseup = (event) => {
-		$.pmouseX = $.mouseX;
-		$.pmouseY = $.mouseY;
-		$.mouseX = event.offsetX;
-		$.mouseY = event.offsetY;
+	$.canvas.onmouseup = (e) => {
+		updateMouse(e);
 		$.mouseIsPressed = false;
-		$._mouseReleasedFn(event);
+		$._mouseReleasedFn(e);
 	};
-	$.canvas.onclick = (event) => {
-		$.pmouseX = $.mouseX;
-		$.pmouseY = $.mouseY;
-		$.mouseX = event.offsetX;
-		$.mouseY = event.offsetY;
+	$.canvas.onclick = (e) => {
+		updateMouse(e);
 		$.mouseIsPressed = true;
-		$._mouseClickedFn(event);
+		$._mouseClickedFn(e);
 		$.mouseIsPressed = false;
 	};
-	window.addEventListener('keydown', (event) => {
+	window.addEventListener('keydown', (e) => {
 		$.keyIsPressed = true;
-		$.key = event.key;
-		$.keyCode = event.keyCode;
+		$.key = e.key;
+		$.keyCode = e.keyCode;
 		keysHeld[$.keyCode] = true;
-		$._keyPressedFn(event);
-		if (event.key.length == 1) {
-			$._keyTypedFn(event);
+		$._keyPressedFn(e);
+		if (e.key.length == 1) {
+			$._keyTypedFn(e);
 		}
 	});
-	window.addEventListener('keyup', (event) => {
+	window.addEventListener('keyup', (e) => {
 		$.keyIsPressed = false;
-		$.key = event.key;
-		$.keyCode = event.keyCode;
+		$.key = e.key;
+		$.keyCode = e.keyCode;
 		keysHeld[$.keyCode] = false;
-		$._keyReleasedFn(event);
+		$._keyReleasedFn(e);
 	});
 	$.keyIsDown = (x) => {
 		return !!keysHeld[x];
@@ -2275,8 +2310,8 @@ function Q5(scope) {
 	function isTouchUnaware() {
 		return $._touchStarted.isPlaceHolder && $._touchMoved.isPlaceHolder && $._touchEnded.isPlaceHolder;
 	}
-	$.canvas.ontouchstart = (event) => {
-		$.touches = event.touches.map(getTouchInfo);
+	$.canvas.ontouchstart = (e) => {
+		$.touches = e.touches.map(getTouchInfo);
 		if (isTouchUnaware()) {
 			$.pmouseX = $.mouseX;
 			$.pmouseY = $.mouseY;
@@ -2284,16 +2319,16 @@ function Q5(scope) {
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = true;
 			$.mouseButton = $.LEFT;
-			if (!$._mousePressedFn(event)) {
-				event.preventDefault();
+			if (!$._mousePressedFn(e)) {
+				e.preventDefault();
 			}
 		}
-		if (!$._touchStartedFn(event)) {
-			event.preventDefault();
+		if (!$._touchStartedFn(e)) {
+			e.preventDefault();
 		}
 	};
-	$.canvas.ontouchmove = (event) => {
-		$.touches = event.touches.map(getTouchInfo);
+	$.canvas.ontouchmove = (e) => {
+		$.touches = e.touches.map(getTouchInfo);
 		if (isTouchUnaware()) {
 			$.pmouseX = $.mouseX;
 			$.pmouseY = $.mouseY;
@@ -2301,28 +2336,28 @@ function Q5(scope) {
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = true;
 			$.mouseButton = $.LEFT;
-			if (!$._mouseDraggedFn(event)) {
-				event.preventDefault();
+			if (!$._mouseDraggedFn(e)) {
+				e.preventDefault();
 			}
 		}
-		if (!$._touchMovedFn(event)) {
-			event.preventDefault();
+		if (!$._touchMovedFn(e)) {
+			e.preventDefault();
 		}
 	};
-	$.canvas.ontouchend = $.canvas.ontouchcancel = (event) => {
-		$.touches = event.touches.map(getTouchInfo);
+	$.canvas.ontouchend = $.canvas.ontouchcancel = (e) => {
+		$.touches = e.touches.map(getTouchInfo);
 		if (isTouchUnaware()) {
 			$.pmouseX = $.mouseX;
 			$.pmouseY = $.mouseY;
 			$.mouseX = $.touches[0].x;
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = false;
-			if (!$._mouseReleasedFn(event)) {
-				event.preventDefault();
+			if (!$._mouseReleasedFn(e)) {
+				e.preventDefault();
 			}
 		}
-		if (!$._touchEndedFn(event)) {
-			event.preventDefault();
+		if (!$._touchEndedFn(e)) {
+			e.preventDefault();
 		}
 	};
 
@@ -2380,7 +2415,7 @@ function Q5(scope) {
 		(A[8] * v[0] + A[9] * v[1] + A[10] * v[2] + A[11]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15])
 	];
 
-	window.ondeviceorientation = (event) => {
+	window.ondeviceorientation = (e) => {
 		$.pRotationX = $.rotationX;
 		$.pRotationY = $.rotationY;
 		$.pRotationZ = $.rotationZ;
@@ -2388,25 +2423,25 @@ function Q5(scope) {
 		$.pRelRotationY = $.relRotationY;
 		$.pRelRotationZ = $.relRotationZ;
 
-		$.rotationX = event.beta * (Math.PI / 180.0);
-		$.rotationY = event.gamma * (Math.PI / 180.0);
-		$.rotationZ = event.alpha * (Math.PI / 180.0);
+		$.rotationX = e.beta * (Math.PI / 180.0);
+		$.rotationY = e.gamma * (Math.PI / 180.0);
+		$.rotationZ = e.alpha * (Math.PI / 180.0);
 		$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][~~(window.orientation / 90) + 1];
 		$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][~~(window.orientation / 90) + 1];
 		$.relRotationZ = $.rotationZ;
 	};
-	window.ondevicemotion = (event) => {
+	window.ondevicemotion = (e) => {
 		$.pAccelerationX = $.accelerationX;
 		$.pAccelerationY = $.accelerationY;
 		$.pAccelerationZ = $.accelerationZ;
-		if (!event.acceleration) {
+		if (!e.acceleration) {
 			// devices that don't support plain acceleration
 			// compute gravitational acceleration's component on X Y Z axes based on gyroscope
 			// g = ~ 9.80665
 			let grav = TRFM(MULT(ROTY($.rotationY), ROTX($.rotationX)), [0, 0, -9.80665]);
-			$.accelerationX = event.accelerationIncludingGravity.x + grav[0];
-			$.accelerationY = event.accelerationIncludingGravity.y + grav[1];
-			$.accelerationZ = event.accelerationIncludingGravity.z - grav[2];
+			$.accelerationX = e.accelerationIncludingGravity.x + grav[0];
+			$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
+			$.accelerationZ = e.accelerationIncludingGravity.z - grav[2];
 		}
 	};
 
