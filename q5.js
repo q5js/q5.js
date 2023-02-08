@@ -33,9 +33,9 @@ function Q5(scope) {
 	$.PIE = 1;
 	$.OPEN = 2;
 
-	$.RADIUS = 1;
-	$.CORNER = 2;
-	$.CORNERS = 3;
+	$.RADIUS = 'radius';
+	$.CORNER = 'corner';
+	$.CORNERS = 'corners';
 
 	$.ROUND = 'round';
 	$.SQUARE = 'butt';
@@ -913,9 +913,7 @@ function Q5(scope) {
 		}
 		ctx.strokeStyle = col;
 	};
-	$.noStroke = () => {
-		$._noStroke = true;
-	};
+	$.noStroke = () => ($._noStroke = true);
 	$.fill = function () {
 		$._noFill = false;
 		if (typeof arguments[0] == 'string') {
@@ -929,30 +927,14 @@ function Q5(scope) {
 		}
 		ctx.fillStyle = col;
 	};
-	$.noFill = () => {
-		$._noFill = true;
-	};
-	$.blendMode = (x) => {
-		ctx.globalCompositeOperation = x;
-	};
-	$.strokeCap = (x) => {
-		ctx.lineCap = x;
-	};
-	$.strokeJoin = (x) => {
-		ctx.lineJoin = x;
-	};
-	$.ellipseMode = (x) => {
-		$._ellipseMode = x;
-	};
-	$.rectMode = (x) => {
-		$._rectMode = x;
-	};
-	$.curveDetail = (x) => {
-		$._curveDetail = x;
-	};
-	$.curveAlpha = (x) => {
-		$._curveAlpha = x;
-	};
+	$.noFill = () => ($._noFill = true);
+	$.blendMode = (x) => (ctx.globalCompositeOperation = x);
+	$.strokeCap = (x) => (ctx.lineCap = x);
+	$.strokeJoin = (x) => (ctx.lineJoin = x);
+	$.ellipseMode = (x) => ($._ellipseMode = x);
+	$.rectMode = (x) => ($._rectMode = x);
+	$.curveDetail = (x) => ($._curveDetail = x);
+	$.curveAlpha = (x) => ($._curveAlpha = x);
 	$.curveTightness = (x) => {
 		console.warn(
 			"curveTightness() sets the 'alpha' parameter of Catmull-Rom curve, and is NOT identical to p5.js counterpart. As this might change in the future, please call curveAlpha() directly."
@@ -1317,8 +1299,44 @@ function Q5(scope) {
 		ctx.scale($._pixelDensity, $._pixelDensity);
 	};
 
-	$.pushMatrix = $.push = () => ctx.save();
-	$.popMatrix = $.pop = () => ctx.restore();
+	$._styleNames = [
+		'_noStroke',
+		'_noFill',
+		'_tint',
+		'_imageMode',
+		'_rectMode',
+		'_ellipseMode',
+		'_textFont',
+		'_textLeading',
+		'_leadingSet',
+		'_textSize',
+		'_textAlign',
+		'_textBaseline',
+		'_textStyle',
+		'_textWrap'
+	];
+
+	$._ctxStyleNames = ['strokeStyle', 'fillStyle', 'lineWidth', 'lineCap', 'lineJoin'];
+
+	$._styles = [];
+	$._ctxStyles = [];
+
+	$.pushMatrix = $.push = () => {
+		ctx.save();
+		let styles = {};
+		for (let s of $._styleNames) styles[s] = $[s];
+		$._styles.push(styles);
+		let ctxStyles = {};
+		for (let s of $._ctxStyleNames) ctxStyles[s] = ctx[s];
+		$._ctxStyles.push(ctxStyles);
+	};
+	$.popMatrix = $.pop = () => {
+		ctx.restore();
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+		let ctxStyles = $._ctxStyles.pop();
+		for (let s of $._ctxStyleNames) ctx[s] = ctxStyles[s];
+	};
 
 	//================================================================
 	// IMAGING
