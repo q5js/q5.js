@@ -15,6 +15,7 @@ q5.js doesn't include any friendly error messages though. If you're a beginner, 
 ## Dev Log
 
 - added `registerMethod` functionality for supporting p5.js addons such as p5.play!
+- automatic global instance creation, can also be user instantiated as well with `new Q5('global')` like with the previous version of q5xjs
 - added `angleMode` functionality
 - fixed `pixelDensity` bugs
 - added a `loadSound` function that returns a barebones sound object with `play`, `pause`, and `setVolume` methods

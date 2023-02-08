@@ -1,8 +1,8 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5js",
-	"version": "1.0.2",
-	"description": "A re-implementation of the p5.js 2D API that's smaller and faster",
+	"version": "1.0.3",
+	"description": "An implementation of the p5.js 2D API that's smaller and faster",
 	"main": "q5.js",
 	"scripts": {
 		"v": "npm version patch --force",

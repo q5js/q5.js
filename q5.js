@@ -1,4 +1,5 @@
 function Q5(scope) {
+	if (scope == 'global') Q5._global = true;
 	let $ = scope == 'global' ? window : this;
 	$.canvas = document.createElement('canvas');
 	let ctx = $.canvas.getContext('2d');
@@ -2512,4 +2513,6 @@ Q5.prototype.registerPreloadMethod = () => {};
 Q5._validateParameters = () => true;
 window.p5 = Q5;
 
-document.addEventListener('DOMContentLoaded', () => new Q5('global'));
+document.addEventListener('DOMContentLoaded', () => {
+	if (!Q5._global) new Q5('global');
+});
