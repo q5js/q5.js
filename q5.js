@@ -346,6 +346,18 @@ function Q5(scope) {
 		if ($._angleMode == 'degrees') return $.degrees(a);
 		return a;
 	};
+	$.nf = (n, l, r) => {
+		let neg = n < 0;
+		let s = n.toString();
+		if (neg) s = s.slice(1);
+		s = s.padStart(l, '0');
+		if (r > 0) {
+			if (s.indexOf('.') == -1) s += '.';
+			s = s.padEnd(l + 1 + r, '0');
+		}
+		if (neg) s = '-' + s;
+		return s;
+	};
 
 	//================================================================
 	// VECTOR
@@ -1280,7 +1292,10 @@ function Q5(scope) {
 	// DRAWING MATRIX
 	//================================================================
 	$.translate = (x, y) => ctx.translate(x, y);
-	$.rotate = (r) => ctx.rotate(r);
+	$.rotate = (r) => {
+		if ($._angleMode == 'degrees') r = $.radians(r);
+		ctx.rotate(r);
+	};
 
 	$.scale = (x, y) => {
 		if (y == undefined) y = x;
