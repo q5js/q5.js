@@ -21,6 +21,7 @@ q5.js doesn't include any friendly error messages though. If you're a beginner, 
 - added a `loadSound` function that returns a barebones sound object with `play`, `pause`, and `setVolume` methods
 - made `instanceof` checks work for q5.js objects of the `Color`, `Vector`, and `Image` classes
 - the `push` and `pop` functions now save and restore style properties like `rectMode` and `strokeWeight`
+- added `pow` function alias to `Math.pow`
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
 
 ## Size Comparison

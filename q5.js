@@ -312,6 +312,7 @@ function Q5(scope) {
 	$.max = Math.max;
 	$.min = Math.min;
 	$.round = Math.round;
+	$.pow = Math.pow;
 	$.sqrt = Math.sqrt;
 	$.sin = (a) => {
 		if ($._angleMode == 'degrees') a = $.radians(a);
@@ -485,10 +486,10 @@ function Q5(scope) {
 			cacheNormSq = m * m;
 			return v;
 		};
-		v.heading = () => Math.atan2(v.y, v.x);
+		v.heading = () => $.atan2(v.y, v.x);
 		v.rotate = (ang) => {
-			let costh = Math.cos(ang);
-			let sinth = Math.sin(ang);
+			let costh = $.cos(ang);
+			let sinth = $.sin(ang);
 			let vx = v.x * costh - v.y * sinth;
 			let vy = v.x * sinth + v.y * costh;
 			v.x = vx;
@@ -499,7 +500,7 @@ function Q5(scope) {
 			let u = arg2v.apply(null, arguments);
 			const costh = v.dot(u) / (v.mag() * u.mag());
 			let ang;
-			ang = Math.acos(Math.min(1, Math.max(-1, costh)));
+			ang = $.tan(Math.min(1, Math.max(-1, costh)));
 			ang = ang * Math.sign(v.cross(u).z || 1);
 			return ang;
 		};
@@ -530,8 +531,8 @@ function Q5(scope) {
 			}
 			cacheNorm = l;
 			cacheNormSq = l * l;
-			v.x = l * Math.cos(th);
-			v.y = l * Math.sin(th);
+			v.x = l * $.cos(th);
+			v.y = l * $.sin(th);
 			v.z = 0;
 			return v;
 		};
@@ -541,10 +542,10 @@ function Q5(scope) {
 			}
 			cacheNorm = l;
 			cacheNormSq = l * l;
-			const cosph = Math.cos(ph);
-			const sinph = Math.sin(ph);
-			const costh = Math.cos(th);
-			const sinth = Math.sin(th);
+			const cosph = $.cos(ph);
+			const sinph = $.sin(ph);
+			const costh = $.cos(th);
+			const sinth = $.sin(th);
 			v.x = l * sinth * sinph;
 			v.y = -l * costh;
 			v.z = l * sinth * cosph;
@@ -998,8 +999,8 @@ function Q5(scope) {
 		for (let i = 0; i < detail + 1; i++) {
 			let t = i / detail;
 			let a = $.lerp(lo, hi, t);
-			let dx = (Math.cos(a) * w) / 2;
-			let dy = (Math.sin(a) * h) / 2;
+			let dx = ($.cos(a) * w) / 2;
+			let dy = ($.sin(a) * h) / 2;
 			ctx[i ? 'lineTo' : 'moveTo'](x + dx, y + dy);
 		}
 		if (mode == $.CHORD) {
@@ -1289,10 +1290,10 @@ function Q5(scope) {
 		ctx.transform(a, b, c, d, e, f);
 	};
 	$.shearX = (ang) => {
-		ctx.transform(1, 0, Math.tan(ang), 1, 0, 0);
+		ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
 	};
 	$.shearY = (ang) => {
-		ctx.transform(1, Math.tan(ang), 0, 1, 0, 0);
+		ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
 	};
 
 	$.resetMatrix = () => {
@@ -1862,7 +1863,7 @@ function Q5(scope) {
 	var perlin_octaves = 4;
 	var perlin_amp_falloff = 0.5;
 	var scaled_cosine = (i) => {
-		return 0.5 * (1.0 - Math.cos(i * Math.PI));
+		return 0.5 * (1.0 - $.cos(i * Math.PI));
 	};
 	var p_perlin;
 
@@ -2408,8 +2409,8 @@ function Q5(scope) {
 	//================================================================
 
 	// 3d transformation helpers
-	let ROTX = (a) => [1, 0, 0, 0, 0, Math.cos(a), -Math.sin(a), 0, 0, Math.sin(a), Math.cos(a), 0, 0, 0, 0, 1];
-	let ROTY = (a) => [Math.cos(a), 0, Math.sin(a), 0, 0, 1, 0, 0, -Math.sin(a), 0, Math.cos(a), 0, 0, 0, 0, 1];
+	let ROTX = (a) => [1, 0, 0, 0, 0, $.cos(a), -$.sin(a), 0, 0, $.sin(a), $.cos(a), 0, 0, 0, 0, 1];
+	let ROTY = (a) => [$.cos(a), 0, $.sin(a), 0, 0, 1, 0, 0, -$.sin(a), 0, $.cos(a), 0, 0, 0, 0, 1];
 	let MULT = (A, B) => [
 		A[0] * B[0] + A[1] * B[4] + A[2] * B[8] + A[3] * B[12],
 		A[0] * B[1] + A[1] * B[5] + A[2] * B[9] + A[3] * B[13],
