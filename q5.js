@@ -1,6 +1,19 @@
-function Q5(scope) {
+/**
+ * q5js
+ * @version 1.0
+ * @author LingDong- and quinton-ashley
+ */
+function Q5(scope, parent) {
+	if (scope == 'auto') {
+		if (typeof window.setup == 'undefined') return;
+		else scope = 'global';
+	}
+	if (arguments.length == 1 && typeof scope != 'string') {
+		parent = arguments[0];
+		scope = null;
+	}
 	if (scope == 'global') Q5._global = true;
-	let $ = scope == 'global' ? window : this;
+	let $ = scope == 'auto' || scope == 'global' ? window : this;
 	$.canvas = document.createElement('canvas');
 	let ctx = $.canvas.getContext('2d');
 
@@ -11,7 +24,8 @@ function Q5(scope) {
 
 	if (scope != 'offscreen') {
 		if (document.body) {
-			document.body.appendChild($.canvas);
+			if (parent) parent.append($.canvas);
+			else document.body.appendChild($.canvas);
 		} else {
 			window.addEventListener('load', () => {
 				document.body.appendChild($.canvas);
@@ -253,7 +267,7 @@ function Q5(scope) {
 	Q5.Image = _Image;
 
 	$.createGraphics = $.createImage = (width, height) => {
-		return new _Image(width, height);
+		return new Q5.Image(width, height);
 	};
 
 	$.pixelDensity = (n) => {
@@ -328,22 +342,22 @@ function Q5(scope) {
 	};
 	$.asin = (x) => {
 		let a = Math.asin(x);
-		if ($._angleMode == 'degrees') return $.degrees(a);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
 		return a;
 	};
 	$.acos = (x) => {
 		let a = Math.acos(x);
-		if ($._angleMode == 'degrees') return $.degrees(a);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
 		return a;
 	};
 	$.atan = (x) => {
 		let a = Math.atan(x);
-		if ($._angleMode == 'degrees') return $.degrees(a);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
 		return a;
 	};
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
-		if ($._angleMode == 'degrees') return $.degrees(a);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
 		return a;
 	};
 	$.nf = (n, l, r) => {
@@ -374,7 +388,7 @@ function Q5(scope) {
 			v.y = _y || 0;
 			v.z = _z || 0;
 		};
-		v.copy = () => new Vector(v.x, v.y, v.z);
+		v.copy = () => new Q5.Vector(v.x, v.y, v.z);
 		function arg2v(x, y, z) {
 			if (x.x != undefined) {
 				return x;
@@ -576,42 +590,42 @@ function Q5(scope) {
 		v.toString = () => `[${v.x}, ${v.y}, ${v.z}]`;
 	}
 	Vector.add = (v, u) => {
-		return new Vector(v.x + u.x, v.y + u.y, v.z + u.z);
+		return new Q5.Vector(v.x + u.x, v.y + u.y, v.z + u.z);
 	};
 	Vector.rem = (v, u) => {
-		return new Vector(v.x % u.x, v.y % u.y, v.z % u.z);
+		return new Q5.Vector(v.x % u.x, v.y % u.y, v.z % u.z);
 	};
 	Vector.sub = (v, u) => {
-		return new Vector(v.x - u.x, v.y - u.y, v.z - u.z);
+		return new Q5.Vector(v.x - u.x, v.y - u.y, v.z - u.z);
 	};
 	Vector.mult = (v, u) => {
 		if (u.x == undefined) {
-			return new Vector(v.x * u, v.y * u, v.z * u);
+			return new Q5.Vector(v.x * u, v.y * u, v.z * u);
 		}
-		return new Vector(v.x * u.x, v.y * u.y, v.z * u.z);
+		return new Q5.Vector(v.x * u.x, v.y * u.y, v.z * u.z);
 	};
 	Vector.div = (v, u) => {
 		if (u.x == undefined) {
-			return new Vector(v.x / u, v.y / u, v.z / u);
+			return new Q5.Vector(v.x / u, v.y / u, v.z / u);
 		}
-		return new Vector(v.x / u.x, v.y / u.y, v.z / u.z);
+		return new Q5.Vector(v.x / u.x, v.y / u.y, v.z / u.z);
 	};
 	Vector.dist = (v, u) => {
 		return Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
 	};
 	Vector.cross = (v, u) => {
-		return new Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
+		return new Q5.Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
 	};
 	Vector.lerp = (v, u, t) => {
-		return new Vector(v.x * (1 - t) + u.x * t, (v.y = v.y * (1 - t) + u.y * t), (v.z = v.z * (1 - t) + u.z * t));
+		return new Q5.Vector(v.x * (1 - t) + u.x * t, (v.y = v.y * (1 - t) + u.y * t), (v.z = v.z * (1 - t) + u.z * t));
 	};
 	Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
 
 	for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
-		Vector[k] = (u, v, t) => new Vector()[k](u, v, t);
+		Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 	}
-	$.createVector = (x, y, z) => new Vector(x, y, z);
-	$.Vector = Vector;
+	$.createVector = (x, y, z) => new Q5.Vector(x, y, z);
+	Q5.Vector = Vector;
 
 	//================================================================
 	// CURVE QUERY
@@ -775,7 +789,7 @@ function Q5(scope) {
 			return `rgba(${Math.round(this._r)},${Math.round(this._g)},${Math.round(this._b)},${~~(this._a * 1000) / 1000})`;
 		}
 	}
-	$.Color = Color;
+	Q5.Color = Color;
 
 	$.colorMode = (mode) => {
 		$._colorMode = mode;
@@ -803,7 +817,7 @@ function Q5(scope) {
 			if (args[0].MAGIC == 0xc010a) return args[0];
 			if (typeof args[0] == 'string') {
 				if (args[0][0] == '#') {
-					return new Color(
+					return new Q5.Color(
 						parseInt(args[0].slice(1, 3), 16),
 						parseInt(args[0].slice(3, 5), 16),
 						parseInt(args[0].slice(5, 7), 16),
@@ -811,31 +825,31 @@ function Q5(scope) {
 					);
 				} else {
 					if (basicColors[args[0]]) {
-						return new Color(...basicColors[args[0]], 1);
+						return new Q5.Color(...basicColors[args[0]], 1);
 					}
-					return new Color(0, 0, 0, 1);
+					return new Q5.Color(0, 0, 0, 1);
 				}
 			}
 		}
 		if ($._colorMode == $.RGB) {
 			if (args.length == 1) {
-				return new Color(args[0], args[0], args[0], 1);
+				return new Q5.Color(args[0], args[0], args[0], 1);
 			} else if (args.length == 2) {
-				return new Color(args[0], args[0], args[0], args[1] / 255);
+				return new Q5.Color(args[0], args[0], args[0], args[1] / 255);
 			} else if (args.length == 3) {
-				return new Color(args[0], args[1], args[2], 1);
+				return new Q5.Color(args[0], args[1], args[2], 1);
 			} else if (args.length == 4) {
-				return new Color(args[0], args[1], args[2], args[3] / 255);
+				return new Q5.Color(args[0], args[1], args[2], args[3] / 255);
 			}
 		} else {
 			if (args.length == 1) {
-				return new Color(...hsv2rgb(0, 0, args[0] / 100), 1);
+				return new Q5.Color(...hsv2rgb(0, 0, args[0] / 100), 1);
 			} else if (args.length == 2) {
-				return new Color(...hsv2rgb(0, 0, args[0] / 100), args[1] / 255);
+				return new Q5.Color(...hsv2rgb(0, 0, args[0] / 100), args[1] / 255);
 			} else if (args.length == 3) {
-				return new Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), 1);
+				return new Q5.Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), 1);
 			} else if (args.length == 4) {
-				return new Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), args[3]);
+				return new Q5.Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), args[3]);
 			}
 		}
 		return null;
@@ -881,7 +895,7 @@ function Q5(scope) {
 
 	$.lerpColor = (a, b, t) => {
 		if ($._colorMode == $.RGB) {
-			return new Color(
+			return new Q5.Color(
 				$.constrain($.lerp(a._r, b._r, t), 0, 255),
 				$.constrain($.lerp(a._g, b._g, t), 0, 255),
 				$.constrain($.lerp(a._b, b._b, t), 0, 255),
@@ -890,7 +904,7 @@ function Q5(scope) {
 		} else {
 			a._inferHSV();
 			b._inferHSV();
-			return new Color(
+			return new Q5.Color(
 				$.constrain(lerpHue(a._h, b._h, t), 0, 360),
 				$.constrain($.lerp(a._s, b._s, t), 0, 100),
 				$.constrain($.lerp(a._v, b._v, t), 0, 100),
@@ -1687,7 +1701,7 @@ function Q5(scope) {
 	$.get = (x, y, w, h) => {
 		if (x != undefined && w == undefined) {
 			let c = ctx.getImageData(x, y, 1, 1).data;
-			return new Color(c[0], c[1], c[2], c[3] / 255);
+			return new Q5.Color(c[0], c[1], c[2], c[3] / 255);
 		}
 		x = x || 0;
 		y = y || 0;
@@ -2279,20 +2293,16 @@ function Q5(scope) {
 		$.pmouseY = $.mouseY;
 
 		let rect = $.canvas.getBoundingClientRect();
-		let sx = canvas.scrollWidth / $.width || 1;
-		let sy = canvas.scrollHeight / $.height || 1;
+		let sx = $.canvas.scrollWidth / $.width || 1;
+		let sy = $.canvas.scrollHeight / $.height || 1;
 		$.mouseX = (e.clientX - rect.left) / sx;
 		$.mouseY = (e.clientY - rect.top) / sy;
 	};
 
 	document.onmousemove = (e) => {
 		updateMouse(e);
-
-		if ($.mouseIsPressed) {
-			$._mouseDraggedFn(e);
-		} else {
-			$._mouseMovedFn(e);
-		}
+		if ($.mouseIsPressed) $._mouseDraggedFn(e);
+		else $._mouseMovedFn(e);
 	};
 	$.canvas.onmousedown = (e) => {
 		updateMouse(e);
@@ -2311,7 +2321,7 @@ function Q5(scope) {
 		$._mouseClickedFn(e);
 		$.mouseIsPressed = false;
 	};
-	window.addEventListener('keydown', (e) => {
+	$._onkeydown = (e) => {
 		$.keyIsPressed = true;
 		$.key = e.key;
 		$.keyCode = e.keyCode;
@@ -2320,17 +2330,17 @@ function Q5(scope) {
 		if (e.key.length == 1) {
 			$._keyTypedFn(e);
 		}
-	});
-	window.addEventListener('keyup', (e) => {
+	};
+	$._onkeyup = (e) => {
 		$.keyIsPressed = false;
 		$.key = e.key;
 		$.keyCode = e.keyCode;
 		keysHeld[$.keyCode] = false;
 		$._keyReleasedFn(e);
-	});
-	$.keyIsDown = (x) => {
-		return !!keysHeld[x];
 	};
+	window.addEventListener('keydown', (e) => $._onkeydown(e));
+	window.addEventListener('keyup', (e) => $._onkeyup(e));
+	$.keyIsDown = (x) => !!keysHeld[x];
 
 	function getTouchInfo(touch) {
 		const rect = $.canvas.getBoundingClientRect();
@@ -2514,6 +2524,8 @@ function Q5(scope) {
 	}
 
 	for (let m of Q5.prototype._methods.init) m.call($);
+
+	if (typeof scope == 'function') scope($);
 }
 
 Q5.prototype._methods = {
@@ -2530,5 +2542,5 @@ Q5._validateParameters = () => true;
 window.p5 = Q5;
 
 document.addEventListener('DOMContentLoaded', () => {
-	if (!Q5._global) new Q5('global');
+	if (!Q5._global) new Q5('auto');
 });
