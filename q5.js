@@ -248,7 +248,7 @@ function Q5(scope, parent) {
 		$.canvas.width = width * $._pixelDensity;
 		$.canvas.height = height * $._pixelDensity;
 		defaultStyle();
-		$.pixelDensity(2);
+		if (scope != 'offscreen') $.pixelDensity(2);
 	};
 
 	$.resizeCanvas = (width, height) => {
@@ -1384,30 +1384,26 @@ function Q5(scope, parent) {
 			tmpCt2.drawImage(img.canvas, 0, 0);
 			img.tinted($._tint);
 		}
-		if ($._imageMode == 'center') {
-			dx -= img.width * 0.5;
-			dy -= img.height * 0.5;
-		}
 		if (!dWidth) {
 			if (img.MAGIC == $.MAGIC || img.width) {
-				ctx.drawImage(drawable, dx, dy, img.width, img.height);
+				dWidth = img.width;
+				dHeight = img.height;
 			} else {
-				ctx.drawImage(drawable, dx, dy, img.videoWidth, img.videoHeight);
+				dWidth = img.videoWidth;
+				dHeight = img.videoHeight;
 			}
-			reset();
-			return;
 		}
-		if (!sx) {
+		if ($._imageMode == 'center') {
+			dx -= dWidth * 0.5;
+			dy -= dHeight * 0.5;
+		}
+		if (sx === undefined) {
 			ctx.drawImage(drawable, dx, dy, dWidth, dHeight);
 			reset();
 			return;
 		}
-		if (!sWidth) {
-			sWidth = drawable.width;
-		}
-		if (!sHeight) {
-			sHeight = drawable.height;
-		}
+		sWidth ??= drawable.width;
+		sHeight ??= drawable.height;
 		ctx.drawImage(drawable, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		reset();
 	};
@@ -1431,10 +1427,8 @@ function Q5(scope, parent) {
 		img.src = url;
 		img.crossOrigin = 'Anonymous';
 		img.onload = () => {
-			c.canvas.width = img.width;
-			c.canvas.height = img.height;
-			g.width = img.width;
-			g.height = img.height;
+			g.width = c.canvas.width = img.naturalWidth;
+			g.height = c.canvas.height = img.naturalHeight;
 			c.drawImage(img, 0, 0);
 			preloadCnt--;
 			if (cb) cb(g);
