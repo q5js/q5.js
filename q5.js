@@ -258,16 +258,6 @@ function Q5(scope, parent) {
 		$.canvas.height = height * $._pixelDensity;
 	};
 
-	class _Image extends Q5 {
-		constructor(width, height) {
-			super('offscreen');
-			this.createCanvas(width, height);
-			this.noLoop();
-		}
-	}
-
-	Q5.Image = _Image;
-
 	$.createGraphics = $.createImage = (width, height) => {
 		return new Q5.Image(width, height);
 	};
@@ -315,7 +305,6 @@ function Q5(scope, parent) {
 	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
-	// TODO angleMode
 	$.angleMode = (mode) => ($._angleMode = mode);
 	$.degrees = (x) => (x * 180) / Math.PI;
 	$.radians = (x) => (x * Math.PI) / 180;
@@ -1378,8 +1367,7 @@ function Q5(scope, parent) {
 	//================================================================
 	// IMAGING
 	//================================================================
-	// TODO imageMode
-	$.imageMode = (mode) => ($._imageMode = mode);
+	$.imageMode = (mode) => ($._imageMode = mode); // TODO
 	$.image = (img, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight) => {
 		let drawable = img.MAGIC == $.MAGIC ? img.canvas : img;
 		function reset() {
@@ -1395,6 +1383,10 @@ function Q5(scope, parent) {
 			makeTmpCt2(img.canvas.width, img.canvas.height);
 			tmpCt2.drawImage(img.canvas, 0, 0);
 			img.tinted($._tint);
+		}
+		if ($._imageMode == 'center') {
+			dx -= img.width * 0.5;
+			dy -= img.height * 0.5;
 		}
 		if (!dWidth) {
 			if (img.MAGIC == $.MAGIC || img.width) {
@@ -2295,7 +2287,8 @@ function Q5(scope, parent) {
 		}
 	});
 
-	updateMouse = (e) => {
+	$._updateMouse = function (e) {
+		let $ = this;
 		$.pmouseX = $.mouseX;
 		$.pmouseY = $.mouseY;
 
@@ -2304,26 +2297,27 @@ function Q5(scope, parent) {
 		let sy = $.canvas.scrollHeight / $.height || 1;
 		$.mouseX = (e.clientX - rect.left) / sx;
 		$.mouseY = (e.clientY - rect.top) / sy;
-	};
+	}.bind($);
 
-	document.onmousemove = (e) => {
-		updateMouse(e);
-		if ($.mouseIsPressed) $._mouseDraggedFn(e);
-		else $._mouseMovedFn(e);
-	};
-	$.canvas.onmousedown = (e) => {
-		updateMouse(e);
+	$._onmousemove = function (e) {
+		$._updateMouse(e);
+		if (this.mouseIsPressed) this._mouseDraggedFn(e);
+		else this._mouseMovedFn(e);
+	}.bind($);
+	addEventListener('mousemove', $._onmousemove, false);
+	$._onmousedown = (e) => {
+		$._updateMouse(e);
 		$.mouseIsPressed = true;
 		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][e.button];
 		$._mousePressedFn(e);
 	};
-	$.canvas.onmouseup = (e) => {
-		updateMouse(e);
+	$._onmouseup = (e) => {
+		$._updateMouse(e);
 		$.mouseIsPressed = false;
 		$._mouseReleasedFn(e);
 	};
-	$.canvas.onclick = (e) => {
-		updateMouse(e);
+	$._onclick = (e) => {
+		$._updateMouse(e);
 		$.mouseIsPressed = true;
 		$._mouseClickedFn(e);
 		$.mouseIsPressed = false;
@@ -2345,6 +2339,9 @@ function Q5(scope, parent) {
 		keysHeld[$.keyCode] = false;
 		$._keyReleasedFn(e);
 	};
+	$.canvas.onmousedown = (e) => $._onmousedown(e);
+	$.canvas.onmouseup = (e) => $._onmouseup(e);
+	$.canvas.onclick = (e) => $._onclick(e);
 	window.addEventListener('keydown', (e) => $._onkeydown(e));
 	window.addEventListener('keyup', (e) => $._onkeyup(e));
 	$.keyIsDown = (x) => !!keysHeld[x];
@@ -2529,10 +2526,19 @@ function Q5(scope, parent) {
 		$.length = 0;
 		delete Q5.Q5;
 	}
+	Q5.Image ??= _Q5Image;
 
 	for (let m of Q5.prototype._methods.init) m.call($);
 
 	if (typeof scope == 'function') scope($);
+}
+
+class _Q5Image extends Q5 {
+	constructor(width, height) {
+		super('offscreen');
+		this.createCanvas(width, height);
+		this.noLoop();
+	}
 }
 
 Q5.prototype._methods = {

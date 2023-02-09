@@ -40,9 +40,12 @@ To use addons, simply load them after q5.js:
 - the `push` and `pop` functions now save and restore style properties like `rectMode` and `strokeWeight`
 - added `nf` (number format) function, which is used in p5.play
 - added `pow` function alias to `Math.pow`
+- prevented text stroke from being drawn if the user did not specify a stroke (p5.js behavior)
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
 
 ## Motivation
+
+_This section was written by @LingDong-, the creator of q5_
 
 After having used many graphics libraries across many different languages, I have found that the Processing/p5.js/Openframeworks system has one huge advantage over others:
 
