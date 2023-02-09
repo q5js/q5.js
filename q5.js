@@ -185,6 +185,8 @@ function Q5(scope, parent) {
 	$._colorMode = $.RGB;
 	$._noStroke = false;
 	$._noFill = false;
+	$._strokeSet = false;
+	$._fillSet = false;
 	$._ellipseMode = $.CENTER;
 	$._rectMode = $.CORNER;
 	$._curveDetail = 20;
@@ -919,7 +921,7 @@ function Q5(scope, parent) {
 
 	function defaultStyle() {
 		ctx.fillStyle = 'white';
-		ctx.strokeStyle = 'transparent';
+		ctx.strokeStyle = 'black';
 		ctx.lineCap = 'round';
 		ctx.lineJoin = 'miter';
 	}
@@ -930,6 +932,7 @@ function Q5(scope, parent) {
 	};
 	$.stroke = function () {
 		$._noStroke = false;
+		$._strokeSet = true;
 		if (typeof arguments[0] == 'string') {
 			ctx.strokeStyle = arguments[0];
 			return;
@@ -944,6 +947,7 @@ function Q5(scope, parent) {
 	$.noStroke = () => ($._noStroke = true);
 	$.fill = function () {
 		$._noFill = false;
+		$._fillSet = true;
 		if (typeof arguments[0] == 'string') {
 			ctx.fillStyle = arguments[0];
 			return;
@@ -1333,6 +1337,8 @@ function Q5(scope, parent) {
 	$._styleNames = [
 		'_noStroke',
 		'_noFill',
+		'_strokeSet',
+		'_fillSet',
 		'_tint',
 		'_imageMode',
 		'_rectMode',
@@ -1861,7 +1867,7 @@ function Q5(scope, parent) {
 			if (!$._noFill) {
 				ctx.fillText(lines[i], x, y, w);
 			}
-			if (!$._noStroke) {
+			if (!$._noStroke && $._strokeSet) {
 				ctx.strokeText(lines[i], x, y, w);
 			}
 			y += $._textLeading;
