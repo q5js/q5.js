@@ -919,7 +919,7 @@ function Q5(scope, parent) {
 
 	function defaultStyle() {
 		ctx.fillStyle = 'white';
-		ctx.strokeStyle = 'black';
+		ctx.strokeStyle = 'transparent';
 		ctx.lineCap = 'round';
 		ctx.lineJoin = 'miter';
 	}
@@ -1835,8 +1835,9 @@ function Q5(scope, parent) {
 		$._textFont = x;
 	};
 	$.textSize = (x) => {
-		$._textSize = x;
+		if (x === undefined) return $._textSize;
 		$._textLeading = x;
+		$._textSize = x;
 	};
 	$.textLeading = (x) => {
 		$._textLeading = x;
