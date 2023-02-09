@@ -159,7 +159,7 @@ function Q5(scope, parent) {
 	$.mouseIsPressed = false;
 	$.key = null;
 	$.keyCode = null;
-	$.pixels = null;
+	$.pixels = [];
 	$.accelerationX = 0;
 	$.accelerationY = 0;
 	$.accelerationZ = 0;
@@ -794,6 +794,7 @@ function Q5(scope, parent) {
 		gold: [255, 215, 0],
 		green: [0, 128, 0],
 		grey: [128, 128, 128],
+		magenta: [255, 0, 255],
 		orange: [255, 165, 0],
 		pink: [255, 192, 203],
 		purple: [128, 0, 128],
@@ -1844,18 +1845,21 @@ function Q5(scope, parent) {
 		}
 	};
 	$.text = (str, x, y, w) => {
-		if (!str) return;
+		if (str === undefined) return;
 		str = str.toString();
 		if ($._noFill && $._noStroke) return;
 		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		let lines = str.split('\n');
 		for (let i = 0; i < lines.length; i++) {
+			let f = ctx.fillStyle;
+			if (!$._fillSet) ctx.fillStyle = 'black';
 			if (!$._noFill) {
 				ctx.fillText(lines[i], x, y, w);
 			}
 			if (!$._noStroke && $._strokeSet) {
 				ctx.strokeText(lines[i], x, y, w);
 			}
+			if (!$._fillSet) ctx.fillStyle = f;
 			y += $._textLeading;
 		}
 	};
@@ -2012,6 +2016,7 @@ function Q5(scope, parent) {
 	};
 	$.randomSeed = (seed) => rng1.setSeed(seed);
 	$.random = (a, b) => {
+		if (a === undefined) return rng1.rand();
 		if (typeof a == 'number') {
 			if (b != undefined) {
 				return rng1.rand() * (b - a) + a;
@@ -2267,6 +2272,7 @@ function Q5(scope, parent) {
 	};
 	$.redraw = () => _draw();
 	$.frameRate = (fps) => ($._frameRate = fps);
+	$.getFrameRate = () => $._frameRate;
 
 	requestAnimationFrame(() => {
 		$._preloadFn();
@@ -2317,6 +2323,7 @@ function Q5(scope, parent) {
 		$.mouseIsPressed = false;
 	};
 	$._onkeydown = (e) => {
+		if (e.repeat) return;
 		$.keyIsPressed = true;
 		$.key = e.key;
 		$.keyCode = e.keyCode;
@@ -2336,8 +2343,8 @@ function Q5(scope, parent) {
 	$.canvas.onmousedown = (e) => $._onmousedown(e);
 	$.canvas.onmouseup = (e) => $._onmouseup(e);
 	$.canvas.onclick = (e) => $._onclick(e);
-	window.addEventListener('keydown', (e) => $._onkeydown(e));
-	window.addEventListener('keyup', (e) => $._onkeyup(e));
+	addEventListener('keydown', (e) => $._onkeydown(e), false);
+	addEventListener('keyup', (e) => $._onkeyup(e), false);
 	$.keyIsDown = (x) => !!keysHeld[x];
 
 	function getTouchInfo(touch) {
@@ -2505,6 +2512,10 @@ function Q5(scope, parent) {
 		a.load();
 		a.setVolume = (l) => (a.volume = l);
 		return a;
+	};
+
+	$.remove = () => {
+		$.canvas.remove();
 	};
 
 	$.Element = function (a) {

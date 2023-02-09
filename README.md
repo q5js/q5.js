@@ -39,6 +39,8 @@ Co-creator of q5, @quinton-ashley, added a ton of features:
 - `angleMode` functionality
 - `loadSound` function that returns a barebones sound object with `play`, `pause`, and `setVolume` methods
 - fixed `pixelDensity` bugs
+- fixed `text` function bug not displaying "0" (falsey value in JS)
+- fixed `keyPressed` repeating key presses
 - made `instanceof` checks work for q5.js objects of the `Color`, `Vector`, and `Image` classes
 - the `push` and `pop` functions now save and restore style properties like `rectMode` and `strokeWeight`
 - `nf` (number format) function, which is used in p5.play
