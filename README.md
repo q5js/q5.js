@@ -48,7 +48,7 @@ Co-creator of q5, @quinton-ashley, added a ton of features:
 - prevented text stroke from being drawn if the user did not specify a stroke (p5.js behavior)
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
 
-## Motivation
+## Motivation: Part 1
 
 _This section was written by @LingDong-, co-creator of q5_
 
@@ -58,13 +58,19 @@ It gets stuff drawn onto the screen quick and easy!
 
 This might sound silly, but it actually means a lot for people concerned with creative expression. The easier it is to try things out, before one's time and patience is up, the greater chance that you'll get something nice in the end. Therefore, although you can theoretically achieve the exact same result in any decent graphics system, the tool does matter in practice. Artists want more time to spend actually working on how their piece looks, instead of wondering why the computer doesn't work as intended.
 
-At [Carnegie Mellon University](https://www.cmu.edu/cfa/studio/index.html), where I studied computational art, p5.js is taught as _the_ framework for the web, and its been a great introduction. However, due to some of the obtuse ways in which p5.js is implemented, I found myself using it less and less as I made more and more projects. Lately, I've found that I'll reach directly for the standard JavaScript/Web APIs instead of p5.js. I sometimes think of this as shedding the training wheels on one's bicycle. But I missed the artist-centered logic of the p5 interface! I started thinking, "Is there a better way?"
+At [Carnegie Mellon University](https://www.cmu.edu/cfa/studio/index.html), where I studied computational art, p5.js is taught as _the_ framework for the web, and its been a great introduction. However, due to some of the ways in which p5.js is implemented, I found myself using it less and less as I made more and more projects. Lately, I've found that I'll reach directly for the standard JavaScript/Web APIs instead of p5.js. I sometimes think of this as shedding the training wheels on one's bicycle. But I missed the artist-centered logic of the p5 interface! I started thinking, "Is there a better way?"
 
 Just to clarify, I think the official p5.js implementation is perfectly justified for its philosophy and suitability for its intended purpose, but my own needs are different enough that I think they justify another implementation instead of pull requests to the official one.
 
 In fact, its not uncommon for successful software systems to have multiple implementations of the same spec (think: compilers of C, implementations of SQL, and engines of JavaScript). This allows the user to choose a backend that best suits their goals or needs. When one is using p5.js (or Processing or OpenFrameworks), what one is really using is the same set of commands, the intuitive way of describing drawings, that empowers creative expression. The actual way these commands are implemented internally is incidental; it should be possible to swap internal implementations as necessary.
 
 Check out these q5 renditions of the standard p5 examples on [the q5xjs website](https://q5xjs.netlify.app).
+
+## Motivation: Part 2
+
+_This section was written by @quinton-ashley, co-creator of q5_
+
+I thought the work @LingDong- did was really great and I wanted to help finish the project. Despite
 
 ## New Features: Top-Level Global Mode
 

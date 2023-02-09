@@ -996,25 +996,30 @@ function Q5(scope, parent) {
 		}
 	};
 
-	function norm2PI(x) {
-		if (0 <= x && x < Math.PI * 2) {
-			return x;
-		}
+	function normAng(x) {
+		let mid = $._angleMode == $.DEGREES ? 180 : Math.PI;
+		let full = mid * 2;
+		if (0 <= x && x <= full) return x;
 		while (x < 0) {
-			x += Math.PI * 2;
+			x += full;
 		}
-		while (x >= Math.PI) {
-			x -= Math.PI * 2;
+		while (x >= mid) {
+			x -= full;
 		}
 		return x;
 	}
 
 	function arcImpl(x, y, w, h, start, stop, mode, detail) {
-		if ($._noFill && $._noStroke) {
-			return;
+		if ($._noFill && $._noStroke) return;
+		let lo = normAng(start);
+		let hi = normAng(stop);
+		if (lo > hi) [lo, hi] = [hi, lo];
+		if (lo == 0) {
+			if (hi == 0) return;
+			if (($._angleMode == $.DEGREES && hi == 360) || hi == Math.PI * 2) {
+				return $.ellipse(x, y, w, h);
+			}
 		}
-		let lo = norm2PI(start);
-		let hi = norm2PI(stop);
 		ctx.beginPath();
 		for (let i = 0; i < detail + 1; i++) {
 			let t = i / detail;
@@ -2506,9 +2511,32 @@ function Q5(scope, parent) {
 	$.second = () => new Date().getSeconds();
 	$.millis = () => window.performance.now() - millisStart;
 
+	$._loadFile = (path, cb, type) => {
+		preloadCnt++;
+		let ret = {};
+		fetch(path)
+			.then((r) => {
+				if (type == 'json') return r.json();
+				if (type == 'text') return r.text();
+			})
+			.then((r) => {
+				preloadCnt--;
+				Object.assign(ret, r);
+				if (cb) cb(r);
+			});
+		return ret;
+	};
+
+	$.loadStrings = (path, cb) => $._loadFile(path, cb, 'text');
+	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
+
 	$.loadSound = (path, cb) => {
+		preloadCnt++;
 		let a = new Audio(path);
-		a.addEventListener('canplaythrough', () => cb(a));
+		a.addEventListener('canplaythrough', () => {
+			preloadCnt--;
+			if (cb) cb(a);
+		});
 		a.load();
 		a.setVolume = (l) => (a.volume = l);
 		return a;
@@ -2546,6 +2574,7 @@ class _Q5Image extends Q5 {
 	}
 }
 
+Q5._friendlyError = (msg, func) => console.error(func + ': ' + msg);
 Q5.prototype._methods = {
 	init: [],
 	pre: [],
