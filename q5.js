@@ -12,8 +12,9 @@ function Q5(scope, parent) {
 		parent = arguments[0];
 		scope = null;
 	}
-	if (scope == 'global') Q5._global = true;
-	let $ = scope == 'auto' || scope == 'global' ? window : this;
+	if (scope == 'global') Q5._hasGlobal = true;
+
+	let $ = this;
 	$.canvas = document.createElement('canvas');
 	let ctx = $.canvas.getContext('2d');
 
@@ -22,7 +23,7 @@ function Q5(scope, parent) {
 	$.canvas.width = $.width;
 	$.canvas.height = $.height;
 
-	if (scope != 'offscreen') {
+	if (scope != 'graphics' && scope != 'image') {
 		if (document.body) {
 			if (parent) parent.append($.canvas);
 			else document.body.appendChild($.canvas);
@@ -137,10 +138,6 @@ function Q5(scope, parent) {
 	$.SHR3 = 1;
 	$.LCG = 2;
 
-	//================================================================
-	// HINTS
-	//================================================================
-
 	$.HARDWARE_FILTERS = true;
 	$.hint = (prop, val) => {
 		$[prop] = val;
@@ -183,15 +180,15 @@ function Q5(scope, parent) {
 	$.touches = [];
 
 	$._colorMode = $.RGB;
-	$._noStroke = false;
-	$._noFill = false;
+	$._doStroke = true;
+	$._doFill = true;
 	$._strokeSet = false;
 	$._fillSet = false;
 	$._ellipseMode = $.CENTER;
 	$._rectMode = $.CORNER;
 	$._curveDetail = 20;
 	$._curveAlpha = 0.0;
-	$._noLoop = false;
+	$._loop = true;
 
 	$._textFont = 'sans-serif';
 	$._textSize = 12;
@@ -199,8 +196,9 @@ function Q5(scope, parent) {
 	$._textStyle = 'normal';
 
 	$._pixelDensity = 1;
-
-	$._frameRate = null;
+	$._lastFrameTime = 0;
+	$._targetFrameRate = null;
+	$._frameRate = $._fps = 60;
 
 	$._tint = null;
 
@@ -248,7 +246,7 @@ function Q5(scope, parent) {
 		$.canvas.width = width * $._pixelDensity;
 		$.canvas.height = height * $._pixelDensity;
 		defaultStyle();
-		if (scope != 'offscreen') $.pixelDensity(2);
+		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
 	};
 
 	$.resizeCanvas = (width, height) => {
@@ -258,7 +256,8 @@ function Q5(scope, parent) {
 		$.canvas.height = height * $._pixelDensity;
 	};
 
-	$.createGraphics = $.createImage = (width, height) => {
+	// $.createGraphics =
+	$.createImage = (width, height) => {
 		return new Q5.Image(width, height);
 	};
 
@@ -306,8 +305,10 @@ function Q5(scope, parent) {
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
 	$.angleMode = (mode) => ($._angleMode = mode);
-	$.degrees = (x) => (x * 180) / Math.PI;
-	$.radians = (x) => (x * Math.PI) / 180;
+	$._DEGTORAD = Math.PI / 180;
+	$._RADTODEG = 180 / Math.PI;
+	$.degrees = (x) => x * $._RADTODEG;
+	$.radians = (x) => x * $._DEGTORAD;
 	$.abs = Math.abs;
 	$.ceil = Math.ceil;
 	$.exp = Math.exp;
@@ -917,11 +918,11 @@ function Q5(scope, parent) {
 	}
 
 	$.strokeWeight = (n) => {
-		$._noStroke = false;
+		$._doStroke = true;
 		ctx.lineWidth = n;
 	};
 	$.stroke = function () {
-		$._noStroke = false;
+		$._doStroke = true;
 		$._strokeSet = true;
 		if (typeof arguments[0] == 'string') {
 			ctx.strokeStyle = arguments[0];
@@ -929,14 +930,14 @@ function Q5(scope, parent) {
 		}
 		let col = $.color.apply(null, arguments);
 		if (col._a <= 0) {
-			$._noStroke = true;
+			$._doStroke = false;
 			return;
 		}
 		ctx.strokeStyle = col;
 	};
-	$.noStroke = () => ($._noStroke = true);
+	$.noStroke = () => ($._doStroke = false);
 	$.fill = function () {
-		$._noFill = false;
+		$._doFill = true;
 		$._fillSet = true;
 		if (typeof arguments[0] == 'string') {
 			ctx.fillStyle = arguments[0];
@@ -944,12 +945,12 @@ function Q5(scope, parent) {
 		}
 		let col = $.color.apply(null, arguments);
 		if (col._a <= 0) {
-			$._noFill = true;
+			$._doFill = false;
 			return;
 		}
 		ctx.fillStyle = col;
 	};
-	$.noFill = () => ($._noFill = true);
+	$.noFill = () => ($._doFill = false);
 	$.blendMode = (x) => (ctx.globalCompositeOperation = x);
 	$.strokeCap = (x) => (ctx.lineCap = x);
 	$.strokeJoin = (x) => (ctx.lineJoin = x);
@@ -988,7 +989,7 @@ function Q5(scope, parent) {
 	};
 
 	$.line = (x0, y0, x1, y1) => {
-		if (!$._noStroke) {
+		if ($._doStroke) {
 			ctx.beginPath();
 			ctx.moveTo(x0, y0);
 			ctx.lineTo(x1, y1);
@@ -1010,13 +1011,13 @@ function Q5(scope, parent) {
 	}
 
 	function arcImpl(x, y, w, h, start, stop, mode, detail) {
-		if ($._noFill && $._noStroke) return;
+		if (!$._doFill && !$._doStroke) return;
 		let lo = normAng(start);
 		let hi = normAng(stop);
 		if (lo > hi) [lo, hi] = [hi, lo];
 		if (lo == 0) {
 			if (hi == 0) return;
-			if (($._angleMode == $.DEGREES && hi == 360) || hi == Math.PI * 2) {
+			if (($._angleMode == $.DEGREES && hi == 360) || hi == $.TAU) {
 				return $.ellipse(x, y, w, h);
 			}
 		}
@@ -1034,8 +1035,8 @@ function Q5(scope, parent) {
 			ctx.lineTo(x, y);
 			ctx.closePath();
 		}
-		if (!$._noFill) ctx.fill();
-		if (!$._noStroke) ctx.stroke();
+		if ($._doFill) ctx.fill();
+		if ($._doStroke) ctx.stroke();
 	}
 	$.arc = (x, y, w, h, start, stop, mode, detail) => {
 		if (start == stop) {
@@ -1059,13 +1060,11 @@ function Q5(scope, parent) {
 	};
 
 	function ellipseImpl(x, y, w, h) {
-		if ($._noFill && $._noStroke) {
-			return;
-		}
+		if (!$._doFill && !$._doStroke) return;
 		ctx.beginPath();
-		ctx.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2);
-		if (!$._noFill) ctx.fill();
-		if (!$._noStroke) ctx.stroke();
+		ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
+		if ($._doFill) ctx.fill();
+		if ($._doStroke) ctx.stroke();
 	}
 	$.ellipse = (x, y, w, h) => {
 		if (h == undefined) {
@@ -1090,21 +1089,15 @@ function Q5(scope, parent) {
 			x = x.x;
 		}
 		ctx.beginPath();
-		ctx.ellipse(x, y, 0.4, 0.4, 0, 0, Math.PI * 2);
+		ctx.ellipse(x, y, 0.4, 0.4, 0, 0, $.TAU);
 		ctx.stroke();
 	};
 	function rectImpl(x, y, w, h) {
-		if (!$._noFill) {
-			ctx.fillRect(x, y, w, h);
-		}
-		if (!$._noStroke) {
-			ctx.strokeRect(x, y, w, h);
-		}
+		if ($._doFill) ctx.fillRect(x, y, w, h);
+		if ($._doStroke) ctx.strokeRect(x, y, w, h);
 	}
 	function roundedRectImpl(x, y, w, h, tl, tr, br, bl) {
-		if ($._noFill && $._noStroke) {
-			return;
-		}
+		if (!$._doFill && !$._doStroke) return;
 		if (tl == undefined) {
 			return rectImpl(x, y, w, h);
 		}
@@ -1123,8 +1116,8 @@ function Q5(scope, parent) {
 		ctx.arcTo(x, y + h, x, y, bl);
 		ctx.arcTo(x, y, x + w, y, tl);
 		ctx.closePath();
-		if (!$._noFill) ctx.fill();
-		if (!$._noStroke) ctx.stroke();
+		if ($._doFill) ctx.fill();
+		if ($._doStroke) ctx.stroke();
 	}
 
 	$.rect = (x, y, w, h, tl, tr, br, bl) => {
@@ -1203,9 +1196,9 @@ function Q5(scope, parent) {
 		if (close) {
 			ctx.closePath();
 		}
-		if (!$._noFill) ctx.fill();
-		if (!$._noStroke) ctx.stroke();
-		if ($._noFill && $._noStroke) {
+		if ($._doFill) ctx.fill();
+		if ($._doStroke) ctx.stroke();
+		if (!$._doFill && !$._doStroke) {
 			// eh.
 			ctx.save();
 			ctx.fillStyle = 'none';
@@ -1330,8 +1323,8 @@ function Q5(scope, parent) {
 	};
 
 	$._styleNames = [
-		'_noStroke',
-		'_noFill',
+		'_doStroke',
+		'_doFill',
 		'_strokeSet',
 		'_fillSet',
 		'_tint',
@@ -1427,7 +1420,7 @@ function Q5(scope, parent) {
 
 	$.loadImage = (url, cb) => {
 		preloadCnt++;
-		let g = $.createGraphics(100, 100);
+		let g = $.createImage(100, 100);
 		let c = g.canvas.getContext('2d');
 		let img = new Image();
 		img.src = url;
@@ -1813,6 +1806,12 @@ function Q5(scope, parent) {
 		return $.save(s.slice(0, -1).join('.'), s[s.length - 1]);
 	};
 
+	$.remove = () => {
+		$.canvas.remove();
+	};
+
+	if (scope == 'image') return;
+
 	//================================================================
 	// TYPOGRAPHY
 	//================================================================
@@ -1852,16 +1851,16 @@ function Q5(scope, parent) {
 	$.text = (str, x, y, w) => {
 		if (str === undefined) return;
 		str = str.toString();
-		if ($._noFill && $._noStroke) return;
+		if (!$._doFill && !$._doStroke) return;
 		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		let lines = str.split('\n');
 		for (let i = 0; i < lines.length; i++) {
 			let f = ctx.fillStyle;
 			if (!$._fillSet) ctx.fillStyle = 'black';
-			if (!$._noFill) {
+			if ($._doFill) {
 				ctx.fillText(lines[i], x, y, w);
 			}
-			if (!$._noStroke && $._strokeSet) {
+			if ($._doStroke && $._strokeSet) {
 				ctx.strokeText(lines[i], x, y, w);
 			}
 			if (!$._fillSet) ctx.fillStyle = f;
@@ -2215,48 +2214,22 @@ function Q5(scope, parent) {
 		return vid;
 	};
 
-	//================================================================
-	// EVENTS
-	//================================================================
-
-	let eventNames = [
-		'setup',
-		'draw',
-		'preload',
-		'mouseMoved',
-		'mousePressed',
-		'mouseReleased',
-		'mouseDragged',
-		'mouseClicked',
-		'keyPressed',
-		'keyReleased',
-		'keyTyped',
-		'touchStarted',
-		'touchEnded'
-	];
-	for (let k of eventNames) {
-		let intern = '_' + k + 'Fn';
-		$[intern] = () => {};
-		$[intern].isPlaceHolder = true;
-		if ($[k]) {
-			$[intern] = $[k];
-		} else {
-			Object.defineProperty($, k, {
-				set: (fun) => {
-					$[intern] = fun;
-				}
-			});
-		}
-	}
-
 	function _draw() {
-		if (!$._noLoop) {
-			if ($._frameRate == null) {
+		let pre = performance.now();
+		if ($._loop) {
+			if (!$._targetFrameRate) {
 				looper = requestAnimationFrame(_draw);
 			} else {
-				looper = setTimeout(_draw, 1000 / $._frameRate);
+				looper = setTimeout(_draw, 1000 / $._targetFrameRate);
 			}
 		}
+		if ($._loop && $._frameCount != 0) {
+			let time_since_last = pre - $._lastFrameTime;
+			let target_time_between_frames = 1000 / ($._targetFrameRate || 60);
+			if (time_since_last < target_time_between_frames - 5) return;
+		}
+		$.deltaTime = pre - $._lastFrameTime;
+		$._frameRate = 1000 / $.deltaTime;
 		for (let m of Q5.prototype._methods.pre) m.call($);
 		clearBuff();
 		firstVertex = true;
@@ -2265,32 +2238,41 @@ function Q5(scope, parent) {
 		$.frameCount++;
 		for (let m of Q5.prototype._methods.post) m.call($);
 		ctx.restore();
+		let post = performance.now();
+		$._fps = Math.round(1000 / (post - pre));
+		$._lastFrameTime = pre;
 	}
 
 	$.noLoop = () => {
-		$._noLoop = true;
+		$._loop = false;
 		looper = null;
 	};
 	$.loop = () => {
-		$._noLoop = false;
+		$._loop = true;
 		if (looper == null) _draw();
 	};
 	$.redraw = () => _draw();
-	$.frameRate = (fps) => ($._frameRate = fps);
+	$.frameRate = (fps) => {
+		if (fps) $._targetFrameRate = fps;
+		return $._frameRate;
+	};
 	$.getFrameRate = () => $._frameRate;
+	$.getFPS = () => $._fps;
 
-	requestAnimationFrame(() => {
-		$._preloadFn();
-		millisStart = window.performance.now();
-		_start();
-		function _start() {
-			if (preloadCnt > 0) {
-				return requestAnimationFrame(_start);
+	if (scope != 'graphics' || scope != 'image') {
+		requestAnimationFrame(() => {
+			$._preloadFn();
+			millisStart = performance.now();
+			_start();
+			function _start() {
+				if (preloadCnt > 0) {
+					return requestAnimationFrame(_start);
+				}
+				$._setupFn();
+				_draw();
 			}
-			$._setupFn();
-			_draw();
-		}
-	});
+		});
+	}
 
 	$._updateMouse = function (e) {
 		let $ = this;
@@ -2309,7 +2291,6 @@ function Q5(scope, parent) {
 		if (this.mouseIsPressed) this._mouseDraggedFn(e);
 		else this._mouseMovedFn(e);
 	}.bind($);
-	addEventListener('mousemove', $._onmousemove, false);
 	$._onmousedown = (e) => {
 		$._updateMouse(e);
 		$.mouseIsPressed = true;
@@ -2345,6 +2326,7 @@ function Q5(scope, parent) {
 		keysHeld[$.keyCode] = false;
 		$._keyReleasedFn(e);
 	};
+	addEventListener('mousemove', $._onmousemove, false);
 	$.canvas.onmousedown = (e) => $._onmousedown(e);
 	$.canvas.onmouseup = (e) => $._onmouseup(e);
 	$.canvas.onclick = (e) => $._onclick(e);
@@ -2509,7 +2491,7 @@ function Q5(scope, parent) {
 	$.hour = () => new Date().getHours();
 	$.minute = () => new Date().getMinutes();
 	$.second = () => new Date().getSeconds();
-	$.millis = () => window.performance.now() - millisStart;
+	$.millis = () => performance.now() - millisStart;
 
 	$._loadFile = (path, cb, type) => {
 		preloadCnt++;
@@ -2542,35 +2524,77 @@ function Q5(scope, parent) {
 		return a;
 	};
 
-	$.remove = () => {
-		$.canvas.remove();
-	};
-
 	$.Element = function (a) {
 		this.elt = a;
 	};
 	$._elements = [];
 
 	if (scope == 'global') {
-		delete $.name;
-		delete $.length;
+		// delete $.name;
+		// delete $.length;
 		Object.assign(Q5, $);
-		$.name = '';
-		$.length = 0;
+		// $.name = '';
+		// $.length = 0;
 		delete Q5.Q5;
 	}
 	Q5.Image ??= _Q5Image;
 
 	for (let m of Q5.prototype._methods.init) m.call($);
 
+	if (scope == 'global') {
+		for (let p in $) {
+			if (typeof $[p] == 'function') window[p] = $[p];
+			else {
+				Object.defineProperty(window, p, {
+					get: () => $[p],
+					set: (v) => ($[p] = v)
+				});
+			}
+		}
+	}
+
+	//================================================================
+	// EVENTS
+	//================================================================
+	let o = scope == 'global' ? window : $;
+	let eventNames = [
+		'setup',
+		'draw',
+		'preload',
+		'mouseMoved',
+		'mousePressed',
+		'mouseReleased',
+		'mouseDragged',
+		'mouseClicked',
+		'keyPressed',
+		'keyReleased',
+		'keyTyped',
+		'touchStarted',
+		'touchEnded'
+	];
+	for (let k of eventNames) {
+		let intern = '_' + k + 'Fn';
+		$[intern] = () => {};
+		$[intern].isPlaceHolder = true;
+		if (o[k]) {
+			$[intern] = o[k];
+		} else {
+			Object.defineProperty($, k, {
+				set: (fun) => {
+					$[intern] = fun;
+				}
+			});
+		}
+	}
+
 	if (typeof scope == 'function') scope($);
 }
 
 class _Q5Image extends Q5 {
 	constructor(width, height) {
-		super('offscreen');
+		super('image');
 		this.createCanvas(width, height);
-		this.noLoop();
+		this._loop = false;
 	}
 }
 
@@ -2589,5 +2613,5 @@ Q5._validateParameters = () => true;
 window.p5 = Q5;
 
 document.addEventListener('DOMContentLoaded', () => {
-	if (!Q5._global) new Q5('auto');
+	if (!Q5._hasGlobal) new Q5('auto');
 });

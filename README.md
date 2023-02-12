@@ -4,7 +4,7 @@ q5.js is a drop-in replacement for [p5.js][]. It supports almost all of p5.js's 
 
 q5.min.js (35kb) is 25x smaller than p5.min.js (898kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
 
-q5.js doesn't include any friendly error messages to help you code though. If you're a beginner, stick with p5.js while developing a sketch and then use q5.js to share your work.
+q5.js doesn't include any friendly error messages to help you code though. q5 is for people that are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
 
 ## Usage
 
@@ -70,7 +70,13 @@ Check out these q5 renditions of the standard p5 examples on [the q5xjs website]
 
 _This section was written by @quinton-ashley, co-creator of q5_
 
-I thought the work @LingDong- did was really great and I wanted to help finish the project. Despite
+I thought @LingDong-'s work on q5 and the idea itself had great potential. So I decided to upgrade its compatibility with p5.js. My main goal was to make it work with [p5play](https://p5play.org)!
+
+An increase in performance of even a few frames per second can make a significant difference in the user experience of a work of interactive art or a game, especially on mobile devices.
+
+As a Computer Science teacher at Crimson Education, I teach students from all over the world. I also live in Colombia, where there are many people who don't have access to a PC, as in no desktop or laptop. There are businesses here that charge for time based access to 10 year old desktop PCs. But nearly everyone in the world, 8.6 million people, owns a smartphone. Improving the UX of p5.js on mobile devices is therefore a major priority for me. q5 is a step in that direction.
+
+I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. Its so complex in large part because it was initially released 10 years ago and also because of its Friendly Error system. Its also just an absolutely massive library, with literally over 100,000 lines of code and documentation! I'm not saying all this as a slight against the authors of p5.js but it does make the source code very difficult to read. q5 is so well organized, concise, and utilizes many modern JS features. I think even without documentation, the source code is much easier for experienced JS programmers to comprehend. That's also due in large part to @LingDong-'s design!
 
 ## New Features: Top-Level Global Mode
 
