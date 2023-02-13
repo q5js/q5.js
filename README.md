@@ -11,12 +11,12 @@ q5 doesn't include any friendly error messages to help you code though. q5 is fo
 ## Usage
 
 ```html
-<script src="https://quinton-ashley.github.io/q5js/q5.js"></script>
+<script src="https://quinton-ashley.github.io/q5.js/q5.js"></script>
 ```
 
 q5 works with your existing p5.js sketches, no modifications required! If you have any problems though, please [make an issue report.][]
 
-@LingDong- also made a [q5js template](https://editor.p5js.org/lingdong/sketches/xrT2VF08P) for the online p5.js Web Editor.
+You can also use this [q5.js template sketch](https://editor.p5js.org/quinton-ashley/sketches/8SEtLEDl9) for the online p5.js Web Editor.
 
 ## Using p5 Addons
 
@@ -222,5 +222,5 @@ p5.js version used is **1.1.9**.
 Speed is a goal for q5.js, and we would very much like to see the above list grow. If you know how to make something faster, advice/pull requests are very welcome.
 
 [p5.js]: https://p5js.org
-[make an issue report.]: https://github.com/quinton-ashley/q5js/issues
+[make an issue report.]: https://github.com/quinton-ashley/q5.js/issues
 [q5 better for the environment!]: https://observablehq.com/@mrchrisadams/carbon-footprint-of-sending-data-around

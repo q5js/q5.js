@@ -1,7 +1,7 @@
 {
 	"author": "quinton-ashley",
-	"name": "q5js",
-	"version": "1.0.16",
+	"name": "q5",
+	"version": "1.0.17",
 	"description": "An implementation of the p5.js 2D API that's smaller and faster",
 	"main": "q5.js",
 	"scripts": {
@@ -12,20 +12,20 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/quinton-ashley/q5js.git"
+		"url": "git+https://github.com/quinton-ashley/q5.js.git"
 	},
 	"keywords": [
 		"p5",
 		"p5js",
 		"p5.js",
 		"p5xjs",
-		"q5",
 		"q5xjs",
-		"q5.js"
+		"q5.js",
+		"q5js"
 	],
 	"license": "GPL-3.0-only",
 	"bugs": {
-		"url": "https://github.com/quinton-ashley/q5js/issues"
+		"url": "https://github.com/quinton-ashley/q5.js/issues"
 	},
-	"homepage": "https://github.com/quinton-ashley/q5js#readme"
+	"homepage": "https://github.com/quinton-ashley/q5.js#readme"
 }
