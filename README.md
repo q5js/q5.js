@@ -6,7 +6,7 @@ q5.js is a drop-in replacement for [p5.js][]. It supports almost all of p5.js's 
 
 q5.min.js (35kb) is 25x smaller than p5.min.js (898kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
 
-q5 doesn't include any friendly error messages to help you code though. q5 is for people that are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
+q5 doesn't include any friendly error messages to help you code though. Its mainly for people who are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
 
 ## Usage
 

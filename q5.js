@@ -256,15 +256,17 @@ function Q5(scope, parent) {
 		$.canvas.height = height * $._pixelDensity;
 	};
 
-	// $.createGraphics =
+	$.createGraphics = (width, height) => {
+		let g = new Q5('graphics');
+		g.createCanvas(width, height);
+		return g;
+	};
 	$.createImage = (width, height) => {
 		return new Q5.Image(width, height);
 	};
 
 	$.pixelDensity = (n) => {
-		if (n == undefined) {
-			return $._pixelDensity;
-		}
+		if (n === undefined) return $._pixelDensity;
 		$._pixelDensity = n;
 
 		$.canvas.width = Math.ceil($.width * n);
@@ -364,260 +366,8 @@ function Q5(scope, parent) {
 		if (neg) s = '-' + s;
 		return s;
 	};
-
-	//================================================================
-	// VECTOR
-	//================================================================
-	function Vector(_x, _y, _z) {
-		let v = this;
-		v.x = _x || 0;
-		v.y = _y || 0;
-		v.z = _z || 0;
-		let cacheNorm = null;
-		let cacheNormSq = null;
-		v.set = (_x, _y, _z) => {
-			v.x = _x || 0;
-			v.y = _y || 0;
-			v.z = _z || 0;
-		};
-		v.copy = () => new Q5.Vector(v.x, v.y, v.z);
-		function arg2v(x, y, z) {
-			if (x.x != undefined) {
-				return x;
-			}
-			if (y != undefined) {
-				return { x, y, z: z || 0 };
-			}
-			return { x: x, y: x, z: x };
-		}
-		function calcNorm() {
-			if (cacheNormSq == null) {
-				cacheNormSq = v.x * v.x + v.y * v.y + v.z * v.z;
-				cacheNorm = Math.sqrt(cacheNormSq);
-			}
-		}
-		function deprecNorm() {
-			cacheNormSq = null;
-			cacheNorm = null;
-		}
-		v.add = function () {
-			let u = arg2v.apply(null, arguments);
-			v.x += u.x;
-			v.y += u.y;
-			v.z += u.z;
-			deprecNorm();
-			return v;
-		};
-		v.rem = function () {
-			let u = arg2v.apply(null, arguments);
-			v.x %= u.x;
-			v.y %= u.y;
-			v.z %= u.z;
-			deprecNorm();
-			return v;
-		};
-		v.sub = function () {
-			let u = arg2v.apply(null, arguments);
-			v.x -= u.x;
-			v.y -= u.y;
-			v.z -= u.z;
-			deprecNorm();
-			return v;
-		};
-		v.mult = function () {
-			let u = arg2v.apply(null, arguments);
-			v.x *= u.x;
-			v.y *= u.y;
-			v.z *= u.z;
-			deprecNorm();
-			return v;
-		};
-		v.div = function () {
-			let u = arg2v.apply(null, arguments);
-			v.x /= u.x;
-			v.y /= u.y;
-			v.z /= u.z;
-			deprecNorm();
-			return v;
-		};
-		v.mag = () => {
-			calcNorm();
-			return cacheNorm;
-		};
-		v.magSq = () => {
-			calcNorm();
-			return cacheNormSq;
-		};
-		v.dot = function () {
-			let u = arg2v.apply(null, arguments);
-			return v.x * u.x + v.y * u.y + v.z * u.z;
-		};
-		v.dist = function () {
-			let u = arg2v.apply(null, arguments);
-			let x = v.x - u.x;
-			let y = v.y - u.y;
-			let z = v.z - u.z;
-			return Math.sqrt(x * x + y * y + z * z);
-		};
-		v.cross = function () {
-			let u = arg2v.apply(null, arguments);
-			let x = v.y * u.z - v.z * u.y;
-			let y = v.z * u.x - v.x * u.z;
-			let z = v.x * u.y - v.y * u.x;
-			v.x = x;
-			v.y = y;
-			v.z = z;
-			deprecNorm();
-			return v;
-		};
-		v.normalize = () => {
-			calcNorm();
-			let n = cacheNorm;
-			v.x /= n;
-			v.y /= n;
-			v.z /= n;
-			cacheNorm = 1;
-			cacheNormSq = 1;
-			return v;
-		};
-		v.limit = (m) => {
-			calcNorm();
-			let n = cacheNorm;
-			if (n > m) {
-				let t = m / n;
-				v.x *= t;
-				v.y *= t;
-				v.z *= t;
-				cacheNorm = m;
-				cacheNormSq = m * m;
-			}
-			return v;
-		};
-		v.setMag = (m) => {
-			calcNorm();
-			let n = cacheNorm;
-			let t = m / n;
-			v.x *= t;
-			v.y *= t;
-			v.z *= t;
-			cacheNorm = m;
-			cacheNormSq = m * m;
-			return v;
-		};
-		v.heading = () => $.atan2(v.y, v.x);
-		v.rotate = (ang) => {
-			let costh = $.cos(ang);
-			let sinth = $.sin(ang);
-			let vx = v.x * costh - v.y * sinth;
-			let vy = v.x * sinth + v.y * costh;
-			v.x = vx;
-			v.y = vy;
-			return v;
-		};
-		v.angleBetween = function () {
-			let u = arg2v.apply(null, arguments);
-			const costh = v.dot(u) / (v.mag() * u.mag());
-			let ang;
-			ang = $.tan(Math.min(1, Math.max(-1, costh)));
-			ang = ang * Math.sign(v.cross(u).z || 1);
-			return ang;
-		};
-		v.lerp = (u, t) => {
-			v.x = v.x * (1 - t) + u.x * t;
-			v.y = v.y * (1 - t) + u.y * t;
-			v.z = v.z * (1 - t) + u.z * t;
-			deprecNorm();
-			return v;
-		};
-		v.reflect = (n) => {
-			n.normalize();
-			return v.sub(n.mult(2 * v.dot(n)));
-		};
-		v.array = () => [v.x, v.y, v.z];
-		v.equals = (u, epsilon) => {
-			if (epsilon == undefined) {
-				epsilon = Number.EPSILON;
-				if (epsilon == undefined) {
-					epsilon = 0;
-				}
-			}
-			return Math.abs(u.x - v.x) < epsilon && Math.abs(u.y - v.y) < epsilon && Math.abs(u.z - v.z) < epsilon;
-		};
-		v.fromAngle = (th, l) => {
-			if (l == undefined) {
-				l = 1;
-			}
-			cacheNorm = l;
-			cacheNormSq = l * l;
-			v.x = l * $.cos(th);
-			v.y = l * $.sin(th);
-			v.z = 0;
-			return v;
-		};
-		v.fromAngles = (th, ph, l) => {
-			if (l == undefined) {
-				l = 1;
-			}
-			cacheNorm = l;
-			cacheNormSq = l * l;
-			const cosph = $.cos(ph);
-			const sinph = $.sin(ph);
-			const costh = $.cos(th);
-			const sinth = $.sin(th);
-			v.x = l * sinth * sinph;
-			v.y = -l * costh;
-			v.z = l * sinth * cosph;
-			return v;
-		};
-		v.random2D = () => {
-			cacheNorm = 1;
-			cacheNormSq = 1;
-			return v.fromAngle(Math.random() * Math.PI * 2);
-		};
-		v.random3D = () => {
-			cacheNorm = 1;
-			cacheNormSq = 1;
-			return v.fromAngles(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
-		};
-		v.toString = () => `[${v.x}, ${v.y}, ${v.z}]`;
-	}
-	Vector.add = (v, u) => {
-		return new Q5.Vector(v.x + u.x, v.y + u.y, v.z + u.z);
-	};
-	Vector.rem = (v, u) => {
-		return new Q5.Vector(v.x % u.x, v.y % u.y, v.z % u.z);
-	};
-	Vector.sub = (v, u) => {
-		return new Q5.Vector(v.x - u.x, v.y - u.y, v.z - u.z);
-	};
-	Vector.mult = (v, u) => {
-		if (u.x == undefined) {
-			return new Q5.Vector(v.x * u, v.y * u, v.z * u);
-		}
-		return new Q5.Vector(v.x * u.x, v.y * u.y, v.z * u.z);
-	};
-	Vector.div = (v, u) => {
-		if (u.x == undefined) {
-			return new Q5.Vector(v.x / u, v.y / u, v.z / u);
-		}
-		return new Q5.Vector(v.x / u.x, v.y / u.y, v.z / u.z);
-	};
-	Vector.dist = (v, u) => {
-		return Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
-	};
-	Vector.cross = (v, u) => {
-		return new Q5.Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
-	};
-	Vector.lerp = (v, u, t) => {
-		return new Q5.Vector(v.x * (1 - t) + u.x * t, (v.y = v.y * (1 - t) + u.y * t), (v.z = v.z * (1 - t) + u.z * t));
-	};
-	Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
-
-	for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
-		Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
-	}
+	$.Vector = Q5.Vector;
 	$.createVector = (x, y, z) => new Q5.Vector(x, y, z);
-	Q5.Vector = Vector;
 
 	//================================================================
 	// CURVE QUERY
@@ -928,7 +678,7 @@ function Q5(scope, parent) {
 			ctx.strokeStyle = arguments[0];
 			return;
 		}
-		let col = $.color.apply(null, arguments);
+		let col = $.color(...arguments);
 		if (col._a <= 0) {
 			$._doStroke = false;
 			return;
@@ -943,7 +693,7 @@ function Q5(scope, parent) {
 			ctx.fillStyle = arguments[0];
 			return;
 		}
-		let col = $.color.apply(null, arguments);
+		let col = $.color(...arguments);
 		if (col._a <= 0) {
 			$._doFill = false;
 			return;
@@ -1039,15 +789,9 @@ function Q5(scope, parent) {
 		if ($._doStroke) ctx.stroke();
 	}
 	$.arc = (x, y, w, h, start, stop, mode, detail) => {
-		if (start == stop) {
-			return $.ellipse(x, y, w, h);
-		}
-		if (detail == undefined) {
-			detail = 25;
-		}
-		if (mode == undefined) {
-			mode = $.PIE;
-		}
+		if (start == stop) return $.ellipse(x, y, w, h);
+		detail ??= 25;
+		mode ??= $.PIE;
 		if ($._ellipseMode == $.CENTER) {
 			arcImpl(x, y, w, h, start, stop, mode, detail);
 		} else if ($._ellipseMode == $.RADIUS) {
@@ -1067,9 +811,7 @@ function Q5(scope, parent) {
 		if ($._doStroke) ctx.stroke();
 	}
 	$.ellipse = (x, y, w, h) => {
-		if (h == undefined) {
-			h = w;
-		}
+		h ??= w;
 		if ($._ellipseMode == $.CENTER) {
 			ellipseImpl(x, y, w, h);
 		} else if ($._ellipseMode == $.RADIUS) {
@@ -1098,10 +840,10 @@ function Q5(scope, parent) {
 	}
 	function roundedRectImpl(x, y, w, h, tl, tr, br, bl) {
 		if (!$._doFill && !$._doStroke) return;
-		if (tl == undefined) {
+		if (tl === undefined) {
 			return rectImpl(x, y, w, h);
 		}
-		if (tr == undefined) {
+		if (tr === undefined) {
 			return roundedRectImpl(x, y, w, h, tl, tl, tl, tl);
 		}
 		const hh = Math.min(Math.abs(h), Math.abs(w)) / 2;
@@ -1304,7 +1046,7 @@ function Q5(scope, parent) {
 	};
 
 	$.scale = (x, y) => {
-		if (y == undefined) y = x;
+		y ??= x;
 		ctx.scale(x, y);
 	};
 	$.applyMatrix = (a, b, c, d, e, f) => {
@@ -1437,7 +1179,7 @@ function Q5(scope, parent) {
 
 	let filterImpl = {};
 	filterImpl[$.THRESHOLD] = (data, thresh) => {
-		if (thresh == undefined) thresh = 127.5;
+		if (thresh === undefined) thresh = 127.5;
 		else thresh *= 255;
 		for (let i = 0; i < data.length; i += 4) {
 			const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
@@ -1598,10 +1340,8 @@ function Q5(scope, parent) {
 			tmpCtx = document.createElement('canvas').getContext('2d');
 			// document.body.appendChild(tmpCtx.canvas)
 		}
-		if (w == undefined) {
-			w = ctx.canvas.width;
-			h = ctx.canvas.height;
-		}
+		h ??= w || ctx.canvas.height;
+		w ??= ctx.canvas.width;
 		if (tmpCtx.canvas.width != w || tmpCtx.canvas.height != h) {
 			tmpCtx.canvas.width = w;
 			tmpCtx.canvas.height = h;
@@ -1612,10 +1352,8 @@ function Q5(scope, parent) {
 			tmpCt2 = document.createElement('canvas').getContext('2d');
 			// document.body.appendChild(tmpCt2.canvas)
 		}
-		if (w == undefined) {
-			w = ctx.canvas.width;
-			h = ctx.canvas.height;
-		}
+		h ??= w || ctx.canvas.height;
+		w ??= ctx.canvas.width;
 		if (tmpCt2.canvas.width != w || tmpCt2.canvas.height != h) {
 			tmpCt2.canvas.width = w;
 			tmpCt2.canvas.height = h;
@@ -1624,7 +1362,7 @@ function Q5(scope, parent) {
 
 	function makeTmpBuf() {
 		let l = ctx.canvas.width * ctx.canvas.height * 4;
-		if (tmpBuf == null || l != tmpBuf.length) {
+		if (!tmpBuf || l != tmpBuf.length) {
 			tmpBuf = new Uint8ClampedArray(l);
 		}
 	}
@@ -1645,7 +1383,7 @@ function Q5(scope, parent) {
 		if (support) {
 			makeTmpCtx();
 			if (typ == $.THRESHOLD) {
-				if (x == undefined) x = 0.5;
+				x ??= 0.5;
 				x = Math.max(x, 0.00001);
 				let b = Math.floor((0.5 / x) * 100);
 				nativeFilter(`saturate(0%) brightness(${b}%) contrast(1000000%)`);
@@ -1690,7 +1428,7 @@ function Q5(scope, parent) {
 	};
 
 	$.get = (x, y, w, h) => {
-		if (x != undefined && w == undefined) {
+		if (x !== undefined && w === undefined) {
 			let c = ctx.getImageData(x, y, 1, 1).data;
 			return new Q5.Color(c[0], c[1], c[2], c[3] / 255);
 		}
@@ -2007,7 +1745,7 @@ function Q5(scope, parent) {
 	rng1.setSeed();
 
 	$.noiseSeed = (seed) => {
-		let jsr = seed == undefined ? Math.random() * 4294967295 : seed;
+		let jsr = seed === undefined ? Math.random() * 4294967295 : seed;
 		if (!p_perlin) {
 			p_perlin = new Float32Array(PERLIN_SIZE + 1);
 		}
@@ -2022,7 +1760,7 @@ function Q5(scope, parent) {
 	$.random = (a, b) => {
 		if (a === undefined) return rng1.rand();
 		if (typeof a == 'number') {
-			if (b != undefined) {
+			if (b !== undefined) {
 				return rng1.rand() * (b - a) + a;
 			} else {
 				return rng1.rand() * a;
@@ -2187,7 +1925,7 @@ function Q5(scope, parent) {
 			name = `url("${name}")`;
 			pfx = ', auto';
 		}
-		if (x != undefined) {
+		if (x !== undefined) {
 			name += ' ' + x + ' ' + y;
 		}
 		$.canvas.style.cursor = name + pfx;
@@ -2223,7 +1961,7 @@ function Q5(scope, parent) {
 				looper = setTimeout(_draw, 1000 / $._targetFrameRate);
 			}
 		}
-		if ($._loop && $._frameCount != 0) {
+		if (looper && $._frameCount != 0) {
 			let time_since_last = pre - $._lastFrameTime;
 			let target_time_between_frames = 1000 / ($._targetFrameRate || 60);
 			if (time_since_last < target_time_between_frames - 5) return;
@@ -2588,6 +2326,260 @@ function Q5(scope, parent) {
 	}
 
 	if (typeof scope == 'function') scope($);
+}
+
+//================================================================
+// VECTOR
+//================================================================
+Q5.Vector = class {
+	constructor(_x, _y, _z) {
+		this.x = _x || 0;
+		this.y = _y || 0;
+		this.z = _z || 0;
+		this._cn = null;
+		this._cnsq = null;
+	}
+
+	set(_x, _y, _z) {
+		this.x = _x || 0;
+		this.y = _y || 0;
+		this.z = _z || 0;
+	}
+	copy() {
+		return new Q5.Vector(this.x, this.y, this.z);
+	}
+	_arg2v(x, y, z) {
+		if (x.x !== undefined) return x;
+		if (y !== undefined) {
+			return { x, y, z: z || 0 };
+		}
+		return { x: x, y: x, z: x };
+	}
+	_calcNorm() {
+		if (this._cnsq == null) {
+			this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
+			this._cn = Math.sqrt(this._cnsq);
+		}
+	}
+	_deprecNorm() {
+		this._cnsq = null;
+		this._cn = null;
+	}
+	add() {
+		let u = this._arg2v(...arguments);
+		this.x += u.x;
+		this.y += u.y;
+		this.z += u.z;
+		this._deprecNorm();
+		return this;
+	}
+	rem() {
+		let u = this._arg2v(...arguments);
+		this.x %= u.x;
+		this.y %= u.y;
+		this.z %= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	sub() {
+		let u = this._arg2v(...arguments);
+		this.x -= u.x;
+		this.y -= u.y;
+		this.z -= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	mult() {
+		let u = this._arg2v(...arguments);
+		this.x *= u.x;
+		this.y *= u.y;
+		this.z *= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	div() {
+		let u = this._arg2v(...arguments);
+		this.x /= u.x;
+		this.y /= u.y;
+		this.z /= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	mag() {
+		this._calcNorm();
+		return this._cn;
+	}
+	magSq() {
+		this._calcNorm();
+		return this._cnsq;
+	}
+	dot() {
+		let u = this._arg2v(...arguments);
+		return this.x * u.x + this.y * u.y + this.z * u.z;
+	}
+	dist() {
+		let u = this._arg2v(...arguments);
+		let x = this.x - u.x;
+		let y = this.y - u.y;
+		let z = this.z - u.z;
+		return Math.sqrt(x * x + y * y + z * z);
+	}
+	cross() {
+		let u = this._arg2v(...arguments);
+		let x = this.y * u.z - this.z * u.y;
+		let y = this.z * u.x - this.x * u.z;
+		let z = this.x * u.y - this.y * u.x;
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this._deprecNorm();
+		return this;
+	}
+	normalize() {
+		this._calcNorm();
+		let n = this._cn;
+		this.x /= n;
+		this.y /= n;
+		this.z /= n;
+		this._cn = 1;
+		this._cnsq = 1;
+		return this;
+	}
+	limit(m) {
+		this._calcNorm();
+		let n = this._cn;
+		if (n > m) {
+			let t = m / n;
+			this.x *= t;
+			this.y *= t;
+			this.z *= t;
+			this._cn = m;
+			this._cnsq = m * m;
+		}
+		return this;
+	}
+	setMag(m) {
+		this._calcNorm();
+		let n = this._cn;
+		let t = m / n;
+		this.x *= t;
+		this.y *= t;
+		this.z *= t;
+		this._cn = m;
+		this._cnsq = m * m;
+		return this;
+	}
+	heading() {
+		return $.atan2(this.y, this.x);
+	}
+	rotate(ang) {
+		let costh = $.cos(ang);
+		let sinth = $.sin(ang);
+		let vx = this.x * costh - this.y * sinth;
+		let vy = this.x * sinth + this.y * costh;
+		this.x = vx;
+		this.y = vy;
+		return this;
+	}
+	angleBetween() {
+		let u = this._arg2v(...arguments);
+		const costh = this.dot(u) / (this.mag() * u.mag());
+		let ang;
+		ang = $.tan(Math.min(1, Math.max(-1, costh)));
+		ang = ang * Math.sign(this.cross(u).z || 1);
+		return ang;
+	}
+	lerp() {
+		let args = [...arguments];
+		let u = this._arg2v(...args.slice(0, -1));
+		let amt = args[args.length - 1];
+		this.x += (u.x - this.x) * amt;
+		this.y += (u.y - this.y) * amt;
+		this.z += (u.z - this.z) * amt;
+		this._deprecNorm();
+		return this;
+	}
+	reflect(n) {
+		n.normalize();
+		return this.sub(n.mult(2 * this.dot(n)));
+	}
+	array() {
+		return [this.x, this.y, this.z];
+	}
+	equals(u, epsilon) {
+		epsilon ??= Number.EPSILON || 0;
+		return Math.abs(u.x - this.x) < epsilon && Math.abs(u.y - this.y) < epsilon && Math.abs(u.z - this.z) < epsilon;
+	}
+	fromAngle(th, l) {
+		if (l === undefined) l = 1;
+		this._cn = l;
+		this._cnsq = l * l;
+		this.x = l * $.cos(th);
+		this.y = l * $.sin(th);
+		this.z = 0;
+		return this;
+	}
+	fromAngles(th, ph, l) {
+		if (l === undefined) l = 1;
+		this._cn = l;
+		this._cnsq = l * l;
+		const cosph = $.cos(ph);
+		const sinph = $.sin(ph);
+		const costh = $.cos(th);
+		const sinth = $.sin(th);
+		this.x = l * sinth * sinph;
+		this.y = -l * costh;
+		this.z = l * sinth * cosph;
+		return this;
+	}
+	random2D() {
+		this._cn = 1;
+		this._cnsq = 1;
+		return this.fromAngle(Math.random() * Math.PI * 2);
+	}
+	random3D() {
+		this._cn = 1;
+		this._cnsq = 1;
+		return this.fromAngles(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
+	}
+	toString() {
+		return `[${this.x}, ${this.y}, ${this.z}]`;
+	}
+};
+Q5.Vector.add = (v, u) => {
+	return new Q5.Vector(v.x + u.x, v.y + u.y, v.z + u.z);
+};
+Q5.Vector.rem = (v, u) => {
+	return new Q5.Vector(v.x % u.x, v.y % u.y, v.z % u.z);
+};
+Q5.Vector.sub = (v, u) => {
+	return new Q5.Vector(v.x - u.x, v.y - u.y, v.z - u.z);
+};
+Q5.Vector.mult = (v, u) => {
+	if (u.x === undefined) {
+		return new Q5.Vector(v.x * u, v.y * u, v.z * u);
+	}
+	return new Q5.Vector(v.x * u.x, v.y * u.y, v.z * u.z);
+};
+Q5.Vector.div = (v, u) => {
+	if (u.x === undefined) {
+		return new Q5.Vector(v.x / u, v.y / u, v.z / u);
+	}
+	return new Q5.Vector(v.x / u.x, v.y / u.y, v.z / u.z);
+};
+Q5.Vector.dist = (v, u) => {
+	return Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
+};
+Q5.Vector.cross = (v, u) => {
+	return new Q5.Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
+};
+Q5.Vector.lerp = (v, u, amt) => {
+	return new Q5.Vector(v.x + (u.x - v.x) * amt, v.y + (u.y - v.y) * amt, v.z + (u.z - v.z) * amt);
+};
+Q5.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
+
+for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
+	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 }
 
 class _Q5Image extends Q5 {
