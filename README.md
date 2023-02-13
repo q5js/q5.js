@@ -14,7 +14,7 @@ q5 doesn't include any friendly error messages to help you code though. Its main
 <script src="https://quinton-ashley.github.io/q5.js/q5.js"></script>
 ```
 
-q5 works with your existing p5.js sketches, no modifications required! If you have any problems though, please [make an issue report.][]
+q5 should work with your existing p5.js sketches, no modifications required! If you have any problems though, please [make an issue report.][]
 
 You can also use this [q5.js template sketch](https://editor.p5js.org/quinton-ashley/sketches/8SEtLEDl9) for the online p5.js Web Editor.
 
@@ -25,7 +25,7 @@ q5.js is compatible with popular p5 addons like p5.sound and p5play because it a
 To use addons, simply load them after q5.js:
 
 ```html
-<script src="q5.min.js"></script>
+<script src="q5.js"></script>
 <!-- load p5 addons after q5 -->
 <script src="p5.sound.js"></script>
 ```
@@ -48,6 +48,7 @@ Co-creator of q5, @quinton-ashley, added a ton of features:
 - `nf` (number format) function, which is used in p5play
 - `pow` function alias to `Math.pow`
 - prevented text stroke from being drawn if the user did not specify a stroke (p5.js behavior)
+- fixed `Vector.lerp` implementation
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
 
 Known issues:
