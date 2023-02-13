@@ -581,36 +581,14 @@ function Q5(scope, parent) {
 		};
 		v.toString = () => `[${v.x}, ${v.y}, ${v.z}]`;
 	}
-	Vector.add = (v, u) => {
-		return new Q5.Vector(v.x + u.x, v.y + u.y, v.z + u.z);
-	};
-	Vector.rem = (v, u) => {
-		return new Q5.Vector(v.x % u.x, v.y % u.y, v.z % u.z);
-	};
-	Vector.sub = (v, u) => {
-		return new Q5.Vector(v.x - u.x, v.y - u.y, v.z - u.z);
-	};
-	Vector.mult = (v, u) => {
-		if (u.x == undefined) {
-			return new Q5.Vector(v.x * u, v.y * u, v.z * u);
-		}
-		return new Q5.Vector(v.x * u.x, v.y * u.y, v.z * u.z);
-	};
-	Vector.div = (v, u) => {
-		if (u.x == undefined) {
-			return new Q5.Vector(v.x / u, v.y / u, v.z / u);
-		}
-		return new Q5.Vector(v.x / u.x, v.y / u.y, v.z / u.z);
-	};
-	Vector.dist = (v, u) => {
-		return Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
-	};
-	Vector.cross = (v, u) => {
-		return new Q5.Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
-	};
-	Vector.lerp = (v, u, t) => {
-		return new Q5.Vector(v.x * (1 - t) + u.x * t, (v.y = v.y * (1 - t) + u.y * t), (v.z = v.z * (1 - t) + u.z * t));
-	};
+	Vector.add = (v, u) => v.add(u);
+	Vector.rem = (v, u) => v.rem(u);
+	Vector.sub = (v, u) => v.sub(u);
+	Vector.mult = (v, u) => v.mult(u);
+	Vector.div = (v, u) => v.div(u);
+	Vector.dist = (v, u) => v.dist(u);
+	Vector.cross = (v, u) => v.cross(u);
+	Vector.lerp = (v, u, t) => v.lerp(u, t);
 	Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
 
 	for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
