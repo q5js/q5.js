@@ -416,123 +416,7 @@ function Q5(scope, parent) {
 	// COLORS
 	//================================================================
 
-	function hsv2rgb(h, s, v) {
-		//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
-		let r, g, b;
-		let hh, i, ff, p, q, t;
-		if (s == 0) {
-			r = v;
-			g = v;
-			b = v;
-			return [r * 255, g * 255, b * 255];
-		}
-		hh = h;
-		if (hh > 360) hh = 0;
-		hh /= 60;
-		i = ~~hh;
-		ff = hh - i;
-		p = v * (1.0 - s);
-		q = v * (1.0 - s * ff);
-		t = v * (1.0 - s * (1.0 - ff));
-		switch (i) {
-			case 0:
-				r = v;
-				g = t;
-				b = p;
-				break;
-			case 1:
-				r = q;
-				g = v;
-				b = p;
-				break;
-			case 2:
-				r = p;
-				g = v;
-				b = t;
-				break;
-			case 3:
-				r = p;
-				g = q;
-				b = v;
-				break;
-			case 4:
-				r = t;
-				g = p;
-				b = v;
-				break;
-			default:
-				r = v;
-				g = p;
-				b = q;
-				break;
-		}
-		return [r * 255, g * 255, b * 255];
-	}
-
-	function rgb2hsv(r, g, b) {
-		//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
-		let rgbMin, rgbMax;
-		let h, s, v;
-		rgbMin = r < g ? (r < b ? r : b) : g < b ? g : b;
-		rgbMax = r > g ? (r > b ? r : b) : g > b ? g : b;
-		v = (rgbMax * 100) / 255;
-		if (v == 0) {
-			h = 0;
-			s = 0;
-			return [h, s, v];
-		}
-		s = (100 * (rgbMax - rgbMin)) / rgbMax;
-		if (s == 0) {
-			h = 0;
-			return [h, s, v];
-		}
-		if (rgbMax == r) h = 0 + (60 * (g - b)) / (rgbMax - rgbMin);
-		else if (rgbMax == g) h = 120 + (60 * (b - r)) / (rgbMax - rgbMin);
-		else h = 240 + (60 * (r - g)) / (rgbMax - rgbMin);
-		return [h, s, v];
-	}
-
-	class Color {
-		constructor(r, g, b, a) {
-			this.MAGIC = 0xc010a;
-			this._r = r;
-			this._g = g;
-			this._b = b;
-			this._a = a;
-			this._h = 0;
-			this._s = 0;
-			this._v = 0;
-			this._hsvInferred = false;
-		}
-
-		setRed(x) {
-			this._r = x;
-			this._hsvInferred = false;
-		}
-		setGreen(x) {
-			this._g = x;
-			this._hsvInferred = false;
-		}
-		setBlue(x) {
-			this._b = x;
-			this._hsvInferred = false;
-		}
-		setAlpha(x) {
-			this._a = x / 255;
-			this._hsvInferred = false;
-		}
-		_inferHSV() {
-			if (!this._hsvInferred) {
-				[this._h, this._s, this._v] = rgb2hsv(this._r, this._g, this._b);
-				this._hsvInferred = true;
-			}
-		}
-		toString() {
-			return `rgba(${Math.round(this._r)},${Math.round(this._g)},${Math.round(this._b)},${~~(this._a * 1000) / 1000})`;
-		}
-	}
-	Q5.Color = Color;
-
+	$.Color = Q5.Color;
 	$.colorMode = (mode) => {
 		$._colorMode = mode;
 	};
@@ -586,13 +470,13 @@ function Q5(scope, parent) {
 			}
 		} else {
 			if (args.length == 1) {
-				return new Q5.Color(...hsv2rgb(0, 0, args[0] / 100), 1);
+				return new Q5.Color(...Q5.Color._hsv2rgb(0, 0, args[0] / 100), 1);
 			} else if (args.length == 2) {
-				return new Q5.Color(...hsv2rgb(0, 0, args[0] / 100), args[1] / 255);
+				return new Q5.Color(...Q5.Color._hsv2rgb(0, 0, args[0] / 100), args[1] / 255);
 			} else if (args.length == 3) {
-				return new Q5.Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), 1);
+				return new Q5.Color(...Q5.Color._hsv2rgb(args[0], args[1] / 100, args[2] / 100), 1);
 			} else if (args.length == 4) {
-				return new Q5.Color(...hsv2rgb(args[0], args[1] / 100, args[2] / 100), args[3]);
+				return new Q5.Color(...Q5.Color._hsv2rgb(args[0], args[1] / 100, args[2] / 100), args[3]);
 			}
 		}
 		return null;
@@ -2581,6 +2465,120 @@ Q5.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
 for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 }
+
+Q5.Color = class {
+	constructor(r, g, b, a) {
+		this.MAGIC = 0xc010a;
+		this._r = r;
+		this._g = g;
+		this._b = b;
+		this._a = a;
+		this._h = 0;
+		this._s = 0;
+		this._v = 0;
+		this._hsvInferred = false;
+	}
+
+	setRed(x) {
+		this._r = x;
+		this._hsvInferred = false;
+	}
+	setGreen(x) {
+		this._g = x;
+		this._hsvInferred = false;
+	}
+	setBlue(x) {
+		this._b = x;
+		this._hsvInferred = false;
+	}
+	setAlpha(x) {
+		this._a = x / 255;
+		this._hsvInferred = false;
+	}
+	_inferHSV() {
+		if (!this._hsvInferred) {
+			[this._h, this._s, this._v] = Q5.Color._rgb2hsv(this._r, this._g, this._b);
+			this._hsvInferred = true;
+		}
+	}
+	toString() {
+		return `rgba(${Math.round(this._r)},${Math.round(this._g)},${Math.round(this._b)},${~~(this._a * 1000) / 1000})`;
+	}
+};
+Q5.Color._rgb2hsv = (r, g, b) => {
+	//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
+	let rgbMin, rgbMax;
+	let h, s, v;
+	rgbMin = r < g ? (r < b ? r : b) : g < b ? g : b;
+	rgbMax = r > g ? (r > b ? r : b) : g > b ? g : b;
+	v = (rgbMax * 100) / 255;
+	if (v == 0) {
+		h = 0;
+		s = 0;
+		return [h, s, v];
+	}
+	s = (100 * (rgbMax - rgbMin)) / rgbMax;
+	if (s == 0) {
+		h = 0;
+		return [h, s, v];
+	}
+	if (rgbMax == r) h = 0 + (60 * (g - b)) / (rgbMax - rgbMin);
+	else if (rgbMax == g) h = 120 + (60 * (b - r)) / (rgbMax - rgbMin);
+	else h = 240 + (60 * (r - g)) / (rgbMax - rgbMin);
+	return [h, s, v];
+};
+Q5.Color._hsv2rgb = (h, s, v) => {
+	//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
+	let r, g, b;
+	let hh, i, ff, p, q, t;
+	if (s == 0) {
+		r = v;
+		g = v;
+		b = v;
+		return [r * 255, g * 255, b * 255];
+	}
+	hh = h;
+	if (hh > 360) hh = 0;
+	hh /= 60;
+	i = ~~hh;
+	ff = hh - i;
+	p = v * (1.0 - s);
+	q = v * (1.0 - s * ff);
+	t = v * (1.0 - s * (1.0 - ff));
+	switch (i) {
+		case 0:
+			r = v;
+			g = t;
+			b = p;
+			break;
+		case 1:
+			r = q;
+			g = v;
+			b = p;
+			break;
+		case 2:
+			r = p;
+			g = v;
+			b = t;
+			break;
+		case 3:
+			r = p;
+			g = q;
+			b = v;
+			break;
+		case 4:
+			r = t;
+			g = p;
+			b = v;
+			break;
+		default:
+			r = v;
+			g = p;
+			b = q;
+			break;
+	}
+	return [r * 255, g * 255, b * 255];
+};
 
 class _Q5Image extends Q5 {
 	constructor(width, height) {
