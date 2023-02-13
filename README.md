@@ -1,10 +1,12 @@
 # q5.js
 
+_WARNING: q5 is currently available for beta testing. It's not fully ready for production use yet!_
+
 q5.js is a drop-in replacement for [p5.js][]. It supports almost all of p5.js's 2D drawing API's, math functionality, and other utilities.
 
 q5.min.js (35kb) is 25x smaller than p5.min.js (898kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
 
-q5.js doesn't include any friendly error messages to help you code though. q5 is for people that are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
+q5 doesn't include any friendly error messages to help you code though. q5 is for people that are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
 
 ## Usage
 
@@ -14,7 +16,7 @@ q5.js doesn't include any friendly error messages to help you code though. q5 is
 
 q5 works with your existing p5.js sketches, no modifications required! If you have any problems though, please [make an issue report.][]
 
-q5.js can also be used with the p5 online Web Editor (editor.p5js.org). [q5 template example](https://editor.p5js.org/lingdong/sketches/xrT2VF08P)
+@LingDong- also made a [q5js template](https://editor.p5js.org/lingdong/sketches/xrT2VF08P) for the online p5.js Web Editor.
 
 ## Using p5 Addons
 
@@ -47,6 +49,10 @@ Co-creator of q5, @quinton-ashley, added a ton of features:
 - `pow` function alias to `Math.pow`
 - prevented text stroke from being drawn if the user did not specify a stroke (p5.js behavior)
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
+
+Known issues:
+
+- When the first frame in a sketch is drawn to the canvas, it's as if the origin of the canvas has been translated to the middle. I tried using `canvas.translate(0, 0)` in `createCanvas` but it didn't help. This can be tested using `noLoop()` in setup.
 
 ## Motivation: Part 1
 
