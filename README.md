@@ -18,7 +18,7 @@ q5.js can also be used with the p5 online Web Editor (editor.p5js.org). [q5 temp
 
 ## Using p5 Addons
 
-q5.js is compatible with popular p5 addons like p5.sound and p5.play because it aliases `Q5` to `p5`.
+q5.js is compatible with popular p5 addons like p5.sound and p5play because it aliases `Q5` to `p5`.
 
 To use addons, simply load them after q5.js:
 
@@ -32,7 +32,7 @@ To use addons, simply load them after q5.js:
 
 Co-creator of q5, @quinton-ashley, added a ton of features:
 
-- `registerMethod` functionality for supporting p5.js addons such as p5.play!
+- `registerMethod` functionality for supporting p5.js addons such as p5play!
 - automatic global instance creation, can also be user instantiated as well with `new Q5('global')` like with the previous version of q5xjs
 - p5 instance mode support
 - add q5 canvas to a container element with `new Q5('global', parentElem)` or `new Q5(parentElem)`
@@ -43,7 +43,7 @@ Co-creator of q5, @quinton-ashley, added a ton of features:
 - fixed `keyPressed` repeating key presses
 - made `instanceof` checks work for q5.js objects of the `Color`, `Vector`, and `Image` classes
 - the `push` and `pop` functions now save and restore style properties like `rectMode` and `strokeWeight`
-- `nf` (number format) function, which is used in p5.play
+- `nf` (number format) function, which is used in p5play
 - `pow` function alias to `Math.pow`
 - prevented text stroke from being drawn if the user did not specify a stroke (p5.js behavior)
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
@@ -97,7 +97,7 @@ fill(c);
 rect(15, 15, 35, 70);
 ```
 
-You could even use your own animation loop in place of `draw()`. But this would cause problems with addons that rely on `draw()`, such as p5.play.
+You could even use your own animation loop in place of `draw()`. But this would cause problems with addons that rely on `draw()`, such as p5play.
 
 ```js
 new Q5('global');
