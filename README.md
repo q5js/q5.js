@@ -59,10 +59,6 @@ Co-creator of q5, @quinton-ashley, added a ton of features:
 - fixed `Vector.lerp` implementation
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
 
-Known issues:
-
-- When the first frame in a sketch is drawn to the canvas, it's as if the origin of the canvas has been translated to the middle. I tried using `canvas.translate(0, 0)` in `createCanvas` but it didn't help. This can be tested using `noLoop()` in setup.
-
 ## Motivation: Part 1
 
 _This section was written by @LingDong-, co-creator of q5_
