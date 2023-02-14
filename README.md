@@ -10,13 +10,21 @@ q5 doesn't include any friendly error messages to help you code though. Its main
 
 ## Usage
 
+q5 should work with your existing p5.js sketches, no modifications required! If you have any problems though, please [make an issue report.][]
+
+Try out the [q5.js template sketch](https://editor.p5js.org/quinton-ashley/sketches/8SEtLEDl9) for the online p5.js Web Editor.
+
+Or you can use q5.js in your own project by adding this line to your HTML file:
+
 ```html
 <script src="https://quinton-ashley.github.io/q5.js/q5.js"></script>
 ```
 
-q5 should work with your existing p5.js sketches, no modifications required! If you have any problems though, please [make an issue report.][]
+q5 is also available on [npm](https://www.npmjs.com/package/q5)!
 
-You can also use this [q5.js template sketch](https://editor.p5js.org/quinton-ashley/sketches/8SEtLEDl9) for the online p5.js Web Editor.
+```bash
+npm install q5
+```
 
 ## Using p5 Addons
 

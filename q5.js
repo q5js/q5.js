@@ -2596,7 +2596,7 @@ Q5.prototype.registerMethod = function () {
 };
 Q5.prototype.registerPreloadMethod = () => {};
 Q5._validateParameters = () => true;
-window.p5 = Q5;
+window.p5 ??= Q5;
 
 document.addEventListener('DOMContentLoaded', () => {
 	if (!Q5._hasGlobal) new Q5('auto');
