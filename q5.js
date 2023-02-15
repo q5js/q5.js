@@ -802,7 +802,8 @@ function Q5(scope, parent) {
 	}
 
 	$.strokeWeight = (n) => {
-		$._doStroke = true;
+		if (n > 0) $._doStroke = true;
+		else $._doStroke = false;
 		ctx.lineWidth = n;
 	};
 	$.stroke = function () {
@@ -1679,6 +1680,7 @@ function Q5(scope, parent) {
 	};
 
 	$.remove = () => {
+		$.noLoop();
 		$.canvas.remove();
 	};
 
