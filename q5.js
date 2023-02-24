@@ -836,6 +836,8 @@ function Q5(scope, parent) {
 		ctx.fillStyle = col;
 	};
 	$.noFill = () => ($._doFill = false);
+	$.smooth = () => ($._smooth = true);
+	$.noSmooth = () => ($._smooth = false);
 	$.blendMode = (x) => (ctx.globalCompositeOperation = x);
 	$.strokeCap = (x) => (ctx.lineCap = x);
 	$.strokeJoin = (x) => (ctx.lineJoin = x);
@@ -2219,10 +2221,10 @@ function Q5(scope, parent) {
 		};
 	}
 	function isTouchUnaware() {
-		return $._touchStarted.isPlaceHolder && $._touchMoved.isPlaceHolder && $._touchEnded.isPlaceHolder;
+		return $._touchStartedFn.isPlaceHolder && $._touchMovedFn.isPlaceHolder && $._touchEndedFn.isPlaceHolder;
 	}
-	$.canvas.ontouchstart = (e) => {
-		$.touches = e.touches.map(getTouchInfo);
+	$._ontouchstart = (e) => {
+		$.touches = [...e.touches].map(getTouchInfo);
 		if (isTouchUnaware()) {
 			$.pmouseX = $.mouseX;
 			$.pmouseY = $.mouseY;
@@ -2238,8 +2240,8 @@ function Q5(scope, parent) {
 			e.preventDefault();
 		}
 	};
-	$.canvas.ontouchmove = (e) => {
-		$.touches = e.touches.map(getTouchInfo);
+	$._ontouchmove = (e) => {
+		$.touches = [...e.touches].map(getTouchInfo);
 		if (isTouchUnaware()) {
 			$.pmouseX = $.mouseX;
 			$.pmouseY = $.mouseY;
@@ -2255,8 +2257,8 @@ function Q5(scope, parent) {
 			e.preventDefault();
 		}
 	};
-	$.canvas.ontouchend = $.canvas.ontouchcancel = (e) => {
-		$.touches = e.touches.map(getTouchInfo);
+	$._ontouchend = (e) => {
+		$.touches = [...e.touches].map(getTouchInfo);
 		if (isTouchUnaware()) {
 			$.pmouseX = $.mouseX;
 			$.pmouseY = $.mouseY;
@@ -2271,6 +2273,9 @@ function Q5(scope, parent) {
 			e.preventDefault();
 		}
 	};
+	$.canvas.ontouchstart = (e) => $._ontouchstart(e);
+	$.canvas.ontouchmove = (e) => $._ontouchmove(e);
+	$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
 
 	$.hasSensorPermission =
 		(!window.DeviceOrientationEvent && !window.DeviceMotionEvent) ||
@@ -2444,6 +2449,7 @@ function Q5(scope, parent) {
 		'keyReleased',
 		'keyTyped',
 		'touchStarted',
+		'touchMoved',
 		'touchEnded'
 	];
 	for (let k of eventNames) {
