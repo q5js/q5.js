@@ -2106,12 +2106,12 @@ function Q5(scope, parent) {
 		}
 		$.deltaTime = pre - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
+		$.frameCount++;
 		for (let m of Q5.prototype._methods.pre) m.call($);
 		clearBuff();
 		firstVertex = true;
 		ctx.save();
 		$._drawFn();
-		$.frameCount++;
 		for (let m of Q5.prototype._methods.post) m.call($);
 		ctx.restore();
 		let post = performance.now();
