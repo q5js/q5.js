@@ -1,4 +1,4 @@
-# q5.js
+# <img src="q5js_logo.png" width="64"> q5.js
 
 _WARNING: q5 is currently available for beta testing. It's not fully ready for production use yet!_
 
