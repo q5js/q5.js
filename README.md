@@ -1,10 +1,8 @@
 # <img src="q5js_logo.png" height="64"> <img src="q5js_brand.png" height="64">
 
-_WARNING: q5 is currently available for beta testing. It's not fully ready for production use yet!_
-
 q5.js is a drop-in replacement for [p5.js][]. It supports almost all of p5.js's 2D drawing API's, math functionality, and other utilities.
 
-q5.min.js (35kb) is 25x smaller than p5.min.js (898kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
+q5.min.js (38kb) is 24x smaller than p5.min.js (914kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
 
 q5 doesn't include any friendly error messages to help you code though. Its mainly for people who are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
 
@@ -26,16 +24,17 @@ q5 is also available on [npm](https://www.npmjs.com/package/q5)!
 npm install q5
 ```
 
-## Using p5 Addons
+## Using p5 Addon Libraries
 
-q5.js is compatible with popular p5 addons like p5.sound and p5play because it aliases `Q5` to `p5`.
+q5.js is compatible with popular p5 addons and projects that use p5, such as p5play, because it aliases `Q5` to `p5`.
 
 To use addons, simply load them after q5.js:
 
 ```html
 <script src="q5.js"></script>
 <!-- load p5 addons after q5 -->
-<script src="p5.sound.js"></script>
+<script src="https://p5play.org/v3/planck.min.js"></script>
+<script src="https://p5play.org/v3/p5play.js"></script>
 ```
 
 ## What's new in Version 1.0?
@@ -87,7 +86,7 @@ An increase in performance of even a few frames per second can make a significan
 
 As a Computer Science teacher at Crimson Education, I teach students from all over the world. I also live in Colombia, where there are many people who don't have access to a PC, as in no desktop or laptop. There are businesses here that charge for time based access to 10 year old desktop PCs. But nearly everyone in the world, 8.6 million people, owns a smartphone. Improving the UX of p5.js on mobile devices is therefore a major priority for me. q5 is a step in that direction.
 
-I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. Its so complex in large part because it was initially released 10 years ago and also because of its Friendly Error system. Its also just an absolutely massive library, with literally over 100,000 lines of code and documentation! I'm not saying all this as a slight against the authors of p5.js but it does make the source code very difficult to read. q5 is so well organized, concise, and utilizes many modern JS features. I think even without documentation, the source code is much easier for experienced JS programmers to comprehend. That's also due in large part to @LingDong-'s design!
+I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. Its so complex in large part because it was initially released 10 years ago and also because of its Friendly Error system. Its also just an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB unminified compared to q5.js which is 65kb. I'm not saying all this as a slight against the authors of p5.js but it does make the source code very difficult to read. q5 is so well organized, concise, and utilizes many modern JS features. I think even without documentation, the source code is much easier for experienced JS programmers to comprehend. Thanks in large part to @LingDong-'s design!
 
 ## New Features: Top-Level Global Mode
 

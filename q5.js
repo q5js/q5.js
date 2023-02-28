@@ -1,7 +1,8 @@
 /**
  * q5.js
- * @version 1.0
- * @author LingDong- and quinton-ashley
+ * @version 1.1
+ * @author quinton-ashley and LingDong-
+ * @license GPL-3.0-only
  */
 function Q5(scope, parent) {
 	if (scope == 'auto') {
