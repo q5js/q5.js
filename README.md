@@ -1,4 +1,4 @@
-# <img src="q5js_logo.png" width="64"> q5.js
+# <img src="q5js_logo.png" height="64"> <img src="q5js_brand.png" height="64">
 
 _WARNING: q5 is currently available for beta testing. It's not fully ready for production use yet!_
 
