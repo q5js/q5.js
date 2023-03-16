@@ -1,6 +1,6 @@
 # <img src="q5js_logo.png" height="64"> <img src="q5js_brand.png" height="64">
 
-q5.js is a drop-in replacement for [p5.js][]. It supports almost all of p5.js's 2D drawing API's, math functionality, and other utilities.
+q5.js is a drop-in replacement for [p5.js][]. It supports almost all of p5.js's 2D drawing API's, math functionality, and some other utilities.
 
 q5.min.js (38kb) is 24x smaller than p5.min.js (914kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
 
