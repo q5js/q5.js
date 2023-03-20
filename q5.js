@@ -2374,6 +2374,11 @@ function Q5(scope, parent) {
 	$.second = () => new Date().getSeconds();
 	$.millis = () => performance.now() - millisStart;
 
+	$.storeItem = localStorage.setItem;
+	$.getItem = localStorage.getItem;
+	$.removeItem = localStorage.removeItem;
+	$.clearStorage = localStorage.clear;
+
 	$._loadFile = (path, cb, type) => {
 		preloadCnt++;
 		let ret = {};
