@@ -9,7 +9,7 @@ function Q5(scope, parent) {
 		if (typeof window.setup == 'undefined') return;
 		else scope = 'global';
 	}
-	if (arguments.length == 1 && typeof scope != 'string') {
+	if (arguments.length == 1 && typeof scope != 'string' && typeof scope != 'function') {
 		parent = arguments[0];
 		scope = null;
 	}
@@ -26,7 +26,7 @@ function Q5(scope, parent) {
 
 	if (scope != 'graphics' && scope != 'image') {
 		if (document.body) {
-			if (parent) parent.append($.canvas);
+			if (parent?.append) parent.append($.canvas);
 			else document.body.appendChild($.canvas);
 		} else {
 			window.addEventListener('load', () => {
@@ -367,258 +367,7 @@ function Q5(scope, parent) {
 		if (neg) s = '-' + s;
 		return s;
 	};
-	//================================================================
-	// VECTOR
-	//================================================================
-	$.Vector = class {
-		constructor(_x, _y, _z) {
-			this.x = _x || 0;
-			this.y = _y || 0;
-			this.z = _z || 0;
-			this._cn = null;
-			this._cnsq = null;
-		}
-
-		set(_x, _y, _z) {
-			this.x = _x || 0;
-			this.y = _y || 0;
-			this.z = _z || 0;
-		}
-		copy() {
-			return new $.Vector(this.x, this.y, this.z);
-		}
-		_arg2v(x, y, z) {
-			if (x.x !== undefined) return x;
-			if (y !== undefined) {
-				return { x, y, z: z || 0 };
-			}
-			return { x: x, y: x, z: x };
-		}
-		_calcNorm() {
-			if (this._cnsq == null) {
-				this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
-				this._cn = Math.sqrt(this._cnsq);
-			}
-		}
-		_deprecNorm() {
-			this._cnsq = null;
-			this._cn = null;
-		}
-		add() {
-			let u = this._arg2v(...arguments);
-			this.x += u.x;
-			this.y += u.y;
-			this.z += u.z;
-			this._deprecNorm();
-			return this;
-		}
-		rem() {
-			let u = this._arg2v(...arguments);
-			this.x %= u.x;
-			this.y %= u.y;
-			this.z %= u.z;
-			this._deprecNorm();
-			return this;
-		}
-		sub() {
-			let u = this._arg2v(...arguments);
-			this.x -= u.x;
-			this.y -= u.y;
-			this.z -= u.z;
-			this._deprecNorm();
-			return this;
-		}
-		mult() {
-			let u = this._arg2v(...arguments);
-			this.x *= u.x;
-			this.y *= u.y;
-			this.z *= u.z;
-			this._deprecNorm();
-			return this;
-		}
-		div() {
-			let u = this._arg2v(...arguments);
-			this.x /= u.x;
-			this.y /= u.y;
-			this.z /= u.z;
-			this._deprecNorm();
-			return this;
-		}
-		mag() {
-			this._calcNorm();
-			return this._cn;
-		}
-		magSq() {
-			this._calcNorm();
-			return this._cnsq;
-		}
-		dot() {
-			let u = this._arg2v(...arguments);
-			return this.x * u.x + this.y * u.y + this.z * u.z;
-		}
-		dist() {
-			let u = this._arg2v(...arguments);
-			let x = this.x - u.x;
-			let y = this.y - u.y;
-			let z = this.z - u.z;
-			return Math.sqrt(x * x + y * y + z * z);
-		}
-		cross() {
-			let u = this._arg2v(...arguments);
-			let x = this.y * u.z - this.z * u.y;
-			let y = this.z * u.x - this.x * u.z;
-			let z = this.x * u.y - this.y * u.x;
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this._deprecNorm();
-			return this;
-		}
-		normalize() {
-			this._calcNorm();
-			let n = this._cn;
-			this.x /= n;
-			this.y /= n;
-			this.z /= n;
-			this._cn = 1;
-			this._cnsq = 1;
-			return this;
-		}
-		limit(m) {
-			this._calcNorm();
-			let n = this._cn;
-			if (n > m) {
-				let t = m / n;
-				this.x *= t;
-				this.y *= t;
-				this.z *= t;
-				this._cn = m;
-				this._cnsq = m * m;
-			}
-			return this;
-		}
-		setMag(m) {
-			this._calcNorm();
-			let n = this._cn;
-			let t = m / n;
-			this.x *= t;
-			this.y *= t;
-			this.z *= t;
-			this._cn = m;
-			this._cnsq = m * m;
-			return this;
-		}
-		heading() {
-			return $.atan2(this.y, this.x);
-		}
-		rotate(ang) {
-			let costh = $.cos(ang);
-			let sinth = $.sin(ang);
-			let vx = this.x * costh - this.y * sinth;
-			let vy = this.x * sinth + this.y * costh;
-			this.x = vx;
-			this.y = vy;
-			return this;
-		}
-		angleBetween() {
-			let u = this._arg2v(...arguments);
-			const costh = this.dot(u) / (this.mag() * u.mag());
-			let ang;
-			ang = $.tan(Math.min(1, Math.max(-1, costh)));
-			ang = ang * Math.sign(this.cross(u).z || 1);
-			return ang;
-		}
-		lerp() {
-			let args = [...arguments];
-			let u = this._arg2v(...args.slice(0, -1));
-			let amt = args[args.length - 1];
-			this.x += (u.x - this.x) * amt;
-			this.y += (u.y - this.y) * amt;
-			this.z += (u.z - this.z) * amt;
-			this._deprecNorm();
-			return this;
-		}
-		reflect(n) {
-			n.normalize();
-			return this.sub(n.mult(2 * this.dot(n)));
-		}
-		array() {
-			return [this.x, this.y, this.z];
-		}
-		equals(u, epsilon) {
-			epsilon ??= Number.EPSILON || 0;
-			return Math.abs(u.x - this.x) < epsilon && Math.abs(u.y - this.y) < epsilon && Math.abs(u.z - this.z) < epsilon;
-		}
-		fromAngle(th, l) {
-			if (l === undefined) l = 1;
-			this._cn = l;
-			this._cnsq = l * l;
-			this.x = l * $.cos(th);
-			this.y = l * $.sin(th);
-			this.z = 0;
-			return this;
-		}
-		fromAngles(th, ph, l) {
-			if (l === undefined) l = 1;
-			this._cn = l;
-			this._cnsq = l * l;
-			const cosph = $.cos(ph);
-			const sinph = $.sin(ph);
-			const costh = $.cos(th);
-			const sinth = $.sin(th);
-			this.x = l * sinth * sinph;
-			this.y = -l * costh;
-			this.z = l * sinth * cosph;
-			return this;
-		}
-		random2D() {
-			this._cn = this._cnsq = 1;
-			return this.fromAngle(Math.random() * Math.PI * 2);
-		}
-		random3D() {
-			this._cn = this._cnsq = 1;
-			return this.fromAngles(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
-		}
-		toString() {
-			return `[${this.x}, ${this.y}, ${this.z}]`;
-		}
-	};
-	$.Vector.add = (v, u) => {
-		return new $.Vector(v.x + u.x, v.y + u.y, v.z + u.z);
-	};
-	$.Vector.rem = (v, u) => {
-		return new $.Vector(v.x % u.x, v.y % u.y, v.z % u.z);
-	};
-	$.Vector.sub = (v, u) => {
-		return new $.Vector(v.x - u.x, v.y - u.y, v.z - u.z);
-	};
-	$.Vector.mult = (v, u) => {
-		if (u.x === undefined) {
-			return new $.Vector(v.x * u, v.y * u, v.z * u);
-		}
-		return new $.Vector(v.x * u.x, v.y * u.y, v.z * u.z);
-	};
-	$.Vector.div = (v, u) => {
-		if (u.x === undefined) {
-			return new $.Vector(v.x / u, v.y / u, v.z / u);
-		}
-		return new $.Vector(v.x / u.x, v.y / u.y, v.z / u.z);
-	};
-	$.Vector.dist = (v, u) => {
-		return Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
-	};
-	$.Vector.cross = (v, u) => {
-		return new $.Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
-	};
-	$.Vector.lerp = (v, u, amt) => {
-		return new $.Vector(v.x + (u.x - v.x) * amt, v.y + (u.y - v.y) * amt, v.z + (u.z - v.z) * amt);
-	};
-	$.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
-
-	for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
-		$.Vector[k] = (u, v, t) => new $.Vector()[k](u, v, t);
-	}
-	$.createVector = (x, y, z) => new $.Vector(x, y, z);
+	$.createVector = (x, y, z) => new Q5.Vector(x, y, z);
 
 	//================================================================
 	// CURVE QUERY
@@ -1303,7 +1052,7 @@ function Q5(scope, parent) {
 		preloadCnt++;
 		let g = $.createImage(100, 100);
 		let c = g.canvas.getContext('2d');
-		let img = new Image();
+		let img = new window.Image();
 		img.src = url;
 		img.crossOrigin = 'Anonymous';
 		img.onload = () => {
@@ -1312,6 +1061,10 @@ function Q5(scope, parent) {
 			c.drawImage(img, 0, 0);
 			preloadCnt--;
 			if (cb) cb(g);
+		};
+		img.onerror = (e) => {
+			preloadCnt--;
+			throw e;
 		};
 		return g;
 	};
@@ -2137,21 +1890,6 @@ function Q5(scope, parent) {
 	$.getFrameRate = () => $._frameRate;
 	$.getFPS = () => $._fps;
 
-	if (scope != 'graphics' || scope != 'image') {
-		requestAnimationFrame(() => {
-			$._preloadFn();
-			millisStart = performance.now();
-			_start();
-			function _start() {
-				if (preloadCnt > 0) {
-					return requestAnimationFrame(_start);
-				}
-				$._setupFn();
-				_draw();
-			}
-		});
-	}
-
 	$._updateMouse = function (e) {
 		let $ = this;
 		$.pmouseX = $.mouseX;
@@ -2333,35 +2071,37 @@ function Q5(scope, parent) {
 		(A[8] * v[0] + A[9] * v[1] + A[10] * v[2] + A[11]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15])
 	];
 
-	window.ondeviceorientation = (e) => {
-		$.pRotationX = $.rotationX;
-		$.pRotationY = $.rotationY;
-		$.pRotationZ = $.rotationZ;
-		$.pRelRotationX = $.relRotationX;
-		$.pRelRotationY = $.relRotationY;
-		$.pRelRotationZ = $.relRotationZ;
+	if (typeof window !== 'undefined') {
+		window.ondeviceorientation = (e) => {
+			$.pRotationX = $.rotationX;
+			$.pRotationY = $.rotationY;
+			$.pRotationZ = $.rotationZ;
+			$.pRelRotationX = $.relRotationX;
+			$.pRelRotationY = $.relRotationY;
+			$.pRelRotationZ = $.relRotationZ;
 
-		$.rotationX = e.beta * (Math.PI / 180.0);
-		$.rotationY = e.gamma * (Math.PI / 180.0);
-		$.rotationZ = e.alpha * (Math.PI / 180.0);
-		$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][~~(window.orientation / 90) + 1];
-		$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][~~(window.orientation / 90) + 1];
-		$.relRotationZ = $.rotationZ;
-	};
-	window.ondevicemotion = (e) => {
-		$.pAccelerationX = $.accelerationX;
-		$.pAccelerationY = $.accelerationY;
-		$.pAccelerationZ = $.accelerationZ;
-		if (!e.acceleration) {
-			// devices that don't support plain acceleration
-			// compute gravitational acceleration's component on X Y Z axes based on gyroscope
-			// g = ~ 9.80665
-			let grav = TRFM(MULT(ROTY($.rotationY), ROTX($.rotationX)), [0, 0, -9.80665]);
-			$.accelerationX = e.accelerationIncludingGravity.x + grav[0];
-			$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
-			$.accelerationZ = e.accelerationIncludingGravity.z - grav[2];
-		}
-	};
+			$.rotationX = e.beta * (Math.PI / 180.0);
+			$.rotationY = e.gamma * (Math.PI / 180.0);
+			$.rotationZ = e.alpha * (Math.PI / 180.0);
+			$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][~~(window.orientation / 90) + 1];
+			$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][~~(window.orientation / 90) + 1];
+			$.relRotationZ = $.rotationZ;
+		};
+		window.ondevicemotion = (e) => {
+			$.pAccelerationX = $.accelerationX;
+			$.pAccelerationY = $.accelerationY;
+			$.pAccelerationZ = $.accelerationZ;
+			if (!e.acceleration) {
+				// devices that don't support plain acceleration
+				// compute gravitational acceleration's component on X Y Z axes based on gyroscope
+				// g = ~ 9.80665
+				let grav = TRFM(MULT(ROTY($.rotationY), ROTX($.rotationX)), [0, 0, -9.80665]);
+				$.accelerationX = e.accelerationIncludingGravity.x + grav[0];
+				$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
+				$.accelerationZ = e.accelerationIncludingGravity.z - grav[2];
+			}
+		};
+	}
 
 	//================================================================
 	// TIME
@@ -2439,9 +2179,8 @@ function Q5(scope, parent) {
 		}
 	}
 
-	//================================================================
-	// EVENTS
-	//================================================================
+	if (typeof scope == 'function') scope($);
+
 	let o = scope == 'global' ? window : $;
 	let eventNames = [
 		'setup',
@@ -2474,7 +2213,18 @@ function Q5(scope, parent) {
 		}
 	}
 
-	if (typeof scope == 'function') scope($);
+	if (scope != 'graphics' || scope != 'image') {
+		$._preloadFn();
+		millisStart = performance.now();
+		function _start() {
+			if (preloadCnt > 0) {
+				return requestAnimationFrame(_start);
+			}
+			$._setupFn();
+			requestAnimationFrame(_draw);
+		}
+		_start();
+	}
 }
 
 Q5.Color = class {
@@ -2505,6 +2255,9 @@ Q5.Color = class {
 	setAlpha(x) {
 		this._a = x / 255;
 		this._hsvInferred = false;
+	}
+	get levels() {
+		return [this._r, this._g, this._b, this._a * 255];
 	}
 	_inferHSV() {
 		if (!this._hsvInferred) {
@@ -2591,6 +2344,258 @@ Q5.Color._hsv2rgb = (h, s, v) => {
 	return [r * 255, g * 255, b * 255];
 };
 
+//================================================================
+// VECTOR
+//================================================================
+Q5.Vector = class {
+	constructor(_x, _y, _z) {
+		this.x = _x || 0;
+		this.y = _y || 0;
+		this.z = _z || 0;
+		this._cn = null;
+		this._cnsq = null;
+	}
+
+	set(_x, _y, _z) {
+		this.x = _x || 0;
+		this.y = _y || 0;
+		this.z = _z || 0;
+	}
+	copy() {
+		return new Q5.Vector(this.x, this.y, this.z);
+	}
+	_arg2v(x, y, z) {
+		if (x.x !== undefined) return x;
+		if (y !== undefined) {
+			return { x, y, z: z || 0 };
+		}
+		return { x: x, y: x, z: x };
+	}
+	_calcNorm() {
+		if (this._cnsq == null) {
+			this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
+			this._cn = Math.sqrt(this._cnsq);
+		}
+	}
+	_deprecNorm() {
+		this._cnsq = null;
+		this._cn = null;
+	}
+	add() {
+		let u = this._arg2v(...arguments);
+		this.x += u.x;
+		this.y += u.y;
+		this.z += u.z;
+		this._deprecNorm();
+		return this;
+	}
+	rem() {
+		let u = this._arg2v(...arguments);
+		this.x %= u.x;
+		this.y %= u.y;
+		this.z %= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	sub() {
+		let u = this._arg2v(...arguments);
+		this.x -= u.x;
+		this.y -= u.y;
+		this.z -= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	mult() {
+		let u = this._arg2v(...arguments);
+		this.x *= u.x;
+		this.y *= u.y;
+		this.z *= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	div() {
+		let u = this._arg2v(...arguments);
+		this.x /= u.x;
+		this.y /= u.y;
+		this.z /= u.z;
+		this._deprecNorm();
+		return this;
+	}
+	mag() {
+		this._calcNorm();
+		return this._cn;
+	}
+	magSq() {
+		this._calcNorm();
+		return this._cnsq;
+	}
+	dot() {
+		let u = this._arg2v(...arguments);
+		return this.x * u.x + this.y * u.y + this.z * u.z;
+	}
+	dist() {
+		let u = this._arg2v(...arguments);
+		let x = this.x - u.x;
+		let y = this.y - u.y;
+		let z = this.z - u.z;
+		return Math.sqrt(x * x + y * y + z * z);
+	}
+	cross() {
+		let u = this._arg2v(...arguments);
+		let x = this.y * u.z - this.z * u.y;
+		let y = this.z * u.x - this.x * u.z;
+		let z = this.x * u.y - this.y * u.x;
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this._deprecNorm();
+		return this;
+	}
+	normalize() {
+		this._calcNorm();
+		let n = this._cn;
+		this.x /= n;
+		this.y /= n;
+		this.z /= n;
+		this._cn = 1;
+		this._cnsq = 1;
+		return this;
+	}
+	limit(m) {
+		this._calcNorm();
+		let n = this._cn;
+		if (n > m) {
+			let t = m / n;
+			this.x *= t;
+			this.y *= t;
+			this.z *= t;
+			this._cn = m;
+			this._cnsq = m * m;
+		}
+		return this;
+	}
+	setMag(m) {
+		this._calcNorm();
+		let n = this._cn;
+		let t = m / n;
+		this.x *= t;
+		this.y *= t;
+		this.z *= t;
+		this._cn = m;
+		this._cnsq = m * m;
+		return this;
+	}
+	heading() {
+		return $.atan2(this.y, this.x);
+	}
+	rotate(ang) {
+		let costh = $.cos(ang);
+		let sinth = $.sin(ang);
+		let vx = this.x * costh - this.y * sinth;
+		let vy = this.x * sinth + this.y * costh;
+		this.x = vx;
+		this.y = vy;
+		return this;
+	}
+	angleBetween() {
+		let u = this._arg2v(...arguments);
+		const costh = this.dot(u) / (this.mag() * u.mag());
+		let ang;
+		ang = $.tan(Math.min(1, Math.max(-1, costh)));
+		ang = ang * Math.sign(this.cross(u).z || 1);
+		return ang;
+	}
+	lerp() {
+		let args = [...arguments];
+		let u = this._arg2v(...args.slice(0, -1));
+		let amt = args[args.length - 1];
+		this.x += (u.x - this.x) * amt;
+		this.y += (u.y - this.y) * amt;
+		this.z += (u.z - this.z) * amt;
+		this._deprecNorm();
+		return this;
+	}
+	reflect(n) {
+		n.normalize();
+		return this.sub(n.mult(2 * this.dot(n)));
+	}
+	array() {
+		return [this.x, this.y, this.z];
+	}
+	equals(u, epsilon) {
+		epsilon ??= Number.EPSILON || 0;
+		return Math.abs(u.x - this.x) < epsilon && Math.abs(u.y - this.y) < epsilon && Math.abs(u.z - this.z) < epsilon;
+	}
+	fromAngle(th, l) {
+		if (l === undefined) l = 1;
+		this._cn = l;
+		this._cnsq = l * l;
+		this.x = l * $.cos(th);
+		this.y = l * $.sin(th);
+		this.z = 0;
+		return this;
+	}
+	fromAngles(th, ph, l) {
+		if (l === undefined) l = 1;
+		this._cn = l;
+		this._cnsq = l * l;
+		const cosph = $.cos(ph);
+		const sinph = $.sin(ph);
+		const costh = $.cos(th);
+		const sinth = $.sin(th);
+		this.x = l * sinth * sinph;
+		this.y = -l * costh;
+		this.z = l * sinth * cosph;
+		return this;
+	}
+	random2D() {
+		this._cn = this._cnsq = 1;
+		return this.fromAngle(Math.random() * Math.PI * 2);
+	}
+	random3D() {
+		this._cn = this._cnsq = 1;
+		return this.fromAngles(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
+	}
+	toString() {
+		return `[${this.x}, ${this.y}, ${this.z}]`;
+	}
+};
+Q5.Vector.add = (v, u) => {
+	return new Q5.Vector(v.x + u.x, v.y + u.y, v.z + u.z);
+};
+Q5.Vector.rem = (v, u) => {
+	return new Q5.Vector(v.x % u.x, v.y % u.y, v.z % u.z);
+};
+Q5.Vector.sub = (v, u) => {
+	return new Q5.Vector(v.x - u.x, v.y - u.y, v.z - u.z);
+};
+Q5.Vector.mult = (v, u) => {
+	if (u.x === undefined) {
+		return new Q5.Vector(v.x * u, v.y * u, v.z * u);
+	}
+	return new Q5.Vector(v.x * u.x, v.y * u.y, v.z * u.z);
+};
+Q5.Vector.div = (v, u) => {
+	if (u.x === undefined) {
+		return new Q5.Vector(v.x / u, v.y / u, v.z / u);
+	}
+	return new Q5.Vector(v.x / u.x, v.y / u.y, v.z / u.z);
+};
+Q5.Vector.dist = (v, u) => {
+	return Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
+};
+Q5.Vector.cross = (v, u) => {
+	return new Q5.Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
+};
+Q5.Vector.lerp = (v, u, amt) => {
+	return new Q5.Vector(v.x + (u.x - v.x) * amt, v.y + (u.y - v.y) * amt, v.z + (u.z - v.z) * amt);
+};
+Q5.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
+
+for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
+	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
+}
+
 class _Q5Image extends Q5 {
 	constructor(width, height) {
 		super('image');
@@ -2599,7 +2604,9 @@ class _Q5Image extends Q5 {
 	}
 }
 
-Q5._friendlyError = (msg, func) => console.error(func + ': ' + msg);
+Q5._friendlyError = (msg, func) => {
+	throw func + ': ' + msg;
+};
 Q5.prototype._methods = {
 	init: [],
 	pre: [],
@@ -2611,7 +2618,9 @@ Q5.prototype.registerMethod = function () {
 };
 Q5.prototype.registerPreloadMethod = () => {};
 Q5._validateParameters = () => true;
-window.p5 ??= Q5;
+
+if (typeof module != 'undefined') module.exports = Q5;
+else window.p5 ??= Q5;
 
 document.addEventListener('DOMContentLoaded', () => {
 	if (!Q5._hasGlobal) new Q5('auto');
