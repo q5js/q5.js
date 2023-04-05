@@ -26,6 +26,7 @@ function Q5(scope, parent) {
 
 	if (scope != 'graphics' && scope != 'image') {
 		if (document.body) {
+			parent ??= document.getElementsByTagName('main')[0];
 			if (parent?.append) parent.append($.canvas);
 			else document.body.appendChild($.canvas);
 		} else {
