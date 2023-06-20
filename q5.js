@@ -1943,7 +1943,7 @@ function Q5(scope, parent) {
 		keysHeld[$.keyCode] = false;
 		$._keyReleasedFn(e);
 	};
-	addEventListener('mousemove', $._onmousemove, false);
+	addEventListener('mousemove', (e) => $._onmousemove(e), false);
 	$.canvas.onmousedown = (e) => $._onmousedown(e);
 	$.canvas.onmouseup = (e) => $._onmouseup(e);
 	$.canvas.onclick = (e) => $._onclick(e);

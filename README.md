@@ -1,6 +1,6 @@
 # <img src="q5js_logo.png" height="64"> <img src="q5js_brand.png" height="64">
 
-q5.js is a drop-in replacement for [p5.js][]. It supports almost all of p5.js's 2D drawing API's, math functionality, and some other utilities.
+q5.js is a drop-in replacement for [p5.js][]. It supports all of p5.js's 2D drawing API's, math functionality, and some other utilities.
 
 q5.min.js (38kb) is 24x smaller than p5.min.js (914kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
 
@@ -74,8 +74,6 @@ Just to clarify, I think the official p5.js implementation is perfectly justifie
 
 In fact, its not uncommon for successful software systems to have multiple implementations of the same spec (think: compilers of C, implementations of SQL, and engines of JavaScript). This allows the user to choose a backend that best suits their goals or needs. When one is using p5.js (or Processing or OpenFrameworks), what one is really using is the same set of commands, the intuitive way of describing drawings, that empowers creative expression. The actual way these commands are implemented internally is incidental; it should be possible to swap internal implementations as necessary.
 
-Check out these q5 renditions of the standard p5 examples on [the q5xjs website](https://q5xjs.netlify.app).
-
 ## Motivation: Part 2
 
 _This section was written by @quinton-ashley, co-creator of q5_
@@ -86,15 +84,15 @@ An increase in performance of even a few frames per second can make a significan
 
 As a Computer Science teacher at Crimson Education, I teach students from all over the world. I also live in Colombia, where there are many people who don't have access to a PC, as in no desktop or laptop. There are businesses here that charge for time based access to 10 year old desktop PCs. But 6.3 billion people in the world own a smartphone. Improving the UX of p5.js on mobile devices is therefore a major priority for me. q5 is a step in that direction.
 
-I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. Its also an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB unminified compared to q5.js which is 65kb.
+I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB unminified compared to q5.js which is 65kb.
 
-I'm not saying all this as a slight against the authors of p5 but it does make the source code very difficult to read. I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were each offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative.
+I'm not saying all this as a slight against the authors of p5, but it does make the source code very difficult to understand. I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
 
-Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without documentation, the source code is much easier for experienced JS programmers to comprehend.
+Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without documentation, the source code is easier for experienced JS programmers to comprehend.
 
 ## New Features: Top-Level Global Mode
 
-There are some features in q5 that aren't in p5, but using them is totally optional.
+There are some extra features in q5 that aren't in p5, but using them is totally optional.
 
 **q5.js** has an automatic global mode, which is enabled by default. This means existing p5.js sketches can be run without any modification.
 
