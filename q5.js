@@ -429,7 +429,7 @@ function Q5(scope, parent) {
 		crimson: [220, 20, 60],
 		gold: [255, 215, 0],
 		green: [0, 128, 0],
-		grey: [128, 128, 128],
+		gray: [128, 128, 128],
 		magenta: [255, 0, 255],
 		orange: [255, 165, 0],
 		pink: [255, 192, 203],
