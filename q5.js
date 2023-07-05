@@ -223,7 +223,7 @@ function Q5(scope, parent) {
 	//================================================================
 
 	Object.defineProperty($, 'deviceOrientation', {
-		get: () => (Math.abs(window.orientation) == 90 ? $.LANDSCAPE : $.PORTRAIT)
+		get: () => window.screen.orientation.type
 	});
 
 	Object.defineProperty($, 'windowWidth', {
@@ -2169,7 +2169,8 @@ function Q5(scope, parent) {
 	for (let m of Q5.prototype._methods.init) m.call($);
 
 	if (scope == 'global') {
-		for (let p in $) {
+		let props = Object.getOwnPropertyNames($);
+		for (let p of props) {
 			if (typeof $[p] == 'function') window[p] = $[p];
 			else {
 				Object.defineProperty(window, p, {
