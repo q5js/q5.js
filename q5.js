@@ -149,6 +149,7 @@ function Q5(scope, parent) {
 	// PUBLIC PROPERTIES
 	//================================================================
 	$.frameCount = 0;
+	$.deltaTime = 16;
 	$.mouseX = 0;
 	$.mouseY = 0;
 	$.pmouseX = 0;
@@ -249,6 +250,7 @@ function Q5(scope, parent) {
 		$.canvas.height = height * $._pixelDensity;
 		defaultStyle();
 		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
+		return $.canvas;
 	};
 
 	$.resizeCanvas = (width, height) => {
