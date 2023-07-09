@@ -256,14 +256,8 @@ function Q5(scope, parent) {
 		return $.canvas;
 	};
 
-	// this is really broken and I will have to learn more about it
-	// but never the less the function should exist
+	// Call on resize canvas event
 	$.doResize = () => {
-		$.width = window.innerWidth;
-		$.height = window.innerHeight;
-		$.canvas.width = $.width;
-		$.canvas.height = $.height;
-
 		$.windowResized();
 	}
 
