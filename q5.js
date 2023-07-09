@@ -149,6 +149,7 @@ function Q5(scope, parent) {
 	// PUBLIC PROPERTIES
 	//================================================================
 	$.frameCount = 0;
+	$.mousepolling = 0;
 	$.deltaTime = 16;
 	$.mouseX = 0;
 	$.mouseY = 0;
@@ -1895,14 +1896,17 @@ function Q5(scope, parent) {
 
 	$._updateMouse = function (e) {
 		let $ = this;
-		$.pmouseX = $.mouseX;
-		$.pmouseY = $.mouseY;
+		if ($.frameCount > $.mousepolling) {
+			$.mousepolling = $.frameCount;
+			$.pmouseX = $.mouseX;
+			$.pmouseY = $.mouseY;
 
-		let rect = $.canvas.getBoundingClientRect();
-		let sx = $.canvas.scrollWidth / $.width || 1;
-		let sy = $.canvas.scrollHeight / $.height || 1;
-		$.mouseX = (e.clientX - rect.left) / sx;
-		$.mouseY = (e.clientY - rect.top) / sy;
+			let rect = $.canvas.getBoundingClientRect();
+			let sx = $.canvas.scrollWidth / $.width || 1;
+			let sy = $.canvas.scrollHeight / $.height || 1;
+			$.mouseX = (e.clientX - rect.left) / sx;
+			$.mouseY = (e.clientY - rect.top) / sy;
+		}
 	}.bind($);
 
 	$._onmousemove = function (e) {
