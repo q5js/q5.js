@@ -23,8 +23,14 @@ function Q5(scope, parent) {
 	$.height = 100;
 	$.canvas.width = $.width;
 	$.canvas.height = $.height;
+	$.windowResized = () => {};
 
 	if (scope != 'graphics' && scope != 'image') {
+		window.addEventListener('resize', $.windowResized);
+		$.canvas.parent = (el) => {
+			if (el[0]) el = document.getElementById(el);
+			el.append($.canvas);
+		};
 		if (document.body) {
 			parent ??= document.getElementsByTagName('main')[0];
 			if (parent?.append) parent.append($.canvas);
@@ -152,8 +158,6 @@ function Q5(scope, parent) {
 	$.deltaTime = 16;
 	$.mouseX = 0;
 	$.mouseY = 0;
-	$.pmouseX = 0;
-	$.pmouseY = 0;
 	$.mouseButton = null;
 	$.keyIsPressed = false;
 	$.mouseIsPressed = false;
@@ -170,6 +174,8 @@ function Q5(scope, parent) {
 	$.relRotationY = 0;
 	$.relRotationZ = 0;
 
+	$.pmouseX = 0;
+	$.pmouseY = 0;
 	$.pAccelerationX = 0;
 	$.pAccelerationY = 0;
 	$.pAccelerationZ = 0;
@@ -1875,6 +1881,8 @@ function Q5(scope, parent) {
 		let post = performance.now();
 		$._fps = Math.round(1000 / (post - pre));
 		$._lastFrameTime = pre;
+		$.pmouseX = $.mouseX;
+		$.pmouseY = $.mouseY;
 	}
 
 	$.noLoop = () => {
@@ -1895,9 +1903,6 @@ function Q5(scope, parent) {
 
 	$._updateMouse = function (e) {
 		let $ = this;
-		$.pmouseX = $.mouseX;
-		$.pmouseY = $.mouseY;
-
 		let rect = $.canvas.getBoundingClientRect();
 		let sx = $.canvas.scrollWidth / $.width || 1;
 		let sy = $.canvas.scrollHeight / $.height || 1;
@@ -1969,8 +1974,6 @@ function Q5(scope, parent) {
 	$._ontouchstart = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
 		if (isTouchUnaware()) {
-			$.pmouseX = $.mouseX;
-			$.pmouseY = $.mouseY;
 			$.mouseX = $.touches[0].x;
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = true;
@@ -1986,8 +1989,6 @@ function Q5(scope, parent) {
 	$._ontouchmove = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
 		if (isTouchUnaware()) {
-			$.pmouseX = $.mouseX;
-			$.pmouseY = $.mouseY;
 			$.mouseX = $.touches[0].x;
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = true;
@@ -2003,8 +2004,6 @@ function Q5(scope, parent) {
 	$._ontouchend = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
 		if (isTouchUnaware()) {
-			$.pmouseX = $.mouseX;
-			$.pmouseY = $.mouseY;
 			$.mouseX = $.touches[0].x;
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = false;
