@@ -34,6 +34,9 @@ function Q5(scope, parent) {
 				document.body.appendChild($.canvas);
 			});
 		}
+		window.addEventListener('resize', () => {
+			$.doResize();
+		});
 	}
 
 	defaultStyle();
@@ -252,6 +255,17 @@ function Q5(scope, parent) {
 		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
 		return $.canvas;
 	};
+
+	// this is really broken and I will have to learn more about it
+	// but never the less the function should exist
+	$.doResize = () => {
+		$.width = window.innerWidth;
+		$.height = window.innerHeight;
+		$.canvas.width = $.width;
+		$.canvas.height = $.height;
+
+		$.windowResized();
+	}
 
 	$.resizeCanvas = (width, height) => {
 		$.width = width;
