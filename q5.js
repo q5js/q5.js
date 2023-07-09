@@ -256,7 +256,6 @@ function Q5(scope, parent) {
 		return $.canvas;
 	};
 
-	// Call on resize canvas event
 	$.doResize = () => {
 		$.windowResized();
 	}
@@ -266,7 +265,10 @@ function Q5(scope, parent) {
 		$.height = height;
 		$.canvas.width = width * $._pixelDensity;
 		$.canvas.height = height * $._pixelDensity;
+		defaultStyle();
+		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
 	};
+
 
 	$.createGraphics = (width, height) => {
 		let g = new Q5('graphics');
@@ -1711,7 +1713,7 @@ function Q5(scope, parent) {
 			var r = 3.44262;
 			var x, y;
 			var u1, u2;
-			for (;;) {
+			for (; ;) {
 				x = hz * wn[iz];
 				if (iz == 0) {
 					do {
@@ -1735,7 +1737,7 @@ function Q5(scope, parent) {
 		};
 		var efix = () => {
 			var x;
-			for (;;) {
+			for (; ;) {
 				if (iz == 0) {
 					return 7.69711 - Math.log(UNI());
 				}
@@ -2212,7 +2214,7 @@ function Q5(scope, parent) {
 	];
 	for (let k of eventNames) {
 		let intern = '_' + k + 'Fn';
-		$[intern] = () => {};
+		$[intern] = () => { };
 		$[intern].isPlaceHolder = true;
 		if (o[k]) {
 			$[intern] = o[k];
@@ -2628,7 +2630,7 @@ Q5.prototype._methods = {
 Q5.prototype.registerMethod = function () {
 	Q5.prototype._methods[arguments[0]].push(arguments[1]);
 };
-Q5.prototype.registerPreloadMethod = () => {};
+Q5.prototype.registerPreloadMethod = () => { };
 Q5._validateParameters = () => true;
 
 if (typeof module != 'undefined') module.exports = Q5;
