@@ -250,7 +250,19 @@ function Q5(scope, parent) {
 		$.canvas.height = height * $._pixelDensity;
 		defaultStyle();
 		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
-		return $.canvas;
+
+		// Create a wrapper object that includes the canvas and parent function
+		let canvasObject = {
+			canvas: $.canvas,
+			parent: function (id) {
+				let parentElement = document.getElementById(id);
+				if (parentElement) {
+					parentElement.appendChild(this.canvas);
+				}
+			}
+		};
+
+		return canvasObject;
 	};
 
 	$.resizeCanvas = (width, height) => {
