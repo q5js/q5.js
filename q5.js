@@ -2489,11 +2489,11 @@ Q5.Vector = class {
 		return this;
 	}
 	heading() {
-		return $.atan2(this.y, this.x);
+		return atan2(this.y, this.x);
 	}
 	rotate(ang) {
-		let costh = $.cos(ang);
-		let sinth = $.sin(ang);
+		let costh = cos(ang);
+		let sinth = sin(ang);
 		let vx = this.x * costh - this.y * sinth;
 		let vy = this.x * sinth + this.y * costh;
 		this.x = vx;
@@ -2504,7 +2504,7 @@ Q5.Vector = class {
 		let u = this._arg2v(...arguments);
 		const costh = this.dot(u) / (this.mag() * u.mag());
 		let ang;
-		ang = $.tan(Math.min(1, Math.max(-1, costh)));
+		ang = tan(Math.min(1, Math.max(-1, costh)));
 		ang = ang * Math.sign(this.cross(u).z || 1);
 		return ang;
 	}
@@ -2533,8 +2533,8 @@ Q5.Vector = class {
 		if (l === undefined) l = 1;
 		this._cn = l;
 		this._cnsq = l * l;
-		this.x = l * $.cos(th);
-		this.y = l * $.sin(th);
+		this.x = l * cos(th);
+		this.y = l * sin(th);
 		this.z = 0;
 		return this;
 	}
@@ -2542,10 +2542,10 @@ Q5.Vector = class {
 		if (l === undefined) l = 1;
 		this._cn = l;
 		this._cnsq = l * l;
-		const cosph = $.cos(ph);
-		const sinph = $.sin(ph);
-		const costh = $.cos(th);
-		const sinth = $.sin(th);
+		const cosph = cos(ph);
+		const sinph = sin(ph);
+		const costh = cos(th);
+		const sinth = sin(th);
 		this.x = l * sinth * sinph;
 		this.y = -l * costh;
 		this.z = l * sinth * cosph;
