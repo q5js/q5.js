@@ -1527,7 +1527,7 @@ function Q5(scope, parent) {
 	var perlin_octaves = 4;
 	var perlin_amp_falloff = 0.5;
 	var scaled_cosine = (i) => {
-		return 0.5 * (1.0 - $.cos(i * Math.PI));
+		return 0.5 * (1.0 - Math.cos(i * Math.PI));
 	};
 	var p_perlin;
 
