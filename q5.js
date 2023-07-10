@@ -26,7 +26,7 @@ function Q5(scope, parent) {
 	$.windowResized = () => {};
 
 	if (scope != 'graphics' && scope != 'image') {
-		window.addEventListener('resize', $.windowResized);
+		window.addEventListener('resize', () => $.windowResized());
 		$.canvas.parent = (el) => {
 			if (el[0]) el = document.getElementById(el);
 			el.append($.canvas);
@@ -264,6 +264,7 @@ function Q5(scope, parent) {
 		$.height = height;
 		$.canvas.width = width * $._pixelDensity;
 		$.canvas.height = height * $._pixelDensity;
+		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
 	};
 
 	$.createGraphics = (width, height) => {
@@ -376,7 +377,7 @@ function Q5(scope, parent) {
 		if (neg) s = '-' + s;
 		return s;
 	};
-	$.createVector = (x, y, z) => new Q5.Vector(x, y, z);
+	$.createVector = (x, y, z) => new Q5.Vector(x, y, z, $);
 
 	//================================================================
 	// CURVE QUERY
@@ -2351,10 +2352,11 @@ Q5.Color._hsv2rgb = (h, s, v) => {
 // VECTOR
 //================================================================
 Q5.Vector = class {
-	constructor(_x, _y, _z) {
+	constructor(_x, _y, _z, _$) {
 		this.x = _x || 0;
 		this.y = _y || 0;
 		this.z = _z || 0;
+		this._$ = _$ || window;
 		this._cn = null;
 		this._cnsq = null;
 	}
@@ -2489,11 +2491,11 @@ Q5.Vector = class {
 		return this;
 	}
 	heading() {
-		return atan2(this.y, this.x);
+		return this._$.atan2(this.y, this.x);
 	}
 	rotate(ang) {
-		let costh = cos(ang);
-		let sinth = sin(ang);
+		let costh = this._$.cos(ang);
+		let sinth = this._$.sin(ang);
 		let vx = this.x * costh - this.y * sinth;
 		let vy = this.x * sinth + this.y * costh;
 		this.x = vx;
@@ -2504,7 +2506,7 @@ Q5.Vector = class {
 		let u = this._arg2v(...arguments);
 		const costh = this.dot(u) / (this.mag() * u.mag());
 		let ang;
-		ang = tan(Math.min(1, Math.max(-1, costh)));
+		ang = this._$.tan(Math.min(1, Math.max(-1, costh)));
 		ang = ang * Math.sign(this.cross(u).z || 1);
 		return ang;
 	}
@@ -2533,8 +2535,8 @@ Q5.Vector = class {
 		if (l === undefined) l = 1;
 		this._cn = l;
 		this._cnsq = l * l;
-		this.x = l * cos(th);
-		this.y = l * sin(th);
+		this.x = l * this._$.cos(th);
+		this.y = l * this._$.sin(th);
 		this.z = 0;
 		return this;
 	}
@@ -2542,10 +2544,10 @@ Q5.Vector = class {
 		if (l === undefined) l = 1;
 		this._cn = l;
 		this._cnsq = l * l;
-		const cosph = cos(ph);
-		const sinph = sin(ph);
-		const costh = cos(th);
-		const sinth = sin(th);
+		const cosph = this._$.cos(ph);
+		const sinph = this._$.sin(ph);
+		const costh = this._$.cos(th);
+		const sinth = this._$.sin(th);
 		this.x = l * sinth * sinph;
 		this.y = -l * costh;
 		this.z = l * sinth * cosph;
