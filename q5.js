@@ -17,6 +17,8 @@ function Q5(scope, parent) {
 
 	let $ = this;
 	$.canvas = document.createElement('canvas');
+	$.canvas.classList.add('p5Canvas'); // for p5.js compatibility
+	$.canvas.classList.add('q5Canvas');
 	let ctx = $.canvas.getContext('2d');
 
 	$.width = 100;
@@ -35,6 +37,14 @@ function Q5(scope, parent) {
 			});
 		}
 	}
+
+	// id setting
+
+	let maxId = Array.from(document.querySelectorAll('.p5Canvas'))
+    .map(el => (el.id.match(/^defaultCanvas(\d+)$/) || [])[1])
+    .reduce((max, id) => Math.max(max, id ? parseInt(id, 10) : 0), 0);
+
+	$.canvas.id = 'defaultCanvas' + (maxId + 1);
 
 	defaultStyle();
 
