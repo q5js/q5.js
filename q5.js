@@ -42,7 +42,7 @@ function Q5(scope, parent) {
 
 	let maxId = Array.from(document.querySelectorAll('.p5Canvas'))
     .map(el => (el.id.match(/^defaultCanvas(\d+)$/) || [])[1])
-    .reduce((max, id) => Math.max(max, id ? parseInt(id, 10) : 0), 0);
+    .reduce((max, id) => Math.max(max, id ? parseInt(id, 10) : 0), 1); 
 
 	$.canvas.id = 'defaultCanvas' + (maxId + 1);
 
