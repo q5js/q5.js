@@ -1,8 +1,8 @@
 # <img src="q5js_logo.png" height="64"> <img src="q5js_brand.png" height="64">
 
-q5.js is a drop-in replacement for [p5.js][]. It supports all of p5.js's 2D drawing API's, math functionality, and some other utilities.
+q5.js is a drop-in replacement for [p5.js][]. It supports all of p5's 2D drawing APIs, math functionality, and some other utilities.
 
-q5.min.js (38kb) is 24x smaller than p5.min.js (914kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
+q5.min.js (39kb) is 24x smaller than p5.min.js (914kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
 
 q5 doesn't include any friendly error messages to help you code though. Its mainly for people who are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
 
@@ -37,7 +37,7 @@ To use addons, simply load them after q5.js:
 <script src="https://p5play.org/v3/p5play.js"></script>
 ```
 
-## What's new in Version 1.0?
+## What's new in Version 1.1?
 
 Co-creator of q5, @quinton-ashley, added a ton of features:
 
@@ -82,11 +82,9 @@ I thought @LingDong-'s work on q5 and the idea itself had great potential. So I 
 
 An increase in performance of even a few frames per second can make a significant difference in the user experience of a work of interactive art or a game, especially on mobile devices.
 
-As a Computer Science teacher at Crimson Education, I teach students from all over the world. I also live in Colombia, where there are many people who don't have access to a PC, as in no desktop or laptop. There are businesses here that charge for time based access to 10 year old desktop PCs. But 6.3 billion people in the world own a smartphone. Improving the UX of p5.js on mobile devices is therefore a major priority for me. q5 is a step in that direction.
+I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB un-minified, q5.js is just 66kb.
 
-I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB unminified compared to q5.js which is 65kb.
-
-I'm not saying all this as a slight against the authors of p5, but it does make the source code very difficult to understand. I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
+I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
 
 Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without documentation, the source code is easier for experienced JS programmers to comprehend.
 
@@ -193,16 +191,16 @@ q5.js provides some other features that are not in p5.js:
 - p5.min.js 898kb
 - p5.sound.min.js 200kb
 
-- q5.min.js 35kb
+- q5.min.js 39kb
 
 - planck.min.js 193kb
-- p5play.min.js 66kb
+- p5play.min.js 90kb
 
 ## Benchmarks
 
-q5.js has significant speed advantage in imaging operations because it uses hardware accelerated Canvas API directly whenever possible, instead of going over pixel by pixel. Most other functionalities have very marginal speed improvements (or none at all when parameter validation overhead is negligible). The operations with important performance differences are listed below.
+q5.js has significant speed advantage in imaging operations because it uses hardware accelerated Canvas APIs directly whenever possible, instead of going over pixel by pixel. Most other functionalities have very marginal speed improvements (or none at all when parameter validation overhead is negligible). The operations with important performance differences are listed below.
 
-The following benchmarks are generated with Google Chrome 84, on an old-ish Macbook Pro 2015 (with lots of apps and tabs running); Performance varies depending on software and hardware.
+The following benchmarks are generated with Google Chrome 84, on an old-ish MacBook Pro 2015 (with lots of apps and tabs running); Performance varies depending on software and hardware.
 
 p5.js version used is **1.1.9**.
 
@@ -225,7 +223,7 @@ p5.js version used is **1.1.9**.
 
 <sub>\* Only for browsers that support CanvasRenderingContext2D.filter ([75% of all](https://caniuse.com/#feat=mdn-api_canvasrenderingcontext2d_filter) as of Aug 2020, including Chrome, Firefox and Edge). For those that don't, performance is similar to p5.js, as identical implementations are usually used as fallbacks.</sub>
 
-Speed is a goal for q5.js, and we would very much like to see the above list grow. If you know how to make something faster, advice/pull requests are very welcome.
+Speed is a goal for q5.js, and we would very much like to see the above list grow. If you know how to make something faster, advice/pull requests are very welcome!
 
 [p5.js]: https://p5js.org
 [make an issue report.]: https://github.com/quinton-ashley/q5.js/issues
