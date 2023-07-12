@@ -41,7 +41,7 @@ To use addons, simply load them after q5.js:
 
 Co-creator of q5, @quinton-ashley, added a ton of features:
 
-- `registerMethod` functionality for supporting p5.js addons such as p5play!
+- `registerMethod` functionality for supporting p5.js addons such as [p5play](https://p5play.org)!
 - automatic global instance creation, can also be user instantiated as well with `new Q5('global')` like with the previous version of q5xjs
 - p5 instance mode support
 - add q5 canvas to a container element with `new Q5('global', parentElem)` or `new Q5(parentElem)`

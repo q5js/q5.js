@@ -18,6 +18,8 @@ function Q5(scope, parent) {
 	let $ = this;
 	$.canvas = document.createElement('canvas');
 	let ctx = $.canvas.getContext('2d');
+	$.canvas.classList.add('p5Canvas', 'q5Canvas');
+	$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
 
 	$.width = 100;
 	$.height = 100;
@@ -2273,6 +2275,7 @@ Q5.Color = class {
 		return `rgba(${Math.round(this._r)},${Math.round(this._g)},${Math.round(this._b)},${~~(this._a * 1000) / 1000})`;
 	}
 };
+Q5._instanceCount = 0;
 Q5.Color._rgb2hsv = (r, g, b) => {
 	//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
 	let rgbMin, rgbMax;
