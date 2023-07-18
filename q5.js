@@ -434,20 +434,33 @@ function Q5(scope, parent) {
 	};
 
 	let basicColors = {
+		aqua: [0, 255, 255],
 		black: [0, 0, 0],
 		blue: [0, 0, 255],
 		brown: [165, 42, 42],
 		crimson: [220, 20, 60],
+		darkviolet: [148, 0, 211],
 		gold: [255, 215, 0],
 		green: [0, 128, 0],
 		gray: [128, 128, 128],
+		hotpink: [255, 105, 180],
+		indigo: [75, 0, 130],
+		khaki: [240, 230, 140],
+		lightgreen: [144, 238, 144],
+		lime: [0, 255, 0],
 		magenta: [255, 0, 255],
+		navy: [0, 0, 128],
 		orange: [255, 165, 0],
+		olive: [128, 128, 0],
+		peachpuff: [255, 218, 185],
 		pink: [255, 192, 203],
 		purple: [128, 0, 128],
 		red: [255, 0, 0],
 		skyblue: [135, 206, 235],
+		tan: [210, 180, 140],
+		turquoise: [64, 224, 208],
 		white: [255, 255, 255],
+		violet: [238, 130, 238],
 		yellow: [255, 255, 0]
 	};
 
