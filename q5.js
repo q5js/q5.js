@@ -2436,9 +2436,12 @@ Q5.Vector = class {
 	}
 	div() {
 		let u = this._arg2v(...arguments);
-		this.x /= u.x;
-		this.y /= u.y;
-		this.z /= u.z;
+		if (u.x) this.x /= u.x;
+		else this.x = 0;
+		if (u.y) this.y /= u.y;
+		else this.y = 0;
+		if (u.z) this.z /= u.z;
+		else this.z = 0;
 		this._deprecNorm();
 		return this;
 	}
@@ -2475,9 +2478,11 @@ Q5.Vector = class {
 	normalize() {
 		this._calcNorm();
 		let n = this._cn;
-		this.x /= n;
-		this.y /= n;
-		this.z /= n;
+		if (n != 0) {
+			this.x /= n;
+			this.y /= n;
+			this.z /= n;
+		}
 		this._cn = 1;
 		this._cnsq = 1;
 		return this;
