@@ -1878,8 +1878,8 @@ function Q5(scope, parent) {
 			} else {
 				looper = setTimeout(_draw, 1000 / $._targetFrameRate);
 			}
-		}
-		if (looper && $._frameCount != 0) {
+		} else if ($.frameCount > 0) return;
+		if (looper && $.frameCount != 0) {
 			let time_since_last = pre - $._lastFrameTime;
 			let target_time_between_frames = 1000 / ($._targetFrameRate || 60);
 			if (time_since_last < target_time_between_frames - 5) return;
