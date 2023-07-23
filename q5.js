@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.1
+ * @version 1.2
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
@@ -1432,34 +1432,41 @@ function Q5(scope, parent) {
 		tmpCt2 = null;
 		tmpBuf = null;
 	};
-
-	$.save = (name, ext) => {
+	$._save = (data, name, ext) => {
 		name = name || 'untitled';
 		ext = ext || 'png';
-		var down = document.createElement('a');
-		down.innerHTML = '[Download]';
-		down.addEventListener(
-			'click',
-			function () {
-				this.href = ctx.canvas.toDataURL();
-				this.download = name + '.' + ext;
-			},
-			false
-		);
-		document.body.appendChild(down);
-		down.click();
-		document.body.removeChild(down);
-	};
-	$.saveCanvas = (a, b, c) => {
-		if (a.MAGIC == $.MAGIC) {
-			if (c) a.save(b, c);
-			let s = b.split('.');
-			return a.save(s.slice(0, -1).join('.'), s[s.length - 1]);
+		if (ext == 'jpg' || ext == 'png') data = data.toDataURL();
+		else {
+			let type = 'text/plain';
+			if (ext == 'json') {
+				if (typeof data != 'string') data = JSON.stringify(data);
+				type = 'text/json';
+			}
+			data = new Blob([data], { type });
+			data = URL.createObjectURL(data);
 		}
-		if (b) return $.save(a, b);
-		let s = a.split('.');
-		return $.save(s.slice(0, -1).join('.'), s[s.length - 1]);
+		let a = document.createElement('a');
+		a.href = data;
+		a.download = name + '.' + ext;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(a.href);
 	};
+	$.save = (a, b, c) => {
+		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
+			c = b;
+			b = a;
+			a = ctx.canvas;
+		}
+		if (c) return $._save(a, b, c);
+		if (b) {
+			b = b.split('.');
+			$._save(a, b[0], b.at(-1));
+		} else $._save(a);
+	};
+	$.canvas.save = $.save;
+	$.saveCanvas = $.save;
 
 	$.remove = () => {
 		$.noLoop();
