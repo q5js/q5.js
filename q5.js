@@ -2593,38 +2593,21 @@ Q5.Vector = class {
 		return `[${this.x}, ${this.y}, ${this.z}]`;
 	}
 };
-Q5.Vector.add = (v, u) => {
-	return new Q5.Vector(v.x + u.x, v.y + u.y, v.z + u.z);
-};
-Q5.Vector.rem = (v, u) => {
-	return new Q5.Vector(v.x % u.x, v.y % u.y, v.z % u.z);
-};
-Q5.Vector.sub = (v, u) => {
-	return new Q5.Vector(v.x - u.x, v.y - u.y, v.z - u.z);
-};
-Q5.Vector.mult = (v, u) => {
-	if (u.x === undefined) {
-		return new Q5.Vector(v.x * u, v.y * u, v.z * u);
-	}
-	return new Q5.Vector(v.x * u.x, v.y * u.y, v.z * u.z);
-};
-Q5.Vector.div = (v, u) => {
-	if (u.x === undefined) {
-		return new Q5.Vector(v.x / u, v.y / u, v.z / u);
-	}
-	return new Q5.Vector(v.x / u.x, v.y / u.y, v.z / u.z);
-};
-Q5.Vector.dist = (v, u) => {
-	return Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
-};
-Q5.Vector.cross = (v, u) => {
-	return new Q5.Vector(v.y * u.z - v.z * u.y, v.z * u.x - v.x * u.z, v.x * u.y - v.y * u.x);
-};
-Q5.Vector.lerp = (v, u, amt) => {
-	return new Q5.Vector(v.x + (u.x - v.x) * amt, v.y + (u.y - v.y) * amt, v.z + (u.z - v.z) * amt);
-};
+Q5.Vector.add = (v, u) => v.copy().add(u);
+Q5.Vector.cross = (v, u) => v.copy().cross(u);
+Q5.Vector.dist = (v, u) => Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
+Q5.Vector.div = (v, u) => v.copy().div(u);
+Q5.Vector.dot = (v, u) => v.copy().dot(u);
 Q5.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
-
+Q5.Vector.lerp = (v, u, amt) => v.copy().lerp(u, amt);
+Q5.Vector.limit = (v, m) => v.copy().limit(m);
+Q5.Vector.heading = (v) => Math.atan2(v.y, v.x);
+Q5.Vector.magSq = (v) => v.x * v.x + v.y * v.y + v.z * v.z;
+Q5.Vector.mag = (v) => Math.sqrt(Q5.Vector.magSq(v));
+Q5.Vector.mult = (v, u) => v.copy().mult(u);
+Q5.Vector.normalize = (v) => v.copy().normalize();
+Q5.Vector.rem = (v, u) => v.copy().rem(u);
+Q5.Vector.sub = (v, u) => v.copy().sub(u);
 for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 }
