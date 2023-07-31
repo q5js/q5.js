@@ -232,7 +232,7 @@ function Q5(scope, parent) {
 	//================================================================
 
 	Object.defineProperty($, 'deviceOrientation', {
-		get: () => window.screen.orientation.type
+		get: () => window.screen?.orientation?.type
 	});
 
 	Object.defineProperty($, 'windowWidth', {
