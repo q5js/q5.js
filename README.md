@@ -164,11 +164,19 @@ let q5 = new Q5();
 let q6 = new Q5();
 
 q5.setup = function () {
-	q5.background(255);
+	q5.createCanvas(400, 400);
+};
+
+q5.draw = function () {
+	q5.background(100);
 };
 
 q6.setup = function () {
-	q6.background(0);
+	q6.createCanvas(400, 400);
+};
+
+q6.draw = function () {
+	q6.background(200);
 };
 ```
 

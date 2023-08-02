@@ -2207,50 +2207,54 @@ function Q5(scope, parent) {
 
 	if (typeof scope == 'function') scope($);
 
-	let o = scope == 'global' ? window : $;
-	let eventNames = [
-		'setup',
-		'draw',
-		'preload',
-		'mouseMoved',
-		'mousePressed',
-		'mouseReleased',
-		'mouseDragged',
-		'mouseClicked',
-		'keyPressed',
-		'keyReleased',
-		'keyTyped',
-		'touchStarted',
-		'touchMoved',
-		'touchEnded'
-	];
-	for (let k of eventNames) {
-		let intern = '_' + k + 'Fn';
-		$[intern] = () => {};
-		$[intern].isPlaceHolder = true;
-		if (o[k]) {
-			$[intern] = o[k];
-		} else {
-			Object.defineProperty($, k, {
-				set: (fun) => {
-					$[intern] = fun;
-				}
-			});
-		}
-	}
-
-	if (scope != 'graphics' || scope != 'image') {
-		$._preloadFn();
-		millisStart = performance.now();
-		function _start() {
-			if (preloadCnt > 0) {
-				return requestAnimationFrame(_start);
+	function _init() {
+		let o = scope == 'global' ? window : $;
+		let eventNames = [
+			'setup',
+			'draw',
+			'preload',
+			'mouseMoved',
+			'mousePressed',
+			'mouseReleased',
+			'mouseDragged',
+			'mouseClicked',
+			'keyPressed',
+			'keyReleased',
+			'keyTyped',
+			'touchStarted',
+			'touchMoved',
+			'touchEnded'
+		];
+		for (let k of eventNames) {
+			let intern = '_' + k + 'Fn';
+			$[intern] = () => {};
+			$[intern].isPlaceHolder = true;
+			if (o[k]) {
+				$[intern] = o[k];
+			} else {
+				Object.defineProperty($, k, {
+					set: (fun) => {
+						$[intern] = fun;
+					}
+				});
 			}
-			$._setupFn();
-			requestAnimationFrame(_draw);
 		}
-		_start();
+
+		if (scope != 'graphics' || scope != 'image') {
+			$._preloadFn();
+			millisStart = performance.now();
+			function _start() {
+				if (preloadCnt > 0) {
+					return requestAnimationFrame(_start);
+				}
+				$._setupFn();
+				requestAnimationFrame(_draw);
+			}
+			_start();
+		}
 	}
+	if (scope == 'global') _init();
+	else requestAnimationFrame(_init);
 }
 
 Q5.Color = class {
