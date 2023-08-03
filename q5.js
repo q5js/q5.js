@@ -467,7 +467,6 @@ function Q5(scope, parent) {
 	$.color = function () {
 		let args = arguments;
 		if (args.length == 1) {
-			if (args[0].MAGIC == 0xc010a) return args[0];
 			if (typeof args[0] == 'string') {
 				if (args[0][0] == '#') {
 					return new Q5.Color(
@@ -482,6 +481,9 @@ function Q5(scope, parent) {
 					}
 					return new Q5.Color(0, 0, 0, 1);
 				}
+			}
+			if (typeof args[0] != 'number' && args[0].MAGIC == 0xc010a) {
+				return args[0];
 			}
 		}
 		if ($._colorMode == $.RGB) {
