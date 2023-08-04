@@ -31,8 +31,16 @@ function Q5(scope, parent) {
 		window.addEventListener('resize', () => $.windowResized());
 		$.canvas.parent = (el) => {
 			if (typeof el === 'string') el = document.getElementById(el);
-			el.append($.canvas);
+			else {
+				try {
+					if (el instanceof p5.Element || el instanceof q5.Element) el = el.elt;
+				} catch (e) {}
+			}
+		
+			el instanceof Node ? el.append($.canvas) : console.error("Invalid parent element provided");
 		};
+		
+		
 		let defaultParent = document.getElementsByTagName('main')[0];
 		if (!defaultParent) {
 			console.warn("Default <main> element not found. Using document.body instead.");
