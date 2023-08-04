@@ -28,16 +28,23 @@ function Q5(scope, parent) {
 	$.windowResized = () => {};
 
 	if (scope != 'graphics' && scope != 'image') {
+		const resizeObserver = new ResizeObserver(() => {
+			$.windowResized();
+		});
 		window.addEventListener('resize', () => $.windowResized());
+
 		$.canvas.parent = (el) => {
 			if (typeof el === 'string') el = document.getElementById(el);
 			el.append($.canvas);
+			resizeObserver.observe(el);
 		};
+
 		let defaultParent = document.getElementsByTagName('main')[0];
 		if (!defaultParent) {
 			console.warn("Default <main> element not found. Using document.body instead.");
 			defaultParent = document.body;
 		}
+		resizeObserver.observe(defaultParent);
 		parent ??= defaultParent;
 
 		if (document.body) {
