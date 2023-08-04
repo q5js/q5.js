@@ -30,13 +30,22 @@ function Q5(scope, parent) {
 	if (scope != 'graphics' && scope != 'image') {
 		window.addEventListener('resize', () => $.windowResized());
 		$.canvas.parent = (el) => {
-			if (el[0]) el = document.getElementById(el);
+			if (typeof el === 'string') el = document.getElementById(el);
 			el.append($.canvas);
 		};
+		let defaultParent = document.getElementsByTagName('main')[0];
+		if (!defaultParent) {
+			console.warn("Default <main> element not found. Using document.body instead.");
+			defaultParent = document.body;
+		}
+		parent ??= defaultParent;
+
 		if (document.body) {
-			parent ??= document.getElementsByTagName('main')[0];
-			if (parent?.append) parent.append($.canvas);
-			else document.body.appendChild($.canvas);
+			if (parent?.append) {
+				parent.append($.canvas);
+			} else {
+				document.body.appendChild($.canvas);
+			}
 		} else {
 			window.addEventListener('load', () => {
 				document.body.appendChild($.canvas);
