@@ -29,34 +29,34 @@ function Q5(scope, parent) {
 
 	if (scope != 'graphics' && scope != 'image') {
 		window.addEventListener('resize', () => $.windowResized());
-		$.canvas.parent = (el) => {
-			if (typeof el === 'string') el = document.getElementById(el);
-			else {
-				try {
-					if (el instanceof p5.Element || el instanceof q5.Element) el = el.elt;
-				} catch (e) {}
+	
+		$.canvas.parent = (p) => {
+			if (typeof p === 'undefined') {
+				return $.canvas.elt.parentNode;
 			}
-		
-			el instanceof Node ? el.append($.canvas) : console.error("Invalid parent element provided");
+			if (typeof p === 'string') {
+				if (p[0] === '#') {
+					p = p.substring(1);
+				}
+				p = document.getElementById(p);
+			}if (typeof p5 != 'undefined') {
+			if (p instanceof p5.Element) {
+				p = p.elt;
+			}}
+			p.appendChild($.canvas);
+			return $.canvas; 
 		};
-		
-		
-		let defaultParent = document.getElementsByTagName('main')[0];
+	
+		// Check for default parent
+		let defaultParent = document.getElementsByTagName('main')[0] || document.body;
 		if (!defaultParent) {
 			console.warn("Default <main> element not found. Using document.body instead.");
-			defaultParent = document.body;
 		}
-		parent ??= defaultParent;
-
 		if (document.body) {
-			if (parent?.append) {
-				parent.append($.canvas);
-			} else {
-				document.body.appendChild($.canvas);
-			}
+			defaultParent.append($.canvas);
 		} else {
 			window.addEventListener('load', () => {
-				document.body.appendChild($.canvas);
+				document.body.append($.canvas);
 			});
 		}
 	}
@@ -1992,12 +1992,10 @@ function Q5(scope, parent) {
 		keysHeld[$.keyCode] = false;
 		$._keyReleasedFn(e);
 	};
-	addEventListener('mousemove', (e) => $._onmousemove(e), false);
+
 	$.canvas.onmousedown = (e) => $._onmousedown(e);
 	$.canvas.onmouseup = (e) => $._onmouseup(e);
 	$.canvas.onclick = (e) => $._onclick(e);
-	addEventListener('keydown', (e) => $._onkeydown(e), false);
-	addEventListener('keyup', (e) => $._onkeyup(e), false);
 	$.keyIsDown = (x) => !!keysHeld[x];
 
 	function getTouchInfo(touch) {
@@ -2271,6 +2269,9 @@ function Q5(scope, parent) {
 			}
 			_start();
 		}
+	addEventListener('mousemove', (e) => $._onmousemove(e), false);
+	addEventListener('keydown', (e) => $._onkeydown(e), false);
+	addEventListener('keyup', (e) => $._onkeyup(e), false);
 	}
 	if (scope == 'global') _init();
 	else requestAnimationFrame(_init);
