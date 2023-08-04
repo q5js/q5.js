@@ -35,8 +35,12 @@ function Q5(scope, parent) {
 
 		$.canvas.parent = (el) => {
 			if (typeof el === 'string') el = document.getElementById(el);
-			el.append($.canvas);
-			resizeObserver.observe(el);
+			else {
+				try {
+					if (el instanceof p5.Element || el instanceof q5.Element) el = el.elt;
+				} catch (e) {}
+			}
+			el instanceof Node ? el.append($.canvas) : console.error("Invalid parent element provided");
 		};
 
 		let defaultParent = document.getElementsByTagName('main')[0];
@@ -46,7 +50,6 @@ function Q5(scope, parent) {
 		}
 		resizeObserver.observe(defaultParent);
 		parent ??= defaultParent;
-
 		if (document.body) {
 			if (parent?.append) {
 				parent.append($.canvas);
@@ -56,6 +59,9 @@ function Q5(scope, parent) {
 		} else {
 			window.addEventListener('load', () => {
 				document.body.appendChild($.canvas);
+
+				// Start observing the body as it is the default parent now.
+				resizeObserver.observe(document.body);
 			});
 		}
 	}
