@@ -1975,12 +1975,10 @@ function Q5(scope, parent) {
 		keysHeld[$.keyCode] = false;
 		$._keyReleasedFn(e);
 	};
-	addEventListener('mousemove', (e) => $._onmousemove(e), false);
+
 	$.canvas.onmousedown = (e) => $._onmousedown(e);
 	$.canvas.onmouseup = (e) => $._onmouseup(e);
 	$.canvas.onclick = (e) => $._onclick(e);
-	addEventListener('keydown', (e) => $._onkeydown(e), false);
-	addEventListener('keyup', (e) => $._onkeyup(e), false);
 	$.keyIsDown = (x) => !!keysHeld[x];
 
 	function getTouchInfo(touch) {
@@ -2254,6 +2252,9 @@ function Q5(scope, parent) {
 			}
 			_start();
 		}
+	addEventListener('mousemove', (e) => $._onmousemove(e), false);
+	addEventListener('keydown', (e) => $._onkeydown(e), false);
+	addEventListener('keyup', (e) => $._onkeyup(e), false);
 	}
 	if (scope == 'global') _init();
 	else requestAnimationFrame(_init);
