@@ -25,23 +25,31 @@ function Q5(scope, parent) {
 	$.height = 100;
 	$.canvas.width = $.width;
 	$.canvas.height = $.height;
-	$.windowResized = () => {};
+	$._windowResizedFn = () => {};
 
 	if (scope != 'graphics' && scope != 'image') {
-		window.addEventListener('resize', () => $.windowResized());
-		$.canvas.parent = (el) => {
-			if (el[0]) el = document.getElementById(el);
-			el.append($.canvas);
+		$._resize = () => {
+			if ($.frameCount > 1) $._shouldResize = true;
 		};
-		if (document.body) {
+		$.canvas.parent = (el) => {
+			if (typeof el == 'string') el = document.getElementById(el);
+			el.append($.canvas);
+
+			if (typeof ResizeObserver != 'undefined') {
+				if ($._ro) $._ro.disconnect();
+				$._ro = new ResizeObserver($._resize);
+				$._ro.observe(parent);
+			} else if ($.frameCount == 0) {
+				addEventListener('resize', $._resize);
+			}
+		};
+		function appendCanvas() {
 			parent ??= document.getElementsByTagName('main')[0];
-			if (parent?.append) parent.append($.canvas);
-			else document.body.appendChild($.canvas);
-		} else {
-			window.addEventListener('load', () => {
-				document.body.appendChild($.canvas);
-			});
+			parent ??= document.body;
+			$.canvas.parent(parent);
 		}
+		if (document.body) appendCanvas();
+		else window.addEventListener('load', appendCanvas);
 	}
 
 	defaultStyle();
@@ -623,12 +631,7 @@ function Q5(scope, parent) {
 	$.rectMode = (x) => ($._rectMode = x);
 	$.curveDetail = (x) => ($._curveDetail = x);
 	$.curveAlpha = (x) => ($._curveAlpha = x);
-	$.curveTightness = (x) => {
-		console.warn(
-			"curveTightness() sets the 'alpha' parameter of Catmull-Rom curve, and is NOT identical to p5.js counterpart. As this might change in the future, please call curveAlpha() directly."
-		);
-		$._curveAlpha = x;
-	};
+	$.curveTightness = (x) => ($._curveAlpha = x);
 
 	//================================================================
 	// DRAWING
@@ -1257,7 +1260,6 @@ function Q5(scope, parent) {
 	function makeTmpCtx(w, h) {
 		if (tmpCtx == null) {
 			tmpCtx = document.createElement('canvas').getContext('2d');
-			// document.body.appendChild(tmpCtx.canvas)
 		}
 		h ??= w || ctx.canvas.height;
 		w ??= ctx.canvas.width;
@@ -1269,7 +1271,6 @@ function Q5(scope, parent) {
 	function makeTmpCt2(w, h) {
 		if (tmpCt2 == null) {
 			tmpCt2 = document.createElement('canvas').getContext('2d');
-			// document.body.appendChild(tmpCt2.canvas)
 		}
 		h ??= w || ctx.canvas.height;
 		w ??= ctx.canvas.width;
@@ -1450,7 +1451,7 @@ function Q5(scope, parent) {
 		let a = document.createElement('a');
 		a.href = data;
 		a.download = name + '.' + ext;
-		document.body.appendChild(a);
+		document.body.append(a);
 		a.click();
 		document.body.removeChild(a);
 		URL.revokeObjectURL(a.href);
@@ -1875,7 +1876,7 @@ function Q5(scope, parent) {
 		vid.style.position = 'absolute';
 		vid.style.opacity = 0.00001;
 		vid.style.zIndex = -1000;
-		document.body.appendChild(vid);
+		document.body.append(vid);
 		return vid;
 	};
 
@@ -1896,6 +1897,10 @@ function Q5(scope, parent) {
 		$.deltaTime = pre - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
 		$.frameCount++;
+		if ($._shouldResize) {
+			$._windowResizedFn();
+			$._shouldResize = false;
+		}
 		for (let m of Q5.prototype._methods.pre) m.call($);
 		clearBuff();
 		firstVertex = true;
@@ -2223,7 +2228,8 @@ function Q5(scope, parent) {
 			'keyTyped',
 			'touchStarted',
 			'touchMoved',
-			'touchEnded'
+			'touchEnded',
+			'windowResized'
 		];
 		for (let k of eventNames) {
 			let intern = '_' + k + 'Fn';
@@ -2252,9 +2258,9 @@ function Q5(scope, parent) {
 			}
 			_start();
 		}
-	addEventListener('mousemove', (e) => $._onmousemove(e), false);
-	addEventListener('keydown', (e) => $._onkeydown(e), false);
-	addEventListener('keyup', (e) => $._onkeyup(e), false);
+		addEventListener('mousemove', (e) => $._onmousemove(e), false);
+		addEventListener('keydown', (e) => $._onkeydown(e), false);
+		addEventListener('keyup', (e) => $._onkeyup(e), false);
 	}
 	if (scope == 'global') _init();
 	else requestAnimationFrame(_init);

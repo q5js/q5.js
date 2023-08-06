@@ -2,7 +2,7 @@
 
 q5.js is a drop-in replacement for [p5.js][]. It supports all of p5's 2D drawing APIs, math functionality, and some other utilities.
 
-q5.min.js (39kb) is 24x smaller than p5.min.js (914kb), which makes using [q5 better for the environment!][] q5 will also load and run faster, which is especially important on mobile devices.
+q5.min.js (39kb) is 24x smaller than p5.min.js (914kb)! It also has better performance, which is especially important on mobile devices.
 
 q5 doesn't include any friendly error messages to help you code though. Its mainly for people who are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
 
@@ -194,6 +194,10 @@ q5.js provides some other features that are not in p5.js:
 
 **q5.js** will only do things when you communicate the command in the simplest way. This means that functions mainly just take numeric inputs. Any behavior needs to be explicitly triggered. q5 has almost no overhead between digesting your parameters and putting them into use.
 
+## Known Issues
+
+- `curveTightness()` sets the 'alpha' parameter of Catmull-Rom curve, and is NOT identical to p5.js counterpart. As this might change in the future, please call `curveAlpha()` directly.
+
 ## Size Comparison
 
 - p5.min.js 898kb
@@ -235,4 +239,3 @@ Speed is a goal for q5.js, and we would very much like to see the above list gro
 
 [p5.js]: https://p5js.org
 [make an issue report.]: https://github.com/quinton-ashley/q5.js/issues
-[q5 better for the environment!]: https://observablehq.com/@mrchrisadams/carbon-footprint-of-sending-data-around
