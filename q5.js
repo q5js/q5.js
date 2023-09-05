@@ -38,7 +38,7 @@ function Q5(scope, parent) {
 			if (typeof ResizeObserver != 'undefined') {
 				if ($._ro) $._ro.disconnect();
 				$._ro = new ResizeObserver($._resize);
-				$._ro.observe(parent);
+				$._ro.observe(el);
 			} else if ($.frameCount == 0) {
 				addEventListener('resize', $._resize);
 			}
