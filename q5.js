@@ -467,6 +467,7 @@ function Q5(scope, parent) {
 		skyblue: [135, 206, 235],
 		tan: [210, 180, 140],
 		turquoise: [64, 224, 208],
+		transparent: [0, 0, 0, 0],
 		white: [255, 255, 255],
 		violet: [238, 130, 238],
 		yellow: [255, 255, 0]
