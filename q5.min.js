@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.2
+ * @version 1.3
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
