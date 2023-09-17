@@ -58,36 +58,6 @@ Co-creator of q5, @quinton-ashley, added a ton of features:
 - fixed `Vector.lerp` implementation
 - fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
 
-## Motivation: Part 1
-
-_This section was written by @LingDong-, co-creator of q5_
-
-After having used many graphics libraries across many different languages, I have found that the Processing/p5.js/Openframeworks system has one huge advantage over others:
-
-It gets stuff drawn onto the screen quick and easy!
-
-This might sound silly, but it actually means a lot for people concerned with creative expression. The easier it is to try things out, before one's time and patience is up, the greater chance that you'll get something nice in the end. Therefore, although you can theoretically achieve the exact same result in any decent graphics system, the tool does matter in practice. Artists want more time to spend actually working on how their piece looks, instead of wondering why the computer doesn't work as intended.
-
-At [Carnegie Mellon University](https://www.cmu.edu/cfa/studio/index.html), where I studied computational art, p5.js is taught as _the_ framework for the web, and its been a great introduction. However, due to some of the ways in which p5.js is implemented, I found myself using it less and less as I made more and more projects. Lately, I've found that I'll reach directly for the standard JavaScript/Web APIs instead of p5.js. I sometimes think of this as shedding the training wheels on one's bicycle. But I missed the artist-centered logic of the p5 interface! I started thinking, "Is there a better way?"
-
-Just to clarify, I think the official p5.js implementation is perfectly justified for its philosophy and suitability for its intended purpose, but my own needs are different enough that I think they justify another implementation instead of pull requests to the official one.
-
-In fact, its not uncommon for successful software systems to have multiple implementations of the same spec (think: compilers of C, implementations of SQL, and engines of JavaScript). This allows the user to choose a backend that best suits their goals or needs. When one is using p5.js (or Processing or OpenFrameworks), what one is really using is the same set of commands, the intuitive way of describing drawings, that empowers creative expression. The actual way these commands are implemented internally is incidental; it should be possible to swap internal implementations as necessary.
-
-## Motivation: Part 2
-
-_This section was written by @quinton-ashley, co-creator of q5_
-
-I thought @LingDong-'s work on q5 and the idea itself had great potential. So I decided to upgrade its compatibility with p5.js. My main goal was to make it work with [p5play](https://p5play.org)!
-
-An increase in performance of even a few frames per second can make a significant difference in the user experience of a work of interactive art or a game, especially on mobile devices.
-
-I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB un-minified, q5.js is just 66kb.
-
-I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
-
-Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without documentation, the source code is easier for experienced JS programmers to comprehend.
-
 ## New Features: Top-Level Global Mode
 
 There are some extra features in q5 that aren't in p5, but using them is totally optional.
@@ -179,6 +149,36 @@ q6.draw = function () {
 	q6.background(200);
 };
 ```
+
+## Motivation: Part 1
+
+_This section was written by @LingDong-, co-creator of q5_
+
+After having used many graphics libraries across many different languages, I have found that the Processing/p5.js/Openframeworks system has one huge advantage over others:
+
+It gets stuff drawn onto the screen quick and easy!
+
+This might sound silly, but it actually means a lot for people concerned with creative expression. The easier it is to try things out, before one's time and patience is up, the greater chance that you'll get something nice in the end. Therefore, although you can theoretically achieve the exact same result in any decent graphics system, the tool does matter in practice. Artists want more time to spend actually working on how their piece looks, instead of wondering why the computer doesn't work as intended.
+
+At [Carnegie Mellon University](https://www.cmu.edu/cfa/studio/index.html), where I studied computational art, p5.js is taught as _the_ framework for the web, and its been a great introduction. However, due to some of the ways in which p5.js is implemented, I found myself using it less and less as I made more and more projects. Lately, I've found that I'll reach directly for the standard JavaScript/Web APIs instead of p5.js. I sometimes think of this as shedding the training wheels on one's bicycle. But I missed the artist-centered logic of the p5 interface! I started thinking, "Is there a better way?"
+
+Just to clarify, I think the official p5.js implementation is perfectly justified for its philosophy and suitability for its intended purpose, but my own needs are different enough that I think they justify another implementation instead of pull requests to the official one.
+
+In fact, its not uncommon for successful software systems to have multiple implementations of the same spec (think: compilers of C, implementations of SQL, and engines of JavaScript). This allows the user to choose a backend that best suits their goals or needs. When one is using p5.js (or Processing or OpenFrameworks), what one is really using is the same set of commands, the intuitive way of describing drawings, that empowers creative expression. The actual way these commands are implemented internally is incidental; it should be possible to swap internal implementations as necessary.
+
+## Motivation: Part 2
+
+_This section was written by @quinton-ashley, co-creator of q5_
+
+I thought @LingDong-'s work on q5 and the idea itself had great potential. So I decided to upgrade its compatibility with p5.js. My main goal was to make it work with [p5play](https://p5play.org)!
+
+An increase in performance of even a few frames per second can make a significant difference in the user experience of a work of interactive art or a game, especially on mobile devices.
+
+I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB un-minified, q5.js is just 66kb.
+
+I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
+
+Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without documentation, the source code is easier for experienced JS programmers to comprehend.
 
 ## More extra features
 

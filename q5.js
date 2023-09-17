@@ -4,6 +4,10 @@
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
+
+/**
+ * @type {Q5}
+ */
 function Q5(scope, parent) {
 	if (scope == 'auto') {
 		if (typeof window.setup == 'undefined') return;
@@ -17,7 +21,7 @@ function Q5(scope, parent) {
 
 	let $ = this;
 	$.canvas = document.createElement('canvas');
-	let ctx = $.canvas.getContext('2d');
+	let ctx = ($._ctx = $.canvas.getContext('2d'));
 	$.canvas.classList.add('p5Canvas', 'q5Canvas');
 	$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
 
@@ -265,16 +269,30 @@ function Q5(scope, parent) {
 		$.canvas.width = width * $._pixelDensity;
 		$.canvas.height = height * $._pixelDensity;
 		defaultStyle();
-		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
+		if (scope != 'graphics' && scope != 'image') {
+			$.pixelDensity(Math.ceil($.displayDensity()));
+		}
 		return $.canvas;
 	};
+
+	function cloneCtx() {
+		let c = {};
+		for (let prop in ctx) {
+			if (typeof ctx[prop] != 'function') c[prop] = ctx[prop];
+		}
+		delete c.canvas;
+		return c;
+	}
 
 	$.resizeCanvas = (width, height) => {
 		$.width = width;
 		$.height = height;
+		let c = cloneCtx();
 		$.canvas.width = width * $._pixelDensity;
 		$.canvas.height = height * $._pixelDensity;
-		if (scope != 'graphics' && scope != 'image') $.pixelDensity(2);
+		ctx = $._ctx = $.canvas.getContext('2d');
+		for (let prop in c) $._ctx[prop] = c[prop];
+		if (scope != 'graphics' && scope != 'image') $.pixelDensity($._pixelDensity);
 	};
 
 	$.createGraphics = (width, height) => {
@@ -285,18 +303,20 @@ function Q5(scope, parent) {
 	$.createImage = (width, height) => {
 		return new Q5.Image(width, height);
 	};
-
+	$.displayDensity = () => window.devicePixelRatio;
 	$.pixelDensity = (n) => {
 		if (n === undefined) return $._pixelDensity;
 		$._pixelDensity = n;
 
+		let c = cloneCtx();
 		$.canvas.width = Math.ceil($.width * n);
 		$.canvas.height = Math.ceil($.height * n);
 		$.canvas.style.width = $.width + 'px';
 		$.canvas.style.height = $.height + 'px';
+		ctx = $._ctx = $.canvas.getContext('2d');
+		for (let prop in c) $._ctx[prop] = c[prop];
 
 		ctx.scale($._pixelDensity, $._pixelDensity);
-		defaultStyle();
 		return $._pixelDensity;
 	};
 
@@ -586,6 +606,7 @@ function Q5(scope, parent) {
 		ctx.strokeStyle = 'black';
 		ctx.lineCap = 'round';
 		ctx.lineJoin = 'miter';
+		ctx.textAlign = 'left';
 	}
 
 	$.strokeWeight = (n) => {
@@ -868,7 +889,7 @@ function Q5(scope, parent) {
 		}
 	};
 	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
-		//https://en.wikipedia.org/wiki/Centripetal_Catmull–Rom_spline
+		//https://en.wikipedia.org/wiki/Centripetal_CatmullÃ¢â‚¬â€œRom_spline
 		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
 			let a = Math.pow(p1x - p0x, 2.0) + Math.pow(p1y - p0y, 2.0);
 			let b = Math.pow(a, alpha * 0.5);
@@ -1495,43 +1516,18 @@ function Q5(scope, parent) {
 		document.head.append(style);
 		return name;
 	};
-	$.textFont = (x) => {
-		$._textFont = x;
-	};
+	$.textFont = (x) => ($._textFont = x);
 	$.textSize = (x) => {
 		if (x === undefined) return $._textSize;
 		$._textLeading = x;
 		$._textSize = x;
 	};
-	$.textLeading = (x) => {
-		$._textLeading = x;
-	};
-	$.textStyle = (x) => {
-		$._textStyle = x;
-	};
+	$.textLeading = (x) => ($._textLeading = x);
+	$.textStyle = (x) => ($._textStyle = x);
 	$.textAlign = (horiz, vert) => {
 		ctx.textAlign = horiz;
 		if (vert) {
 			ctx.textBaseline = vert == $.CENTER ? 'middle' : vert;
-		}
-	};
-	$.text = (str, x, y, w) => {
-		if (str === undefined) return;
-		str = str.toString();
-		if (!$._doFill && !$._doStroke) return;
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		let lines = str.split('\n');
-		for (let i = 0; i < lines.length; i++) {
-			let f = ctx.fillStyle;
-			if (!$._fillSet) ctx.fillStyle = 'black';
-			if ($._doFill) {
-				ctx.fillText(lines[i], x, y, w);
-			}
-			if ($._doStroke && $._strokeSet) {
-				ctx.strokeText(lines[i], x, y, w);
-			}
-			if (!$._fillSet) ctx.fillStyle = f;
-			y += $._textLeading;
 		}
 	};
 	$.textWidth = (str) => {
@@ -1545,6 +1541,136 @@ function Q5(scope, parent) {
 	$.textDescent = (str) => {
 		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		return ctx.measureText(str).actualBoundingBoxDescent;
+	};
+	$._textCache = true;
+	$._TimedCache = class extends Map {
+		constructor() {
+			super();
+			this.maxSize = 500;
+		}
+		set(k, v) {
+			v.lastAccessed = Date.now();
+			super.set(k, v);
+			if (this.size > this.maxSize) this.gc();
+		}
+		get(k) {
+			const v = super.get(k);
+			if (v) v.lastAccessed = Date.now();
+			return v;
+		}
+		gc() {
+			let t = Infinity;
+			let oldest;
+			let i = 0;
+			for (const [k, v] of this.entries()) {
+				if (v.lastAccessed < t) {
+					t = v.lastAccessed;
+					oldest = i;
+				}
+				i++;
+			}
+			i = oldest;
+			for (const k of this.keys()) {
+				if (i == 0) {
+					oldest = k;
+					break;
+				}
+				i--;
+			}
+			this.delete(oldest);
+		}
+	};
+	$._tic = new $._TimedCache();
+	$.textCache = (b, maxSize) => {
+		if (maxSize) $._tic.maxSize = maxSize;
+		if (b !== undefined) $._textCache = b;
+		return $._textCache;
+	};
+	function genTextImageKey(str, w, h) {
+		return (
+			str.slice(0, 200) +
+			$._textStyle +
+			$._textSize +
+			$._textFont +
+			($._doFill ? ctx.fillStyle : '') +
+			'_' +
+			($._doStroke && $._strokeSet ? ctx.lineWidth + ctx.strokeStyle + '_' : '') +
+			(w || '') +
+			(h ? 'x' + h : '')
+		);
+	}
+	$.createTextImage = (str, size, w, h) => {
+		let og = $._textCache;
+		$._textCache = true;
+		let s = $.textSize();
+		if (size) $.textSize(size);
+		$.text(str, 0, 0, w);
+		let k = genTextImageKey(str, w, h);
+		$._textCache = og;
+		$.textSize(s);
+		return $._tic.get(k);
+	};
+	$.text = (str, x, y, w, h) => {
+		if (str === undefined) return;
+		str = str.toString();
+		if (!$._doFill && !$._doStroke) return;
+		let c, ti, k, cX, cY;
+		let t = ctx.getTransform();
+		let useCache = $._textCache && (t.b != 0 || t.c != 0);
+		if (!useCache) {
+			c = ctx;
+			cX = x;
+			cY = y;
+		} else {
+			k = genTextImageKey(str, w, h);
+			ti = $._tic.get(k);
+			if (ti) {
+				$.textImage(ti, x, y);
+				return;
+			}
+			ti = new Q5.Image(1, 1);
+			c = ti._ctx;
+		}
+		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		let lines = str.split('\n');
+		if (useCache) {
+			cX = 0;
+			cY = $._textLeading * lines.length;
+			let m = c.measureText(' ');
+			ti._ascent = m.fontBoundingBoxAscent;
+			ti._descent = m.fontBoundingBoxDescent;
+			h ??= cY + ti._descent;
+			ti.resizeCanvas(Math.ceil($.textWidth(str)), Math.ceil(h));
+			ti.pixelDensity($._pixelDensity);
+
+			c.fillStyle = ctx.fillStyle;
+			c.strokeStyle = ctx.strokeStyle;
+		}
+		for (let i = 0; i < lines.length; i++) {
+			if ($._doStroke && $._strokeSet) c.strokeText(lines[i], cX, cY);
+			let f = c.fillStyle;
+			if (!$._fillSet) c.fillStyle = 'black';
+			if ($._doFill) c.fillText(lines[i], cX, cY);
+			if (!$._fillSet) c.fillStyle = f;
+			cY += $._textLeading;
+			if (cY > h) break;
+		}
+		if (useCache) {
+			$._tic.set(k, ti);
+			$.textImage(ti, x, y);
+		}
+	};
+	$.textImage = (img, x, y) => {
+		let og = $._imageMode;
+		$._imageMode = 'left';
+		if (ctx.textAlign == 'center') x -= img.width * 0.5;
+		else if (ctx.textAlign == 'right') x -= img.width;
+		if (ctx.textBaseline == 'alphabetic') y -= $._textLeading;
+		if (ctx.textBaseline == 'middle') y -= img._ascent * 0.5 + img._descent;
+		else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent;
+		else if (ctx.textBaseline == 'top') y -= img._descent;
+		$.image(img, x, y);
+		$._imageMode = og;
 	};
 
 	//================================================================
