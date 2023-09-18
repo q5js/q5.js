@@ -1599,15 +1599,12 @@ function Q5(scope, parent) {
 			(h ? 'x' + h : '')
 		);
 	}
-	$.createTextImage = (str, size, w, h) => {
+	$.createTextImage = (str, w, h) => {
 		let og = $._textCache;
 		$._textCache = true;
-		let s = $.textSize();
-		if (size) $.textSize(size);
-		$.text(str, 0, 0, w);
+		$.text(str, 0, 0, w, h);
 		let k = genTextImageKey(str, w, h);
 		$._textCache = og;
-		$.textSize(s);
 		return $._tic.get(k);
 	};
 	$.text = (str, x, y, w, h) => {
