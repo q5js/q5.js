@@ -1602,7 +1602,9 @@ function Q5(scope, parent) {
 	$.createTextImage = (str, w, h) => {
 		let og = $._textCache;
 		$._textCache = true;
+		$._useCache = true;
 		$.text(str, 0, 0, w, h);
+		$._useCache = false;
 		let k = genTextImageKey(str, w, h);
 		$._textCache = og;
 		return $._tic.get(k);
@@ -1613,7 +1615,7 @@ function Q5(scope, parent) {
 		if (!$._doFill && !$._doStroke) return;
 		let c, ti, k, cX, cY;
 		let t = ctx.getTransform();
-		let useCache = $._textCache && (t.b != 0 || t.c != 0);
+		let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
 			c = ctx;
 			cX = x;
