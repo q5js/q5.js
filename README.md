@@ -2,7 +2,7 @@
 
 q5.js is a drop-in replacement for [p5.js][]. It supports all of p5's 2D drawing APIs, math functionality, and some other utilities.
 
-q5.min.js (39kb) is 24x smaller than p5.min.js (914kb)! It also has better performance, which is especially important on mobile devices.
+q5.min.js (42kb) is 23x smaller than p5.min.js (977kb)! It also has better performance, which is especially important on mobile devices.
 
 q5 doesn't include any friendly error messages to help you code though. Its mainly for people who are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
 
@@ -37,39 +37,16 @@ To use addons, simply load them after q5.js:
 <script src="https://p5play.org/v3/p5play.js"></script>
 ```
 
-## What's new in Version 1.1?
-
-Co-creator of q5, @quinton-ashley, added a ton of features:
-
-- `registerMethod` functionality for supporting p5.js addons such as [p5play](https://p5play.org)!
-- automatic global instance creation, can also be user instantiated as well with `new Q5('global')` like with the previous version of q5xjs
-- p5 instance mode support
-- add q5 canvas to a container element with `new Q5('global', parentElem)` or `new Q5(parentElem)`
-- `angleMode` functionality
-- `loadSound` function that returns a barebones sound object with `play`, `pause`, and `setVolume` methods
-- fixed `pixelDensity` bugs
-- fixed `text` function bug not displaying "0" (falsey value in JS)
-- fixed `keyPressed` repeating key presses
-- made `instanceof` checks work for q5.js objects of the `Color`, `Vector`, and `Image` classes
-- the `push` and `pop` functions now save and restore style properties like `rectMode` and `strokeWeight`
-- `nf` (number format) function, which is used in p5play
-- `pow` function alias to `Math.pow`
-- prevented text stroke from being drawn if the user did not specify a stroke (p5.js behavior)
-- fixed `Vector.lerp` implementation
-- fixed `mouseX` and `mouseY` not updating when the mouse is outside the canvas
-
 ## New Features: Top-Level Global Mode
 
 There are some extra features in q5 that aren't in p5, but using them is totally optional.
 
 **q5.js** has an automatic global mode, which is enabled by default. This means existing p5.js sketches can be run without any modification.
 
-But with q5, you could do away with the setup function all together. Just write the initialization routine `new Q5('global')` at the top of your sketch.
-
-For example, you can now directly run examples from [p5js.org/reference](https://p5js.org/reference) without wrapping them in a setup function:
+But with q5, you could do away with the setup function all together. Just write the initialization routine `new Q5()` or `new Q5('global')` at the top of your sketch.
 
 ```js
-new Q5('global');
+new Q5();
 
 noStroke();
 let c = color(0, 126, 255, 102);
@@ -80,7 +57,7 @@ rect(15, 15, 35, 70);
 You could even use your own animation loop in place of `draw()`. But this would cause problems with addons that rely on `draw()`, such as p5play.
 
 ```js
-new Q5('global');
+new Q5();
 
 fill(255, 0, 0);
 
@@ -116,7 +93,7 @@ This does solve the problem of global namespace pollution, but there're still so
 **q5** introduces "namespace" mode, in addition to global/instance modes:
 
 ```js
-let q5 = new Q5();
+let q5 = new Q5('namespace');
 
 q5.setup = function () {
 	q5.createCanvas(100, 100);
@@ -130,8 +107,8 @@ q5.draw = function () {
 You can call the namespace whatever you like. You can even get multiple instances of q5 running on the same page easily.
 
 ```js
-let q5 = new Q5();
-let q6 = new Q5();
+let q5 = new Q5('namespace');
+let q6 = new Q5('namespace');
 
 q5.setup = function () {
 	q5.createCanvas(400, 400);
@@ -174,7 +151,7 @@ I thought @LingDong-'s work on q5 and the idea itself had great potential. So I 
 
 An increase in performance of even a few frames per second can make a significant difference in the user experience of a work of interactive art or a game, especially on mobile devices.
 
-I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4 MB un-minified, q5.js is just 66kb.
+I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4.3 MB un-minified, q5.js is just 70kb.
 
 I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
 
@@ -184,6 +161,8 @@ Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and 
 
 q5.js provides some other features that are not in p5.js:
 
+- `textCache(true)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
+- `loadSound()`: Basic sound support in q5.js, returns a Web Audio object. Not as powerful as p5.sound, but it's good enough for simple sketches. Includes `sound.setVolume()`.
 - `randomExponential()` in addition to `randomGaussian()`: a random distribution that resembles exponential decay.
 - `curveAlpha()`: manipulate the `α` parameter of Catmull-Rom curves.
 - `relRotationX`, `relRotationY` and `relRotationZ`: Similar to `rotationX/Y/Z`, but are relative to the orientation of the mobile device.
@@ -200,13 +179,13 @@ q5.js provides some other features that are not in p5.js:
 
 ## Size Comparison
 
-- p5.min.js 898kb
+- p5.min.js 977kb
 - p5.sound.min.js 200kb
 
-- q5.min.js 39kb
+- q5.min.js 42kb
 
-- planck.min.js 193kb
-- p5play.min.js 90kb
+- planck.min.js 209kb
+- p5play.min.js 93kb
 
 ## Benchmarks
 

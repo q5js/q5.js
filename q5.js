@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.3
+ * @version 1.4
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
@@ -9,6 +9,7 @@
  * @type {Q5}
  */
 function Q5(scope, parent) {
+	if (typeof scope == 'undefined') scope = 'global';
 	if (scope == 'auto') {
 		if (typeof window.setup == 'undefined') return;
 		else scope = 'global';
@@ -1586,7 +1587,7 @@ function Q5(scope, parent) {
 		if (b !== undefined) $._textCache = b;
 		return $._textCache;
 	};
-	function genTextImageKey(str, w, h) {
+	function _genTextImageKey(str, w, h) {
 		return (
 			str.slice(0, 200) +
 			$._textStyle +
@@ -1605,7 +1606,7 @@ function Q5(scope, parent) {
 		$._useCache = true;
 		$.text(str, 0, 0, w, h);
 		$._useCache = false;
-		let k = genTextImageKey(str, w, h);
+		let k = _genTextImageKey(str, w, h);
 		$._textCache = og;
 		return $._tic.get(k);
 	};
@@ -1621,13 +1622,13 @@ function Q5(scope, parent) {
 			cX = x;
 			cY = y;
 		} else {
-			k = genTextImageKey(str, w, h);
+			k = _genTextImageKey(str, w, h);
 			ti = $._tic.get(k);
 			if (ti) {
 				$.textImage(ti, x, y);
 				return;
 			}
-			ti = new Q5.Image(1, 1);
+			ti = $.createGraphics(1, 1);
 			c = ti._ctx;
 		}
 		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
@@ -1661,7 +1662,7 @@ function Q5(scope, parent) {
 	};
 	$.textImage = (img, x, y) => {
 		let og = $._imageMode;
-		$._imageMode = 'left';
+		$._imageMode = 'corner';
 		if (ctx.textAlign == 'center') x -= img.width * 0.5;
 		else if (ctx.textAlign == 'right') x -= img.width;
 		if (ctx.textBaseline == 'alphabetic') y -= $._textLeading;
