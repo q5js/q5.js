@@ -216,7 +216,8 @@ function Q5(scope, parent) {
 
 	$._textFont = 'sans-serif';
 	$._textSize = 12;
-	$._textLeading = 12;
+	$._textLeading = 15;
+	$._textLeadDiff = 3;
 	$._textStyle = 'normal';
 
 	$._pixelDensity = 1;
@@ -1520,10 +1521,18 @@ function Q5(scope, parent) {
 	$.textFont = (x) => ($._textFont = x);
 	$.textSize = (x) => {
 		if (x === undefined) return $._textSize;
-		$._textLeading = x;
 		$._textSize = x;
+		if (!$._leadingSet) {
+			$._textLeading = x * 1.25;
+			$._textLeadDiff = $._textLeading - x;
+		}
 	};
-	$.textLeading = (x) => ($._textLeading = x);
+	$.textLeading = (x) => {
+		if (x === undefined) return $._textLeading;
+		$._textLeading = x;
+		$._textLeadDiff = x - $._textSize;
+		$._leadingSet = true;
+	};
 	$.textStyle = (x) => ($._textStyle = x);
 	$.textAlign = (horiz, vert) => {
 		ctx.textAlign = horiz;
@@ -1666,9 +1675,9 @@ function Q5(scope, parent) {
 		if (ctx.textAlign == 'center') x -= img.width * 0.5;
 		else if (ctx.textAlign == 'right') x -= img.width;
 		if (ctx.textBaseline == 'alphabetic') y -= $._textLeading;
-		if (ctx.textBaseline == 'middle') y -= img._ascent * 0.5 + img._descent;
-		else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent;
-		else if (ctx.textBaseline == 'top') y -= img._descent;
+		if (ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + $._textLeadDiff;
+		else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + $._textLeadDiff;
+		else if (ctx.textBaseline == 'top') y -= img._descent + $._textLeadDiff;
 		$.image(img, x, y);
 		$._imageMode = og;
 	};
