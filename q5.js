@@ -1637,7 +1637,7 @@ function Q5(scope, parent) {
 				$.textImage(ti, x, y);
 				return;
 			}
-			ti = $.createGraphics(1, 1);
+			ti = $.createImage(1, 1);
 			c = ti._ctx;
 		}
 		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
