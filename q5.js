@@ -60,6 +60,8 @@ function Q5(scope, parent) {
 	defaultStyle();
 
 	$.MAGIC = 0x9a0ce55;
+	$.pixels = [];
+	let imgData = null;
 
 	$.createCanvas = (width, height) => {
 		$.width = width;
@@ -347,7 +349,8 @@ function Q5(scope, parent) {
 		w = w || $.width;
 		h = h || $.height;
 		let img = $.createImage(w, h);
-		let imgData = ctx.getImageData(x * $._pixelDensity, y * $._pixelDensity, w * $._pixelDensity, h * $._pixelDensity);
+		let mod = $._pixelDensity || 1;
+		let imgData = ctx.getImageData(x * mod, y * mod, w * mod, h * mod);
 		img.canvas.getContext('2d').putImageData(imgData, 0, 0);
 		return img;
 	};
@@ -360,9 +363,10 @@ function Q5(scope, parent) {
 			$._tint = old;
 			return;
 		}
-		for (let i = 0; i < $._pixelDensity; i++) {
-			for (let j = 0; j < $._pixelDensity; j++) {
-				let idx = 4 * ((y * $._pixelDensity + i) * ctx.canvas.width + x * $._pixelDensity + j);
+		let mod = $._pixelDensity || 1;
+		for (let i = 0; i < mod; i++) {
+			for (let j = 0; j < mod; j++) {
+				let idx = 4 * ((y * mod + i) * ctx.canvas.width + x * mod + j);
 				$.pixels[idx] = c._r;
 				$.pixels[idx + 1] = c._g;
 				$.pixels[idx + 2] = c._b;
@@ -578,7 +582,6 @@ function Q5(scope, parent) {
 	$.mouseIsPressed = false;
 	$.key = null;
 	$.keyCode = null;
-	$.pixels = [];
 	$.accelerationX = 0;
 	$.accelerationY = 0;
 	$.accelerationZ = 0;
@@ -633,7 +636,6 @@ function Q5(scope, parent) {
 	let looper = null;
 	let firstVertex = true;
 	let curveBuff = [];
-	let imgData = null;
 	let preloadCnt = 0;
 	let keysHeld = {};
 	let millisStart = 0;
