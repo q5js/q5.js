@@ -59,10 +59,410 @@ function Q5(scope, parent) {
 
 	defaultStyle();
 
+	$.MAGIC = 0x9a0ce55;
+
+	$.createCanvas = (width, height) => {
+		$.width = width;
+		$.height = height;
+		$.canvas.width = width;
+		$.canvas.height = height;
+		if (scope != 'image') {
+			$.canvas.width *= $._pixelDensity;
+			$.canvas.height *= $._pixelDensity;
+		}
+		defaultStyle();
+		if (scope != 'graphics' && scope != 'image') {
+			$.pixelDensity(Math.ceil($.displayDensity()));
+		}
+		return $.canvas;
+	};
+
+	//================================================================
+	// IMAGE
+	//================================================================
+
+	$.loadPixels = () => {
+		imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		$.pixels = imgData.data;
+	};
+	$.updatePixels = () => {
+		if (imgData != null) ctx.putImageData(imgData, 0, 0);
+	};
+
+	let filterImpl = {};
+	filterImpl[$.THRESHOLD] = (data, thresh) => {
+		if (thresh === undefined) thresh = 127.5;
+		else thresh *= 255;
+		for (let i = 0; i < data.length; i += 4) {
+			const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+			data[i] = data[i + 1] = data[i + 2] = gray >= thresh ? 255 : 0;
+		}
+	};
+	filterImpl[$.GRAY] = (data) => {
+		for (let i = 0; i < data.length; i += 4) {
+			const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+			data[i] = data[i + 1] = data[i + 2] = gray;
+		}
+	};
+	filterImpl[$.OPAQUE] = (data) => {
+		for (let i = 0; i < data.length; i += 4) {
+			data[i + 3] = 255;
+		}
+	};
+	filterImpl[$.INVERT] = (data) => {
+		for (let i = 0; i < data.length; i += 4) {
+			data[i] = 255 - data[i];
+			data[i + 1] = 255 - data[i + 1];
+			data[i + 2] = 255 - data[i + 2];
+		}
+	};
+	filterImpl[$.POSTERIZE] = (data, lvl) => {
+		let lvl1 = lvl - 1;
+		for (let i = 0; i < data.length; i += 4) {
+			data[i] = (((data[i] * lvl) >> 8) * 255) / lvl1;
+			data[i + 1] = (((data[i + 1] * lvl) >> 8) * 255) / lvl1;
+			data[i + 2] = (((data[i + 2] * lvl) >> 8) * 255) / lvl1;
+		}
+	};
+
+	filterImpl[$.DILATE] = (data) => {
+		makeTmpBuf();
+		tmpBuf.set(data);
+		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				let l = 4 * Math.max(j - 1, 0);
+				let r = 4 * Math.min(j + 1, w - 1);
+				let t = 4 * Math.max(i - 1, 0) * w;
+				let b = 4 * Math.min(i + 1, h - 1) * w;
+				let oi = 4 * i * w;
+				let oj = 4 * j;
+				for (let k = 0; k < 4; k++) {
+					let kt = k + t;
+					let kb = k + b;
+					let ko = k + oi;
+					data[oi + oj + k] = Math.max(
+						/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
+						tmpBuf[ko + l],
+						tmpBuf[ko + oj],
+						tmpBuf[ko + r],
+						/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
+					);
+				}
+			}
+		}
+	};
+	filterImpl[$.ERODE] = (data) => {
+		makeTmpBuf();
+		tmpBuf.set(data);
+		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				let l = 4 * Math.max(j - 1, 0);
+				let r = 4 * Math.min(j + 1, w - 1);
+				let t = 4 * Math.max(i - 1, 0) * w;
+				let b = 4 * Math.min(i + 1, h - 1) * w;
+				let oi = 4 * i * w;
+				let oj = 4 * j;
+				for (let k = 0; k < 4; k++) {
+					let kt = k + t;
+					let kb = k + b;
+					let ko = k + oi;
+					data[oi + oj + k] = Math.min(
+						/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
+						tmpBuf[ko + l],
+						tmpBuf[ko + oj],
+						tmpBuf[ko + r],
+						/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
+					);
+				}
+			}
+		}
+	};
+
+	filterImpl[$.BLUR] = (data, rad) => {
+		rad = rad || 1;
+		rad = Math.floor(rad * $._pixelDensity);
+		makeTmpBuf();
+		tmpBuf.set(data);
+
+		let ksize = rad * 2 + 1;
+
+		function gauss1d(ksize) {
+			let im = new Float32Array(ksize);
+			let sigma = 0.3 * rad + 0.8;
+			let ss2 = sigma * sigma * 2;
+			for (let i = 0; i < ksize; i++) {
+				let x = i - ksize / 2;
+				let z = Math.exp(-(x * x) / ss2) / (2.5066282746 * sigma);
+				im[i] = z;
+			}
+			return im;
+		}
+
+		let kern = gauss1d(ksize);
+		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				let s0 = 0,
+					s1 = 0,
+					s2 = 0,
+					s3 = 0;
+				for (let k = 0; k < ksize; k++) {
+					let jk = Math.min(Math.max(j - rad + k, 0), w - 1);
+					let idx = 4 * (i * w + jk);
+					s0 += tmpBuf[idx] * kern[k];
+					s1 += tmpBuf[idx + 1] * kern[k];
+					s2 += tmpBuf[idx + 2] * kern[k];
+					s3 += tmpBuf[idx + 3] * kern[k];
+				}
+				let idx = 4 * (i * w + j);
+				data[idx] = s0;
+				data[idx + 1] = s1;
+				data[idx + 2] = s2;
+				data[idx + 3] = s3;
+			}
+		}
+		tmpBuf.set(data);
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				let s0 = 0,
+					s1 = 0,
+					s2 = 0,
+					s3 = 0;
+				for (let k = 0; k < ksize; k++) {
+					let ik = Math.min(Math.max(i - rad + k, 0), h - 1);
+					let idx = 4 * (ik * w + j);
+					s0 += tmpBuf[idx] * kern[k];
+					s1 += tmpBuf[idx + 1] * kern[k];
+					s2 += tmpBuf[idx + 2] * kern[k];
+					s3 += tmpBuf[idx + 3] * kern[k];
+				}
+				let idx = 4 * (i * w + j);
+				data[idx] = s0;
+				data[idx + 1] = s1;
+				data[idx + 2] = s2;
+				data[idx + 3] = s3;
+			}
+		}
+	};
+
+	function makeTmpCtx(w, h) {
+		if (tmpCtx == null) {
+			tmpCtx = document.createElement('canvas').getContext('2d');
+		}
+		h ??= w || ctx.canvas.height;
+		w ??= ctx.canvas.width;
+		if (tmpCtx.canvas.width != w || tmpCtx.canvas.height != h) {
+			tmpCtx.canvas.width = w;
+			tmpCtx.canvas.height = h;
+		}
+	}
+	function makeTmpCt2(w, h) {
+		if (tmpCt2 == null) {
+			tmpCt2 = document.createElement('canvas').getContext('2d');
+		}
+		h ??= w || ctx.canvas.height;
+		w ??= ctx.canvas.width;
+		if (tmpCt2.canvas.width != w || tmpCt2.canvas.height != h) {
+			tmpCt2.canvas.width = w;
+			tmpCt2.canvas.height = h;
+		}
+	}
+
+	function makeTmpBuf() {
+		let l = ctx.canvas.width * ctx.canvas.height * 4;
+		if (!tmpBuf || l != tmpBuf.length) {
+			tmpBuf = new Uint8ClampedArray(l);
+		}
+	}
+
+	function nativeFilter(filtstr) {
+		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+		tmpCtx.filter = filtstr;
+		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		ctx.save();
+		ctx.resetTransform();
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.drawImage(tmpCtx.canvas, 0, 0);
+		ctx.restore();
+	}
+
+	$.filter = (typ, x) => {
+		let support = $.HARDWARE_FILTERS && ctx.filter != undefined;
+		if (support) {
+			makeTmpCtx();
+			if (typ == $.THRESHOLD) {
+				x ??= 0.5;
+				x = Math.max(x, 0.00001);
+				let b = Math.floor((0.5 / x) * 100);
+				nativeFilter(`saturate(0%) brightness(${b}%) contrast(1000000%)`);
+			} else if (typ == $.GRAY) {
+				nativeFilter(`saturate(0%)`);
+			} else if (typ == $.OPAQUE) {
+				tmpCtx.fillStyle = 'black';
+				tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+				tmpCtx.drawImage(ctx.canvas, 0, 0);
+				ctx.save();
+				ctx.resetTransform();
+				ctx.drawImage(tmpCtx.canvas, 0, 0);
+				ctx.restore();
+			} else if (typ == $.INVERT) {
+				nativeFilter(`invert(100%)`);
+			} else if (typ == $.BLUR) {
+				nativeFilter(`blur(${Math.ceil((x * $._pixelDensity) / 1) || 1}px)`);
+			} else {
+				let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+				filterImpl[typ](imgData.data, x);
+				ctx.putImageData(imgData, 0, 0);
+			}
+		} else {
+			let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+			filterImpl[typ](imgData.data, x);
+			ctx.putImageData(imgData, 0, 0);
+		}
+	};
+
+	$.resize = (w, h) => {
+		makeTmpCtx();
+		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		$.width = w;
+		$.height = h;
+		ctx.canvas.width = w * $._pixelDensity;
+		ctx.canvas.height = h * $._pixelDensity;
+		ctx.save();
+		ctx.resetTransform();
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.drawImage(tmpCtx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.restore();
+	};
+
+	$.get = (x, y, w, h) => {
+		if (x !== undefined && w === undefined) {
+			let c = ctx.getImageData(x, y, 1, 1).data;
+			return new Q5.Color(c[0], c[1], c[2], c[3] / 255);
+		}
+		x = x || 0;
+		y = y || 0;
+		w = w || $.width;
+		h = h || $.height;
+		let img = $.createImage(w, h);
+		let imgData = ctx.getImageData(x * $._pixelDensity, y * $._pixelDensity, w * $._pixelDensity, h * $._pixelDensity);
+		img.canvas.getContext('2d').putImageData(imgData, 0, 0);
+		return img;
+	};
+
+	$.set = (x, y, c) => {
+		if (c.MAGIC == $.MAGIC) {
+			let old = $._tint;
+			$._tint = null;
+			$.image(c, x, y);
+			$._tint = old;
+			return;
+		}
+		for (let i = 0; i < $._pixelDensity; i++) {
+			for (let j = 0; j < $._pixelDensity; j++) {
+				let idx = 4 * ((y * $._pixelDensity + i) * ctx.canvas.width + x * $._pixelDensity + j);
+				$.pixels[idx] = c._r;
+				$.pixels[idx + 1] = c._g;
+				$.pixels[idx + 2] = c._b;
+				$.pixels[idx + 3] = c._a * 255;
+			}
+		}
+	};
+
+	$.tinted = function () {
+		let col = $.color(...Array.from(arguments));
+		let alpha = col._a;
+		col._a = 1;
+		makeTmpCtx();
+		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+		tmpCtx.fillStyle = col;
+		tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+		tmpCtx.globalCompositeOperation = 'multiply';
+		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.globalCompositeOperation = 'source-over';
+
+		ctx.save();
+		ctx.resetTransform();
+		let old = ctx.globalCompositeOperation;
+		ctx.globalCompositeOperation = 'source-in';
+		ctx.drawImage(tmpCtx.canvas, 0, 0);
+		ctx.globalCompositeOperation = old;
+		ctx.restore();
+
+		tmpCtx.globalAlpha = alpha;
+		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.globalAlpha = 1;
+
+		ctx.save();
+		ctx.resetTransform();
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.drawImage(tmpCtx.canvas, 0, 0);
+		ctx.restore();
+	};
+	$.tint = function () {
+		$._tint = $.color(...Array.from(arguments));
+	};
+	$.noTint = () => ($._tint = null);
+
+	$.mask = (img) => {
+		ctx.save();
+		ctx.resetTransform();
+		let old = ctx.globalCompositeOperation;
+		ctx.globalCompositeOperation = 'destination-in';
+		ctx.drawImage(img.canvas, 0, 0);
+		ctx.globalCompositeOperation = old;
+		ctx.restore();
+	};
+
+	$._save = (data, name, ext) => {
+		name = name || 'untitled';
+		ext = ext || 'png';
+		if (ext == 'jpg' || ext == 'png') data = data.toDataURL();
+		else {
+			let type = 'text/plain';
+			if (ext == 'json') {
+				if (typeof data != 'string') data = JSON.stringify(data);
+				type = 'text/json';
+			}
+			data = new Blob([data], { type });
+			data = URL.createObjectURL(data);
+		}
+		let a = document.createElement('a');
+		a.href = data;
+		a.download = name + '.' + ext;
+		document.body.append(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(a.href);
+	};
+	$.save = (a, b, c) => {
+		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
+			c = b;
+			b = a;
+			a = ctx.canvas;
+		}
+		if (c) return $._save(a, b, c);
+		if (b) {
+			b = b.split('.');
+			$._save(a, b[0], b.at(-1));
+		} else $._save(a);
+	};
+	$.canvas.save = $.save;
+	$.saveCanvas = $.save;
+
+	if (scope == 'image') return;
+
+	$.remove = () => {
+		$.noLoop();
+		$.canvas.remove();
+	};
+
 	//================================================================
 	// CONSTANTS
 	//================================================================
-	$.MAGIC = 0x9a0ce55;
 
 	$.RGB = 0;
 	$.HSV = 1;
@@ -264,18 +664,6 @@ function Q5(scope, parent) {
 	//================================================================
 	// CANVAS
 	//================================================================
-
-	$.createCanvas = (width, height) => {
-		$.width = width;
-		$.height = height;
-		$.canvas.width = width * $._pixelDensity;
-		$.canvas.height = height * $._pixelDensity;
-		defaultStyle();
-		if (scope != 'graphics' && scope != 'image') {
-			$.pixelDensity(Math.ceil($.displayDensity()));
-		}
-		return $.canvas;
-	};
 
 	function cloneCtx() {
 		let c = {};
@@ -1091,14 +1479,6 @@ function Q5(scope, parent) {
 		reset();
 	};
 
-	$.loadPixels = () => {
-		imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
-		$.pixels = imgData.data;
-	};
-	$.updatePixels = () => {
-		if (imgData != null) ctx.putImageData(imgData, 0, 0);
-	};
-
 	$._incrementPreload = () => preloadCnt++;
 	$._decrementPreload = () => preloadCnt--;
 
@@ -1123,384 +1503,11 @@ function Q5(scope, parent) {
 		return g;
 	};
 
-	let filterImpl = {};
-	filterImpl[$.THRESHOLD] = (data, thresh) => {
-		if (thresh === undefined) thresh = 127.5;
-		else thresh *= 255;
-		for (let i = 0; i < data.length; i += 4) {
-			const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-			data[i] = data[i + 1] = data[i + 2] = gray >= thresh ? 255 : 0;
-		}
-	};
-	filterImpl[$.GRAY] = (data) => {
-		for (let i = 0; i < data.length; i += 4) {
-			const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-			data[i] = data[i + 1] = data[i + 2] = gray;
-		}
-	};
-	filterImpl[$.OPAQUE] = (data) => {
-		for (let i = 0; i < data.length; i += 4) {
-			data[i + 3] = 255;
-		}
-	};
-	filterImpl[$.INVERT] = (data) => {
-		for (let i = 0; i < data.length; i += 4) {
-			data[i] = 255 - data[i];
-			data[i + 1] = 255 - data[i + 1];
-			data[i + 2] = 255 - data[i + 2];
-		}
-	};
-	filterImpl[$.POSTERIZE] = (data, lvl) => {
-		let lvl1 = lvl - 1;
-		for (let i = 0; i < data.length; i += 4) {
-			data[i] = (((data[i] * lvl) >> 8) * 255) / lvl1;
-			data[i + 1] = (((data[i + 1] * lvl) >> 8) * 255) / lvl1;
-			data[i + 2] = (((data[i + 2] * lvl) >> 8) * 255) / lvl1;
-		}
-	};
-
-	filterImpl[$.DILATE] = (data) => {
-		makeTmpBuf();
-		tmpBuf.set(data);
-		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
-		for (let i = 0; i < h; i++) {
-			for (let j = 0; j < w; j++) {
-				let l = 4 * Math.max(j - 1, 0);
-				let r = 4 * Math.min(j + 1, w - 1);
-				let t = 4 * Math.max(i - 1, 0) * w;
-				let b = 4 * Math.min(i + 1, h - 1) * w;
-				let oi = 4 * i * w;
-				let oj = 4 * j;
-				for (let k = 0; k < 4; k++) {
-					let kt = k + t;
-					let kb = k + b;
-					let ko = k + oi;
-					data[oi + oj + k] = Math.max(
-						/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
-						tmpBuf[ko + l],
-						tmpBuf[ko + oj],
-						tmpBuf[ko + r],
-						/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
-					);
-				}
-			}
-		}
-	};
-	filterImpl[$.ERODE] = (data) => {
-		makeTmpBuf();
-		tmpBuf.set(data);
-		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
-		for (let i = 0; i < h; i++) {
-			for (let j = 0; j < w; j++) {
-				let l = 4 * Math.max(j - 1, 0);
-				let r = 4 * Math.min(j + 1, w - 1);
-				let t = 4 * Math.max(i - 1, 0) * w;
-				let b = 4 * Math.min(i + 1, h - 1) * w;
-				let oi = 4 * i * w;
-				let oj = 4 * j;
-				for (let k = 0; k < 4; k++) {
-					let kt = k + t;
-					let kb = k + b;
-					let ko = k + oi;
-					data[oi + oj + k] = Math.min(
-						/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
-						tmpBuf[ko + l],
-						tmpBuf[ko + oj],
-						tmpBuf[ko + r],
-						/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
-					);
-				}
-			}
-		}
-	};
-
-	filterImpl[$.BLUR] = (data, rad) => {
-		rad = rad || 1;
-		rad = Math.floor(rad * $._pixelDensity);
-		makeTmpBuf();
-		tmpBuf.set(data);
-
-		let ksize = rad * 2 + 1;
-
-		function gauss1d(ksize) {
-			let im = new Float32Array(ksize);
-			let sigma = 0.3 * rad + 0.8;
-			let ss2 = sigma * sigma * 2;
-			for (let i = 0; i < ksize; i++) {
-				let x = i - ksize / 2;
-				let z = Math.exp(-(x * x) / ss2) / (2.5066282746 * sigma);
-				im[i] = z;
-			}
-			return im;
-		}
-
-		let kern = gauss1d(ksize);
-		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
-		for (let i = 0; i < h; i++) {
-			for (let j = 0; j < w; j++) {
-				let s0 = 0,
-					s1 = 0,
-					s2 = 0,
-					s3 = 0;
-				for (let k = 0; k < ksize; k++) {
-					let jk = Math.min(Math.max(j - rad + k, 0), w - 1);
-					let idx = 4 * (i * w + jk);
-					s0 += tmpBuf[idx] * kern[k];
-					s1 += tmpBuf[idx + 1] * kern[k];
-					s2 += tmpBuf[idx + 2] * kern[k];
-					s3 += tmpBuf[idx + 3] * kern[k];
-				}
-				let idx = 4 * (i * w + j);
-				data[idx] = s0;
-				data[idx + 1] = s1;
-				data[idx + 2] = s2;
-				data[idx + 3] = s3;
-			}
-		}
-		tmpBuf.set(data);
-		for (let i = 0; i < h; i++) {
-			for (let j = 0; j < w; j++) {
-				let s0 = 0,
-					s1 = 0,
-					s2 = 0,
-					s3 = 0;
-				for (let k = 0; k < ksize; k++) {
-					let ik = Math.min(Math.max(i - rad + k, 0), h - 1);
-					let idx = 4 * (ik * w + j);
-					s0 += tmpBuf[idx] * kern[k];
-					s1 += tmpBuf[idx + 1] * kern[k];
-					s2 += tmpBuf[idx + 2] * kern[k];
-					s3 += tmpBuf[idx + 3] * kern[k];
-				}
-				let idx = 4 * (i * w + j);
-				data[idx] = s0;
-				data[idx + 1] = s1;
-				data[idx + 2] = s2;
-				data[idx + 3] = s3;
-			}
-		}
-	};
-
-	function makeTmpCtx(w, h) {
-		if (tmpCtx == null) {
-			tmpCtx = document.createElement('canvas').getContext('2d');
-		}
-		h ??= w || ctx.canvas.height;
-		w ??= ctx.canvas.width;
-		if (tmpCtx.canvas.width != w || tmpCtx.canvas.height != h) {
-			tmpCtx.canvas.width = w;
-			tmpCtx.canvas.height = h;
-		}
-	}
-	function makeTmpCt2(w, h) {
-		if (tmpCt2 == null) {
-			tmpCt2 = document.createElement('canvas').getContext('2d');
-		}
-		h ??= w || ctx.canvas.height;
-		w ??= ctx.canvas.width;
-		if (tmpCt2.canvas.width != w || tmpCt2.canvas.height != h) {
-			tmpCt2.canvas.width = w;
-			tmpCt2.canvas.height = h;
-		}
-	}
-
-	function makeTmpBuf() {
-		let l = ctx.canvas.width * ctx.canvas.height * 4;
-		if (!tmpBuf || l != tmpBuf.length) {
-			tmpBuf = new Uint8ClampedArray(l);
-		}
-	}
-
-	function nativeFilter(filtstr) {
-		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.filter = filtstr;
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.restore();
-	}
-
-	$.filter = (typ, x) => {
-		let support = $.HARDWARE_FILTERS && ctx.filter != undefined;
-		if (support) {
-			makeTmpCtx();
-			if (typ == $.THRESHOLD) {
-				x ??= 0.5;
-				x = Math.max(x, 0.00001);
-				let b = Math.floor((0.5 / x) * 100);
-				nativeFilter(`saturate(0%) brightness(${b}%) contrast(1000000%)`);
-			} else if (typ == $.GRAY) {
-				nativeFilter(`saturate(0%)`);
-			} else if (typ == $.OPAQUE) {
-				tmpCtx.fillStyle = 'black';
-				tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-				tmpCtx.drawImage(ctx.canvas, 0, 0);
-				ctx.save();
-				ctx.resetTransform();
-				ctx.drawImage(tmpCtx.canvas, 0, 0);
-				ctx.restore();
-			} else if (typ == $.INVERT) {
-				nativeFilter(`invert(100%)`);
-			} else if (typ == $.BLUR) {
-				nativeFilter(`blur(${Math.ceil((x * $._pixelDensity) / 1) || 1}px)`);
-			} else {
-				let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-				filterImpl[typ](imgData.data, x);
-				ctx.putImageData(imgData, 0, 0);
-			}
-		} else {
-			let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-			filterImpl[typ](imgData.data, x);
-			ctx.putImageData(imgData, 0, 0);
-		}
-	};
-
-	$.resize = (w, h) => {
-		makeTmpCtx();
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
-		$.width = w;
-		$.height = h;
-		ctx.canvas.width = w * $._pixelDensity;
-		ctx.canvas.height = h * $._pixelDensity;
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.restore();
-	};
-
-	$.get = (x, y, w, h) => {
-		if (x !== undefined && w === undefined) {
-			let c = ctx.getImageData(x, y, 1, 1).data;
-			return new Q5.Color(c[0], c[1], c[2], c[3] / 255);
-		}
-		x = x || 0;
-		y = y || 0;
-		w = w || $.width;
-		h = h || $.height;
-		let g = $.createGraphics(w, h);
-		g.pixelDensity($._pixelDensity);
-		let imgData = ctx.getImageData(x * $._pixelDensity, y * $._pixelDensity, w * $._pixelDensity, h * $._pixelDensity);
-		g.canvas.getContext('2d').putImageData(imgData, 0, 0);
-		return g;
-	};
-
-	$.set = (x, y, c) => {
-		if (c.MAGIC == $.MAGIC) {
-			let old = $._tint;
-			$._tint = null;
-			$.image(c, x, y);
-			$._tint = old;
-			return;
-		}
-		for (let i = 0; i < $._pixelDensity; i++) {
-			for (let j = 0; j < $._pixelDensity; j++) {
-				let idx = 4 * ((y * $._pixelDensity + i) * ctx.canvas.width + x * $._pixelDensity + j);
-				$.pixels[idx] = c._r;
-				$.pixels[idx + 1] = c._g;
-				$.pixels[idx + 2] = c._b;
-				$.pixels[idx + 3] = c._a * 255;
-			}
-		}
-	};
-
-	$.tinted = function () {
-		let col = $.color(...Array.from(arguments));
-		let alpha = col._a;
-		col._a = 1;
-		makeTmpCtx();
-		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.fillStyle = col;
-		tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.globalCompositeOperation = 'multiply';
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
-		tmpCtx.globalCompositeOperation = 'source-over';
-
-		ctx.save();
-		ctx.resetTransform();
-		let old = ctx.globalCompositeOperation;
-		ctx.globalCompositeOperation = 'source-in';
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.globalCompositeOperation = old;
-		ctx.restore();
-
-		tmpCtx.globalAlpha = alpha;
-		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
-		tmpCtx.globalAlpha = 1;
-
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.restore();
-	};
-
-	$.tint = function () {
-		$._tint = $.color(...Array.from(arguments));
-	};
-
-	$.noTint = () => ($._tint = null);
-
-	$.mask = (img) => {
-		ctx.save();
-		ctx.resetTransform();
-		let old = ctx.globalCompositeOperation;
-		ctx.globalCompositeOperation = 'destination-in';
-		ctx.drawImage(img.canvas, 0, 0);
-		ctx.globalCompositeOperation = old;
-		ctx.restore();
-	};
-
-	$.clearTemporaryBuffers = () => {
+	$._clearTemporaryBuffers = () => {
 		tmpCtx = null;
 		tmpCt2 = null;
 		tmpBuf = null;
 	};
-	$._save = (data, name, ext) => {
-		name = name || 'untitled';
-		ext = ext || 'png';
-		if (ext == 'jpg' || ext == 'png') data = data.toDataURL();
-		else {
-			let type = 'text/plain';
-			if (ext == 'json') {
-				if (typeof data != 'string') data = JSON.stringify(data);
-				type = 'text/json';
-			}
-			data = new Blob([data], { type });
-			data = URL.createObjectURL(data);
-		}
-		let a = document.createElement('a');
-		a.href = data;
-		a.download = name + '.' + ext;
-		document.body.append(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(a.href);
-	};
-	$.save = (a, b, c) => {
-		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
-			c = b;
-			b = a;
-			a = ctx.canvas;
-		}
-		if (c) return $._save(a, b, c);
-		if (b) {
-			b = b.split('.');
-			$._save(a, b[0], b.at(-1));
-		} else $._save(a);
-	};
-	$.canvas.save = $.save;
-	$.saveCanvas = $.save;
-
-	$.remove = () => {
-		$.noLoop();
-		$.canvas.remove();
-	};
-
-	if (scope == 'image') return;
 
 	//================================================================
 	// TYPOGRAPHY
@@ -1623,7 +1630,8 @@ function Q5(scope, parent) {
 		if (str === undefined) return;
 		str = str.toString();
 		if (!$._doFill && !$._doStroke) return;
-		let c, ti, k, cX, cY;
+		let c, ti, tg, k, cX, cY;
+		let mod = 1;
 		let t = ctx.getTransform();
 		let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
@@ -1637,34 +1645,38 @@ function Q5(scope, parent) {
 				$.textImage(ti, x, y);
 				return;
 			}
-			ti = $.createImage(1, 1);
-			c = ti._ctx;
+			tg = $.createGraphics(1, 1);
+			c = tg._ctx;
+			mod = $._pixelDensity;
 		}
-		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		c.font = `${$._textStyle} ${$._textSize * mod}px ${$._textFont}`;
 		let lines = str.split('\n');
 		if (useCache) {
 			cX = 0;
-			cY = $._textLeading * lines.length;
+			cY = $._textLeading * mod * lines.length;
 			let m = c.measureText(' ');
-			ti._ascent = m.fontBoundingBoxAscent;
-			ti._descent = m.fontBoundingBoxDescent;
-			h ??= cY + ti._descent;
-			ti.resizeCanvas(Math.ceil($.textWidth(str)), Math.ceil(h));
-			ti.pixelDensity($._pixelDensity);
+			tg._ascent = m.fontBoundingBoxAscent;
+			tg._descent = m.fontBoundingBoxDescent;
+			h ??= cY + tg._descent;
+			tg.resizeCanvas(Math.ceil(c.measureText(str).width), Math.ceil(h));
 
 			c.fillStyle = ctx.fillStyle;
 			c.strokeStyle = ctx.strokeStyle;
+			c.lineWidth = ctx.lineWidth * mod;
 		}
+		let f = c.fillStyle;
+		if (!$._fillSet) c.fillStyle = 'black';
 		for (let i = 0; i < lines.length; i++) {
 			if ($._doStroke && $._strokeSet) c.strokeText(lines[i], cX, cY);
-			let f = c.fillStyle;
-			if (!$._fillSet) c.fillStyle = 'black';
 			if ($._doFill) c.fillText(lines[i], cX, cY);
-			if (!$._fillSet) c.fillStyle = f;
 			cY += $._textLeading;
 			if (cY > h) break;
 		}
+		if (!$._fillSet) c.fillStyle = f;
 		if (useCache) {
+			ti = tg.get();
+			ti.width /= $._pixelDensity;
+			ti.height /= $._pixelDensity;
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		}
@@ -2765,6 +2777,7 @@ class _Q5Image extends Q5 {
 	constructor(width, height) {
 		super('image');
 		this.createCanvas(width, height);
+		delete this.createCanvas;
 		this._loop = false;
 	}
 }
