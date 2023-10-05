@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.4
+ * @version 1.5
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
@@ -1632,7 +1632,7 @@ function Q5(scope, parent) {
 		if (str === undefined) return;
 		str = str.toString();
 		if (!$._doFill && !$._doStroke) return;
-		let c, ti, tg, k, cX, cY;
+		let c, ti, tg, k, cX, cY, _ascent, _descent;
 		let mod = 1;
 		let t = ctx.getTransform();
 		let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
@@ -1657,9 +1657,9 @@ function Q5(scope, parent) {
 			cX = 0;
 			cY = $._textLeading * mod * lines.length;
 			let m = c.measureText(' ');
-			tg._ascent = m.fontBoundingBoxAscent;
-			tg._descent = m.fontBoundingBoxDescent;
-			h ??= cY + tg._descent;
+			_ascent = m.fontBoundingBoxAscent;
+			_descent = m.fontBoundingBoxDescent;
+			h ??= cY + _descent;
 			tg.resizeCanvas(Math.ceil(c.measureText(str).width), Math.ceil(h));
 
 			c.fillStyle = ctx.fillStyle;
@@ -1679,6 +1679,8 @@ function Q5(scope, parent) {
 			ti = tg.get();
 			ti.width /= $._pixelDensity;
 			ti.height /= $._pixelDensity;
+			ti._ascent = _ascent / $._pixelDensity;
+			ti._descent = _descent / $._pixelDensity;
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		}
