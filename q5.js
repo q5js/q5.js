@@ -2158,42 +2158,26 @@ function Q5(scope, parent) {
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = true;
 			$.mouseButton = $.LEFT;
-			if (!$._mousePressedFn(e)) {
-				e.preventDefault();
-			}
+			if (!$._mousePressedFn(e)) e.preventDefault();
 		}
-		if (!$._touchStartedFn(e)) {
-			e.preventDefault();
-		}
+		if (!$._touchStartedFn(e)) e.preventDefault();
 	};
 	$._ontouchmove = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
 		if (isTouchUnaware()) {
 			$.mouseX = $.touches[0].x;
 			$.mouseY = $.touches[0].y;
-			$.mouseIsPressed = true;
-			$.mouseButton = $.LEFT;
-			if (!$._mouseDraggedFn(e)) {
-				e.preventDefault();
-			}
+			if (!$._mouseDraggedFn(e)) e.preventDefault();
 		}
-		if (!$._touchMovedFn(e)) {
-			e.preventDefault();
-		}
+		if (!$._touchMovedFn(e)) e.preventDefault();
 	};
 	$._ontouchend = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
-		if (isTouchUnaware()) {
-			$.mouseX = $.touches[0].x;
-			$.mouseY = $.touches[0].y;
+		if (isTouchUnaware() && !$.touches.length) {
 			$.mouseIsPressed = false;
-			if (!$._mouseReleasedFn(e)) {
-				e.preventDefault();
-			}
+			if (!$._mouseReleasedFn(e)) e.preventDefault();
 		}
-		if (!$._touchEndedFn(e)) {
-			e.preventDefault();
-		}
+		if (!$._touchEndedFn(e)) e.preventDefault();
 	};
 	$.canvas.ontouchstart = (e) => $._ontouchstart(e);
 	$.canvas.ontouchmove = (e) => $._ontouchmove(e);
