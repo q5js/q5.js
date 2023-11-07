@@ -33,6 +33,7 @@ function Q5(scope, parent) {
 	$._windowResizedFn = () => {};
 
 	if (scope != 'graphics' && scope != 'image') {
+		$._setupDone = false;
 		$._resize = () => {
 			if ($.frameCount > 1) $._shouldResize = true;
 		};
@@ -2390,6 +2391,7 @@ function Q5(scope, parent) {
 					return requestAnimationFrame(_start);
 				}
 				$._setupFn();
+				$._setupDone = true;
 				requestAnimationFrame(_draw);
 			}
 			_start();
