@@ -1720,7 +1720,7 @@ function Q5(scope, parent) {
 		y ??= 0;
 		z ??= 0;
 		if (p_perlin == null) {
-			p_perlin = new Array(PERLIN_SIZE + 1);
+			p_perlin = new Float32Array(PERLIN_SIZE + 1);
 			for (var i = 0; i < PERLIN_SIZE + 1; i++) {
 				p_perlin[i] = Math.random();
 			}
@@ -2685,7 +2685,7 @@ Q5.Vector = class {
 		let u = this._arg2v(...arguments);
 		const costh = this.dot(u) / (this.mag() * u.mag());
 		let ang;
-		ang = this._$.tan(Math.min(1, Math.max(-1, costh)));
+		ang = this._$.acos(Math.min(1, Math.max(-1, costh)));
 		ang = ang * Math.sign(this.cross(u).z || 1);
 		return ang;
 	}
