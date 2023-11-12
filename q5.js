@@ -2683,11 +2683,9 @@ Q5.Vector = class {
 	}
 	angleBetween() {
 		let u = this._arg2v(...arguments);
-		const costh = this.dot(u) / (this.mag() * u.mag());
-		let ang;
-		ang = this._$.tan(Math.min(1, Math.max(-1, costh)));
-		ang = ang * Math.sign(this.cross(u).z || 1);
-		return ang;
+		let o = Q5.Vector.cross(this, u);
+		let ang = this._$.atan2(o.mag(), this.dot(u));
+		return ang * Math.sign(o.z || 1);
 	}
 	lerp() {
 		let args = [...arguments];
@@ -2752,7 +2750,7 @@ Q5.Vector.dot = (v, u) => v.copy().dot(u);
 Q5.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
 Q5.Vector.lerp = (v, u, amt) => v.copy().lerp(u, amt);
 Q5.Vector.limit = (v, m) => v.copy().limit(m);
-Q5.Vector.heading = (v) => Math.atan2(v.y, v.x);
+Q5.Vector.heading = (v) => this._$.atan2(v.y, v.x);
 Q5.Vector.magSq = (v) => v.x * v.x + v.y * v.y + v.z * v.z;
 Q5.Vector.mag = (v) => Math.sqrt(Q5.Vector.magSq(v));
 Q5.Vector.mult = (v, u) => v.copy().mult(u);
