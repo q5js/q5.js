@@ -1003,9 +1003,8 @@ function Q5(scope, parent) {
 	}
 
 	$.strokeWeight = (n) => {
-		if (n > 0) $._doStroke = true;
-		else $._doStroke = false;
-		ctx.lineWidth = n;
+		if (!n) $._doStroke = false;
+		ctx.lineWidth = n || 0.0001;
 	};
 	$.stroke = function () {
 		$._doStroke = true;
