@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.5
+ * @version 1.6
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
@@ -74,7 +74,7 @@ function Q5(scope, parent) {
 			$.canvas.height *= $._pixelDensity;
 		}
 		defaultStyle();
-		if (scope != 'graphics' && scope != 'image') {
+		if (scope != 'image') {
 			$.pixelDensity(Math.ceil($.displayDensity()));
 		}
 		return $.canvas;
@@ -341,17 +341,17 @@ function Q5(scope, parent) {
 	};
 
 	$.get = (x, y, w, h) => {
+		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
-			let c = ctx.getImageData(x, y, 1, 1).data;
+			let c = ctx.getImageData(x * pd, y * pd, 1, 1).data;
 			return new Q5.Color(c[0], c[1], c[2], c[3] / 255);
 		}
-		x = x || 0;
-		y = y || 0;
-		w = w || $.width;
-		h = h || $.height;
+		x = (x || 0) * pd;
+		y = (y || 0) * pd;
+		w = (w || $.width) * pd;
+		h = (h || $.height) * pd;
 		let img = $.createImage(w, h);
-		let mod = $._pixelDensity || 1;
-		let imgData = ctx.getImageData(x * mod, y * mod, w * mod, h * mod);
+		let imgData = ctx.getImageData(x, y, w, h);
 		img.canvas.getContext('2d').putImageData(imgData, 0, 0);
 		return img;
 	};
@@ -685,7 +685,7 @@ function Q5(scope, parent) {
 		$.canvas.height = height * $._pixelDensity;
 		ctx = $._ctx = $.canvas.getContext('2d');
 		for (let prop in c) $._ctx[prop] = c[prop];
-		if (scope != 'graphics' && scope != 'image') $.pixelDensity($._pixelDensity);
+		if (scope != 'image') $.pixelDensity($._pixelDensity);
 	};
 
 	$.createGraphics = (width, height) => {
@@ -1470,14 +1470,14 @@ function Q5(scope, parent) {
 			dx -= dWidth * 0.5;
 			dy -= dHeight * 0.5;
 		}
-		if (sx === undefined) {
-			ctx.drawImage(drawable, dx, dy, dWidth, dHeight);
-			reset();
-			return;
-		}
-		sWidth ??= drawable.width;
-		sHeight ??= drawable.height;
-		ctx.drawImage(drawable, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+		let pd = img._pixelDensity;
+		sx ??= 0;
+		sy ??= 0;
+		if (!sWidth) sWidth = drawable.width;
+		else sWidth *= pd;
+		if (!sHeight) sHeight = drawable.height;
+		else sHeight *= pd;
+		ctx.drawImage(drawable, sx * pd, sy * pd, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		reset();
 	};
 
@@ -1491,6 +1491,7 @@ function Q5(scope, parent) {
 		let img = new window.Image();
 		img.src = url;
 		img.crossOrigin = 'Anonymous';
+		img._pixelDensity = 1;
 		img.onload = () => {
 			g.width = c.canvas.width = img.naturalWidth;
 			g.height = c.canvas.height = img.naturalHeight;
@@ -1633,7 +1634,7 @@ function Q5(scope, parent) {
 		str = str.toString();
 		if (!$._doFill && !$._doStroke) return;
 		let c, ti, tg, k, cX, cY, _ascent, _descent;
-		let mod = 1;
+		let pd = 1;
 		let t = ctx.getTransform();
 		let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
@@ -1649,13 +1650,13 @@ function Q5(scope, parent) {
 			}
 			tg = $.createGraphics(1, 1);
 			c = tg._ctx;
-			mod = $._pixelDensity;
+			pd = $._pixelDensity;
 		}
-		c.font = `${$._textStyle} ${$._textSize * mod}px ${$._textFont}`;
+		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		let lines = str.split('\n');
 		if (useCache) {
 			cX = 0;
-			cY = $._textLeading * mod * lines.length;
+			cY = $._textLeading * lines.length;
 			let m = c.measureText(' ');
 			_ascent = m.fontBoundingBoxAscent;
 			_descent = m.fontBoundingBoxDescent;
@@ -1664,7 +1665,7 @@ function Q5(scope, parent) {
 
 			c.fillStyle = ctx.fillStyle;
 			c.strokeStyle = ctx.strokeStyle;
-			c.lineWidth = ctx.lineWidth * mod;
+			c.lineWidth = ctx.lineWidth;
 		}
 		let f = c.fillStyle;
 		if (!$._fillSet) c.fillStyle = 'black';
@@ -1677,10 +1678,11 @@ function Q5(scope, parent) {
 		if (!$._fillSet) c.fillStyle = f;
 		if (useCache) {
 			ti = tg.get();
-			ti.width /= $._pixelDensity;
-			ti.height /= $._pixelDensity;
-			ti._ascent = _ascent / $._pixelDensity;
-			ti._descent = _descent / $._pixelDensity;
+			ti._pixelDensity = pd;
+			ti.width /= pd;
+			ti.height /= pd;
+			ti._ascent = _ascent;
+			ti._descent = _descent;
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		}
@@ -2766,6 +2768,7 @@ class _Q5Image extends Q5 {
 		this.createCanvas(width, height);
 		delete this.createCanvas;
 		this._loop = false;
+		this._pixelDensity = 1;
 	}
 }
 
