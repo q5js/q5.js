@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.6
+ * @version 1.8
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
@@ -64,21 +64,20 @@ function Q5(scope, parent) {
 	$.pixels = [];
 	let imgData = null;
 
-	$.createCanvas = (width, height) => {
+	$.createCanvas = function (width, height) {
 		$.width = width;
 		$.height = height;
 		$.canvas.width = width;
 		$.canvas.height = height;
-		if (scope != 'image') {
-			$.canvas.width *= $._pixelDensity;
-			$.canvas.height *= $._pixelDensity;
-		}
 		defaultStyle();
 		if (scope != 'image') {
-			$.pixelDensity(Math.ceil($.displayDensity()));
+			let pd = $.displayDensity();
+			if (scope == 'graphics') pd = this._pixelDensity;
+			$.pixelDensity(Math.ceil(pd));
 		}
 		return $.canvas;
 	};
+	$._createCanvas = $.createCanvas;
 
 	//================================================================
 	// IMAGE
@@ -688,9 +687,9 @@ function Q5(scope, parent) {
 		if (scope != 'image') $.pixelDensity($._pixelDensity);
 	};
 
-	$.createGraphics = (width, height) => {
+	$.createGraphics = function (width, height) {
 		let g = new Q5('graphics');
-		g.createCanvas(width, height);
+		g._createCanvas.call($, width, height);
 		return g;
 	};
 	$.createImage = (width, height) => {
@@ -1516,16 +1515,16 @@ function Q5(scope, parent) {
 	// TYPOGRAPHY
 	//================================================================
 
-	$.loadFont = (url, callback) => {
+	$.loadFont = (url, cb) => {
+		preloadCnt++;
 		let sp = url.split('/');
 		let name = sp[sp.length - 1].split('.')[0].replace(' ', '');
-		let cssStr = `@font-face {
-        font-family: '${name}';
-        src: url('${url}');
-      }`;
-		const style = document.createElement('style');
-		style.textContent = cssStr;
-		document.head.append(style);
+		let f = new FontFace(name, 'url(' + url + ')');
+		document.fonts.add(f);
+		f.load().then(() => {
+			preloadCnt--;
+			if (cb) cb(name);
+		});
 		return name;
 	};
 	$.textFont = (x) => ($._textFont = x);
@@ -1648,7 +1647,7 @@ function Q5(scope, parent) {
 				$.textImage(ti, x, y);
 				return;
 			}
-			tg = $.createGraphics(1, 1);
+			tg = $.createGraphics.call($, 1, 1);
 			c = tg._ctx;
 			pd = $._pixelDensity;
 		}
@@ -2062,6 +2061,7 @@ function Q5(scope, parent) {
 		$._drawFn();
 		for (let m of Q5.prototype._methods.post) m.call($);
 		ctx.restore();
+		$.resetMatrix();
 		let post = performance.now();
 		$._fps = Math.round(1000 / (post - pre));
 		$._lastFrameTime = pre;
@@ -2391,8 +2391,11 @@ function Q5(scope, parent) {
 				if (preloadCnt > 0) {
 					return requestAnimationFrame(_start);
 				}
+				ctx.save();
 				$._setupFn();
 				$._setupDone = true;
+				ctx.restore();
+				$.resetMatrix();
 				requestAnimationFrame(_draw);
 			}
 			_start();
@@ -2768,7 +2771,6 @@ class _Q5Image extends Q5 {
 		this.createCanvas(width, height);
 		delete this.createCanvas;
 		this._loop = false;
-		this._pixelDensity = 1;
 	}
 }
 
