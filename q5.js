@@ -74,7 +74,7 @@ function Q5(scope, parent) {
 			let pd = $.displayDensity();
 			if (scope == 'graphics') pd = this._pixelDensity;
 			$.pixelDensity(Math.ceil(pd));
-		}
+		} else this._pixelDensity = 1;
 		return $.canvas;
 	};
 	$._createCanvas = $.createCanvas;
