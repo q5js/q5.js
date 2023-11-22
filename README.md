@@ -43,7 +43,7 @@ There are some extra features in q5 that aren't in p5, but using them is totally
 
 **q5.js** has an automatic global mode, which is enabled by default. This means existing p5.js sketches can be run without any modification.
 
-But with q5, you could do away with the setup function all together. Just write the initialization routine `new Q5()` or `new Q5('global')` at the top of your sketch.
+But with q5, you could do away with the preload and setup functions all together. Just write the initialization routine `new Q5()` or `new Q5('global')` at the top of your sketch.
 
 ```js
 new Q5();

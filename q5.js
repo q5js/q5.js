@@ -51,7 +51,10 @@ function Q5(scope, parent) {
 		};
 		function appendCanvas() {
 			parent ??= document.getElementsByTagName('main')[0];
-			parent ??= document.body;
+			if (!parent) {
+				parent = document.createElement('main');
+				document.body.append(parent);
+			}
 			$.canvas.parent(parent);
 		}
 		if (document.body) appendCanvas();
@@ -1485,7 +1488,7 @@ function Q5(scope, parent) {
 
 	$.loadImage = (url, cb) => {
 		preloadCnt++;
-		let g = $.createImage(100, 100);
+		let g = $.createImage(1, 1);
 		let c = g.canvas.getContext('2d');
 		let img = new window.Image();
 		img.src = url;
