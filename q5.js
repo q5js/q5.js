@@ -9,7 +9,12 @@
  * @type {Q5}
  */
 function Q5(scope, parent) {
-	if (typeof scope == 'undefined') scope = 'global';
+	let preloadCnt = 0;
+	if (typeof scope == 'undefined') {
+		scope = 'global';
+		preloadCnt++;
+		setTimeout(() => preloadCnt--, 32);
+	}
 	if (scope == 'auto') {
 		if (typeof window.setup == 'undefined') return;
 		else scope = 'global';
@@ -639,7 +644,6 @@ function Q5(scope, parent) {
 	let looper = null;
 	let firstVertex = true;
 	let curveBuff = [];
-	let preloadCnt = 0;
 	let keysHeld = {};
 	let millisStart = 0;
 	let tmpCtx = null;
@@ -2391,9 +2395,7 @@ function Q5(scope, parent) {
 			$._preloadFn();
 			millisStart = performance.now();
 			function _start() {
-				if (preloadCnt > 0) {
-					return requestAnimationFrame(_start);
-				}
+				if (preloadCnt > 0) return requestAnimationFrame(_start);
 				ctx.save();
 				$._setupFn();
 				$._setupDone = true;

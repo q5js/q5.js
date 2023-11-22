@@ -1,12 +1,12 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5",
-	"version": "1.8.3",
+	"version": "1.8.4",
 	"description": "An implementation of the p5.js 2D API that's smaller and faster",
 	"main": "q5.js",
 	"scripts": {
 		"min": "minify q5.js > q5.min.js",
-		"dist": "bun min && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
+		"dist": "cp q5.js ../../web/p5play-web/v3/q5.js && bun min && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
 		"version": "git add -A",
