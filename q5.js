@@ -383,8 +383,7 @@ function Q5(scope, parent) {
 		}
 	};
 
-	$.tinted = function () {
-		let col = $.color(...Array.from(arguments));
+	$.tinted = function (col) {
 		let alpha = col._a;
 		col._a = 1;
 		makeTmpCtx();
@@ -464,6 +463,18 @@ function Q5(scope, parent) {
 	};
 	$.canvas.save = $.save;
 	$.saveCanvas = $.save;
+
+	//================================================================
+	// PRIVATE VARS
+	//================================================================
+	let looper = null;
+	let firstVertex = true;
+	let curveBuff = [];
+	let keysHeld = {};
+	let millisStart = 0;
+	let tmpCtx = null;
+	let tmpCt2 = null;
+	let tmpBuf = null;
 
 	if (scope == 'image') return;
 
@@ -637,18 +648,6 @@ function Q5(scope, parent) {
 	$._frameRate = $._fps = 60;
 
 	$._tint = null;
-
-	//================================================================
-	// PRIVATE VARS
-	//================================================================
-	let looper = null;
-	let firstVertex = true;
-	let curveBuff = [];
-	let keysHeld = {};
-	let millisStart = 0;
-	let tmpCtx = null;
-	let tmpCt2 = null;
-	let tmpBuf = null;
 
 	//================================================================
 	// ALIAS PROPERTIES
