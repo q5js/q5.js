@@ -869,6 +869,7 @@ function Q5(scope, parent) {
 		gold: [255, 215, 0],
 		green: [0, 128, 0],
 		gray: [128, 128, 128],
+		grey: [128, 128, 128],
 		hotpink: [255, 105, 180],
 		indigo: [75, 0, 130],
 		khaki: [240, 230, 140],
@@ -2321,6 +2322,7 @@ function Q5(scope, parent) {
 		});
 		a.load();
 		a.setVolume = (l) => (a.volume = l);
+		a.setLoop = (l) => (a.loop = l);
 		return a;
 	};
 
@@ -2340,6 +2342,14 @@ function Q5(scope, parent) {
 	Q5.Image ??= _Q5Image;
 
 	for (let m of Q5.prototype._methods.init) m.call($);
+
+	for (let [n, fn] of Object.entries(Q5.prototype)) {
+		if (n[0] != '_') {
+			$[n] = function () {
+				return fn.call($, ...arguments);
+			};
+		}
+	}
 
 	if (scope == 'global') {
 		let props = Object.getOwnPropertyNames($);
@@ -2787,10 +2797,10 @@ Q5.prototype._methods = {
 	post: [],
 	remove: []
 };
-Q5.prototype.registerMethod = function () {
-	Q5.prototype._methods[arguments[0]].push(arguments[1]);
+Q5.prototype.registerMethod = function (m, fn) {
+	Q5.prototype._methods[m].push(fn);
 };
-Q5.prototype.registerPreloadMethod = () => {};
+Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 Q5._validateParameters = () => true;
 
 if (typeof module != 'undefined') module.exports = Q5;
