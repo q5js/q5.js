@@ -1,7 +1,7 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5",
-	"version": "1.8.6",
+	"version": "1.8.7",
 	"description": "An implementation of the p5.js 2D API that's smaller and faster",
 	"main": "q5.js",
 	"scripts": {

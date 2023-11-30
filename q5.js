@@ -2344,11 +2344,7 @@ function Q5(scope, parent) {
 	for (let m of Q5.prototype._methods.init) m.call($);
 
 	for (let [n, fn] of Object.entries(Q5.prototype)) {
-		if (n[0] != '_') {
-			$[n] = function () {
-				return fn.call($, ...arguments);
-			};
-		}
+		if (n[0] != '_' && typeof $[n] == 'function') $[n] = fn.bind($);
 	}
 
 	if (scope == 'global') {
@@ -2797,9 +2793,7 @@ Q5.prototype._methods = {
 	post: [],
 	remove: []
 };
-Q5.prototype.registerMethod = function (m, fn) {
-	Q5.prototype._methods[m].push(fn);
-};
+Q5.prototype.registerMethod = (m, fn) => Q5.prototype._methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 Q5._validateParameters = () => true;
 
