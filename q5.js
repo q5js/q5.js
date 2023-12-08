@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.8
+ * @version 1.9
  * @author quinton-ashley and LingDong-
  * @license GPL-3.0-only
  */
@@ -355,11 +355,16 @@ function Q5(scope, parent) {
 		}
 		x = (x || 0) * pd;
 		y = (y || 0) * pd;
-		w = (w || $.width) * pd;
-		h = (h || $.height) * pd;
+		let _w = (w = w || $.width);
+		let _h = (h = h || $.height);
+		w *= pd;
+		h *= pd;
 		let img = $.createImage(w, h);
 		let imgData = ctx.getImageData(x, y, w, h);
 		img.canvas.getContext('2d').putImageData(imgData, 0, 0);
+		img._pixelDensity = pd;
+		img.width = _w;
+		img.height = _h;
 		return img;
 	};
 
@@ -1684,9 +1689,6 @@ function Q5(scope, parent) {
 		if (!$._fillSet) c.fillStyle = f;
 		if (useCache) {
 			ti = tg.get();
-			ti._pixelDensity = pd;
-			ti.width /= pd;
-			ti.height /= pd;
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);
@@ -2781,6 +2783,12 @@ class _Q5Image extends Q5 {
 		this.createCanvas(width, height);
 		delete this.createCanvas;
 		this._loop = false;
+	}
+	get w() {
+		return this.width;
+	}
+	get h() {
+		return this.height;
 	}
 }
 
