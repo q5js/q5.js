@@ -2567,21 +2567,14 @@ Q5.Vector = class {
 		return { x: x, y: x, z: x };
 	}
 	_calcNorm() {
-		if (this._cnsq == null) {
-			this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
-			this._cn = Math.sqrt(this._cnsq);
-		}
-	}
-	_deprecNorm() {
-		this._cnsq = null;
-		this._cn = null;
+		this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
+		this._cn = Math.sqrt(this._cnsq);
 	}
 	add() {
 		let u = this._arg2v(...arguments);
 		this.x += u.x;
 		this.y += u.y;
 		this.z += u.z;
-		this._deprecNorm();
 		return this;
 	}
 	rem() {
@@ -2589,7 +2582,6 @@ Q5.Vector = class {
 		this.x %= u.x;
 		this.y %= u.y;
 		this.z %= u.z;
-		this._deprecNorm();
 		return this;
 	}
 	sub() {
@@ -2597,7 +2589,6 @@ Q5.Vector = class {
 		this.x -= u.x;
 		this.y -= u.y;
 		this.z -= u.z;
-		this._deprecNorm();
 		return this;
 	}
 	mult() {
@@ -2605,7 +2596,6 @@ Q5.Vector = class {
 		this.x *= u.x;
 		this.y *= u.y;
 		this.z *= u.z;
-		this._deprecNorm();
 		return this;
 	}
 	div() {
@@ -2616,7 +2606,6 @@ Q5.Vector = class {
 		else this.y = 0;
 		if (u.z) this.z /= u.z;
 		else this.z = 0;
-		this._deprecNorm();
 		return this;
 	}
 	mag() {
@@ -2646,7 +2635,6 @@ Q5.Vector = class {
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this._deprecNorm();
 		return this;
 	}
 	normalize() {
@@ -2710,7 +2698,6 @@ Q5.Vector = class {
 		this.x += (u.x - this.x) * amt;
 		this.y += (u.y - this.y) * amt;
 		this.z += (u.z - this.z) * amt;
-		this._deprecNorm();
 		return this;
 	}
 	reflect(n) {
