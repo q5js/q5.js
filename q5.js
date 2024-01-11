@@ -2,7 +2,7 @@
  * q5.js
  * @version 1.9
  * @author quinton-ashley and LingDong-
- * @license GPL-3.0-only
+ * @license AGPL-3.0
  */
 
 /**

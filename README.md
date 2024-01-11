@@ -24,6 +24,14 @@ q5 is also available on [npm](https://www.npmjs.com/package/q5)!
 npm install q5
 ```
 
+## Support this project 🤝
+
+q5 is open source and [multi-licensed](https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md). Anyone can use q5 for free under the terms of the AGPLv3. 🎉
+
+But if you want to use q5 commercially in a closed source product or service, you must comply with the [p5play Professional License](https://github.com/quinton-ashley/p5play-web/blob/main/pro/LICENSE.md), which is only available to current p5play [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/p5play) members paying for the appropriate tier.
+
+If you can't afford to pay, you can apply for the free [p5play Novice License](https://github.com/quinton-ashley/p5play-novice/blob/main/LICENSE.md). See [LICENSING.md](https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md) for more info.
+
 ## Using p5 Addon Libraries
 
 q5.js is compatible with popular p5 addons and projects that use p5, such as p5play, because it aliases `Q5` to `p5`.
