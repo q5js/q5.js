@@ -10,26 +10,23 @@
  */
 function Q5(scope, parent) {
 	let preloadCnt = 0;
-	if (typeof scope == 'undefined') {
+	if (!scope) {
 		scope = 'global';
 		preloadCnt++;
 		setTimeout(() => preloadCnt--, 32);
 	}
 	if (scope == 'auto') {
-		if (typeof window.setup == 'undefined') return;
+		if (typeof window != 'object' || !(window.setup || window.draw)) return;
 		else scope = 'global';
-	}
-	if (arguments.length == 1 && typeof scope != 'string' && typeof scope != 'function') {
-		parent = arguments[0];
-		scope = null;
 	}
 	if (scope == 'global') Q5._hasGlobal = true;
 
+	// CANVAS
+
 	let $ = this;
 	$.canvas = document.createElement('canvas');
-	let ctx = ($._ctx = $.canvas.getContext('2d'));
-	$.canvas.classList.add('p5Canvas', 'q5Canvas');
 	$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
+	$.canvas.classList.add('p5Canvas', 'q5Canvas');
 
 	$.width = 100;
 	$.height = 100;
@@ -42,6 +39,9 @@ function Q5(scope, parent) {
 		$._resize = () => {
 			if ($.frameCount > 1) $._shouldResize = true;
 		};
+		if (parent && typeof parent == 'string') {
+			parent = document.getElementById(parent);
+		}
 		$.canvas.parent = (el) => {
 			if (typeof el == 'string') el = document.getElementById(el);
 			el.append($.canvas);
@@ -63,21 +63,29 @@ function Q5(scope, parent) {
 			$.canvas.parent(parent);
 		}
 		if (document.body) appendCanvas();
-		else window.addEventListener('load', appendCanvas);
+		else document.addEventListener('DOMContentLoaded', appendCanvas);
 	}
 
-	defaultStyle();
-
-	$.MAGIC = 0x9a0ce55;
+	$._q5 = true;
 	$.pixels = [];
 	let imgData = null;
+	let ctx;
 
-	$.createCanvas = function (width, height) {
+	$.createCanvas = function (width, height, renderer, options) {
+		if (renderer == 'webgl') throw `webgl renderer is not supported in q5, use '2d'`;
 		$.width = width;
 		$.height = height;
 		$.canvas.width = width;
 		$.canvas.height = height;
+		$.canvas.renderer = '2d';
+		let opt = Object.assign({}, Q5.canvasOptions);
+		if (options) Object.assign(opt, options);
+
+		ctx = $.ctx = $.drawingContext = $.canvas.getContext('2d', opt);
+		if (scope == 'global') window.ctx = window.drawingContext = ctx;
+		Object.assign($.canvas, opt);
 		defaultStyle();
+		ctx.save();
 		if (scope != 'image') {
 			let pd = $.displayDensity();
 			if (scope == 'graphics') pd = this._pixelDensity;
@@ -87,9 +95,7 @@ function Q5(scope, parent) {
 	};
 	$._createCanvas = $.createCanvas;
 
-	//================================================================
 	// IMAGE
-	//================================================================
 
 	$.loadPixels = () => {
 		imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
@@ -189,7 +195,6 @@ function Q5(scope, parent) {
 			}
 		}
 	};
-
 	filterImpl[$.BLUR] = (data, rad) => {
 		rad = rad || 1;
 		rad = Math.floor(rad * $._pixelDensity);
@@ -268,6 +273,7 @@ function Q5(scope, parent) {
 			tmpCtx.canvas.height = h;
 		}
 	}
+
 	function makeTmpCt2(w, h) {
 		if (tmpCt2 == null) {
 			tmpCt2 = document.createElement('canvas').getContext('2d');
@@ -298,38 +304,38 @@ function Q5(scope, parent) {
 		ctx.restore();
 	}
 
+	function softFilter(typ, x) {
+		let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+		filterImpl[typ](imgData.data, x);
+		ctx.putImageData(imgData, 0, 0);
+	}
+
 	$.filter = (typ, x) => {
-		let support = $.HARDWARE_FILTERS && ctx.filter != undefined;
-		if (support) {
-			makeTmpCtx();
-			if (typ == $.THRESHOLD) {
-				x ??= 0.5;
-				x = Math.max(x, 0.00001);
-				let b = Math.floor((0.5 / x) * 100);
-				nativeFilter(`saturate(0%) brightness(${b}%) contrast(1000000%)`);
-			} else if (typ == $.GRAY) {
-				nativeFilter(`saturate(0%)`);
-			} else if (typ == $.OPAQUE) {
-				tmpCtx.fillStyle = 'black';
-				tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-				tmpCtx.drawImage(ctx.canvas, 0, 0);
-				ctx.save();
-				ctx.resetTransform();
-				ctx.drawImage(tmpCtx.canvas, 0, 0);
-				ctx.restore();
-			} else if (typ == $.INVERT) {
-				nativeFilter(`invert(100%)`);
-			} else if (typ == $.BLUR) {
-				nativeFilter(`blur(${Math.ceil((x * $._pixelDensity) / 1) || 1}px)`);
-			} else {
-				let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-				filterImpl[typ](imgData.data, x);
-				ctx.putImageData(imgData, 0, 0);
-			}
+		if (!ctx.filter) return softFilter(typ, x);
+		makeTmpCtx();
+		if (typeof typ == 'string') {
+			nativeFilter(typ);
+		} else if (typ == $.THRESHOLD) {
+			x ??= 0.5;
+			x = Math.max(x, 0.00001);
+			let b = Math.floor((0.5 / x) * 100);
+			nativeFilter(`saturate(0%) brightness(${b}%) contrast(1000000%)`);
+		} else if (typ == $.GRAY) {
+			nativeFilter(`saturate(0%)`);
+		} else if (typ == $.OPAQUE) {
+			tmpCtx.fillStyle = 'black';
+			tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+			tmpCtx.drawImage(ctx.canvas, 0, 0);
+			ctx.save();
+			ctx.resetTransform();
+			ctx.drawImage(tmpCtx.canvas, 0, 0);
+			ctx.restore();
+		} else if (typ == $.INVERT) {
+			nativeFilter(`invert(100%)`);
+		} else if (typ == $.BLUR) {
+			nativeFilter(`blur(${Math.ceil((x * $._pixelDensity) / 1) || 1}px)`);
 		} else {
-			let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-			filterImpl[typ](imgData.data, x);
-			ctx.putImageData(imgData, 0, 0);
+			softFilter(typ, x);
 		}
 	};
 
@@ -351,7 +357,7 @@ function Q5(scope, parent) {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
 			let c = ctx.getImageData(x * pd, y * pd, 1, 1).data;
-			return new Q5.Color(c[0], c[1], c[2], c[3] / 255);
+			return new $.Color(c[0], c[1], c[2], c[3] / 255);
 		}
 		x = (x || 0) * pd;
 		y = (y || 0) * pd;
@@ -369,7 +375,7 @@ function Q5(scope, parent) {
 	};
 
 	$.set = (x, y, c) => {
-		if (c.MAGIC == $.MAGIC) {
+		if (c._q5) {
 			let old = $._tint;
 			$._tint = null;
 			$.image(c, x, y);
@@ -418,8 +424,8 @@ function Q5(scope, parent) {
 		ctx.drawImage(tmpCtx.canvas, 0, 0);
 		ctx.restore();
 	};
-	$.tint = function () {
-		$._tint = $.color(...Array.from(arguments));
+	$.tint = (c) => {
+		$._tint = c._q5Color ? c : $.color(...arguments);
 	};
 	$.noTint = () => ($._tint = null);
 
@@ -469,9 +475,8 @@ function Q5(scope, parent) {
 	$.canvas.save = $.save;
 	$.saveCanvas = $.save;
 
-	//================================================================
 	// PRIVATE VARS
-	//================================================================
+
 	let looper = null;
 	let firstVertex = true;
 	let curveBuff = [];
@@ -483,18 +488,11 @@ function Q5(scope, parent) {
 
 	if (scope == 'image') return;
 
-	$.remove = () => {
-		$.noLoop();
-		$.canvas.remove();
-	};
-
-	//================================================================
 	// CONSTANTS
-	//================================================================
 
-	$.RGB = 0;
-	$.HSV = 1;
-	$.HSB = 1;
+	$.RGB = 'rgb';
+	$.RGBA = 'rgb';
+	$.HSB = 'hsb';
 
 	$.CHORD = 0;
 	$.PIE = 1;
@@ -589,18 +587,17 @@ function Q5(scope, parent) {
 	$.SHR3 = 1;
 	$.LCG = 2;
 
-	$.HARDWARE_FILTERS = true;
 	$.hint = (prop, val) => {
 		$[prop] = val;
 	};
 
-	//================================================================
 	// PUBLIC PROPERTIES
-	//================================================================
+
 	$.frameCount = 0;
 	$.deltaTime = 16;
 	$.mouseX = 0;
 	$.mouseY = 0;
+	$.touches = [];
 	$.mouseButton = null;
 	$.keyIsPressed = false;
 	$.mouseIsPressed = false;
@@ -615,7 +612,6 @@ function Q5(scope, parent) {
 	$.relRotationX = 0;
 	$.relRotationY = 0;
 	$.relRotationZ = 0;
-
 	$.pmouseX = 0;
 	$.pmouseY = 0;
 	$.pAccelerationX = 0;
@@ -628,55 +624,40 @@ function Q5(scope, parent) {
 	$.pRelRotationY = 0;
 	$.pRelRotationZ = 0;
 
-	$.touches = [];
+	Object.defineProperty($, 'deviceOrientation', {
+		get: () => window.screen?.orientation?.type
+	});
+	Object.defineProperty($, 'windowWidth', {
+		get: () => window.innerWidth
+	});
+	Object.defineProperty($, 'windowHeight', {
+		get: () => window.innerHeight
+	});
 
-	$._colorMode = $.RGB;
+	// PRIVATE PROPERTIES
+
+	$._colorMode = 'rgb';
 	$._doStroke = true;
 	$._doFill = true;
 	$._strokeSet = false;
 	$._fillSet = false;
+	$._tint = null;
 	$._ellipseMode = $.CENTER;
 	$._rectMode = $.CORNER;
 	$._curveDetail = 20;
 	$._curveAlpha = 0.0;
 	$._loop = true;
-
 	$._textFont = 'sans-serif';
 	$._textSize = 12;
 	$._textLeading = 15;
 	$._textLeadDiff = 3;
 	$._textStyle = 'normal';
-
 	$._pixelDensity = 1;
 	$._lastFrameTime = 0;
 	$._targetFrameRate = null;
 	$._frameRate = $._fps = 60;
 
-	$._tint = null;
-
-	//================================================================
-	// ALIAS PROPERTIES
-	//================================================================
-
-	Object.defineProperty($, 'deviceOrientation', {
-		get: () => window.screen?.orientation?.type
-	});
-
-	Object.defineProperty($, 'windowWidth', {
-		get: () => window.innerWidth
-	});
-
-	Object.defineProperty($, 'windowHeight', {
-		get: () => window.innerHeight
-	});
-
-	Object.defineProperty($, 'drawingContext', {
-		get: () => ctx
-	});
-
-	//================================================================
 	// CANVAS
-	//================================================================
 
 	function cloneCtx() {
 		let c = {};
@@ -693,8 +674,7 @@ function Q5(scope, parent) {
 		let c = cloneCtx();
 		$.canvas.width = width * $._pixelDensity;
 		$.canvas.height = height * $._pixelDensity;
-		ctx = $._ctx = $.canvas.getContext('2d');
-		for (let prop in c) $._ctx[prop] = c[prop];
+		for (let prop in c) $.ctx[prop] = c[prop];
 		if (scope != 'image') $.pixelDensity($._pixelDensity);
 	};
 
@@ -706,6 +686,7 @@ function Q5(scope, parent) {
 	$.createImage = (width, height) => {
 		return new Q5.Image(width, height);
 	};
+
 	$.displayDensity = () => window.devicePixelRatio;
 	$.pixelDensity = (n) => {
 		if (n === undefined) return $._pixelDensity;
@@ -716,16 +697,13 @@ function Q5(scope, parent) {
 		$.canvas.height = Math.ceil($.height * n);
 		$.canvas.style.width = $.width + 'px';
 		$.canvas.style.height = $.height + 'px';
-		ctx = $._ctx = $.canvas.getContext('2d');
-		for (let prop in c) $._ctx[prop] = c[prop];
+		for (let prop in c) $.ctx[prop] = c[prop];
 
 		ctx.scale($._pixelDensity, $._pixelDensity);
 		return $._pixelDensity;
 	};
 
-	//================================================================
 	// MATH
-	//================================================================
 
 	$.map = (value, istart, istop, ostart, ostop, clamp) => {
 		let val = ostart + (ostop - ostart) * (((value - istart) * 1.0) / (istop - istart));
@@ -812,10 +790,7 @@ function Q5(scope, parent) {
 	};
 	$.createVector = (x, y, z) => new Q5.Vector(x, y, z, $);
 
-	//================================================================
-	// CURVE QUERY
-	//================================================================
-	//https://github.com/processing/p5.js/blob/1.1.9/src/core/shape/curves.js
+	// CURVES
 
 	$.curvePoint = (a, b, c, d, t) => {
 		const t3 = t * t * t,
@@ -855,13 +830,21 @@ function Q5(scope, parent) {
 		);
 	};
 
-	//================================================================
-	// COLORS
-	//================================================================
+	// COLOR
 
-	$.Color = Q5.Color;
+	$.Color = Q5.ColorRGBA_P3;
+
 	$.colorMode = (mode) => {
 		$._colorMode = mode;
+		if (mode == 'oklch') {
+			$.Color = Q5.ColorOKLCH;
+		} else if (mode == 'rgb') {
+			if ($.canvas.colorSpace == 'srgb') $.Color = Q5.ColorRGBA;
+			else $.Color = Q5.ColorRGBA_P3;
+		} else if (mode == 'srgb') {
+			$.Color = Q5.ColorRGBA;
+			$._colorMode = 'rgb';
+		}
 	};
 
 	let basicColors = {
@@ -897,113 +880,64 @@ function Q5(scope, parent) {
 		yellow: [255, 255, 0]
 	};
 
-	$.color = function () {
+	$.color = function (c0, c1, c2, c3) {
+		let C = $.Color;
+		if (c0._q5Color) return new C(...c0.levels);
 		let args = arguments;
 		if (args.length == 1) {
-			if (typeof args[0] == 'string') {
-				if (args[0][0] == '#') {
-					return new Q5.Color(
-						parseInt(args[0].slice(1, 3), 16),
-						parseInt(args[0].slice(3, 5), 16),
-						parseInt(args[0].slice(5, 7), 16),
-						1
+			if (typeof c0 == 'string') {
+				if (c0[0] == '#') {
+					return new C(
+						parseInt(c0.slice(1, 3), 16),
+						parseInt(c0.slice(3, 5), 16),
+						parseInt(c0.slice(5, 7), 16),
+						c0.length != 9 ? null : parseInt(c0.slice(7, 9), 16)
 					);
-				} else {
-					if (basicColors[args[0]]) {
-						return new Q5.Color(...basicColors[args[0]], 1);
-					}
-					return new Q5.Color(0, 0, 0, 1);
-				}
-			}
-			if (typeof args[0] != 'number' && args[0].MAGIC == 0xc010a) {
-				return args[0];
-			}
+				} else if (basicColors[c0]) return new C(...basicColors[c0]);
+				else return new C(0, 0, 0);
+			} else if (Array.isArray(c0)) return new C(...c0);
 		}
-		if ($._colorMode == $.RGB) {
-			if (args.length == 1) {
-				return new Q5.Color(args[0], args[0], args[0], 1);
-			} else if (args.length == 2) {
-				return new Q5.Color(args[0], args[0], args[0], args[1] / 255);
-			} else if (args.length == 3) {
-				return new Q5.Color(args[0], args[1], args[2], 1);
-			} else if (args.length == 4) {
-				return new Q5.Color(args[0], args[1], args[2], args[3] / 255);
-			}
-		} else {
-			if (args.length == 1) {
-				return new Q5.Color(...Q5.Color._hsv2rgb(0, 0, args[0] / 100), 1);
-			} else if (args.length == 2) {
-				return new Q5.Color(...Q5.Color._hsv2rgb(0, 0, args[0] / 100), args[1] / 255);
-			} else if (args.length == 3) {
-				return new Q5.Color(...Q5.Color._hsv2rgb(args[0], args[1] / 100, args[2] / 100), 1);
-			} else if (args.length == 4) {
-				return new Q5.Color(...Q5.Color._hsv2rgb(args[0], args[1] / 100, args[2] / 100), args[3]);
-			}
+		if ($._colorMode == 'rgb') {
+			if (args.length == 1) return new C(c0, c0, c0);
+			else if (args.length == 2) return new C(c0, c0, c0, c1);
+			else if (args.length == 3) return new C(c0, c1, c2);
+			else if (args.length == 4) return new C(c0, c1, c2, c3);
 		}
-		return null;
 	};
 
-	$.red = (c) => {
-		return c._r;
-	};
-	$.green = (c) => {
-		return c._g;
-	};
-	$.blue = (c) => {
-		return c._b;
-	};
-	$.alpha = (c) => {
-		return c._a * 255;
-	};
-	$.hue = (c) => {
-		c._inferHSV();
-		return c._h;
-	};
-	$.saturation = (c) => {
-		c._inferHSV();
-		return c._s;
-	};
-	$.brightness = (c) => {
-		c._inferHSV();
-		return c._v;
-	};
+	$.red = (c) => c._r;
+	$.green = (c) => c._g;
+	$.blue = (c) => c._b;
+	$.alpha = (c) => c._a;
 	$.lightness = (c) => {
 		return ((0.2126 * c._r + 0.7152 * c._g + 0.0722 * c._b) * 100) / 255;
 	};
 
-	function lerpHue(h0, h1, t) {
-		var methods = [
-			[Math.abs(h1 - h0), $.map(t, 0, 1, h0, h1)],
-			[Math.abs(h1 + 360 - h0), $.map(t, 0, 1, h0, h1 + 360)],
-			[Math.abs(h1 - 360 - h0), $.map(t, 0, 1, h0, h1 - 360)]
-		];
-		methods.sort((x, y) => x[0] - y[0]);
-		return (methods[0][1] + 720) % 360;
-	}
-
 	$.lerpColor = (a, b, t) => {
-		if ($._colorMode == $.RGB) {
-			return new Q5.Color(
-				$.constrain($.lerp(a._r, b._r, t), 0, 255),
-				$.constrain($.lerp(a._g, b._g, t), 0, 255),
-				$.constrain($.lerp(a._b, b._b, t), 0, 255),
-				$.constrain($.lerp(a._a, b._a, t), 0, 1)
+		if ($._colorMode == 'rgb') {
+			return new $.Color(
+				$.constrain($.lerp(a.r, b.r, t), 0, 255),
+				$.constrain($.lerp(a.g, b.g, t), 0, 255),
+				$.constrain($.lerp(a.b, b.b, t), 0, 255),
+				$.constrain($.lerp(a.a, b.a, t), 0, 255)
 			);
 		} else {
-			a._inferHSV();
-			b._inferHSV();
-			return new Q5.Color(
-				$.constrain(lerpHue(a._h, b._h, t), 0, 360),
-				$.constrain($.lerp(a._s, b._s, t), 0, 100),
-				$.constrain($.lerp(a._v, b._v, t), 0, 100),
-				$.constrain($.lerp(a._a, b._a, t), 0, 1)
+			let deltaH = b.h - a.h;
+			if (deltaH > 180) deltaH -= 360;
+			if (deltaH < -180) deltaH += 360;
+			let h = a.h + t * deltaH;
+			if (h < 0) h += 360;
+			if (h > 360) h -= 360;
+			return new $.Color(
+				$.constrain($.lerp(a.l, b.l, t), 0, 100),
+				$.constrain($.lerp(a.c, b.c, t), 0, 100),
+				h,
+				$.constrain($.lerp(a.a, b.a, t), 0, 255)
 			);
 		}
 	};
 
-	//================================================================
-	// DRAWING SETTING
-	//================================================================
+	// DRAWING SETTINGS
 
 	function defaultStyle() {
 		ctx.fillStyle = 'white';
@@ -1017,34 +951,20 @@ function Q5(scope, parent) {
 		if (!n) $._doStroke = false;
 		ctx.lineWidth = n || 0.0001;
 	};
-	$.stroke = function () {
+	$.stroke = function (c) {
 		$._doStroke = true;
 		$._strokeSet = true;
-		if (typeof arguments[0] == 'string') {
-			ctx.strokeStyle = arguments[0];
-			return;
-		}
-		let col = $.color(...arguments);
-		if (col._a <= 0) {
-			$._doStroke = false;
-			return;
-		}
-		ctx.strokeStyle = col;
+		if (!c._q5Color) c = $.color(...arguments);
+		if (c._a <= 0) return ($._doStroke = false);
+		ctx.strokeStyle = c;
 	};
 	$.noStroke = () => ($._doStroke = false);
-	$.fill = function () {
+	$.fill = function (c) {
 		$._doFill = true;
 		$._fillSet = true;
-		if (typeof arguments[0] == 'string') {
-			ctx.fillStyle = arguments[0];
-			return;
-		}
-		let col = $.color(...arguments);
-		if (col._a <= 0) {
-			$._doFill = false;
-			return;
-		}
-		ctx.fillStyle = col;
+		if (!c._q5Color) c = $.color(...arguments);
+		if (c._a <= 0) return ($._doFill = false);
+		ctx.fillStyle = c;
 	};
 	$.noFill = () => ($._doFill = false);
 	$.smooth = () => ($._smooth = true);
@@ -1058,25 +978,18 @@ function Q5(scope, parent) {
 	$.curveAlpha = (x) => ($._curveAlpha = x);
 	$.curveTightness = (x) => ($._curveAlpha = x);
 
-	//================================================================
 	// DRAWING
-	//================================================================
 
 	$.clear = () => {
 		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
 	};
 
-	$.background = function () {
-		if (arguments[0] && arguments[0].MAGIC == $.MAGIC) {
-			return $.image(arguments[0], 0, 0, $.width, $.height);
-		}
+	$.background = function (c) {
+		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
 		ctx.save();
 		ctx.resetTransform();
-		if (typeof arguments[0] == 'string') {
-			ctx.fillStyle = arguments[0];
-		} else {
-			ctx.fillStyle = $.color(...Array.from(arguments));
-		}
+		if (!c._q5color) c = $.color(...arguments);
+		ctx.fillStyle = c;
 		ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		ctx.restore();
 	};
@@ -1284,7 +1197,6 @@ function Q5(scope, parent) {
 		if ($._doFill) ctx.fill();
 		if ($._doStroke) ctx.stroke();
 		if (!$._doFill && !$._doStroke) {
-			// eh.
 			ctx.save();
 			ctx.fillStyle = 'none';
 			ctx.fill();
@@ -1292,7 +1204,6 @@ function Q5(scope, parent) {
 		}
 	};
 	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
-		//https://en.wikipedia.org/wiki/Centripetal_CatmullÃ¢â‚¬â€œRom_spline
 		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
 			let a = Math.pow(p1x - p0x, 2.0) + Math.pow(p1y - p0y, 2.0);
 			let b = Math.pow(a, alpha * 0.5);
@@ -1378,30 +1289,22 @@ function Q5(scope, parent) {
 		$.curveVertex(x4, y4);
 		$.endShape();
 	};
+	$.opacity = (a) => (ctx.globalAlpha = a);
 
-	//================================================================
 	// DRAWING MATRIX
-	//================================================================
+
 	$.translate = (x, y) => ctx.translate(x, y);
 	$.rotate = (r) => {
 		if ($._angleMode == 'degrees') r = $.radians(r);
 		ctx.rotate(r);
 	};
-
 	$.scale = (x, y) => {
 		y ??= x;
 		ctx.scale(x, y);
 	};
-	$.applyMatrix = (a, b, c, d, e, f) => {
-		ctx.transform(a, b, c, d, e, f);
-	};
-	$.shearX = (ang) => {
-		ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
-	};
-	$.shearY = (ang) => {
-		ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
-	};
-
+	$.applyMatrix = (a, b, c, d, e, f) => ctx.transform(a, b, c, d, e, f);
+	$.shearX = (ang) => ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
+	$.shearY = (ang) => ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
 	$.resetMatrix = () => {
 		ctx.resetTransform();
 		ctx.scale($._pixelDensity, $._pixelDensity);
@@ -1425,37 +1328,27 @@ function Q5(scope, parent) {
 		'_textStyle',
 		'_textWrap'
 	];
-
-	$._ctxStyleNames = ['strokeStyle', 'fillStyle', 'lineWidth', 'lineCap', 'lineJoin'];
-
 	$._styles = [];
-	$._ctxStyles = [];
 
-	$.pushMatrix = $.push = () => {
+	$.push = $.pushMatrix = () => {
 		ctx.save();
 		let styles = {};
 		for (let s of $._styleNames) styles[s] = $[s];
 		$._styles.push(styles);
-		let ctxStyles = {};
-		for (let s of $._ctxStyleNames) ctxStyles[s] = ctx[s];
-		$._ctxStyles.push(ctxStyles);
 	};
-	$.popMatrix = $.pop = () => {
+	$.pop = $.popMatrix = () => {
 		ctx.restore();
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
-		let ctxStyles = $._ctxStyles.pop();
-		for (let s of $._ctxStyleNames) ctx[s] = ctxStyles[s];
 	};
 
-	//================================================================
 	// IMAGING
-	//================================================================
-	$.imageMode = (mode) => ($._imageMode = mode); // TODO
+
+	$.imageMode = (mode) => ($._imageMode = mode);
 	$.image = (img, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight) => {
-		let drawable = img.MAGIC == $.MAGIC ? img.canvas : img;
+		let drawable = img._q5 ? img.canvas : img;
 		function reset() {
-			if (img.MAGIC != $.MAGIC || !$._tint) return;
+			if (!img._q5 || !$._tint) return;
 			let c = img.canvas.getContext('2d');
 			c.save();
 			c.resetTransform();
@@ -1463,13 +1356,13 @@ function Q5(scope, parent) {
 			c.drawImage(tmpCt2.canvas, 0, 0);
 			c.restore();
 		}
-		if (img.MAGIC == $.MAGIC && $._tint != null) {
+		if (img._q5 && $._tint != null) {
 			makeTmpCt2(img.canvas.width, img.canvas.height);
 			tmpCt2.drawImage(img.canvas, 0, 0);
 			img.tinted($._tint);
 		}
 		if (!dWidth) {
-			if (img.MAGIC == $.MAGIC || img.width) {
+			if (img._q5 || img.width) {
 				dWidth = img.width;
 				dHeight = img.height;
 			} else {
@@ -1523,9 +1416,7 @@ function Q5(scope, parent) {
 		tmpBuf = null;
 	};
 
-	//================================================================
 	// TYPOGRAPHY
-	//================================================================
 
 	$.loadFont = (url, cb) => {
 		preloadCnt++;
@@ -1660,7 +1551,7 @@ function Q5(scope, parent) {
 				return;
 			}
 			tg = $.createGraphics.call($, 1, 1);
-			c = tg._ctx;
+			c = tg.ctx;
 			pd = $._pixelDensity;
 		}
 		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
@@ -1708,11 +1599,8 @@ function Q5(scope, parent) {
 		$._imageMode = og;
 	};
 
-	//================================================================
 	// RANDOM
-	//================================================================
 
-	//https://github.com/processing/p5.js/blob/1.1.9/src/math/noise.js
 	var PERLIN_YWRAPB = 4;
 	var PERLIN_YWRAP = 1 << PERLIN_YWRAPB;
 	var PERLIN_ZWRAPB = 8;
@@ -1856,7 +1744,7 @@ function Q5(scope, parent) {
 				return rng1.rand() * a;
 			}
 		} else {
-			return a[~~(a.length * rng1.rand())];
+			return a[Math.trunc(a.length * rng1.rand())];
 		}
 	};
 	$.randomGenerator = (method) => {
@@ -1866,7 +1754,6 @@ function Q5(scope, parent) {
 	};
 
 	var ziggurat = new (function () {
-		//http://ziggurat.glitch.me/
 		var iz;
 		var jz;
 		var kn = new Array(128);
@@ -2004,29 +1891,12 @@ function Q5(scope, parent) {
 		return ziggurat.REXP();
 	};
 
-	//================================================================
-	// ENVIRONMENT
-	//================================================================
-
-	$.print = console.log;
-	$.cursor = (name, x, y) => {
-		let pfx = '';
-		if (name.includes('.')) {
-			name = `url("${name}")`;
-			pfx = ', auto';
-		}
-		if (x !== undefined) {
-			name += ' ' + x + ' ' + y;
-		}
-		$.canvas.style.cursor = name + pfx;
-	};
-	$.noCursor = () => {
-		$.canvas.style.cursor = 'none';
-	};
-
-	//================================================================
 	// DOM
-	//================================================================
+
+	$.Element = function (a) {
+		this.elt = a;
+	};
+	$._elements = [];
 
 	$.createCapture = (x) => {
 		var vid = document.createElement('video');
@@ -2041,6 +1911,10 @@ function Q5(scope, parent) {
 		document.body.append(vid);
 		return vid;
 	};
+
+	// ENVIRONMENT
+
+	$.print = console.log;
 
 	function _draw() {
 		let pre = performance.now();
@@ -2077,7 +1951,6 @@ function Q5(scope, parent) {
 		$.pmouseX = $.mouseX;
 		$.pmouseY = $.mouseY;
 	}
-
 	$.noLoop = () => {
 		$._loop = false;
 		looper = null;
@@ -2087,6 +1960,11 @@ function Q5(scope, parent) {
 		if (looper == null) _draw();
 	};
 	$.redraw = () => _draw();
+	$.remove = () => {
+		$.noLoop();
+		$.canvas.remove();
+	};
+
 	$.frameRate = (fps) => {
 		if (fps) $._targetFrameRate = fps;
 		return $._frameRate;
@@ -2094,25 +1972,30 @@ function Q5(scope, parent) {
 	$.getFrameRate = () => $._frameRate;
 	$.getFPS = () => $._fps;
 
-	$._updateMouse = function (e) {
-		let $ = this;
+	$.storeItem = localStorage.setItem;
+	$.getItem = localStorage.getItem;
+	$.removeItem = localStorage.removeItem;
+	$.clearStorage = localStorage.clear;
+
+	// USER INPUT
+
+	$._updateMouse = (e) => {
 		let rect = $.canvas.getBoundingClientRect();
 		let sx = $.canvas.scrollWidth / $.width || 1;
 		let sy = $.canvas.scrollHeight / $.height || 1;
 		$.mouseX = (e.clientX - rect.left) / sx;
 		$.mouseY = (e.clientY - rect.top) / sy;
-	}.bind($);
-
-	$._onmousemove = function (e) {
-		$._updateMouse(e);
-		if (this.mouseIsPressed) this._mouseDraggedFn(e);
-		else this._mouseMovedFn(e);
-	}.bind($);
+	};
 	$._onmousedown = (e) => {
 		$._updateMouse(e);
 		$.mouseIsPressed = true;
 		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][e.button];
 		$._mousePressedFn(e);
+	};
+	$._onmousemove = (e) => {
+		$._updateMouse(e);
+		if ($.mouseIsPressed) $._mouseDraggedFn(e);
+		else $._mouseMovedFn(e);
 	};
 	$._onmouseup = (e) => {
 		$._updateMouse(e);
@@ -2125,6 +2008,21 @@ function Q5(scope, parent) {
 		$._mouseClickedFn(e);
 		$.mouseIsPressed = false;
 	};
+	$.cursor = (name, x, y) => {
+		let pfx = '';
+		if (name.includes('.')) {
+			name = `url("${name}")`;
+			pfx = ', auto';
+		}
+		if (x !== undefined) {
+			name += ' ' + x + ' ' + y;
+		}
+		$.canvas.style.cursor = name + pfx;
+	};
+	$.noCursor = () => {
+		$.canvas.style.cursor = 'none';
+	};
+
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
 		$.keyIsPressed = true;
@@ -2194,6 +2092,8 @@ function Q5(scope, parent) {
 	$.canvas.ontouchmove = (e) => $._ontouchmove(e);
 	$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
 
+	// SENSORS
+
 	$.hasSensorPermission =
 		(!window.DeviceOrientationEvent && !window.DeviceMotionEvent) ||
 		!(DeviceOrientationEvent.requestPermission || DeviceMotionEvent.requestPermission);
@@ -2217,11 +2117,6 @@ function Q5(scope, parent) {
 		}
 	};
 
-	//================================================================
-	// SENSORS
-	//================================================================
-
-	// 3d transformation helpers
 	let ROTX = (a) => [1, 0, 0, 0, 0, $.cos(a), -$.sin(a), 0, 0, $.sin(a), $.cos(a), 0, 0, 0, 0, 1];
 	let ROTY = (a) => [$.cos(a), 0, $.sin(a), 0, 0, 1, 0, 0, -$.sin(a), 0, $.cos(a), 0, 0, 0, 0, 1];
 	let MULT = (A, B) => [
@@ -2248,7 +2143,7 @@ function Q5(scope, parent) {
 		(A[8] * v[0] + A[9] * v[1] + A[10] * v[2] + A[11]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15])
 	];
 
-	if (typeof window !== 'undefined') {
+	if (typeof window != 'undefined') {
 		window.ondeviceorientation = (e) => {
 			$.pRotationX = $.rotationX;
 			$.pRotationY = $.rotationY;
@@ -2260,8 +2155,8 @@ function Q5(scope, parent) {
 			$.rotationX = e.beta * (Math.PI / 180.0);
 			$.rotationY = e.gamma * (Math.PI / 180.0);
 			$.rotationZ = e.alpha * (Math.PI / 180.0);
-			$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][~~(window.orientation / 90) + 1];
-			$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][~~(window.orientation / 90) + 1];
+			$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][Math.trunc(window.orientation / 90) + 1];
+			$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][Math.trunc(window.orientation / 90) + 1];
 			$.relRotationZ = $.rotationZ;
 		};
 		window.ondevicemotion = (e) => {
@@ -2269,9 +2164,6 @@ function Q5(scope, parent) {
 			$.pAccelerationY = $.accelerationY;
 			$.pAccelerationZ = $.accelerationZ;
 			if (!e.acceleration) {
-				// devices that don't support plain acceleration
-				// compute gravitational acceleration's component on X Y Z axes based on gyroscope
-				// g = ~ 9.80665
 				let grav = TRFM(MULT(ROTY($.rotationY), ROTX($.rotationX)), [0, 0, -9.80665]);
 				$.accelerationX = e.accelerationIncludingGravity.x + grav[0];
 				$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
@@ -2280,9 +2172,7 @@ function Q5(scope, parent) {
 		};
 	}
 
-	//================================================================
 	// TIME
-	//================================================================
 
 	$.year = () => new Date().getFullYear();
 	$.day = () => new Date().getDay();
@@ -2291,10 +2181,7 @@ function Q5(scope, parent) {
 	$.second = () => new Date().getSeconds();
 	$.millis = () => performance.now() - millisStart;
 
-	$.storeItem = localStorage.setItem;
-	$.getItem = localStorage.getItem;
-	$.removeItem = localStorage.removeItem;
-	$.clearStorage = localStorage.clear;
+	// LOAD FILES
 
 	$._loadFile = (path, cb, type) => {
 		preloadCnt++;
@@ -2314,7 +2201,6 @@ function Q5(scope, parent) {
 
 	$.loadStrings = (path, cb) => $._loadFile(path, cb, 'text');
 	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
-
 	$.loadSound = (path, cb) => {
 		preloadCnt++;
 		let a = new Audio(path);
@@ -2328,17 +2214,10 @@ function Q5(scope, parent) {
 		return a;
 	};
 
-	$.Element = function (a) {
-		this.elt = a;
-	};
-	$._elements = [];
+	// INIT
 
 	if (scope == 'global') {
-		// delete $.name;
-		// delete $.length;
 		Object.assign(Q5, $);
-		// $.name = '';
-		// $.length = 0;
 		delete Q5.Q5;
 	}
 	Q5.Image ??= _Q5Image;
@@ -2403,8 +2282,8 @@ function Q5(scope, parent) {
 			millisStart = performance.now();
 			function _start() {
 				if (preloadCnt > 0) return requestAnimationFrame(_start);
-				ctx.save();
 				$._setupFn();
+				if (!ctx) $.createCanvas(100, 100);
 				$._setupDone = true;
 				ctx.restore();
 				$.resetMatrix();
@@ -2420,127 +2299,100 @@ function Q5(scope, parent) {
 	else requestAnimationFrame(_init);
 }
 
-Q5.Color = class {
-	constructor(r, g, b, a) {
-		this.MAGIC = 0xc010a;
-		this._r = r;
-		this._g = g;
-		this._b = b;
-		this._a = a;
-		this._h = 0;
-		this._s = 0;
-		this._v = 0;
-		this._hsvInferred = false;
-	}
+// COLOR CLASSES
 
-	setRed(x) {
-		this._r = x;
-		this._hsvInferred = false;
+Q5.Color = class {
+	constructor() {
+		this._q5Color = true;
 	}
-	setGreen(x) {
-		this._g = x;
-		this._hsvInferred = false;
-	}
-	setBlue(x) {
-		this._b = x;
-		this._hsvInferred = false;
-	}
-	setAlpha(x) {
-		this._a = x / 255;
-		this._hsvInferred = false;
-	}
-	get levels() {
-		return [this._r, this._g, this._b, this._a * 255];
-	}
-	_inferHSV() {
-		if (!this._hsvInferred) {
-			[this._h, this._s, this._v] = Q5.Color._rgb2hsv(this._r, this._g, this._b);
-			this._hsvInferred = true;
-		}
+};
+Q5.ColorOKLCH = class extends Q5.Color {
+	constructor(l, c, h, a) {
+		super();
+		this.l = l;
+		this.c = c;
+		this.h = h;
+		this.a = a ?? 1;
 	}
 	toString() {
-		return `rgba(${Math.round(this._r)},${Math.round(this._g)},${Math.round(this._b)},${~~(this._a * 1000) / 1000})`;
+		return `color(oklch ${this.l} ${this.c} ${this.h} / ${this.a})`;
 	}
 };
-Q5._instanceCount = 0;
-Q5.Color._rgb2hsv = (r, g, b) => {
-	//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
-	let rgbMin, rgbMax;
-	let h, s, v;
-	rgbMin = r < g ? (r < b ? r : b) : g < b ? g : b;
-	rgbMax = r > g ? (r > b ? r : b) : g > b ? g : b;
-	v = (rgbMax * 100) / 255;
-	if (v == 0) {
-		h = 0;
-		s = 0;
-		return [h, s, v];
+Q5.ColorRGBA = class extends Q5.Color {
+	constructor(r, g, b, a) {
+		super();
+		this.r = r;
+		this.g = g;
+		this.b = b;
+		this.a = a ?? 255;
 	}
-	s = (100 * (rgbMax - rgbMin)) / rgbMax;
-	if (s == 0) {
-		h = 0;
-		return [h, s, v];
+	setRed(v) {
+		this.r = v;
 	}
-	if (rgbMax == r) h = 0 + (60 * (g - b)) / (rgbMax - rgbMin);
-	else if (rgbMax == g) h = 120 + (60 * (b - r)) / (rgbMax - rgbMin);
-	else h = 240 + (60 * (r - g)) / (rgbMax - rgbMin);
-	return [h, s, v];
+	setGreen(v) {
+		this.g = v;
+	}
+	setBlue(v) {
+		this.b = v;
+	}
+	setAlpha(v) {
+		this.a = v;
+	}
+	get levels() {
+		return [this.r, this.g, this.b, this.a];
+	}
+	toString() {
+		return `rgb(${this.r} ${this.g} ${this.b} / ${this.a / 255})`;
+	}
 };
-Q5.Color._hsv2rgb = (h, s, v) => {
-	//https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
-	let r, g, b;
-	let hh, i, ff, p, q, t;
-	if (s == 0) {
-		r = v;
-		g = v;
-		b = v;
-		return [r * 255, g * 255, b * 255];
+Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
+	constructor(r, g, b, a) {
+		super(r, g, b, a);
+		this._edited = true;
 	}
-	hh = h;
-	if (hh > 360) hh = 0;
-	hh /= 60;
-	i = ~~hh;
-	ff = hh - i;
-	p = v * (1.0 - s);
-	q = v * (1.0 - s * ff);
-	t = v * (1.0 - s * (1.0 - ff));
-	switch (i) {
-		case 0:
-			r = v;
-			g = t;
-			b = p;
-			break;
-		case 1:
-			r = q;
-			g = v;
-			b = p;
-			break;
-		case 2:
-			r = p;
-			g = v;
-			b = t;
-			break;
-		case 3:
-			r = p;
-			g = q;
-			b = v;
-			break;
-		case 4:
-			r = t;
-			g = p;
-			b = v;
-			break;
-		default:
-			r = v;
-			g = p;
-			b = q;
-			break;
+	get r() {
+		return this._r;
 	}
-	return [r * 255, g * 255, b * 255];
+	set r(v) {
+		this._r = v;
+		this._edited = true;
+	}
+	get g() {
+		return this._g;
+	}
+	set g(v) {
+		this._g = v;
+		this._edited = true;
+	}
+	get b() {
+		return this._b;
+	}
+	set b(v) {
+		this._b = v;
+		this._edited = true;
+	}
+	get a() {
+		return this._a;
+	}
+	set a(v) {
+		this._a = v;
+		this._edited = true;
+	}
+	toString() {
+		if (this._edited) {
+			let r = (this._r / 255).toFixed(3);
+			let g = (this._g / 255).toFixed(3);
+			let b = (this._b / 255).toFixed(3);
+			let a = (this._a / 255).toFixed(3);
+			this._css = `color(display-p3 ${r} ${g} ${b} / ${a})`;
+			this._edited = false;
+		}
+		return this._css;
+	}
 };
 
-//================================================================
 // VECTOR
-//================================================================
+
 Q5.Vector = class {
 	constructor(_x, _y, _z, _$) {
 		this.x = _x || 0;
@@ -2550,7 +2402,6 @@ Q5.Vector = class {
 		this._cn = null;
 		this._cnsq = null;
 	}
-
 	set(_x, _y, _z) {
 		this.x = _x || 0;
 		this.y = _y || 0;
@@ -2764,6 +2615,8 @@ for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 }
 
+// IMAGE CLASS
+
 class _Q5Image extends Q5 {
 	constructor(width, height) {
 		super('image');
@@ -2779,9 +2632,24 @@ class _Q5Image extends Q5 {
 	}
 }
 
+// Q5
+
+Q5.canvasOptions = {
+	alpha: false,
+	desynchronized: true,
+	colorSpace: 'display-p3'
+};
+
+if (typeof matchMedia == 'undefined' || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {
+	Q5.canvasOptions.colorSpace = 'srgb';
+}
+
+Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
 	throw func + ': ' + msg;
 };
+Q5._validateParameters = () => true;
+
 Q5.prototype._methods = {
 	init: [],
 	pre: [],
@@ -2790,7 +2658,6 @@ Q5.prototype._methods = {
 };
 Q5.prototype.registerMethod = (m, fn) => Q5.prototype._methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
-Q5._validateParameters = () => true;
 
 if (typeof module != 'undefined') module.exports = Q5;
 else window.p5 ??= Q5;
