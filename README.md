@@ -68,7 +68,11 @@ This is great because you don't have to declare variables on the file level and 
 
 Most modern devices support the "display-p3" HDR color space. If a device doesn't support it, q5 will fall back to "srgb".
 
-**q5** now supports the [oklch](https://oklch.com/#63.65,0.2872,16.57,100) color format which is capable of representing HDR colors.
+In **q5**, `colorMode` accepts 'rgb', 'srgb', and 'oklch'. The default mode is 'rgb', which upgrades rgb colors to HDR on supported displays. Specifying 'srgb' on an HDR capable device enables sRGB gamut correction for rgb colors.
+
+The [oklch](https://oklch.com/#63.65,0.2872,16.57,100) color format is the best way to work with HDR colors!
+
+https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
 
 ```js
 colorMode('oklch');
@@ -77,11 +81,15 @@ colorMode('oklch');
 let c = color(0.637, 0.287, 16.57, 1);
 ```
 
-Support for the HSV color format was removed in q5 v1.9.3 because color experts thought HSV was flawed, outdated, and ought to be abandoned way back in 1997!
+The `color` function doesn't accept percentages so you'll have to convert those to decimal values. Also its string parsing capability is limited to the "#RRGGBB" or "#RRGGBBAA" formats.
 
-The `color` function does accept strings but only hex strings in "#RRGGBB" or "#RRGGBBAA" format. It also does not accept percentages so you'll have to convert those to decimal values.
+Use `new Color()` to create color objects without any parsing overhead.
 
-`colorMode` accepts 'rgb', 'oklch', or 'srgb'. The default mode is 'rgb', which upgrades rgb colors to HDR on supported displays. Specifying 'srgb' enables sRGB gamut correction for rgb colors on HDR displays.
+q5 also exposes color components as single letter properties of `Color` objects. For example, you can easily change the red of rgb colors like this `c.r = 128` or the hue of oklch colors like this `c.h = 180`.
+
+Support for the HSV color format was removed in q5 v1.9.3 because color experts thought HSV was flawed, outdated, and ought to be abandoned way back in 1997! oklch is superior in every way.
+
+https://en.wikipedia.org/wiki/HSL_and_HSV#Disadvantages
 
 ## New Features: Customize Canvas Context Attributes
 
@@ -159,7 +167,7 @@ In fact, its not uncommon for successful software systems to have multiple imple
 
 > This section was written by @quinton-ashley, co-creator of q5.
 
-I thought @LingDong-'s work on q5 and the idea itself had great potential. So I decided to upgrade its compatibility with p5.js. My main goal was to make it work with [p5play](https://p5play.org)!
+I thought @LingDong-'s work on q5 and the idea itself had great potential, so I decided to implement more of the p5.js API. My main goal was to make it work with [p5play](https://p5play.org)!
 
 An increase in performance of even a few frames per second can make a significant difference in the user experience of a work of interactive art or a game, especially on mobile devices.
 
@@ -167,15 +175,18 @@ I was also interested in working on q5 because for a lot of p5.js users, the lib
 
 I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
 
-Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without documentation, the source code is easier for experienced JS programmers to comprehend.
+Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without inline documentation, the source code is easier for experienced JS programmers to comprehend.
 
 ## More exclusive features
 
-q5.js provides some other features that are not in p5.js:
+Features added by @quinton-ashley:
 
 - `textCache(true)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
-- `loadSound()`: Basic sound support in q5.js, returns a Web Audio object. Not as powerful as p5.sound, but it's good enough for simple sketches. Includes `sound.setVolume()`.
+- `loadSound()`: Basic sound support in q5.js, returns a Web Audio object with `setVolume()` and `setLoop()` functions added. Not as powerful as p5.sound, but it's good enough in many cases.
 - `ctx`: an alias for `drawingContext`
+
+Features added by @LingDong-:
+
 - `randomExponential()` in addition to `randomGaussian()`: a random distribution that resembles exponential decay.
 - `curveAlpha()`: manipulate the `α` parameter of Catmull-Rom curves.
 - `relRotationX`, `relRotationY` and `relRotationZ`: Similar to `rotationX/Y/Z`, but are relative to the orientation of the mobile device.
@@ -240,6 +251,14 @@ Higher FPS (frames per second) is better.
 ## Contributing
 
 Speed is a goal for q5.js, and we would very much like to see the above list grow. If you know how to make something faster, advice/pull requests are very welcome!
+
+## Licensing
+
+q5.js is not affiliated with the Processing Foundation. p5.js is licensed under the LGPLv2, the two small sections of p5.js' code were directly copied into q5.js are credited below. The rest of q5 is a partial re-implementation of the p5.js API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Oracle v Google case.
+
+@LingDong- created the original q5xjs library and licensed it under the MIT license.
+
+@quinton-ashley created q5.js (this project) and implemented more of the p5.js API and added several exclusive features. q5.js is licensed under the AGPLv3.
 
 ## Credits
 

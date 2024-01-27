@@ -16,7 +16,7 @@ function Q5(scope, parent) {
 		setTimeout(() => preloadCnt--, 32);
 	}
 	if (scope == 'auto') {
-		if (typeof window != 'object' || !(window.setup || window.draw)) return;
+		if (!(window.setup || window.draw)) return;
 		else scope = 'global';
 	}
 	if (scope == 'global') Q5._hasGlobal = true;
@@ -24,14 +24,16 @@ function Q5(scope, parent) {
 	// CANVAS
 
 	let $ = this;
-	$.canvas = document.createElement('canvas');
-	$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
-	$.canvas.classList.add('p5Canvas', 'q5Canvas');
+	if (scope == 'image' || scope == 'graphics') {
+		$.canvas = new OffscreenCanvas(100, 100);
+	} else {
+		$.canvas = document.createElement('canvas');
+		$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
+		$.canvas.classList.add('p5Canvas', 'q5Canvas');
+	}
 
-	$.width = 100;
-	$.height = 100;
-	$.canvas.width = $.width;
-	$.canvas.height = $.height;
+	$.canvas.width = $.width = 100;
+	$.canvas.height = $.height = 100;
 	$._windowResizedFn = () => {};
 
 	if (scope != 'graphics' && scope != 'image') {
@@ -70,19 +72,17 @@ function Q5(scope, parent) {
 	$.pixels = [];
 	let imgData = null;
 	let ctx;
+	$.ctx = $.drawingContext = null;
 
 	$.createCanvas = function (width, height, renderer, options) {
 		if (renderer == 'webgl') throw `webgl renderer is not supported in q5, use '2d'`;
-		$.width = width;
-		$.height = height;
-		$.canvas.width = width;
-		$.canvas.height = height;
+		$.width = $.canvas.width = width;
+		$.height = $.canvas.height = height;
 		$.canvas.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
 
 		ctx = $.ctx = $.drawingContext = $.canvas.getContext('2d', opt);
-		if (scope == 'global') window.ctx = window.drawingContext = ctx;
 		Object.assign($.canvas, opt);
 		defaultStyle();
 		ctx.save();
@@ -105,7 +105,7 @@ function Q5(scope, parent) {
 		if (imgData != null) ctx.putImageData(imgData, 0, 0);
 	};
 
-	let filterImpl = {};
+	let filterImpl = [];
 	filterImpl[$.THRESHOLD] = (data, thresh) => {
 		if (thresh === undefined) thresh = 127.5;
 		else thresh *= 255;
@@ -144,7 +144,7 @@ function Q5(scope, parent) {
 	filterImpl[$.DILATE] = (data) => {
 		makeTmpBuf();
 		tmpBuf.set(data);
-		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
+		let [w, h] = [$.canvas.width, $.canvas.height];
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
 				let l = 4 * Math.max(j - 1, 0);
@@ -171,7 +171,7 @@ function Q5(scope, parent) {
 	filterImpl[$.ERODE] = (data) => {
 		makeTmpBuf();
 		tmpBuf.set(data);
-		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
+		let [w, h] = [$.canvas.width, $.canvas.height];
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
 				let l = 4 * Math.max(j - 1, 0);
@@ -216,7 +216,7 @@ function Q5(scope, parent) {
 		}
 
 		let kern = gauss1d(ksize);
-		let [w, h] = [ctx.canvas.width, ctx.canvas.height];
+		let [w, h] = [$.canvas.width, $.canvas.height];
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
 				let s0 = 0,
@@ -263,11 +263,13 @@ function Q5(scope, parent) {
 	};
 
 	function makeTmpCtx(w, h) {
+		h ??= w || $.canvas.height;
+		w ??= $.canvas.width;
 		if (tmpCtx == null) {
-			tmpCtx = document.createElement('canvas').getContext('2d');
+			tmpCtx = new OffscreenCanvas(w, h).getContext('2d', {
+				colorSpace: $.canvas.colorSpace
+			});
 		}
-		h ??= w || ctx.canvas.height;
-		w ??= ctx.canvas.width;
 		if (tmpCtx.canvas.width != w || tmpCtx.canvas.height != h) {
 			tmpCtx.canvas.width = w;
 			tmpCtx.canvas.height = h;
@@ -275,11 +277,13 @@ function Q5(scope, parent) {
 	}
 
 	function makeTmpCt2(w, h) {
+		h ??= w || $.canvas.height;
+		w ??= $.canvas.width;
 		if (tmpCt2 == null) {
-			tmpCt2 = document.createElement('canvas').getContext('2d');
+			tmpCt2 = new OffscreenCanvas(w, h).getContext('2d', {
+				colorSpace: $.canvas.colorSpace
+			});
 		}
-		h ??= w || ctx.canvas.height;
-		w ??= ctx.canvas.width;
 		if (tmpCt2.canvas.width != w || tmpCt2.canvas.height != h) {
 			tmpCt2.canvas.width = w;
 			tmpCt2.canvas.height = h;
@@ -287,7 +291,7 @@ function Q5(scope, parent) {
 	}
 
 	function makeTmpBuf() {
-		let l = ctx.canvas.width * ctx.canvas.height * 4;
+		let l = $.canvas.width * $.canvas.height * 4;
 		if (!tmpBuf || l != tmpBuf.length) {
 			tmpBuf = new Uint8ClampedArray(l);
 		}
@@ -296,16 +300,16 @@ function Q5(scope, parent) {
 	function nativeFilter(filtstr) {
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.filter = filtstr;
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.drawImage($.canvas, 0, 0);
 		ctx.save();
 		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
 		ctx.drawImage(tmpCtx.canvas, 0, 0);
 		ctx.restore();
 	}
 
 	function softFilter(typ, x) {
-		let imgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+		let imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
 		filterImpl[typ](imgData.data, x);
 		ctx.putImageData(imgData, 0, 0);
 	}
@@ -325,7 +329,7 @@ function Q5(scope, parent) {
 		} else if (typ == $.OPAQUE) {
 			tmpCtx.fillStyle = 'black';
 			tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-			tmpCtx.drawImage(ctx.canvas, 0, 0);
+			tmpCtx.drawImage($.canvas, 0, 0);
 			ctx.save();
 			ctx.resetTransform();
 			ctx.drawImage(tmpCtx.canvas, 0, 0);
@@ -341,15 +345,15 @@ function Q5(scope, parent) {
 
 	$.resize = (w, h) => {
 		makeTmpCtx();
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.drawImage($.canvas, 0, 0);
 		$.width = w;
 		$.height = h;
-		ctx.canvas.width = w * $._pixelDensity;
-		ctx.canvas.height = h * $._pixelDensity;
+		$.canvas.width = w * $._pixelDensity;
+		$.canvas.height = h * $._pixelDensity;
 		ctx.save();
 		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		ctx.drawImage(tmpCtx.canvas, 0, 0, $.canvas.width, $.canvas.height);
 		ctx.restore();
 	};
 
@@ -367,7 +371,7 @@ function Q5(scope, parent) {
 		h *= pd;
 		let img = $.createImage(w, h);
 		let imgData = ctx.getImageData(x, y, w, h);
-		img.canvas.getContext('2d').putImageData(imgData, 0, 0);
+		img.ctx.putImageData(imgData, 0, 0);
 		img._pixelDensity = pd;
 		img.width = _w;
 		img.height = _h;
@@ -382,21 +386,22 @@ function Q5(scope, parent) {
 			$._tint = old;
 			return;
 		}
+		if (!$.pixels.length) $.loadPixels();
 		let mod = $._pixelDensity || 1;
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
-				let idx = 4 * ((y * mod + i) * ctx.canvas.width + x * mod + j);
-				$.pixels[idx] = c._r;
-				$.pixels[idx + 1] = c._g;
-				$.pixels[idx + 2] = c._b;
-				$.pixels[idx + 3] = c._a * 255;
+				let idx = 4 * ((y * mod + i) * $.canvas.width + x * mod + j);
+				$.pixels[idx] = c.r ?? c.l;
+				$.pixels[idx + 1] = c.g ?? c.c;
+				$.pixels[idx + 2] = c.b ?? c.h;
+				$.pixels[idx + 3] = c.a;
 			}
 		}
 	};
 
 	$.tinted = function (col) {
-		let alpha = col._a;
-		col._a = 1;
+		let alpha = col.a;
+		col.a = 255;
 		makeTmpCtx();
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.fillStyle = col;
@@ -413,7 +418,7 @@ function Q5(scope, parent) {
 		ctx.globalCompositeOperation = old;
 		ctx.restore();
 
-		tmpCtx.globalAlpha = alpha;
+		tmpCtx.globalAlpha = alpha / 255;
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.drawImage(ctx.canvas, 0, 0);
 		tmpCtx.globalAlpha = 1;
@@ -424,7 +429,7 @@ function Q5(scope, parent) {
 		ctx.drawImage(tmpCtx.canvas, 0, 0);
 		ctx.restore();
 	};
-	$.tint = (c) => {
+	$.tint = function (c) {
 		$._tint = c._q5Color ? c : $.color(...arguments);
 	};
 	$.noTint = () => ($._tint = null);
@@ -464,7 +469,7 @@ function Q5(scope, parent) {
 		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
 			c = b;
 			b = a;
-			a = ctx.canvas;
+			a = $.canvas;
 		}
 		if (c) return $._save(a, b, c);
 		if (b) {
@@ -486,9 +491,35 @@ function Q5(scope, parent) {
 	let tmpCt2 = null;
 	let tmpBuf = null;
 
+	// CONSTANTS
+
+	$.THRESHOLD = 1;
+	$.GRAY = 2;
+	$.OPAQUE = 3;
+	$.INVERT = 4;
+	$.POSTERIZE = 5;
+	$.DILATE = 6;
+	$.ERODE = 7;
+	$.BLUR = 8;
+
 	if (scope == 'image') return;
 
-	// CONSTANTS
+	$.BLEND = 'source-over';
+	$.REMOVE = 'destination-out';
+	$.ADD = 'lighter';
+	$.DARKEST = 'darken';
+	$.LIGHTEST = 'lighten';
+	$.DIFFERENCE = 'difference';
+	$.SUBTRACT = 'subtract';
+	$.EXCLUSION = 'exclusion';
+	$.MULTIPLY = 'multiply';
+	$.SCREEN = 'screen';
+	$.REPLACE = 'copy';
+	$.OVERLAY = 'overlay';
+	$.HARD_LIGHT = 'hard-light';
+	$.SOFT_LIGHT = 'soft-light';
+	$.DODGE = 'color-dodge';
+	$.BURN = 'color-burn';
 
 	$.RGB = 'rgb';
 	$.RGBA = 'rgb';
@@ -509,23 +540,6 @@ function Q5(scope, parent) {
 	$.BEVEL = 'bevel';
 
 	$.CLOSE = 1;
-
-	$.BLEND = 'source-over';
-	$.REMOVE = 'destination-out';
-	$.ADD = 'lighter';
-	$.DARKEST = 'darken';
-	$.LIGHTEST = 'lighten';
-	$.DIFFERENCE = 'difference';
-	$.SUBTRACT = 'subtract';
-	$.EXCLUSION = 'exclusion';
-	$.MULTIPLY = 'multiply';
-	$.SCREEN = 'screen';
-	$.REPLACE = 'copy';
-	$.OVERLAY = 'overlay';
-	$.HARD_LIGHT = 'hard-light';
-	$.SOFT_LIGHT = 'soft-light';
-	$.DODGE = 'color-dodge';
-	$.BURN = 'color-burn';
 
 	$.NORMAL = 'normal';
 	$.ITALIC = 'italic';
@@ -565,15 +579,6 @@ function Q5(scope, parent) {
 	$.QUARTER_PI = Math.PI / 4;
 	$.TAU = Math.PI * 2;
 	$.TWO_PI = Math.PI * 2;
-
-	$.THRESHOLD = 1;
-	$.GRAY = 2;
-	$.OPAQUE = 3;
-	$.INVERT = 4;
-	$.POSTERIZE = 5;
-	$.DILATE = 6;
-	$.ERODE = 7;
-	$.BLUR = 8;
 
 	$.ARROW = 'default';
 	$.CROSS = 'crosshair';
@@ -668,23 +673,23 @@ function Q5(scope, parent) {
 		return c;
 	}
 
-	$.resizeCanvas = (width, height) => {
-		$.width = width;
-		$.height = height;
+	$.resizeCanvas = (w, h) => {
+		$.width = w;
+		$.height = h;
 		let c = cloneCtx();
-		$.canvas.width = width * $._pixelDensity;
-		$.canvas.height = height * $._pixelDensity;
+		$.canvas.width = w * $._pixelDensity;
+		$.canvas.height = h * $._pixelDensity;
 		for (let prop in c) $.ctx[prop] = c[prop];
 		if (scope != 'image') $.pixelDensity($._pixelDensity);
 	};
 
-	$.createGraphics = function (width, height) {
+	$.createGraphics = function (w, h) {
 		let g = new Q5('graphics');
-		g._createCanvas.call($, width, height);
+		g._createCanvas.call($, w, h);
 		return g;
 	};
-	$.createImage = (width, height) => {
-		return new Q5.Image(width, height);
+	$.createImage = (w, h) => {
+		return new Q5.Image(w, h);
 	};
 
 	$.displayDensity = () => window.devicePixelRatio;
@@ -719,11 +724,9 @@ function Q5(scope, parent) {
 	$.lerp = (a, b, t) => a * (1 - t) + b * t;
 	$.constrain = (x, lo, hi) => Math.min(Math.max(x, lo), hi);
 	$.dist = function () {
-		if (arguments.length == 4) {
-			return Math.hypot(arguments[0] - arguments[2], arguments[1] - arguments[3]);
-		} else {
-			return Math.hypot(arguments[0] - arguments[3], arguments[1] - arguments[4], arguments[2] - arguments[5]);
-		}
+		let a = arguments;
+		if (a.length == 4) return Math.hypot(a[0] - a[2], a[1] - a[3]);
+		else return Math.hypot(a[0] - a[3], a[1] - a[4], a[2] - a[5]);
 	};
 	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
 	$.sq = (x) => x * x;
@@ -905,12 +908,12 @@ function Q5(scope, parent) {
 		}
 	};
 
-	$.red = (c) => c._r;
-	$.green = (c) => c._g;
-	$.blue = (c) => c._b;
-	$.alpha = (c) => c._a;
+	$.red = (c) => c.r;
+	$.green = (c) => c.g;
+	$.blue = (c) => c.b;
+	$.alpha = (c) => c.a;
 	$.lightness = (c) => {
-		return ((0.2126 * c._r + 0.7152 * c._g + 0.0722 * c._b) * 100) / 255;
+		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
 	};
 
 	$.lerpColor = (a, b, t) => {
@@ -955,7 +958,7 @@ function Q5(scope, parent) {
 		$._doStroke = true;
 		$._strokeSet = true;
 		if (!c._q5Color) c = $.color(...arguments);
-		if (c._a <= 0) return ($._doStroke = false);
+		if (c.a <= 0) return ($._doStroke = false);
 		ctx.strokeStyle = c;
 	};
 	$.noStroke = () => ($._doStroke = false);
@@ -963,7 +966,7 @@ function Q5(scope, parent) {
 		$._doFill = true;
 		$._fillSet = true;
 		if (!c._q5Color) c = $.color(...arguments);
-		if (c._a <= 0) return ($._doFill = false);
+		if (c.a <= 0) return ($._doFill = false);
 		ctx.fillStyle = c;
 	};
 	$.noFill = () => ($._doFill = false);
@@ -1349,7 +1352,7 @@ function Q5(scope, parent) {
 		let drawable = img._q5 ? img.canvas : img;
 		function reset() {
 			if (!img._q5 || !$._tint) return;
-			let c = img.canvas.getContext('2d');
+			let c = img.ctx;
 			c.save();
 			c.resetTransform();
 			c.clearRect(0, 0, c.canvas.width, c.canvas.height);
@@ -1391,7 +1394,7 @@ function Q5(scope, parent) {
 	$.loadImage = (url, cb) => {
 		preloadCnt++;
 		let g = $.createImage(1, 1);
-		let c = g.canvas.getContext('2d');
+		let c = g.ctx;
 		let img = new window.Image();
 		img.src = url;
 		img.crossOrigin = 'Anonymous';
@@ -1915,6 +1918,7 @@ function Q5(scope, parent) {
 	// ENVIRONMENT
 
 	$.print = console.log;
+	$.describe = () => {};
 
 	function _draw() {
 		let pre = performance.now();
@@ -2143,34 +2147,32 @@ function Q5(scope, parent) {
 		(A[8] * v[0] + A[9] * v[1] + A[10] * v[2] + A[11]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15])
 	];
 
-	if (typeof window != 'undefined') {
-		window.ondeviceorientation = (e) => {
-			$.pRotationX = $.rotationX;
-			$.pRotationY = $.rotationY;
-			$.pRotationZ = $.rotationZ;
-			$.pRelRotationX = $.relRotationX;
-			$.pRelRotationY = $.relRotationY;
-			$.pRelRotationZ = $.relRotationZ;
+	window.ondeviceorientation = (e) => {
+		$.pRotationX = $.rotationX;
+		$.pRotationY = $.rotationY;
+		$.pRotationZ = $.rotationZ;
+		$.pRelRotationX = $.relRotationX;
+		$.pRelRotationY = $.relRotationY;
+		$.pRelRotationZ = $.relRotationZ;
 
-			$.rotationX = e.beta * (Math.PI / 180.0);
-			$.rotationY = e.gamma * (Math.PI / 180.0);
-			$.rotationZ = e.alpha * (Math.PI / 180.0);
-			$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][Math.trunc(window.orientation / 90) + 1];
-			$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][Math.trunc(window.orientation / 90) + 1];
-			$.relRotationZ = $.rotationZ;
-		};
-		window.ondevicemotion = (e) => {
-			$.pAccelerationX = $.accelerationX;
-			$.pAccelerationY = $.accelerationY;
-			$.pAccelerationZ = $.accelerationZ;
-			if (!e.acceleration) {
-				let grav = TRFM(MULT(ROTY($.rotationY), ROTX($.rotationX)), [0, 0, -9.80665]);
-				$.accelerationX = e.accelerationIncludingGravity.x + grav[0];
-				$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
-				$.accelerationZ = e.accelerationIncludingGravity.z - grav[2];
-			}
-		};
-	}
+		$.rotationX = e.beta * (Math.PI / 180.0);
+		$.rotationY = e.gamma * (Math.PI / 180.0);
+		$.rotationZ = e.alpha * (Math.PI / 180.0);
+		$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][Math.trunc(window.orientation / 90) + 1];
+		$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][Math.trunc(window.orientation / 90) + 1];
+		$.relRotationZ = $.rotationZ;
+	};
+	window.ondevicemotion = (e) => {
+		$.pAccelerationX = $.accelerationX;
+		$.pAccelerationY = $.accelerationY;
+		$.pAccelerationZ = $.accelerationZ;
+		if (!e.acceleration) {
+			let grav = TRFM(MULT(ROTY($.rotationY), ROTX($.rotationX)), [0, 0, -9.80665]);
+			$.accelerationX = e.accelerationIncludingGravity.x + grav[0];
+			$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
+			$.accelerationZ = e.accelerationIncludingGravity.z - grav[2];
+		}
+	};
 
 	// TIME
 
@@ -2618,9 +2620,9 @@ for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 // IMAGE CLASS
 
 class _Q5Image extends Q5 {
-	constructor(width, height) {
+	constructor(w, h) {
 		super('image');
-		this.createCanvas(width, height);
+		this.createCanvas(w, h);
 		delete this.createCanvas;
 		this._loop = false;
 	}
@@ -2634,15 +2636,23 @@ class _Q5Image extends Q5 {
 
 // Q5
 
+if (typeof window == 'undefined') {
+	throw 'q5 requires you to define a window object.';
+}
+
 Q5.canvasOptions = {
 	alpha: false,
 	desynchronized: true,
 	colorSpace: 'display-p3'
 };
 
-if (typeof matchMedia == 'undefined' || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {
+if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {
 	Q5.canvasOptions.colorSpace = 'srgb';
-}
+} else Q5.supportsHDR = true;
+
+window.OffscreenCanvas ??= function () {
+	return document.createElement('canvas');
+};
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
