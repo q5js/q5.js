@@ -181,6 +181,7 @@ Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and 
 
 Features added by @quinton-ashley:
 
+- `opacity`: set the opacity multiplier for anything subsequently drawn to the canvas. Range between 0 and 1.
 - `textCache(true)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
 - `loadSound()`: Basic sound support in q5.js, returns a Web Audio object with `setVolume()` and `setLoop()` functions added. Not as powerful as p5.sound, but it's good enough in many cases.
 - `ctx`: an alias for `drawingContext`
