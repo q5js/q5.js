@@ -9,6 +9,7 @@
  * @type {Q5}
  */
 function Q5(scope, parent) {
+	let $ = this;
 	let preloadCnt = 0;
 	if (!scope) {
 		scope = 'global';
@@ -19,11 +20,10 @@ function Q5(scope, parent) {
 		if (!(window.setup || window.draw)) return;
 		else scope = 'global';
 	}
-	if (scope == 'global') Q5._hasGlobal = true;
+	if (scope == 'global') Q5._hasGlobal = $._isGlobal = true;
 
 	// CANVAS
 
-	let $ = this;
 	if (scope == 'image' || scope == 'graphics') {
 		$.canvas = new OffscreenCanvas(100, 100);
 	} else {
@@ -34,7 +34,6 @@ function Q5(scope, parent) {
 
 	$.canvas.width = $.width = 100;
 	$.canvas.height = $.height = 100;
-	$._windowResizedFn = () => {};
 
 	if (scope != 'graphics' && scope != 'image') {
 		$._setupDone = false;
@@ -677,14 +676,23 @@ function Q5(scope, parent) {
 		return c;
 	}
 
-	$.resizeCanvas = (w, h) => {
+	function _resizeCanvas(w, h) {
 		$.width = w;
 		$.height = h;
 		let c = cloneCtx();
-		$.canvas.width = w * $._pixelDensity;
-		$.canvas.height = h * $._pixelDensity;
+		$.canvas.width = Math.ceil(w * $._pixelDensity);
+		$.canvas.height = Math.ceil(h * $._pixelDensity);
+		if (!$.canvas.fullscreen && $.canvas.style) {
+			$.canvas.style.width = w + 'px';
+			$.canvas.style.height = h + 'px';
+		}
 		for (let prop in c) $.ctx[prop] = c[prop];
-		if (scope != 'image') $.pixelDensity($._pixelDensity);
+		ctx.scale($._pixelDensity, $._pixelDensity);
+	}
+
+	$.resizeCanvas = (w, h) => {
+		if (w == $.width && h == $.height) return;
+		_resizeCanvas(w, h);
 	};
 
 	$.createGraphics = function (w, h) {
@@ -697,19 +705,11 @@ function Q5(scope, parent) {
 	};
 
 	$.displayDensity = () => window.devicePixelRatio;
-	$.pixelDensity = (n) => {
-		if (n === undefined) return $._pixelDensity;
-		$._pixelDensity = n;
-
-		let c = cloneCtx();
-		$.canvas.width = Math.ceil($.width * n);
-		$.canvas.height = Math.ceil($.height * n);
-		$.canvas.style.width = $.width + 'px';
-		$.canvas.style.height = $.height + 'px';
-		for (let prop in c) $.ctx[prop] = c[prop];
-
-		ctx.scale($._pixelDensity, $._pixelDensity);
-		return $._pixelDensity;
+	$.pixelDensity = (v) => {
+		if (!v || v == $._pixelDensity) return $._pixelDensity;
+		$._pixelDensity = v;
+		_resizeCanvas($.width, $.height);
+		return v;
 	};
 
 	// MATH
@@ -1943,14 +1943,14 @@ function Q5(scope, parent) {
 		$._frameRate = 1000 / $.deltaTime;
 		$.frameCount++;
 		if ($._shouldResize) {
-			$._windowResizedFn();
+			$.windowResized();
 			$._shouldResize = false;
 		}
 		for (let m of Q5.prototype._methods.pre) m.call($);
 		clearBuff();
 		firstVertex = true;
 		ctx.save();
-		$._drawFn();
+		$.draw();
 		for (let m of Q5.prototype._methods.post) m.call($);
 		ctx.restore();
 		$.resetMatrix();
@@ -1999,22 +1999,22 @@ function Q5(scope, parent) {
 		$._updateMouse(e);
 		$.mouseIsPressed = true;
 		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][e.button];
-		$._mousePressedFn(e);
+		$.mousePressed(e);
 	};
 	$._onmousemove = (e) => {
 		$._updateMouse(e);
-		if ($.mouseIsPressed) $._mouseDraggedFn(e);
-		else $._mouseMovedFn(e);
+		if ($.mouseIsPressed) $.mouseDragged(e);
+		else $.mouseMoved(e);
 	};
 	$._onmouseup = (e) => {
 		$._updateMouse(e);
 		$.mouseIsPressed = false;
-		$._mouseReleasedFn(e);
+		$.mouseReleased(e);
 	};
 	$._onclick = (e) => {
 		$._updateMouse(e);
 		$.mouseIsPressed = true;
-		$._mouseClickedFn(e);
+		$.mouseClicked(e);
 		$.mouseIsPressed = false;
 	};
 	$.cursor = (name, x, y) => {
@@ -2038,9 +2038,9 @@ function Q5(scope, parent) {
 		$.key = e.key;
 		$.keyCode = e.keyCode;
 		keysHeld[$.keyCode] = true;
-		$._keyPressedFn(e);
+		$.keyPressed(e);
 		if (e.key.length == 1) {
-			$._keyTypedFn(e);
+			$.keyTyped(e);
 		}
 	};
 	$._onkeyup = (e) => {
@@ -2048,7 +2048,7 @@ function Q5(scope, parent) {
 		$.key = e.key;
 		$.keyCode = e.keyCode;
 		keysHeld[$.keyCode] = false;
-		$._keyReleasedFn(e);
+		$.keyReleased(e);
 	};
 
 	$.canvas.onmousedown = (e) => $._onmousedown(e);
@@ -2066,36 +2066,33 @@ function Q5(scope, parent) {
 			id: touch.identifier
 		};
 	}
-	function isTouchUnaware() {
-		return $._touchStartedFn.isPlaceHolder && $._touchMovedFn.isPlaceHolder && $._touchEndedFn.isPlaceHolder;
-	}
 	$._ontouchstart = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
-		if (isTouchUnaware()) {
+		if (!$._isTouchAware) {
 			$.mouseX = $.touches[0].x;
 			$.mouseY = $.touches[0].y;
 			$.mouseIsPressed = true;
 			$.mouseButton = $.LEFT;
-			if (!$._mousePressedFn(e)) e.preventDefault();
+			if (!$.mousePressed(e)) e.preventDefault();
 		}
-		if (!$._touchStartedFn(e)) e.preventDefault();
+		if (!$.touchStarted(e)) e.preventDefault();
 	};
 	$._ontouchmove = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
-		if (isTouchUnaware()) {
+		if (!$._isTouchAware) {
 			$.mouseX = $.touches[0].x;
 			$.mouseY = $.touches[0].y;
-			if (!$._mouseDraggedFn(e)) e.preventDefault();
+			if (!$.mouseDragged(e)) e.preventDefault();
 		}
-		if (!$._touchMovedFn(e)) e.preventDefault();
+		if (!$.touchMoved(e)) e.preventDefault();
 	};
 	$._ontouchend = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
-		if (isTouchUnaware() && !$.touches.length) {
+		if (!$._isTouchAware && !$.touches.length) {
 			$.mouseIsPressed = false;
-			if (!$._mouseReleasedFn(e)) e.preventDefault();
+			if (!$.mouseReleased(e)) e.preventDefault();
 		}
-		if (!$._touchEndedFn(e)) e.preventDefault();
+		if (!$.touchEnded(e)) e.preventDefault();
 	};
 	$.canvas.ontouchstart = (e) => $._ontouchstart(e);
 	$.canvas.ontouchmove = (e) => $._ontouchmove(e);
@@ -2250,8 +2247,10 @@ function Q5(scope, parent) {
 
 	if (typeof scope == 'function') scope($);
 
+	if (scope == 'graphics' || scope == 'image') return;
+
 	function _init() {
-		let o = scope == 'global' ? window : $;
+		let t = scope == 'global' ? window : $;
 		let eventNames = [
 			'setup',
 			'draw',
@@ -2270,38 +2269,30 @@ function Q5(scope, parent) {
 			'windowResized'
 		];
 		for (let k of eventNames) {
-			let intern = '_' + k + 'Fn';
-			$[intern] = () => {};
-			$[intern].isPlaceHolder = true;
-			if (o[k]) {
-				$[intern] = o[k];
-			} else {
-				Object.defineProperty($, k, {
-					set: (fun) => {
-						$[intern] = fun;
-					}
-				});
-			}
+			if (!t[k]) $[k] = () => {};
+			else if ($._isGlobal) $[k] = t[k];
 		}
 
-		if (scope != 'graphics' || scope != 'image') {
-			$._preloadFn();
-			millisStart = performance.now();
-			function _start() {
-				if (preloadCnt > 0) return requestAnimationFrame(_start);
-				$._setupFn();
-				if (!ctx) $.createCanvas(100, 100);
-				$._setupDone = true;
-				ctx.restore();
-				$.resetMatrix();
-				requestAnimationFrame(_draw);
-			}
-			_start();
-		}
+		$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
+
 		addEventListener('mousemove', (e) => $._onmousemove(e), false);
 		addEventListener('keydown', (e) => $._onkeydown(e), false);
 		addEventListener('keyup', (e) => $._onkeyup(e), false);
+
+		$.preload();
+		millisStart = performance.now();
+		function _start() {
+			if (preloadCnt > 0) return requestAnimationFrame(_start);
+			$.setup();
+			if (!ctx) $.createCanvas(100, 100);
+			$._setupDone = true;
+			ctx.restore();
+			$.resetMatrix();
+			requestAnimationFrame(_draw);
+		}
+		_start();
 	}
+
 	if (scope == 'global') _init();
 	else requestAnimationFrame(_init);
 }
@@ -2627,8 +2618,8 @@ for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 class _Q5Image extends Q5 {
 	constructor(w, h) {
 		super('image');
-		this.createCanvas(w, h);
 		delete this.createCanvas;
+		this._createCanvas(w, h);
 		this._loop = false;
 	}
 	get w() {

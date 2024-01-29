@@ -181,9 +181,9 @@ Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and 
 
 Features added by @quinton-ashley:
 
-- `opacity`: set the opacity multiplier for anything subsequently drawn to the canvas. Range between 0 and 1.
-- `textCache(true)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
-- `loadSound()`: Basic sound support in q5.js, returns a Web Audio object with `setVolume()` and `setLoop()` functions added. Not as powerful as p5.sound, but it's good enough in many cases.
+- `opacity(globalAlpha)`: set the opacity multiplier for anything subsequently drawn to the canvas in a range between 0 (transparent) and 1 (opaque).
+- `textCache(enabled)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
+- `loadSound(file)`: Basic sound support in q5.js, returns a Web Audio object with `setVolume()` and `setLoop()` functions added. Not as powerful as p5.sound, but it's good enough in many cases.
 - `ctx`: an alias for `drawingContext`
 
 Features added by @LingDong-:
@@ -220,9 +220,9 @@ The following benchmarks are generated with Google Chrome 120, on a MacBook Air 
 
 Less time (milliseconds) is better.
 
-| Task                                               | p5.js | q5.js |
-| -------------------------------------------------- | ----- | ----- |
-| Generate 100,000 random colors with `color(r,g,b)` | 168ms | 12ms  |
+| Task                                              | p5.js | q5.js |
+| ------------------------------------------------- | ----- | ----- |
+| Generate 10,000 random colors with `color(r,g,b)` | 33ms  | 3ms   |
 
 ## Older Benchmarks
 
