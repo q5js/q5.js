@@ -147,6 +147,24 @@ with (q) {
 }
 ```
 
+## Node.js Usage
+
+> Experimental feature, please [make an issue report][] if you encounter any problems.
+
+If you're not interested in rendering to a canvas, q5.js can be used in node.js without any additional dependencies. Just use `noCanvas()` in your sketch and don't call any drawing functions that require a canvas.
+
+If you do want to render to a canvas, you'll need to install the `canvas` and `jsdom` packages.
+
+```bash
+npm install canvas jsdom
+```
+
+Note that you don't need to do anything else besides `require('q5')` at the top of your file to use q5 in node.js, whether you're using a canvas or not. q5 will automatically load and configure `canvas` and `jsdom` if they are installed. `Q5`, `cairoCanvas`, and `JSDOM` will be added to the global scope.
+
+Automatic global mode is disabled in node.js. To use global mode you need to assign q5 user defined functions like `draw` and `setup` to the `global` object then call `new Q5()`. q5 will add q5 variables and functions to the `global` object, just like it adds them to the `window` object in the browser.
+
+If you'd like q5 to render frames as fast as possible, use `noLoop()` before calling `draw`, then call `redraw()` at the end of `draw`.
+
 ## Motivation: Part 1
 
 > This section was written by @LingDong-, co-creator of q5.

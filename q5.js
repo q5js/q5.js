@@ -10,6 +10,7 @@
  */
 function Q5(scope, parent) {
 	let $ = this;
+	$._q5 = true;
 	let preloadCnt = 0;
 	if (!scope) {
 		scope = 'global';
@@ -24,8 +25,22 @@ function Q5(scope, parent) {
 
 	// CANVAS
 
-	if (scope == 'image' || scope == 'graphics') {
-		$.canvas = new OffscreenCanvas(100, 100);
+	let imgData = null;
+	let ctx = ($.ctx = $.drawingContext = null);
+	$.canvas = null;
+	$.pixels = [];
+
+	$.noCanvas = () => {
+		if ($.canvas) $.canvas.remove();
+		$.canvas = 0;
+		ctx = $.ctx = $.drawingContext = 0;
+	};
+
+	if (Q5._nodejs) {
+		if (global.createNodeJSCanvas) $.canvas = createNodeJSCanvas(100, 100);
+		else $.noCanvas();
+	} else if (scope == 'image' || scope == 'graphics') {
+		$.canvas = new window.OffscreenCanvas(100, 100);
 	} else {
 		$.canvas = document.createElement('canvas');
 		$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
@@ -35,7 +50,7 @@ function Q5(scope, parent) {
 	$.canvas.width = $.width = 100;
 	$.canvas.height = $.height = 100;
 
-	if (scope != 'graphics' && scope != 'image') {
+	if ($.canvas && scope != 'graphics' && scope != 'image') {
 		$._setupDone = false;
 		$._resize = () => {
 			if ($.frameCount > 1) $._shouldResize = true;
@@ -47,12 +62,12 @@ function Q5(scope, parent) {
 			if (typeof el == 'string') el = document.getElementById(el);
 			el.append($.canvas);
 
-			if (typeof ResizeObserver != 'undefined') {
+			if (typeof ResizeObserver == 'function') {
 				if ($._ro) $._ro.disconnect();
 				$._ro = new ResizeObserver($._resize);
 				$._ro.observe(parent);
 			} else if ($.frameCount == 0) {
-				addEventListener('resize', $._resize);
+				window.addEventListener('resize', $._resize);
 			}
 		};
 		function appendCanvas() {
@@ -66,12 +81,6 @@ function Q5(scope, parent) {
 		if (document.body) appendCanvas();
 		else document.addEventListener('DOMContentLoaded', appendCanvas);
 	}
-
-	$._q5 = true;
-	$.pixels = [];
-	let imgData = null;
-	let ctx;
-	$.ctx = $.drawingContext = null;
 
 	$.createCanvas = function (width, height, renderer, options) {
 		if (renderer == 'webgl') throw `webgl renderer is not supported in q5, use '2d'`;
@@ -109,7 +118,7 @@ function Q5(scope, parent) {
 		h ??= w || $.canvas.height;
 		w ??= $.canvas.width;
 		if (tmpCtx == null) {
-			tmpCtx = new OffscreenCanvas(w, h).getContext('2d', {
+			tmpCtx = new window.OffscreenCanvas(w, h).getContext('2d', {
 				colorSpace: $.canvas.colorSpace
 			});
 		}
@@ -123,7 +132,7 @@ function Q5(scope, parent) {
 		h ??= w || $.canvas.height;
 		w ??= $.canvas.width;
 		if (tmpCt2 == null) {
-			tmpCt2 = new OffscreenCanvas(w, h).getContext('2d', {
+			tmpCt2 = new window.OffscreenCanvas(w, h).getContext('2d', {
 				colorSpace: $.canvas.colorSpace
 			});
 		}
@@ -662,7 +671,7 @@ function Q5(scope, parent) {
 	$._textStyle = 'normal';
 	$._pixelDensity = 1;
 	$._lastFrameTime = 0;
-	$._targetFrameRate = null;
+	$._targetFrameRate = 0;
 	$._frameRate = $._fps = 60;
 
 	// CANVAS
@@ -962,7 +971,7 @@ function Q5(scope, parent) {
 	$.stroke = function (c) {
 		$._doStroke = true;
 		$._strokeSet = true;
-		if (!c._q5Color) c = $.color(...arguments);
+		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
 		if (c.a <= 0) return ($._doStroke = false);
 		ctx.strokeStyle = c;
 	};
@@ -970,7 +979,7 @@ function Q5(scope, parent) {
 	$.fill = function (c) {
 		$._doFill = true;
 		$._fillSet = true;
-		if (!c._q5Color) c = $.color(...arguments);
+		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
 		if (c.a <= 0) return ($._doFill = false);
 		ctx.fillStyle = c;
 	};
@@ -996,7 +1005,7 @@ function Q5(scope, parent) {
 		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
 		ctx.save();
 		ctx.resetTransform();
-		if (!c._q5color) c = $.color(...arguments);
+		if (!c._q5color && typeof c != 'string') c = $.color(...arguments);
 		ctx.fillStyle = c;
 		ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		ctx.restore();
@@ -1925,40 +1934,42 @@ function Q5(scope, parent) {
 	$.print = console.log;
 	$.describe = () => {};
 
-	function _draw() {
-		let pre = performance.now();
+	function _draw(timestamp) {
+		let ts = timestamp || performance.now();
+
 		if ($._loop) {
-			if (!$._targetFrameRate) {
-				looper = requestAnimationFrame(_draw);
-			} else {
-				looper = setTimeout(_draw, 1000 / $._targetFrameRate);
-			}
-		} else if ($.frameCount > 0) return;
+			if (!$._targetFrameRate) looper = raf(_draw);
+			else looper = setTimeout(_draw, 1000 / $._targetFrameRate);
+		} else if ($.frameCount > 0 && !$._redraw) return;
+
 		if (looper && $.frameCount != 0) {
-			let time_since_last = pre - $._lastFrameTime;
+			let time_since_last = ts - $._lastFrameTime;
 			let target_time_between_frames = 1000 / ($._targetFrameRate || 60);
 			if (time_since_last < target_time_between_frames - 5) return;
 		}
-		$.deltaTime = pre - $._lastFrameTime;
+		$.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
 		$.frameCount++;
 		if ($._shouldResize) {
 			$.windowResized();
 			$._shouldResize = false;
 		}
+		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
 		clearBuff();
 		firstVertex = true;
-		ctx.save();
+		if (ctx) ctx.save();
 		$.draw();
 		for (let m of Q5.prototype._methods.post) m.call($);
-		ctx.restore();
-		$.resetMatrix();
-		let post = performance.now();
-		$._fps = Math.round(1000 / (post - pre));
-		$._lastFrameTime = pre;
+		if (ctx) {
+			ctx.restore();
+			$.resetMatrix();
+		}
 		$.pmouseX = $.mouseX;
 		$.pmouseY = $.mouseY;
+		$._lastFrameTime = ts;
+		let post = performance.now();
+		$._fps = Math.round(1000 / (post - pre));
 	}
 	$.noLoop = () => {
 		$._loop = false;
@@ -1968,24 +1979,31 @@ function Q5(scope, parent) {
 		$._loop = true;
 		if (looper == null) _draw();
 	};
-	$.redraw = () => _draw();
+	$.redraw = (n) => {
+		n ??= 1;
+		$._redraw = true;
+		for (let i = 0; i < n; i++) {
+			_draw();
+		}
+	};
 	$.remove = () => {
 		$.noLoop();
 		$.canvas.remove();
 	};
 
-	$.frameRate = (fps) => {
-		if (fps) $._targetFrameRate = fps;
+	$.frameRate = (hz) => {
+		if (hz) $._targetFrameRate = hz;
 		return $._frameRate;
 	};
-	$.getFrameRate = () => $._frameRate;
+	$.getTargetFrameRate = () => $._targetFrameRate;
 	$.getFPS = () => $._fps;
 
-	$.storeItem = localStorage.setItem;
-	$.getItem = localStorage.getItem;
-	$.removeItem = localStorage.removeItem;
-	$.clearStorage = localStorage.clear;
-
+	if (typeof localStorage == 'object') {
+		$.storeItem = localStorage.setItem;
+		$.getItem = localStorage.getItem;
+		$.removeItem = localStorage.removeItem;
+		$.clearStorage = localStorage.clear;
+	}
 	// USER INPUT
 
 	$._updateMouse = (e) => {
@@ -2234,10 +2252,11 @@ function Q5(scope, parent) {
 
 	if (scope == 'global') {
 		let props = Object.getOwnPropertyNames($);
+		let t = !Q5._nodejs ? window : global;
 		for (let p of props) {
-			if (typeof $[p] == 'function') window[p] = $[p];
+			if (typeof $[p] == 'function') t[p] = $[p];
 			else {
-				Object.defineProperty(window, p, {
+				Object.defineProperty(t, p, {
 					get: () => $[p],
 					set: (v) => ($[p] = v)
 				});
@@ -2247,10 +2266,16 @@ function Q5(scope, parent) {
 
 	if (typeof scope == 'function') scope($);
 
-	if (scope == 'graphics' || scope == 'image') return;
+	if (scope == 'image') return;
+
+	let raf =
+		window.requestAnimationFrame ||
+		function (cb) {
+			return setTimeout(cb, 1 / ($._targetFrameRate || 60));
+		};
 
 	function _init() {
-		let t = scope == 'global' ? window : $;
+		let t = scope == 'global' ? (!Q5._nodejs ? window : global) : $;
 		let eventNames = [
 			'setup',
 			'draw',
@@ -2273,28 +2298,31 @@ function Q5(scope, parent) {
 			else if ($._isGlobal) $[k] = t[k];
 		}
 
+		if (!($.setup || $.draw)) return;
+
 		$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
 
-		addEventListener('mousemove', (e) => $._onmousemove(e), false);
-		addEventListener('keydown', (e) => $._onkeydown(e), false);
-		addEventListener('keyup', (e) => $._onkeyup(e), false);
+		if (window) {
+			window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
+			window.addEventListener('keydown', (e) => $._onkeydown(e), false);
+			window.addEventListener('keyup', (e) => $._onkeyup(e), false);
+		}
 
 		$.preload();
 		millisStart = performance.now();
 		function _start() {
-			if (preloadCnt > 0) return requestAnimationFrame(_start);
+			if (preloadCnt > 0) return raf(_start);
 			$.setup();
-			if (!ctx) $.createCanvas(100, 100);
+			if (ctx === null) $.createCanvas(100, 100);
 			$._setupDone = true;
-			ctx.restore();
-			$.resetMatrix();
-			requestAnimationFrame(_draw);
+			if (ctx) $.resetMatrix();
+			raf(_draw);
 		}
 		_start();
 	}
 
 	if (scope == 'global') _init();
-	else requestAnimationFrame(_init);
+	else raf(_init);
 }
 
 // COLOR CLASSES
@@ -2632,9 +2660,9 @@ class _Q5Image extends Q5 {
 
 // Q5
 
-if (typeof window == 'undefined') {
-	throw 'q5 requires you to define a window object.';
-}
+if (typeof window != 'object') window = 0;
+
+Q5._nodejs = typeof process == 'object';
 
 Q5.canvasOptions = {
 	alpha: false,
@@ -2665,9 +2693,13 @@ Q5.prototype._methods = {
 Q5.prototype.registerMethod = (m, fn) => Q5.prototype._methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
-if (typeof module != 'undefined') module.exports = Q5;
-else window.p5 ??= Q5;
+if (typeof module == 'object') {
+	global.p5 ??= Q5;
+	module.exports = global.Q5 = Q5;
+} else window.p5 ??= Q5;
 
-document.addEventListener('DOMContentLoaded', () => {
-	if (!Q5._hasGlobal) new Q5('auto');
-});
+if (typeof document == 'object') {
+	document.addEventListener('DOMContentLoaded', () => {
+		if (!Q5._hasGlobal) new Q5('auto');
+	});
+}
