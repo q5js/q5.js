@@ -1,16 +1,12 @@
 try {
 	global.CairoCanvas ??= require('canvas');
+	global.JSDOM ??= require('jsdom').JSDOM;
 } catch (e) {
 	module.exports = require('./q5.js');
 	return;
 }
 
-let { loadImage, registerFont } = CairoCanvas;
-global.loadImage = loadImage;
-global.registerFont = registerFont;
-
-global.JSDOM ??= require('jsdom').JSDOM;
-global.window = new JSDOM('', { url: 'http://localhost', pretendToBeVisual: true }).window;
+global.window = new JSDOM('', { url: 'http://localhost' }).window;
 
 {
 	let props = Object.getOwnPropertyNames(window).concat(Object.getOwnPropertyNames(Object.getPrototypeOf(window)));
@@ -22,23 +18,28 @@ global.window = new JSDOM('', { url: 'http://localhost', pretendToBeVisual: true
 	global.Event = window.Event;
 }
 
-global.createNodeJSCanvas = function () {
+const Q5 = require('./q5.js');
+
+Q5._createNodeJSCanvas = function () {
 	let cairoCanvas = CairoCanvas.createCanvas(...arguments);
 	let jsdomCanvas = window.document.createElement('canvas');
 
-	return new Proxy(jsdomCanvas, {
+	return new Proxy(cairoCanvas, {
 		get: function (target, prop) {
-			return prop in target ? target[prop] : cairoCanvas[prop];
+			let t = prop in target ? target : jsdomCanvas;
+			let p = t[prop];
+			if (typeof p === 'function') return p.bind(t);
+			return p;
 		},
 		set: function (target, prop, value) {
 			if (prop in target) {
 				target[prop] = value;
 			} else {
-				cairoCanvas[prop] = value;
+				jsdomCanvas[prop] = value;
 			}
 			return true;
 		}
 	});
 };
 
-module.exports = require('./q5.js');
+module.exports = Q5;

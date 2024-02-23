@@ -64,6 +64,20 @@ rect(15, 15, 35, 70);
 
 This is great because you don't have to declare variables on the file level and then define them in `preload` or `setup`. You can declare and define them at the same time!
 
+Note that if you use `loadImage` on the file level, q5 will wait to run `setup` and `draw` until the image loads. If you don't define a `preload` function, q5 will create one for you. Optionally you can run it to signify that the sketch can start once loading is complete. Otherwise q5 will just start the sketch automatically after 32ms of delay, this ensures the code after `new Q5()` is run.
+
+```js
+new Q5();
+
+let cow = loadImage('cow.png');
+
+preload();
+
+function setup() {
+	image(cow, 0, 0);
+}
+```
+
 ## New Features: HDR Color Support
 
 Most modern devices support the "display-p3" HDR color space. If a device doesn't support it, q5 will fall back to "srgb".
@@ -189,7 +203,7 @@ I thought @LingDong-'s work on q5 and the idea itself had great potential, so I 
 
 An increase in performance of even a few frames per second can make a significant difference in the user experience of a work of interactive art or a game, especially on mobile devices.
 
-I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and I think some bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation! p5.js is 4.3 MB un-minified, q5.js is under 70kb.
+I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation!
 
 I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
 
@@ -201,8 +215,9 @@ Features added by @quinton-ashley:
 
 - `opacity(globalAlpha)`: set the opacity multiplier for anything subsequently drawn to the canvas in a range between 0 (transparent) and 1 (opaque).
 - `textCache(enabled)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
+- `createImage`, `loadImage`, and `createGraphics`: as a last parameter to these functions, `opt` (options) object, users can specify canvas context attributes for an image or graphic. `opt.alpha` is set to true by default.
 - `loadSound(file)`: Basic sound support in q5.js, returns a Web Audio object with `setVolume()` and `setLoop()` functions added. Not as powerful as p5.sound, but it's good enough in many cases.
-- `ctx`: an alias for `drawingContext`
+- `ctx`: an instance level alias for `drawingContext`
 
 Features added by @LingDong-:
 

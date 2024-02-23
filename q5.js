@@ -6,17 +6,13 @@
  */
 
 /**
- * @type {Q5}
+ * @class Q5
  */
 function Q5(scope, parent) {
 	let $ = this;
 	$._q5 = true;
 	let preloadCnt = 0;
-	if (!scope) {
-		scope = 'global';
-		preloadCnt++;
-		setTimeout(() => preloadCnt--, 32);
-	}
+	if (!scope) scope = 'global';
 	if (scope == 'auto') {
 		if (!(window.setup || window.draw)) return;
 		else scope = 'global';
@@ -31,20 +27,26 @@ function Q5(scope, parent) {
 	$.pixels = [];
 
 	$.noCanvas = () => {
-		if ($.canvas) $.canvas.remove();
+		if ($.canvas?.remove) $.canvas.remove();
 		$.canvas = 0;
 		ctx = $.ctx = $.drawingContext = 0;
 	};
 
 	if (Q5._nodejs) {
-		if (global.createNodeJSCanvas) $.canvas = createNodeJSCanvas(100, 100);
-		else $.noCanvas();
+		if (Q5._createNodeJSCanvas) {
+			$.canvas = Q5._createNodeJSCanvas(100, 100);
+		}
 	} else if (scope == 'image' || scope == 'graphics') {
 		$.canvas = new window.OffscreenCanvas(100, 100);
-	} else {
-		$.canvas = document.createElement('canvas');
-		$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
-		$.canvas.classList.add('p5Canvas', 'q5Canvas');
+	}
+	if (!$.canvas) {
+		if (typeof document == 'object') {
+			$.canvas = document.createElement('canvas');
+			$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
+			$.canvas.classList.add('p5Canvas', 'q5Canvas');
+		} else {
+			$.noCanvas();
+		}
 	}
 
 	$.canvas.width = $.width = 100;
@@ -66,7 +68,7 @@ function Q5(scope, parent) {
 				if ($._ro) $._ro.disconnect();
 				$._ro = new ResizeObserver($._resize);
 				$._ro.observe(parent);
-			} else if ($.frameCount == 0) {
+			} else if (!$.frameCount) {
 				window.addEventListener('resize', $._resize);
 			}
 		};
@@ -416,7 +418,7 @@ function Q5(scope, parent) {
 		col.a = 255;
 		makeTmpCtx();
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.fillStyle = col;
+		tmpCtx.fillStyle = col.toString();
 		tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.globalCompositeOperation = 'multiply';
 		tmpCtx.drawImage(ctx.canvas, 0, 0);
@@ -459,8 +461,9 @@ function Q5(scope, parent) {
 	$._save = (data, name, ext) => {
 		name = name || 'untitled';
 		ext = ext || 'png';
-		if (ext == 'jpg' || ext == 'png') data = data.toDataURL();
-		else {
+		if (ext == 'jpg' || ext == 'png' || ext == 'webp') {
+			data = data.toDataURL('image/' + ext);
+		} else {
 			let type = 'text/plain';
 			if (ext == 'json') {
 				if (typeof data != 'string') data = JSON.stringify(data);
@@ -670,8 +673,8 @@ function Q5(scope, parent) {
 	$._textLeadDiff = 3;
 	$._textStyle = 'normal';
 	$._pixelDensity = 1;
-	$._lastFrameTime = 0;
 	$._targetFrameRate = 0;
+	$._targetFrameDuration = 16.666666666666668;
 	$._frameRate = $._fps = 60;
 
 	// CANVAS
@@ -704,13 +707,13 @@ function Q5(scope, parent) {
 		_resizeCanvas(w, h);
 	};
 
-	$.createGraphics = function (w, h) {
+	$.createGraphics = function (w, h, opt) {
 		let g = new Q5('graphics');
-		g._createCanvas.call($, w, h);
+		g._createCanvas.call($, w, h, opt);
 		return g;
 	};
-	$.createImage = (w, h) => {
-		return new Q5.Image(w, h);
+	$.createImage = (w, h, opt) => {
+		return new Q5.Image(w, h, opt);
 	};
 
 	$.displayDensity = () => window.devicePixelRatio;
@@ -973,7 +976,7 @@ function Q5(scope, parent) {
 		$._strokeSet = true;
 		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
 		if (c.a <= 0) return ($._doStroke = false);
-		ctx.strokeStyle = c;
+		ctx.strokeStyle = c.toString();
 	};
 	$.noStroke = () => ($._doStroke = false);
 	$.fill = function (c) {
@@ -981,7 +984,7 @@ function Q5(scope, parent) {
 		$._fillSet = true;
 		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
 		if (c.a <= 0) return ($._doFill = false);
-		ctx.fillStyle = c;
+		ctx.fillStyle = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
 	$.smooth = () => ($._smooth = true);
@@ -1006,7 +1009,7 @@ function Q5(scope, parent) {
 		ctx.save();
 		ctx.resetTransform();
 		if (!c._q5color && typeof c != 'string') c = $.color(...arguments);
-		ctx.fillStyle = c;
+		ctx.fillStyle = c.toString();
 		ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		ctx.restore();
 	};
@@ -1364,6 +1367,9 @@ function Q5(scope, parent) {
 	$.imageMode = (mode) => ($._imageMode = mode);
 	$.image = (img, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight) => {
 		let drawable = img._q5 ? img.canvas : img;
+		if (Q5._createNodeJSCanvas) {
+			drawable = drawable.context.canvas;
+		}
 		function reset() {
 			if (!img._q5 || !$._tint) return;
 			let c = img.ctx;
@@ -1405,25 +1411,42 @@ function Q5(scope, parent) {
 	$._incrementPreload = () => preloadCnt++;
 	$._decrementPreload = () => preloadCnt--;
 
-	$.loadImage = (url, cb) => {
+	$.loadImage = function (url, cb, opt) {
 		preloadCnt++;
-		let g = $.createImage(1, 1);
+		let last = [...arguments].at(-1);
+		opt = typeof last == 'object' ? last : true;
+		let g = $.createImage(1, 1, opt.alpha);
 		let c = g.ctx;
-		let img = new window.Image();
-		img.src = url;
-		img.crossOrigin = 'Anonymous';
-		img._pixelDensity = 1;
-		img.onload = () => {
-			g.width = c.canvas.width = img.naturalWidth;
-			g.height = c.canvas.height = img.naturalHeight;
-			c.drawImage(img, 0, 0);
-			preloadCnt--;
-			if (cb) cb(g);
-		};
-		img.onerror = (e) => {
-			preloadCnt--;
-			throw e;
-		};
+		if (Q5._nodejs && global.CairoCanvas) {
+			CairoCanvas.loadImage(url)
+				.then((img) => {
+					g.width = c.canvas.width = img.width;
+					g.height = c.canvas.height = img.height;
+					c.drawImage(img, 0, 0);
+					preloadCnt--;
+					if (cb) cb(g);
+				})
+				.catch((e) => {
+					preloadCnt--;
+					throw e;
+				});
+		} else {
+			let img = new window.Image();
+			img.src = url;
+			img.crossOrigin = 'Anonymous';
+			img._pixelDensity = 1;
+			img.onload = () => {
+				g.width = c.canvas.width = img.naturalWidth;
+				g.height = c.canvas.height = img.naturalHeight;
+				c.drawImage(img, 0, 0);
+				preloadCnt--;
+				if (cb) cb(g);
+			};
+			img.onerror = (e) => {
+				preloadCnt--;
+				throw e;
+			};
+		}
 		return g;
 	};
 
@@ -1936,16 +1959,14 @@ function Q5(scope, parent) {
 
 	function _draw(timestamp) {
 		let ts = timestamp || performance.now();
+		$._lastFrameTime ??= ts - $._targetFrameDuration;
 
-		if ($._loop) {
-			if (!$._targetFrameRate) looper = raf(_draw);
-			else looper = setTimeout(_draw, 1000 / $._targetFrameRate);
-		} else if ($.frameCount > 0 && !$._redraw) return;
+		if ($._loop) looper = raf(_draw);
+		else if ($.frameCount && !$._redraw) return;
 
-		if (looper && $.frameCount != 0) {
+		if (looper && $.frameCount) {
 			let time_since_last = ts - $._lastFrameTime;
-			let target_time_between_frames = 1000 / ($._targetFrameRate || 60);
-			if (time_since_last < target_time_between_frames - 5) return;
+			if (time_since_last < $._targetFrameDuration - 1) return;
 		}
 		$.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
@@ -1985,6 +2006,7 @@ function Q5(scope, parent) {
 		for (let i = 0; i < n; i++) {
 			_draw();
 		}
+		$._redraw = false;
 	};
 	$.remove = () => {
 		$.noLoop();
@@ -1992,7 +2014,10 @@ function Q5(scope, parent) {
 	};
 
 	$.frameRate = (hz) => {
-		if (hz) $._targetFrameRate = hz;
+		if (hz) {
+			$._targetFrameRate = hz;
+			$._targetFrameDuration = 1000 / hz;
+		}
 		return $._frameRate;
 	};
 	$.getTargetFrameRate = () => $._targetFrameRate;
@@ -2007,6 +2032,7 @@ function Q5(scope, parent) {
 	// USER INPUT
 
 	$._updateMouse = (e) => {
+		if (e.changedTouches) return;
 		let rect = $.canvas.getBoundingClientRect();
 		let sx = $.canvas.scrollWidth / $.width || 1;
 		let sy = $.canvas.scrollHeight / $.height || 1;
@@ -2069,11 +2095,6 @@ function Q5(scope, parent) {
 		$.keyReleased(e);
 	};
 
-	$.canvas.onmousedown = (e) => $._onmousedown(e);
-	$.canvas.onmouseup = (e) => $._onmouseup(e);
-	$.canvas.onclick = (e) => $._onclick(e);
-	$.keyIsDown = (x) => !!keysHeld[x];
-
 	function getTouchInfo(touch) {
 		const rect = $.canvas.getBoundingClientRect();
 		const sx = $.canvas.scrollWidth / $.width || 1;
@@ -2112,9 +2133,16 @@ function Q5(scope, parent) {
 		}
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
-	$.canvas.ontouchstart = (e) => $._ontouchstart(e);
-	$.canvas.ontouchmove = (e) => $._ontouchmove(e);
-	$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
+
+	if (scope != 'graphics') {
+		$.keyIsDown = (x) => !!keysHeld[x];
+		$.canvas.onmousedown = (e) => $._onmousedown(e);
+		$.canvas.onmouseup = (e) => $._onmouseup(e);
+		$.canvas.onclick = (e) => $._onclick(e);
+		$.canvas.ontouchstart = (e) => $._ontouchstart(e);
+		$.canvas.ontouchmove = (e) => $._ontouchmove(e);
+		$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
+	}
 
 	// SENSORS
 
@@ -2271,58 +2299,69 @@ function Q5(scope, parent) {
 	let raf =
 		window.requestAnimationFrame ||
 		function (cb) {
-			return setTimeout(cb, 1 / ($._targetFrameRate || 60));
+			const idealFrameTime = $._lastFrameTime + $._targetFrameDuration;
+			return setTimeout(() => {
+				cb(idealFrameTime);
+			}, idealFrameTime - performance.now());
 		};
 
-	function _init() {
-		let t = scope == 'global' ? (!Q5._nodejs ? window : global) : $;
-		let eventNames = [
-			'setup',
-			'draw',
-			'preload',
-			'mouseMoved',
-			'mousePressed',
-			'mouseReleased',
-			'mouseDragged',
-			'mouseClicked',
-			'keyPressed',
-			'keyReleased',
-			'keyTyped',
-			'touchStarted',
-			'touchMoved',
-			'touchEnded',
-			'windowResized'
-		];
-		for (let k of eventNames) {
-			if (!t[k]) $[k] = () => {};
-			else if ($._isGlobal) $[k] = t[k];
-		}
-
-		if (!($.setup || $.draw)) return;
-
-		$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
-
-		if (window) {
-			window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
-			window.addEventListener('keydown', (e) => $._onkeydown(e), false);
-			window.addEventListener('keyup', (e) => $._onkeyup(e), false);
-		}
-
-		$.preload();
-		millisStart = performance.now();
-		function _start() {
-			if (preloadCnt > 0) return raf(_start);
-			$.setup();
-			if (ctx === null) $.createCanvas(100, 100);
-			$._setupDone = true;
-			if (ctx) $.resetMatrix();
-			raf(_draw);
-		}
-		_start();
+	let t = scope == 'global' ? (!Q5._nodejs ? window : global) : $;
+	let preloadDefined = t.preload;
+	let eventNames = [
+		'setup',
+		'draw',
+		'preload',
+		'mouseMoved',
+		'mousePressed',
+		'mouseReleased',
+		'mouseDragged',
+		'mouseClicked',
+		'keyPressed',
+		'keyReleased',
+		'keyTyped',
+		'touchStarted',
+		'touchMoved',
+		'touchEnded',
+		'windowResized'
+	];
+	for (let k of eventNames) {
+		if (!t[k]) $[k] = () => {};
+		else if ($._isGlobal) $[k] = t[k];
 	}
 
-	if (scope == 'global') _init();
-	else raf(_init);
+	$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
+
+	if (window && scope != 'graphics') {
+		window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
+		window.addEventListener('keydown', (e) => $._onkeydown(e), false);
+		window.addEventListener('keyup', (e) => $._onkeyup(e), false);
+	}
+
+	if (!($.setup || $.draw)) return;
+
+	$._startDone = false;
+
+	function _start() {
+		$._startDone = true;
+		if (preloadCnt > 0) return raf(_start);
+		millisStart = performance.now();
+		$.setup();
+		if ($.frameCount) return;
+		if (ctx === null) $.createCanvas(100, 100);
+		$._setupDone = true;
+		if (ctx) $.resetMatrix();
+		raf(_draw);
+	}
+
+	if (arguments.length || preloadDefined) {
+		$.preload();
+		_start();
+	} else {
+		t.preload = $.preload = () => {
+			if (!$._startDone) _start();
+		};
+		setTimeout($.preload, 32);
+	}
 }
 
 // COLOR CLASSES
@@ -2644,10 +2683,12 @@ for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 // IMAGE CLASS
 
 class _Q5Image extends Q5 {
-	constructor(w, h) {
+	constructor(w, h, opt) {
 		super('image');
 		delete this.createCanvas;
-		this._createCanvas(w, h);
+		opt ??= {};
+		opt.alpha ??= true;
+		this._createCanvas(w, h, '2d', opt);
 		this._loop = false;
 	}
 	get w() {
@@ -2696,7 +2737,10 @@ Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 if (typeof module == 'object') {
 	global.p5 ??= Q5;
 	module.exports = global.Q5 = Q5;
-} else window.p5 ??= Q5;
+} else {
+	window.p5 ??= Q5;
+	window.Q5 = Q5;
+}
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
