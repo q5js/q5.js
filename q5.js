@@ -709,6 +709,8 @@ function Q5(scope, parent) {
 
 	$.createGraphics = function (w, h, opt) {
 		let g = new Q5('graphics');
+		opt ??= {};
+		opt.alpha ??= true;
 		g._createCanvas.call($, w, h, opt);
 		return g;
 	};
@@ -1384,26 +1386,21 @@ function Q5(scope, parent) {
 			tmpCt2.drawImage(img.canvas, 0, 0);
 			img.tinted($._tint);
 		}
-		if (!dWidth) {
-			if (img._q5 || img.width) {
-				dWidth = img.width;
-				dHeight = img.height;
-			} else {
-				dWidth = img.videoWidth;
-				dHeight = img.videoHeight;
-			}
-		}
+		dWidth ??= img.width || img.videoWidth;
+		dHeight ??= img.height || img.videoHeight;
 		if ($._imageMode == 'center') {
 			dx -= dWidth * 0.5;
 			dy -= dHeight * 0.5;
 		}
-		let pd = img._pixelDensity;
+		let pd = img._pixelDensity || 1;
 		sx ??= 0;
 		sy ??= 0;
-		if (!sWidth) sWidth = drawable.width;
-		else sWidth *= pd;
-		if (!sHeight) sHeight = drawable.height;
-		else sHeight *= pd;
+		if (!sWidth) {
+			sWidth = drawable.width || drawable.videoWidth;
+		} else sWidth *= pd;
+		if (!sHeight) {
+			sHeight = drawable.height || drawable.videoHeight;
+		} else sHeight *= pd;
 		ctx.drawImage(drawable, sx * pd, sy * pd, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		reset();
 	};
