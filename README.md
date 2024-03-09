@@ -1,4 +1,4 @@
-# <img src="q5js_logo.png" height="64"> <img src="q5js_brand.png" height="64">
+# <img src="q5js_logo.webp" height="64"> <img src="q5js_brand.webp" height="64">
 
 **q5.js** implements all of [p5][]'s 2D drawing, math, and user input functionality.
 
