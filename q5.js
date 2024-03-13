@@ -2704,7 +2704,7 @@ Q5._nodejs = typeof process == 'object';
 
 Q5.canvasOptions = {
 	alpha: false,
-	desynchronized: true,
+	desynchronized: false,
 	colorSpace: 'display-p3'
 };
 

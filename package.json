@@ -1,11 +1,11 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5",
-	"version": "1.9.9",
+	"version": "1.9.10",
 	"description": "An implementation of the p5.js 2D API that's smaller and faster",
 	"main": "q5-server.js",
 	"scripts": {
-		"min": "minify q5.js > q5.min.js",
+		"min": "terser q5.js --compress ecma=2024 --mangle > q5.min.js",
 		"dist": "cp q5.js ../../web/p5play-web/v3/q5.js && bun min && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",

@@ -49,9 +49,9 @@ To use addons, simply load them after q5.js:
 
 > q5.js includes some exclusive features that aren't available in p5.js. Using them is optional!
 
-In **p5**, p5 functions can't be used on the file level. Also you must declare a `setup` or `draw` function on the file level for p5 to start running in global mode.
+In **p5**, functions like `rect` can't be used on the file level. They must be called from within p5 functions like `setup` and `draw`.
 
-**q5** can automatically run in global mode as well, so existing sketches don't require any modification. But if you initialize Q5 at the top of your sketch, the `preload` and `setup` functions become optional.
+In **q5**, existing p5 2D sketches don't require any modification. But if you initialize Q5 at the top of your sketch, the `preload` and `setup` functions become optional.
 
 ```js
 new Q5();
@@ -64,8 +64,6 @@ rect(15, 15, 35, 70);
 
 This is great because you don't have to declare variables on the file level and then define them in `preload` or `setup`. You can declare and define them at the same time!
 
-Note that if you use `loadImage` on the file level, q5 will wait to run `setup` and `draw` until the image loads. If you don't define a `preload` function, q5 will create one for you. Optionally you can run it to signify that the sketch can start once loading is complete. Otherwise q5 will just start the sketch automatically after 32ms of delay, this ensures the code after `new Q5()` is run.
-
 ```js
 new Q5();
 
@@ -77,6 +75,8 @@ function setup() {
 	image(cow, 0, 0);
 }
 ```
+
+Note that if you use `loadImage` on the file level, q5 will wait to run `setup` and `draw` until the image loads. Optionally if you forgo defining `preload`, you can run it to signify that the sketch can start once loading is complete. Otherwise q5 will just start the sketch automatically after 32ms of delay, this ensures the code after `new Q5()` is run.
 
 ## New Features: HDR Color Support
 
@@ -107,14 +107,14 @@ https://en.wikipedia.org/wiki/HSL_and_HSV#Disadvantages
 
 ## New Features: Customize Canvas Context Attributes
 
-In **p5**, you're stuck with the default [canvas context attributes][], which can't be changed. So the canvas must have an alpha layer, even if you don't need one. p5 also doesn't support HDR color spaces or desynchronized rendering.
+In **p5**, you're stuck with the default [canvas context attributes][], which can't be changed. So the canvas must have an alpha layer, even if you don't need one. p5 also doesn't support HDR color spaces or [desynchronized rendering][].
 
 But **q5** has its own defaults:
 
 ```js
 Q5.canvasOptions = {
 	alpha: false,
-	desynchronized: true,
+	desynchronized: false,
 	colorSpace: 'display-p3'
 };
 ```
@@ -163,11 +163,11 @@ with (q) {
 
 ## Node.js Usage
 
-> Experimental feature, please [make an issue report][] if you encounter any problems.
+> Node.js support was recently added, please [make an issue report][] if you encounter any problems.
 
 If you're not interested in rendering to a canvas, q5.js can be used in node.js without any additional dependencies. Just use `noCanvas()` in your sketch and don't call any drawing functions that require a canvas.
 
-If you do want to render to a canvas, you'll need to install the `canvas` and `jsdom` packages.
+If you want to render to a canvas, you'll need to install the `canvas` and `jsdom` packages.
 
 ```bash
 npm install canvas jsdom
@@ -288,11 +288,11 @@ Speed is a goal for q5.js, and we would very much like to see the above list gro
 
 ## Licensing
 
-q5.js is not affiliated with the Processing Foundation. p5.js is licensed under the LGPLv2, the two small sections of p5.js' code were directly copied into q5.js are credited below. The rest of q5 is a partial re-implementation of the p5.js API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Oracle v Google case.
+q5.js is not affiliated with the Processing Foundation. p5.js is licensed under the LGPLv2, the two small sections of p5.js' code were directly copied into q5.js are credited below. The rest of q5 is a new implementation of part of the p5.js API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Google v Oracle case.
 
 @LingDong- created the original q5xjs library and licensed it under the MIT license.
 
-@quinton-ashley created q5.js (this project) and implemented more of the p5.js API and added several exclusive features. q5.js is licensed under the AGPLv3.
+@quinton-ashley created q5.js (this project) which contains many bug fixes, additional p5.js API implementations, and several exclusive features. q5.js is licensed under the AGPLv3.
 
 ## Credits
 
@@ -314,3 +314,4 @@ https://github.com/processing/p5.js/blob/1.1.9/src/core/shape/curves.js
 [with statement]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/with
 [make an issue report]: https://github.com/quinton-ashley/q5.js/issues
 [context attributes]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes
+[desynchronized rendering]: https://github.com/whatwg/html/issues/5466
