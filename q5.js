@@ -21,6 +21,12 @@ function Q5(scope, parent) {
 
 	// CANVAS
 
+	let _OffscreenCanvas =
+		window.OffscreenCanvas ||
+		function () {
+			return document.createElement('canvas');
+		};
+
 	let imgData = null;
 	let ctx = ($.ctx = $.drawingContext = null);
 	$.canvas = null;
@@ -37,7 +43,7 @@ function Q5(scope, parent) {
 			$.canvas = Q5._createNodeJSCanvas(100, 100);
 		}
 	} else if (scope == 'image' || scope == 'graphics') {
-		$.canvas = new window.OffscreenCanvas(100, 100);
+		$.canvas = new _OffscreenCanvas(100, 100);
 	}
 	if (!$.canvas) {
 		if (typeof document == 'object') {
@@ -120,7 +126,7 @@ function Q5(scope, parent) {
 		h ??= w || $.canvas.height;
 		w ??= $.canvas.width;
 		if (tmpCtx == null) {
-			tmpCtx = new window.OffscreenCanvas(w, h).getContext('2d', {
+			tmpCtx = new _OffscreenCanvas(w, h).getContext('2d', {
 				colorSpace: $.canvas.colorSpace
 			});
 		}
@@ -134,7 +140,7 @@ function Q5(scope, parent) {
 		h ??= w || $.canvas.height;
 		w ??= $.canvas.width;
 		if (tmpCt2 == null) {
-			tmpCt2 = new window.OffscreenCanvas(w, h).getContext('2d', {
+			tmpCt2 = new _OffscreenCanvas(w, h).getContext('2d', {
 				colorSpace: $.canvas.colorSpace
 			});
 		}
@@ -2711,10 +2717,6 @@ Q5.canvasOptions = {
 if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {
 	Q5.canvasOptions.colorSpace = 'srgb';
 } else Q5.supportsHDR = true;
-
-window.OffscreenCanvas ??= function () {
-	return document.createElement('canvas');
-};
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
