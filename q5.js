@@ -733,9 +733,9 @@ function Q5(scope, parent) {
 	};
 
 	$.fullscreen = (v) => {
-		if (!v === undefined) return document.fullscreenElement;
-		if (v) document.requestFullscreen();
-		else document.exitFullscreen();
+		if (v === undefined) return document.fullscreenElement;
+		if (v) document.body.requestFullscreen();
+		else document.body.exitFullscreen();
 	};
 
 	// MATH
