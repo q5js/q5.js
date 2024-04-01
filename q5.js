@@ -732,6 +732,12 @@ function Q5(scope, parent) {
 		return v;
 	};
 
+	$.fullscreen = (v) => {
+		if (!v === undefined) return document.fullscreenElement;
+		if (v) document.requestFullscreen();
+		else document.exitFullscreen();
+	};
+
 	// MATH
 
 	$.map = (value, istart, istop, ostart, ostop, clamp) => {
@@ -805,13 +811,10 @@ function Q5(scope, parent) {
 	};
 	$.nf = (n, l, r) => {
 		let neg = n < 0;
-		let s = n.toString();
-		if (neg) s = s.slice(1);
-		s = s.padStart(l, '0');
-		if (r > 0) {
-			if (s.indexOf('.') == -1) s += '.';
-			s = s.padEnd(l + 1 + r, '0');
-		}
+		n = Math.abs(n);
+		let parts = n.toFixed(r).split('.');
+		parts[0] = parts[0].padStart(l, '0');
+		let s = parts.join('.');
 		if (neg) s = '-' + s;
 		return s;
 	};
