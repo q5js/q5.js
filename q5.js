@@ -2359,7 +2359,7 @@ function Q5(scope, parent) {
 		raf(_draw);
 	}
 
-	if (arguments.length || preloadDefined) {
+	if ((arguments.length && scope != 'namespace') || preloadDefined) {
 		$.preload();
 		_start();
 	} else {
