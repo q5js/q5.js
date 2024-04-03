@@ -76,7 +76,7 @@ function setup() {
 }
 ```
 
-Note that if you use `loadImage` on the file level, q5 will wait to run `setup` and `draw` until the image loads. Optionally if you forgo defining `preload`, you can run it to signify that the sketch can start once loading is complete. Otherwise q5 will just start the sketch automatically after 32ms of delay, this ensures the code after `new Q5()` is run.
+Note that if you use `loadImage` on the file level, q5 will wait to run `setup` and `draw` until the image loads. Optionally if you forgo defining `preload`, you can run it to signify that the sketch can start once loading is complete. Otherwise q5 will auto-start the sketch after 32ms of delay, this ensures code after `new Q5()` is run before the sketch starts.
 
 ## New Features: HDR Color Support
 
@@ -95,7 +95,7 @@ colorMode('oklch');
 let c = color(0.637, 0.287, 16.57, 1);
 ```
 
-The `color` function doesn't accept percentages so you'll have to convert those to decimal values. Also its string parsing capability is limited to the "#RRGGBB" or "#RRGGBBAA" formats.
+The `color` function doesn't accept percentages so you'll have to convert those to decimal values. Also its string parsing capability is limited to simple named colors and the hex "#RRGGBB" or "#RRGGBBAA" formats.
 
 Use `new Color()` to create color objects without any parsing overhead.
 
@@ -107,7 +107,7 @@ https://en.wikipedia.org/wiki/HSL_and_HSV#Disadvantages
 
 ## New Features: Customize Canvas Context Attributes
 
-In **p5**, you're stuck with the default [canvas context attributes][], which can't be changed. So the canvas must have an alpha layer, even if you don't need one. p5 also doesn't support HDR color spaces or [desynchronized rendering][].
+In **p5**, you're stuck with the default [canvas context attributes][], which can't be changed. So the canvas must have an alpha layer, even if you don't need one. Also p5 doesn't support HDR color spaces or [desynchronized rendering][].
 
 But **q5** has its own defaults:
 
@@ -173,11 +173,9 @@ If you want to render to a canvas, you'll need to install the `canvas` and `jsdo
 npm install canvas jsdom
 ```
 
-Note that you don't need to do anything else besides `require('q5')` at the top of your file to use q5 in node.js, whether you're using a canvas or not. q5 will automatically load and configure `canvas` and `jsdom` if they are installed. `Q5`, `cairoCanvas`, and `JSDOM` will be added to the global scope.
+q5 will automatically load and configure `canvas` and `jsdom` if they are installed. `Q5`, `cairoCanvas`, and `JSDOM` will be added to the global scope by `require('q5')`.
 
-Automatic global mode is disabled in node.js. To use global mode you need to assign q5 user defined functions like `draw` and `setup` to the `global` object then call `new Q5()`. q5 will add q5 variables and functions to the `global` object, just like it adds them to the `window` object in the browser.
-
-If you'd like q5 to render frames as fast as possible, use `noLoop()` before calling `draw`, then call `redraw()` at the end of `draw`.
+In node.js, q5's automatic global mode is disabled. To use global mode you need to assign q5 user defined functions like `draw` and `setup` to the `global` object then call `new Q5()`. q5 will add q5 variables and functions to the `global` object, just like it adds them to the `window` object in the browser.
 
 ## Motivation: Part 1
 
@@ -216,7 +214,7 @@ Features added by @quinton-ashley:
 - `opacity(globalAlpha)`: set the opacity multiplier for anything subsequently drawn to the canvas in a range between 0 (transparent) and 1 (opaque).
 - `textCache(enabled)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
 - `createImage`, `loadImage`, and `createGraphics`: as a last parameter to these functions, `opt` (options) object, users can specify canvas context attributes for an image or graphic. `opt.alpha` is set to true by default.
-- `loadSound(file)`: Basic sound support in q5.js, returns a Web Audio object with `setVolume()` and `setLoop()` functions added. Not as powerful as p5.sound, but it's good enough in many cases.
+- `loadSound(file)`: Returns a Web Audio object with `setVolume()` and `setLoop()` functions added to it. Not as powerful as p5.sound, but it's good enough in some cases.
 - `ctx`: an instance level alias for `drawingContext`
 
 Features added by @LingDong-:
@@ -225,11 +223,9 @@ Features added by @LingDong-:
 - `curveAlpha()`: manipulate the `α` parameter of Catmull-Rom curves.
 - `relRotationX`, `relRotationY` and `relRotationZ`: Similar to `rotationX/Y/Z`, but are relative to the orientation of the mobile device.
 
-## Cutting room floor
+## Limitations
 
-**p5.js** has some pretty extensive parsing capabilities. For example, it can parse out a color from strings like `color('hsl(160, 100%, 50%)')`. Functions behave sightly differently when under different "modes" and some have secret default settings, such as `arc` and `text`.
-
-**q5.js** will only do things when you communicate the command in the simplest way. This means that functions mainly just take numeric inputs. q5 has almost no overhead between digesting your parameters and putting them into use.
+- `color` function only accepts numeric input, hex, and simple named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`. This was done to keep the codebase small and easier to understand.
 
 ## Size Comparison
 
@@ -313,5 +309,5 @@ https://github.com/processing/p5.js/blob/1.1.9/src/core/shape/curves.js
 [instance mode]: https://p5js.org/examples/instance-mode-instantiation.html
 [with statement]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/with
 [make an issue report]: https://github.com/quinton-ashley/q5.js/issues
-[context attributes]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes
+[canvas context attributes]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes
 [desynchronized rendering]: https://github.com/whatwg/html/issues/5466

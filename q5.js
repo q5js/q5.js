@@ -1227,12 +1227,6 @@ function Q5(scope, parent) {
 		}
 		if ($._doFill) ctx.fill();
 		if ($._doStroke) ctx.stroke();
-		if (!$._doFill && !$._doStroke) {
-			ctx.save();
-			ctx.fillStyle = 'none';
-			ctx.fill();
-			ctx.restore();
-		}
 	};
 	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
 		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
