@@ -13,7 +13,7 @@ q5 should work with your existing p5.js sketches, no modifications required! If 
 Use q5.js in your own project by adding this line to your HTML file:
 
 ```html
-<script src="https://quinton-ashley.github.io/q5.js/q5.js"></script>
+<script src="https://q5js.org/q5.js"></script>
 ```
 
 q5 is also available on [npm](https://www.npmjs.com/package/q5)!
