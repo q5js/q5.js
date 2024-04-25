@@ -2115,6 +2115,7 @@ function Q5(scope, parent) {
 			if (!$.mousePressed(e)) e.preventDefault();
 		}
 		if (!$.touchStarted(e)) e.preventDefault();
+		if ($.getAudioContext()?.state != 'running') $.userStartAudio();
 	};
 	$._ontouchmove = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
@@ -2262,6 +2263,11 @@ function Q5(scope, parent) {
 		a.setVolume = (l) => (a.volume = l);
 		a.setLoop = (l) => (a.loop = l);
 		return a;
+	};
+	$.getAudioContext = () => $.audioContext;
+	$.userStartAudio = () => {
+		$.audioContext ??= new window.AudioContext();
+		return $.audioContext.resume();
 	};
 
 	// INIT
