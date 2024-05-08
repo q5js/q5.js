@@ -92,6 +92,7 @@ function Q5(scope, parent) {
 
 	$.createCanvas = function (width, height, renderer, options) {
 		if (renderer == 'webgl') throw `webgl renderer is not supported in q5, use '2d'`;
+		if (typeof renderer == 'object') options = renderer;
 		$.width = $.canvas.width = width;
 		$.height = $.canvas.height = height;
 		$.canvas.renderer = '2d';
@@ -2300,7 +2301,7 @@ function Q5(scope, parent) {
 
 	if (typeof scope == 'function') scope($);
 
-	if (scope == 'image') return;
+	if (scope == 'image' || scope == 'graphics') return;
 
 	let raf =
 		window.requestAnimationFrame ||
