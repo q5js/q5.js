@@ -186,8 +186,7 @@ function Q5(scope, parent) {
 				data[i + 2] = 255 - data[i + 2];
 			}
 		};
-		$._filters[$.POSTERIZE] = (data, lvl) => {
-			lvl ??= 4;
+		$._filters[$.POSTERIZE] = (data, lvl = 4) => {
 			let lvl1 = lvl - 1;
 			for (let i = 0; i < data.length; i += 4) {
 				data[i] = (((data[i] * lvl) >> 8) * 255) / lvl1;
@@ -378,6 +377,34 @@ function Q5(scope, parent) {
 		ctx.restore();
 	};
 
+	$.trim = () => {
+		let pd = $._pixelDensity || 1;
+		let imgData = ctx.getImageData(0, 0, $.width * pd, $.height * pd);
+		let data = imgData.data;
+		let left = $.width,
+			right = 0,
+			top = $.height,
+			bottom = 0;
+
+		for (let y = 0; y < $.height * pd; y++) {
+			for (let x = 0; x < $.width * pd; x++) {
+				let index = (y * $.width * pd + x) * 4;
+				if (data[index + 3] !== 0) {
+					if (x < left) left = x;
+					if (x > right) right = x;
+					if (y < top) top = y;
+					if (y > bottom) bottom = y;
+				}
+			}
+		}
+		top = Math.floor(top / pd);
+		bottom = Math.floor(bottom / pd);
+		left = Math.floor(left / pd);
+		right = Math.floor(right / pd);
+
+		return $.get(left, top, right - left + 1, bottom - top + 1);
+	};
+
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
@@ -465,11 +492,20 @@ function Q5(scope, parent) {
 		ctx.restore();
 	};
 
-	$._save = (data, name, ext) => {
+	$._save = async (data, name, ext) => {
 		name = name || 'untitled';
 		ext = ext || 'png';
 		if (ext == 'jpg' || ext == 'png' || ext == 'webp') {
-			data = data.toDataURL('image/' + ext);
+			if (data instanceof OffscreenCanvas) {
+				const blob = await data.convertToBlob({ type: 'image/' + ext });
+				data = await new Promise((resolve) => {
+					const reader = new FileReader();
+					reader.onloadend = () => resolve(reader.result);
+					reader.readAsDataURL(blob);
+				});
+			} else {
+				data = data.toDataURL('image/' + ext);
+			}
 		} else {
 			let type = 'text/plain';
 			if (ext == 'json') {
@@ -501,6 +537,10 @@ function Q5(scope, parent) {
 	};
 	$.canvas.save = $.save;
 	$.saveCanvas = $.save;
+
+	$.createImage = (w, h, opt) => {
+		return new Q5.Image(w, h, opt);
+	};
 
 	// PRIVATE VARS
 
@@ -720,9 +760,6 @@ function Q5(scope, parent) {
 		opt.alpha ??= true;
 		g._createCanvas.call($, w, h, opt);
 		return g;
-	};
-	$.createImage = (w, h, opt) => {
-		return new Q5.Image(w, h, opt);
 	};
 
 	$.displayDensity = () => window.devicePixelRatio;
@@ -1076,9 +1113,8 @@ function Q5(scope, parent) {
 		if ($._doFill) ctx.fill();
 		if ($._doStroke) ctx.stroke();
 	}
-	$.arc = (x, y, w, h, start, stop, mode, detail) => {
+	$.arc = (x, y, w, h, start, stop, mode, detail = 25) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
-		detail ??= 25;
 		mode ??= $.PIE;
 		if ($._ellipseMode == $.CENTER) {
 			arcImpl(x, y, w, h, start, stop, mode, detail);
@@ -1371,7 +1407,7 @@ function Q5(scope, parent) {
 	// IMAGING
 
 	$.imageMode = (mode) => ($._imageMode = mode);
-	$.image = (img, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight) => {
+	$.image = (img, dx, dy, dWidth, dHeight, sx = 0, sy = 0, sWidth, sHeight) => {
 		let drawable = img._q5 ? img.canvas : img;
 		if (Q5._createNodeJSCanvas) {
 			drawable = drawable.context.canvas;
@@ -1397,8 +1433,6 @@ function Q5(scope, parent) {
 			dy -= dHeight * 0.5;
 		}
 		let pd = img._pixelDensity || 1;
-		sx ??= 0;
-		sy ??= 0;
 		if (!sWidth) {
 			sWidth = drawable.width || drawable.videoWidth;
 		} else sWidth *= pd;
@@ -1549,7 +1583,7 @@ function Q5(scope, parent) {
 		if (b !== undefined) $._textCache = b;
 		return $._textCache;
 	};
-	function _genTextImageKey(str, w, h) {
+	$._genTextImageKey = (str, w, h) => {
 		return (
 			str.slice(0, 200) +
 			$._textStyle +
@@ -1561,14 +1595,14 @@ function Q5(scope, parent) {
 			(w || '') +
 			(h ? 'x' + h : '')
 		);
-	}
+	};
 	$.createTextImage = (str, w, h) => {
 		let og = $._textCache;
 		$._textCache = true;
-		$._useCache = true;
+		$._genTextImage = true;
 		$.text(str, 0, 0, w, h);
-		$._useCache = false;
-		let k = _genTextImageKey(str, w, h);
+		$._genTextImage = false;
+		let k = $._genTextImageKey(str, w, h);
 		$._textCache = og;
 		return $._tic.get(k);
 	};
@@ -1579,15 +1613,15 @@ function Q5(scope, parent) {
 		let c, ti, tg, k, cX, cY, _ascent, _descent;
 		let pd = 1;
 		let t = ctx.getTransform();
-		let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
+		let useCache = $._genTextImage || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
 			c = ctx;
 			cX = x;
 			cY = y;
 		} else {
-			k = _genTextImageKey(str, w, h);
+			k = $._genTextImageKey(str, w, h);
 			ti = $._tic.get(k);
-			if (ti) {
+			if (ti && !$._genTextImage) {
 				$.textImage(ti, x, y);
 				return;
 			}
@@ -1624,7 +1658,7 @@ function Q5(scope, parent) {
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);
-			$.textImage(ti, x, y);
+			if (!$._genTextImage) $.textImage(ti, x, y);
 		}
 	};
 	$.textImage = (img, x, y) => {
@@ -1654,9 +1688,7 @@ function Q5(scope, parent) {
 	};
 	var p_perlin;
 
-	$.noise = (x, y, z) => {
-		y ??= 0;
-		z ??= 0;
+	$.noise = (x = 0, y = 0, z) => {
 		if (p_perlin == null) {
 			p_perlin = new Array(PERLIN_SIZE + 1);
 			for (var i = 0; i < PERLIN_SIZE + 1; i++) {
@@ -1981,7 +2013,11 @@ function Q5(scope, parent) {
 		clearBuff();
 		firstVertex = true;
 		if (ctx) ctx.save();
-		$.draw();
+		try {
+			$.draw();
+		} catch (e) {
+			console.error(e);
+		}
 		for (let m of Q5.prototype._methods.post) m.call($);
 		if (ctx) {
 			ctx.restore();
@@ -2001,8 +2037,7 @@ function Q5(scope, parent) {
 		$._loop = true;
 		if (looper == null) _draw();
 	};
-	$.redraw = (n) => {
-		n ??= 1;
+	$.redraw = (n = 1) => {
 		$._redraw = true;
 		for (let i = 0; i < n; i++) {
 			_draw();
