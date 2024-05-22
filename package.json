@@ -1,7 +1,7 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5",
-	"version": "1.9.19",
+	"version": "1.9.20",
 	"description": "An implementation of the p5.js 2D API that's smaller and faster",
 	"main": "q5-server.js",
 	"scripts": {
@@ -25,7 +25,7 @@
 		"q5.js",
 		"q5js"
 	],
-	"license": "AGPL-3.0",
+	"license": "LGPL-3.0",
 	"bugs": {
 		"url": "https://github.com/quinton-ashley/q5.js/issues"
 	},

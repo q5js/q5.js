@@ -26,11 +26,9 @@ Or try out the [q5.js template sketch](https://editor.p5js.org/quinton-ashley/sk
 
 ## Support this project 🤝
 
-q5 is open source and [multi-licensed](https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md). Anyone can use q5 for free under the terms of the AGPLv3. 🎉
+q5 is open source. Anyone can use q5 for free under the terms of the LGPL, just like p5.js. 🎉
 
-But if you want to use q5 commercially in a closed source product or service, you must comply with the [p5play Professional License](https://github.com/quinton-ashley/p5play-web/blob/main/pro/LICENSE.md), which is only available to current p5play [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/p5play) members paying for the appropriate tier.
-
-If you can't afford to pay, you can apply for the free [p5play Novice License](https://github.com/quinton-ashley/p5play-novice/blob/main/LICENSE.md). See [LICENSING.md](https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md) for more info.
+If you'd like to support this project, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/p5play).
 
 ## Using p5 Addon Libraries
 
@@ -288,7 +286,7 @@ q5.js is not affiliated with the Processing Foundation. p5.js is licensed under 
 
 @LingDong- created the original q5xjs library and licensed it under the MIT license.
 
-@quinton-ashley created q5.js (this project) which contains many bug fixes, additional p5.js API implementations, and several exclusive features. q5.js is licensed under the AGPLv3.
+@quinton-ashley created q5.js (this project) which contains many bug fixes, additional p5.js API implementations, and several exclusive features. q5.js is licensed under the LGPLv3.
 
 ## Credits
 
