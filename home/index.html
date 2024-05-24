@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>q5.js</title>
+	<link rel="icon" href="/q5js_logo.webp">
+	<link rel="stylesheet" href="index.css">
+</head>
+
+<body class="light">
+	<main></main>
+	<div class="reel0">
+		<div class="brand">
+			<a href="https://github.com/quinton-ashley/q5.js">
+				<div class="img q5js_logo"></div>
+				<div class="img q5js_brand"></div>
+			</a>
+			<textarea rows="1" readonly><script src="https://q5js.org/q5.js"></script></textarea>
+		</div>
+	</div>
+	<script src="../q5.js"></script>
+	<script>
+		let lavas = [];
+		let looping = true;
+
+		function setup() {
+			createCanvas();
+			for (let i = 0; i < 30; i++) {
+				let l = new Lava(random(width), random(height), random(10, 100));
+				lavas.push(l);
+			}
+		}
+
+		function draw() {
+			background('#b7ebff40');
+			for (let l of lavas) {
+				l.move();
+				l.show();
+			}
+		}
+
+		function mousePressed() {
+			if (looping) noLoop();
+			else loop();
+			looping = !looping;
+		}
+
+		class Lava {
+			constructor(x, y, r) {
+				this.x = x;
+				this.y = y;
+				this.r = r;
+				this.d = r * 2;
+				this.xSpeed = random(-0.5, 0.5);
+				this.ySpeed = random(-0.5, -2);
+				this.res = r < 25 ? 5 : 8;
+				this.offsets = Array.from({ length: this.res }, () => random(-5, 5));
+				this.noiseOffsets = Array.from({ length: this.res }, () => random(1000));
+				this.layer = round(random(1, 4));
+			}
+			move() {
+				this.x += this.xSpeed;
+				this.y += this.ySpeed;
+				if (this.y < -this.d) {
+					this.x = random(width);
+					this.y = height + this.d;
+				}
+				for (let i = 0; i < this.offsets.length; i++) {
+					this.offsets[i] = map(noise(this.noiseOffsets[i]), 0, 1, 0, this.d);
+					this.noiseOffsets[i] += 0.005;
+				}
+			}
+			show() {
+				push();
+				fill(0, 25 * this.layer);
+				translate(this.x, this.y);
+				beginShape();
+
+				let hv = this.res / 2;
+				for (let i = 0; i < this.res; i++) {
+					let rad = (i * PI) / hv;
+					let r = this.r + this.offsets[i];
+					let x = r * cos(rad);
+					let y = r * sin(rad);
+					curveVertex(x, y);
+				}
+				for (let i = 0; i < hv; i++) {
+					let rad = (i * PI) / hv;
+					let r = this.r + this.offsets[i];
+					let x = r * cos(rad);
+					let y = r * sin(rad);
+					curveVertex(x, y);
+				}
+				endShape();
+				pop();
+			}
+		}
+
+		function windowResized() {
+			resizeCanvas();
+		}
+
+	</script>
+</body>
+
+</html>

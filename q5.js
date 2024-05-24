@@ -93,8 +93,8 @@ function Q5(scope, parent) {
 	$.createCanvas = function (width, height, renderer, options) {
 		if (renderer == 'webgl') throw `webgl renderer is not supported in q5, use '2d'`;
 		if (typeof renderer == 'object') options = renderer;
-		$.width = $.canvas.width = width;
-		$.height = $.canvas.height = height;
+		$.width = $.canvas.width = width || window.innerWidth;
+		$.height = $.canvas.height = height || window.innerHeight;
 		$.canvas.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
@@ -736,6 +736,8 @@ function Q5(scope, parent) {
 	}
 
 	function _resizeCanvas(w, h) {
+		w ??= window.innerWidth;
+		h ??= window.innerHeight;
 		$.width = w;
 		$.height = h;
 		let c = cloneCtx();
@@ -1154,9 +1156,12 @@ function Q5(scope, parent) {
 			y = x.y;
 			x = x.x;
 		}
+		ctx.save();
 		ctx.beginPath();
-		ctx.ellipse(x, y, 0.4, 0.4, 0, 0, $.TAU);
-		ctx.stroke();
+		ctx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2);
+		ctx.fillStyle = ctx.strokeStyle;
+		ctx.fill();
+		ctx.restore();
 	};
 	function rectImpl(x, y, w, h) {
 		if ($._doFill) ctx.fillRect(x, y, w, h);
@@ -1688,7 +1693,7 @@ function Q5(scope, parent) {
 	};
 	var p_perlin;
 
-	$.noise = (x = 0, y = 0, z) => {
+	$.noise = (x = 0, y = 0, z = 0) => {
 		if (p_perlin == null) {
 			p_perlin = new Array(PERLIN_SIZE + 1);
 			for (var i = 0; i < PERLIN_SIZE + 1; i++) {
@@ -2377,6 +2382,7 @@ function Q5(scope, parent) {
 		window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
 		window.addEventListener('keydown', (e) => $._onkeydown(e), false);
 		window.addEventListener('keyup', (e) => $._onkeyup(e), false);
+		window.addEventListener('resize', () => ($._shouldResize = true));
 	}
 
 	if (!($.setup || $.draw)) return;

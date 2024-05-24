@@ -105,7 +105,7 @@ https://en.wikipedia.org/wiki/HSL_and_HSV#Disadvantages
 
 ## New Features: Customize Canvas Context Attributes
 
-In **p5**, you're stuck with the default [canvas context attributes][], which can't be changed. So the canvas must have an alpha layer, even if you don't need one. Also p5 doesn't support HDR color spaces or [desynchronized rendering][].
+In **p5**, you're stuck with the default [canvas context attributes][], which can't be changed. So the canvas must have an alpha layer, even if you don't need one. HDR color space and [desynchronized rendering][] are not supported.
 
 But **q5** has its own defaults:
 
@@ -117,7 +117,9 @@ Q5.canvasOptions = {
 };
 ```
 
-The `Q5.canvasOptions` object can be overridden, which will effect all q5 instances.You can also override any of these defaults by passing an options object as the fourth parameter to the `createCanvas()` function:
+The "display-p3" color space will be used by default on supported devices, falling back to "srgb".
+
+The `Q5.canvasOptions` object can be overridden, which will effect all q5 instances. You can also override any of these defaults by passing an options object as the fourth parameter to the `createCanvas()` function:
 
 ```js
 createCanvas(400, 400, '2d', {

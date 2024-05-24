@@ -1,0 +1,106 @@
+html {
+	--blue: #b7ebff;
+	--black: #000;
+
+	--brand-primary: #000;
+	--brand-secondary: #b7ebff;
+
+	--primary: #fff;
+	--secondary: #000;
+}
+
+body.dark {
+	--brand-primary: #b7ebff;
+	--brand-secondary: #000;
+
+	--primary: #c8c3bc;
+	--secondary: #131516;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	background-color: var(--brand-secondary);
+	font-family: sans-serif;
+	height: 100vh;
+}
+
+main {
+	position: absolute;
+	top: 0;
+}
+
+.reel0 {
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+}
+
+a {
+	text-decoration: none;
+}
+
+.brand a {
+	display: flex;
+	gap: 8px;
+}
+
+.brand .img {
+	height: 128px;
+	border-radius: 16px;
+	background-size: contain;
+}
+
+.q5js_logo {
+	width: 128px;
+	background-image: url('/q5js_logo.webp');
+}
+
+.dark .q5js_logo {
+	background-image: url('/assets/q5js_logo-light.webp');
+}
+
+.q5js_brand {
+	width: 256px;
+	background-image: url('/q5js_brand.webp');
+}
+
+.dark .q5js_brand {
+	background-image: url('/assets/q5js_brand-light.webp');
+}
+
+.reel0 textarea {
+	width: 100%;
+	background-color: var(--brand-primary);
+	color: var(--brand-secondary);
+	text-align: center;
+	margin-top: 8px;
+	padding: 0;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	border-radius: 16px;
+	font-weight: bold;
+	font-size: 13px;
+	line-height: 1;
+	resize: none;
+	box-sizing: border-box;
+	border: none;
+	white-space: nowrap;
+}
+
+@media screen and (max-width: 400px) {
+
+	.brand .img:first-child {
+		display: none;
+	}
+
+	.reel0 textarea {
+		font-size: 8px;
+	}
+}

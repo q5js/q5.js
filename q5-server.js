@@ -1,3 +1,9 @@
+/**
+ * q5-server.js
+ * @author quinton-ashley
+ * @license LGPL-3.0
+ */
+
 try {
 	global.CairoCanvas ??= require('canvas');
 	global.JSDOM ??= require('jsdom').JSDOM;
