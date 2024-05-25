@@ -26,6 +26,7 @@ body {
 	background-color: var(--brand-secondary);
 	font-family: sans-serif;
 	height: 100vh;
+	overflow-x: hidden;
 }
 
 main {
