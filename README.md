@@ -2,9 +2,7 @@
 
 **q5.js** implements all of [p5][]'s 2D drawing, math, and user input functionality.
 
-It's a drop-in replacement that's performance optimized and 23x smaller than p5. q5 even has a few exclusive features: top-level global mode, HDR color support, namespace mode, and text image caching.
-
-But q5 doesn't include any friendly error messages, so its mainly for people who are already familiar with p5.js or JS programming in general. If you're a beginner, stick with p5 while developing a sketch, then use q5 to share your work.
+It's a drop-in replacement that's performance optimized and ~20x smaller than p5, while packing a few exclusive new features: top-level global mode, HDR color support, namespace mode, and text image caching.
 
 ## Usage
 
@@ -42,6 +40,35 @@ To use addons, simply load them after q5.js:
 <script src="https://p5play.org/v3/planck.min.js"></script>
 <script src="https://p5play.org/v3/p5play.js"></script>
 ```
+
+## New Features: Ask AI ✨
+
+Why doesn't this code work? `text('Hello!');`
+
+JavaScript quietly avoids errors if possible (for example by giving undefined variables default values) and its error messages can be confusing for beginners.
+
+p5's error messages are friendlier but often too vague, leaving beginners searching for help. 🙋
+
+```
+🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
+```
+
+q5 creates error reports that can be sent to an AI just by clicking a link! Users can also run the `askAI()` function before a line of code that isn't working as expected. 🤖
+
+```js
+function draw() {
+	askAI();
+	text('Hello!');
+}
+```
+
+Optionally `askAI` can take a question as input, the default question is "What's wrong with this line? short answer".
+
+ChatGPT 4o excels at identifying the most common errors that beginners make: typos, missing syntax, incorrect arguments, and more.
+
+This feature can be disabled by setting `Q5.disableFriendlyErrors = true;`, though unlike in p5 this doesn't provide a performance boost from disabling argument validation because q5 mostly doesn't have any already.
+
+q5 can catch errors in q5 function like `draw` and continue looping if you set `Q5.errorTolerant = true;`.
 
 ## New Features: Top-Level Global Mode
 

@@ -1,8 +1,8 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5",
-	"version": "1.9.22",
-	"description": "An implementation of the p5.js 2D API that's smaller and faster",
+	"version": "1.9.23",
+	"description": "The unofficial sequel to p5.js",
 	"main": "q5-server.js",
 	"scripts": {
 		"min": "terser q5.js --compress ecma=2024 --mangle > q5.min.js",
@@ -29,5 +29,8 @@
 	"bugs": {
 		"url": "https://github.com/quinton-ashley/q5.js/issues"
 	},
-	"homepage": "https://github.com/quinton-ashley/q5.js#readme"
+	"homepage": "https://github.com/quinton-ashley/q5.js#readme",
+	"dependencies": {
+		"jsdom": "^24.0.0"
+	}
 }

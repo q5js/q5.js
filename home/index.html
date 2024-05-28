@@ -11,30 +11,207 @@
 
 <body class="light">
 	<main></main>
-	<div class="reel0">
+	<div id="reel0">
 		<div class="brand">
 			<a href="https://github.com/quinton-ashley/q5.js">
 				<div class="img q5js_logo"></div>
 				<div class="img q5js_brand"></div>
 			</a>
-			<textarea rows="1" readonly><script src="https://q5js.org/q5.js"></script></textarea>
+			<textarea rows="1" readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
 		</div>
 	</div>
+	<div id="reel1">
+		<md id="md1-0">
+			<h2 id="the-sequel-to-p5js-is-here-🎉">The sequel to p5.js is here! 🎉</h2>
+			<p>q5.js implements all of <a href="https://p5js.org" target="_blank">p5</a>'s 2D drawing, math, and user input
+				functionality.</p>
+			<p>It's a drop-in replacement that's performance optimized and ~20x smaller than p5.</p>
+		</md>
+		<div class="minis horiz">
+			<script type="mie/p5" id="p5.js" horiz="" width="350px">
+function setup() {
+	createCanvas(100, 100);
+	circle(50, 50, 50);
+}
+			</script>
+			<script type="mie/q5" id="q5.js" horiz="" width="350px">
+function setup() {
+	createCanvas(100, 100);
+	circle(50, 50, 50);
+}
+			</script>
+		</div>
+	</div>
+	<div id="reel2">
+		<md id="md2-0">
+			<h2 id="more-vibrant-colors-🎨">More vibrant colors! 🎨</h2>
+		</md>
+		<div class="minis horiz">
+			<div>
+				<script type="mie/p5" id="SDR" hide-editor="">
+window.calcMiniWidth = () => (min(windowWidth, 1200) - 72) / 2;
+
+let colors = ['red', 'lime', 'magenta', 'yellow', 'cyan', 'blue', 'white', 'black'];
+
+function setup() {
+	createCanvas(calcMiniWidth(), 200, {
+		colorSpace: 'srgb'
+	});
+}
+
+function draw() {
+	background('#eee');
+
+	let f = frameCount * 0.001;
+	let a = [];
+	for (let i = 0; i < 33; i++) {
+		a.push(noise(i, f));
+	}
+
+	for (let i = 0; i < 30; i++) {
+		let d = a[i] * 100;
+		fill(colors[i % colors.length]);
+		circle(a[i + 1] * width, a[i + 2] * height, d);
+	}
+}
+
+function windowResized() {
+	resizeCanvas(calcMiniWidth(), 200);
+}
+				</script>
+				<md id="md2-1">
+					<p>In p5, bright colors look dull on modern devices 😕</p>
+				</md>
+			</div>
+			<div>
+				<script type="mie/q5" id="HDR" hide-editor="">
+let colors = ['red', 'lime', 'magenta', 'yellow', 'cyan', 'blue', 'white', 'black'];
+
+function setup() {
+	createCanvas(calcMiniWidth(), 200);
+}
+
+function draw() {
+	background('#eee');
+
+	let f = frameCount * 0.001;
+	let a = [];
+	for (let i = 0; i < 33; i++) {
+		a.push(noise(i, f));
+	}
+
+	for (let i = 0; i < 30; i++) {
+		let d = a[i] * 100;
+		fill(colors[i % colors.length]);
+		circle(a[i + 1] * width, a[i + 2] * height, d);
+	}
+}
+
+function windowResized() {
+	resizeCanvas(calcMiniWidth(), 200);
+}
+			</script>
+				<md id="md2-2">
+					<p>q5 empowers artists with a <a
+							href="https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#new-features-hdr-color-support"
+							target="_blank">wider range of colors</a> 🤩</p>
+				</md>
+			</div>
+		</div>
+	</div>
+	<div id="reel3">
+		<md id="md3-0">
+			<h2 id="more-help-for-beginners-✨">More help for beginners ✨</h2>
+			<p>Why doesn't this code work? <code>text('Hello!');</code></p>
+			<p>p5's error messages are often too vague and leave beginners searching for help. 🙋</p>
+			<pre><code>🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
+</code></pre>
+			<p>q5 creates error reports that can be sent to an AI just by clicking a link! Users can also run the
+				<code>askAI()</code> function before code that isn't working as expected. 🤖</p>
+			<pre><code class="language-js">function draw() {
+    askAI();
+    text('Hello!');
+}
+</code></pre>
+			<p>ChatGPT 4o excels at identifying the most common errors that beginners make: typos, missing syntax, incorrect
+				arguments, and more.</p>
+		</md>
+		<img src="ai_help.webp" alt="AI help">
+	</div>
+	<div id="reel4">
+		<md id="md4-0">
+			<h2 id="more-freedom-🔥">More freedom 🔥</h2>
+			<p>q5 is open source licensed under the <a href="../LICENSE.md" target="_blank">LGPLv3</a>, so you can even use it
+				for free in commercial projects. 🆓</p>
+			<p>The q5 team is committed to fostering an inclusive community. Join us on the <a
+					href="https://discord.gg/QuxQYwGWuB" target="_blank">q5.js Discord</a>! 🗺️</p>
+		</md>
+	</div>
+	<div id="reel10">
+		<md id="md10-0">
+			<h2 id="why-switch-from-p5-⚖️">Why switch from p5? ⚖️</h2>
+			<p>In October 2023, Processing's co-founder, Ben Fry, <a href="https://x.com/ben_fry/status/1709400641456501020"
+					target="_blank">publicly criticized</a> The Processing Foundation for squandering <a
+					href="https://medium.com/processing-foundation/processing-foundation-funding-update-94cddb25a3d9"
+					target="_blank">millions of dollars</a> and resigned. 🚪</p>
+			<p>So where is all that donor money going? 💸</p>
+			<p>Many of the proposed <a href="https://github.com/processing/p5.js/issues/6678" target="_blank">"2.0"
+					updates</a> to p5.js are years overdue. The p5 web editor has <a
+					href="https://medium.com/processing-foundation/hello-p5-js-web-editor-b90b902b74cf" target="_blank">hardly
+					changed since it released in 2018</a>. Even the legendary Dan Shiffman has been waiting on a <a
+					href="https://github.com/processing/p5.js-web-editor/issues/208#issuecomment-263898359"
+					target="_blank">feature request for 7 years and counting</a>. So what hope does anyone else have at getting
+				their suggestions implemented? 📅</p>
+			<p>Volunteers are doing most of the real work on p5 and the p5 ecosystem, yet it still takes months for paid staff
+				to simply approve and publish crucial updates. Even the most popular third party p5 library, <a
+					href="https://p5play.org" target="_blank">p5play</a>, hasn't been offered a cent from the foundation. 😔</p>
+			<p>Why can't staff focus on p5? Perhaps because even the foundation's executives are too busy <a
+					href="https://www.linkedin.com/in/edsaber/" target="_blank">taking paychecks from other full-time jobs</a>.
+				🕵️</p>
+			<p>When confronted about any of this on Discord or GitHub, the p5 team ignores or bans posts by upset users,
+				citing "verbal violence" and playing the victim. It seems they'd prefer to take their $80k-$160k salaries in
+				peace. 🎂</p>
+			<p><a href="https://processingfoundation.org/" target="_blank">The Processing Foundation website</a> is filled
+				with aspirational platitudes but their actions speak louder than words. Many people in the community feel like
+				their trust in the foundation has been betrayed. 🤥</p>
+		</md>
+		<md id="md10-1">
+			<h2 id="q5-is-the-future-⌚️">q5 is the future ⌚️</h2>
+			<p>The q5 team aims to right these wrongs by being financially transparent, quick with useful updates, and
+				receptive to all feedback (especially criticism). 📝</p>
+			<p>We're inspired to carry on the legacy of Processing and truly champion the original creators' goals. Creative
+				coders deserve better, let's make it happen together! 🤝</p>
+		</md>
+	</div>
+	<div id="reel6">
+		<md id="md6-0">
+			<h2 id="webgpu-support-🚀">WebGPU support 🚀</h2>
+			<p>We're already working on a next-gen version of q5 that uses <a
+					href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API" target="_blank">WebGPU</a> for blazing fast
+				rendering. Stay tuned! 🏎️</p>
+		</md>
+	</div>
+	<footer>Created by Quinton Ashley</footer>
 	<script src="../q5.js"></script>
 	<script>
 		let lavas = [];
 		let looping = true;
+		let darkMode = false;
 
 		function setup() {
 			createCanvas();
-			for (let i = 0; i < 30; i++) {
+			let amount = floor(width / 40);
+			for (let i = 0; i < amount; i++) {
 				let l = new Lava(random(width), random(height), random(10, 100));
 				lavas.push(l);
 			}
 		}
 
 		function draw() {
-			background('#b7ebff40');
+			darkMode = document.body.classList.contains('dark');
+			if (darkMode) background('#00000040');
+			else background('#b7ebff40');
+
 			for (let l of lavas) {
 				l.move();
 				l.show();
@@ -53,6 +230,7 @@
 				this.y = y;
 				this.r = r;
 				this.d = r * 2;
+				this.maxSize = this.d * 2;
 				this.xSpeed = random(-0.5, 0.5);
 				this.ySpeed = random(-0.5, -2);
 				this.res = r < 25 ? 5 : 8;
@@ -63,7 +241,7 @@
 			move() {
 				this.x += this.xSpeed;
 				this.y += this.ySpeed;
-				if (this.y < -this.d) {
+				if (this.y < -this.maxSize) {
 					this.x = random(width);
 					this.y = height + this.d;
 				}
@@ -74,7 +252,8 @@
 			}
 			show() {
 				push();
-				fill(0, 25 * this.layer);
+				if (darkMode) fill(183, 235, 255, 25 * this.layer);
+				else fill(0, 25 * this.layer);
 				translate(this.x, this.y);
 				beginShape();
 
@@ -103,6 +282,55 @@
 		}
 
 	</script>
+	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.18.0/src-min-noconflict/ace.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.18.0/src-min-noconflict/ext-language_tools.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.18.0/src-min-noconflict/ext-beautify.js"></script>
+	<script src="/home/mie.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </body>
 
 </html>

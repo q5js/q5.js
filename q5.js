@@ -91,7 +91,7 @@ function Q5(scope, parent) {
 	}
 
 	$.createCanvas = function (width, height, renderer, options) {
-		if (renderer == 'webgl') throw `webgl renderer is not supported in q5, use '2d'`;
+		if (renderer == 'webgl') throw Error(`webgl renderer is not supported in q5, use '2d'`);
 		if (typeof renderer == 'object') options = renderer;
 		$.width = $.canvas.width = width || window.innerWidth;
 		$.height = $.canvas.height = height || window.innerHeight;
@@ -924,6 +924,7 @@ function Q5(scope, parent) {
 		blue: [0, 0, 255],
 		brown: [165, 42, 42],
 		crimson: [220, 20, 60],
+		cyan: [0, 255, 255],
 		darkviolet: [148, 0, 211],
 		gold: [255, 215, 0],
 		green: [0, 128, 0],
@@ -1026,6 +1027,7 @@ function Q5(scope, parent) {
 		$._doStroke = true;
 		$._strokeSet = true;
 		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+		else if (basicColors[c]) c = $.color(...basicColors[c]);
 		if (c.a <= 0) return ($._doStroke = false);
 		ctx.strokeStyle = c.toString();
 	};
@@ -1034,6 +1036,7 @@ function Q5(scope, parent) {
 		$._doFill = true;
 		$._fillSet = true;
 		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+		else if (basicColors[c]) c = $.color(...basicColors[c]);
 		if (c.a <= 0) return ($._doFill = false);
 		ctx.fillStyle = c.toString();
 	};
@@ -1059,7 +1062,8 @@ function Q5(scope, parent) {
 		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
 		ctx.save();
 		ctx.resetTransform();
-		if (!c._q5color && typeof c != 'string') c = $.color(...arguments);
+		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+		else if (basicColors[c]) c = $.color(...basicColors[c]);
 		ctx.fillStyle = c.toString();
 		ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		ctx.restore();
@@ -2018,11 +2022,7 @@ function Q5(scope, parent) {
 		clearBuff();
 		firstVertex = true;
 		if (ctx) ctx.save();
-		try {
-			$.draw();
-		} catch (e) {
-			console.error(e);
-		}
+		$.draw();
 		for (let m of Q5.prototype._methods.post) m.call($);
 		if (ctx) {
 			ctx.restore();
@@ -2311,6 +2311,72 @@ function Q5(scope, parent) {
 		return $.audioContext.resume();
 	};
 
+	// AI
+
+	$.askAI = (q = '') => {
+		throw Error('Ask AI ✨ ' + q);
+	};
+
+	async function aiErrorAssistance(e) {
+		let askAI = e.message.includes('Ask AI ✨');
+		if (!askAI) console.error(e);
+		if (Q5.disableFriendlyErrors) return;
+		if (askAI || !Q5.errorTolerant) noLoop();
+		let stackLines = e.stack.split('\n');
+		if (stackLines.length <= 1) return;
+
+		let idx = 1;
+		let sep = '(';
+		if (navigator.userAgent.indexOf('Chrome') == -1) {
+			idx = 0;
+			sep = '@';
+		}
+		while (stackLines[idx].indexOf('q5.js:') >= 0) idx++;
+
+		let parts = stackLines[idx].split(sep).at(-1);
+		parts = parts.split(':');
+		let lineNum = parseInt(parts.at(-2));
+		if (askAI) lineNum++;
+		let fileUrl = parts.slice(0, -2).join(':');
+		let fileBase = fileUrl.split('/').at(-1);
+
+		try {
+			let res = await (await fetch(fileUrl)).text();
+			let lines = res.split('\n');
+			let errLine = lines[lineNum - 1].trim();
+
+			let context = '';
+			let i = 1;
+			while (context.length < 1600) {
+				if (lineNum - i >= 0) {
+					context = lines[lineNum - i].trim() + '\n' + context;
+				}
+				if (lineNum + i < lines.length) {
+					context += lines[lineNum + i].trim() + '\n';
+				}
+				i++;
+			}
+
+			let question =
+				askAI && e.message.length > 10 ? e.message.slice(10) : 'Whats+wrong+with+this+line%3F+short+answer';
+
+			let url =
+				'https://chatgpt.com/?q=q5.js+' +
+				question +
+				(askAI ? '' : '%0A%0A' + encodeURIComponent(e.name + ': ' + e.message)) +
+				'%0A%0ALine%3A+' +
+				encodeURIComponent(errLine) +
+				'%0A%0AExcerpt+for+context%3A%0A%0A' +
+				encodeURIComponent(context);
+
+			if (!askAI) console.log('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
+
+			console.warn('Ask AI ✨ ' + url);
+
+			if (askAI) window.open(url, '_blank');
+		} catch (err) {}
+	}
+
 	// INIT
 
 	if (scope == 'global') {
@@ -2354,7 +2420,7 @@ function Q5(scope, parent) {
 
 	let t = scope == 'global' ? (!Q5._nodejs ? window : global) : $;
 	let preloadDefined = t.preload;
-	let eventNames = [
+	let userFns = [
 		'setup',
 		'draw',
 		'preload',
@@ -2371,9 +2437,17 @@ function Q5(scope, parent) {
 		'touchEnded',
 		'windowResized'
 	];
-	for (let k of eventNames) {
+	for (let k of userFns) {
 		if (!t[k]) $[k] = () => {};
-		else if ($._isGlobal) $[k] = t[k];
+		else if ($._isGlobal) {
+			$[k] = () => {
+				try {
+					t[k]();
+				} catch (e) {
+					aiErrorAssistance(e);
+				}
+			};
+		}
 	}
 
 	$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
@@ -2382,7 +2456,10 @@ function Q5(scope, parent) {
 		window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
 		window.addEventListener('keydown', (e) => $._onkeydown(e), false);
 		window.addEventListener('keyup', (e) => $._onkeyup(e), false);
-		window.addEventListener('resize', () => ($._shouldResize = true));
+		window.addEventListener('resize', () => {
+			$._shouldResize = true;
+			if (!$._loop) $.redraw();
+		});
 	}
 
 	if (!($.setup || $.draw)) return;
@@ -2765,7 +2842,7 @@ if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
-	throw func + ': ' + msg;
+	throw Error(func + ': ' + msg);
 };
 Q5._validateParameters = () => true;
 
