@@ -67,7 +67,13 @@ We're already working on a next-gen version of q5 that uses [WebGPU](https://dev
 
 ## Why switch from p5? ⚖️
 
-In October 2023, Processing's co-founder, Ben Fry, [publicly criticized](https://x.com/ben_fry/status/1709400641456501020) The Processing Foundation for squandering [millions of dollars](https://medium.com/processing-foundation/processing-foundation-funding-update-94cddb25a3d9) and resigned. 🚪
+In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020).
+
+Despite taking exorbitant salaries, the foundation's executives are too busy [working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. Volunteers still do most of the real work, yet it takes several months for paid staff to simply approve and publish crucial updates. 🕵️
+
+Creative coders deserve better, let's make it happen together! q5 will be run as a worker co-op. All contributors will be fairly compensated for their work. 🤝
+
+# 10-1
 
 So where is all that donor money going? 💸
 
@@ -79,12 +85,4 @@ Why can't staff focus on p5? Perhaps because even the foundation's executives ar
 
 When confronted about any of this on Discord or GitHub, the p5 team ignores or bans posts by upset users, citing "verbal violence" and playing the victim. It seems they'd prefer to take their $80k-$160k salaries in peace. 🎂
 
-[The Processing Foundation website](https://processingfoundation.org/) is filled with aspirational platitudes but their actions speak louder than words. Many people in the community feel like their trust in the foundation has been betrayed. 🤥
-
-# 10-1
-
-## q5 is the future ⌚️
-
-The q5 team aims to right these wrongs by being financially transparent, quick with useful updates, and receptive to all feedback (especially criticism). 📝
-
-We're inspired to carry on the legacy of Processing and truly champion the original creators' goals. Creative coders deserve better, let's make it happen together! 🤝
+[The Processing Foundation website](https://processingfoundation.org/) is filled with aspirational platitudes but their actions speak louder than words. Many people in the community feel like their trust in the foundation has been betrayed.

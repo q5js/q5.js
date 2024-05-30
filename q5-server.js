@@ -48,4 +48,5 @@ Q5._createNodeJSCanvas = function () {
 	});
 };
 
-module.exports = Q5;
+global.p5 ??= Q5;
+module.exports = global.Q5 = Q5;

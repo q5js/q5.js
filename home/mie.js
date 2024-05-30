@@ -41,8 +41,8 @@ class MiniEditor {
 		else mini.className += ' vert';
 		mini.id = 'mie-' + this.id;
 		mini.style = script.style.cssText;
-		if (!script.style.cssText.includes('width')) {
-			mini.style.width = props.width || 'fit-content';
+		if (!script.style.cssText.includes('width') && props.width) {
+			mini.style.width = props.width;
 		}
 		script.after(mini);
 		this.elem = mini;

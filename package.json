@@ -1,7 +1,7 @@
 {
 	"author": "quinton-ashley",
 	"name": "q5",
-	"version": "1.9.23",
+	"version": "1.9.24",
 	"description": "The unofficial sequel to p5.js",
 	"main": "q5-server.js",
 	"scripts": {
