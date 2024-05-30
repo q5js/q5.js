@@ -71,7 +71,7 @@ In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and p
 
 Despite taking exorbitant salaries, the foundation's executives are too busy [working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. Volunteers still do most of the real work, yet it takes several months for paid staff to simply approve and publish crucial updates. 🕵️
 
-Creative coders deserve better, let's make it happen together! q5 will be run as a worker co-op. All contributors will be fairly compensated for their work. 🤝
+Creative coders deserve better, let's make it happen together! q5 will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative). All contributors will be fairly compensated for their work. 🤝
 
 # 10-1
 

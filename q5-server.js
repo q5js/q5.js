@@ -8,7 +8,8 @@ try {
 	global.CairoCanvas ??= require('canvas');
 	global.JSDOM ??= require('jsdom').JSDOM;
 } catch (e) {
-	module.exports = require('./q5.js');
+	require('./q5.js');
+	module.exports = Q5;
 	return;
 }
 
@@ -24,7 +25,7 @@ global.window = new JSDOM('', { url: 'http://localhost' }).window;
 	global.Event = window.Event;
 }
 
-const Q5 = require('./q5.js');
+require('./q5.js');
 
 Q5._createNodeJSCanvas = function () {
 	let cairoCanvas = CairoCanvas.createCanvas(...arguments);
@@ -48,5 +49,4 @@ Q5._createNodeJSCanvas = function () {
 	});
 };
 
-global.p5 ??= Q5;
-module.exports = global.Q5 = Q5;
+module.exports = Q5;

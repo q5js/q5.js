@@ -282,7 +282,7 @@ function Q5(scope, parent) {
 	}
 }
 
-// Q5
+Q5.modules = {};
 
 Q5._nodejs = typeof process == 'object';
 
@@ -301,10 +301,9 @@ Q5.prototype._methods = {
 Q5.prototype.registerMethod = (m, fn) => Q5.prototype._methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
-if (typeof window == 'object') {
-	window.p5 ??= Q5;
-	window.Q5 = Q5;
-} else window = 0;
+if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
+else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
+else window = 0;
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
