@@ -4,6 +4,7 @@ dev
 home
 lang
 learn
+src
 node_modules
 package-lock.json
 index.html
