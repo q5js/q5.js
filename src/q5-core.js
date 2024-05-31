@@ -11,6 +11,8 @@
 function Q5(scope, parent) {
 	let $ = this;
 	$._q5 = true;
+	$._scope = scope;
+	$._parent = parent;
 	$._preloadCount = 0;
 	if (!scope) scope = 'global';
 	if (scope == 'auto') {
@@ -19,7 +21,7 @@ function Q5(scope, parent) {
 	}
 	if (scope == 'global') Q5._hasGlobal = $._isGlobal = true;
 
-	let ctx = ($.ctx = $.drawingContext = null);
+	$.ctx = $.drawingContext = null;
 	$.canvas = null;
 	$.pixels = [];
 	let looper = null;
@@ -37,7 +39,7 @@ function Q5(scope, parent) {
 	$.noCanvas = () => {
 		if ($.canvas?.remove) $.canvas.remove();
 		$.canvas = 0;
-		ctx = $.ctx = $.drawingContext = 0;
+		$.ctx = $.drawingContext = 0;
 	};
 
 	Object.defineProperty($, 'windowWidth', {
@@ -76,13 +78,13 @@ function Q5(scope, parent) {
 		}
 		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
-		clearBuff();
+		// clearBuff(); TODO
 		firstVertex = true;
-		if (ctx) ctx.save();
+		if ($.ctx) $.ctx.save();
 		$.draw();
 		for (let m of Q5.prototype._methods.post) m.call($);
-		if (ctx) {
-			ctx.restore();
+		if ($.ctx) {
+			$.ctx.restore();
 			$.resetMatrix();
 		}
 		$.pmouseX = $.mouseX;
@@ -126,44 +128,8 @@ function Q5(scope, parent) {
 	};
 	$._elements = [];
 
-	// TIME
-
-	$.year = () => new Date().getFullYear();
-	$.day = () => new Date().getDay();
-	$.hour = () => new Date().getHours();
-	$.minute = () => new Date().getMinutes();
-	$.second = () => new Date().getSeconds();
-
-	// LOAD FILES
-
-	$._loadFile = (path, cb, type) => {
-		$._preloadCount++;
-		let ret = {};
-		fetch(path)
-			.then((r) => {
-				if (type == 'json') return r.json();
-				if (type == 'text') return r.text();
-			})
-			.then((r) => {
-				$._preloadCount--;
-				Object.assign(ret, r);
-				if (cb) cb(r);
-			});
-		return ret;
-	};
-
-	$.loadStrings = (path, cb) => $._loadFile(path, cb, 'text');
-	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
-
-	if (typeof localStorage == 'object') {
-		$.storeItem = localStorage.setItem;
-		$.getItem = localStorage.getItem;
-		$.removeItem = localStorage.removeItem;
-		$.clearStorage = localStorage.clear;
-	}
-
-	for (let module of Q5.modules) {
-		module($);
+	for (let m in Q5.modules) {
+		Q5.modules[m]($);
 	}
 
 	// INIT
@@ -265,9 +231,9 @@ function Q5(scope, parent) {
 		millisStart = performance.now();
 		$.setup();
 		if ($.frameCount) return;
-		if (ctx === null) $.createCanvas(100, 100);
+		if ($.ctx === null) $.createCanvas(100, 100);
 		$._setupDone = true;
-		if (ctx) $.resetMatrix();
+		if ($.ctx) $.resetMatrix();
 		raf(_draw);
 	}
 

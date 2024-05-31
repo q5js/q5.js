@@ -1,6 +1,4 @@
 Q5.modules.q2d_canvas = ($) => {
-	let ctx = $.ctx;
-
 	let _OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
@@ -11,7 +9,7 @@ Q5.modules.q2d_canvas = ($) => {
 		if (Q5._createNodeJSCanvas) {
 			$.canvas = Q5._createNodeJSCanvas(100, 100);
 		}
-	} else if (scope == 'image' || scope == 'graphics') {
+	} else if ($._scope == 'image' || $._scope == 'graphics') {
 		$.canvas = new _OffscreenCanvas(100, 100);
 	}
 	if (!$.canvas) {
@@ -27,11 +25,12 @@ Q5.modules.q2d_canvas = ($) => {
 	$.canvas.width = $.width = 100;
 	$.canvas.height = $.height = 100;
 
-	if ($.canvas && scope != 'graphics' && scope != 'image') {
+	if ($.canvas && $._scope != 'graphics' && $._scope != 'image') {
 		$._setupDone = false;
 		$._resize = () => {
 			if ($.frameCount > 1) $._shouldResize = true;
 		};
+		let parent = $._parent;
 		if (parent && typeof parent == 'string') {
 			parent = document.getElementById(parent);
 		}
@@ -59,6 +58,14 @@ Q5.modules.q2d_canvas = ($) => {
 		else document.addEventListener('DOMContentLoaded', appendCanvas);
 	}
 
+	$._defaultStyle = () => {
+		$.ctx.fillStyle = 'white';
+		$.ctx.strokeStyle = 'black';
+		$.ctx.lineCap = 'round';
+		$.ctx.lineJoin = 'miter';
+		$.ctx.textAlign = 'left';
+	};
+
 	$.createCanvas = function (width, height, renderer, options) {
 		if (renderer == 'webgl') throw Error(`webgl renderer is not supported in q5, use '2d'`);
 		if (typeof renderer == 'object') options = renderer;
@@ -68,26 +75,26 @@ Q5.modules.q2d_canvas = ($) => {
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
 
-		ctx = $.ctx = $.drawingContext = $.canvas.getContext('2d', opt);
+		$.ctx = $.drawingContext = $.canvas.getContext('2d', opt);
 		Object.assign($.canvas, opt);
 		if ($._colorMode == 'rgb') $.colorMode('rgb');
-		defaultStyle();
-		ctx.save();
-		if (scope != 'image') {
+		$._defaultStyle();
+		$.ctx.save();
+		if ($._scope != 'image') {
 			let pd = $.displayDensity();
-			if (scope == 'graphics') pd = this._pixelDensity;
+			if ($._scope == 'graphics') pd = this._pixelDensity;
 			$.pixelDensity(Math.ceil(pd));
 		} else this._pixelDensity = 1;
 		return $.canvas;
 	};
 	$._createCanvas = $.createCanvas;
 
-	if (scope == 'image') return;
+	if ($._scope == 'image') return;
 
 	function cloneCtx() {
 		let c = {};
-		for (let prop in ctx) {
-			if (typeof ctx[prop] != 'function') c[prop] = ctx[prop];
+		for (let prop in $.ctx) {
+			if (typeof $.ctx[prop] != 'function') c[prop] = $.ctx[prop];
 		}
 		delete c.canvas;
 		return c;
@@ -106,7 +113,7 @@ Q5.modules.q2d_canvas = ($) => {
 			$.canvas.style.height = h + 'px';
 		}
 		for (let prop in c) $.ctx[prop] = c[prop];
-		ctx.scale($._pixelDensity, $._pixelDensity);
+		$.ctx.scale($._pixelDensity, $._pixelDensity);
 	}
 
 	$.resizeCanvas = (w, h) => {
@@ -139,22 +146,22 @@ Q5.modules.q2d_canvas = ($) => {
 
 	// DRAWING MATRIX
 
-	$.translate = (x, y) => ctx.translate(x, y);
+	$.translate = (x, y) => $.ctx.translate(x, y);
 	$.rotate = (r) => {
 		if ($._angleMode == 'degrees') r = $.radians(r);
-		ctx.rotate(r);
+		$.ctx.rotate(r);
 	};
 	$.scale = (x, y) => {
 		y ??= x;
-		ctx.scale(x, y);
+		$.ctx.scale(x, y);
 	};
-	$.opacity = (a) => (ctx.globalAlpha = a);
-	$.applyMatrix = (a, b, c, d, e, f) => ctx.transform(a, b, c, d, e, f);
-	$.shearX = (ang) => ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
-	$.shearY = (ang) => ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
+	$.opacity = (a) => ($.ctx.globalAlpha = a);
+	$.applyMatrix = (a, b, c, d, e, f) => $.ctx.transform(a, b, c, d, e, f);
+	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
+	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
 	$.resetMatrix = () => {
-		ctx.resetTransform();
-		ctx.scale($._pixelDensity, $._pixelDensity);
+		$.ctx.resetTransform();
+		$.ctx.scale($._pixelDensity, $._pixelDensity);
 	};
 
 	$._styleNames = [
@@ -178,13 +185,13 @@ Q5.modules.q2d_canvas = ($) => {
 	$._styles = [];
 
 	$.push = $.pushMatrix = () => {
-		ctx.save();
+		$.ctx.save();
 		let styles = {};
 		for (let s of $._styleNames) styles[s] = $[s];
 		$._styles.push(styles);
 	};
 	$.pop = $.popMatrix = () => {
-		ctx.restore();
+		$.ctx.restore();
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
 	};

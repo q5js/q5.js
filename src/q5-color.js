@@ -17,7 +17,7 @@ Q5.modules.color = ($) => {
 		}
 	};
 
-	let basicColors = {
+	$._basicColors = {
 		aqua: [0, 255, 255],
 		black: [0, 0, 0],
 		blue: [0, 0, 255],
@@ -64,7 +64,7 @@ Q5.modules.color = ($) => {
 						parseInt(c0.slice(5, 7), 16),
 						c0.length != 9 ? null : parseInt(c0.slice(7, 9), 16)
 					);
-				} else if (basicColors[c0]) return new C(...basicColors[c0]);
+				} else if ($._basicColors[c0]) return new C(...$._basicColors[c0]);
 				else return new C(0, 0, 0);
 			} else if (Array.isArray(c0)) return new C(...c0);
 		}

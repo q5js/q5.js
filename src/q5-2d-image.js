@@ -1,6 +1,4 @@
 Q5.modules.q2d_image = ($) => {
-	let ctx = $.ctx;
-
 	$.BLEND = 'source-over';
 	$.REMOVE = 'destination-out';
 	$.ADD = 'lighter';
@@ -26,11 +24,11 @@ Q5.modules.q2d_image = ($) => {
 	let tmpBuf = null;
 
 	$.loadPixels = () => {
-		imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
 		$.pixels = imgData.data;
 	};
 	$.updatePixels = () => {
-		if (imgData != null) ctx.putImageData(imgData, 0, 0);
+		if (imgData != null) $.ctx.putImageData(imgData, 0, 0);
 	};
 
 	function makeTmpCtx(w, h) {
@@ -228,24 +226,24 @@ Q5.modules.q2d_image = ($) => {
 
 	function softFilter(typ, x) {
 		if (!$._filters) initSoftFilters();
-		let imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		let imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
 		$._filters[typ](imgData.data, x);
-		ctx.putImageData(imgData, 0, 0);
+		$.ctx.putImageData(imgData, 0, 0);
 	}
 
 	function nativeFilter(filtstr) {
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.filter = filtstr;
 		tmpCtx.drawImage($.canvas, 0, 0);
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.restore();
 	}
 
 	$.filter = (typ, x) => {
-		if (!ctx.filter) return softFilter(typ, x);
+		if (!$.ctx.filter) return softFilter(typ, x);
 		makeTmpCtx();
 		if (typeof typ == 'string') {
 			nativeFilter(typ);
@@ -260,10 +258,10 @@ Q5.modules.q2d_image = ($) => {
 			tmpCtx.fillStyle = 'black';
 			tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 			tmpCtx.drawImage($.canvas, 0, 0);
-			ctx.save();
-			ctx.resetTransform();
-			ctx.drawImage(tmpCtx.canvas, 0, 0);
-			ctx.restore();
+			$.ctx.save();
+			$.ctx.resetTransform();
+			$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+			$.ctx.restore();
 		} else if (typ == $.INVERT) {
 			nativeFilter(`invert(100%)`);
 		} else if (typ == $.BLUR) {
@@ -280,16 +278,16 @@ Q5.modules.q2d_image = ($) => {
 		$.height = h;
 		$.canvas.width = w * $._pixelDensity;
 		$.canvas.height = h * $._pixelDensity;
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0, $.canvas.width, $.canvas.height);
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.restore();
 	};
 
 	$.trim = () => {
 		let pd = $._pixelDensity || 1;
-		let imgData = ctx.getImageData(0, 0, $.width * pd, $.height * pd);
+		let imgData = $.ctx.getImageData(0, 0, $.width * pd, $.height * pd);
 		let data = imgData.data;
 		let left = $.width,
 			right = 0,
@@ -318,7 +316,7 @@ Q5.modules.q2d_image = ($) => {
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
-			let c = ctx.getImageData(x * pd, y * pd, 1, 1).data;
+			let c = $.ctx.getImageData(x * pd, y * pd, 1, 1).data;
 			return new $.Color(c[0], c[1], c[2], c[3] / 255);
 		}
 		x = (x || 0) * pd;
@@ -328,8 +326,8 @@ Q5.modules.q2d_image = ($) => {
 		w *= pd;
 		h *= pd;
 		let img = $.createImage(w, h);
-		let imgData = ctx.getImageData(x, y, w, h);
-		img.ctx.putImageData(imgData, 0, 0);
+		let imgData = $.ctx.getImageData(x, y, w, h);
+		img.$.ctx.putImageData(imgData, 0, 0);
 		img._pixelDensity = pd;
 		img.width = _w;
 		img.height = _h;
@@ -365,27 +363,27 @@ Q5.modules.q2d_image = ($) => {
 		tmpCtx.fillStyle = col.toString();
 		tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.globalCompositeOperation = 'multiply';
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.drawImage($.ctx.canvas, 0, 0);
 		tmpCtx.globalCompositeOperation = 'source-over';
 
-		ctx.save();
-		ctx.resetTransform();
-		let old = ctx.globalCompositeOperation;
-		ctx.globalCompositeOperation = 'source-in';
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.globalCompositeOperation = old;
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		let old = $.ctx.globalCompositeOperation;
+		$.ctx.globalCompositeOperation = 'source-in';
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.globalCompositeOperation = old;
+		$.ctx.restore();
 
 		tmpCtx.globalAlpha = alpha / 255;
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.drawImage($.ctx.canvas, 0, 0);
 		tmpCtx.globalAlpha = 1;
 
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.ctx.canvas.width, $.ctx.canvas.height);
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.restore();
 	};
 	$.tint = function (c) {
 		$._tint = c._q5Color ? c : $.color(...arguments);
@@ -393,13 +391,13 @@ Q5.modules.q2d_image = ($) => {
 	$.noTint = () => ($._tint = null);
 
 	$.mask = (img) => {
-		ctx.save();
-		ctx.resetTransform();
-		let old = ctx.globalCompositeOperation;
-		ctx.globalCompositeOperation = 'destination-in';
-		ctx.drawImage(img.canvas, 0, 0);
-		ctx.globalCompositeOperation = old;
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		let old = $.ctx.globalCompositeOperation;
+		$.ctx.globalCompositeOperation = 'destination-in';
+		$.ctx.drawImage(img.canvas, 0, 0);
+		$.ctx.globalCompositeOperation = old;
+		$.ctx.restore();
 	};
 
 	$._save = async (data, name, ext) => {
@@ -458,7 +456,7 @@ Q5.modules.q2d_image = ($) => {
 		tmpBuf = null;
 	};
 
-	if (scope == 'image') return;
+	if ($._scope == 'image') return;
 
 	// IMAGING
 
@@ -470,7 +468,7 @@ Q5.modules.q2d_image = ($) => {
 		}
 		function reset() {
 			if (!img._q5 || !$._tint) return;
-			let c = img.ctx;
+			let c = img.$.ctx;
 			c.save();
 			c.resetTransform();
 			c.clearRect(0, 0, c.canvas.width, c.canvas.height);
@@ -495,7 +493,7 @@ Q5.modules.q2d_image = ($) => {
 		if (!sHeight) {
 			sHeight = drawable.height || drawable.videoHeight;
 		} else sHeight *= pd;
-		ctx.drawImage(drawable, sx * pd, sy * pd, sWidth, sHeight, dx, dy, dWidth, dHeight);
+		$.ctx.drawImage(drawable, sx * pd, sy * pd, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		reset();
 	};
 
@@ -504,7 +502,7 @@ Q5.modules.q2d_image = ($) => {
 		let last = [...arguments].at(-1);
 		opt = typeof last == 'object' ? last : true;
 		let g = $.createImage(1, 1, opt.alpha);
-		let c = g.ctx;
+		let c = g.$.ctx;
 		if (Q5._nodejs && global.CairoCanvas) {
 			CairoCanvas.loadImage(url)
 				.then((img) => {

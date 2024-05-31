@@ -8,4 +8,6 @@ import './q5-color.js';
 import './q5-input.js';
 import './q5-math.js';
 import './q5-sound.js';
+import './q5-util.js';
 import './q5-vector.js';
+// default bundle

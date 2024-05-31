@@ -137,7 +137,7 @@ Q5.modules.input = ($) => {
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
 
-	if (scope != 'graphics') {
+	if ($._scope != 'graphics') {
 		$.keyIsDown = (x) => !!keysHeld[x];
 		$.canvas.onmousedown = (e) => $._onmousedown(e);
 		$.canvas.onmouseup = (e) => $._onmouseup(e);

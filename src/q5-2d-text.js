@@ -1,6 +1,4 @@
 Q5.modules.q2d_text = ($) => {
-	let ctx = $.ctx;
-
 	$.NORMAL = 'normal';
 	$.ITALIC = 'italic';
 	$.BOLD = 'bold';
@@ -48,22 +46,22 @@ Q5.modules.q2d_text = ($) => {
 	};
 	$.textStyle = (x) => ($._textStyle = x);
 	$.textAlign = (horiz, vert) => {
-		ctx.textAlign = horiz;
+		$.ctx.textAlign = horiz;
 		if (vert) {
-			ctx.textBaseline = vert == $.CENTER ? 'middle' : vert;
+			$.ctx.textBaseline = vert == $.CENTER ? 'middle' : vert;
 		}
 	};
 	$.textWidth = (str) => {
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		return ctx.measureText(str).width;
+		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		return $.ctx.measureText(str).width;
 	};
 	$.textAscent = (str) => {
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		return ctx.measureText(str).actualBoundingBoxAscent;
+		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		return $.ctx.measureText(str).actualBoundingBoxAscent;
 	};
 	$.textDescent = (str) => {
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		return ctx.measureText(str).actualBoundingBoxDescent;
+		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
 	$._textCache = true;
 	$._TimedCache = class extends Map {
@@ -115,9 +113,9 @@ Q5.modules.q2d_text = ($) => {
 			$._textStyle +
 			$._textSize +
 			$._textFont +
-			($._doFill ? ctx.fillStyle : '') +
+			($._doFill ? $.ctx.fillStyle : '') +
 			'_' +
-			($._doStroke && $._strokeSet ? ctx.lineWidth + ctx.strokeStyle + '_' : '') +
+			($._doStroke && $._strokeSet ? $.ctx.lineWidth + $.ctx.strokeStyle + '_' : '') +
 			(w || '') +
 			(h ? 'x' + h : '')
 		);
@@ -138,10 +136,10 @@ Q5.modules.q2d_text = ($) => {
 		if (!$._doFill && !$._doStroke) return;
 		let c, ti, tg, k, cX, cY, _ascent, _descent;
 		let pd = 1;
-		let t = ctx.getTransform();
+		let t = $.ctx.getTransform();
 		let useCache = $._genTextImage || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
-			c = ctx;
+			c = $.ctx;
 			cX = x;
 			cY = y;
 		} else {
@@ -152,7 +150,7 @@ Q5.modules.q2d_text = ($) => {
 				return;
 			}
 			tg = $.createGraphics.call($, 1, 1);
-			c = tg.ctx;
+			c = tg.$.ctx;
 			pd = $._pixelDensity;
 		}
 		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
@@ -166,9 +164,9 @@ Q5.modules.q2d_text = ($) => {
 			h ??= cY + _descent;
 			tg.resizeCanvas(Math.ceil(c.measureText(str).width), Math.ceil(h));
 
-			c.fillStyle = ctx.fillStyle;
-			c.strokeStyle = ctx.strokeStyle;
-			c.lineWidth = ctx.lineWidth;
+			c.fillStyle = $.ctx.fillStyle;
+			c.strokeStyle = $.ctx.strokeStyle;
+			c.lineWidth = $.ctx.lineWidth;
 		}
 		let f = c.fillStyle;
 		if (!$._fillSet) c.fillStyle = 'black';
@@ -190,12 +188,12 @@ Q5.modules.q2d_text = ($) => {
 	$.textImage = (img, x, y) => {
 		let og = $._imageMode;
 		$._imageMode = 'corner';
-		if (ctx.textAlign == 'center') x -= img.width * 0.5;
-		else if (ctx.textAlign == 'right') x -= img.width;
-		if (ctx.textBaseline == 'alphabetic') y -= $._textLeading;
-		if (ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + $._textLeadDiff;
-		else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + $._textLeadDiff;
-		else if (ctx.textBaseline == 'top') y -= img._descent + $._textLeadDiff;
+		if ($.ctx.textAlign == 'center') x -= img.width * 0.5;
+		else if ($.ctx.textAlign == 'right') x -= img.width;
+		if ($.ctx.textBaseline == 'alphabetic') y -= $._textLeading;
+		if ($.ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + $._textLeadDiff;
+		else if ($.ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + $._textLeadDiff;
+		else if ($.ctx.textBaseline == 'top') y -= img._descent + $._textLeadDiff;
 		$.image(img, x, y);
 		$._imageMode = og;
 	};

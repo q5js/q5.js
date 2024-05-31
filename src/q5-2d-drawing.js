@@ -1,6 +1,4 @@
 Q5.modules.q2d_drawing = ($) => {
-	let ctx = $.ctx;
-
 	$.THRESHOLD = 1;
 	$.GRAY = 2;
 	$.OPAQUE = 3;
@@ -10,7 +8,7 @@ Q5.modules.q2d_drawing = ($) => {
 	$.ERODE = 7;
 	$.BLUR = 8;
 
-	if (scope == 'image') return;
+	if ($._scope == 'image') return;
 
 	$.CHORD = 0;
 	$.PIE = 1;
@@ -91,71 +89,63 @@ Q5.modules.q2d_drawing = ($) => {
 
 	// DRAWING SETTINGS
 
-	function defaultStyle() {
-		ctx.fillStyle = 'white';
-		ctx.strokeStyle = 'black';
-		ctx.lineCap = 'round';
-		ctx.lineJoin = 'miter';
-		ctx.textAlign = 'left';
-	}
-
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
-		ctx.lineWidth = n || 0.0001;
+		$.ctx.lineWidth = n || 0.0001;
 	};
 	$.stroke = function (c) {
 		$._doStroke = true;
 		$._strokeSet = true;
 		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-		else if (basicColors[c]) c = $.color(...basicColors[c]);
+		else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
 		if (c.a <= 0) return ($._doStroke = false);
-		ctx.strokeStyle = c.toString();
+		$.ctx.strokeStyle = c.toString();
 	};
 	$.noStroke = () => ($._doStroke = false);
 	$.fill = function (c) {
 		$._doFill = true;
 		$._fillSet = true;
 		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-		else if (basicColors[c]) c = $.color(...basicColors[c]);
+		else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
 		if (c.a <= 0) return ($._doFill = false);
-		ctx.fillStyle = c.toString();
+		$.ctx.fillStyle = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
 	$.smooth = () => ($._smooth = true);
 	$.noSmooth = () => ($._smooth = false);
-	$.strokeCap = (x) => (ctx.lineCap = x);
-	$.strokeJoin = (x) => (ctx.lineJoin = x);
+	$.strokeCap = (x) => ($.ctx.lineCap = x);
+	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
 	$.ellipseMode = (x) => ($._ellipseMode = x);
 	$.rectMode = (x) => ($._rectMode = x);
 	$.curveDetail = (x) => ($._curveDetail = x);
 	$.curveAlpha = (x) => ($._curveAlpha = x);
 	$.curveTightness = (x) => ($._curveAlpha = x);
 
-	$.blendMode = (x) => (ctx.globalCompositeOperation = x);
+	$.blendMode = (x) => ($.ctx.globalCompositeOperation = x);
 
 	// DRAWING
 
 	$.clear = () => {
-		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
 	};
 
 	$.background = function (c) {
 		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
-		ctx.save();
-		ctx.resetTransform();
+		$.ctx.save();
+		$.ctx.resetTransform();
 		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-		else if (basicColors[c]) c = $.color(...basicColors[c]);
-		ctx.fillStyle = c.toString();
-		ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
-		ctx.restore();
+		else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
+		$.ctx.fillStyle = c.toString();
+		$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.restore();
 	};
 
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
-			ctx.beginPath();
-			ctx.moveTo(x0, y0);
-			ctx.lineTo(x1, y1);
-			ctx.stroke();
+			$.ctx.beginPath();
+			$.ctx.moveTo(x0, y0);
+			$.ctx.lineTo(x1, y1);
+			$.ctx.stroke();
 		}
 	};
 
@@ -183,22 +173,22 @@ Q5.modules.q2d_drawing = ($) => {
 				return $.ellipse(x, y, w, h);
 			}
 		}
-		ctx.beginPath();
+		$.ctx.beginPath();
 		for (let i = 0; i < detail + 1; i++) {
 			let t = i / detail;
 			let a = $.lerp(lo, hi, t);
 			let dx = ($.cos(a) * w) / 2;
 			let dy = ($.sin(a) * h) / 2;
-			ctx[i ? 'lineTo' : 'moveTo'](x + dx, y + dy);
+			$.ctx[i ? 'lineTo' : 'moveTo'](x + dx, y + dy);
 		}
 		if (mode == $.CHORD) {
-			ctx.closePath();
+			$.ctx.closePath();
 		} else if (mode == $.PIE) {
-			ctx.lineTo(x, y);
-			ctx.closePath();
+			$.ctx.lineTo(x, y);
+			$.ctx.closePath();
 		}
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
+		if ($._doFill) $.ctx.fill();
+		if ($._doStroke) $.ctx.stroke();
 	}
 	$.arc = (x, y, w, h, start, stop, mode, detail = 25) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
@@ -216,10 +206,10 @@ Q5.modules.q2d_drawing = ($) => {
 
 	function ellipseImpl(x, y, w, h) {
 		if (!$._doFill && !$._doStroke) return;
-		ctx.beginPath();
-		ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
+		$.ctx.beginPath();
+		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
+		if ($._doFill) $.ctx.fill();
+		if ($._doStroke) $.ctx.stroke();
 	}
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
@@ -241,16 +231,16 @@ Q5.modules.q2d_drawing = ($) => {
 			y = x.y;
 			x = x.x;
 		}
-		ctx.save();
-		ctx.beginPath();
-		ctx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2);
-		ctx.fillStyle = ctx.strokeStyle;
-		ctx.fill();
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.beginPath();
+		$.ctx.arc(x, y, $.ctx.lineWidth / 2, 0, Math.PI * 2);
+		$.ctx.fillStyle = $.ctx.strokeStyle;
+		$.ctx.fill();
+		$.ctx.restore();
 	};
 	function rectImpl(x, y, w, h) {
-		if ($._doFill) ctx.fillRect(x, y, w, h);
-		if ($._doStroke) ctx.strokeRect(x, y, w, h);
+		if ($._doFill) $.ctx.fillRect(x, y, w, h);
+		if ($._doStroke) $.ctx.strokeRect(x, y, w, h);
 	}
 	function roundedRectImpl(x, y, w, h, tl, tr, br, bl) {
 		if (!$._doFill && !$._doStroke) return;
@@ -265,15 +255,15 @@ Q5.modules.q2d_drawing = ($) => {
 		tr = Math.min(hh, tr);
 		bl = Math.min(hh, bl);
 		br = Math.min(hh, br);
-		ctx.beginPath();
-		ctx.moveTo(x + tl, y);
-		ctx.arcTo(x + w, y, x + w, y + h, tr);
-		ctx.arcTo(x + w, y + h, x, y + h, br);
-		ctx.arcTo(x, y + h, x, y, bl);
-		ctx.arcTo(x, y, x + w, y, tl);
-		ctx.closePath();
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
+		$.ctx.beginPath();
+		$.ctx.moveTo(x + tl, y);
+		$.ctx.arcTo(x + w, y, x + w, y + h, tr);
+		$.ctx.arcTo(x + w, y + h, x, y + h, br);
+		$.ctx.arcTo(x, y + h, x, y, bl);
+		$.ctx.arcTo(x, y, x + w, y, tl);
+		$.ctx.closePath();
+		if ($._doFill) $.ctx.fill();
+		if ($._doStroke) $.ctx.stroke();
 	}
 
 	$.rect = (x, y, w, h, tl, tr, br, bl) => {
@@ -297,11 +287,11 @@ Q5.modules.q2d_drawing = ($) => {
 
 	$.beginShape = () => {
 		clearBuff();
-		ctx.beginPath();
+		$.ctx.beginPath();
 		firstVertex = true;
 	};
 	$.beginContour = () => {
-		ctx.closePath();
+		$.ctx.closePath();
 		clearBuff();
 		firstVertex = true;
 	};
@@ -312,19 +302,19 @@ Q5.modules.q2d_drawing = ($) => {
 	$.vertex = (x, y) => {
 		clearBuff();
 		if (firstVertex) {
-			ctx.moveTo(x, y);
+			$.ctx.moveTo(x, y);
 		} else {
-			ctx.lineTo(x, y);
+			$.ctx.lineTo(x, y);
 		}
 		firstVertex = false;
 	};
 	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
 		clearBuff();
-		ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
 		clearBuff();
-		ctx.quadraticCurveTo(cp1x, cp1y, x, y);
+		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
 	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
@@ -350,10 +340,10 @@ Q5.modules.q2d_drawing = ($) => {
 	$.endShape = (close) => {
 		clearBuff();
 		if (close) {
-			ctx.closePath();
+			$.ctx.closePath();
 		}
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
+		if ($._doFill) $.ctx.fill();
+		if ($._doStroke) $.ctx.stroke();
 	};
 	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
 		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
@@ -419,16 +409,16 @@ Q5.modules.q2d_drawing = ($) => {
 		if (curveBuff.length < 4) {
 			return;
 		}
-		let p0 = curveBuff[curveBuff.length - 4];
-		let p1 = curveBuff[curveBuff.length - 3];
-		let p2 = curveBuff[curveBuff.length - 2];
-		let p3 = curveBuff[curveBuff.length - 1];
+		let p0 = curveBuff.at(-4);
+		let p1 = curveBuff.at(-3);
+		let p2 = curveBuff.at(-2);
+		let p3 = curveBuff.at(-1);
 		let pts = catmullRomSpline(...p0, ...p1, ...p2, ...p3, $._curveDetail, $._curveAlpha);
 		for (let i = 0; i < pts.length; i++) {
 			if (firstVertex) {
-				ctx.moveTo(...pts[i]);
+				$.ctx.moveTo(...pts[i]);
 			} else {
-				ctx.lineTo(...pts[i]);
+				$.ctx.lineTo(...pts[i]);
 			}
 			firstVertex = false;
 		}
