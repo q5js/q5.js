@@ -87,10 +87,29 @@ Q5.modules.q2d_drawing = ($) => {
 		);
 	};
 
+	// ERASE
+	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
+		$.ctx.globalCompositeOperation = 'destination-out';
+		$.ctx.fillStyle = `rgba(0, 0, 0, ${fillAlpha / 255})`;
+		$.ctx.strokeStyle = `rgba(0, 0, 0, ${strokeAlpha / 255})`;
+	};
+
+	$.noErase = function () {
+		$.ctx.globalCompositeOperation = 'source-over';
+		if ($._fillSet) {
+			$.ctx.fillStyle = $.color($.ctx.fillStyle).toString();
+		}
+		if ($._strokeSet) {
+			$.ctx.strokeStyle = $.color($.ctx.strokeStyle).toString();
+		}
+	};
 	// DRAWING SETTINGS
 
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
+		if ($._da) {
+			n = $._sc(n);
+		}
 		$.ctx.lineWidth = n || 0.0001;
 	};
 	$.stroke = function (c) {
@@ -142,6 +161,12 @@ Q5.modules.q2d_drawing = ($) => {
 
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
+			if ($._da) {
+				x0 = $._sc(x0);
+				y0 = $._sc(y0);
+				x1 = $._sc(x1);
+				y1 = $._sc(y1);
+			}
 			$.ctx.beginPath();
 			$.ctx.moveTo(x0, y0);
 			$.ctx.lineTo(x1, y1);
@@ -206,6 +231,12 @@ Q5.modules.q2d_drawing = ($) => {
 
 	function ellipseImpl(x, y, w, h) {
 		if (!$._doFill && !$._doStroke) return;
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
+			w = $._sc(w);
+			h = $._sc(h);
+		}
 		$.ctx.beginPath();
 		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
 		if ($._doFill) $.ctx.fill();
@@ -227,6 +258,10 @@ Q5.modules.q2d_drawing = ($) => {
 		return $.ellipse(x, y, r, r);
 	};
 	$.point = (x, y) => {
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
+		}
 		if (x.x) {
 			y = x.y;
 			x = x.x;
@@ -239,6 +274,12 @@ Q5.modules.q2d_drawing = ($) => {
 		$.ctx.restore();
 	};
 	function rectImpl(x, y, w, h) {
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
+			w = $._sc(w);
+			h = $._sc(h);
+		}
 		if ($._doFill) $.ctx.fillRect(x, y, w, h);
 		if ($._doStroke) $.ctx.strokeRect(x, y, w, h);
 	}
@@ -249,6 +290,16 @@ Q5.modules.q2d_drawing = ($) => {
 		}
 		if (tr === undefined) {
 			return roundedRectImpl(x, y, w, h, tl, tl, tl, tl);
+		}
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
+			w = $._sc(w);
+			h = $._sc(h);
+			tl = $._sc(tl);
+			tr = $._sc(tr);
+			bl = $._sc(bl);
+			br = $._sc(br);
 		}
 		const hh = Math.min(Math.abs(h), Math.abs(w)) / 2;
 		tl = Math.min(hh, tl);
@@ -300,6 +351,10 @@ Q5.modules.q2d_drawing = ($) => {
 		firstVertex = true;
 	};
 	$.vertex = (x, y) => {
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
+		}
 		clearBuff();
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
@@ -309,10 +364,24 @@ Q5.modules.q2d_drawing = ($) => {
 		firstVertex = false;
 	};
 	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
+		if ($._da) {
+			cp1x = $._sc(cp1x);
+			cp1y = $._sc(cp1y);
+			cp2x = $._sc(cp2x);
+			cp2y = $._sc(cp2y);
+			x = $._sc(x);
+			y = $._sc(y);
+		}
 		clearBuff();
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
+		if ($._da) {
+			cp1x = $._sc(cp1x);
+			cp1y = $._sc(cp1y);
+			x = $._sc(x);
+			y = $._sc(y);
+		}
 		clearBuff();
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
@@ -405,6 +474,10 @@ Q5.modules.q2d_drawing = ($) => {
 	}
 
 	$.curveVertex = (x, y) => {
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
+		}
 		curveBuff.push([x, y]);
 		if (curveBuff.length < 4) {
 			return;

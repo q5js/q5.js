@@ -129,7 +129,9 @@ function Q5(scope, parent) {
 	$._elements = [];
 
 	for (let m in Q5.modules) {
-		Q5.modules[m]($);
+		if (scope != 'image' || Q5.imageModules.includes(m)) {
+			Q5.modules[m]($);
+		}
 	}
 
 	// INIT
@@ -207,7 +209,7 @@ function Q5(scope, parent) {
 
 	$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
 
-	if (window && scope != 'graphics') {
+	if (window) {
 		if (Q5.modules.input) {
 			window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
 			window.addEventListener('keydown', (e) => $._onkeydown(e), false);
@@ -249,6 +251,7 @@ function Q5(scope, parent) {
 }
 
 Q5.modules = {};
+Q5.imageModules = ['q2d_canvas', 'q2d_image'];
 
 Q5._nodejs = typeof process == 'object';
 

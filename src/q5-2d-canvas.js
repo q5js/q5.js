@@ -71,6 +71,8 @@ Q5.modules.q2d_canvas = ($) => {
 		if (typeof renderer == 'object') options = renderer;
 		$.width = $.canvas.width = width || window.innerWidth;
 		$.height = $.canvas.height = height || window.innerHeight;
+		$.da = false;
+		$._dimensionUnit = 0;
 		$.canvas.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
@@ -144,9 +146,26 @@ Q5.modules.q2d_canvas = ($) => {
 		else document.body.exitFullscreen();
 	};
 
+	$._sc = (coord) => {
+		return ((coord / $._dimensionUnit) * $.canvas.width) / $._pixelDensity;
+	};
+	$.flexibleCanvas = (unit = 400) => {
+		$._da = !!unit;
+		if (unit) {
+			$._dimensionUnit = unit;
+			$._dimensionUnit = unit;
+		}
+	};
 	// DRAWING MATRIX
 
-	$.translate = (x, y) => $.ctx.translate(x, y);
+	$.translate = (x, y) => {
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
+		}
+
+		$.ctx.translate(x, y);
+	};
 	$.rotate = (r) => {
 		if ($._angleMode == 'degrees') r = $.radians(r);
 		$.ctx.rotate(r);

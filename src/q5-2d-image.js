@@ -462,6 +462,17 @@ Q5.modules.q2d_image = ($) => {
 
 	$.imageMode = (mode) => ($._imageMode = mode);
 	$.image = (img, dx, dy, dWidth, dHeight, sx = 0, sy = 0, sWidth, sHeight) => {
+		if ($._da) {
+			dx = $._sc(dx);
+			dy = $._sc(dy);
+			dWidth = $._sc(dWidth);
+			dHeight = $._sc(dHeight);
+
+			sx = $._sc(sx);
+			sy = $._sc(sy);
+			sWidth = $._sc(sHeight);
+			sHeight = $._sc(sHeight);
+		}
 		let drawable = img._q5 ? img.canvas : img;
 		if (Q5._createNodeJSCanvas) {
 			drawable = drawable.context.canvas;
@@ -502,7 +513,7 @@ Q5.modules.q2d_image = ($) => {
 		let last = [...arguments].at(-1);
 		opt = typeof last == 'object' ? last : true;
 		let g = $.createImage(1, 1, opt.alpha);
-		let c = g.$.ctx;
+		let c = g.ctx;
 		if (Q5._nodejs && global.CairoCanvas) {
 			CairoCanvas.loadImage(url)
 				.then((img) => {
