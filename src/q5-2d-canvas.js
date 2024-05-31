@@ -155,9 +155,8 @@ Q5.modules.q2d_canvas = ($) => {
 	};
 	$.flexibleCanvas = (unit = 400) => {
 		if (unit) {
-			$._da = unit;
-			$.height = ($.canvas.h / $.canvas.w) * $._da;
-			$.width = $._da;
+			$.width = $._da = unit;
+			$.height = ($.canvas.h / $.canvas.w) * unit;
 		} else $._da = 0;
 	};
 
@@ -232,6 +231,13 @@ Q5.modules.q2d_canvas = ($) => {
 		document.body.append(vid);
 		return vid;
 	};
+
+	if (window && $._scope != 'graphics') {
+		window.addEventListener('resize', () => {
+			$._shouldResize = true;
+			if (!$._loop) $.redraw();
+		});
+	}
 };
 
 Q5.canvasOptions = {

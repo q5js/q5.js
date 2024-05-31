@@ -139,13 +139,19 @@ Q5.modules.input = ($) => {
 	$.requestPointerLock = document.body.requestPointerLock;
 	$.exitPointerLock = document.exitPointerLock;
 
-	if ($._scope != 'graphics') {
-		$.keyIsDown = (x) => !!keysHeld[x];
-		$.canvas.onmousedown = (e) => $._onmousedown(e);
-		$.canvas.onmouseup = (e) => $._onmouseup(e);
-		$.canvas.onclick = (e) => $._onclick(e);
-		$.canvas.ontouchstart = (e) => $._ontouchstart(e);
-		$.canvas.ontouchmove = (e) => $._ontouchmove(e);
-		$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
+	if ($._scope == 'graphics') return;
+
+	$.keyIsDown = (x) => !!keysHeld[x];
+	$.canvas.onmousedown = (e) => $._onmousedown(e);
+	$.canvas.onmouseup = (e) => $._onmouseup(e);
+	$.canvas.onclick = (e) => $._onclick(e);
+	$.canvas.ontouchstart = (e) => $._ontouchstart(e);
+	$.canvas.ontouchmove = (e) => $._ontouchmove(e);
+	$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
+
+	if (window) {
+		window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
+		window.addEventListener('keydown', (e) => $._onkeydown(e), false);
+		window.addEventListener('keyup', (e) => $._onkeyup(e), false);
 	}
 };

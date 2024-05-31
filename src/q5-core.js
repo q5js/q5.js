@@ -209,20 +209,6 @@ function Q5(scope, parent) {
 
 	$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
 
-	if (window) {
-		if (Q5.modules.input) {
-			window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
-			window.addEventListener('keydown', (e) => $._onkeydown(e), false);
-			window.addEventListener('keyup', (e) => $._onkeyup(e), false);
-		}
-		if (Q5.modules.q2d_canvas) {
-			window.addEventListener('resize', () => {
-				$._shouldResize = true;
-				if (!$._loop) $.redraw();
-			});
-		}
-	}
-
 	if (!($.setup || $.draw)) return;
 
 	$._startDone = false;

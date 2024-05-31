@@ -1,10 +1,12 @@
 # <img src="q5js_logo.webp" height="64"> <img src="q5js_brand.webp" height="64">
 
+The sequel to p5.js is here!
+
 **q5.js** implements all of [p5][]'s 2D drawing, math, and user input functionality.
 
-It's a drop-in replacement that's performance optimized and ~20x smaller than p5, while packing a few exclusive new features: top-level global mode, HDR color support, namespace mode, and text image caching.
+It's a drop-in replacement that's performance optimized and ~20x smaller than p5, while packing exclusive new features: HDR color support, modular use, top-level global mode, namespace mode, and text image caching.
 
-## Usage
+## Typical Use
 
 q5 should work with your existing p5.js sketches, no modifications required! If you have any problems though, please [make an issue report][].
 
@@ -41,7 +43,11 @@ To use addons, simply load them after q5.js:
 <script src="https://p5play.org/v3/p5play.js"></script>
 ```
 
-## New Features: Ask AI ✨
+## Exclusive Features
+
+q5 includes some exclusive features that aren't available in p5. Using them is optional!
+
+## Ask AI ✨
 
 Why doesn't this code work? `text('Hello!');`
 
@@ -70,9 +76,7 @@ This feature can be disabled by setting `Q5.disableFriendlyErrors = true;`, thou
 
 q5 can catch errors in q5 function like `draw` and continue looping if you set `Q5.errorTolerant = true;`.
 
-## New Features: Top-Level Global Mode
-
-> q5.js includes some exclusive features that aren't available in p5.js. Using them is optional!
+## Top-Level Global Mode
 
 In **p5**, functions like `rect` can't be used on the file level. They must be called from within p5 functions like `setup` and `draw`.
 
@@ -103,7 +107,7 @@ function setup() {
 
 Note that if you use `loadImage` on the file level, q5 will wait to run `setup` and `draw` until the image loads. Optionally if you forgo defining `preload`, you can run it to signify that the sketch can start once loading is complete. Otherwise q5 will auto-start the sketch after 32ms of delay, this ensures code after `new Q5()` is run before the sketch starts.
 
-## New Features: HDR Color Support
+## HDR Color Support
 
 Most modern devices support the "display-p3" HDR color space. If a device doesn't support it, q5 will fall back to "srgb".
 
@@ -130,7 +134,7 @@ Support for the HSV color format was removed in q5 v1.9.3 because color experts 
 
 https://en.wikipedia.org/wiki/HSL_and_HSV#Disadvantages
 
-## New Features: Customize Canvas Context Attributes
+## Customize Canvas Context Attributes
 
 In **p5**, you're stuck with the default [canvas context attributes][], which can't be changed. So the canvas must have an alpha layer, even if you don't need one. HDR color space and [desynchronized rendering][] are not supported.
 
@@ -154,7 +158,7 @@ createCanvas(400, 400, '2d', {
 });
 ```
 
-## New Features: Namespace Mode
+## Namespace Mode
 
 **p5**'s [instance mode][] enables multiple sketches to run on one page. To avoid needing to preface every p5 function with `p.` you can use a JS [with statement][].
 
@@ -204,11 +208,17 @@ q5 will automatically load and configure `canvas` and `jsdom` if they are instal
 
 In node.js, q5's automatic global mode is disabled. To use global mode you need to assign q5 user defined functions like `draw` and `setup` to the `global` object then call `new Q5()`. q5 will add q5 variables and functions to the `global` object, just like it adds them to the `window` object in the browser.
 
+## Modular Use
+
+**p5.js** is nearly 5MB in size. This is mainly [due to the inclusion of the webgl render and the dependencies corejs and opentype](https://github.com/processing/p5.js/issues/6776#issuecomment-1918238317). If 2d rendering is all a sketch needs, p5 wastes user bandwidth and is slower to load, parse, and run.
+
+**q5.js** (the default bundle) is 20x smaller than p5, which is already great for typical use. For extremely lightweight use you can load a subset of scripts from the `src` folder, just be sure to load `src/q5-core.js` first.
+
 ## Motivation: Part 1
 
 > This section was written by @LingDong-
 
-After having used many graphics libraries across many different languages, I have found that the Processing/p5.js/Openframeworks system has one huge advantage over others:
+After having used many graphics libraries across many different languages, I have found that the Processing system has one huge advantage over others:
 
 It gets stuff drawn onto the screen quick and easy!
 
@@ -310,9 +320,21 @@ Higher FPS (frames per second) is better.
 
 <sub>\* Only for browsers that support CanvasRenderingContext2D.filter ([75% of all](https://caniuse.com/#feat=mdn-api_canvasrenderingcontext2d_filter) as of Aug 2020, including Chrome, Firefox and Edge). For those that don't, performance is similar to p5.js, as identical implementations are usually used as fallbacks.</sub>
 
-## Contributing
+## Contributor Code of Conduct
 
-Speed is a goal for q5.js, and we would very much like to see the above list grow. If you know how to make something faster, advice/pull requests are very welcome!
+We aim to make contributing to the q5 project more approachable for non-experts by using plain modern JavaScript and no fancy build tools or frameworks.
+
+All contributors are required to check their ego at the door and be open to feedback. Critique of code is not a critique of the person who wrote it. We're all here to learn and work with others to collectively write the best code possible.
+
+Code is a language art that can be subjectively judged by its effectiveness at communicating its functionality to humans. Code can also be objectively measured by its performance and because JavaScript is served over a network, size is a factor as well. Therefore, the q5 team strives to balance code readability with brevity and performance.
+
+Check out the q5 project planning board:
+
+https://github.com/users/quinton-ashley/projects/4/views/1
+
+## Organization
+
+If the q5 project is successful, all contributing developers will be paid for their work. The project will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative).
 
 ## Licensing
 
