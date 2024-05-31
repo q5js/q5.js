@@ -88,6 +88,7 @@ Q5.modules.q2d_drawing = ($) => {
 	};
 
 	// ERASE
+
 	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
 		$.ctx.globalCompositeOperation = 'destination-out';
 		$.ctx.fillStyle = `rgba(0, 0, 0, ${fillAlpha / 255})`;
@@ -103,13 +104,12 @@ Q5.modules.q2d_drawing = ($) => {
 			$.ctx.strokeStyle = $.color($.ctx.strokeStyle).toString();
 		}
 	};
+
 	// DRAWING SETTINGS
 
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
-		if ($._da) {
-			n = $._sc(n);
-		}
+		if ($._da) n = $._sc(n);
 		$.ctx.lineWidth = n || 0.0001;
 	};
 	$.stroke = function (c) {
@@ -258,13 +258,13 @@ Q5.modules.q2d_drawing = ($) => {
 		return $.ellipse(x, y, r, r);
 	};
 	$.point = (x, y) => {
-		if ($._da) {
-			x = $._sc(x);
-			y = $._sc(y);
-		}
 		if (x.x) {
 			y = x.y;
 			x = x.x;
+		}
+		if ($._da) {
+			x = $._sc(x);
+			y = $._sc(y);
 		}
 		$.ctx.save();
 		$.ctx.beginPath();
@@ -479,9 +479,7 @@ Q5.modules.q2d_drawing = ($) => {
 			y = $._sc(y);
 		}
 		curveBuff.push([x, y]);
-		if (curveBuff.length < 4) {
-			return;
-		}
+		if (curveBuff.length < 4) return;
 		let p0 = curveBuff.at(-4);
 		let p1 = curveBuff.at(-3);
 		let p2 = curveBuff.at(-2);

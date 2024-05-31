@@ -107,6 +107,8 @@ Q5.modules.q2d_canvas = ($) => {
 		let c = cloneCtx();
 		$.canvas.width = Math.ceil(w * $._pixelDensity);
 		$.canvas.height = Math.ceil(h * $._pixelDensity);
+		$.canvas.w = w;
+		$.canvas.h = h;
 		if (!$.canvas.fullscreen && $.canvas.style) {
 			$.canvas.style.width = w + 'px';
 			$.canvas.style.height = h + 'px';
@@ -158,6 +160,7 @@ Q5.modules.q2d_canvas = ($) => {
 			$.width = $._da;
 		} else $._da = 0;
 	};
+
 	// DRAWING MATRIX
 
 	$.translate = (x, y) => {
