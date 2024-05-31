@@ -69,10 +69,9 @@ Q5.modules.q2d_canvas = ($) => {
 	$.createCanvas = function (width, height, renderer, options) {
 		if (renderer == 'webgl') throw Error(`webgl renderer is not supported in q5, use '2d'`);
 		if (typeof renderer == 'object') options = renderer;
-		$.width = $.canvas.width = width || window.innerWidth;
-		$.height = $.canvas.height = height || window.innerHeight;
-		$.da = false;
-		$._dimensionUnit = 0;
+		$.width = $.canvas.width = $.canvas.w = width || window.innerWidth;
+		$.height = $.canvas.height = $.canvas.h = height || window.innerHeight;
+		$._da = 0;
 		$.canvas.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
@@ -105,8 +104,6 @@ Q5.modules.q2d_canvas = ($) => {
 	function _resizeCanvas(w, h) {
 		w ??= window.innerWidth;
 		h ??= window.innerHeight;
-		$.width = w;
-		$.height = h;
 		let c = cloneCtx();
 		$.canvas.width = Math.ceil(w * $._pixelDensity);
 		$.canvas.height = Math.ceil(h * $._pixelDensity);
@@ -116,10 +113,15 @@ Q5.modules.q2d_canvas = ($) => {
 		}
 		for (let prop in c) $.ctx[prop] = c[prop];
 		$.ctx.scale($._pixelDensity, $._pixelDensity);
+
+		if (!$._da) {
+			$.width = w;
+			$.height = h;
+		} else $.flexibleCanvas($._da);
 	}
 
 	$.resizeCanvas = (w, h) => {
-		if (w == $.width && h == $.height) return;
+		if (w == $.canvas.w && h == $.canvas.h) return;
 		_resizeCanvas(w, h);
 	};
 
@@ -136,7 +138,7 @@ Q5.modules.q2d_canvas = ($) => {
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
-		_resizeCanvas($.width, $.height);
+		_resizeCanvas($.canvas.w, $.canvas.h);
 		return v;
 	};
 
@@ -147,14 +149,14 @@ Q5.modules.q2d_canvas = ($) => {
 	};
 
 	$._sc = (coord) => {
-		return ((coord / $._dimensionUnit) * $.canvas.width) / $._pixelDensity;
+		return ((coord / $._da) * $.canvas.width) / $._pixelDensity;
 	};
 	$.flexibleCanvas = (unit = 400) => {
-		$._da = !!unit;
 		if (unit) {
-			$._dimensionUnit = unit;
-			$._dimensionUnit = unit;
-		}
+			$._da = unit;
+			$.height = ($.canvas.h / $.canvas.w) * $._da;
+			$.width = $._da;
+		} else $._da = 0;
 	};
 	// DRAWING MATRIX
 
@@ -163,7 +165,6 @@ Q5.modules.q2d_canvas = ($) => {
 			x = $._sc(x);
 			y = $._sc(y);
 		}
-
 		$.ctx.translate(x, y);
 	};
 	$.rotate = (r) => {
