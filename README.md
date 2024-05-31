@@ -35,7 +35,7 @@ q5.js is compatible with popular p5 addons and projects that use p5, such as [p5
 To use addons, simply load them after q5.js:
 
 ```html
-<script src="q5.js"></script>
+<script src="https://q5js.org/q5.js"></script>
 <!-- load p5 addons after q5 -->
 <script src="https://p5play.org/v3/planck.min.js"></script>
 <script src="https://p5play.org/v3/p5play.js"></script>
@@ -206,7 +206,7 @@ In node.js, q5's automatic global mode is disabled. To use global mode you need 
 
 ## Motivation: Part 1
 
-> This section was written by @LingDong-, co-creator of q5.
+> This section was written by @LingDong-
 
 After having used many graphics libraries across many different languages, I have found that the Processing/p5.js/Openframeworks system has one huge advantage over others:
 
@@ -222,7 +222,7 @@ In fact, its not uncommon for successful software systems to have multiple imple
 
 ## Motivation: Part 2
 
-> This section was written by @quinton-ashley, co-creator of q5.
+> This section was written by @quinton-ashley
 
 I thought @LingDong-'s work on q5 and the idea itself had great potential, so I decided to implement more of the p5.js API. My main goal was to make it work with [p5play](https://p5play.org)!
 
@@ -230,11 +230,15 @@ An increase in performance of even a few frames per second can make a significan
 
 I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation!
 
-I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. Instead they insist on adding more accessibility features to the base library, which the majority of people just don't need. So q5 is a good alternative that trims out the fat.
+I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. So q5 is a good alternative that trims out the fat.
 
 Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without inline documentation, the source code is easier for experienced JS programmers to comprehend.
 
 ## More exclusive features
+
+Features added by @Tezumie:
+
+- `point()`: more efficient point drawing.
 
 Features added by @quinton-ashley:
 
@@ -253,21 +257,21 @@ Features added by @LingDong-:
 
 ## Limitations
 
-- `color` function only accepts numeric input, hex, and simple named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`. This was done to keep the codebase small and easier to understand.
+- `color` function only accepts numeric input, hex, and simple named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`. q5 supports oklch which is a superior color format so use it instead. The `fill`, `stroke`, and `background` functions can accept any css color string though.
 
 ## Size Comparison
 
 Unminified:
 
-- p5.js **4300kb** ⚠️
+- p5.js **4958** ⚠️
 - p5.sound.js 488kb
-- q5.js 66kb
+- q5.js 71kb
 
 Minified:
 
-- p5.min.js 1000kb
+- p5.min.js 1033kb ⚠️
 - p5.sound.min.js 200kb
-- q5.min.js **42kb** 🎉
+- q5.min.js **45kb** 🎉
 
 ## Benchmarks
 
@@ -312,11 +316,13 @@ Speed is a goal for q5.js, and we would very much like to see the above list gro
 
 ## Licensing
 
-q5.js is not affiliated with the Processing Foundation. p5.js is licensed under the LGPLv2, the two small sections of p5.js' code were directly copied into q5.js are credited below. The rest of q5 is a new implementation of part of the p5.js API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Google v Oracle case.
+q5.js is not affiliated with The Processing Foundation.
+
+p5.js is licensed under the LGPLv2, the two small sections of p5' code were directly copied into q5 are credited below. The rest of q5 is a new implementation of part of the p5 API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Google v Oracle case.
 
 @LingDong- created the original q5xjs library and licensed it under the MIT license.
 
-@quinton-ashley created q5.js (this project) which contains many bug fixes, additional p5.js API implementations, and several exclusive features. q5.js is licensed under the LGPLv3.
+@quinton-ashley created q5.js (this project) which contains many bug fixes, additional p5 API implementations, and several exclusive features. q5.js is licensed under the LGPLv3.
 
 ## Credits
 

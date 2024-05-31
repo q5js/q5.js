@@ -136,6 +136,8 @@ Q5.modules.input = ($) => {
 		}
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
+	$.requestPointerLock = document.body.requestPointerLock;
+	$.exitPointerLock = document.exitPointerLock;
 
 	if ($._scope != 'graphics') {
 		$.keyIsDown = (x) => !!keysHeld[x];

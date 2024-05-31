@@ -1,8 +1,14 @@
 {
-	"author": "quinton-ashley",
 	"name": "q5",
-	"version": "1.9.28",
-	"description": "The unofficial sequel to p5.js",
+	"version": "1.9.29",
+	"description": "The sequel to p5.js!",
+	"author": "quinton-ashley",
+	"contributors": [
+		"Tezumie",
+		"LingDong-"
+	],
+	"license": "LGPL-3.0",
+	"homepage": "https://q5js.org/home",
 	"main": "q5-server.js",
 	"scripts": {
 		"bundle": "cat src/q5-core.js src/q5-2d-canvas.js src/q5-2d-drawing.js src/q5-2d-image.js src/q5-2d-text.js src/q5-ai.js src/q5-color.js src/q5-input.js src/q5-math.js src/q5-sound.js src/q5-util.js src/q5-vector.js > q5.js",
@@ -17,6 +23,9 @@
 		"type": "git",
 		"url": "git+https://github.com/quinton-ashley/q5.js.git"
 	},
+	"bugs": {
+		"url": "https://github.com/quinton-ashley/q5.js/issues"
+	},
 	"keywords": [
 		"p5",
 		"p5js",
@@ -26,12 +35,9 @@
 		"q5.js",
 		"q5js"
 	],
-	"license": "LGPL-3.0",
-	"bugs": {
-		"url": "https://github.com/quinton-ashley/q5.js/issues"
-	},
-	"homepage": "https://github.com/quinton-ashley/q5.js#readme",
-	"dependencies": {
-		"jsdom": "^24.0.0"
+	"devDependencies": {
+		"canvas": "^2.11.2",
+		"jsdom": "^24.1.0",
+		"@types/p5": "^1.7.6"
 	}
 }
