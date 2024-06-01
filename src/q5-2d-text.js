@@ -160,7 +160,7 @@ Q5.modules.q2d_text = ($) => {
 				return;
 			}
 			tg = $.createGraphics.call($, 1, 1);
-			c = tg.$.ctx;
+			c = tg.ctx;
 			pd = $._pixelDensity;
 		}
 		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;

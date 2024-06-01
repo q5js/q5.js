@@ -39,7 +39,7 @@ Q5.modules.ai = ($) => {
 				}
 				if (lineNum + i < lines.length) {
 					context += lines[lineNum + i].trim() + '\n';
-				}
+				} else break;
 				i++;
 			}
 

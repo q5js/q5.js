@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 1.9
+ * @version 2.0-beta0
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -134,6 +134,8 @@ function Q5(scope, parent) {
 		}
 	}
 
+	if (scope == 'image') return;
+
 	// INIT
 
 	if (scope == 'global') {
@@ -163,7 +165,7 @@ function Q5(scope, parent) {
 
 	if (typeof scope == 'function') scope($);
 
-	if (scope == 'image' || scope == 'graphics') return;
+	if (scope == 'graphics') return;
 
 	let raf =
 		window.requestAnimationFrame ||

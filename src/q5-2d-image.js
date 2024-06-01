@@ -327,7 +327,7 @@ Q5.modules.q2d_image = ($) => {
 		h *= pd;
 		let img = $.createImage(w, h);
 		let imgData = $.ctx.getImageData(x, y, w, h);
-		img.$.ctx.putImageData(imgData, 0, 0);
+		img.ctx.putImageData(imgData, 0, 0);
 		img._pixelDensity = pd;
 		img.width = _w;
 		img.height = _h;
@@ -479,7 +479,7 @@ Q5.modules.q2d_image = ($) => {
 		}
 		function reset() {
 			if (!img._q5 || !$._tint) return;
-			let c = img.$.ctx;
+			let c = img.ctx;
 			c.save();
 			c.resetTransform();
 			c.clearRect(0, 0, c.canvas.width, c.canvas.height);
