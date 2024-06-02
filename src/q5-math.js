@@ -2,11 +2,9 @@ Q5.modules.math = ($) => {
 	$.DEGREES = 'degrees';
 	$.RADIANS = 'radians';
 
-	$.HALF_PI = Math.PI / 2;
 	$.PI = Math.PI;
+	$.HALF_PI = Math.PI / 2;
 	$.QUARTER_PI = Math.PI / 4;
-	$.TAU = Math.PI * 2;
-	$.TWO_PI = Math.PI * 2;
 
 	$.abs = Math.abs;
 	$.ceil = Math.ceil;

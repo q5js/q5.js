@@ -31,10 +31,8 @@ Q5.modules.q2d_text = ($) => {
 	};
 	$.textFont = (x) => ($._textFont = x);
 	$.textSize = (x) => {
-		if ($._da) {
-			x = $._sc(x);
-		}
 		if (x === undefined) return $._textSize;
+		if ($._da) x *= $._da;
 		$._textSize = x;
 		if (!$._leadingSet) {
 			$._textLeading = x * 1.25;
@@ -42,10 +40,8 @@ Q5.modules.q2d_text = ($) => {
 		}
 	};
 	$.textLeading = (x) => {
-		if ($._da) {
-			x = $._sc(x);
-		}
 		if (x === undefined) return $._textLeading;
+		if ($._da) x *= $._da;
 		$._textLeading = x;
 		$._textLeadDiff = x - $._textSize;
 		$._leadingSet = true;
@@ -140,8 +136,8 @@ Q5.modules.q2d_text = ($) => {
 		if (str === undefined) return;
 		str = str.toString();
 		if ($._da) {
-			x = $._sc(x);
-			y = $._sc(y);
+			x *= $._da;
+			y *= $._da;
 		}
 		if (!$._doFill && !$._doStroke) return;
 		let c, ti, tg, k, cX, cY, _ascent, _descent;

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta0
+ * @version 2.0-beta1
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -54,9 +54,6 @@ function Q5(scope, parent) {
 
 	$._incrementPreload = () => $._preloadCount++;
 	$._decrementPreload = () => $._preloadCount--;
-
-	$.print = console.log;
-	$.describe = () => {};
 
 	function _draw(timestamp) {
 		let ts = timestamp || performance.now();
@@ -127,6 +124,11 @@ function Q5(scope, parent) {
 		this.elt = a;
 	};
 	$._elements = [];
+
+	$.TWO_PI = $.TAU = Math.PI * 2;
+
+	$.print = console.log;
+	$.describe = () => {};
 
 	for (let m in Q5.modules) {
 		if (scope != 'image' || Q5.imageModules.includes(m)) {

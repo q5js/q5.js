@@ -2,9 +2,9 @@
 
 ## The sequel to p5.js is here! 🎉
 
-q5.js implements all of [p5](https://p5js.org)'s 2D drawing, math, and user input functionality.
+q5.js is a new implementation of the [p5](https://p5js.org) API that's performance optimized and packed with additional features to make creative coding even more fun and accessible.
 
-It's a drop-in replacement that's performance optimized and ~20x smaller than p5.
+q5 works out of the box with your existing p5 2D sketches and even supports popular libraries like [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org).
 
 # 2-0
 
@@ -12,7 +12,7 @@ It's a drop-in replacement that's performance optimized and ~20x smaller than p5
 
 # 2-1
 
-In p5, bright colors look dull on modern devices 😕
+In p5, bright colors can look dull on modern devices 😕
 
 # 2-2
 
@@ -22,40 +22,61 @@ q5 empowers artists with a [wider range of colors](https://github.com/quinton-as
 
 ## More help for beginners ✨
 
-Why doesn't this code work? `text('Hello!');`
+Why doesn't this code work? `text('Hello!')` 🤔
 
-p5's error messages are often too vague and leave beginners searching for help. 🙋
+# 3-1
+
+p5's error messages are often too vague, leaving users searching for help. 🙋
 
 ```
 🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
 ```
 
-q5 creates error reports that can be sent to an AI just by clicking a link! Users can also run the `askAI()` function before code that isn't working as expected. 🤖
+Why not ask ChatGPT 4o? It excels at identifying the most common errors that beginners make: typos, missing syntax, incorrect arguments, and more.
 
-```js
-function draw() {
-	askAI();
-	text('Hello!');
-}
+# 3-2
+
+Run q5's `askAI()` function before code that isn't working as expected. 🤖
+
+```
+The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
+
+text('Hello!', 50, 50);
 ```
 
-ChatGPT 4o excels at identifying the most common errors that beginners make: typos, missing syntax, incorrect arguments, and more.
+Spend less time debugging and more time creating! 🐛
 
 # 4-0
+
+## More flexible 🤹
+
+q5's top-level global mode makes the `setup` function optional, letting you use q5 functions anywhere. 👀
+
+```js
+new Q5();
+
+createCanvas(400, 400);
+```
+
+# 4-1
+
+## Modular design 🧩
+
+q5 is already ~20x smaller than p5, but for extremely lightweight use, load only the features you need from the [`src` folder](https://github.com/quinton-ashley/q5.js/tree/main/src). 📦
+
+```html
+<script src="https://q5js.org/src/q5-core.js">
+<script src="https://q5js.org/src/q5-2d-canvas.js">
+<script src="https://q5js.org/src/q5-2d-drawing.js">
+```
+
+# 5-0
 
 ## More freedom 🔥
 
 q5 is open source licensed under the [LGPLv3](../LICENSE.md), so you can even use it for free in commercial projects. 🆓
 
 The q5 team is committed to fostering an inclusive community. Join us on the [q5.js Discord](https://discord.gg/QuxQYwGWuB)! 🗺️
-
-# 5-0
-
-## More flexible 🤹
-
-q5.js works right out of the box with your existing p5.js sketches! 📦
-
-But with q5's top-level global mode, the `setup` and `draw` functions are optional. 👀
 
 # 6-0
 
@@ -65,13 +86,13 @@ We're already working on a next-gen version of q5 that uses [WebGPU](https://dev
 
 # 10-0
 
-## Why switch from p5? ⚖️
+## Why not contribute to p5? ⚖️
 
 In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020).
 
-Despite taking exorbitant salaries, the foundation's executives are too busy [working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. Volunteers still do most of the real work, yet it takes several months for paid staff to simply approve and publish crucial updates. 🕵️
+Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. Volunteers still do most of the real work, yet it takes months for paid staff to approve and publish crucial updates. 🕵️
 
-Creative coders deserve better, let's make it happen together! q5 will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative). All contributors will be fairly compensated for their work. 🤝
+Creative coders deserve better: let's make it happen together! q5 will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative). All contributors will be fairly compensated for their work. 🤝
 
 # 10-1
 

@@ -21,6 +21,11 @@ body.dark {
 	--background: #000;
 }
 
+html,
+body {
+	overflow-x: hidden;
+}
+
 body {
 	box-sizing: border-box;
 	display: flex;
@@ -30,7 +35,6 @@ body {
 	width: 100%;
 	margin: 0;
 	font-family: sans-serif;
-	overflow-x: hidden;
 	background-color: var(--brand-secondary);
 	color: var(--primary);
 }
@@ -187,19 +191,17 @@ a {
 	min-width: 0;
 }
 
-#reel3>:first-child {
-	flex: 1;
-	width: 100%;
+.minis md {
+	max-width: 45vw;
 }
 
-#reel3 img {
-	flex: 1;
-	min-width: 400px;
-	max-width: 400px;
+@media screen and (max-width: 800px) {
+	.minis md {
+		max-width: 100%;
+	}
 }
 
 @media screen and (max-width: 400px) {
-
 	.brand .img:first-child {
 		display: none;
 	}

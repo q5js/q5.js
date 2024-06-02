@@ -119,7 +119,7 @@ Q5.modules.q2d_canvas = ($) => {
 		if (!$._da) {
 			$.width = w;
 			$.height = h;
-		} else $.flexibleCanvas($._da);
+		} else $.flexibleCanvas($._dau);
 	}
 
 	$.resizeCanvas = (w, h) => {
@@ -150,12 +150,10 @@ Q5.modules.q2d_canvas = ($) => {
 		else document.body.exitFullscreen();
 	};
 
-	$._sc = (coord) => {
-		return ((coord / $._da) * $.canvas.width) / $._pixelDensity;
-	};
 	$.flexibleCanvas = (unit = 400) => {
 		if (unit) {
-			$.width = $._da = unit;
+			$._da = $.canvas.width / (unit * $._pixelDensity);
+			$.width = $._dau = unit;
 			$.height = ($.canvas.h / $.canvas.w) * unit;
 		} else $._da = 0;
 	};
@@ -164,8 +162,8 @@ Q5.modules.q2d_canvas = ($) => {
 
 	$.translate = (x, y) => {
 		if ($._da) {
-			x = $._sc(x);
-			y = $._sc(y);
+			x *= $._da;
+			y *= $._da;
 		}
 		$.ctx.translate(x, y);
 	};

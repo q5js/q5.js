@@ -45,7 +45,7 @@ To use addons, simply load them after q5.js:
 
 ## Exclusive Features
 
-q5 includes some exclusive features that aren't available in p5. Using them is optional!
+q5 includes some exclusive features that aren't available in p5.
 
 ## Ask AI ✨
 
@@ -322,11 +322,11 @@ Higher FPS (frames per second) is better.
 
 ## Contributor Code of Conduct
 
-We aim to make contributing to the q5 project more approachable for non-experts by using plain modern JavaScript and no fancy build tools or frameworks.
+We aim to make contributing to the q5 project more approachable for non-experts by using modern JavaScript without any complicated build tools or frameworks.
 
 All contributors are required to check their ego at the door and be open to feedback. Critique of code is not a critique of the person who wrote it. We're all here to learn and work with others to collectively write the best code possible.
 
-Code is a language art that can be subjectively judged by its effectiveness at communicating its functionality to humans. Code can also be objectively measured by its performance and because JavaScript is served over a network, size is a factor as well. Therefore, the q5 team strives to balance code readability with brevity and performance.
+Code is a language art that can be subjectively judged by its effectiveness at communicating its functionality to humans. Code can also be objectively measured by its performance. Since JavaScript is served over a network, size is a factor as well. Therefore, the q5 team strives to balance code readability with brevity and performance.
 
 Check out the q5 project planning board:
 
@@ -338,13 +338,11 @@ If the q5 project is successful, all contributing developers will be paid for th
 
 ## Licensing
 
-q5.js is not affiliated with The Processing Foundation.
+q5.js was created by the q5 team and is licensed under the LGPLv3. q5 is not affiliated with The Processing Foundation.
 
-p5.js is licensed under the LGPLv2, the two small sections of p5' code were directly copied into q5 are credited below. The rest of q5 is a new implementation of part of the p5 API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Google v Oracle case.
+@LingDong- created the original q5xjs library which is MIT licensed.
 
-@LingDong- created the original q5xjs library and licensed it under the MIT license.
-
-@quinton-ashley created q5.js (this project) which contains many bug fixes, additional p5 API implementations, and several exclusive features. q5.js is licensed under the LGPLv3.
+p5.js is licensed under the LGPLv2, the two small sections of p5' code directly copied into q5 are credited below. The rest of q5 is a new implementation of part of the p5 API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Google v Oracle case.
 
 ## Credits
 
