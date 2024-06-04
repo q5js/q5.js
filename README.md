@@ -83,7 +83,7 @@ In **p5**, functions like `rect` can't be used on the file level. They must be c
 In **q5**, existing p5 2D sketches don't require any modification. But if you initialize Q5 at the top of your sketch, the `preload` and `setup` functions become optional.
 
 ```js
-new Q5();
+Q5();
 
 noStroke();
 let c = color(0, 126, 255, 102);
@@ -94,7 +94,7 @@ rect(15, 15, 35, 70);
 This is great because you don't have to declare variables on the file level and then define them in `preload` or `setup`. You can declare and define them at the same time!
 
 ```js
-new Q5();
+Q5();
 
 let cow = loadImage('cow.png');
 
@@ -273,7 +273,7 @@ Features added by @LingDong-:
 
 Unminified:
 
-- p5.js **4958** ⚠️
+- p5.js **4958kb** ⚠️
 - p5.sound.js 488kb
 - q5.js 71kb
 

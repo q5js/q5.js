@@ -53,7 +53,7 @@ Spend less time debugging and more time creating! 🐛
 q5's top-level global mode makes the `setup` function optional, letting you use q5 functions anywhere. 👀
 
 ```js
-new Q5();
+Q5();
 
 createCanvas(400, 400);
 ```
@@ -84,13 +84,21 @@ The q5 team is committed to fostering an inclusive community. Join us on the [q5
 
 We're already working on a next-gen version of q5 that uses [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast rendering. Stay tuned! 🏎️
 
+# 6-1
+
+## Join our community 🤝
+
+The future of creative coding is here! Join us on the [q5 community Discord]().
+
+If you'd like to work on q5.js, check out our [Contributor Code of Conduct](https://github.com/quinton-ashley/q5.js/?tab=readme-ov-file#contributor-code-of-conduct) and [Project Planning Board](https://github.com/users/quinton-ashley/projects/4/views/1).
+
 # 10-0
 
-## Why not contribute to p5? ⚖️
+## Why make q5? ⚖️
 
 In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020).
 
-Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. Volunteers still do most of the real work, yet it takes months for paid staff to approve and publish crucial updates. 🕵️
+Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. Volunteers do most of the real work, yet it takes months for paid staff to approve and publish crucial updates. 🕵️
 
 Creative coders deserve better: let's make it happen together! q5 will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative). All contributors will be fairly compensated for their work. 🤝
 
