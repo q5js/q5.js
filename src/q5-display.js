@@ -40,7 +40,7 @@ main {
 		);
 	}
 
-	function _applyCanvasMode() {
+	$._applyDisplayMode = () => {
 		let s = c.style;
 		if (!s) return;
 		let p = c.parentElement;
@@ -73,13 +73,13 @@ main {
 				} else s.height = '100%';
 			}
 		}
-	}
+	};
 
 	$.displayMode = (mode, renderQuality = 'default', displayScale = 1) => {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
 		Object.assign(c, { mode, renderQuality, displayScale });
-		_applyCanvasMode();
+		$._applyDisplayMode();
 	};
 };

@@ -38,7 +38,7 @@ Q5.modules.q2d_canvas = ($) => {
 			function parentResized() {
 				if ($.frameCount > 1) {
 					$._shouldResize = true;
-					_applyCanvasMode();
+					if ($._applyDisplayMode) $._applyDisplayMode();
 				}
 			}
 			if (typeof ResizeObserver == 'function') {
@@ -127,7 +127,7 @@ Q5.modules.q2d_canvas = ($) => {
 			$.height = h;
 		} else $.flexibleCanvas($._dau);
 
-		if (frameCount != 0) _applyCanvasMode();
+		if (frameCount != 0 && $._applyDisplayMode) $._applyDisplayMode();
 	}
 
 	$.resizeCanvas = (w, h) => {
