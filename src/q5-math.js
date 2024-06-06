@@ -81,13 +81,15 @@ Q5.modules.math = ($) => {
 		return a;
 	};
 
-	var _noise;
+	$.Noise = Q5.P5Noise;
+	let _noise;
 
+	$.noiseMode = (mode) => {};
 	$.noiseSeed = (seed) => {
-		_noise = new Q5.P5Noise(seed);
+		_noise = new $.Noise(seed);
 	};
 	$.noise = (x = 0, y = 0, z = 0) => {
-		_noise ??= new Q5.P5Noise();
+		_noise ??= new $.Noise();
 		return _noise.noise(x, y, z);
 	};
 	$.noiseDetail = (lod, falloff) => {
@@ -292,8 +294,12 @@ Q5.modules.math = ($) => {
 	};
 };
 
-Q5.P5Noise = class {
+Q5.Noise = class {
+	constructor() {}
+};
+Q5.P5Noise = class extends Q5.Noise {
 	constructor(seed) {
+		super();
 		this.YWRAPB = 4;
 		this.YWRAP = 1 << this.YWRAPB;
 		this.ZWRAPB = 8;
