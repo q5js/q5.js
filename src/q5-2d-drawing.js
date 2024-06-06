@@ -139,8 +139,6 @@ Q5.modules.q2d_drawing = ($) => {
 		$.ctx.fillStyle = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
-	$.smooth = () => ($._smooth = true);
-	$.noSmooth = () => ($._smooth = false);
 	$.strokeCap = (x) => ($.ctx.lineCap = x);
 	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
 	$.ellipseMode = (x) => ($._ellipseMode = x);

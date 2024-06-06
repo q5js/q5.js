@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta1
+ * @version 2.0-beta2
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -168,6 +168,8 @@ function Q5(scope, parent) {
 	if (typeof scope == 'function') scope($);
 
 	if (scope == 'graphics') return;
+
+	Q5._instanceCount++;
 
 	let raf =
 		window.requestAnimationFrame ||

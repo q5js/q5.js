@@ -15,35 +15,38 @@ Q5.modules.q2d_canvas = ($) => {
 	if (!$.canvas) {
 		if (typeof document == 'object') {
 			$.canvas = document.createElement('canvas');
-			$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
-			$.canvas.classList.add('p5Canvas', 'q5Canvas');
-		} else {
-			$.noCanvas();
-		}
+			$.canvas.id = 'q5Canvas' + Q5._instanceCount;
+			$.canvas.classList.add('q5Canvas');
+		} else $.noCanvas();
 	}
 
-	$.canvas.width = $.width = 100;
-	$.canvas.height = $.height = 100;
+	let c = $.canvas;
 
-	if ($.canvas && $._scope != 'graphics' && $._scope != 'image') {
+	c.width = $.width = 100;
+	c.height = $.height = 100;
+
+	if (c && $._scope != 'graphics' && $._scope != 'image') {
 		$._setupDone = false;
-		$._resize = () => {
-			if ($.frameCount > 1) $._shouldResize = true;
-		};
 		let parent = $._parent;
 		if (parent && typeof parent == 'string') {
 			parent = document.getElementById(parent);
 		}
-		$.canvas.parent = (el) => {
+		c.parent = (el) => {
 			if (typeof el == 'string') el = document.getElementById(el);
-			el.append($.canvas);
+			el.append(c);
 
+			function parentResized() {
+				if ($.frameCount > 1) {
+					$._shouldResize = true;
+					_applyCanvasMode();
+				}
+			}
 			if (typeof ResizeObserver == 'function') {
 				if ($._ro) $._ro.disconnect();
-				$._ro = new ResizeObserver($._resize);
+				$._ro = new ResizeObserver(parentResized);
 				$._ro.observe(parent);
 			} else if (!$.frameCount) {
-				window.addEventListener('resize', $._resize);
+				window.addEventListener('resize', parentResized);
 			}
 		};
 		function appendCanvas() {
@@ -52,7 +55,7 @@ Q5.modules.q2d_canvas = ($) => {
 				parent = document.createElement('main');
 				document.body.append(parent);
 			}
-			$.canvas.parent(parent);
+			c.parent(parent);
 		}
 		if (document.body) appendCanvas();
 		else document.addEventListener('DOMContentLoaded', appendCanvas);
@@ -66,18 +69,20 @@ Q5.modules.q2d_canvas = ($) => {
 		$.ctx.textAlign = 'left';
 	};
 
-	$.createCanvas = function (width, height, renderer, options) {
+	$.createCanvas = function (w, h, renderer, options) {
 		if (renderer == 'webgl') throw Error(`webgl renderer is not supported in q5, use '2d'`);
 		if (typeof renderer == 'object') options = renderer;
-		$.width = $.canvas.width = $.canvas.w = width || window.innerWidth;
-		$.height = $.canvas.height = $.canvas.h = height || window.innerHeight;
+		$.width = c.width = c.w = w || window.innerWidth;
+		$.height = c.height = c.h = h || window.innerHeight;
+		c.hw = w / 2;
+		c.hh = h / 2;
 		$._da = 0;
-		$.canvas.renderer = '2d';
+		c.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
 
-		$.ctx = $.drawingContext = $.canvas.getContext('2d', opt);
-		Object.assign($.canvas, opt);
+		$.ctx = $.drawingContext = c.getContext('2d', opt);
+		Object.assign(c, opt);
 		if ($._colorMode == 'rgb') $.colorMode('rgb');
 		$._defaultStyle();
 		$.ctx.save();
@@ -86,44 +91,47 @@ Q5.modules.q2d_canvas = ($) => {
 			if ($._scope == 'graphics') pd = this._pixelDensity;
 			$.pixelDensity(Math.ceil(pd));
 		} else this._pixelDensity = 1;
-		return $.canvas;
+
+		c.style.width = c.w + 'px';
+		c.style.height = c.h + 'px';
+		return c;
 	};
 	$._createCanvas = $.createCanvas;
 
 	if ($._scope == 'image') return;
 
 	function cloneCtx() {
-		let c = {};
+		let t = {};
 		for (let prop in $.ctx) {
-			if (typeof $.ctx[prop] != 'function') c[prop] = $.ctx[prop];
+			if (typeof $.ctx[prop] != 'function') t[prop] = $.ctx[prop];
 		}
-		delete c.canvas;
-		return c;
+		delete t.canvas;
+		return t;
 	}
 
 	function _resizeCanvas(w, h) {
 		w ??= window.innerWidth;
 		h ??= window.innerHeight;
-		let c = cloneCtx();
-		$.canvas.width = Math.ceil(w * $._pixelDensity);
-		$.canvas.height = Math.ceil(h * $._pixelDensity);
-		$.canvas.w = w;
-		$.canvas.h = h;
-		if (!$.canvas.fullscreen && $.canvas.style) {
-			$.canvas.style.width = w + 'px';
-			$.canvas.style.height = h + 'px';
-		}
-		for (let prop in c) $.ctx[prop] = c[prop];
+		let t = cloneCtx();
+		c.width = Math.ceil(w * $._pixelDensity);
+		c.height = Math.ceil(h * $._pixelDensity);
+		c.w = w;
+		c.h = h;
+		c.hw = w / 2;
+		c.hh = h / 2;
+		for (let prop in t) $.ctx[prop] = t[prop];
 		$.ctx.scale($._pixelDensity, $._pixelDensity);
 
 		if (!$._da) {
 			$.width = w;
 			$.height = h;
 		} else $.flexibleCanvas($._dau);
+
+		if (frameCount != 0) _applyCanvasMode();
 	}
 
 	$.resizeCanvas = (w, h) => {
-		if (w == $.canvas.w && h == $.canvas.h) return;
+		if (w == c.w && h == c.h) return;
 		_resizeCanvas(w, h);
 	};
 
@@ -140,7 +148,7 @@ Q5.modules.q2d_canvas = ($) => {
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
-		_resizeCanvas($.canvas.w, $.canvas.h);
+		_resizeCanvas(c.w, c.h);
 		return v;
 	};
 
@@ -152,9 +160,9 @@ Q5.modules.q2d_canvas = ($) => {
 
 	$.flexibleCanvas = (unit = 400) => {
 		if (unit) {
-			$._da = $.canvas.width / (unit * $._pixelDensity);
+			$._da = c.width / (unit * $._pixelDensity);
 			$.width = $._dau = unit;
-			$.height = ($.canvas.h / $.canvas.w) * unit;
+			$.height = (c.h / c.w) * unit;
 		} else $._da = 0;
 	};
 

@@ -545,6 +545,9 @@ Q5.modules.q2d_image = ($) => {
 		}
 		return g;
 	};
+
+	$.smooth = () => ($.ctx.imageSmoothingEnabled = true);
+	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
 };
 
 // IMAGE CLASS
