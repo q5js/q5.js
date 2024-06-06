@@ -40,9 +40,9 @@ main {
 		);
 	}
 
-	$._applyDisplayMode = () => {
+	$._displayMode = () => {
 		let s = c.style;
-		if (!s) return;
+		if (!s || !c.displayMode) return;
 		let p = c.parentElement;
 		if (c.renderQuality == 'pixelated') {
 			c.classList.add('q5-pixelated');
@@ -50,15 +50,15 @@ main {
 			if ($.noSmooth) $.noSmooth();
 			if ($.textFont) $.textFont('monospace');
 		}
-		if (c.mode == 'normal') {
+		if (c.displayMode == 'normal') {
 			p.classList.remove('q5-centered', 'q5-fullscreen');
 			s.width = c.w * c.displayScale + 'px';
 			s.height = c.h * c.displayScale + 'px';
 		} else {
-			p.classList.add('q5-' + c.mode);
+			p.classList.add('q5-' + c.displayMode);
 			p = p.getBoundingClientRect();
 			if (c.w / c.h > p.width / p.height) {
-				if (c.mode == 'centered') {
+				if (c.displayMode == 'centered') {
 					s.width = c.w * c.displayScale + 'px';
 					s.maxWidth = '100%';
 				} else s.width = '100%';
@@ -67,7 +67,7 @@ main {
 			} else {
 				s.width = 'auto';
 				s.maxWidth = '';
-				if (c.mode == 'centered') {
+				if (c.displayMode == 'centered') {
 					s.height = c.h * c.displayScale + 'px';
 					s.maxHeight = '100%';
 				} else s.height = '100%';
@@ -75,11 +75,11 @@ main {
 		}
 	};
 
-	$.displayMode = (mode, renderQuality = 'default', displayScale = 1) => {
+	$.displayMode = (displayMode, renderQuality = 'default', displayScale = 1) => {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
-		Object.assign(c, { mode, renderQuality, displayScale });
-		$._applyDisplayMode();
+		Object.assign(c, { displayMode, renderQuality, displayScale });
+		$._displayMode();
 	};
 };
