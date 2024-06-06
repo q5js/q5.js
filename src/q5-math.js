@@ -81,87 +81,21 @@ Q5.modules.math = ($) => {
 		return a;
 	};
 
-	var PERLIN_YWRAPB = 4;
-	var PERLIN_YWRAP = 1 << PERLIN_YWRAPB;
-	var PERLIN_ZWRAPB = 8;
-	var PERLIN_ZWRAP = 1 << PERLIN_ZWRAPB;
-	var PERLIN_SIZE = 4095;
-	var perlin_octaves = 4;
-	var perlin_amp_falloff = 0.5;
-	var scaled_cosine = (i) => {
-		return 0.5 * (1.0 - Math.cos(i * Math.PI));
-	};
-	var p_perlin;
+	var _noise;
 
+	$.noiseSeed = (seed) => {
+		_noise = new Q5.P5Noise(seed);
+	};
 	$.noise = (x = 0, y = 0, z = 0) => {
-		if (p_perlin == null) {
-			p_perlin = new Array(PERLIN_SIZE + 1);
-			for (var i = 0; i < PERLIN_SIZE + 1; i++) {
-				p_perlin[i] = Math.random();
-			}
-		}
-		if (x < 0) x = -x;
-		if (y < 0) y = -y;
-		if (z < 0) z = -z;
-		var xi = Math.floor(x),
-			yi = Math.floor(y),
-			zi = Math.floor(z);
-		var xf = x - xi;
-		var yf = y - yi;
-		var zf = z - zi;
-		var rxf, ryf;
-		var r = 0;
-		var ampl = 0.5;
-		var n1, n2, n3;
-		for (var o = 0; o < perlin_octaves; o++) {
-			var of = xi + (yi << PERLIN_YWRAPB) + (zi << PERLIN_ZWRAPB);
-			rxf = scaled_cosine(xf);
-			ryf = scaled_cosine(yf);
-			n1 = p_perlin[of & PERLIN_SIZE];
-			n1 += rxf * (p_perlin[(of + 1) & PERLIN_SIZE] - n1);
-			n2 = p_perlin[(of + PERLIN_YWRAP) & PERLIN_SIZE];
-			n2 += rxf * (p_perlin[(of + PERLIN_YWRAP + 1) & PERLIN_SIZE] - n2);
-			n1 += ryf * (n2 - n1);
-			of += PERLIN_ZWRAP;
-			n2 = p_perlin[of & PERLIN_SIZE];
-			n2 += rxf * (p_perlin[(of + 1) & PERLIN_SIZE] - n2);
-			n3 = p_perlin[(of + PERLIN_YWRAP) & PERLIN_SIZE];
-			n3 += rxf * (p_perlin[(of + PERLIN_YWRAP + 1) & PERLIN_SIZE] - n3);
-			n2 += ryf * (n3 - n2);
-			n1 += scaled_cosine(zf) * (n2 - n1);
-			r += n1 * ampl;
-			ampl *= perlin_amp_falloff;
-			xi <<= 1;
-			xf *= 2;
-			yi <<= 1;
-			yf *= 2;
-			zi <<= 1;
-			zf *= 2;
-			if (xf >= 1.0) {
-				xi++;
-				xf--;
-			}
-			if (yf >= 1.0) {
-				yi++;
-				yf--;
-			}
-			if (zf >= 1.0) {
-				zi++;
-				zf--;
-			}
-		}
-		return r;
+		_noise ??= new Q5.P5Noise();
+		return _noise.noise(x, y, z);
+	};
+	$.noiseDetail = (lod, falloff) => {
+		if (lod > 0) _noise.octaves = lod;
+		if (falloff > 0) _noise.falloff = falloff;
 	};
 
-	$.noiseDetail = (lod, falloff) => {
-		if (lod > 0) {
-			perlin_octaves = lod;
-		}
-		if (falloff > 0) {
-			perlin_amp_falloff = falloff;
-		}
-	};
-	const Lcg = () => {
+	function lcg() {
 		const m = 4294967296;
 		const a = 1664525;
 		const c = 1013904223;
@@ -178,8 +112,8 @@ Q5.modules.math = ($) => {
 				return z / m;
 			}
 		};
-	};
-	const Shr3 = () => {
+	}
+	function shr3() {
 		let jsr, seed;
 		let m = 4294967295;
 		return {
@@ -196,22 +130,10 @@ Q5.modules.math = ($) => {
 				return (jsr >>> 0) / m;
 			}
 		};
-	};
-	let rng1 = Shr3();
+	}
+	let rng1 = shr3();
 	rng1.setSeed();
 
-	$.noiseSeed = (seed) => {
-		let jsr = seed === undefined ? Math.random() * 4294967295 : seed;
-		if (!p_perlin) {
-			p_perlin = new Float32Array(PERLIN_SIZE + 1);
-		}
-		for (var i = 0; i < PERLIN_SIZE + 1; i++) {
-			jsr ^= jsr << 17;
-			jsr ^= jsr >> 13;
-			jsr ^= jsr << 5;
-			p_perlin[i] = (jsr >>> 0) / 4294967295;
-		}
-	};
 	$.randomSeed = (seed) => rng1.setSeed(seed);
 	$.random = (a, b) => {
 		if (a === undefined) return rng1.rand();
@@ -226,8 +148,8 @@ Q5.modules.math = ($) => {
 		}
 	};
 	$.randomGenerator = (method) => {
-		if (method == $.LCG) rng1 = Lcg();
-		else if (method == $.SHR3) rng1 = Shr3();
+		if (method == $.LCG) rng1 = lcg();
+		else if (method == $.SHR3) rng1 = shr3();
 		rng1.setSeed();
 	};
 
@@ -368,4 +290,83 @@ Q5.modules.math = ($) => {
 		}
 		return ziggurat.REXP();
 	};
+};
+
+Q5.P5Noise = class {
+	constructor(seed) {
+		this.YWRAPB = 4;
+		this.YWRAP = 1 << this.YWRAPB;
+		this.ZWRAPB = 8;
+		this.ZWRAP = 1 << this.ZWRAPB;
+		this.size = 4095;
+		this.octaves = 4;
+		this.falloff = 0.5;
+
+		seed ??= Math.random() * 4294967295;
+		this.perlin = new Array(this.size + 1);
+		for (var i = 0; i < this.size + 1; i++) {
+			seed ^= seed << 17;
+			seed ^= seed >> 13;
+			seed ^= seed << 5;
+			this.perlin[i] = (seed >>> 0) / 4294967295;
+		}
+	}
+
+	scaled_cosine(i) {
+		return 0.5 * (1.0 - Math.cos(i * Math.PI));
+	}
+
+	noise(x = 0, y = 0, z = 0) {
+		if (x < 0) x = -x;
+		if (y < 0) y = -y;
+		if (z < 0) z = -z;
+		var xi = Math.floor(x),
+			yi = Math.floor(y),
+			zi = Math.floor(z);
+		var xf = x - xi;
+		var yf = y - yi;
+		var zf = z - zi;
+		var rxf, ryf;
+		var r = 0;
+		var ampl = 0.5;
+		var n1, n2, n3;
+		for (var o = 0; o < this.octaves; o++) {
+			var f = xi + (yi << this.YWRAPB) + (zi << this.ZWRAPB);
+			rxf = this.scaled_cosine(xf);
+			ryf = this.scaled_cosine(yf);
+			n1 = this.perlin[f & this.size];
+			n1 += rxf * (this.perlin[(f + 1) & this.size] - n1);
+			n2 = this.perlin[(f + this.YWRAP) & this.size];
+			n2 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n2);
+			n1 += ryf * (n2 - n1);
+			f += this.ZWRAP;
+			n2 = this.perlin[f & this.size];
+			n2 += rxf * (this.perlin[(f + 1) & this.size] - n2);
+			n3 = this.perlin[(f + this.YWRAP) & this.size];
+			n3 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n3);
+			n2 += ryf * (n3 - n2);
+			n1 += this.scaled_cosine(zf) * (n2 - n1);
+			r += n1 * ampl;
+			ampl *= this.falloff;
+			xi <<= 1;
+			xf *= 2;
+			yi <<= 1;
+			yf *= 2;
+			zi <<= 1;
+			zf *= 2;
+			if (xf >= 1.0) {
+				xi++;
+				xf--;
+			}
+			if (yf >= 1.0) {
+				yi++;
+				yf--;
+			}
+			if (zf >= 1.0) {
+				zi++;
+				zf--;
+			}
+		}
+		return r;
+	}
 };
