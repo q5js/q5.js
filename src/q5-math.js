@@ -81,31 +81,6 @@ Q5.modules.math = ($) => {
 		return a;
 	};
 
-	$.PERLIN = 'perlin';
-	$.P5_PERLIN = 'p5-perlin';
-	$.SIMPLEX = 'simplex';
-
-	$.Noise = Q5.P5PerlinNoise;
-	let _noise;
-
-	$.noiseMode = (mode) => {
-		if (mode == $.PERLIN) $.Noise = Q5.PerlinNoise;
-		else if (mode == $.P5_PERLIN) $.Noise = Q5.P5PerlinNoise;
-		// else if (mode == $.SIMPLEX) $.Noise = Q5.SimplexNoise;
-	};
-	$.noiseSeed = (seed) => {
-		_noise = new $.Noise(seed);
-	};
-	$.noise = (x = 0, y = 0, z = 0) => {
-		_noise ??= new $.Noise();
-		return _noise.noise(x, y, z);
-	};
-	$.noiseDetail = (lod, falloff) => {
-		_noise ??= new $.Noise();
-		if (lod > 0) _noise.octaves = lod;
-		if (falloff > 0) _noise.falloff = falloff;
-	};
-
 	function lcg() {
 		const m = 4294967296;
 		const a = 1664525;
@@ -301,6 +276,31 @@ Q5.modules.math = ($) => {
 		}
 		return ziggurat.REXP();
 	};
+
+	$.PERLIN = 'perlin';
+	$.P5_PERLIN = 'p5-perlin';
+	$.SIMPLEX = 'simplex';
+
+	$.Noise = Q5.PerlinNoise;
+	let _noise;
+
+	$.noiseMode = (mode) => {
+		if (mode == $.PERLIN) $.Noise = Q5.PerlinNoise;
+		else if (mode == $.P5_PERLIN) $.Noise = Q5.P5PerlinNoise;
+		// else if (mode == $.SIMPLEX) $.Noise = Q5.SimplexNoise;
+	};
+	$.noiseSeed = (seed) => {
+		_noise = new $.Noise(seed);
+	};
+	$.noise = (x = 0, y = 0, z = 0) => {
+		_noise ??= new $.Noise();
+		return _noise.noise(x, y, z);
+	};
+	$.noiseDetail = (lod, falloff) => {
+		_noise ??= new $.Noise();
+		if (lod > 0) _noise.octaves = lod;
+		if (falloff > 0) _noise.falloff = falloff;
+	};
 };
 
 Q5.Noise = class {
@@ -420,7 +420,7 @@ Q5.PerlinNoise = class extends Q5.Noise {
 			frequency *= 2;
 		}
 
-		return total / maxAmplitude;
+		return total / maxAmplitude + 0.5;
 	}
 };
 
