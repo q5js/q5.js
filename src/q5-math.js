@@ -376,3 +376,95 @@ Q5.P5Noise = class extends Q5.Noise {
 		return r;
 	}
 };
+
+Q5.PerlinNoise = class extends Q5.Noise {
+    constructor(seed) {
+        super();
+        this.grad3 = [
+            [1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0],
+            [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1],
+            [0, 1, 1], [0, -1, 1], [0, 1, -1], [0, -1, -1]
+        ];
+        this.octaves = 4;
+        this.falloff = 0.25;
+        this.p = Array.from({ length: 256 }, () => Math.floor(Math.random() * 256));
+        if (seed !== undefined) {
+            this.p = this.seedPermutation(seed);
+        }
+        this.perm = Array.from({ length: 512 }, (_, i) => this.p[i & 255]);
+    }
+
+    seedPermutation(seed) {
+        let p = [];
+        for (let i = 0; i < 256; i++) {
+            p[i] = i;
+        }
+
+        let n, q;
+        for (let i = 255; i > 0; i--) {
+            seed = (seed * 16807) % 2147483647;
+            n = (seed % (i + 1));
+            q = p[i];
+            p[i] = p[n];
+            p[n] = q;
+        }
+
+        return p;
+    }
+
+    dot(g, x, y, z) {
+        return g[0] * x + g[1] * y + g[2] * z;
+    }
+
+    mix(a, b, t) {
+        return (1 - t) * a + t * b;
+    }
+
+    fade(t) {
+        return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+
+    noise(x, y, z) {
+        let total = 0;
+        let frequency = 1;
+        let amplitude = 1;
+        let maxAmplitude = 0;
+
+        for (let i = 0; i < this.octaves; i++) {
+            const X = Math.floor(x * frequency) & 255;
+            const Y = Math.floor(y * frequency) & 255;
+            const Z = Math.floor(z * frequency) & 255;
+
+            const xf = x * frequency - Math.floor(x * frequency);
+            const yf = y * frequency - Math.floor(y * frequency);
+            const zf = z * frequency - Math.floor(z * frequency);
+
+            const u = this.fade(xf);
+            const v = this.fade(yf);
+            const w = this.fade(zf);
+
+            const A = this.perm[X] + Y;
+            const AA = this.perm[A] + Z;
+            const AB = this.perm[A + 1] + Z;
+            const B = this.perm[X + 1] + Y;
+            const BA = this.perm[B] + Z;
+            const BB = this.perm[B + 1] + Z;
+
+            const lerp1 = this.mix(this.dot(this.grad3[this.perm[AA] % 12], xf, yf, zf), this.dot(this.grad3[this.perm[BA] % 12], xf - 1, yf, zf), u);
+            const lerp2 = this.mix(this.dot(this.grad3[this.perm[AB] % 12], xf, yf - 1, zf), this.dot(this.grad3[this.perm[BB] % 12], xf - 1, yf - 1, zf), u);
+            const lerp3 = this.mix(this.dot(this.grad3[this.perm[AA + 1] % 12], xf, yf, zf - 1), this.dot(this.grad3[this.perm[BA + 1] % 12], xf - 1, yf, zf - 1), u);
+            const lerp4 = this.mix(this.dot(this.grad3[this.perm[AB + 1] % 12], xf, yf - 1, zf - 1), this.dot(this.grad3[this.perm[BB + 1] % 12], xf - 1, yf - 1, zf - 1), u);
+
+            const mix1 = this.mix(lerp1, lerp2, v);
+            const mix2 = this.mix(lerp3, lerp4, v);
+
+            total += this.mix(mix1, mix2, w) * amplitude;
+
+            maxAmplitude += amplitude;
+            amplitude *= this.falloff;
+            frequency *= 2;
+        }
+
+        return total / maxAmplitude;
+    }
+};
