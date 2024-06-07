@@ -101,6 +101,7 @@ Q5.modules.math = ($) => {
 		return _noise.noise(x, y, z);
 	};
 	$.noiseDetail = (lod, falloff) => {
+		_noise ??= new $.Noise();
 		if (lod > 0) _noise.octaves = lod;
 		if (falloff > 0) _noise.falloff = falloff;
 	};
