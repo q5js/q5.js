@@ -1,7 +1,7 @@
 {
 	"name": "q5",
-	"version": "1.9.44",
-	"description": "The sequel to p5.js!",
+	"version": "1.9.45",
+	"description": "The sequel to p5.js that's smaller and faster",
 	"author": "quinton-ashley",
 	"contributors": [
 		"Tezumie",
@@ -21,10 +21,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/quinton-ashley/q5.js.git"
+		"url": "git+https://github.com/q5js/q5.js.git"
 	},
 	"bugs": {
-		"url": "https://github.com/quinton-ashley/q5.js/issues"
+		"url": "https://github.com/q5js/q5.js/issues"
 	},
 	"keywords": [
 		"p5",
