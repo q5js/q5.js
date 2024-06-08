@@ -38,7 +38,7 @@ Q5.modules.q2d_canvas = ($) => {
 			function parentResized() {
 				if ($.frameCount > 1) {
 					$._shouldResize = true;
-					if ($._displayMode) $._displayMode();
+					if ($._adjustDisplay) $._adjustDisplay();
 				}
 			}
 			if (typeof ResizeObserver == 'function') {
@@ -69,6 +69,13 @@ Q5.modules.q2d_canvas = ($) => {
 		$.ctx.textAlign = 'left';
 	};
 
+	$._adjustDisplay = () => {
+		if (c.style) {
+			c.style.width = c.w + 'px';
+			c.style.height = c.h + 'px';
+		}
+	};
+
 	$.createCanvas = function (w, h, renderer, options) {
 		if (renderer == 'webgl') throw Error(`webgl renderer is not supported in q5, use '2d'`);
 		if (typeof renderer == 'object') options = renderer;
@@ -92,8 +99,13 @@ Q5.modules.q2d_canvas = ($) => {
 			$.pixelDensity(Math.ceil(pd));
 		} else this._pixelDensity = 1;
 
-		c.style.width = c.w + 'px';
-		c.style.height = c.h + 'px';
+		if ($.displayMode) {
+			c.displayMode = 'normal';
+			c.renderQuality = 'default';
+			c.displayScale = 1;
+		}
+
+		$._adjustDisplay();
 		return c;
 	};
 	$._createCanvas = $.createCanvas;
@@ -127,7 +139,7 @@ Q5.modules.q2d_canvas = ($) => {
 			$.height = h;
 		} else $.flexibleCanvas($._dau);
 
-		if (frameCount != 0 && $._displayMode) $._displayMode();
+		if (frameCount != 0) $._adjustDisplay();
 	}
 
 	$.resizeCanvas = (w, h) => {

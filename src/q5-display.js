@@ -40,7 +40,7 @@ main {
 		);
 	}
 
-	$._displayMode = () => {
+	$._adjustDisplay = () => {
 		let s = c.style;
 		if (!s || !c.displayMode) return;
 		let p = c.parentElement;
@@ -80,6 +80,6 @@ main {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
 		Object.assign(c, { displayMode, renderQuality, displayScale });
-		$._displayMode();
+		$._adjustDisplay();
 	};
 };
