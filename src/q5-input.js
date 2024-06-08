@@ -42,6 +42,7 @@ Q5.modules.input = ($) => {
 		$.mouseY = (e.clientY - rect.top) / sy;
 	};
 	$._onmousedown = (e) => {
+		if ($.aud?.state != 'running') $.aud.resume();
 		$._updateMouse(e);
 		$.mouseIsPressed = true;
 		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][e.button];
@@ -80,6 +81,7 @@ Q5.modules.input = ($) => {
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
+		if ($.aud?.state != 'running') $.aud.resume();
 		$.keyIsPressed = true;
 		$.key = e.key;
 		$.keyCode = e.keyCode;
@@ -108,6 +110,7 @@ Q5.modules.input = ($) => {
 		};
 	}
 	$._ontouchstart = (e) => {
+		if ($.aud?.state != 'running') $.aud.resume();
 		$.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
 			$.mouseX = $.touches[0].x;
@@ -117,7 +120,6 @@ Q5.modules.input = ($) => {
 			if (!$.mousePressed(e)) e.preventDefault();
 		}
 		if (!$.touchStarted(e)) e.preventDefault();
-		if ($.getAudioContext()?.state != 'running') $.userStartAudio();
 	};
 	$._ontouchmove = (e) => {
 		$.touches = [...e.touches].map(getTouchInfo);
