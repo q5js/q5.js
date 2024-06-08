@@ -102,8 +102,6 @@ Despite taking exorbitant salaries, the foundation's executives are too [busy wo
 
 When criticized, TPF staff play the victim, gaslight, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the very people who made Processing and p5 great. 🚪
 
-The q5 team is not "anti-p5". 🌸
-
-We recognize that the [pro5 grants](https://processingfoundation.org/grants) are an overdue step in the right direction. But many of the planned p5 v2 features have been promised for years and we got tired of waiting. 🕰️
+The q5 team is not "anti-p5". We aim to carry on Processing's legacy by continuing to make creative coding fun and accessible. 🌸
 
 Creative coders deserve better: let's make it happen together! q5 will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative). All contributors will be fairly compensated for their work. 🤝
