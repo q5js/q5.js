@@ -52,64 +52,6 @@ Q5.modules.q2d_drawing = ($) => {
 		if ($._doStroke) $.ctx.stroke();
 	}
 
-	// CURVES
-
-	$.curvePoint = (a, b, c, d, t) => {
-		const t3 = t * t * t,
-			t2 = t * t,
-			f1 = -0.5 * t3 + t2 - 0.5 * t,
-			f2 = 1.5 * t3 - 2.5 * t2 + 1.0,
-			f3 = -1.5 * t3 + 2.0 * t2 + 0.5 * t,
-			f4 = 0.5 * t3 - 0.5 * t2;
-		return a * f1 + b * f2 + c * f3 + d * f4;
-	};
-	$.bezierPoint = (a, b, c, d, t) => {
-		const adjustedT = 1 - t;
-		return (
-			Math.pow(adjustedT, 3) * a +
-			3 * Math.pow(adjustedT, 2) * t * b +
-			3 * adjustedT * Math.pow(t, 2) * c +
-			Math.pow(t, 3) * d
-		);
-	};
-	$.curveTangent = (a, b, c, d, t) => {
-		const t2 = t * t,
-			f1 = (-3 * t2) / 2 + 2 * t - 0.5,
-			f2 = (9 * t2) / 2 - 5 * t,
-			f3 = (-9 * t2) / 2 + 4 * t + 0.5,
-			f4 = (3 * t2) / 2 - t;
-		return a * f1 + b * f2 + c * f3 + d * f4;
-	};
-	$.bezierTangent = (a, b, c, d, t) => {
-		const adjustedT = 1 - t;
-		return (
-			3 * d * Math.pow(t, 2) -
-			3 * c * Math.pow(t, 2) +
-			6 * c * adjustedT * t -
-			6 * b * adjustedT * t +
-			3 * b * Math.pow(adjustedT, 2) -
-			3 * a * Math.pow(adjustedT, 2)
-		);
-	};
-
-	// ERASE
-
-	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
-		$.ctx.globalCompositeOperation = 'destination-out';
-		$.ctx.fillStyle = `rgba(0, 0, 0, ${fillAlpha / 255})`;
-		$.ctx.strokeStyle = `rgba(0, 0, 0, ${strokeAlpha / 255})`;
-	};
-
-	$.noErase = function () {
-		$.ctx.globalCompositeOperation = 'source-over';
-		if ($._fillSet) {
-			$.ctx.fillStyle = $.color($.ctx.fillStyle).toString();
-		}
-		if ($._strokeSet) {
-			$.ctx.strokeStyle = $.color($.ctx.strokeStyle).toString();
-		}
-	};
-
 	// DRAWING SETTINGS
 
 	$.strokeWeight = (n) => {
@@ -139,6 +81,7 @@ Q5.modules.q2d_drawing = ($) => {
 		$.ctx.fillStyle = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
+	$.blendMode = (x) => ($.ctx.globalCompositeOperation = x);
 	$.strokeCap = (x) => ($.ctx.lineCap = x);
 	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
 	$.ellipseMode = (x) => ($._ellipseMode = x);
@@ -146,8 +89,6 @@ Q5.modules.q2d_drawing = ($) => {
 	$.curveDetail = (x) => ($._curveDetail = x);
 	$.curveAlpha = (x) => ($._curveAlpha = x);
 	$.curveTightness = (x) => ($._curveAlpha = x);
-
-	$.blendMode = (x) => ($.ctx.globalCompositeOperation = x);
 
 	// DRAWING
 
@@ -504,5 +445,54 @@ Q5.modules.q2d_drawing = ($) => {
 		$.curveVertex(x3, y3);
 		$.curveVertex(x4, y4);
 		$.endShape();
+	};
+	$.curvePoint = (a, b, c, d, t) => {
+		const t3 = t * t * t,
+			t2 = t * t,
+			f1 = -0.5 * t3 + t2 - 0.5 * t,
+			f2 = 1.5 * t3 - 2.5 * t2 + 1.0,
+			f3 = -1.5 * t3 + 2.0 * t2 + 0.5 * t,
+			f4 = 0.5 * t3 - 0.5 * t2;
+		return a * f1 + b * f2 + c * f3 + d * f4;
+	};
+	$.bezierPoint = (a, b, c, d, t) => {
+		const adjustedT = 1 - t;
+		return (
+			Math.pow(adjustedT, 3) * a +
+			3 * Math.pow(adjustedT, 2) * t * b +
+			3 * adjustedT * Math.pow(t, 2) * c +
+			Math.pow(t, 3) * d
+		);
+	};
+	$.curveTangent = (a, b, c, d, t) => {
+		const t2 = t * t,
+			f1 = (-3 * t2) / 2 + 2 * t - 0.5,
+			f2 = (9 * t2) / 2 - 5 * t,
+			f3 = (-9 * t2) / 2 + 4 * t + 0.5,
+			f4 = (3 * t2) / 2 - t;
+		return a * f1 + b * f2 + c * f3 + d * f4;
+	};
+	$.bezierTangent = (a, b, c, d, t) => {
+		const adjustedT = 1 - t;
+		return (
+			3 * d * Math.pow(t, 2) -
+			3 * c * Math.pow(t, 2) +
+			6 * c * adjustedT * t -
+			6 * b * adjustedT * t +
+			3 * b * Math.pow(adjustedT, 2) -
+			3 * a * Math.pow(adjustedT, 2)
+		);
+	};
+
+	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
+		$.ctx.save();
+		$.ctx.globalCompositeOperation = 'destination-out';
+		$.ctx.fillStyle = `rgba(0, 0, 0, ${fillAlpha / 255})`;
+		$.ctx.strokeStyle = `rgba(0, 0, 0, ${strokeAlpha / 255})`;
+	};
+
+	$.noErase = function () {
+		$.ctx.globalCompositeOperation = 'source-over';
+		$.ctx.restore();
 	};
 };

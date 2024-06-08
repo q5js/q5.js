@@ -198,6 +198,8 @@ In **p5** the only way to do dimension agnostic sketches is to set variables to 
 
 In **q5**, @Tezumie added a new feature called `flexibleCanvas`. It takes a unit as input, then any position coordinates or dimensions you use will be scaled based on that unit.
 
+In this example, the rect will appear in the middle of the canvas, regardless of its size.
+
 ```js
 new Q5();
 createCanvas(1000, 1000);
