@@ -83,7 +83,7 @@ In **p5**, functions like `rect` can't be used on the file level. They must be c
 In **q5**, existing p5 2D sketches don't require any modification. But if you initialize Q5 at the top of your sketch, the `preload` and `setup` functions become optional.
 
 ```js
-Q5();
+new Q5();
 
 noStroke();
 let c = color(0, 126, 255, 102);
@@ -94,7 +94,7 @@ rect(15, 15, 35, 70);
 This is great because you don't have to declare variables on the file level and then define them in `preload` or `setup`. You can declare and define them at the same time!
 
 ```js
-Q5();
+new Q5();
 
 let cow = loadImage('cow.png');
 
@@ -192,6 +192,20 @@ with (q) {
 }
 ```
 
+## Dimension Agnostic
+
+In **p5** the only way to do dimension agnostic sketches is to set variables to percentages of the canvas' width and height but this is cumbersome and makes code look messy.
+
+In **q5**, @Tezumie added a new feature called `flexibleCanvas`. It takes a unit as input, then any position coordinates or dimensions you use will be scaled based on that unit.
+
+```js
+new Q5();
+createCanvas(1000, 1000);
+
+flexibleCanvas(400);
+rect(100, 100, 200, 200);
+```
+
 ## Node.js Usage
 
 > Node.js support was recently added, please [make an issue report][] if you encounter any problems.
@@ -245,10 +259,6 @@ I think it'd be better if the canvas mode, webgl mode, Friendly Error System, an
 Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without inline documentation, the source code is easier for experienced JS programmers to comprehend.
 
 ## More exclusive features
-
-Features added by @Tezumie:
-
-- `point()`: more efficient point drawing.
 
 Features added by @quinton-ashley:
 
