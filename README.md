@@ -340,9 +340,7 @@ All contributors are required to check their ego at the door and be open to feed
 
 Code is a language art that can be subjectively judged by its effectiveness at communicating its functionality to humans. Code can also be objectively measured by its performance. Since JavaScript is served over a network, size is a factor as well. Therefore, the q5 team strives to balance code readability with brevity and performance.
 
-Check out the q5 project planning board:
-
-https://github.com/users/quinton-ashley/projects/4/views/1
+Check out the [q5 planning board](https://github.com/orgs/q5js/projects/1/views/1).
 
 ## Organization
 

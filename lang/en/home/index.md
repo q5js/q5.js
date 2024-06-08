@@ -90,7 +90,7 @@ We're already working on a next-gen version of q5 that uses [WebGPU](https://dev
 
 The future of creative coding is here! Join us on the [q5 community Discord]().
 
-If you'd like to work on q5.js, check out our [Contributor Code of Conduct](https://github.com/quinton-ashley/q5.js/?tab=readme-ov-file#contributor-code-of-conduct) and [Project Planning Board](https://github.com/users/quinton-ashley/projects/4/views/1).
+If you'd like to work on q5.js, check out our [Contributor Code of Conduct](https://github.com/quinton-ashley/q5.js/?tab=readme-ov-file#contributor-code-of-conduct) and [Project Planning Board](https://github.com/orgs/q5js/projects/1/views/1).
 
 # 10-0
 
