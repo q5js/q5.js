@@ -1,4 +1,4 @@
-Q5.modules.q2d_image = ($) => {
+Q5.modules.q2d_image = ($, p) => {
 	$.BLEND = 'source-over';
 	$.REMOVE = 'destination-out';
 	$.ADD = 'lighter';
@@ -25,7 +25,7 @@ Q5.modules.q2d_image = ($) => {
 
 	$.loadPixels = () => {
 		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
-		$.pixels = imgData.data;
+		p.pixels = imgData.data;
 	};
 	$.updatePixels = () => {
 		if (imgData != null) $.ctx.putImageData(imgData, 0, 0);
@@ -274,8 +274,8 @@ Q5.modules.q2d_image = ($) => {
 	$.resize = (w, h) => {
 		makeTmpCtx();
 		tmpCtx.drawImage($.canvas, 0, 0);
-		$.width = w;
-		$.height = h;
+		p.width = w;
+		p.height = h;
 		$.canvas.width = w * $._pixelDensity;
 		$.canvas.height = h * $._pixelDensity;
 		$.ctx.save();
@@ -508,7 +508,7 @@ Q5.modules.q2d_image = ($) => {
 	};
 
 	$.loadImage = function (url, cb, opt) {
-		$._preloadCount++;
+		p._preloadCount++;
 		let last = [...arguments].at(-1);
 		opt = typeof last == 'object' ? last : true;
 		let g = $.createImage(1, 1, opt.alpha);
@@ -519,11 +519,11 @@ Q5.modules.q2d_image = ($) => {
 					g.width = c.canvas.width = img.width;
 					g.height = c.canvas.height = img.height;
 					c.drawImage(img, 0, 0);
-					$._preloadCount--;
+					p._preloadCount--;
 					if (cb) cb(g);
 				})
 				.catch((e) => {
-					$._preloadCount--;
+					p._preloadCount--;
 					throw e;
 				});
 		} else {
@@ -535,11 +535,11 @@ Q5.modules.q2d_image = ($) => {
 				g.width = c.canvas.width = img.naturalWidth;
 				g.height = c.canvas.height = img.naturalHeight;
 				c.drawImage(img, 0, 0);
-				$._preloadCount--;
+				p._preloadCount--;
 				if (cb) cb(g);
 			};
 			img.onerror = (e) => {
-				$._preloadCount--;
+				p._preloadCount--;
 				throw e;
 			};
 		}

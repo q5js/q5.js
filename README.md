@@ -208,6 +208,30 @@ flexibleCanvas(400);
 rect(100, 100, 200, 200);
 ```
 
+## Frame your Art
+
+The `displayMode` function lets you customize how your canvas is presented.
+
+```js
+displayMode(mode, renderQuality, displayScale);
+```
+
+Display modes:
+
+"normal": no styling to canvas or its parent element
+"centered": canvas will be centered horizontally and vertically within its parent and if it's display size is bigger than its parent it will not clip
+"maxed": canvas will fill the parent element, same as fullscreen for a global mode canvas inside a `main` element
+"fullscreen": canvas will fill the screen with letterboxing to persevere its aspect ratio, like css object-fit contain
+
+Render qualities:
+
+"default": pixelDensity set to displayDensity
+"pixelated": pixelDensity set to 1 and various css styles are applied to the canvas to make it render without image smoothing
+
+displayScale:
+
+Can be given as a string "x2" or a number. This can be used to make small canvases appear larger.
+
 ## Node.js Usage
 
 > Node.js support was recently added, please [make an issue report][] if you encounter any problems.

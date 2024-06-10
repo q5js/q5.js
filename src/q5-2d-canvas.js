@@ -1,4 +1,4 @@
-Q5.modules.q2d_canvas = ($) => {
+Q5.modules.q2d_canvas = ($, p) => {
 	let _OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
@@ -7,14 +7,14 @@ Q5.modules.q2d_canvas = ($) => {
 
 	if (Q5._nodejs) {
 		if (Q5._createNodeJSCanvas) {
-			$.canvas = Q5._createNodeJSCanvas(100, 100);
+			p.canvas = Q5._createNodeJSCanvas(100, 100);
 		}
 	} else if ($._scope == 'image' || $._scope == 'graphics') {
-		$.canvas = new _OffscreenCanvas(100, 100);
+		p.canvas = new _OffscreenCanvas(100, 100);
 	}
 	if (!$.canvas) {
 		if (typeof document == 'object') {
-			$.canvas = document.createElement('canvas');
+			p.canvas = document.createElement('canvas');
 			$.canvas.id = 'q5Canvas' + Q5._instanceCount;
 			$.canvas.classList.add('q5Canvas');
 		} else $.noCanvas();
@@ -79,8 +79,8 @@ Q5.modules.q2d_canvas = ($) => {
 	$.createCanvas = function (w, h, renderer, options) {
 		if (renderer == 'webgl') throw Error(`webgl renderer is not supported in q5, use '2d'`);
 		if (typeof renderer == 'object') options = renderer;
-		$.width = c.width = c.w = w || window.innerWidth;
-		$.height = c.height = c.h = h || window.innerHeight;
+		p.width = c.width = c.w = w || window.innerWidth;
+		p.height = c.height = c.h = h || window.innerHeight;
 		c.hw = w / 2;
 		c.hh = h / 2;
 		$._da = 0;
@@ -88,7 +88,7 @@ Q5.modules.q2d_canvas = ($) => {
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
 
-		$.ctx = $.drawingContext = c.getContext('2d', opt);
+		p.ctx = p.drawingContext = c.getContext('2d', opt);
 		Object.assign(c, opt);
 		if ($._colorMode == 'rgb') $.colorMode('rgb');
 		$._defaultStyle();
@@ -99,13 +99,8 @@ Q5.modules.q2d_canvas = ($) => {
 			$.pixelDensity(Math.ceil(pd));
 		} else this._pixelDensity = 1;
 
-		if ($.displayMode) {
-			c.displayMode = 'normal';
-			c.renderQuality = 'default';
-			c.displayScale = 1;
-		}
-
-		$._adjustDisplay();
+		if ($.displayMode) $.displayMode();
+		else $._adjustDisplay();
 		return c;
 	};
 	$._createCanvas = $.createCanvas;
@@ -135,11 +130,11 @@ Q5.modules.q2d_canvas = ($) => {
 		$.ctx.scale($._pixelDensity, $._pixelDensity);
 
 		if (!$._da) {
-			$.width = w;
-			$.height = h;
+			p.width = w;
+			p.height = h;
 		} else $.flexibleCanvas($._dau);
 
-		if (frameCount != 0) $._adjustDisplay();
+		if ($.frameCount != 0) $._adjustDisplay();
 	}
 
 	$.resizeCanvas = (w, h) => {
@@ -173,8 +168,8 @@ Q5.modules.q2d_canvas = ($) => {
 	$.flexibleCanvas = (unit = 400) => {
 		if (unit) {
 			$._da = c.width / (unit * $._pixelDensity);
-			$.width = $._dau = unit;
-			$.height = (c.h / c.w) * unit;
+			p.width = $._dau = unit;
+			p.height = (c.h / c.w) * unit;
 		} else $._da = 0;
 	};
 
@@ -253,6 +248,9 @@ Q5.modules.q2d_canvas = ($) => {
 	if (window && $._scope != 'graphics') {
 		window.addEventListener('resize', () => {
 			$._shouldResize = true;
+			p.windowWidth = window.innerWidth;
+			p.windowHeight = window.innerHeight;
+			p.deviceOrientation = window.screen?.orientation?.type;
 			if (!$._loop) $.redraw();
 		});
 	}
@@ -261,7 +259,8 @@ Q5.modules.q2d_canvas = ($) => {
 Q5.canvasOptions = {
 	alpha: false,
 	desynchronized: false,
-	colorSpace: 'display-p3'
+	colorSpace: 'display-p3',
+	willReadFrequently: true
 };
 
 if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {

@@ -10,7 +10,7 @@ Q5.modules.math = ($) => {
 	$.ceil = Math.ceil;
 	$.exp = Math.exp;
 	$.floor = Math.floor;
-	$.log = Math.log;
+	$.loge = Math.log;
 	$.mag = Math.hypot;
 	$.max = Math.max;
 	$.min = Math.min;
@@ -281,13 +281,13 @@ Q5.modules.math = ($) => {
 	$.P5_PERLIN = 'p5-perlin';
 	$.SIMPLEX = 'simplex';
 
-	$.Noise = Q5.PerlinNoise;
+	$.Noise = Q5.SimplexNoise;
 	let _noise;
 
 	$.noiseMode = (mode) => {
 		if (mode == $.PERLIN) $.Noise = Q5.PerlinNoise;
 		else if (mode == $.P5_PERLIN) $.Noise = Q5.P5PerlinNoise;
-		// else if (mode == $.SIMPLEX) $.Noise = Q5.SimplexNoise;
+		else if (mode == $.SIMPLEX) $.Noise = Q5.SimplexNoise;
 	};
 	$.noiseSeed = (seed) => {
 		_noise = new $.Noise(seed);
@@ -365,18 +365,18 @@ Q5.PerlinNoise = class extends Q5.Noise {
 
 	noise(x, y, z) {
 		let total = 0;
-		let frequency = 1;
-		let amplitude = 1;
-		let maxAmplitude = 0;
+		let freq = 1;
+		let amp = 1;
+		let maxAmp = 0;
 
 		for (let i = 0; i < this.octaves; i++) {
-			const X = Math.floor(x * frequency) & 255;
-			const Y = Math.floor(y * frequency) & 255;
-			const Z = Math.floor(z * frequency) & 255;
+			const X = Math.floor(x * freq) & 255;
+			const Y = Math.floor(y * freq) & 255;
+			const Z = Math.floor(z * freq) & 255;
 
-			const xf = x * frequency - Math.floor(x * frequency);
-			const yf = y * frequency - Math.floor(y * frequency);
-			const zf = z * frequency - Math.floor(z * frequency);
+			const xf = x * freq - Math.floor(x * freq);
+			const yf = y * freq - Math.floor(y * freq);
+			const zf = z * freq - Math.floor(z * freq);
 
 			const u = this.fade(xf);
 			const v = this.fade(yf);
@@ -413,14 +413,14 @@ Q5.PerlinNoise = class extends Q5.Noise {
 			const mix1 = this.mix(lerp1, lerp2, v);
 			const mix2 = this.mix(lerp3, lerp4, v);
 
-			total += this.mix(mix1, mix2, w) * amplitude;
+			total += this.mix(mix1, mix2, w) * amp;
 
-			maxAmplitude += amplitude;
-			amplitude *= this.falloff;
-			frequency *= 2;
+			maxAmp += amp;
+			amp *= this.falloff;
+			freq *= 2;
 		}
 
-		return total / maxAmplitude + 0.5;
+		return total / maxAmp + 0.5;
 	}
 };
 
@@ -436,12 +436,12 @@ Q5.P5PerlinNoise = class extends Q5.Noise {
 		this.falloff = 0.5;
 
 		seed ??= Math.random() * 4294967295;
-		this.perlin = new Array(this.size + 1);
+		this.perm = new Array(this.size + 1);
 		for (var i = 0; i < this.size + 1; i++) {
 			seed ^= seed << 17;
 			seed ^= seed >> 13;
 			seed ^= seed << 5;
-			this.perlin[i] = (seed >>> 0) / 4294967295;
+			this.perm[i] = (seed >>> 0) / 4294967295;
 		}
 	}
 
@@ -461,26 +461,26 @@ Q5.P5PerlinNoise = class extends Q5.Noise {
 		var zf = z - zi;
 		var rxf, ryf;
 		var r = 0;
-		var ampl = 0.5;
+		var amp = 0.5;
 		var n1, n2, n3;
 		for (var o = 0; o < this.octaves; o++) {
 			var f = xi + (yi << this.YWRAPB) + (zi << this.ZWRAPB);
 			rxf = this.scaled_cosine(xf);
 			ryf = this.scaled_cosine(yf);
-			n1 = this.perlin[f & this.size];
-			n1 += rxf * (this.perlin[(f + 1) & this.size] - n1);
-			n2 = this.perlin[(f + this.YWRAP) & this.size];
-			n2 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n2);
+			n1 = this.perm[f & this.size];
+			n1 += rxf * (this.perm[(f + 1) & this.size] - n1);
+			n2 = this.perm[(f + this.YWRAP) & this.size];
+			n2 += rxf * (this.perm[(f + this.YWRAP + 1) & this.size] - n2);
 			n1 += ryf * (n2 - n1);
 			f += this.ZWRAP;
-			n2 = this.perlin[f & this.size];
-			n2 += rxf * (this.perlin[(f + 1) & this.size] - n2);
-			n3 = this.perlin[(f + this.YWRAP) & this.size];
-			n3 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n3);
+			n2 = this.perm[f & this.size];
+			n2 += rxf * (this.perm[(f + 1) & this.size] - n2);
+			n3 = this.perm[(f + this.YWRAP) & this.size];
+			n3 += rxf * (this.perm[(f + this.YWRAP + 1) & this.size] - n3);
 			n2 += ryf * (n3 - n2);
 			n1 += this.scaled_cosine(zf) * (n2 - n1);
-			r += n1 * ampl;
-			ampl *= this.falloff;
+			r += n1 * amp;
+			amp *= this.falloff;
 			xi <<= 1;
 			xf *= 2;
 			yi <<= 1;

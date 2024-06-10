@@ -1,10 +1,10 @@
 Q5.modules.sound = ($) => {
 	$.loadSound = (path, cb) => {
-		$._preloadCount++;
+		p._preloadCount++;
 		$.aud ??= new window.AudioContext();
 		let a = new Audio(path);
 		a.addEventListener('canplaythrough', () => {
-			$._preloadCount--;
+			p._preloadCount--;
 			if (cb) cb(a);
 		});
 		a.load();

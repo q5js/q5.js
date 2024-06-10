@@ -1,4 +1,4 @@
-Q5.modules.input = ($) => {
+Q5.modules.input = ($, p) => {
 	$.mouseX = 0;
 	$.mouseY = 0;
 	$.pmouseX = 0;
@@ -32,20 +32,21 @@ Q5.modules.input = ($) => {
 	$.TEXT = 'text';
 
 	let keysHeld = {};
+	let mouseBtns = [$.LEFT, $.CENTER, $.RIGHT];
 
 	$._updateMouse = (e) => {
 		if (e.changedTouches) return;
 		let rect = $.canvas.getBoundingClientRect();
 		let sx = $.canvas.scrollWidth / $.width || 1;
 		let sy = $.canvas.scrollHeight / $.height || 1;
-		$.mouseX = (e.clientX - rect.left) / sx;
-		$.mouseY = (e.clientY - rect.top) / sy;
+		p.mouseX = (e.clientX - rect.left) / sx;
+		p.mouseY = (e.clientY - rect.top) / sy;
 	};
 	$._onmousedown = (e) => {
 		if ($.aud && $.aud.state != 'running') $.aud.resume();
 		$._updateMouse(e);
-		$.mouseIsPressed = true;
-		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][e.button];
+		p.mouseIsPressed = true;
+		p.mouseButton = mouseBtns[e.button];
 		$.mousePressed(e);
 	};
 	$._onmousemove = (e) => {
@@ -55,14 +56,14 @@ Q5.modules.input = ($) => {
 	};
 	$._onmouseup = (e) => {
 		$._updateMouse(e);
-		$.mouseIsPressed = false;
+		p.mouseIsPressed = false;
 		$.mouseReleased(e);
 	};
 	$._onclick = (e) => {
 		$._updateMouse(e);
-		$.mouseIsPressed = true;
+		p.mouseIsPressed = true;
 		$.mouseClicked(e);
-		$.mouseIsPressed = false;
+		p.mouseIsPressed = false;
 	};
 	$.cursor = (name, x, y) => {
 		let pfx = '';
@@ -82,9 +83,9 @@ Q5.modules.input = ($) => {
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
 		if ($.aud && $.aud.state != 'running') $.aud.resume();
-		$.keyIsPressed = true;
-		$.key = e.key;
-		$.keyCode = e.keyCode;
+		p.keyIsPressed = true;
+		p.key = e.key;
+		p.keyCode = e.keyCode;
 		keysHeld[$.keyCode] = true;
 		$.keyPressed(e);
 		if (e.key.length == 1) {
@@ -92,9 +93,9 @@ Q5.modules.input = ($) => {
 		}
 	};
 	$._onkeyup = (e) => {
-		$.keyIsPressed = false;
-		$.key = e.key;
-		$.keyCode = e.keyCode;
+		p.keyIsPressed = false;
+		p.key = e.key;
+		p.keyCode = e.keyCode;
 		keysHeld[$.keyCode] = false;
 		$.keyReleased(e);
 	};
@@ -111,29 +112,29 @@ Q5.modules.input = ($) => {
 	}
 	$._ontouchstart = (e) => {
 		if ($.aud && $.aud.state != 'running') $.aud.resume();
-		$.touches = [...e.touches].map(getTouchInfo);
+		p.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
-			$.mouseX = $.touches[0].x;
-			$.mouseY = $.touches[0].y;
-			$.mouseIsPressed = true;
-			$.mouseButton = $.LEFT;
+			p.mouseX = $.touches[0].x;
+			p.mouseY = $.touches[0].y;
+			p.mouseIsPressed = true;
+			p.mouseButton = $.LEFT;
 			if (!$.mousePressed(e)) e.preventDefault();
 		}
 		if (!$.touchStarted(e)) e.preventDefault();
 	};
 	$._ontouchmove = (e) => {
-		$.touches = [...e.touches].map(getTouchInfo);
+		p.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
-			$.mouseX = $.touches[0].x;
-			$.mouseY = $.touches[0].y;
+			p.mouseX = $.touches[0].x;
+			p.mouseY = $.touches[0].y;
 			if (!$.mouseDragged(e)) e.preventDefault();
 		}
 		if (!$.touchMoved(e)) e.preventDefault();
 	};
 	$._ontouchend = (e) => {
-		$.touches = [...e.touches].map(getTouchInfo);
+		p.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware && !$.touches.length) {
-			$.mouseIsPressed = false;
+			p.mouseIsPressed = false;
 			if (!$.mouseReleased(e)) e.preventDefault();
 		}
 		if (!$.touchEnded(e)) e.preventDefault();

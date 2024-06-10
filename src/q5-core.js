@@ -19,7 +19,19 @@ function Q5(scope, parent) {
 		if (!(window.setup || window.draw)) return;
 		else scope = 'global';
 	}
-	if (scope == 'global') Q5._hasGlobal = $._isGlobal = true;
+	let globalScope;
+	if (scope == 'global') {
+		Q5._hasGlobal = $._isGlobal = true;
+		globalScope = !Q5._nodejs ? window : global;
+	}
+
+	let p = new Proxy($, {
+		set: (t, p, v) => {
+			$[p] = v;
+			if ($._isGlobal) globalScope[p] = v;
+			return true;
+		}
+	});
 
 	$.ctx = $.drawingContext = null;
 	$.canvas = null;
@@ -39,21 +51,17 @@ function Q5(scope, parent) {
 	$.noCanvas = () => {
 		if ($.canvas?.remove) $.canvas.remove();
 		$.canvas = 0;
-		$.ctx = $.drawingContext = 0;
+		p.ctx = p.drawingContext = 0;
 	};
 
-	Object.defineProperty($, 'windowWidth', {
-		get: () => window.innerWidth
-	});
-	Object.defineProperty($, 'windowHeight', {
-		get: () => window.innerHeight
-	});
-	Object.defineProperty($, 'deviceOrientation', {
-		get: () => window.screen?.orientation?.type
-	});
+	if (window) {
+		$.windowWidth = window.innerWidth;
+		$.windowHeight = window.innerHeight;
+		$.deviceOrientation = window.screen?.orientation?.type;
+	}
 
-	$._incrementPreload = () => $._preloadCount++;
-	$._decrementPreload = () => $._preloadCount--;
+	$._incrementPreload = () => p._preloadCount++;
+	$._decrementPreload = () => p._preloadCount--;
 
 	function _draw(timestamp) {
 		let ts = timestamp || performance.now();
@@ -66,9 +74,9 @@ function Q5(scope, parent) {
 			let time_since_last = ts - $._lastFrameTime;
 			if (time_since_last < $._targetFrameDuration - 1) return;
 		}
-		$.deltaTime = ts - $._lastFrameTime;
+		p.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
-		$.frameCount++;
+		p.frameCount++;
 		if ($._shouldResize) {
 			$.windowResized();
 			$._shouldResize = false;
@@ -84,8 +92,8 @@ function Q5(scope, parent) {
 			$.ctx.restore();
 			$.resetMatrix();
 		}
-		$.pmouseX = $.mouseX;
-		$.pmouseY = $.mouseY;
+		p.pmouseX = $.mouseX;
+		p.pmouseY = $.mouseY;
 		$._lastFrameTime = ts;
 		let post = performance.now();
 		$._fps = Math.round(1000 / (post - pre));
@@ -127,12 +135,12 @@ function Q5(scope, parent) {
 
 	$.TWO_PI = $.TAU = Math.PI * 2;
 
-	$.print = console.log;
+	$.log = $.print = console.log;
 	$.describe = () => {};
 
 	for (let m in Q5.modules) {
 		if (scope != 'image' || Q5.imageModules.includes(m)) {
-			Q5.modules[m]($);
+			Q5.modules[m]($, p);
 		}
 	}
 
@@ -153,15 +161,8 @@ function Q5(scope, parent) {
 
 	if (scope == 'global') {
 		let props = Object.getOwnPropertyNames($);
-		let t = !Q5._nodejs ? window : global;
 		for (let p of props) {
-			if (typeof $[p] == 'function') t[p] = $[p];
-			else {
-				Object.defineProperty(t, p, {
-					get: () => $[p],
-					set: (v) => ($[p] = v)
-				});
-			}
+			if (p[0] != '_') globalScope[p] = $[p];
 		}
 	}
 
@@ -180,7 +181,7 @@ function Q5(scope, parent) {
 			}, idealFrameTime - performance.now());
 		};
 
-	let t = scope == 'global' ? (!Q5._nodejs ? window : global) : $;
+	let t = globalScope || $;
 	let preloadDefined = t.preload;
 	let userFns = [
 		'setup',
@@ -221,7 +222,7 @@ function Q5(scope, parent) {
 
 	function _start() {
 		$._startDone = true;
-		if ($._preloadCount > 0) return raf(_start);
+		if ($.preloadCount > 0) return raf(_start);
 		millisStart = performance.now();
 		$.setup();
 		if ($.frameCount) return;

@@ -48,9 +48,9 @@ Spend less time debugging and more time creating! 🐛
 
 # 4-0
 
-## More flexible 🤹
+## More dynamic 🎚️
 
-q5's top-level global mode makes the `setup` function optional, letting you use q5 functions anywhere. 👀
+Q5 instances can be created manually, which makes the `setup` function optional. Use q5 functions anywhere! 👀
 
 ```js
 new Q5();
@@ -62,13 +62,25 @@ createCanvas(400, 400);
 
 ## Modular design 🧩
 
-q5 is already ~20x smaller than p5, but for extremely lightweight use, load only the features you need from the [`src` folder](https://github.com/quinton-ashley/q5.js/tree/main/src). 📦
+p5 is a whopping 5MB. q5 is already ~20x smaller, but for extremely lightweight use, load only the features you need from q5's [`src` folder](https://github.com/q5js/q5.js/tree/main/src). 📦
 
 ```html
 <script src="https://q5js.org/src/q5-core.js">
 <script src="https://q5js.org/src/q5-2d-canvas.js">
 <script src="https://q5js.org/src/q5-2d-drawing.js">
 ```
+
+# 4-2
+
+## More flexible 💪
+
+The `flexibleCanvas` function enables you to truly scale your art to any canvas size, without image scaling distortion. A game changer for generative artists! 🌱
+
+# 4-3
+
+## Frame your art 🖼️
+
+The `displayMode` function lets you customize how your canvas is presented. Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
 
 # 5-0
 
@@ -98,9 +110,9 @@ If you'd like to work on q5.js, check out our [Contributor Code of Conduct](http
 
 In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020).
 
-Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. They think just because p5 is open source, there's no need to pay developers. Volunteer contributors do all the real work, yet somehow it still takes months for staff to review and publish simple bug fixes. 🕵️
+Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. They think just because p5 is open source, volunteer contributors should do all the real work. Yet it still takes months for staff to simply review and publish updates. 🕵️
 
-When criticized, TPF staff play the victim, gaslight, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the very people who made Processing and p5 great. 🚪
+When criticized, TPF staff play the victim, gaslight, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the people who made Processing and p5 great. 🚪
 
 The q5 team is not "anti-p5". We aim to carry on Processing's legacy by continuing to make creative coding fun and accessible. 🌸
 

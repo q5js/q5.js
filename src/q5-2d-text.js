@@ -18,13 +18,13 @@ Q5.modules.q2d_text = ($) => {
 	$._textStyle = 'normal';
 
 	$.loadFont = (url, cb) => {
-		$._preloadCount++;
+		p._preloadCount++;
 		let sp = url.split('/');
 		let name = sp[sp.length - 1].split('.')[0].replace(' ', '');
 		let f = new FontFace(name, 'url(' + url + ')');
 		document.fonts.add(f);
 		f.load().then(() => {
-			$._preloadCount--;
+			p._preloadCount--;
 			if (cb) cb(name);
 		});
 		return name;

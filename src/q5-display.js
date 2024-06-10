@@ -24,12 +24,14 @@ html, body {
 	-webkit-font-smoothing: none;
 }
 .q5-centered,
+.q5-maxed,
 .q5-fullscreen {
   display: flex;
 	align-items: center;
 	justify-content: center;
 }
 main.q5-centered,
+main.q5-maxed,
 .q5-fullscreen {
 	height: 100vh;
 }
@@ -51,7 +53,7 @@ main {
 			if ($.textFont) $.textFont('monospace');
 		}
 		if (c.displayMode == 'normal') {
-			p.classList.remove('q5-centered', 'q5-fullscreen');
+			p.classList.remove('q5-centered', 'q5-maxed', 'q5-fullscreen');
 			s.width = c.w * c.displayScale + 'px';
 			s.height = c.h * c.displayScale + 'px';
 		} else {
@@ -75,7 +77,7 @@ main {
 		}
 	};
 
-	$.displayMode = (displayMode, renderQuality = 'default', displayScale = 1) => {
+	$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}

@@ -1,6 +1,6 @@
 Q5.modules.util = ($) => {
 	$._loadFile = (path, cb, type) => {
-		$._preloadCount++;
+		p._preloadCount++;
 		let ret = {};
 		fetch(path)
 			.then((r) => {
@@ -8,7 +8,7 @@ Q5.modules.util = ($) => {
 				if (type == 'text') return r.text();
 			})
 			.then((r) => {
-				$._preloadCount--;
+				p._preloadCount--;
 				Object.assign(ret, r);
 				if (cb) cb(r);
 			});
