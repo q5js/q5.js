@@ -48,6 +48,12 @@ Spend less time debugging and more time creating! 🐛
 
 # 4-0
 
+## More flexible 💪
+
+The `flexibleCanvas` function enables you to stretch your art to fill any canvas size. A game changer for generative artists! 🌱
+
+# 10-0
+
 ## More dynamic 🎚️
 
 Q5 instances can be created manually, which makes the `setup` function optional. Use q5 functions anywhere! 👀
@@ -58,7 +64,7 @@ new Q5();
 createCanvas(400, 400);
 ```
 
-# 4-1
+# 10-1
 
 ## Modular design 🧩
 
@@ -70,41 +76,27 @@ p5 is a whopping 5MB. q5 is already ~20x smaller, but for extremely lightweight 
 <script src="https://q5js.org/src/q5-2d-drawing.js">
 ```
 
-# 4-2
-
-## More flexible 💪
-
-The `flexibleCanvas` function enables you to truly scale your art to any canvas size, without image scaling distortion. A game changer for generative artists! 🌱
-
-# 4-3
+# 10-2
 
 ## Frame your art 🖼️
 
 The `displayMode` function lets you customize how your canvas is presented. Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
 
-# 5-0
-
-## More freedom 🔥
-
-q5 is open source licensed under the [LGPLv3](../LICENSE.md), so you can even use it for free in commercial projects. 🆓
-
-The q5 team is committed to fostering an inclusive community. Join us on the [q5.js Discord](https://discord.gg/QuxQYwGWuB)! 🗺️
-
-# 6-0
+# 10-3
 
 ## WebGPU support 🚀
 
 We're already working on a next-gen version of q5 that uses [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast rendering. Stay tuned! 🏎️
 
-# 6-1
+# 11-0
 
 ## Join our community 🤝
 
-The future of creative coding is here! Join us on the [q5 community Discord]().
+The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB). 🗺️
 
 If you'd like to work on q5.js, check out our [Contributor Code of Conduct](https://github.com/quinton-ashley/q5.js/?tab=readme-ov-file#contributor-code-of-conduct) and [Project Planning Board](https://github.com/orgs/q5js/projects/1/views/1).
 
-# 10-0
+# 12-0
 
 ## Why make q5? ⚖️
 

@@ -83,7 +83,7 @@ main {
 	z-index: 0;
 }
 
-body>div {
+.reel {
 	z-index: 1;
 	display: flex;
 	flex-flow: column wrap;
@@ -94,12 +94,14 @@ body>div {
 	background-color: var(--background);
 	padding: 16px;
 	gap: 16px;
+	margin-bottom: 40vh;
 }
 
 #reel0 {
 	width: unset;
 	background-color: unset;
 	height: 100vh;
+	margin-bottom: 0;
 }
 
 #reel1 {
@@ -108,17 +110,6 @@ body>div {
 }
 
 #reel2 {
-	margin-bottom: 40vh;
-}
-
-#reel3,
-#reel4,
-#reel5,
-#reel6,
-#reel7,
-#reel8,
-#reel9,
-#reel10 {
 	margin-bottom: 40vh;
 }
 
