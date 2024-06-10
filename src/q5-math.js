@@ -281,13 +281,13 @@ Q5.modules.math = ($) => {
 	$.P5_PERLIN = 'p5-perlin';
 	$.SIMPLEX = 'simplex';
 
-	$.Noise = Q5.SimplexNoise;
+	$.Noise = Q5.PerlinNoise;
 	let _noise;
 
 	$.noiseMode = (mode) => {
 		if (mode == $.PERLIN) $.Noise = Q5.PerlinNoise;
 		else if (mode == $.P5_PERLIN) $.Noise = Q5.P5PerlinNoise;
-		else if (mode == $.SIMPLEX) $.Noise = Q5.SimplexNoise;
+		// else if (mode == $.SIMPLEX) $.Noise = Q5.SimplexNoise;
 	};
 	$.noiseSeed = (seed) => {
 		_noise = new $.Noise(seed);
@@ -436,12 +436,12 @@ Q5.P5PerlinNoise = class extends Q5.Noise {
 		this.falloff = 0.5;
 
 		seed ??= Math.random() * 4294967295;
-		this.perm = new Array(this.size + 1);
+		this.perlin = new Array(this.size + 1);
 		for (var i = 0; i < this.size + 1; i++) {
 			seed ^= seed << 17;
 			seed ^= seed >> 13;
 			seed ^= seed << 5;
-			this.perm[i] = (seed >>> 0) / 4294967295;
+			this.perlin[i] = (seed >>> 0) / 4294967295;
 		}
 	}
 
@@ -467,16 +467,16 @@ Q5.P5PerlinNoise = class extends Q5.Noise {
 			var f = xi + (yi << this.YWRAPB) + (zi << this.ZWRAPB);
 			rxf = this.scaled_cosine(xf);
 			ryf = this.scaled_cosine(yf);
-			n1 = this.perm[f & this.size];
-			n1 += rxf * (this.perm[(f + 1) & this.size] - n1);
-			n2 = this.perm[(f + this.YWRAP) & this.size];
-			n2 += rxf * (this.perm[(f + this.YWRAP + 1) & this.size] - n2);
+			n1 = this.perlin[f & this.size];
+			n1 += rxf * (this.perlin[(f + 1) & this.size] - n1);
+			n2 = this.perlin[(f + this.YWRAP) & this.size];
+			n2 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n2);
 			n1 += ryf * (n2 - n1);
 			f += this.ZWRAP;
-			n2 = this.perm[f & this.size];
-			n2 += rxf * (this.perm[(f + 1) & this.size] - n2);
-			n3 = this.perm[(f + this.YWRAP) & this.size];
-			n3 += rxf * (this.perm[(f + this.YWRAP + 1) & this.size] - n3);
+			n2 = this.perlin[f & this.size];
+			n2 += rxf * (this.perlin[(f + 1) & this.size] - n2);
+			n3 = this.perlin[(f + this.YWRAP) & this.size];
+			n3 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n3);
 			n2 += ryf * (n3 - n2);
 			n1 += this.scaled_cosine(zf) * (n2 - n1);
 			r += n1 * amp;
