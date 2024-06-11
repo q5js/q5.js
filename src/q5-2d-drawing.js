@@ -195,14 +195,14 @@ Q5.modules.q2d_drawing = ($) => {
 			ellipseImpl((x + w) / 2, (y + h) / 2, w - x, h - y);
 		}
 	};
-	$.circle = (x, y, r) => {
+	$.circle = (x, y, d) => {
 		if ($._da) {
 			x *= $._da;
 			y *= $._da;
 			r *= $._da;
 		}
 		$.ctx.beginPath();
-		$.ctx.arc(x, y, r, 0, $.TAU);
+		$.ctx.arc(x, y, d / 2, 0, $.TAU);
 		ink();
 	};
 	$.point = (x, y) => {

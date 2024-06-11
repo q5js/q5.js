@@ -72,14 +72,14 @@ function setup() {
 function draw() {
 	background('#eee');
 
-	let f = frameCount * 0.001;
+	let f = frameCount * 0.002;
 	let a = [];
 	for (let i = 0; i < 33; i++) {
-		a.push(noise(i, f));
+		a.push(noise(i * f * 0.1, f));
 	}
 
 	for (let i = 0; i < 30; i++) {
-		let d = a[i] * 100;
+		let d = a[i] * 80;
 		fill(colors[i % colors.length]);
 		circle(a[i + 1] * width, a[i + 2] * height, d);
 	}
@@ -104,14 +104,14 @@ function setup() {
 function draw() {
 	background('#eee');
 
-	let f = frameCount * 0.001;
+	let f = frameCount * 0.002;
 	let a = [];
 	for (let i = 0; i < 33; i++) {
-		a.push(noise(i, f));
+		a.push(noise(i * f * 0.1, f));
 	}
 
 	for (let i = 0; i < 30; i++) {
-		let d = a[i] * 100;
+		let d = a[i] * 80;
 		fill(colors[i % colors.length]);
 		circle(a[i + 1] * width, a[i + 2] * height, d);
 	}
