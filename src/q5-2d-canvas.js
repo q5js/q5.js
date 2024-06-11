@@ -259,8 +259,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 Q5.canvasOptions = {
 	alpha: false,
 	desynchronized: false,
-	colorSpace: 'display-p3',
-	willReadFrequently: true
+	colorSpace: 'display-p3'
 };
 
 if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {

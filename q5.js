@@ -1,7 +1,7 @@
 /**
  * q5.js
- * @version 1.9
- * @author quinton-ashley and LingDong-
+ * @version 2.0-beta15
+ * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
 
@@ -11,71 +11,316 @@
 function Q5(scope, parent) {
 	let $ = this;
 	$._q5 = true;
-	let preloadCnt = 0;
+	$._scope = scope;
+	$._parent = parent;
+	$._preloadCount = 0;
 	if (!scope) scope = 'global';
 	if (scope == 'auto') {
 		if (!(window.setup || window.draw)) return;
 		else scope = 'global';
 	}
-	if (scope == 'global') Q5._hasGlobal = $._isGlobal = true;
+	let globalScope;
+	if (scope == 'global') {
+		Q5._hasGlobal = $._isGlobal = true;
+		globalScope = !Q5._nodejs ? window : global;
+	}
 
-	// CANVAS
+	let p = new Proxy($, {
+		set: (t, p, v) => {
+			$[p] = v;
+			if ($._isGlobal) globalScope[p] = v;
+			return true;
+		}
+	});
 
+	$.ctx = $.drawingContext = null;
+	$.canvas = null;
+	$.pixels = [];
+	let looper = null;
+
+	$.frameCount = 0;
+	$.deltaTime = 16;
+	$._targetFrameRate = 0;
+	$._targetFrameDuration = 16.666666666666668;
+	$._frameRate = $._fps = 60;
+	$._loop = true;
+
+	let millisStart = 0;
+	$.millis = () => performance.now() - millisStart;
+
+	$.noCanvas = () => {
+		if ($.canvas?.remove) $.canvas.remove();
+		$.canvas = 0;
+		p.ctx = p.drawingContext = 0;
+	};
+
+	if (window) {
+		$.windowWidth = window.innerWidth;
+		$.windowHeight = window.innerHeight;
+		$.deviceOrientation = window.screen?.orientation?.type;
+	}
+
+	$._incrementPreload = () => p._preloadCount++;
+	$._decrementPreload = () => p._preloadCount--;
+
+	function _draw(timestamp) {
+		let ts = timestamp || performance.now();
+		$._lastFrameTime ??= ts - $._targetFrameDuration;
+
+		if ($._loop) looper = raf(_draw);
+		else if ($.frameCount && !$._redraw) return;
+
+		if (looper && $.frameCount) {
+			let time_since_last = ts - $._lastFrameTime;
+			if (time_since_last < $._targetFrameDuration - 1) return;
+		}
+		p.deltaTime = ts - $._lastFrameTime;
+		$._frameRate = 1000 / $.deltaTime;
+		p.frameCount++;
+		if ($._shouldResize) {
+			$.windowResized();
+			$._shouldResize = false;
+		}
+		let pre = performance.now();
+		for (let m of Q5.prototype._methods.pre) m.call($);
+		// clearBuff(); TODO
+		firstVertex = true;
+		if ($.ctx) $.ctx.save();
+		$.draw();
+		for (let m of Q5.prototype._methods.post) m.call($);
+		if ($.ctx) {
+			$.ctx.restore();
+			$.resetMatrix();
+		}
+		p.pmouseX = $.mouseX;
+		p.pmouseY = $.mouseY;
+		$._lastFrameTime = ts;
+		let post = performance.now();
+		$._fps = Math.round(1000 / (post - pre));
+	}
+	$.noLoop = () => {
+		$._loop = false;
+		looper = null;
+	};
+	$.loop = () => {
+		$._loop = true;
+		if (looper == null) _draw();
+	};
+	$.redraw = (n = 1) => {
+		$._redraw = true;
+		for (let i = 0; i < n; i++) {
+			_draw();
+		}
+		$._redraw = false;
+	};
+	$.remove = () => {
+		$.noLoop();
+		$.canvas.remove();
+	};
+
+	$.frameRate = (hz) => {
+		if (hz) {
+			$._targetFrameRate = hz;
+			$._targetFrameDuration = 1000 / hz;
+		}
+		return $._frameRate;
+	};
+	$.getTargetFrameRate = () => $._targetFrameRate;
+	$.getFPS = () => $._fps;
+
+	$.Element = function (a) {
+		this.elt = a;
+	};
+	$._elements = [];
+
+	$.TWO_PI = $.TAU = Math.PI * 2;
+
+	$.log = $.print = console.log;
+	$.describe = () => {};
+
+	for (let m in Q5.modules) {
+		if (scope != 'image' || Q5.imageModules.includes(m)) {
+			Q5.modules[m]($, p);
+		}
+	}
+
+	if (scope == 'image') return;
+
+	// INIT
+
+	if (scope == 'global') {
+		Object.assign(Q5, $);
+		delete Q5.Q5;
+	}
+
+	for (let m of Q5.prototype._methods.init) m.call($);
+
+	for (let [n, fn] of Object.entries(Q5.prototype)) {
+		if (n[0] != '_' && typeof $[n] == 'function') $[n] = fn.bind($);
+	}
+
+	if (scope == 'global') {
+		let props = Object.getOwnPropertyNames($);
+		for (let p of props) {
+			if (p[0] != '_') globalScope[p] = $[p];
+		}
+	}
+
+	if (typeof scope == 'function') scope($);
+
+	if (scope == 'graphics') return;
+
+	Q5._instanceCount++;
+
+	let raf =
+		window.requestAnimationFrame ||
+		function (cb) {
+			const idealFrameTime = $._lastFrameTime + $._targetFrameDuration;
+			return setTimeout(() => {
+				cb(idealFrameTime);
+			}, idealFrameTime - performance.now());
+		};
+
+	let t = globalScope || $;
+	let preloadDefined = t.preload;
+	let userFns = [
+		'setup',
+		'draw',
+		'preload',
+		'mouseMoved',
+		'mousePressed',
+		'mouseReleased',
+		'mouseDragged',
+		'mouseClicked',
+		'keyPressed',
+		'keyReleased',
+		'keyTyped',
+		'touchStarted',
+		'touchMoved',
+		'touchEnded',
+		'windowResized'
+	];
+	for (let k of userFns) {
+		if (!t[k]) $[k] = () => {};
+		else if ($._isGlobal) {
+			$[k] = () => {
+				try {
+					t[k]();
+				} catch (e) {
+					if ($._aiErrorAssistance) $._aiErrorAssistance(e);
+					else console.error(e);
+				}
+			};
+		}
+	}
+
+	$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
+
+	if (!($.setup || $.draw)) return;
+
+	$._startDone = false;
+
+	function _start() {
+		$._startDone = true;
+		if ($.preloadCount > 0) return raf(_start);
+		millisStart = performance.now();
+		$.setup();
+		if ($.frameCount) return;
+		if ($.ctx === null) $.createCanvas(100, 100);
+		$._setupDone = true;
+		if ($.ctx) $.resetMatrix();
+		raf(_draw);
+	}
+
+	if ((arguments.length && scope != 'namespace') || preloadDefined) {
+		$.preload();
+		_start();
+	} else {
+		t.preload = $.preload = () => {
+			if (!$._startDone) _start();
+		};
+		setTimeout($.preload, 32);
+	}
+}
+
+Q5.modules = {};
+Q5.imageModules = ['q2d_canvas', 'q2d_image'];
+
+Q5._nodejs = typeof process == 'object';
+
+Q5._instanceCount = 0;
+Q5._friendlyError = (msg, func) => {
+	throw Error(func + ': ' + msg);
+};
+Q5._validateParameters = () => true;
+
+Q5.prototype._methods = {
+	init: [],
+	pre: [],
+	post: [],
+	remove: []
+};
+Q5.prototype.registerMethod = (m, fn) => Q5.prototype._methods[m].push(fn);
+Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
+
+if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
+else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
+else window = 0;
+
+if (typeof document == 'object') {
+	document.addEventListener('DOMContentLoaded', () => {
+		if (!Q5._hasGlobal) new Q5('auto');
+	});
+}
+Q5.modules.q2d_canvas = ($, p) => {
 	let _OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
 			return document.createElement('canvas');
 		};
 
-	let imgData = null;
-	let ctx = ($.ctx = $.drawingContext = null);
-	$.canvas = null;
-	$.pixels = [];
-
-	$.noCanvas = () => {
-		if ($.canvas?.remove) $.canvas.remove();
-		$.canvas = 0;
-		ctx = $.ctx = $.drawingContext = 0;
-	};
-
 	if (Q5._nodejs) {
 		if (Q5._createNodeJSCanvas) {
-			$.canvas = Q5._createNodeJSCanvas(100, 100);
+			p.canvas = Q5._createNodeJSCanvas(100, 100);
 		}
-	} else if (scope == 'image' || scope == 'graphics') {
-		$.canvas = new _OffscreenCanvas(100, 100);
+	} else if ($._scope == 'image' || $._scope == 'graphics') {
+		p.canvas = new _OffscreenCanvas(100, 100);
 	}
 	if (!$.canvas) {
 		if (typeof document == 'object') {
-			$.canvas = document.createElement('canvas');
-			$.canvas.id = 'defaultCanvas' + Q5._instanceCount++;
-			$.canvas.classList.add('p5Canvas', 'q5Canvas');
-		} else {
-			$.noCanvas();
-		}
+			p.canvas = document.createElement('canvas');
+			$.canvas.id = 'q5Canvas' + Q5._instanceCount;
+			$.canvas.classList.add('q5Canvas');
+		} else $.noCanvas();
 	}
 
-	$.canvas.width = $.width = 100;
-	$.canvas.height = $.height = 100;
+	let c = $.canvas;
 
-	if ($.canvas && scope != 'graphics' && scope != 'image') {
+	c.width = $.width = 100;
+	c.height = $.height = 100;
+
+	if (c && $._scope != 'graphics' && $._scope != 'image') {
 		$._setupDone = false;
-		$._resize = () => {
-			if ($.frameCount > 1) $._shouldResize = true;
-		};
+		let parent = $._parent;
 		if (parent && typeof parent == 'string') {
 			parent = document.getElementById(parent);
 		}
-		$.canvas.parent = (el) => {
+		c.parent = (el) => {
 			if (typeof el == 'string') el = document.getElementById(el);
-			el.append($.canvas);
+			el.append(c);
 
+			function parentResized() {
+				if ($.frameCount > 1) {
+					$._shouldResize = true;
+					if ($._adjustDisplay) $._adjustDisplay();
+				}
+			}
 			if (typeof ResizeObserver == 'function') {
 				if ($._ro) $._ro.disconnect();
-				$._ro = new ResizeObserver($._resize);
+				$._ro = new ResizeObserver(parentResized);
 				$._ro.observe(parent);
 			} else if (!$.frameCount) {
-				window.addEventListener('resize', $._resize);
+				window.addEventListener('resize', parentResized);
 			}
 		};
 		function appendCanvas() {
@@ -84,43 +329,745 @@ function Q5(scope, parent) {
 				parent = document.createElement('main');
 				document.body.append(parent);
 			}
-			$.canvas.parent(parent);
+			c.parent(parent);
 		}
 		if (document.body) appendCanvas();
 		else document.addEventListener('DOMContentLoaded', appendCanvas);
 	}
 
-	$.createCanvas = function (width, height, renderer, options) {
+	$._defaultStyle = () => {
+		$.ctx.fillStyle = 'white';
+		$.ctx.strokeStyle = 'black';
+		$.ctx.lineCap = 'round';
+		$.ctx.lineJoin = 'miter';
+		$.ctx.textAlign = 'left';
+	};
+
+	$._adjustDisplay = () => {
+		if (c.style) {
+			c.style.width = c.w + 'px';
+			c.style.height = c.h + 'px';
+		}
+	};
+
+	$.createCanvas = function (w, h, renderer, options) {
 		if (renderer == 'webgl') throw Error(`webgl renderer is not supported in q5, use '2d'`);
 		if (typeof renderer == 'object') options = renderer;
-		$.width = $.canvas.width = width || window.innerWidth;
-		$.height = $.canvas.height = height || window.innerHeight;
-		$.canvas.renderer = '2d';
+		p.width = c.width = c.w = w || window.innerWidth;
+		p.height = c.height = c.h = h || window.innerHeight;
+		c.hw = w / 2;
+		c.hh = h / 2;
+		$._da = 0;
+		c.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
 
-		ctx = $.ctx = $.drawingContext = $.canvas.getContext('2d', opt);
-		Object.assign($.canvas, opt);
+		p.ctx = p.drawingContext = c.getContext('2d', opt);
+		Object.assign(c, opt);
 		if ($._colorMode == 'rgb') $.colorMode('rgb');
-		defaultStyle();
-		ctx.save();
-		if (scope != 'image') {
+		$._defaultStyle();
+		$.ctx.save();
+		if ($._scope != 'image') {
 			let pd = $.displayDensity();
-			if (scope == 'graphics') pd = this._pixelDensity;
+			if ($._scope == 'graphics') pd = this._pixelDensity;
 			$.pixelDensity(Math.ceil(pd));
 		} else this._pixelDensity = 1;
-		return $.canvas;
+
+		if ($.displayMode) $.displayMode();
+		else $._adjustDisplay();
+		return c;
 	};
 	$._createCanvas = $.createCanvas;
 
-	// IMAGE
+	if ($._scope == 'image') return;
+
+	function cloneCtx() {
+		let t = {};
+		for (let prop in $.ctx) {
+			if (typeof $.ctx[prop] != 'function') t[prop] = $.ctx[prop];
+		}
+		delete t.canvas;
+		return t;
+	}
+
+	function _resizeCanvas(w, h) {
+		w ??= window.innerWidth;
+		h ??= window.innerHeight;
+		let t = cloneCtx();
+		c.width = Math.ceil(w * $._pixelDensity);
+		c.height = Math.ceil(h * $._pixelDensity);
+		c.w = w;
+		c.h = h;
+		c.hw = w / 2;
+		c.hh = h / 2;
+		for (let prop in t) $.ctx[prop] = t[prop];
+		$.ctx.scale($._pixelDensity, $._pixelDensity);
+
+		if (!$._da) {
+			p.width = w;
+			p.height = h;
+		} else $.flexibleCanvas($._dau);
+
+		if ($.frameCount != 0) $._adjustDisplay();
+	}
+
+	$.resizeCanvas = (w, h) => {
+		if (w == c.w && h == c.h) return;
+		_resizeCanvas(w, h);
+	};
+
+	$.createGraphics = function (w, h, opt) {
+		let g = new Q5('graphics');
+		opt ??= {};
+		opt.alpha ??= true;
+		g._createCanvas.call($, w, h, opt);
+		return g;
+	};
+
+	$._pixelDensity = 1;
+	$.displayDensity = () => window.devicePixelRatio;
+	$.pixelDensity = (v) => {
+		if (!v || v == $._pixelDensity) return $._pixelDensity;
+		$._pixelDensity = v;
+		_resizeCanvas(c.w, c.h);
+		return v;
+	};
+
+	$.fullscreen = (v) => {
+		if (v === undefined) return document.fullscreenElement;
+		if (v) document.body.requestFullscreen();
+		else document.body.exitFullscreen();
+	};
+
+	$.flexibleCanvas = (unit = 400) => {
+		if (unit) {
+			$._da = c.width / (unit * $._pixelDensity);
+			p.width = $._dau = unit;
+			p.height = (c.h / c.w) * unit;
+		} else $._da = 0;
+	};
+
+	// DRAWING MATRIX
+
+	$.translate = (x, y) => {
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+		}
+		$.ctx.translate(x, y);
+	};
+	$.rotate = (r) => {
+		if ($._angleMode == 'degrees') r = $.radians(r);
+		$.ctx.rotate(r);
+	};
+	$.scale = (x, y) => {
+		y ??= x;
+		$.ctx.scale(x, y);
+	};
+	$.opacity = (a) => ($.ctx.globalAlpha = a);
+	$.applyMatrix = (a, b, c, d, e, f) => $.ctx.transform(a, b, c, d, e, f);
+	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
+	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
+	$.resetMatrix = () => {
+		$.ctx.resetTransform();
+		$.ctx.scale($._pixelDensity, $._pixelDensity);
+	};
+
+	$._styleNames = [
+		'_doStroke',
+		'_doFill',
+		'_strokeSet',
+		'_fillSet',
+		'_tint',
+		'_imageMode',
+		'_rectMode',
+		'_ellipseMode',
+		'_textFont',
+		'_textLeading',
+		'_leadingSet',
+		'_textSize',
+		'_textAlign',
+		'_textBaseline',
+		'_textStyle',
+		'_textWrap'
+	];
+	$._styles = [];
+
+	$.push = $.pushMatrix = () => {
+		$.ctx.save();
+		let styles = {};
+		for (let s of $._styleNames) styles[s] = $[s];
+		$._styles.push(styles);
+	};
+	$.pop = $.popMatrix = () => {
+		$.ctx.restore();
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+	};
+
+	$.createCapture = (x) => {
+		var vid = document.createElement('video');
+		vid.playsinline = 'playsinline';
+		vid.autoplay = 'autoplay';
+		navigator.mediaDevices.getUserMedia(x).then((stream) => {
+			vid.srcObject = stream;
+		});
+		vid.style.position = 'absolute';
+		vid.style.opacity = 0.00001;
+		vid.style.zIndex = -1000;
+		document.body.append(vid);
+		return vid;
+	};
+
+	if (window && $._scope != 'graphics') {
+		window.addEventListener('resize', () => {
+			$._shouldResize = true;
+			p.windowWidth = window.innerWidth;
+			p.windowHeight = window.innerHeight;
+			p.deviceOrientation = window.screen?.orientation?.type;
+			if (!$._loop) $.redraw();
+		});
+	}
+};
+
+Q5.canvasOptions = {
+	alpha: false,
+	desynchronized: false,
+	colorSpace: 'display-p3'
+};
+
+if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {
+	Q5.canvasOptions.colorSpace = 'srgb';
+} else Q5.supportsHDR = true;
+Q5.modules.q2d_drawing = ($) => {
+	$.THRESHOLD = 1;
+	$.GRAY = 2;
+	$.OPAQUE = 3;
+	$.INVERT = 4;
+	$.POSTERIZE = 5;
+	$.DILATE = 6;
+	$.ERODE = 7;
+	$.BLUR = 8;
+
+	if ($._scope == 'image') return;
+
+	$.CHORD = 0;
+	$.PIE = 1;
+	$.OPEN = 2;
+
+	$.RADIUS = 'radius';
+	$.CORNER = 'corner';
+	$.CORNERS = 'corners';
+
+	$.ROUND = 'round';
+	$.SQUARE = 'butt';
+	$.PROJECT = 'square';
+	$.MITER = 'miter';
+	$.BEVEL = 'bevel';
+
+	$.CLOSE = 1;
+
+	$.CENTER = 'center';
+	$.LEFT = 'left';
+	$.RIGHT = 'right';
+	$.TOP = 'top';
+	$.BOTTOM = 'bottom';
+
+	$.LANDSCAPE = 'landscape';
+	$.PORTRAIT = 'portrait';
+
+	$._doStroke = true;
+	$._doFill = true;
+	$._strokeSet = false;
+	$._fillSet = false;
+	$._ellipseMode = $.CENTER;
+	$._rectMode = $.CORNER;
+	$._curveDetail = 20;
+	$._curveAlpha = 0.0;
+
+	let firstVertex = true;
+	let curveBuff = [];
+
+	function ink() {
+		if ($._doFill) $.ctx.fill();
+		if ($._doStroke) $.ctx.stroke();
+	}
+
+	// DRAWING SETTINGS
+
+	$.strokeWeight = (n) => {
+		if (!n) $._doStroke = false;
+		if ($._da) n *= $._da;
+		$.ctx.lineWidth = n || 0.0001;
+	};
+	$.stroke = function (c) {
+		$._doStroke = true;
+		$._strokeSet = true;
+		if (Q5.Color) {
+			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+			else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
+			if (c.a <= 0) return ($._doStroke = false);
+		}
+		$.ctx.strokeStyle = c.toString();
+	};
+	$.noStroke = () => ($._doStroke = false);
+	$.fill = function (c) {
+		$._doFill = true;
+		$._fillSet = true;
+		if (Q5.Color) {
+			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+			else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
+			if (c.a <= 0) return ($._doFill = false);
+		}
+		$.ctx.fillStyle = c.toString();
+	};
+	$.noFill = () => ($._doFill = false);
+	$.blendMode = (x) => ($.ctx.globalCompositeOperation = x);
+	$.strokeCap = (x) => ($.ctx.lineCap = x);
+	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
+	$.ellipseMode = (x) => ($._ellipseMode = x);
+	$.rectMode = (x) => ($._rectMode = x);
+	$.curveDetail = (x) => ($._curveDetail = x);
+	$.curveAlpha = (x) => ($._curveAlpha = x);
+	$.curveTightness = (x) => ($._curveAlpha = x);
+
+	// DRAWING
+
+	$.clear = () => {
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+	};
+
+	$.background = function (c) {
+		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
+		$.ctx.save();
+		$.ctx.resetTransform();
+		if (Q5.Color) {
+			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+			else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
+		}
+		$.ctx.fillStyle = c.toString();
+		$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.restore();
+	};
+
+	$.line = (x0, y0, x1, y1) => {
+		if ($._doStroke) {
+			if ($._da) {
+				x0 *= $._da;
+				y0 *= $._da;
+				x1 *= $._da;
+				y1 *= $._da;
+			}
+			$.ctx.beginPath();
+			$.ctx.moveTo(x0, y0);
+			$.ctx.lineTo(x1, y1);
+			$.ctx.stroke();
+		}
+	};
+
+	function normAng(x) {
+		let full = $._angleMode == $.DEGREES ? 360 : $.TAU;
+		x = x % full;
+		if (x < 0) x += full;
+		return x;
+	}
+
+	function arcImpl(x, y, w, h, start, stop, mode, detail) {
+		if (!$._doFill && !$._doStroke) return;
+		let lo = normAng(start);
+		let hi = normAng(stop);
+		if (lo > hi) [lo, hi] = [hi, lo];
+		if (lo == 0 && hi == 0) return;
+		$.ctx.beginPath();
+		if (w == h) {
+			$.ctx.arc(x, y, w / 2, lo, hi);
+		} else {
+			for (let i = 0; i < detail + 1; i++) {
+				let t = i / detail;
+				let a = $.lerp(lo, hi, t);
+				let dx = ($.cos(a) * w) / 2;
+				let dy = ($.sin(a) * h) / 2;
+				$.ctx[i ? 'lineTo' : 'moveTo'](x + dx, y + dy);
+			}
+			if (mode == $.CHORD) {
+				$.ctx.closePath();
+			} else if (mode == $.PIE) {
+				$.ctx.lineTo(x, y);
+				$.ctx.closePath();
+			}
+		}
+		ink();
+	}
+	$.arc = (x, y, w, h, start, stop, mode, detail = 25) => {
+		if (start == stop) return $.ellipse(x, y, w, h);
+		mode ??= $.PIE;
+		if ($._ellipseMode == $.CENTER) {
+			arcImpl(x, y, w, h, start, stop, mode, detail);
+		} else if ($._ellipseMode == $.RADIUS) {
+			arcImpl(x, y, w * 2, h * 2, start, stop, mode, detail);
+		} else if ($._ellipseMode == $.CORNER) {
+			arcImpl(x + w / 2, y + h / 2, w, h, start, stop, mode, detail);
+		} else if ($._ellipseMode == $.CORNERS) {
+			arcImpl((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode, detail);
+		}
+	};
+
+	function ellipseImpl(x, y, w, h) {
+		if (!$._doFill && !$._doStroke) return;
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+			w *= $._da;
+			h *= $._da;
+		}
+		$.ctx.beginPath();
+		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
+		ink();
+	}
+	$.ellipse = (x, y, w, h) => {
+		h ??= w;
+		if ($._ellipseMode == $.CENTER) {
+			ellipseImpl(x, y, w, h);
+		} else if ($._ellipseMode == $.RADIUS) {
+			ellipseImpl(x, y, w * 2, h * 2);
+		} else if ($._ellipseMode == $.CORNER) {
+			ellipseImpl(x + w / 2, y + h / 2, w, h);
+		} else if ($._ellipseMode == $.CORNERS) {
+			ellipseImpl((x + w) / 2, (y + h) / 2, w - x, h - y);
+		}
+	};
+	$.circle = (x, y, r) => {
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+			r *= $._da;
+		}
+		$.ctx.beginPath();
+		$.ctx.arc(x, y, r, 0, $.TAU);
+		ink();
+	};
+	$.point = (x, y) => {
+		if (x.x) {
+			y = x.y;
+			x = x.x;
+		}
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+		}
+		$.ctx.save();
+		$.ctx.beginPath();
+		$.ctx.arc(x, y, $.ctx.lineWidth / 2, 0, $.TAU);
+		$.ctx.fillStyle = $.ctx.strokeStyle;
+		$.ctx.fill();
+		$.ctx.restore();
+	};
+	function rectImpl(x, y, w, h) {
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+			w *= $._da;
+			h *= $._da;
+		}
+		if ($._doFill) $.ctx.fillRect(x, y, w, h);
+		if ($._doStroke) $.ctx.strokeRect(x, y, w, h);
+	}
+	function roundedRectImpl(x, y, w, h, tl, tr, br, bl) {
+		if (!$._doFill && !$._doStroke) return;
+		if (tl === undefined) {
+			return rectImpl(x, y, w, h);
+		}
+		if (tr === undefined) {
+			return roundedRectImpl(x, y, w, h, tl, tl, tl, tl);
+		}
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+			w *= $._da;
+			h *= $._da;
+			tl *= $._da;
+			tr *= $._da;
+			bl *= $._da;
+			br *= $._da;
+		}
+		const hh = Math.min(Math.abs(h), Math.abs(w)) / 2;
+		tl = Math.min(hh, tl);
+		tr = Math.min(hh, tr);
+		bl = Math.min(hh, bl);
+		br = Math.min(hh, br);
+		$.ctx.beginPath();
+		$.ctx.moveTo(x + tl, y);
+		$.ctx.arcTo(x + w, y, x + w, y + h, tr);
+		$.ctx.arcTo(x + w, y + h, x, y + h, br);
+		$.ctx.arcTo(x, y + h, x, y, bl);
+		$.ctx.arcTo(x, y, x + w, y, tl);
+		$.ctx.closePath();
+		ink();
+	}
+
+	$.rect = (x, y, w, h, tl, tr, br, bl) => {
+		if ($._rectMode == $.CENTER) {
+			roundedRectImpl(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
+		} else if ($._rectMode == $.RADIUS) {
+			roundedRectImpl(x - w, y - h, w * 2, h * 2, tl, tr, br, bl);
+		} else if ($._rectMode == $.CORNER) {
+			roundedRectImpl(x, y, w, h, tl, tr, br, bl);
+		} else if ($._rectMode == $.CORNERS) {
+			roundedRectImpl(x, y, w - x, h - y, tl, tr, br, bl);
+		}
+	};
+	$.square = (x, y, s, tl, tr, br, bl) => {
+		return $.rect(x, y, s, s, tl, tr, br, bl);
+	};
+
+	function clearBuff() {
+		curveBuff = [];
+	}
+
+	$.beginShape = () => {
+		clearBuff();
+		$.ctx.beginPath();
+		firstVertex = true;
+	};
+	$.beginContour = () => {
+		$.ctx.closePath();
+		clearBuff();
+		firstVertex = true;
+	};
+	$.endContour = () => {
+		clearBuff();
+		firstVertex = true;
+	};
+	$.vertex = (x, y) => {
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+		}
+		clearBuff();
+		if (firstVertex) {
+			$.ctx.moveTo(x, y);
+		} else {
+			$.ctx.lineTo(x, y);
+		}
+		firstVertex = false;
+	};
+	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
+		if ($._da) {
+			cp1x *= $._da;
+			cp1y *= $._da;
+			cp2x *= $._da;
+			cp2y *= $._da;
+			x *= $._da;
+			y *= $._da;
+		}
+		clearBuff();
+		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+	};
+	$.quadraticVertex = (cp1x, cp1y, x, y) => {
+		if ($._da) {
+			cp1x *= $._da;
+			cp1y *= $._da;
+			x *= $._da;
+			y *= $._da;
+		}
+		clearBuff();
+		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
+	};
+	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.bezierVertex(x2, y2, x3, y3, x4, y4);
+		$.endShape();
+	};
+	$.triangle = (x1, y1, x2, y2, x3, y3) => {
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.vertex(x2, y2);
+		$.vertex(x3, y3);
+		$.endShape($.CLOSE);
+	};
+	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.vertex(x2, y2);
+		$.vertex(x3, y3);
+		$.vertex(x4, y4);
+		$.endShape($.CLOSE);
+	};
+	$.endShape = (close) => {
+		clearBuff();
+		if (close) $.ctx.closePath();
+		ink();
+	};
+	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
+		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
+			let a = Math.pow(p1x - p0x, 2.0) + Math.pow(p1y - p0y, 2.0);
+			let b = Math.pow(a, alpha * 0.5);
+			return b + t;
+		}
+		let pts = [];
+
+		let t0 = 0.0;
+		let t1 = catmullromSplineGetT(t0, p0x, p0y, p1x, p1y, alpha);
+		let t2 = catmullromSplineGetT(t1, p1x, p1y, p2x, p2y, alpha);
+		let t3 = catmullromSplineGetT(t2, p2x, p2y, p3x, p3y, alpha);
+
+		for (let i = 0; i < numPts; i++) {
+			let t = t1 + (i / (numPts - 1)) * (t2 - t1);
+			let s = [
+				(t1 - t) / (t1 - t0),
+				(t - t0) / (t1 - t0),
+				(t2 - t) / (t2 - t1),
+				(t - t1) / (t2 - t1),
+				(t3 - t) / (t3 - t2),
+				(t - t2) / (t3 - t2),
+				(t2 - t) / (t2 - t0),
+				(t - t0) / (t2 - t0),
+				(t3 - t) / (t3 - t1),
+				(t - t1) / (t3 - t1)
+			];
+			for (let j = 0; j < s.length; j += 2) {
+				if (isNaN(s[j])) {
+					s[j] = 1;
+					s[j + 1] = 0;
+				}
+				if (!isFinite(s[j])) {
+					if (s[j] > 0) {
+						s[j] = 1;
+						s[j + 1] = 0;
+					} else {
+						s[j] = 0;
+						s[j + 1] = 1;
+					}
+				}
+			}
+			let a1x = p0x * s[0] + p1x * s[1];
+			let a1y = p0y * s[0] + p1y * s[1];
+			let a2x = p1x * s[2] + p2x * s[3];
+			let a2y = p1y * s[2] + p2y * s[3];
+			let a3x = p2x * s[4] + p3x * s[5];
+			let a3y = p2y * s[4] + p3y * s[5];
+			let b1x = a1x * s[6] + a2x * s[7];
+			let b1y = a1y * s[6] + a2y * s[7];
+			let b2x = a2x * s[8] + a3x * s[9];
+			let b2y = a2y * s[8] + a3y * s[9];
+			let cx = b1x * s[2] + b2x * s[3];
+			let cy = b1y * s[2] + b2y * s[3];
+			pts.push([cx, cy]);
+		}
+		return pts;
+	}
+
+	$.curveVertex = (x, y) => {
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+		}
+		curveBuff.push([x, y]);
+		if (curveBuff.length < 4) return;
+		let p0 = curveBuff.at(-4);
+		let p1 = curveBuff.at(-3);
+		let p2 = curveBuff.at(-2);
+		let p3 = curveBuff.at(-1);
+		let pts = catmullRomSpline(...p0, ...p1, ...p2, ...p3, $._curveDetail, $._curveAlpha);
+		for (let i = 0; i < pts.length; i++) {
+			if (firstVertex) {
+				$.ctx.moveTo(...pts[i]);
+			} else {
+				$.ctx.lineTo(...pts[i]);
+			}
+			firstVertex = false;
+		}
+	};
+	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+		$.beginShape();
+		$.curveVertex(x1, y1);
+		$.curveVertex(x2, y2);
+		$.curveVertex(x3, y3);
+		$.curveVertex(x4, y4);
+		$.endShape();
+	};
+	$.curvePoint = (a, b, c, d, t) => {
+		const t3 = t * t * t,
+			t2 = t * t,
+			f1 = -0.5 * t3 + t2 - 0.5 * t,
+			f2 = 1.5 * t3 - 2.5 * t2 + 1.0,
+			f3 = -1.5 * t3 + 2.0 * t2 + 0.5 * t,
+			f4 = 0.5 * t3 - 0.5 * t2;
+		return a * f1 + b * f2 + c * f3 + d * f4;
+	};
+	$.bezierPoint = (a, b, c, d, t) => {
+		const adjustedT = 1 - t;
+		return (
+			Math.pow(adjustedT, 3) * a +
+			3 * Math.pow(adjustedT, 2) * t * b +
+			3 * adjustedT * Math.pow(t, 2) * c +
+			Math.pow(t, 3) * d
+		);
+	};
+	$.curveTangent = (a, b, c, d, t) => {
+		const t2 = t * t,
+			f1 = (-3 * t2) / 2 + 2 * t - 0.5,
+			f2 = (9 * t2) / 2 - 5 * t,
+			f3 = (-9 * t2) / 2 + 4 * t + 0.5,
+			f4 = (3 * t2) / 2 - t;
+		return a * f1 + b * f2 + c * f3 + d * f4;
+	};
+	$.bezierTangent = (a, b, c, d, t) => {
+		const adjustedT = 1 - t;
+		return (
+			3 * d * Math.pow(t, 2) -
+			3 * c * Math.pow(t, 2) +
+			6 * c * adjustedT * t -
+			6 * b * adjustedT * t +
+			3 * b * Math.pow(adjustedT, 2) -
+			3 * a * Math.pow(adjustedT, 2)
+		);
+	};
+
+	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
+		$.ctx.save();
+		$.ctx.globalCompositeOperation = 'destination-out';
+		$.ctx.fillStyle = `rgba(0, 0, 0, ${fillAlpha / 255})`;
+		$.ctx.strokeStyle = `rgba(0, 0, 0, ${strokeAlpha / 255})`;
+	};
+
+	$.noErase = function () {
+		$.ctx.globalCompositeOperation = 'source-over';
+		$.ctx.restore();
+	};
+};
+Q5.modules.q2d_image = ($, p) => {
+	$.BLEND = 'source-over';
+	$.REMOVE = 'destination-out';
+	$.ADD = 'lighter';
+	$.DARKEST = 'darken';
+	$.LIGHTEST = 'lighten';
+	$.DIFFERENCE = 'difference';
+	$.SUBTRACT = 'subtract';
+	$.EXCLUSION = 'exclusion';
+	$.MULTIPLY = 'multiply';
+	$.SCREEN = 'screen';
+	$.REPLACE = 'copy';
+	$.OVERLAY = 'overlay';
+	$.HARD_LIGHT = 'hard-light';
+	$.SOFT_LIGHT = 'soft-light';
+	$.DODGE = 'color-dodge';
+	$.BURN = 'color-burn';
+
+	$._tint = null;
+
+	let imgData = null;
+	let tmpCtx = null;
+	let tmpCt2 = null;
+	let tmpBuf = null;
 
 	$.loadPixels = () => {
-		imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
-		$.pixels = imgData.data;
+		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		p.pixels = imgData.data;
 	};
 	$.updatePixels = () => {
-		if (imgData != null) ctx.putImageData(imgData, 0, 0);
+		if (imgData != null) $.ctx.putImageData(imgData, 0, 0);
 	};
 
 	function makeTmpCtx(w, h) {
@@ -318,24 +1265,24 @@ function Q5(scope, parent) {
 
 	function softFilter(typ, x) {
 		if (!$._filters) initSoftFilters();
-		let imgData = ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		let imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
 		$._filters[typ](imgData.data, x);
-		ctx.putImageData(imgData, 0, 0);
+		$.ctx.putImageData(imgData, 0, 0);
 	}
 
 	function nativeFilter(filtstr) {
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.filter = filtstr;
 		tmpCtx.drawImage($.canvas, 0, 0);
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.restore();
 	}
 
 	$.filter = (typ, x) => {
-		if (!ctx.filter) return softFilter(typ, x);
+		if (!$.ctx.filter) return softFilter(typ, x);
 		makeTmpCtx();
 		if (typeof typ == 'string') {
 			nativeFilter(typ);
@@ -350,10 +1297,10 @@ function Q5(scope, parent) {
 			tmpCtx.fillStyle = 'black';
 			tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 			tmpCtx.drawImage($.canvas, 0, 0);
-			ctx.save();
-			ctx.resetTransform();
-			ctx.drawImage(tmpCtx.canvas, 0, 0);
-			ctx.restore();
+			$.ctx.save();
+			$.ctx.resetTransform();
+			$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+			$.ctx.restore();
 		} else if (typ == $.INVERT) {
 			nativeFilter(`invert(100%)`);
 		} else if (typ == $.BLUR) {
@@ -366,20 +1313,20 @@ function Q5(scope, parent) {
 	$.resize = (w, h) => {
 		makeTmpCtx();
 		tmpCtx.drawImage($.canvas, 0, 0);
-		$.width = w;
-		$.height = h;
+		p.width = w;
+		p.height = h;
 		$.canvas.width = w * $._pixelDensity;
 		$.canvas.height = h * $._pixelDensity;
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0, $.canvas.width, $.canvas.height);
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.restore();
 	};
 
 	$.trim = () => {
 		let pd = $._pixelDensity || 1;
-		let imgData = ctx.getImageData(0, 0, $.width * pd, $.height * pd);
+		let imgData = $.ctx.getImageData(0, 0, $.width * pd, $.height * pd);
 		let data = imgData.data;
 		let left = $.width,
 			right = 0,
@@ -408,7 +1355,7 @@ function Q5(scope, parent) {
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
-			let c = ctx.getImageData(x * pd, y * pd, 1, 1).data;
+			let c = $.ctx.getImageData(x * pd, y * pd, 1, 1).data;
 			return new $.Color(c[0], c[1], c[2], c[3] / 255);
 		}
 		x = (x || 0) * pd;
@@ -418,7 +1365,7 @@ function Q5(scope, parent) {
 		w *= pd;
 		h *= pd;
 		let img = $.createImage(w, h);
-		let imgData = ctx.getImageData(x, y, w, h);
+		let imgData = $.ctx.getImageData(x, y, w, h);
 		img.ctx.putImageData(imgData, 0, 0);
 		img._pixelDensity = pd;
 		img.width = _w;
@@ -455,27 +1402,27 @@ function Q5(scope, parent) {
 		tmpCtx.fillStyle = col.toString();
 		tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 		tmpCtx.globalCompositeOperation = 'multiply';
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.drawImage($.ctx.canvas, 0, 0);
 		tmpCtx.globalCompositeOperation = 'source-over';
 
-		ctx.save();
-		ctx.resetTransform();
-		let old = ctx.globalCompositeOperation;
-		ctx.globalCompositeOperation = 'source-in';
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.globalCompositeOperation = old;
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		let old = $.ctx.globalCompositeOperation;
+		$.ctx.globalCompositeOperation = 'source-in';
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.globalCompositeOperation = old;
+		$.ctx.restore();
 
 		tmpCtx.globalAlpha = alpha / 255;
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.drawImage(ctx.canvas, 0, 0);
+		tmpCtx.drawImage($.ctx.canvas, 0, 0);
 		tmpCtx.globalAlpha = 1;
 
-		ctx.save();
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.drawImage(tmpCtx.canvas, 0, 0);
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.ctx.canvas.width, $.ctx.canvas.height);
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.restore();
 	};
 	$.tint = function (c) {
 		$._tint = c._q5Color ? c : $.color(...arguments);
@@ -483,13 +1430,13 @@ function Q5(scope, parent) {
 	$.noTint = () => ($._tint = null);
 
 	$.mask = (img) => {
-		ctx.save();
-		ctx.resetTransform();
-		let old = ctx.globalCompositeOperation;
-		ctx.globalCompositeOperation = 'destination-in';
-		ctx.drawImage(img.canvas, 0, 0);
-		ctx.globalCompositeOperation = old;
-		ctx.restore();
+		$.ctx.save();
+		$.ctx.resetTransform();
+		let old = $.ctx.globalCompositeOperation;
+		$.ctx.globalCompositeOperation = 'destination-in';
+		$.ctx.drawImage(img.canvas, 0, 0);
+		$.ctx.globalCompositeOperation = old;
+		$.ctx.restore();
 	};
 
 	$._save = async (data, name, ext) => {
@@ -542,881 +1489,28 @@ function Q5(scope, parent) {
 		return new Q5.Image(w, h, opt);
 	};
 
-	// PRIVATE VARS
-
-	let looper = null;
-	let firstVertex = true;
-	let curveBuff = [];
-	let keysHeld = {};
-	let millisStart = 0;
-	let tmpCtx = null;
-	let tmpCt2 = null;
-	let tmpBuf = null;
-
-	// CONSTANTS
-
-	$.THRESHOLD = 1;
-	$.GRAY = 2;
-	$.OPAQUE = 3;
-	$.INVERT = 4;
-	$.POSTERIZE = 5;
-	$.DILATE = 6;
-	$.ERODE = 7;
-	$.BLUR = 8;
-
-	if (scope == 'image') return;
-
-	$.BLEND = 'source-over';
-	$.REMOVE = 'destination-out';
-	$.ADD = 'lighter';
-	$.DARKEST = 'darken';
-	$.LIGHTEST = 'lighten';
-	$.DIFFERENCE = 'difference';
-	$.SUBTRACT = 'subtract';
-	$.EXCLUSION = 'exclusion';
-	$.MULTIPLY = 'multiply';
-	$.SCREEN = 'screen';
-	$.REPLACE = 'copy';
-	$.OVERLAY = 'overlay';
-	$.HARD_LIGHT = 'hard-light';
-	$.SOFT_LIGHT = 'soft-light';
-	$.DODGE = 'color-dodge';
-	$.BURN = 'color-burn';
-
-	$.RGB = 'rgb';
-	$.RGBA = 'rgb';
-	$.HSB = 'hsb';
-
-	$.CHORD = 0;
-	$.PIE = 1;
-	$.OPEN = 2;
-
-	$.RADIUS = 'radius';
-	$.CORNER = 'corner';
-	$.CORNERS = 'corners';
-
-	$.ROUND = 'round';
-	$.SQUARE = 'butt';
-	$.PROJECT = 'square';
-	$.MITER = 'miter';
-	$.BEVEL = 'bevel';
-
-	$.CLOSE = 1;
-
-	$.NORMAL = 'normal';
-	$.ITALIC = 'italic';
-	$.BOLD = 'bold';
-	$.BOLDITALIC = 'italic bold';
-
-	$.CENTER = 'center';
-	$.LEFT = 'left';
-	$.RIGHT = 'right';
-	$.TOP = 'top';
-	$.BOTTOM = 'bottom';
-	$.BASELINE = 'alphabetic';
-
-	$.LANDSCAPE = 'landscape';
-	$.PORTRAIT = 'portrait';
-
-	$.ALT = 18;
-	$.BACKSPACE = 8;
-	$.CONTROL = 17;
-	$.DELETE = 46;
-	$.DOWN_ARROW = 40;
-	$.ENTER = 13;
-	$.ESCAPE = 27;
-	$.LEFT_ARROW = 37;
-	$.OPTION = 18;
-	$.RETURN = 13;
-	$.RIGHT_ARROW = 39;
-	$.SHIFT = 16;
-	$.TAB = 9;
-	$.UP_ARROW = 38;
-
-	$.DEGREES = 'degrees';
-	$.RADIANS = 'radians';
-
-	$.HALF_PI = Math.PI / 2;
-	$.PI = Math.PI;
-	$.QUARTER_PI = Math.PI / 4;
-	$.TAU = Math.PI * 2;
-	$.TWO_PI = Math.PI * 2;
-
-	$.ARROW = 'default';
-	$.CROSS = 'crosshair';
-	$.HAND = 'pointer';
-	$.MOVE = 'move';
-	$.TEXT = 'text';
-
-	$.VIDEO = { video: true, audio: false };
-	$.AUDIO = { video: false, audio: true };
-
-	$.SHR3 = 1;
-	$.LCG = 2;
-
-	$.hint = (prop, val) => {
-		$[prop] = val;
+	$._clearTemporaryBuffers = () => {
+		tmpCtx = null;
+		tmpCt2 = null;
+		tmpBuf = null;
 	};
 
-	// PUBLIC PROPERTIES
-
-	$.frameCount = 0;
-	$.deltaTime = 16;
-	$.mouseX = 0;
-	$.mouseY = 0;
-	$.touches = [];
-	$.mouseButton = null;
-	$.keyIsPressed = false;
-	$.mouseIsPressed = false;
-	$.key = null;
-	$.keyCode = null;
-	$.accelerationX = 0;
-	$.accelerationY = 0;
-	$.accelerationZ = 0;
-	$.rotationX = 0;
-	$.rotationY = 0;
-	$.rotationZ = 0;
-	$.relRotationX = 0;
-	$.relRotationY = 0;
-	$.relRotationZ = 0;
-	$.pmouseX = 0;
-	$.pmouseY = 0;
-	$.pAccelerationX = 0;
-	$.pAccelerationY = 0;
-	$.pAccelerationZ = 0;
-	$.pRotationX = 0;
-	$.pRotationY = 0;
-	$.pRotationZ = 0;
-	$.pRelRotationX = 0;
-	$.pRelRotationY = 0;
-	$.pRelRotationZ = 0;
-
-	Object.defineProperty($, 'deviceOrientation', {
-		get: () => window.screen?.orientation?.type
-	});
-	Object.defineProperty($, 'windowWidth', {
-		get: () => window.innerWidth
-	});
-	Object.defineProperty($, 'windowHeight', {
-		get: () => window.innerHeight
-	});
-
-	// PRIVATE PROPERTIES
-
-	$._colorMode = 'rgb';
-	$._doStroke = true;
-	$._doFill = true;
-	$._strokeSet = false;
-	$._fillSet = false;
-	$._tint = null;
-	$._ellipseMode = $.CENTER;
-	$._rectMode = $.CORNER;
-	$._curveDetail = 20;
-	$._curveAlpha = 0.0;
-	$._loop = true;
-	$._textFont = 'sans-serif';
-	$._textSize = 12;
-	$._textLeading = 15;
-	$._textLeadDiff = 3;
-	$._textStyle = 'normal';
-	$._pixelDensity = 1;
-	$._targetFrameRate = 0;
-	$._targetFrameDuration = 16.666666666666668;
-	$._frameRate = $._fps = 60;
-
-	// CANVAS
-
-	function cloneCtx() {
-		let c = {};
-		for (let prop in ctx) {
-			if (typeof ctx[prop] != 'function') c[prop] = ctx[prop];
-		}
-		delete c.canvas;
-		return c;
-	}
-
-	function _resizeCanvas(w, h) {
-		w ??= window.innerWidth;
-		h ??= window.innerHeight;
-		$.width = w;
-		$.height = h;
-		let c = cloneCtx();
-		$.canvas.width = Math.ceil(w * $._pixelDensity);
-		$.canvas.height = Math.ceil(h * $._pixelDensity);
-		if (!$.canvas.fullscreen && $.canvas.style) {
-			$.canvas.style.width = w + 'px';
-			$.canvas.style.height = h + 'px';
-		}
-		for (let prop in c) $.ctx[prop] = c[prop];
-		ctx.scale($._pixelDensity, $._pixelDensity);
-	}
-
-	$.resizeCanvas = (w, h) => {
-		if (w == $.width && h == $.height) return;
-		_resizeCanvas(w, h);
-	};
-
-	$.createGraphics = function (w, h, opt) {
-		let g = new Q5('graphics');
-		opt ??= {};
-		opt.alpha ??= true;
-		g._createCanvas.call($, w, h, opt);
-		return g;
-	};
-
-	$.displayDensity = () => window.devicePixelRatio;
-	$.pixelDensity = (v) => {
-		if (!v || v == $._pixelDensity) return $._pixelDensity;
-		$._pixelDensity = v;
-		_resizeCanvas($.width, $.height);
-		return v;
-	};
-
-	$.fullscreen = (v) => {
-		if (v === undefined) return document.fullscreenElement;
-		if (v) document.body.requestFullscreen();
-		else document.body.exitFullscreen();
-	};
-
-	// MATH
-
-	$.map = (value, istart, istop, ostart, ostop, clamp) => {
-		let val = ostart + (ostop - ostart) * (((value - istart) * 1.0) / (istop - istart));
-		if (!clamp) {
-			return val;
-		}
-		if (ostart < ostop) {
-			return Math.min(Math.max(val, ostart), ostop);
-		} else {
-			return Math.min(Math.max(val, ostop), ostart);
-		}
-	};
-	$.lerp = (a, b, t) => a * (1 - t) + b * t;
-	$.constrain = (x, lo, hi) => Math.min(Math.max(x, lo), hi);
-	$.dist = function () {
-		let a = arguments;
-		if (a.length == 4) return Math.hypot(a[0] - a[2], a[1] - a[3]);
-		else return Math.hypot(a[0] - a[3], a[1] - a[4], a[2] - a[5]);
-	};
-	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
-	$.sq = (x) => x * x;
-	$.fract = (x) => x - Math.floor(x);
-	$.angleMode = (mode) => ($._angleMode = mode);
-	$._DEGTORAD = Math.PI / 180;
-	$._RADTODEG = 180 / Math.PI;
-	$.degrees = (x) => x * $._RADTODEG;
-	$.radians = (x) => x * $._DEGTORAD;
-	$.abs = Math.abs;
-	$.ceil = Math.ceil;
-	$.exp = Math.exp;
-	$.floor = Math.floor;
-	$.log = Math.log;
-	$.mag = Math.hypot;
-	$.max = Math.max;
-	$.min = Math.min;
-	$.round = Math.round;
-	$.pow = Math.pow;
-	$.sqrt = Math.sqrt;
-	$.sin = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.sin(a);
-	};
-	$.cos = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.cos(a);
-	};
-	$.tan = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.tan(a);
-	};
-	$.asin = (x) => {
-		let a = Math.asin(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.acos = (x) => {
-		let a = Math.acos(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.atan = (x) => {
-		let a = Math.atan(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.atan2 = (y, x) => {
-		let a = Math.atan2(y, x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.nf = (n, l, r) => {
-		let neg = n < 0;
-		n = Math.abs(n);
-		let parts = n.toFixed(r).split('.');
-		parts[0] = parts[0].padStart(l, '0');
-		let s = parts.join('.');
-		if (neg) s = '-' + s;
-		return s;
-	};
-	$.createVector = (x, y, z) => new Q5.Vector(x, y, z, $);
-
-	// CURVES
-
-	$.curvePoint = (a, b, c, d, t) => {
-		const t3 = t * t * t,
-			t2 = t * t,
-			f1 = -0.5 * t3 + t2 - 0.5 * t,
-			f2 = 1.5 * t3 - 2.5 * t2 + 1.0,
-			f3 = -1.5 * t3 + 2.0 * t2 + 0.5 * t,
-			f4 = 0.5 * t3 - 0.5 * t2;
-		return a * f1 + b * f2 + c * f3 + d * f4;
-	};
-	$.bezierPoint = (a, b, c, d, t) => {
-		const adjustedT = 1 - t;
-		return (
-			Math.pow(adjustedT, 3) * a +
-			3 * Math.pow(adjustedT, 2) * t * b +
-			3 * adjustedT * Math.pow(t, 2) * c +
-			Math.pow(t, 3) * d
-		);
-	};
-	$.curveTangent = (a, b, c, d, t) => {
-		const t2 = t * t,
-			f1 = (-3 * t2) / 2 + 2 * t - 0.5,
-			f2 = (9 * t2) / 2 - 5 * t,
-			f3 = (-9 * t2) / 2 + 4 * t + 0.5,
-			f4 = (3 * t2) / 2 - t;
-		return a * f1 + b * f2 + c * f3 + d * f4;
-	};
-	$.bezierTangent = (a, b, c, d, t) => {
-		const adjustedT = 1 - t;
-		return (
-			3 * d * Math.pow(t, 2) -
-			3 * c * Math.pow(t, 2) +
-			6 * c * adjustedT * t -
-			6 * b * adjustedT * t +
-			3 * b * Math.pow(adjustedT, 2) -
-			3 * a * Math.pow(adjustedT, 2)
-		);
-	};
-
-	// COLOR
-
-	if (Q5.supportsHDR) $.Color = Q5.ColorRGBA_P3;
-	else $.Color = Q5.ColorRGBA;
-
-	$.colorMode = (mode) => {
-		$._colorMode = mode;
-		if (mode == 'oklch') {
-			$.Color = Q5.ColorOKLCH;
-		} else if (mode == 'rgb') {
-			if ($.canvas.colorSpace == 'srgb') $.Color = Q5.ColorRGBA;
-			else $.Color = Q5.ColorRGBA_P3;
-		} else if (mode == 'srgb') {
-			$.Color = Q5.ColorRGBA;
-			$._colorMode = 'rgb';
-		}
-	};
-
-	let basicColors = {
-		aqua: [0, 255, 255],
-		black: [0, 0, 0],
-		blue: [0, 0, 255],
-		brown: [165, 42, 42],
-		crimson: [220, 20, 60],
-		cyan: [0, 255, 255],
-		darkviolet: [148, 0, 211],
-		gold: [255, 215, 0],
-		green: [0, 128, 0],
-		gray: [128, 128, 128],
-		grey: [128, 128, 128],
-		hotpink: [255, 105, 180],
-		indigo: [75, 0, 130],
-		khaki: [240, 230, 140],
-		lightgreen: [144, 238, 144],
-		lime: [0, 255, 0],
-		magenta: [255, 0, 255],
-		navy: [0, 0, 128],
-		orange: [255, 165, 0],
-		olive: [128, 128, 0],
-		peachpuff: [255, 218, 185],
-		pink: [255, 192, 203],
-		purple: [128, 0, 128],
-		red: [255, 0, 0],
-		skyblue: [135, 206, 235],
-		tan: [210, 180, 140],
-		turquoise: [64, 224, 208],
-		transparent: [0, 0, 0, 0],
-		white: [255, 255, 255],
-		violet: [238, 130, 238],
-		yellow: [255, 255, 0]
-	};
-
-	$.color = function (c0, c1, c2, c3) {
-		let C = $.Color;
-		if (c0._q5Color) return new C(...c0.levels);
-		let args = arguments;
-		if (args.length == 1) {
-			if (typeof c0 == 'string') {
-				if (c0[0] == '#') {
-					return new C(
-						parseInt(c0.slice(1, 3), 16),
-						parseInt(c0.slice(3, 5), 16),
-						parseInt(c0.slice(5, 7), 16),
-						c0.length != 9 ? null : parseInt(c0.slice(7, 9), 16)
-					);
-				} else if (basicColors[c0]) return new C(...basicColors[c0]);
-				else return new C(0, 0, 0);
-			} else if (Array.isArray(c0)) return new C(...c0);
-		}
-		if ($._colorMode == 'rgb') {
-			if (args.length == 1) return new C(c0, c0, c0);
-			else if (args.length == 2) return new C(c0, c0, c0, c1);
-			else if (args.length == 3) return new C(c0, c1, c2);
-			else if (args.length == 4) return new C(c0, c1, c2, c3);
-		}
-	};
-
-	$.red = (c) => c.r;
-	$.green = (c) => c.g;
-	$.blue = (c) => c.b;
-	$.alpha = (c) => c.a;
-	$.lightness = (c) => {
-		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
-	};
-
-	$.lerpColor = (a, b, t) => {
-		if ($._colorMode == 'rgb') {
-			return new $.Color(
-				$.constrain($.lerp(a.r, b.r, t), 0, 255),
-				$.constrain($.lerp(a.g, b.g, t), 0, 255),
-				$.constrain($.lerp(a.b, b.b, t), 0, 255),
-				$.constrain($.lerp(a.a, b.a, t), 0, 255)
-			);
-		} else {
-			let deltaH = b.h - a.h;
-			if (deltaH > 180) deltaH -= 360;
-			if (deltaH < -180) deltaH += 360;
-			let h = a.h + t * deltaH;
-			if (h < 0) h += 360;
-			if (h > 360) h -= 360;
-			return new $.Color(
-				$.constrain($.lerp(a.l, b.l, t), 0, 100),
-				$.constrain($.lerp(a.c, b.c, t), 0, 100),
-				h,
-				$.constrain($.lerp(a.a, b.a, t), 0, 255)
-			);
-		}
-	};
-
-	// DRAWING SETTINGS
-
-	function defaultStyle() {
-		ctx.fillStyle = 'white';
-		ctx.strokeStyle = 'black';
-		ctx.lineCap = 'round';
-		ctx.lineJoin = 'miter';
-		ctx.textAlign = 'left';
-	}
-
-	$.strokeWeight = (n) => {
-		if (!n) $._doStroke = false;
-		ctx.lineWidth = n || 0.0001;
-	};
-	$.stroke = function (c) {
-		$._doStroke = true;
-		$._strokeSet = true;
-		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-		else if (basicColors[c]) c = $.color(...basicColors[c]);
-		if (c.a <= 0) return ($._doStroke = false);
-		ctx.strokeStyle = c.toString();
-	};
-	$.noStroke = () => ($._doStroke = false);
-	$.fill = function (c) {
-		$._doFill = true;
-		$._fillSet = true;
-		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-		else if (basicColors[c]) c = $.color(...basicColors[c]);
-		if (c.a <= 0) return ($._doFill = false);
-		ctx.fillStyle = c.toString();
-	};
-	$.noFill = () => ($._doFill = false);
-	$.smooth = () => ($._smooth = true);
-	$.noSmooth = () => ($._smooth = false);
-	$.blendMode = (x) => (ctx.globalCompositeOperation = x);
-	$.strokeCap = (x) => (ctx.lineCap = x);
-	$.strokeJoin = (x) => (ctx.lineJoin = x);
-	$.ellipseMode = (x) => ($._ellipseMode = x);
-	$.rectMode = (x) => ($._rectMode = x);
-	$.curveDetail = (x) => ($._curveDetail = x);
-	$.curveAlpha = (x) => ($._curveAlpha = x);
-	$.curveTightness = (x) => ($._curveAlpha = x);
-
-	// DRAWING
-
-	$.clear = () => {
-		ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-	};
-
-	$.background = function (c) {
-		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
-		ctx.save();
-		ctx.resetTransform();
-		if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-		else if (basicColors[c]) c = $.color(...basicColors[c]);
-		ctx.fillStyle = c.toString();
-		ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
-		ctx.restore();
-	};
-
-	$.line = (x0, y0, x1, y1) => {
-		if ($._doStroke) {
-			ctx.beginPath();
-			ctx.moveTo(x0, y0);
-			ctx.lineTo(x1, y1);
-			ctx.stroke();
-		}
-	};
-
-	function normAng(x) {
-		let mid = $._angleMode == $.DEGREES ? 180 : Math.PI;
-		let full = mid * 2;
-		if (0 <= x && x <= full) return x;
-		while (x < 0) {
-			x += full;
-		}
-		while (x >= mid) {
-			x -= full;
-		}
-		return x;
-	}
-
-	function arcImpl(x, y, w, h, start, stop, mode, detail) {
-		if (!$._doFill && !$._doStroke) return;
-		let lo = normAng(start);
-		let hi = normAng(stop);
-		if (lo > hi) [lo, hi] = [hi, lo];
-		if (lo == 0) {
-			if (hi == 0) return;
-			if (($._angleMode == $.DEGREES && hi == 360) || hi == $.TAU) {
-				return $.ellipse(x, y, w, h);
-			}
-		}
-		ctx.beginPath();
-		for (let i = 0; i < detail + 1; i++) {
-			let t = i / detail;
-			let a = $.lerp(lo, hi, t);
-			let dx = ($.cos(a) * w) / 2;
-			let dy = ($.sin(a) * h) / 2;
-			ctx[i ? 'lineTo' : 'moveTo'](x + dx, y + dy);
-		}
-		if (mode == $.CHORD) {
-			ctx.closePath();
-		} else if (mode == $.PIE) {
-			ctx.lineTo(x, y);
-			ctx.closePath();
-		}
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
-	}
-	$.arc = (x, y, w, h, start, stop, mode, detail = 25) => {
-		if (start == stop) return $.ellipse(x, y, w, h);
-		mode ??= $.PIE;
-		if ($._ellipseMode == $.CENTER) {
-			arcImpl(x, y, w, h, start, stop, mode, detail);
-		} else if ($._ellipseMode == $.RADIUS) {
-			arcImpl(x, y, w * 2, h * 2, start, stop, mode, detail);
-		} else if ($._ellipseMode == $.CORNER) {
-			arcImpl(x + w / 2, y + h / 2, w, h, start, stop, mode, detail);
-		} else if ($._ellipseMode == $.CORNERS) {
-			arcImpl((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode, detail);
-		}
-	};
-
-	function ellipseImpl(x, y, w, h) {
-		if (!$._doFill && !$._doStroke) return;
-		ctx.beginPath();
-		ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
-	}
-	$.ellipse = (x, y, w, h) => {
-		h ??= w;
-		if ($._ellipseMode == $.CENTER) {
-			ellipseImpl(x, y, w, h);
-		} else if ($._ellipseMode == $.RADIUS) {
-			ellipseImpl(x, y, w * 2, h * 2);
-		} else if ($._ellipseMode == $.CORNER) {
-			ellipseImpl(x + w / 2, y + h / 2, w, h);
-		} else if ($._ellipseMode == $.CORNERS) {
-			ellipseImpl((x + w) / 2, (y + h) / 2, w - x, h - y);
-		}
-	};
-	$.circle = (x, y, r) => {
-		return $.ellipse(x, y, r, r);
-	};
-	$.point = (x, y) => {
-		if (x.x) {
-			y = x.y;
-			x = x.x;
-		}
-		ctx.save();
-		ctx.beginPath();
-		ctx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2);
-		ctx.fillStyle = ctx.strokeStyle;
-		ctx.fill();
-		ctx.restore();
-	};
-	function rectImpl(x, y, w, h) {
-		if ($._doFill) ctx.fillRect(x, y, w, h);
-		if ($._doStroke) ctx.strokeRect(x, y, w, h);
-	}
-	function roundedRectImpl(x, y, w, h, tl, tr, br, bl) {
-		if (!$._doFill && !$._doStroke) return;
-		if (tl === undefined) {
-			return rectImpl(x, y, w, h);
-		}
-		if (tr === undefined) {
-			return roundedRectImpl(x, y, w, h, tl, tl, tl, tl);
-		}
-		const hh = Math.min(Math.abs(h), Math.abs(w)) / 2;
-		tl = Math.min(hh, tl);
-		tr = Math.min(hh, tr);
-		bl = Math.min(hh, bl);
-		br = Math.min(hh, br);
-		ctx.beginPath();
-		ctx.moveTo(x + tl, y);
-		ctx.arcTo(x + w, y, x + w, y + h, tr);
-		ctx.arcTo(x + w, y + h, x, y + h, br);
-		ctx.arcTo(x, y + h, x, y, bl);
-		ctx.arcTo(x, y, x + w, y, tl);
-		ctx.closePath();
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
-	}
-
-	$.rect = (x, y, w, h, tl, tr, br, bl) => {
-		if ($._rectMode == $.CENTER) {
-			roundedRectImpl(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
-		} else if ($._rectMode == $.RADIUS) {
-			roundedRectImpl(x - w, y - h, w * 2, h * 2, tl, tr, br, bl);
-		} else if ($._rectMode == $.CORNER) {
-			roundedRectImpl(x, y, w, h, tl, tr, br, bl);
-		} else if ($._rectMode == $.CORNERS) {
-			roundedRectImpl(x, y, w - x, h - y, tl, tr, br, bl);
-		}
-	};
-	$.square = (x, y, s, tl, tr, br, bl) => {
-		return $.rect(x, y, s, s, tl, tr, br, bl);
-	};
-
-	function clearBuff() {
-		curveBuff = [];
-	}
-
-	$.beginShape = () => {
-		clearBuff();
-		ctx.beginPath();
-		firstVertex = true;
-	};
-	$.beginContour = () => {
-		ctx.closePath();
-		clearBuff();
-		firstVertex = true;
-	};
-	$.endContour = () => {
-		clearBuff();
-		firstVertex = true;
-	};
-	$.vertex = (x, y) => {
-		clearBuff();
-		if (firstVertex) {
-			ctx.moveTo(x, y);
-		} else {
-			ctx.lineTo(x, y);
-		}
-		firstVertex = false;
-	};
-	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
-		clearBuff();
-		ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-	};
-	$.quadraticVertex = (cp1x, cp1y, x, y) => {
-		clearBuff();
-		ctx.quadraticCurveTo(cp1x, cp1y, x, y);
-	};
-	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
-		$.beginShape();
-		$.vertex(x1, y1);
-		$.bezierVertex(x2, y2, x3, y3, x4, y4);
-		$.endShape();
-	};
-	$.triangle = (x1, y1, x2, y2, x3, y3) => {
-		$.beginShape();
-		$.vertex(x1, y1);
-		$.vertex(x2, y2);
-		$.vertex(x3, y3);
-		$.endShape($.CLOSE);
-	};
-	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
-		$.beginShape();
-		$.vertex(x1, y1);
-		$.vertex(x2, y2);
-		$.vertex(x3, y3);
-		$.vertex(x4, y4);
-		$.endShape($.CLOSE);
-	};
-	$.endShape = (close) => {
-		clearBuff();
-		if (close) {
-			ctx.closePath();
-		}
-		if ($._doFill) ctx.fill();
-		if ($._doStroke) ctx.stroke();
-	};
-	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
-		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
-			let a = Math.pow(p1x - p0x, 2.0) + Math.pow(p1y - p0y, 2.0);
-			let b = Math.pow(a, alpha * 0.5);
-			return b + t;
-		}
-		let pts = [];
-
-		let t0 = 0.0;
-		let t1 = catmullromSplineGetT(t0, p0x, p0y, p1x, p1y, alpha);
-		let t2 = catmullromSplineGetT(t1, p1x, p1y, p2x, p2y, alpha);
-		let t3 = catmullromSplineGetT(t2, p2x, p2y, p3x, p3y, alpha);
-
-		for (let i = 0; i < numPts; i++) {
-			let t = t1 + (i / (numPts - 1)) * (t2 - t1);
-			let s = [
-				(t1 - t) / (t1 - t0),
-				(t - t0) / (t1 - t0),
-				(t2 - t) / (t2 - t1),
-				(t - t1) / (t2 - t1),
-				(t3 - t) / (t3 - t2),
-				(t - t2) / (t3 - t2),
-				(t2 - t) / (t2 - t0),
-				(t - t0) / (t2 - t0),
-				(t3 - t) / (t3 - t1),
-				(t - t1) / (t3 - t1)
-			];
-			for (let j = 0; j < s.length; j += 2) {
-				if (isNaN(s[j])) {
-					s[j] = 1;
-					s[j + 1] = 0;
-				}
-				if (!isFinite(s[j])) {
-					if (s[j] > 0) {
-						s[j] = 1;
-						s[j + 1] = 0;
-					} else {
-						s[j] = 0;
-						s[j + 1] = 1;
-					}
-				}
-			}
-			let a1x = p0x * s[0] + p1x * s[1];
-			let a1y = p0y * s[0] + p1y * s[1];
-			let a2x = p1x * s[2] + p2x * s[3];
-			let a2y = p1y * s[2] + p2y * s[3];
-			let a3x = p2x * s[4] + p3x * s[5];
-			let a3y = p2y * s[4] + p3y * s[5];
-			let b1x = a1x * s[6] + a2x * s[7];
-			let b1y = a1y * s[6] + a2y * s[7];
-			let b2x = a2x * s[8] + a3x * s[9];
-			let b2y = a2y * s[8] + a3y * s[9];
-			let cx = b1x * s[2] + b2x * s[3];
-			let cy = b1y * s[2] + b2y * s[3];
-			pts.push([cx, cy]);
-		}
-		return pts;
-	}
-
-	$.curveVertex = (x, y) => {
-		curveBuff.push([x, y]);
-		if (curveBuff.length < 4) {
-			return;
-		}
-		let p0 = curveBuff[curveBuff.length - 4];
-		let p1 = curveBuff[curveBuff.length - 3];
-		let p2 = curveBuff[curveBuff.length - 2];
-		let p3 = curveBuff[curveBuff.length - 1];
-		let pts = catmullRomSpline(...p0, ...p1, ...p2, ...p3, $._curveDetail, $._curveAlpha);
-		for (let i = 0; i < pts.length; i++) {
-			if (firstVertex) {
-				ctx.moveTo(...pts[i]);
-			} else {
-				ctx.lineTo(...pts[i]);
-			}
-			firstVertex = false;
-		}
-	};
-	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
-		$.beginShape();
-		$.curveVertex(x1, y1);
-		$.curveVertex(x2, y2);
-		$.curveVertex(x3, y3);
-		$.curveVertex(x4, y4);
-		$.endShape();
-	};
-	$.opacity = (a) => (ctx.globalAlpha = a);
-
-	// DRAWING MATRIX
-
-	$.translate = (x, y) => ctx.translate(x, y);
-	$.rotate = (r) => {
-		if ($._angleMode == 'degrees') r = $.radians(r);
-		ctx.rotate(r);
-	};
-	$.scale = (x, y) => {
-		y ??= x;
-		ctx.scale(x, y);
-	};
-	$.applyMatrix = (a, b, c, d, e, f) => ctx.transform(a, b, c, d, e, f);
-	$.shearX = (ang) => ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
-	$.shearY = (ang) => ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
-	$.resetMatrix = () => {
-		ctx.resetTransform();
-		ctx.scale($._pixelDensity, $._pixelDensity);
-	};
-
-	$._styleNames = [
-		'_doStroke',
-		'_doFill',
-		'_strokeSet',
-		'_fillSet',
-		'_tint',
-		'_imageMode',
-		'_rectMode',
-		'_ellipseMode',
-		'_textFont',
-		'_textLeading',
-		'_leadingSet',
-		'_textSize',
-		'_textAlign',
-		'_textBaseline',
-		'_textStyle',
-		'_textWrap'
-	];
-	$._styles = [];
-
-	$.push = $.pushMatrix = () => {
-		ctx.save();
-		let styles = {};
-		for (let s of $._styleNames) styles[s] = $[s];
-		$._styles.push(styles);
-	};
-	$.pop = $.popMatrix = () => {
-		ctx.restore();
-		let styles = $._styles.pop();
-		for (let s of $._styleNames) $[s] = styles[s];
-	};
+	if ($._scope == 'image') return;
 
 	// IMAGING
 
 	$.imageMode = (mode) => ($._imageMode = mode);
 	$.image = (img, dx, dy, dWidth, dHeight, sx = 0, sy = 0, sWidth, sHeight) => {
+		if ($._da) {
+			dx *= $._da;
+			dy *= $._da;
+			dWidth *= $._da;
+			dHeight *= $._da;
+			sx *= $._da;
+			sy *= $._da;
+			sWidth *= $._da;
+			sHeight *= $._da;
+		}
 		let drawable = img._q5 ? img.canvas : img;
 		if (Q5._createNodeJSCanvas) {
 			drawable = drawable.context.canvas;
@@ -1448,15 +1542,12 @@ function Q5(scope, parent) {
 		if (!sHeight) {
 			sHeight = drawable.height || drawable.videoHeight;
 		} else sHeight *= pd;
-		ctx.drawImage(drawable, sx * pd, sy * pd, sWidth, sHeight, dx, dy, dWidth, dHeight);
+		$.ctx.drawImage(drawable, sx * pd, sy * pd, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		reset();
 	};
 
-	$._incrementPreload = () => preloadCnt++;
-	$._decrementPreload = () => preloadCnt--;
-
 	$.loadImage = function (url, cb, opt) {
-		preloadCnt++;
+		p._preloadCount++;
 		let last = [...arguments].at(-1);
 		opt = typeof last == 'object' ? last : true;
 		let g = $.createImage(1, 1, opt.alpha);
@@ -1467,11 +1558,11 @@ function Q5(scope, parent) {
 					g.width = c.canvas.width = img.width;
 					g.height = c.canvas.height = img.height;
 					c.drawImage(img, 0, 0);
-					preloadCnt--;
+					p._preloadCount--;
 					if (cb) cb(g);
 				})
 				.catch((e) => {
-					preloadCnt--;
+					p._preloadCount--;
 					throw e;
 				});
 		} else {
@@ -1483,33 +1574,68 @@ function Q5(scope, parent) {
 				g.width = c.canvas.width = img.naturalWidth;
 				g.height = c.canvas.height = img.naturalHeight;
 				c.drawImage(img, 0, 0);
-				preloadCnt--;
+				p._preloadCount--;
 				if (cb) cb(g);
 			};
 			img.onerror = (e) => {
-				preloadCnt--;
+				p._preloadCount--;
 				throw e;
 			};
 		}
 		return g;
 	};
 
-	$._clearTemporaryBuffers = () => {
-		tmpCtx = null;
-		tmpCt2 = null;
-		tmpBuf = null;
-	};
+	$.smooth = () => ($.ctx.imageSmoothingEnabled = true);
+	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
+};
 
-	// TYPOGRAPHY
+// IMAGE CLASS
+
+class _Q5Image extends Q5 {
+	constructor(w, h, opt) {
+		super('image');
+		delete this.createCanvas;
+		opt ??= {};
+		opt.alpha ??= true;
+		this._createCanvas(w, h, '2d', opt);
+		this._loop = false;
+	}
+	get w() {
+		return this.width;
+	}
+	get h() {
+		return this.height;
+	}
+}
+
+Q5.Image ??= _Q5Image;
+Q5.modules.q2d_text = ($) => {
+	$.NORMAL = 'normal';
+	$.ITALIC = 'italic';
+	$.BOLD = 'bold';
+	$.BOLDITALIC = 'italic bold';
+
+	$.CENTER = 'center';
+	$.LEFT = 'left';
+	$.RIGHT = 'right';
+	$.TOP = 'top';
+	$.BOTTOM = 'bottom';
+	$.BASELINE = 'alphabetic';
+
+	$._textFont = 'sans-serif';
+	$._textSize = 12;
+	$._textLeading = 15;
+	$._textLeadDiff = 3;
+	$._textStyle = 'normal';
 
 	$.loadFont = (url, cb) => {
-		preloadCnt++;
+		p._preloadCount++;
 		let sp = url.split('/');
 		let name = sp[sp.length - 1].split('.')[0].replace(' ', '');
 		let f = new FontFace(name, 'url(' + url + ')');
 		document.fonts.add(f);
 		f.load().then(() => {
-			preloadCnt--;
+			p._preloadCount--;
 			if (cb) cb(name);
 		});
 		return name;
@@ -1517,6 +1643,7 @@ function Q5(scope, parent) {
 	$.textFont = (x) => ($._textFont = x);
 	$.textSize = (x) => {
 		if (x === undefined) return $._textSize;
+		if ($._da) x *= $._da;
 		$._textSize = x;
 		if (!$._leadingSet) {
 			$._textLeading = x * 1.25;
@@ -1525,28 +1652,29 @@ function Q5(scope, parent) {
 	};
 	$.textLeading = (x) => {
 		if (x === undefined) return $._textLeading;
+		if ($._da) x *= $._da;
 		$._textLeading = x;
 		$._textLeadDiff = x - $._textSize;
 		$._leadingSet = true;
 	};
 	$.textStyle = (x) => ($._textStyle = x);
 	$.textAlign = (horiz, vert) => {
-		ctx.textAlign = horiz;
+		$.ctx.textAlign = horiz;
 		if (vert) {
-			ctx.textBaseline = vert == $.CENTER ? 'middle' : vert;
+			$.ctx.textBaseline = vert == $.CENTER ? 'middle' : vert;
 		}
 	};
 	$.textWidth = (str) => {
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		return ctx.measureText(str).width;
+		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		return $.ctx.measureText(str).width;
 	};
 	$.textAscent = (str) => {
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		return ctx.measureText(str).actualBoundingBoxAscent;
+		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		return $.ctx.measureText(str).actualBoundingBoxAscent;
 	};
 	$.textDescent = (str) => {
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		return ctx.measureText(str).actualBoundingBoxDescent;
+		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
 	$._textCache = true;
 	$._TimedCache = class extends Map {
@@ -1598,9 +1726,9 @@ function Q5(scope, parent) {
 			$._textStyle +
 			$._textSize +
 			$._textFont +
-			($._doFill ? ctx.fillStyle : '') +
+			($._doFill ? $.ctx.fillStyle : '') +
 			'_' +
-			($._doStroke && $._strokeSet ? ctx.lineWidth + ctx.strokeStyle + '_' : '') +
+			($._doStroke && $._strokeSet ? $.ctx.lineWidth + $.ctx.strokeStyle + '_' : '') +
 			(w || '') +
 			(h ? 'x' + h : '')
 		);
@@ -1618,13 +1746,17 @@ function Q5(scope, parent) {
 	$.text = (str, x, y, w, h) => {
 		if (str === undefined) return;
 		str = str.toString();
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+		}
 		if (!$._doFill && !$._doStroke) return;
 		let c, ti, tg, k, cX, cY, _ascent, _descent;
 		let pd = 1;
-		let t = ctx.getTransform();
+		let t = $.ctx.getTransform();
 		let useCache = $._genTextImage || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
-			c = ctx;
+			c = $.ctx;
 			cX = x;
 			cY = y;
 		} else {
@@ -1649,9 +1781,9 @@ function Q5(scope, parent) {
 			h ??= cY + _descent;
 			tg.resizeCanvas(Math.ceil(c.measureText(str).width), Math.ceil(h));
 
-			c.fillStyle = ctx.fillStyle;
-			c.strokeStyle = ctx.strokeStyle;
-			c.lineWidth = ctx.lineWidth;
+			c.fillStyle = $.ctx.fillStyle;
+			c.strokeStyle = $.ctx.strokeStyle;
+			c.lineWidth = $.ctx.lineWidth;
 		}
 		let f = c.fillStyle;
 		if (!$._fillSet) c.fillStyle = 'black';
@@ -1673,99 +1805,624 @@ function Q5(scope, parent) {
 	$.textImage = (img, x, y) => {
 		let og = $._imageMode;
 		$._imageMode = 'corner';
-		if (ctx.textAlign == 'center') x -= img.width * 0.5;
-		else if (ctx.textAlign == 'right') x -= img.width;
-		if (ctx.textBaseline == 'alphabetic') y -= $._textLeading;
-		if (ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + $._textLeadDiff;
-		else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + $._textLeadDiff;
-		else if (ctx.textBaseline == 'top') y -= img._descent + $._textLeadDiff;
+		if ($.ctx.textAlign == 'center') x -= img.width * 0.5;
+		else if ($.ctx.textAlign == 'right') x -= img.width;
+		if ($.ctx.textBaseline == 'alphabetic') y -= $._textLeading;
+		if ($.ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + $._textLeadDiff;
+		else if ($.ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + $._textLeadDiff;
+		else if ($.ctx.textBaseline == 'top') y -= img._descent + $._textLeadDiff;
 		$.image(img, x, y);
 		$._imageMode = og;
 	};
 
-	// RANDOM
-
-	var PERLIN_YWRAPB = 4;
-	var PERLIN_YWRAP = 1 << PERLIN_YWRAPB;
-	var PERLIN_ZWRAPB = 8;
-	var PERLIN_ZWRAP = 1 << PERLIN_ZWRAPB;
-	var PERLIN_SIZE = 4095;
-	var perlin_octaves = 4;
-	var perlin_amp_falloff = 0.5;
-	var scaled_cosine = (i) => {
-		return 0.5 * (1.0 - Math.cos(i * Math.PI));
+	$.nf = (n, l, r) => {
+		let neg = n < 0;
+		n = Math.abs(n);
+		let parts = n.toFixed(r).split('.');
+		parts[0] = parts[0].padStart(l, '0');
+		let s = parts.join('.');
+		if (neg) s = '-' + s;
+		return s;
 	};
-	var p_perlin;
-
-	$.noise = (x = 0, y = 0, z = 0) => {
-		if (p_perlin == null) {
-			p_perlin = new Array(PERLIN_SIZE + 1);
-			for (var i = 0; i < PERLIN_SIZE + 1; i++) {
-				p_perlin[i] = Math.random();
-			}
-		}
-		if (x < 0) x = -x;
-		if (y < 0) y = -y;
-		if (z < 0) z = -z;
-		var xi = Math.floor(x),
-			yi = Math.floor(y),
-			zi = Math.floor(z);
-		var xf = x - xi;
-		var yf = y - yi;
-		var zf = z - zi;
-		var rxf, ryf;
-		var r = 0;
-		var ampl = 0.5;
-		var n1, n2, n3;
-		for (var o = 0; o < perlin_octaves; o++) {
-			var of = xi + (yi << PERLIN_YWRAPB) + (zi << PERLIN_ZWRAPB);
-			rxf = scaled_cosine(xf);
-			ryf = scaled_cosine(yf);
-			n1 = p_perlin[of & PERLIN_SIZE];
-			n1 += rxf * (p_perlin[(of + 1) & PERLIN_SIZE] - n1);
-			n2 = p_perlin[(of + PERLIN_YWRAP) & PERLIN_SIZE];
-			n2 += rxf * (p_perlin[(of + PERLIN_YWRAP + 1) & PERLIN_SIZE] - n2);
-			n1 += ryf * (n2 - n1);
-			of += PERLIN_ZWRAP;
-			n2 = p_perlin[of & PERLIN_SIZE];
-			n2 += rxf * (p_perlin[(of + 1) & PERLIN_SIZE] - n2);
-			n3 = p_perlin[(of + PERLIN_YWRAP) & PERLIN_SIZE];
-			n3 += rxf * (p_perlin[(of + PERLIN_YWRAP + 1) & PERLIN_SIZE] - n3);
-			n2 += ryf * (n3 - n2);
-			n1 += scaled_cosine(zf) * (n2 - n1);
-			r += n1 * ampl;
-			ampl *= perlin_amp_falloff;
-			xi <<= 1;
-			xf *= 2;
-			yi <<= 1;
-			yf *= 2;
-			zi <<= 1;
-			zf *= 2;
-			if (xf >= 1.0) {
-				xi++;
-				xf--;
-			}
-			if (yf >= 1.0) {
-				yi++;
-				yf--;
-			}
-			if (zf >= 1.0) {
-				zi++;
-				zf--;
-			}
-		}
-		return r;
+};
+Q5.modules.ai = ($) => {
+	$.askAI = (q = '') => {
+		throw Error('Ask AI ✨ ' + q);
 	};
 
-	$.noiseDetail = (lod, falloff) => {
-		if (lod > 0) {
-			perlin_octaves = lod;
+	$._aiErrorAssistance = async (e) => {
+		let askAI = e.message.includes('Ask AI ✨');
+		if (!askAI) console.error(e);
+		if (Q5.disableFriendlyErrors) return;
+		if (askAI || !Q5.errorTolerant) noLoop();
+		let stackLines = e.stack.split('\n');
+		if (stackLines.length <= 1) return;
+
+		let idx = 1;
+		let sep = '(';
+		if (navigator.userAgent.indexOf('Chrome') == -1) {
+			idx = 0;
+			sep = '@';
 		}
-		if (falloff > 0) {
-			perlin_amp_falloff = falloff;
+		while (stackLines[idx].indexOf('q5.js:') >= 0) idx++;
+
+		let parts = stackLines[idx].split(sep).at(-1);
+		parts = parts.split(':');
+		let lineNum = parseInt(parts.at(-2));
+		if (askAI) lineNum++;
+		let fileUrl = parts.slice(0, -2).join(':');
+		let fileBase = fileUrl.split('/').at(-1);
+
+		try {
+			let res = await (await fetch(fileUrl)).text();
+			let lines = res.split('\n');
+			let errLine = lines[lineNum - 1].trim();
+
+			let context = '';
+			let i = 1;
+			while (context.length < 1600) {
+				if (lineNum - i >= 0) {
+					context = lines[lineNum - i].trim() + '\n' + context;
+				}
+				if (lineNum + i < lines.length) {
+					context += lines[lineNum + i].trim() + '\n';
+				} else break;
+				i++;
+			}
+
+			let question =
+				askAI && e.message.length > 10 ? e.message.slice(10) : 'Whats+wrong+with+this+line%3F+short+answer';
+
+			let url =
+				'https://chatgpt.com/?q=q5.js+' +
+				question +
+				(askAI ? '' : '%0A%0A' + encodeURIComponent(e.name + ': ' + e.message)) +
+				'%0A%0ALine%3A+' +
+				encodeURIComponent(errLine) +
+				'%0A%0AExcerpt+for+context%3A%0A%0A' +
+				encodeURIComponent(context);
+
+			if (!askAI) console.log('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
+
+			console.warn('Ask AI ✨ ' + url);
+
+			if (askAI) window.open(url, '_blank');
+		} catch (err) {}
+	};
+};
+Q5.modules.color = ($, p) => {
+	$.RGB = $.RGBA = $._colorMode = 'rgb';
+
+	if (Q5.supportsHDR) $.Color = Q5.ColorRGBA_P3;
+	else $.Color = Q5.ColorRGBA;
+
+	$.colorMode = (mode) => {
+		$._colorMode = mode;
+		if (mode == 'oklch') {
+			p.Color = Q5.ColorOKLCH;
+		} else if (mode == 'rgb') {
+			if ($.canvas.colorSpace == 'srgb') p.Color = Q5.ColorRGBA;
+			else p.Color = Q5.ColorRGBA_P3;
+		} else if (mode == 'srgb') {
+			p.Color = Q5.ColorRGBA;
+			$._colorMode = 'rgb';
 		}
 	};
-	const Lcg = () => {
+
+	$._basicColors = {
+		aqua: [0, 255, 255],
+		black: [0, 0, 0],
+		blue: [0, 0, 255],
+		brown: [165, 42, 42],
+		crimson: [220, 20, 60],
+		cyan: [0, 255, 255],
+		darkviolet: [148, 0, 211],
+		gold: [255, 215, 0],
+		green: [0, 128, 0],
+		gray: [128, 128, 128],
+		grey: [128, 128, 128],
+		hotpink: [255, 105, 180],
+		indigo: [75, 0, 130],
+		khaki: [240, 230, 140],
+		lightgreen: [144, 238, 144],
+		lime: [0, 255, 0],
+		magenta: [255, 0, 255],
+		navy: [0, 0, 128],
+		orange: [255, 165, 0],
+		olive: [128, 128, 0],
+		peachpuff: [255, 218, 185],
+		pink: [255, 192, 203],
+		purple: [128, 0, 128],
+		red: [255, 0, 0],
+		skyblue: [135, 206, 235],
+		tan: [210, 180, 140],
+		turquoise: [64, 224, 208],
+		transparent: [0, 0, 0, 0],
+		white: [255, 255, 255],
+		violet: [238, 130, 238],
+		yellow: [255, 255, 0]
+	};
+
+	$.color = function (c0, c1, c2, c3) {
+		let C = $.Color;
+		if (c0._q5Color) return new C(...c0.levels);
+		let args = arguments;
+		if (args.length == 1) {
+			if (typeof c0 == 'string') {
+				if (c0[0] == '#') {
+					return new C(
+						parseInt(c0.slice(1, 3), 16),
+						parseInt(c0.slice(3, 5), 16),
+						parseInt(c0.slice(5, 7), 16),
+						c0.length != 9 ? null : parseInt(c0.slice(7, 9), 16)
+					);
+				} else if ($._basicColors[c0]) return new C(...$._basicColors[c0]);
+				else return new C(0, 0, 0);
+			} else if (Array.isArray(c0)) return new C(...c0);
+		}
+		if ($._colorMode == 'rgb') {
+			if (args.length == 1) return new C(c0, c0, c0);
+			else if (args.length == 2) return new C(c0, c0, c0, c1);
+			else if (args.length == 3) return new C(c0, c1, c2);
+			else if (args.length == 4) return new C(c0, c1, c2, c3);
+		}
+	};
+
+	$.red = (c) => c.r;
+	$.green = (c) => c.g;
+	$.blue = (c) => c.b;
+	$.alpha = (c) => c.a;
+	$.lightness = (c) => {
+		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
+	};
+
+	$.lerpColor = (a, b, t) => {
+		if ($._colorMode == 'rgb') {
+			return new $.Color(
+				$.constrain($.lerp(a.r, b.r, t), 0, 255),
+				$.constrain($.lerp(a.g, b.g, t), 0, 255),
+				$.constrain($.lerp(a.b, b.b, t), 0, 255),
+				$.constrain($.lerp(a.a, b.a, t), 0, 255)
+			);
+		} else {
+			let deltaH = b.h - a.h;
+			if (deltaH > 180) deltaH -= 360;
+			if (deltaH < -180) deltaH += 360;
+			let h = a.h + t * deltaH;
+			if (h < 0) h += 360;
+			if (h > 360) h -= 360;
+			return new $.Color(
+				$.constrain($.lerp(a.l, b.l, t), 0, 100),
+				$.constrain($.lerp(a.c, b.c, t), 0, 100),
+				h,
+				$.constrain($.lerp(a.a, b.a, t), 0, 255)
+			);
+		}
+	};
+};
+
+// COLOR CLASSES
+
+Q5.Color = class {
+	constructor() {
+		this._q5Color = true;
+	}
+};
+Q5.ColorOKLCH = class extends Q5.Color {
+	constructor(l, c, h, a) {
+		super();
+		this.l = l;
+		this.c = c;
+		this.h = h;
+		this.a = a ?? 1;
+	}
+	toString() {
+		return `color(oklch ${this.l} ${this.c} ${this.h} / ${this.a})`;
+	}
+};
+Q5.ColorRGBA = class extends Q5.Color {
+	constructor(r, g, b, a) {
+		super();
+		this.r = r;
+		this.g = g;
+		this.b = b;
+		this.a = a ?? 255;
+	}
+	setRed(v) {
+		this.r = v;
+	}
+	setGreen(v) {
+		this.g = v;
+	}
+	setBlue(v) {
+		this.b = v;
+	}
+	setAlpha(v) {
+		this.a = v;
+	}
+	get levels() {
+		return [this.r, this.g, this.b, this.a];
+	}
+	toString() {
+		return `rgb(${this.r} ${this.g} ${this.b} / ${this.a / 255})`;
+	}
+};
+Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
+	constructor(r, g, b, a) {
+		super(r, g, b, a);
+		this._edited = true;
+	}
+	get r() {
+		return this._r;
+	}
+	set r(v) {
+		this._r = v;
+		this._edited = true;
+	}
+	get g() {
+		return this._g;
+	}
+	set g(v) {
+		this._g = v;
+		this._edited = true;
+	}
+	get b() {
+		return this._b;
+	}
+	set b(v) {
+		this._b = v;
+		this._edited = true;
+	}
+	get a() {
+		return this._a;
+	}
+	set a(v) {
+		this._a = v;
+		this._edited = true;
+	}
+	toString() {
+		if (this._edited) {
+			let r = (this._r / 255).toFixed(3);
+			let g = (this._g / 255).toFixed(3);
+			let b = (this._b / 255).toFixed(3);
+			let a = (this._a / 255).toFixed(3);
+			this._css = `color(display-p3 ${r} ${g} ${b} / ${a})`;
+			this._edited = false;
+		}
+		return this._css;
+	}
+};
+Q5.modules.display = ($) => {
+	if (!$.canvas || $._scope == 'graphics') return;
+
+	let c = $.canvas;
+
+	if (Q5._instanceCount == 0 && !Q5._nodejs) {
+		document.head.insertAdjacentHTML(
+			'beforeend',
+			`<style>
+html, body {
+	margin: 0;
+	padding: 0;
+}
+.q5Canvas {
+	outline: none;
+	-webkit-touch-callout: none;
+	-webkit-text-size-adjust: none;
+	-webkit-user-select: none;
+	overscroll-behavior: none;
+}
+.q5-pixelated {
+	image-rendering: pixelated;
+	font-smooth: never;
+	-webkit-font-smoothing: none;
+}
+.q5-centered,
+.q5-maxed,
+.q5-fullscreen {
+  display: flex;
+	align-items: center;
+	justify-content: center;
+}
+main.q5-centered,
+main.q5-maxed,
+.q5-fullscreen {
+	height: 100vh;
+}
+main {
+	overscroll-behavior: none;
+}
+</style>`
+		);
+	}
+
+	$._adjustDisplay = () => {
+		let s = c.style;
+		if (!s || !c.displayMode) return;
+		let p = c.parentElement;
+		if (c.renderQuality == 'pixelated') {
+			c.classList.add('q5-pixelated');
+			$.pixelDensity(1);
+			if ($.noSmooth) $.noSmooth();
+			if ($.textFont) $.textFont('monospace');
+		}
+		if (c.displayMode == 'normal') {
+			p.classList.remove('q5-centered', 'q5-maxed', 'q5-fullscreen');
+			s.width = c.w * c.displayScale + 'px';
+			s.height = c.h * c.displayScale + 'px';
+		} else {
+			p.classList.add('q5-' + c.displayMode);
+			p = p.getBoundingClientRect();
+			if (c.w / c.h > p.width / p.height) {
+				if (c.displayMode == 'centered') {
+					s.width = c.w * c.displayScale + 'px';
+					s.maxWidth = '100%';
+				} else s.width = '100%';
+				s.height = 'auto';
+				s.maxHeight = '';
+			} else {
+				s.width = 'auto';
+				s.maxWidth = '';
+				if (c.displayMode == 'centered') {
+					s.height = c.h * c.displayScale + 'px';
+					s.maxHeight = '100%';
+				} else s.height = '100%';
+			}
+		}
+	};
+
+	$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
+		if (typeof displayScale == 'string') {
+			displayScale = parseFloat(displayScale.slice(1));
+		}
+		Object.assign(c, { displayMode, renderQuality, displayScale });
+		$._adjustDisplay();
+	};
+};
+Q5.modules.input = ($, p) => {
+	$.mouseX = 0;
+	$.mouseY = 0;
+	$.pmouseX = 0;
+	$.pmouseY = 0;
+	$.touches = [];
+	$.mouseButton = null;
+	$.keyIsPressed = false;
+	$.mouseIsPressed = false;
+	$.key = null;
+	$.keyCode = null;
+
+	$.ALT = 18;
+	$.BACKSPACE = 8;
+	$.CONTROL = 17;
+	$.DELETE = 46;
+	$.DOWN_ARROW = 40;
+	$.ENTER = 13;
+	$.ESCAPE = 27;
+	$.LEFT_ARROW = 37;
+	$.OPTION = 18;
+	$.RETURN = 13;
+	$.RIGHT_ARROW = 39;
+	$.SHIFT = 16;
+	$.TAB = 9;
+	$.UP_ARROW = 38;
+
+	$.ARROW = 'default';
+	$.CROSS = 'crosshair';
+	$.HAND = 'pointer';
+	$.MOVE = 'move';
+	$.TEXT = 'text';
+
+	let keysHeld = {};
+	let mouseBtns = [$.LEFT, $.CENTER, $.RIGHT];
+
+	$._updateMouse = (e) => {
+		if (e.changedTouches) return;
+		let rect = $.canvas.getBoundingClientRect();
+		let sx = $.canvas.scrollWidth / $.width || 1;
+		let sy = $.canvas.scrollHeight / $.height || 1;
+		p.mouseX = (e.clientX - rect.left) / sx;
+		p.mouseY = (e.clientY - rect.top) / sy;
+	};
+	$._onmousedown = (e) => {
+		if ($.aud && $.aud.state != 'running') $.aud.resume();
+		$._updateMouse(e);
+		p.mouseIsPressed = true;
+		p.mouseButton = mouseBtns[e.button];
+		$.mousePressed(e);
+	};
+	$._onmousemove = (e) => {
+		$._updateMouse(e);
+		if ($.mouseIsPressed) $.mouseDragged(e);
+		else $.mouseMoved(e);
+	};
+	$._onmouseup = (e) => {
+		$._updateMouse(e);
+		p.mouseIsPressed = false;
+		$.mouseReleased(e);
+	};
+	$._onclick = (e) => {
+		$._updateMouse(e);
+		p.mouseIsPressed = true;
+		$.mouseClicked(e);
+		p.mouseIsPressed = false;
+	};
+	$.cursor = (name, x, y) => {
+		let pfx = '';
+		if (name.includes('.')) {
+			name = `url("${name}")`;
+			pfx = ', auto';
+		}
+		if (x !== undefined) {
+			name += ' ' + x + ' ' + y;
+		}
+		$.canvas.style.cursor = name + pfx;
+	};
+	$.noCursor = () => {
+		$.canvas.style.cursor = 'none';
+	};
+
+	$._onkeydown = (e) => {
+		if (e.repeat) return;
+		if ($.aud && $.aud.state != 'running') $.aud.resume();
+		p.keyIsPressed = true;
+		p.key = e.key;
+		p.keyCode = e.keyCode;
+		keysHeld[$.keyCode] = true;
+		$.keyPressed(e);
+		if (e.key.length == 1) {
+			$.keyTyped(e);
+		}
+	};
+	$._onkeyup = (e) => {
+		p.keyIsPressed = false;
+		p.key = e.key;
+		p.keyCode = e.keyCode;
+		keysHeld[$.keyCode] = false;
+		$.keyReleased(e);
+	};
+
+	function getTouchInfo(touch) {
+		const rect = $.canvas.getBoundingClientRect();
+		const sx = $.canvas.scrollWidth / $.width || 1;
+		const sy = $.canvas.scrollHeight / $.height || 1;
+		return {
+			x: (touch.clientX - rect.left) / sx,
+			y: (touch.clientY - rect.top) / sy,
+			id: touch.identifier
+		};
+	}
+	$._ontouchstart = (e) => {
+		if ($.aud && $.aud.state != 'running') $.aud.resume();
+		p.touches = [...e.touches].map(getTouchInfo);
+		if (!$._isTouchAware) {
+			p.mouseX = $.touches[0].x;
+			p.mouseY = $.touches[0].y;
+			p.mouseIsPressed = true;
+			p.mouseButton = $.LEFT;
+			if (!$.mousePressed(e)) e.preventDefault();
+		}
+		if (!$.touchStarted(e)) e.preventDefault();
+	};
+	$._ontouchmove = (e) => {
+		p.touches = [...e.touches].map(getTouchInfo);
+		if (!$._isTouchAware) {
+			p.mouseX = $.touches[0].x;
+			p.mouseY = $.touches[0].y;
+			if (!$.mouseDragged(e)) e.preventDefault();
+		}
+		if (!$.touchMoved(e)) e.preventDefault();
+	};
+	$._ontouchend = (e) => {
+		p.touches = [...e.touches].map(getTouchInfo);
+		if (!$._isTouchAware && !$.touches.length) {
+			p.mouseIsPressed = false;
+			if (!$.mouseReleased(e)) e.preventDefault();
+		}
+		if (!$.touchEnded(e)) e.preventDefault();
+	};
+	$.requestPointerLock = document.body.requestPointerLock;
+	$.exitPointerLock = document.exitPointerLock;
+
+	if ($._scope == 'graphics') return;
+
+	$.keyIsDown = (x) => !!keysHeld[x];
+	$.canvas.onmousedown = (e) => $._onmousedown(e);
+	$.canvas.onmouseup = (e) => $._onmouseup(e);
+	$.canvas.onclick = (e) => $._onclick(e);
+	$.canvas.ontouchstart = (e) => $._ontouchstart(e);
+	$.canvas.ontouchmove = (e) => $._ontouchmove(e);
+	$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
+
+	if (window) {
+		window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
+		window.addEventListener('keydown', (e) => $._onkeydown(e), false);
+		window.addEventListener('keyup', (e) => $._onkeyup(e), false);
+	}
+};
+Q5.modules.math = ($, p) => {
+	$.DEGREES = 'degrees';
+	$.RADIANS = 'radians';
+
+	$.PI = Math.PI;
+	$.HALF_PI = Math.PI / 2;
+	$.QUARTER_PI = Math.PI / 4;
+
+	$.abs = Math.abs;
+	$.ceil = Math.ceil;
+	$.exp = Math.exp;
+	$.floor = Math.floor;
+	$.loge = Math.log;
+	$.mag = Math.hypot;
+	$.max = Math.max;
+	$.min = Math.min;
+	$.round = Math.round;
+	$.pow = Math.pow;
+	$.sqrt = Math.sqrt;
+
+	$.SHR3 = 1;
+	$.LCG = 2;
+
+	$.angleMode = (mode) => ($._angleMode = mode);
+	$._DEGTORAD = Math.PI / 180;
+	$._RADTODEG = 180 / Math.PI;
+	$.degrees = (x) => x * $._RADTODEG;
+	$.radians = (x) => x * $._DEGTORAD;
+
+	$.map = (value, istart, istop, ostart, ostop, clamp) => {
+		let val = ostart + (ostop - ostart) * (((value - istart) * 1.0) / (istop - istart));
+		if (!clamp) {
+			return val;
+		}
+		if (ostart < ostop) {
+			return Math.min(Math.max(val, ostart), ostop);
+		} else {
+			return Math.min(Math.max(val, ostop), ostart);
+		}
+	};
+	$.lerp = (a, b, t) => a * (1 - t) + b * t;
+	$.constrain = (x, lo, hi) => Math.min(Math.max(x, lo), hi);
+	$.dist = function () {
+		let a = arguments;
+		if (a.length == 4) return Math.hypot(a[0] - a[2], a[1] - a[3]);
+		else return Math.hypot(a[0] - a[3], a[1] - a[4], a[2] - a[5]);
+	};
+	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
+	$.sq = (x) => x * x;
+	$.fract = (x) => x - Math.floor(x);
+	$.sin = (a) => {
+		if ($._angleMode == 'degrees') a = $.radians(a);
+		return Math.sin(a);
+	};
+	$.cos = (a) => {
+		if ($._angleMode == 'degrees') a = $.radians(a);
+		return Math.cos(a);
+	};
+	$.tan = (a) => {
+		if ($._angleMode == 'degrees') a = $.radians(a);
+		return Math.tan(a);
+	};
+	$.asin = (x) => {
+		let a = Math.asin(x);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
+		return a;
+	};
+	$.acos = (x) => {
+		let a = Math.acos(x);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
+		return a;
+	};
+	$.atan = (x) => {
+		let a = Math.atan(x);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
+		return a;
+	};
+	$.atan2 = (y, x) => {
+		let a = Math.atan2(y, x);
+		if ($._angleMode == 'degrees') a = $.degrees(a);
+		return a;
+	};
+
+	function lcg() {
 		const m = 4294967296;
 		const a = 1664525;
 		const c = 1013904223;
@@ -1782,8 +2439,8 @@ function Q5(scope, parent) {
 				return z / m;
 			}
 		};
-	};
-	const Shr3 = () => {
+	}
+	function shr3() {
 		let jsr, seed;
 		let m = 4294967295;
 		return {
@@ -1800,22 +2457,10 @@ function Q5(scope, parent) {
 				return (jsr >>> 0) / m;
 			}
 		};
-	};
-	let rng1 = Shr3();
+	}
+	let rng1 = shr3();
 	rng1.setSeed();
 
-	$.noiseSeed = (seed) => {
-		let jsr = seed === undefined ? Math.random() * 4294967295 : seed;
-		if (!p_perlin) {
-			p_perlin = new Float32Array(PERLIN_SIZE + 1);
-		}
-		for (var i = 0; i < PERLIN_SIZE + 1; i++) {
-			jsr ^= jsr << 17;
-			jsr ^= jsr >> 13;
-			jsr ^= jsr << 5;
-			p_perlin[i] = (jsr >>> 0) / 4294967295;
-		}
-	};
 	$.randomSeed = (seed) => rng1.setSeed(seed);
 	$.random = (a, b) => {
 		if (a === undefined) return rng1.rand();
@@ -1830,8 +2475,8 @@ function Q5(scope, parent) {
 		}
 	};
 	$.randomGenerator = (method) => {
-		if (method == $.LCG) rng1 = Lcg();
-		else if (method == $.SHR3) rng1 = Shr3();
+		if (method == $.LCG) rng1 = lcg();
+		else if (method == $.SHR3) rng1 = shr3();
 		rng1.setSeed();
 	};
 
@@ -1973,310 +2618,178 @@ function Q5(scope, parent) {
 		return ziggurat.REXP();
 	};
 
-	// DOM
+	$.PERLIN = 'perlin';
+	$.SIMPLEX = 'simplex';
+	$.BLOCKY = 'blocky';
 
-	$.Element = function (a) {
-		this.elt = a;
+	$.Noise = Q5.PerlinNoise;
+	let _noise;
+
+	$.noiseMode = (mode) => {
+		p.Noise = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
+		_noise = null;
 	};
-	$._elements = [];
+	$.noiseSeed = (seed) => {
+		_noise = new $.Noise(seed);
+	};
+	$.noise = (x = 0, y = 0, z = 0) => {
+		_noise ??= new $.Noise();
+		return _noise.noise(x, y, z);
+	};
+	$.noiseDetail = (lod, falloff) => {
+		_noise ??= new $.Noise();
+		if (lod > 0) _noise.octaves = lod;
+		if (falloff > 0) _noise.falloff = falloff;
+	};
+};
 
-	$.createCapture = (x) => {
-		var vid = document.createElement('video');
-		vid.playsinline = 'playsinline';
-		vid.autoplay = 'autoplay';
-		navigator.mediaDevices.getUserMedia(x).then((stream) => {
-			vid.srcObject = stream;
+Q5.Noise = class {
+	constructor() {}
+};
+
+Q5.PerlinNoise = class extends Q5.Noise {
+	constructor(seed) {
+		super();
+		this.grad3 = [
+			[1, 1, 0],
+			[-1, 1, 0],
+			[1, -1, 0],
+			[-1, -1, 0],
+			[1, 0, 1],
+			[-1, 0, 1],
+			[1, 0, -1],
+			[-1, 0, -1],
+			[0, 1, 1],
+			[0, -1, 1],
+			[0, 1, -1],
+			[0, -1, -1]
+		];
+		this.octaves = 1;
+		this.falloff = 0.5;
+		if (seed == undefined) {
+			this.p = Array.from({ length: 256 }, () => Math.floor(Math.random() * 256));
+		} else {
+			this.p = this.seedPermutation(seed);
+		}
+		this.p = this.p.concat(this.p);
+	}
+
+	seedPermutation(seed) {
+		let p = [];
+		for (let i = 0; i < 256; i++) {
+			p[i] = i;
+		}
+
+		let n, q;
+		for (let i = 255; i > 0; i--) {
+			seed = (seed * 16807) % 2147483647;
+			n = seed % (i + 1);
+			q = p[i];
+			p[i] = p[n];
+			p[n] = q;
+		}
+
+		return p;
+	}
+
+	dot(g, x, y, z) {
+		return g[0] * x + g[1] * y + g[2] * z;
+	}
+
+	mix(a, b, t) {
+		return (1 - t) * a + t * b;
+	}
+
+	fade(t) {
+		return t * t * t * (t * (t * 6 - 15) + 10);
+	}
+
+	noise(x, y, z) {
+		let t = this;
+		let total = 0;
+		let freq = 1;
+		let amp = 1;
+		let maxAmp = 0;
+
+		for (let i = 0; i < t.octaves; i++) {
+			const X = Math.floor(x * freq) & 255;
+			const Y = Math.floor(y * freq) & 255;
+			const Z = Math.floor(z * freq) & 255;
+
+			const xf = x * freq - Math.floor(x * freq);
+			const yf = y * freq - Math.floor(y * freq);
+			const zf = z * freq - Math.floor(z * freq);
+
+			const u = t.fade(xf);
+			const v = t.fade(yf);
+			const w = t.fade(zf);
+
+			const A = t.p[X] + Y;
+			const AA = t.p[A] + Z;
+			const AB = t.p[A + 1] + Z;
+			const B = t.p[X + 1] + Y;
+			const BA = t.p[B] + Z;
+			const BB = t.p[B + 1] + Z;
+
+			const lerp1 = t.mix(t.dot(t.grad3[t.p[AA] % 12], xf, yf, zf), t.dot(t.grad3[t.p[BA] % 12], xf - 1, yf, zf), u);
+			const lerp2 = t.mix(
+				t.dot(t.grad3[t.p[AB] % 12], xf, yf - 1, zf),
+				t.dot(t.grad3[t.p[BB] % 12], xf - 1, yf - 1, zf),
+				u
+			);
+			const lerp3 = t.mix(
+				t.dot(t.grad3[t.p[AA + 1] % 12], xf, yf, zf - 1),
+				t.dot(t.grad3[t.p[BA + 1] % 12], xf - 1, yf, zf - 1),
+				u
+			);
+			const lerp4 = t.mix(
+				t.dot(t.grad3[t.p[AB + 1] % 12], xf, yf - 1, zf - 1),
+				t.dot(t.grad3[t.p[BB + 1] % 12], xf - 1, yf - 1, zf - 1),
+				u
+			);
+
+			const mix1 = t.mix(lerp1, lerp2, v);
+			const mix2 = t.mix(lerp3, lerp4, v);
+
+			total += t.mix(mix1, mix2, w) * amp;
+
+			maxAmp += amp;
+			amp *= t.falloff;
+			freq *= 2;
+		}
+
+		return (total / maxAmp + 1) / 2;
+	}
+};
+Q5.modules.sound = ($) => {
+	$.loadSound = (path, cb) => {
+		p._preloadCount++;
+		$.aud ??= new window.AudioContext();
+		let a = new Audio(path);
+		a.addEventListener('canplaythrough', () => {
+			p._preloadCount--;
+			if (cb) cb(a);
 		});
-		vid.style.position = 'absolute';
-		vid.style.opacity = 0.00001;
-		vid.style.zIndex = -1000;
-		document.body.append(vid);
-		return vid;
+		a.load();
+		a.setVolume = (l) => (a.volume = l);
+		a.setLoop = (l) => (a.loop = l);
+		a.panner = $.aud.createStereoPanner();
+		a.source = $.aud.createMediaElementSource(a);
+		a.source.connect(a.panner);
+		a.panner.connect($.aud.destination);
+		Object.defineProperty(a, 'pan', {
+			get: () => a.panner.pan.value,
+			set: (v) => (a.panner.pan.value = v)
+		});
+		a.setPan = (v) => (a.pan = v);
+		return a;
 	};
-
-	// ENVIRONMENT
-
-	$.print = console.log;
-	$.describe = () => {};
-
-	function _draw(timestamp) {
-		let ts = timestamp || performance.now();
-		$._lastFrameTime ??= ts - $._targetFrameDuration;
-
-		if ($._loop) looper = raf(_draw);
-		else if ($.frameCount && !$._redraw) return;
-
-		if (looper && $.frameCount) {
-			let time_since_last = ts - $._lastFrameTime;
-			if (time_since_last < $._targetFrameDuration - 1) return;
-		}
-		$.deltaTime = ts - $._lastFrameTime;
-		$._frameRate = 1000 / $.deltaTime;
-		$.frameCount++;
-		if ($._shouldResize) {
-			$.windowResized();
-			$._shouldResize = false;
-		}
-		let pre = performance.now();
-		for (let m of Q5.prototype._methods.pre) m.call($);
-		clearBuff();
-		firstVertex = true;
-		if (ctx) ctx.save();
-		$.draw();
-		for (let m of Q5.prototype._methods.post) m.call($);
-		if (ctx) {
-			ctx.restore();
-			$.resetMatrix();
-		}
-		$.pmouseX = $.mouseX;
-		$.pmouseY = $.mouseY;
-		$._lastFrameTime = ts;
-		let post = performance.now();
-		$._fps = Math.round(1000 / (post - pre));
-	}
-	$.noLoop = () => {
-		$._loop = false;
-		looper = null;
-	};
-	$.loop = () => {
-		$._loop = true;
-		if (looper == null) _draw();
-	};
-	$.redraw = (n = 1) => {
-		$._redraw = true;
-		for (let i = 0; i < n; i++) {
-			_draw();
-		}
-		$._redraw = false;
-	};
-	$.remove = () => {
-		$.noLoop();
-		$.canvas.remove();
-	};
-
-	$.frameRate = (hz) => {
-		if (hz) {
-			$._targetFrameRate = hz;
-			$._targetFrameDuration = 1000 / hz;
-		}
-		return $._frameRate;
-	};
-	$.getTargetFrameRate = () => $._targetFrameRate;
-	$.getFPS = () => $._fps;
-
-	if (typeof localStorage == 'object') {
-		$.storeItem = localStorage.setItem;
-		$.getItem = localStorage.getItem;
-		$.removeItem = localStorage.removeItem;
-		$.clearStorage = localStorage.clear;
-	}
-	// USER INPUT
-
-	$._updateMouse = (e) => {
-		if (e.changedTouches) return;
-		let rect = $.canvas.getBoundingClientRect();
-		let sx = $.canvas.scrollWidth / $.width || 1;
-		let sy = $.canvas.scrollHeight / $.height || 1;
-		$.mouseX = (e.clientX - rect.left) / sx;
-		$.mouseY = (e.clientY - rect.top) / sy;
-	};
-	$._onmousedown = (e) => {
-		$._updateMouse(e);
-		$.mouseIsPressed = true;
-		$.mouseButton = [$.LEFT, $.CENTER, $.RIGHT][e.button];
-		$.mousePressed(e);
-	};
-	$._onmousemove = (e) => {
-		$._updateMouse(e);
-		if ($.mouseIsPressed) $.mouseDragged(e);
-		else $.mouseMoved(e);
-	};
-	$._onmouseup = (e) => {
-		$._updateMouse(e);
-		$.mouseIsPressed = false;
-		$.mouseReleased(e);
-	};
-	$._onclick = (e) => {
-		$._updateMouse(e);
-		$.mouseIsPressed = true;
-		$.mouseClicked(e);
-		$.mouseIsPressed = false;
-	};
-	$.cursor = (name, x, y) => {
-		let pfx = '';
-		if (name.includes('.')) {
-			name = `url("${name}")`;
-			pfx = ', auto';
-		}
-		if (x !== undefined) {
-			name += ' ' + x + ' ' + y;
-		}
-		$.canvas.style.cursor = name + pfx;
-	};
-	$.noCursor = () => {
-		$.canvas.style.cursor = 'none';
-	};
-
-	$._onkeydown = (e) => {
-		if (e.repeat) return;
-		$.keyIsPressed = true;
-		$.key = e.key;
-		$.keyCode = e.keyCode;
-		keysHeld[$.keyCode] = true;
-		$.keyPressed(e);
-		if (e.key.length == 1) {
-			$.keyTyped(e);
-		}
-	};
-	$._onkeyup = (e) => {
-		$.keyIsPressed = false;
-		$.key = e.key;
-		$.keyCode = e.keyCode;
-		keysHeld[$.keyCode] = false;
-		$.keyReleased(e);
-	};
-
-	function getTouchInfo(touch) {
-		const rect = $.canvas.getBoundingClientRect();
-		const sx = $.canvas.scrollWidth / $.width || 1;
-		const sy = $.canvas.scrollHeight / $.height || 1;
-		return {
-			x: (touch.clientX - rect.left) / sx,
-			y: (touch.clientY - rect.top) / sy,
-			id: touch.identifier
-		};
-	}
-	$._ontouchstart = (e) => {
-		$.touches = [...e.touches].map(getTouchInfo);
-		if (!$._isTouchAware) {
-			$.mouseX = $.touches[0].x;
-			$.mouseY = $.touches[0].y;
-			$.mouseIsPressed = true;
-			$.mouseButton = $.LEFT;
-			if (!$.mousePressed(e)) e.preventDefault();
-		}
-		if (!$.touchStarted(e)) e.preventDefault();
-		if ($.getAudioContext()?.state != 'running') $.userStartAudio();
-	};
-	$._ontouchmove = (e) => {
-		$.touches = [...e.touches].map(getTouchInfo);
-		if (!$._isTouchAware) {
-			$.mouseX = $.touches[0].x;
-			$.mouseY = $.touches[0].y;
-			if (!$.mouseDragged(e)) e.preventDefault();
-		}
-		if (!$.touchMoved(e)) e.preventDefault();
-	};
-	$._ontouchend = (e) => {
-		$.touches = [...e.touches].map(getTouchInfo);
-		if (!$._isTouchAware && !$.touches.length) {
-			$.mouseIsPressed = false;
-			if (!$.mouseReleased(e)) e.preventDefault();
-		}
-		if (!$.touchEnded(e)) e.preventDefault();
-	};
-
-	if (scope != 'graphics') {
-		$.keyIsDown = (x) => !!keysHeld[x];
-		$.canvas.onmousedown = (e) => $._onmousedown(e);
-		$.canvas.onmouseup = (e) => $._onmouseup(e);
-		$.canvas.onclick = (e) => $._onclick(e);
-		$.canvas.ontouchstart = (e) => $._ontouchstart(e);
-		$.canvas.ontouchmove = (e) => $._ontouchmove(e);
-		$.canvas.ontouchcancel = $.canvas.ontouchend = (e) => $._ontouchend(e);
-	}
-
-	// SENSORS
-
-	$.hasSensorPermission =
-		(!window.DeviceOrientationEvent && !window.DeviceMotionEvent) ||
-		!(DeviceOrientationEvent.requestPermission || DeviceMotionEvent.requestPermission);
-	$.requestSensorPermissions = () => {
-		if (DeviceOrientationEvent.requestPermission) {
-			DeviceOrientationEvent.requestPermission()
-				.then((response) => {
-					if (response == 'granted') {
-						if (DeviceMotionEvent.requestPermission) {
-							DeviceMotionEvent.requestPermission()
-								.then((response) => {
-									if (response == 'granted') {
-										$.hasSensorPermission = true;
-									}
-								})
-								.catch(alert);
-						}
-					}
-				})
-				.catch(alert);
-		}
-	};
-
-	let ROTX = (a) => [1, 0, 0, 0, 0, $.cos(a), -$.sin(a), 0, 0, $.sin(a), $.cos(a), 0, 0, 0, 0, 1];
-	let ROTY = (a) => [$.cos(a), 0, $.sin(a), 0, 0, 1, 0, 0, -$.sin(a), 0, $.cos(a), 0, 0, 0, 0, 1];
-	let MULT = (A, B) => [
-		A[0] * B[0] + A[1] * B[4] + A[2] * B[8] + A[3] * B[12],
-		A[0] * B[1] + A[1] * B[5] + A[2] * B[9] + A[3] * B[13],
-		A[0] * B[2] + A[1] * B[6] + A[2] * B[10] + A[3] * B[14],
-		A[0] * B[3] + A[1] * B[7] + A[2] * B[11] + A[3] * B[15],
-		A[4] * B[0] + A[5] * B[4] + A[6] * B[8] + A[7] * B[12],
-		A[4] * B[1] + A[5] * B[5] + A[6] * B[9] + A[7] * B[13],
-		A[4] * B[2] + A[5] * B[6] + A[6] * B[10] + A[7] * B[14],
-		A[4] * B[3] + A[5] * B[7] + A[6] * B[11] + A[7] * B[15],
-		A[8] * B[0] + A[9] * B[4] + A[10] * B[8] + A[11] * B[12],
-		A[8] * B[1] + A[9] * B[5] + A[10] * B[9] + A[11] * B[13],
-		A[8] * B[2] + A[9] * B[6] + A[10] * B[10] + A[11] * B[14],
-		A[8] * B[3] + A[9] * B[7] + A[10] * B[11] + A[11] * B[15],
-		A[12] * B[0] + A[13] * B[4] + A[14] * B[8] + A[15] * B[12],
-		A[12] * B[1] + A[13] * B[5] + A[14] * B[9] + A[15] * B[13],
-		A[12] * B[2] + A[13] * B[6] + A[14] * B[10] + A[15] * B[14],
-		A[12] * B[3] + A[13] * B[7] + A[14] * B[11] + A[15] * B[15]
-	];
-	let TRFM = (A, v) => [
-		(A[0] * v[0] + A[1] * v[1] + A[2] * v[2] + A[3]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15]),
-		(A[4] * v[0] + A[5] * v[1] + A[6] * v[2] + A[7]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15]),
-		(A[8] * v[0] + A[9] * v[1] + A[10] * v[2] + A[11]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15])
-	];
-
-	window.ondeviceorientation = (e) => {
-		$.pRotationX = $.rotationX;
-		$.pRotationY = $.rotationY;
-		$.pRotationZ = $.rotationZ;
-		$.pRelRotationX = $.relRotationX;
-		$.pRelRotationY = $.relRotationY;
-		$.pRelRotationZ = $.relRotationZ;
-
-		$.rotationX = e.beta * (Math.PI / 180.0);
-		$.rotationY = e.gamma * (Math.PI / 180.0);
-		$.rotationZ = e.alpha * (Math.PI / 180.0);
-		$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][Math.trunc(window.orientation / 90) + 1];
-		$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][Math.trunc(window.orientation / 90) + 1];
-		$.relRotationZ = $.rotationZ;
-	};
-	window.ondevicemotion = (e) => {
-		$.pAccelerationX = $.accelerationX;
-		$.pAccelerationY = $.accelerationY;
-		$.pAccelerationZ = $.accelerationZ;
-		if (!e.acceleration) {
-			let grav = TRFM(MULT(ROTY($.rotationY), ROTX($.rotationX)), [0, 0, -9.80665]);
-			$.accelerationX = e.accelerationIncludingGravity.x + grav[0];
-			$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
-			$.accelerationZ = e.accelerationIncludingGravity.z - grav[2];
-		}
-	};
-
-	// TIME
-
-	$.year = () => new Date().getFullYear();
-	$.day = () => new Date().getDay();
-	$.hour = () => new Date().getHours();
-	$.minute = () => new Date().getMinutes();
-	$.second = () => new Date().getSeconds();
-	$.millis = () => performance.now() - millisStart;
-
-	// LOAD FILES
-
+	$.getAudioContext = () => $.aud;
+	$.userStartAudio = () => $.aud.resume();
+};
+Q5.modules.util = ($) => {
 	$._loadFile = (path, cb, type) => {
-		preloadCnt++;
+		p._preloadCount++;
 		let ret = {};
 		fetch(path)
 			.then((r) => {
@@ -2284,7 +2797,7 @@ function Q5(scope, parent) {
 				if (type == 'text') return r.text();
 			})
 			.then((r) => {
-				preloadCnt--;
+				p._preloadCount--;
 				Object.assign(ret, r);
 				if (cb) cb(r);
 			});
@@ -2293,295 +2806,23 @@ function Q5(scope, parent) {
 
 	$.loadStrings = (path, cb) => $._loadFile(path, cb, 'text');
 	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
-	$.loadSound = (path, cb) => {
-		preloadCnt++;
-		let a = new Audio(path);
-		a.addEventListener('canplaythrough', () => {
-			preloadCnt--;
-			if (cb) cb(a);
-		});
-		a.load();
-		a.setVolume = (l) => (a.volume = l);
-		a.setLoop = (l) => (a.loop = l);
-		return a;
-	};
-	$.getAudioContext = () => $.audioContext;
-	$.userStartAudio = () => {
-		$.audioContext ??= new window.AudioContext();
-		return $.audioContext.resume();
-	};
 
-	// AI
-
-	$.askAI = (q = '') => {
-		throw Error('Ask AI ✨ ' + q);
-	};
-
-	async function aiErrorAssistance(e) {
-		let askAI = e.message.includes('Ask AI ✨');
-		if (!askAI) console.error(e);
-		if (Q5.disableFriendlyErrors) return;
-		if (askAI || !Q5.errorTolerant) noLoop();
-		let stackLines = e.stack.split('\n');
-		if (stackLines.length <= 1) return;
-
-		let idx = 1;
-		let sep = '(';
-		if (navigator.userAgent.indexOf('Chrome') == -1) {
-			idx = 0;
-			sep = '@';
-		}
-		while (stackLines[idx].indexOf('q5.js:') >= 0) idx++;
-
-		let parts = stackLines[idx].split(sep).at(-1);
-		parts = parts.split(':');
-		let lineNum = parseInt(parts.at(-2));
-		if (askAI) lineNum++;
-		let fileUrl = parts.slice(0, -2).join(':');
-		let fileBase = fileUrl.split('/').at(-1);
-
-		try {
-			let res = await (await fetch(fileUrl)).text();
-			let lines = res.split('\n');
-			let errLine = lines[lineNum - 1].trim();
-
-			let context = '';
-			let i = 1;
-			while (context.length < 1600) {
-				if (lineNum - i >= 0) {
-					context = lines[lineNum - i].trim() + '\n' + context;
-				}
-				if (lineNum + i < lines.length) {
-					context += lines[lineNum + i].trim() + '\n';
-				}
-				i++;
-			}
-
-			let question =
-				askAI && e.message.length > 10 ? e.message.slice(10) : 'Whats+wrong+with+this+line%3F+short+answer';
-
-			let url =
-				'https://chatgpt.com/?q=q5.js+' +
-				question +
-				(askAI ? '' : '%0A%0A' + encodeURIComponent(e.name + ': ' + e.message)) +
-				'%0A%0ALine%3A+' +
-				encodeURIComponent(errLine) +
-				'%0A%0AExcerpt+for+context%3A%0A%0A' +
-				encodeURIComponent(context);
-
-			if (!askAI) console.log('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
-
-			console.warn('Ask AI ✨ ' + url);
-
-			if (askAI) window.open(url, '_blank');
-		} catch (err) {}
+	if (typeof localStorage == 'object') {
+		$.storeItem = localStorage.setItem;
+		$.getItem = localStorage.getItem;
+		$.removeItem = localStorage.removeItem;
+		$.clearStorage = localStorage.clear;
 	}
 
-	// INIT
-
-	if (scope == 'global') {
-		Object.assign(Q5, $);
-		delete Q5.Q5;
-	}
-	Q5.Image ??= _Q5Image;
-
-	for (let m of Q5.prototype._methods.init) m.call($);
-
-	for (let [n, fn] of Object.entries(Q5.prototype)) {
-		if (n[0] != '_' && typeof $[n] == 'function') $[n] = fn.bind($);
-	}
-
-	if (scope == 'global') {
-		let props = Object.getOwnPropertyNames($);
-		let t = !Q5._nodejs ? window : global;
-		for (let p of props) {
-			if (typeof $[p] == 'function') t[p] = $[p];
-			else {
-				Object.defineProperty(t, p, {
-					get: () => $[p],
-					set: (v) => ($[p] = v)
-				});
-			}
-		}
-	}
-
-	if (typeof scope == 'function') scope($);
-
-	if (scope == 'image' || scope == 'graphics') return;
-
-	let raf =
-		window.requestAnimationFrame ||
-		function (cb) {
-			const idealFrameTime = $._lastFrameTime + $._targetFrameDuration;
-			return setTimeout(() => {
-				cb(idealFrameTime);
-			}, idealFrameTime - performance.now());
-		};
-
-	let t = scope == 'global' ? (!Q5._nodejs ? window : global) : $;
-	let preloadDefined = t.preload;
-	let userFns = [
-		'setup',
-		'draw',
-		'preload',
-		'mouseMoved',
-		'mousePressed',
-		'mouseReleased',
-		'mouseDragged',
-		'mouseClicked',
-		'keyPressed',
-		'keyReleased',
-		'keyTyped',
-		'touchStarted',
-		'touchMoved',
-		'touchEnded',
-		'windowResized'
-	];
-	for (let k of userFns) {
-		if (!t[k]) $[k] = () => {};
-		else if ($._isGlobal) {
-			$[k] = () => {
-				try {
-					t[k]();
-				} catch (e) {
-					aiErrorAssistance(e);
-				}
-			};
-		}
-	}
-
-	$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
-
-	if (window && scope != 'graphics') {
-		window.addEventListener('mousemove', (e) => $._onmousemove(e), false);
-		window.addEventListener('keydown', (e) => $._onkeydown(e), false);
-		window.addEventListener('keyup', (e) => $._onkeyup(e), false);
-		window.addEventListener('resize', () => {
-			$._shouldResize = true;
-			if (!$._loop) $.redraw();
-		});
-	}
-
-	if (!($.setup || $.draw)) return;
-
-	$._startDone = false;
-
-	function _start() {
-		$._startDone = true;
-		if (preloadCnt > 0) return raf(_start);
-		millisStart = performance.now();
-		$.setup();
-		if ($.frameCount) return;
-		if (ctx === null) $.createCanvas(100, 100);
-		$._setupDone = true;
-		if (ctx) $.resetMatrix();
-		raf(_draw);
-	}
-
-	if ((arguments.length && scope != 'namespace') || preloadDefined) {
-		$.preload();
-		_start();
-	} else {
-		t.preload = $.preload = () => {
-			if (!$._startDone) _start();
-		};
-		setTimeout($.preload, 32);
-	}
-}
-
-// COLOR CLASSES
-
-Q5.Color = class {
-	constructor() {
-		this._q5Color = true;
-	}
+	$.year = () => new Date().getFullYear();
+	$.day = () => new Date().getDay();
+	$.hour = () => new Date().getHours();
+	$.minute = () => new Date().getMinutes();
+	$.second = () => new Date().getSeconds();
 };
-Q5.ColorOKLCH = class extends Q5.Color {
-	constructor(l, c, h, a) {
-		super();
-		this.l = l;
-		this.c = c;
-		this.h = h;
-		this.a = a ?? 1;
-	}
-	toString() {
-		return `color(oklch ${this.l} ${this.c} ${this.h} / ${this.a})`;
-	}
+Q5.modules.vector = ($) => {
+	$.createVector = (x, y, z) => new Q5.Vector(x, y, z, $);
 };
-Q5.ColorRGBA = class extends Q5.Color {
-	constructor(r, g, b, a) {
-		super();
-		this.r = r;
-		this.g = g;
-		this.b = b;
-		this.a = a ?? 255;
-	}
-	setRed(v) {
-		this.r = v;
-	}
-	setGreen(v) {
-		this.g = v;
-	}
-	setBlue(v) {
-		this.b = v;
-	}
-	setAlpha(v) {
-		this.a = v;
-	}
-	get levels() {
-		return [this.r, this.g, this.b, this.a];
-	}
-	toString() {
-		return `rgb(${this.r} ${this.g} ${this.b} / ${this.a / 255})`;
-	}
-};
-Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
-	constructor(r, g, b, a) {
-		super(r, g, b, a);
-		this._edited = true;
-	}
-	get r() {
-		return this._r;
-	}
-	set r(v) {
-		this._r = v;
-		this._edited = true;
-	}
-	get g() {
-		return this._g;
-	}
-	set g(v) {
-		this._g = v;
-		this._edited = true;
-	}
-	get b() {
-		return this._b;
-	}
-	set b(v) {
-		this._b = v;
-		this._edited = true;
-	}
-	get a() {
-		return this._a;
-	}
-	set a(v) {
-		this._a = v;
-		this._edited = true;
-	}
-	toString() {
-		if (this._edited) {
-			let r = (this._r / 255).toFixed(3);
-			let g = (this._g / 255).toFixed(3);
-			let b = (this._b / 255).toFixed(3);
-			let a = (this._a / 255).toFixed(3);
-			this._css = `color(display-p3 ${r} ${g} ${b} / ${a})`;
-			this._edited = false;
-		}
-		return this._css;
-	}
-};
-
-// VECTOR
 
 Q5.Vector = class {
 	constructor(_x, _y, _z, _$) {
@@ -2803,68 +3044,4 @@ Q5.Vector.rem = (v, u) => v.copy().rem(u);
 Q5.Vector.sub = (v, u) => v.copy().sub(u);
 for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
-}
-
-// IMAGE CLASS
-
-class _Q5Image extends Q5 {
-	constructor(w, h, opt) {
-		super('image');
-		delete this.createCanvas;
-		opt ??= {};
-		opt.alpha ??= true;
-		this._createCanvas(w, h, '2d', opt);
-		this._loop = false;
-	}
-	get w() {
-		return this.width;
-	}
-	get h() {
-		return this.height;
-	}
-}
-
-// Q5
-
-if (typeof window != 'object') window = 0;
-
-Q5._nodejs = typeof process == 'object';
-
-Q5.canvasOptions = {
-	alpha: false,
-	desynchronized: false,
-	colorSpace: 'display-p3'
-};
-
-if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {
-	Q5.canvasOptions.colorSpace = 'srgb';
-} else Q5.supportsHDR = true;
-
-Q5._instanceCount = 0;
-Q5._friendlyError = (msg, func) => {
-	throw Error(func + ': ' + msg);
-};
-Q5._validateParameters = () => true;
-
-Q5.prototype._methods = {
-	init: [],
-	pre: [],
-	post: [],
-	remove: []
-};
-Q5.prototype.registerMethod = (m, fn) => Q5.prototype._methods[m].push(fn);
-Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
-
-if (typeof module == 'object') {
-	global.p5 ??= Q5;
-	module.exports = global.Q5 = Q5;
-} else {
-	window.p5 ??= Q5;
-	window.Q5 = Q5;
-}
-
-if (typeof document == 'object') {
-	document.addEventListener('DOMContentLoaded', () => {
-		if (!Q5._hasGlobal) new Q5('auto');
-	});
 }
