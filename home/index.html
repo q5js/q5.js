@@ -61,12 +61,13 @@ function setup() {
 				<script type="mie/p5" id="SDR" hide-editor="">
 window.calcMiniWidth = () => (min(windowWidth, 1200) - 72) / 2;
 
-let colors = ['red', 'lime', 'magenta', 'yellow', 'cyan', 'blue', 'white', 'black'];
+let colors = ['blue', 'yellow', 'cyan', 'lime', 'magenta', 'red', 'white', 'black'];
 
 function setup() {
 	createCanvas(calcMiniWidth(), 200, {
 		colorSpace: 'srgb'
 	});
+	noiseSeed(1);
 }
 
 function draw() {
@@ -95,10 +96,11 @@ function windowResized() {
 			</div>
 			<div>
 				<script type="mie/q5" id="HDR" hide-editor="">
-let colors = ['red', 'lime', 'magenta', 'yellow', 'cyan', 'blue', 'white', 'black'];
+let colors = ['blue', 'yellow', 'cyan', 'lime', 'magenta', 'red', 'white', 'black'];
 
 function setup() {
 	createCanvas(calcMiniWidth(), 200);
+	noiseSeed(1);
 }
 
 function draw() {

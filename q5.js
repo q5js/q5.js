@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta16
+ * @version 2.0-beta17
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -67,6 +67,11 @@ function Q5(scope, parent) {
 		let ts = timestamp || performance.now();
 		$._lastFrameTime ??= ts - $._targetFrameDuration;
 
+		if ($._shouldResize) {
+			$.windowResized();
+			$._shouldResize = false;
+		}
+
 		if ($._loop) looper = raf(_draw);
 		else if ($.frameCount && !$._redraw) return;
 
@@ -77,10 +82,6 @@ function Q5(scope, parent) {
 		p.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
 		p.frameCount++;
-		if ($._shouldResize) {
-			$.windowResized();
-			$._shouldResize = false;
-		}
 		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
 		// clearBuff(); TODO
@@ -312,7 +313,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 			function parentResized() {
 				if ($.frameCount > 1) {
 					$._shouldResize = true;
-					if ($._adjustDisplay) $._adjustDisplay();
+					$._adjustDisplay();
 				}
 			}
 			if (typeof ResizeObserver == 'function') {
@@ -393,7 +394,17 @@ Q5.modules.q2d_canvas = ($, p) => {
 	function _resizeCanvas(w, h) {
 		w ??= window.innerWidth;
 		h ??= window.innerHeight;
+
 		let t = cloneCtx();
+		let o;
+		if ($.frameCount) {
+			o = new _OffscreenCanvas(c.width, c.height);
+			o.w = c.w;
+			o.h = c.h;
+			let oCtx = o.getContext('2d');
+			oCtx.drawImage(c, 0, 0);
+		}
+
 		c.width = Math.ceil(w * $._pixelDensity);
 		c.height = Math.ceil(h * $._pixelDensity);
 		c.w = w;
@@ -402,6 +413,8 @@ Q5.modules.q2d_canvas = ($, p) => {
 		c.hh = h / 2;
 		for (let prop in t) $.ctx[prop] = t[prop];
 		$.ctx.scale($._pixelDensity, $._pixelDensity);
+
+		if ($.frameCount) $.ctx.drawImage(o, 0, 0, o.w, o.h);
 
 		if (!$._da) {
 			p.width = w;
@@ -525,7 +538,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 			p.windowWidth = window.innerWidth;
 			p.windowHeight = window.innerHeight;
 			p.deviceOrientation = window.screen?.orientation?.type;
-			if (!$._loop) $.redraw();
 		});
 	}
 };

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta16
+ * @version 2.0-beta17
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -67,6 +67,11 @@ function Q5(scope, parent) {
 		let ts = timestamp || performance.now();
 		$._lastFrameTime ??= ts - $._targetFrameDuration;
 
+		if ($._shouldResize) {
+			$.windowResized();
+			$._shouldResize = false;
+		}
+
 		if ($._loop) looper = raf(_draw);
 		else if ($.frameCount && !$._redraw) return;
 
@@ -77,10 +82,6 @@ function Q5(scope, parent) {
 		p.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
 		p.frameCount++;
-		if ($._shouldResize) {
-			$.windowResized();
-			$._shouldResize = false;
-		}
 		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
 		// clearBuff(); TODO

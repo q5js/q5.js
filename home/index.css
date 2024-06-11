@@ -255,6 +255,11 @@ body.dark #fullscreenIcon {
 }
 
 @media screen and (max-width: 800px) {
+	.reel {
+		padding-left: 0;
+		padding-right: 0;
+	}
+
 	.minis md {
 		max-width: 100%;
 	}

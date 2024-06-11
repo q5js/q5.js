@@ -38,7 +38,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 			function parentResized() {
 				if ($.frameCount > 1) {
 					$._shouldResize = true;
-					if ($._adjustDisplay) $._adjustDisplay();
+					$._adjustDisplay();
 				}
 			}
 			if (typeof ResizeObserver == 'function') {
@@ -119,7 +119,17 @@ Q5.modules.q2d_canvas = ($, p) => {
 	function _resizeCanvas(w, h) {
 		w ??= window.innerWidth;
 		h ??= window.innerHeight;
+
 		let t = cloneCtx();
+		let o;
+		if ($.frameCount) {
+			o = new _OffscreenCanvas(c.width, c.height);
+			o.w = c.w;
+			o.h = c.h;
+			let oCtx = o.getContext('2d');
+			oCtx.drawImage(c, 0, 0);
+		}
+
 		c.width = Math.ceil(w * $._pixelDensity);
 		c.height = Math.ceil(h * $._pixelDensity);
 		c.w = w;
@@ -128,6 +138,8 @@ Q5.modules.q2d_canvas = ($, p) => {
 		c.hh = h / 2;
 		for (let prop in t) $.ctx[prop] = t[prop];
 		$.ctx.scale($._pixelDensity, $._pixelDensity);
+
+		if ($.frameCount) $.ctx.drawImage(o, 0, 0, o.w, o.h);
 
 		if (!$._da) {
 			p.width = w;
@@ -251,7 +263,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 			p.windowWidth = window.innerWidth;
 			p.windowHeight = window.innerHeight;
 			p.deviceOrientation = window.screen?.orientation?.type;
-			if (!$._loop) $.redraw();
 		});
 	}
 };
