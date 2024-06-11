@@ -277,14 +277,15 @@ Q5.modules.math = ($, p) => {
 		return ziggurat.REXP();
 	};
 
-	$.PERLIN = 'Perlin';
-	$.SIMPLEX = 'Simplex';
+	$.PERLIN = 'perlin';
+	$.SIMPLEX = 'simplex';
+	$.BLOCKY = 'blocky';
 
 	$.Noise = Q5.PerlinNoise;
 	let _noise;
 
 	$.noiseMode = (mode) => {
-		p.Noise = Q5[mode + 'Noise'];
+		p.Noise = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
 		_noise = null;
 	};
 	$.noiseSeed = (seed) => {
