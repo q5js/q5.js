@@ -1,4 +1,4 @@
-Q5.modules.color = ($) => {
+Q5.modules.color = ($, p) => {
 	$.RGB = $.RGBA = $._colorMode = 'rgb';
 
 	if (Q5.supportsHDR) $.Color = Q5.ColorRGBA_P3;
@@ -7,12 +7,12 @@ Q5.modules.color = ($) => {
 	$.colorMode = (mode) => {
 		$._colorMode = mode;
 		if (mode == 'oklch') {
-			$.Color = Q5.ColorOKLCH;
+			p.Color = Q5.ColorOKLCH;
 		} else if (mode == 'rgb') {
-			if ($.canvas.colorSpace == 'srgb') $.Color = Q5.ColorRGBA;
-			else $.Color = Q5.ColorRGBA_P3;
+			if ($.canvas.colorSpace == 'srgb') p.Color = Q5.ColorRGBA;
+			else p.Color = Q5.ColorRGBA_P3;
 		} else if (mode == 'srgb') {
-			$.Color = Q5.ColorRGBA;
+			p.Color = Q5.ColorRGBA;
 			$._colorMode = 'rgb';
 		}
 	};

@@ -1,4 +1,4 @@
-Q5.modules.math = ($) => {
+Q5.modules.math = ($, p) => {
 	$.DEGREES = 'degrees';
 	$.RADIANS = 'radians';
 
@@ -277,17 +277,15 @@ Q5.modules.math = ($) => {
 		return ziggurat.REXP();
 	};
 
-	$.PERLIN = 'perlin';
-	$.P5_PERLIN = 'p5-perlin';
-	$.SIMPLEX = 'simplex';
+	$.PERLIN = 'Perlin';
+	$.SIMPLEX = 'Simplex';
 
 	$.Noise = Q5.PerlinNoise;
 	let _noise;
 
 	$.noiseMode = (mode) => {
-		if (mode == $.PERLIN) $.Noise = Q5.PerlinNoise;
-		else if (mode == $.P5_PERLIN) $.Noise = Q5.P5PerlinNoise;
-		// else if (mode == $.SIMPLEX) $.Noise = Q5.SimplexNoise;
+		p.Noise = Q5[mode + 'Noise'];
+		_noise = null;
 	};
 	$.noiseSeed = (seed) => {
 		_noise = new $.Noise(seed);
@@ -324,13 +322,14 @@ Q5.PerlinNoise = class extends Q5.Noise {
 			[0, 1, -1],
 			[0, -1, -1]
 		];
-		this.octaves = 4;
-		this.falloff = 0.25;
-		this.p = Array.from({ length: 256 }, () => Math.floor(Math.random() * 256));
-		if (seed !== undefined) {
+		this.octaves = 1;
+		this.falloff = 0.5;
+		if (seed == undefined) {
+			this.p = Array.from({ length: 256 }, () => Math.floor(Math.random() * 256));
+		} else {
 			this.p = this.seedPermutation(seed);
 		}
-		this.perm = Array.from({ length: 512 }, (_, i) => this.p[i & 255]);
+		this.p = this.p.concat(this.p);
 	}
 
 	seedPermutation(seed) {
@@ -364,12 +363,13 @@ Q5.PerlinNoise = class extends Q5.Noise {
 	}
 
 	noise(x, y, z) {
+		let t = this;
 		let total = 0;
 		let freq = 1;
 		let amp = 1;
 		let maxAmp = 0;
 
-		for (let i = 0; i < this.octaves; i++) {
+		for (let i = 0; i < t.octaves; i++) {
 			const X = Math.floor(x * freq) & 255;
 			const Y = Math.floor(y * freq) & 255;
 			const Z = Math.floor(z * freq) & 255;
@@ -378,128 +378,44 @@ Q5.PerlinNoise = class extends Q5.Noise {
 			const yf = y * freq - Math.floor(y * freq);
 			const zf = z * freq - Math.floor(z * freq);
 
-			const u = this.fade(xf);
-			const v = this.fade(yf);
-			const w = this.fade(zf);
+			const u = t.fade(xf);
+			const v = t.fade(yf);
+			const w = t.fade(zf);
 
-			const A = this.perm[X] + Y;
-			const AA = this.perm[A] + Z;
-			const AB = this.perm[A + 1] + Z;
-			const B = this.perm[X + 1] + Y;
-			const BA = this.perm[B] + Z;
-			const BB = this.perm[B + 1] + Z;
+			const A = t.p[X] + Y;
+			const AA = t.p[A] + Z;
+			const AB = t.p[A + 1] + Z;
+			const B = t.p[X + 1] + Y;
+			const BA = t.p[B] + Z;
+			const BB = t.p[B + 1] + Z;
 
-			const lerp1 = this.mix(
-				this.dot(this.grad3[this.perm[AA] % 12], xf, yf, zf),
-				this.dot(this.grad3[this.perm[BA] % 12], xf - 1, yf, zf),
+			const lerp1 = t.mix(t.dot(t.grad3[t.p[AA] % 12], xf, yf, zf), t.dot(t.grad3[t.p[BA] % 12], xf - 1, yf, zf), u);
+			const lerp2 = t.mix(
+				t.dot(t.grad3[t.p[AB] % 12], xf, yf - 1, zf),
+				t.dot(t.grad3[t.p[BB] % 12], xf - 1, yf - 1, zf),
 				u
 			);
-			const lerp2 = this.mix(
-				this.dot(this.grad3[this.perm[AB] % 12], xf, yf - 1, zf),
-				this.dot(this.grad3[this.perm[BB] % 12], xf - 1, yf - 1, zf),
+			const lerp3 = t.mix(
+				t.dot(t.grad3[t.p[AA + 1] % 12], xf, yf, zf - 1),
+				t.dot(t.grad3[t.p[BA + 1] % 12], xf - 1, yf, zf - 1),
 				u
 			);
-			const lerp3 = this.mix(
-				this.dot(this.grad3[this.perm[AA + 1] % 12], xf, yf, zf - 1),
-				this.dot(this.grad3[this.perm[BA + 1] % 12], xf - 1, yf, zf - 1),
-				u
-			);
-			const lerp4 = this.mix(
-				this.dot(this.grad3[this.perm[AB + 1] % 12], xf, yf - 1, zf - 1),
-				this.dot(this.grad3[this.perm[BB + 1] % 12], xf - 1, yf - 1, zf - 1),
+			const lerp4 = t.mix(
+				t.dot(t.grad3[t.p[AB + 1] % 12], xf, yf - 1, zf - 1),
+				t.dot(t.grad3[t.p[BB + 1] % 12], xf - 1, yf - 1, zf - 1),
 				u
 			);
 
-			const mix1 = this.mix(lerp1, lerp2, v);
-			const mix2 = this.mix(lerp3, lerp4, v);
+			const mix1 = t.mix(lerp1, lerp2, v);
+			const mix2 = t.mix(lerp3, lerp4, v);
 
-			total += this.mix(mix1, mix2, w) * amp;
+			total += t.mix(mix1, mix2, w) * amp;
 
 			maxAmp += amp;
-			amp *= this.falloff;
+			amp *= t.falloff;
 			freq *= 2;
 		}
 
-		return total / maxAmp + 0.5;
-	}
-};
-
-Q5.P5PerlinNoise = class extends Q5.Noise {
-	constructor(seed) {
-		super();
-		this.YWRAPB = 4;
-		this.YWRAP = 1 << this.YWRAPB;
-		this.ZWRAPB = 8;
-		this.ZWRAP = 1 << this.ZWRAPB;
-		this.size = 4095;
-		this.octaves = 4;
-		this.falloff = 0.5;
-
-		seed ??= Math.random() * 4294967295;
-		this.perlin = new Array(this.size + 1);
-		for (var i = 0; i < this.size + 1; i++) {
-			seed ^= seed << 17;
-			seed ^= seed >> 13;
-			seed ^= seed << 5;
-			this.perlin[i] = (seed >>> 0) / 4294967295;
-		}
-	}
-
-	scaled_cosine(i) {
-		return 0.5 * (1.0 - Math.cos(i * Math.PI));
-	}
-
-	noise(x = 0, y = 0, z = 0) {
-		if (x < 0) x = -x;
-		if (y < 0) y = -y;
-		if (z < 0) z = -z;
-		var xi = Math.floor(x),
-			yi = Math.floor(y),
-			zi = Math.floor(z);
-		var xf = x - xi;
-		var yf = y - yi;
-		var zf = z - zi;
-		var rxf, ryf;
-		var r = 0;
-		var amp = 0.5;
-		var n1, n2, n3;
-		for (var o = 0; o < this.octaves; o++) {
-			var f = xi + (yi << this.YWRAPB) + (zi << this.ZWRAPB);
-			rxf = this.scaled_cosine(xf);
-			ryf = this.scaled_cosine(yf);
-			n1 = this.perlin[f & this.size];
-			n1 += rxf * (this.perlin[(f + 1) & this.size] - n1);
-			n2 = this.perlin[(f + this.YWRAP) & this.size];
-			n2 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n2);
-			n1 += ryf * (n2 - n1);
-			f += this.ZWRAP;
-			n2 = this.perlin[f & this.size];
-			n2 += rxf * (this.perlin[(f + 1) & this.size] - n2);
-			n3 = this.perlin[(f + this.YWRAP) & this.size];
-			n3 += rxf * (this.perlin[(f + this.YWRAP + 1) & this.size] - n3);
-			n2 += ryf * (n3 - n2);
-			n1 += this.scaled_cosine(zf) * (n2 - n1);
-			r += n1 * amp;
-			amp *= this.falloff;
-			xi <<= 1;
-			xf *= 2;
-			yi <<= 1;
-			yf *= 2;
-			zi <<= 1;
-			zf *= 2;
-			if (xf >= 1.0) {
-				xi++;
-				xf--;
-			}
-			if (yf >= 1.0) {
-				yi++;
-				yf--;
-			}
-			if (zf >= 1.0) {
-				zi++;
-				zf--;
-			}
-		}
-		return r;
+		return (total / maxAmp + 1) / 2;
 	}
 };
