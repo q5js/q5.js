@@ -1,4 +1,4 @@
-Q5.modules.sound = ($) => {
+Q5.modules.sound = ($, p) => {
 	$.loadSound = (path, cb) => {
 		p._preloadCount++;
 		$.aud ??= new window.AudioContext();

@@ -1,4 +1,4 @@
-Q5.modules.q2d_text = ($) => {
+Q5.modules.q2d_text = ($, p) => {
 	$.NORMAL = 'normal';
 	$.ITALIC = 'italic';
 	$.BOLD = 'bold';

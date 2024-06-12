@@ -44,8 +44,8 @@ main {
 
 	$._adjustDisplay = () => {
 		let s = c.style;
-		if (!s || !c.displayMode) return;
 		let p = c.parentElement;
+		if (!s || !p || !c.displayMode) return;
 		if (c.renderQuality == 'pixelated') {
 			c.classList.add('q5-pixelated');
 			$.pixelDensity(1);

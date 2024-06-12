@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta17
+ * @version 2.0-beta18
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -1621,7 +1621,7 @@ class _Q5Image extends Q5 {
 }
 
 Q5.Image ??= _Q5Image;
-Q5.modules.q2d_text = ($) => {
+Q5.modules.q2d_text = ($, p) => {
 	$.NORMAL = 'normal';
 	$.ITALIC = 'italic';
 	$.BOLD = 'bold';
@@ -2150,8 +2150,8 @@ main {
 
 	$._adjustDisplay = () => {
 		let s = c.style;
-		if (!s || !c.displayMode) return;
 		let p = c.parentElement;
+		if (!s || !p || !c.displayMode) return;
 		if (c.renderQuality == 'pixelated') {
 			c.classList.add('q5-pixelated');
 			$.pixelDensity(1);
@@ -2773,7 +2773,7 @@ Q5.PerlinNoise = class extends Q5.Noise {
 		return (total / maxAmp + 1) / 2;
 	}
 };
-Q5.modules.sound = ($) => {
+Q5.modules.sound = ($, p) => {
 	$.loadSound = (path, cb) => {
 		p._preloadCount++;
 		$.aud ??= new window.AudioContext();
@@ -2799,7 +2799,7 @@ Q5.modules.sound = ($) => {
 	$.getAudioContext = () => $.aud;
 	$.userStartAudio = () => $.aud.resume();
 };
-Q5.modules.util = ($) => {
+Q5.modules.util = ($, p) => {
 	$._loadFile = (path, cb, type) => {
 		p._preloadCount++;
 		let ret = {};

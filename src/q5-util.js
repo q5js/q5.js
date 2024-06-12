@@ -1,4 +1,4 @@
-Q5.modules.util = ($) => {
+Q5.modules.util = ($, p) => {
 	$._loadFile = (path, cb, type) => {
 		p._preloadCount++;
 		let ret = {};
