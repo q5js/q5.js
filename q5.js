@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta19
+ * @version 2.0-beta20
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -2244,6 +2244,10 @@ Q5.modules.input = ($, p) => {
 	let keysHeld = {};
 	let mouseBtns = [$.LEFT, $.CENTER, $.RIGHT];
 
+	$._startAudio = () => {
+		if ($.getAudioContext && $.getAudioContext()?.state == 'suspended') $.userStartAudio();
+	};
+
 	$._updateMouse = (e) => {
 		if (e.changedTouches) return;
 		let rect = $.canvas.getBoundingClientRect();
@@ -2253,7 +2257,7 @@ Q5.modules.input = ($, p) => {
 		p.mouseY = (e.clientY - rect.top) / sy;
 	};
 	$._onmousedown = (e) => {
-		if ($.aud && $.aud.state != 'running') $.aud.resume();
+		$._startAudio();
 		$._updateMouse(e);
 		p.mouseIsPressed = true;
 		p.mouseButton = mouseBtns[e.button];
@@ -2292,7 +2296,7 @@ Q5.modules.input = ($, p) => {
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
-		if ($.aud && $.aud.state != 'running') $.aud.resume();
+		$._startAudio;
 		p.keyIsPressed = true;
 		p.key = e.key;
 		p.keyCode = e.keyCode;
@@ -2321,7 +2325,7 @@ Q5.modules.input = ($, p) => {
 		};
 	}
 	$._ontouchstart = (e) => {
-		if ($.aud && $.aud.state != 'running') $.aud.resume();
+		$._startAudio();
 		p.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
 			p.mouseX = $.touches[0].x;

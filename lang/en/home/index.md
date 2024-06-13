@@ -64,7 +64,7 @@ createCanvas(400, 400);
 
 ## Modular design 🧩
 
-p5 is a whopping 5MB. q5 is already ~20x smaller, but for extremely lightweight use, load only the features you need from q5's [`src` folder](https://github.com/q5js/q5.js/tree/main/src). 📦
+p5 is a whopping 5MB. q5 is already ~70x smaller, but for extremely lightweight use, load only the features you need from q5's [`src` folder](https://github.com/q5js/q5.js/tree/main/src). 📦
 
 ```html
 <script src="https://q5js.org/src/q5-core.js">

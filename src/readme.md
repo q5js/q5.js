@@ -1,4 +1,4 @@
-## Modular Use
+# Modular Use
 
 To use q5 modules, "q5.js" (the default bundle) or the "q5-core.js" module must be loaded first!
 

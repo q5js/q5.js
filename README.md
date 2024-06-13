@@ -4,7 +4,7 @@ The sequel to p5.js is here!
 
 **q5.js** implements all of [p5][]'s 2D drawing, math, and user input functionality.
 
-It's a drop-in replacement that's performance optimized and ~20x smaller than p5, while packing exclusive new features: HDR color support, modular use, top-level global mode, namespace mode, and text image caching.
+It's a drop-in replacement that's performance optimized and ~70x smaller than p5, while packing exclusive new features: HDR color support, modular use, top-level global mode, namespace mode, and text image caching.
 
 ## Typical Use
 
@@ -254,7 +254,7 @@ In node.js, q5's automatic global mode is disabled. To use global mode you need 
 
 **p5.js** is nearly 5MB in size. This is mainly [due to the inclusion of the webgl render and the dependencies corejs and opentype](https://github.com/processing/p5.js/issues/6776#issuecomment-1918238317). If 2d rendering is all a sketch needs, p5 wastes user bandwidth and is slower to load, parse, and run.
 
-**q5.js** (the default bundle) is 20x smaller than p5, which is already great for typical use. For extremely lightweight use you can load a subset of scripts from the `src` folder, just be sure to load `src/q5-core.js` first.
+**q5.js** (the default bundle) is 70x smaller than p5, which is already great for typical use. For extremely lightweight use you can load a subset of scripts from the `src` folder, just be sure to load `src/q5-core.js` first.
 
 ## Motivation: Part 1
 
@@ -311,15 +311,15 @@ Features added by @LingDong-:
 
 Unminified:
 
-- p5.js **4958kb** ⚠️
+- p5.js **5112kb** ⚠️
 - p5.sound.js 488kb
-- q5.js 71kb
+- q5.js 74kb
 
 Minified:
 
-- p5.min.js 1033kb ⚠️
+- p5.min.js 1034kb ⚠️
 - p5.sound.min.js 200kb
-- q5.min.js **45kb** 🎉
+- q5.min.js **48kb** 🎉
 
 ## Benchmarks
 
