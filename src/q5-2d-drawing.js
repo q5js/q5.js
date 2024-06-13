@@ -1,15 +1,4 @@
 Q5.modules.q2d_drawing = ($) => {
-	$.THRESHOLD = 1;
-	$.GRAY = 2;
-	$.OPAQUE = 3;
-	$.INVERT = 4;
-	$.POSTERIZE = 5;
-	$.DILATE = 6;
-	$.ERODE = 7;
-	$.BLUR = 8;
-
-	if ($._scope == 'image') return;
-
 	$.CHORD = 0;
 	$.PIE = 1;
 	$.OPEN = 2;
@@ -131,7 +120,7 @@ Q5.modules.q2d_drawing = ($) => {
 		return x;
 	}
 
-	function arcImpl(x, y, w, h, start, stop, mode, detail) {
+	function arc(x, y, w, h, start, stop, mode, detail) {
 		if (!$._doFill && !$._doStroke) return;
 		let lo = normAng(start);
 		let hi = normAng(stop);
@@ -161,17 +150,17 @@ Q5.modules.q2d_drawing = ($) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
 		mode ??= $.PIE;
 		if ($._ellipseMode == $.CENTER) {
-			arcImpl(x, y, w, h, start, stop, mode, detail);
+			arc(x, y, w, h, start, stop, mode, detail);
 		} else if ($._ellipseMode == $.RADIUS) {
-			arcImpl(x, y, w * 2, h * 2, start, stop, mode, detail);
+			arc(x, y, w * 2, h * 2, start, stop, mode, detail);
 		} else if ($._ellipseMode == $.CORNER) {
-			arcImpl(x + w / 2, y + h / 2, w, h, start, stop, mode, detail);
+			arc(x + w / 2, y + h / 2, w, h, start, stop, mode, detail);
 		} else if ($._ellipseMode == $.CORNERS) {
-			arcImpl((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode, detail);
+			arc((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode, detail);
 		}
 	};
 
-	function ellipseImpl(x, y, w, h) {
+	function ellipse(x, y, w, h) {
 		if (!$._doFill && !$._doStroke) return;
 		if ($._da) {
 			x *= $._da;
@@ -186,24 +175,26 @@ Q5.modules.q2d_drawing = ($) => {
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
 		if ($._ellipseMode == $.CENTER) {
-			ellipseImpl(x, y, w, h);
+			ellipse(x, y, w, h);
 		} else if ($._ellipseMode == $.RADIUS) {
-			ellipseImpl(x, y, w * 2, h * 2);
+			ellipse(x, y, w * 2, h * 2);
 		} else if ($._ellipseMode == $.CORNER) {
-			ellipseImpl(x + w / 2, y + h / 2, w, h);
+			ellipse(x + w / 2, y + h / 2, w, h);
 		} else if ($._ellipseMode == $.CORNERS) {
-			ellipseImpl((x + w) / 2, (y + h) / 2, w - x, h - y);
+			ellipse((x + w) / 2, (y + h) / 2, w - x, h - y);
 		}
 	};
 	$.circle = (x, y, d) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			r *= $._da;
-		}
-		$.ctx.beginPath();
-		$.ctx.arc(x, y, d / 2, 0, $.TAU);
-		ink();
+		if ($._ellipseMode == $.CENTER) {
+			if ($._da) {
+				x *= $._da;
+				y *= $._da;
+				d *= $._da;
+			}
+			$.ctx.beginPath();
+			$.ctx.arc(x, y, d / 2, 0, $.TAU);
+			ink();
+		} else $.ellipse(x, y, d, d);
 	};
 	$.point = (x, y) => {
 		if (x.x) {
@@ -221,7 +212,7 @@ Q5.modules.q2d_drawing = ($) => {
 		$.ctx.fill();
 		$.ctx.restore();
 	};
-	function rectImpl(x, y, w, h) {
+	function rect(x, y, w, h) {
 		if ($._da) {
 			x *= $._da;
 			y *= $._da;
@@ -231,13 +222,13 @@ Q5.modules.q2d_drawing = ($) => {
 		if ($._doFill) $.ctx.fillRect(x, y, w, h);
 		if ($._doStroke) $.ctx.strokeRect(x, y, w, h);
 	}
-	function roundedRectImpl(x, y, w, h, tl, tr, br, bl) {
+	function roundedRect(x, y, w, h, tl, tr, br, bl) {
 		if (!$._doFill && !$._doStroke) return;
 		if (tl === undefined) {
-			return rectImpl(x, y, w, h);
+			return rect(x, y, w, h);
 		}
 		if (tr === undefined) {
-			return roundedRectImpl(x, y, w, h, tl, tl, tl, tl);
+			return roundedRect(x, y, w, h, tl, tl, tl, tl);
 		}
 		if ($._da) {
 			x *= $._da;
@@ -266,13 +257,13 @@ Q5.modules.q2d_drawing = ($) => {
 
 	$.rect = (x, y, w, h, tl, tr, br, bl) => {
 		if ($._rectMode == $.CENTER) {
-			roundedRectImpl(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
+			roundedRect(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
 		} else if ($._rectMode == $.RADIUS) {
-			roundedRectImpl(x - w, y - h, w * 2, h * 2, tl, tr, br, bl);
+			roundedRect(x - w, y - h, w * 2, h * 2, tl, tr, br, bl);
 		} else if ($._rectMode == $.CORNER) {
-			roundedRectImpl(x, y, w, h, tl, tr, br, bl);
+			roundedRect(x, y, w, h, tl, tr, br, bl);
 		} else if ($._rectMode == $.CORNERS) {
-			roundedRectImpl(x, y, w - x, h - y, tl, tr, br, bl);
+			roundedRect(x, y, w - x, h - y, tl, tr, br, bl);
 		}
 	};
 	$.square = (x, y, s, tl, tr, br, bl) => {

@@ -59,6 +59,8 @@ p5's error messages are friendlier but often too vague, leaving beginners search
 🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
 ```
 
+Why not ask ChatGPT 4o? It excels at identifying the most common errors that beginners make: typos, missing syntax, incorrect arguments, and more.
+
 q5 creates error reports that can be sent to an AI just by clicking a link! Users can also run the `askAI()` function before a line of code that isn't working as expected. 🤖
 
 ```js

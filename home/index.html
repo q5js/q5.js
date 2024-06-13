@@ -71,6 +71,8 @@ function setup() {
 }
 
 function draw() {
+	if (!canvas.visible) return;
+
 	background('#eee');
 
 	let f = frameCount * 0.002;
@@ -104,6 +106,8 @@ function setup() {
 }
 
 function draw() {
+	if (!canvas.visible) return;
+	
 	background('#eee');
 
 	let f = frameCount * 0.002;
@@ -141,16 +145,13 @@ function windowResized() {
 				<p>p5's error messages are often too vague, leaving users searching for help. 🙋</p>
 				<pre><code>🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
 </code></pre>
-				<p>Why not ask ChatGPT 4o? It excels at identifying the most common errors that beginners make: typos, missing
-					syntax, incorrect arguments, and more.</p>
 			</md>
 			<md id="md3-2">
-				<p>Run q5's <code>askAI()</code> function before code that isn't working as expected. 🤖</p>
+				<p>Run q5's <code>askAI()</code> before code that isn't working as expected. 🤖</p>
 				<pre><code>The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
 
 text('Hello!', 50, 50);
 </code></pre>
-				<p>Spend less time debugging and more time creating! 🐛</p>
 			</md>
 		</div>
 	</div>

@@ -4,12 +4,12 @@ Q5.modules.ai = ($) => {
 	};
 
 	$._aiErrorAssistance = async (e) => {
-		let askAI = e.message.includes('Ask AI ✨');
+		let askAI = e.message?.includes('Ask AI ✨');
 		if (!askAI) console.error(e);
 		if (Q5.disableFriendlyErrors) return;
 		if (askAI || !Q5.errorTolerant) noLoop();
-		let stackLines = e.stack.split('\n');
-		if (stackLines.length <= 1) return;
+		let stackLines = e.stack?.split('\n');
+		if (!e.stack || stackLines.length <= 1) return;
 
 		let idx = 1;
 		let sep = '(';

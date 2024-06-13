@@ -1,3 +1,4 @@
+/* Adds mobile device accelerometer and gyroscope input */
 Q5.modules.sensors = ($) => {
 	$.accelerationX = 0;
 	$.accelerationY = 0;

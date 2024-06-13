@@ -32,19 +32,15 @@ p5's error messages are often too vague, leaving users searching for help. 🙋
 🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
 ```
 
-Why not ask ChatGPT 4o? It excels at identifying the most common errors that beginners make: typos, missing syntax, incorrect arguments, and more.
-
 # 3-2
 
-Run q5's `askAI()` function before code that isn't working as expected. 🤖
+Run q5's `askAI()` before code that isn't working as expected. 🤖
 
 ```
 The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
 
 text('Hello!', 50, 50);
 ```
-
-Spend less time debugging and more time creating! 🐛
 
 # 4-0
 

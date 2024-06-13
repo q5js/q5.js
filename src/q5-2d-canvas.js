@@ -1,5 +1,5 @@
 Q5.modules.q2d_canvas = ($, p) => {
-	let _OffscreenCanvas =
+	$._OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
 			return document.createElement('canvas');
@@ -10,7 +10,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 			p.canvas = Q5._createNodeJSCanvas(100, 100);
 		}
 	} else if ($._scope == 'image' || $._scope == 'graphics') {
-		p.canvas = new _OffscreenCanvas(100, 100);
+		p.canvas = new $._OffscreenCanvas(100, 100);
 	}
 	if (!$.canvas) {
 		if (typeof document == 'object') {
@@ -96,6 +96,11 @@ Q5.modules.q2d_canvas = ($, p) => {
 		if ($._scope != 'image') {
 			let pd = $.displayDensity();
 			if ($._scope == 'graphics') pd = this._pixelDensity;
+			else if (window.IntersectionObserver) {
+				new IntersectionObserver((e) => {
+					c.visible = e[0].isIntersecting;
+				}).observe(c);
+			}
 			$.pixelDensity(Math.ceil(pd));
 		} else this._pixelDensity = 1;
 
@@ -123,7 +128,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 		let t = cloneCtx();
 		let o;
 		if ($.frameCount) {
-			o = new _OffscreenCanvas(c.width, c.height);
+			o = new $._OffscreenCanvas(c.width, c.height);
 			o.w = c.w;
 			o.h = c.h;
 			let oCtx = o.getContext('2d');

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta18
+ * @version 2.0-beta19
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -84,7 +84,6 @@ function Q5(scope, parent) {
 		p.frameCount++;
 		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
-		// clearBuff(); TODO
 		firstVertex = true;
 		if ($.ctx) $.ctx.save();
 		$.draw();
@@ -148,6 +147,12 @@ function Q5(scope, parent) {
 	if (scope == 'image') return;
 
 	// INIT
+
+	for (let k in Q5) {
+		if (k[1] != '_' && k[1] == k[1].toUpperCase()) {
+			$[k] = Q5[k];
+		}
+	}
 
 	if (scope == 'global') {
 		Object.assign(Q5, $);
@@ -223,7 +228,7 @@ function Q5(scope, parent) {
 
 	function _start() {
 		$._startDone = true;
-		if ($.preloadCount > 0) return raf(_start);
+		if ($._preloadCount > 0) return raf(_start);
 		millisStart = performance.now();
 		$.setup();
 		if ($.frameCount) return;
@@ -274,7 +279,7 @@ if (typeof document == 'object') {
 	});
 }
 Q5.modules.q2d_canvas = ($, p) => {
-	let _OffscreenCanvas =
+	$._OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
 			return document.createElement('canvas');
@@ -285,7 +290,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 			p.canvas = Q5._createNodeJSCanvas(100, 100);
 		}
 	} else if ($._scope == 'image' || $._scope == 'graphics') {
-		p.canvas = new _OffscreenCanvas(100, 100);
+		p.canvas = new $._OffscreenCanvas(100, 100);
 	}
 	if (!$.canvas) {
 		if (typeof document == 'object') {
@@ -371,6 +376,11 @@ Q5.modules.q2d_canvas = ($, p) => {
 		if ($._scope != 'image') {
 			let pd = $.displayDensity();
 			if ($._scope == 'graphics') pd = this._pixelDensity;
+			else if (window.IntersectionObserver) {
+				new IntersectionObserver((e) => {
+					c.visible = e[0].isIntersecting;
+				}).observe(c);
+			}
 			$.pixelDensity(Math.ceil(pd));
 		} else this._pixelDensity = 1;
 
@@ -398,7 +408,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 		let t = cloneCtx();
 		let o;
 		if ($.frameCount) {
-			o = new _OffscreenCanvas(c.width, c.height);
+			o = new $._OffscreenCanvas(c.width, c.height);
 			o.w = c.w;
 			o.h = c.h;
 			let oCtx = o.getContext('2d');
@@ -552,17 +562,6 @@ if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p
 	Q5.canvasOptions.colorSpace = 'srgb';
 } else Q5.supportsHDR = true;
 Q5.modules.q2d_drawing = ($) => {
-	$.THRESHOLD = 1;
-	$.GRAY = 2;
-	$.OPAQUE = 3;
-	$.INVERT = 4;
-	$.POSTERIZE = 5;
-	$.DILATE = 6;
-	$.ERODE = 7;
-	$.BLUR = 8;
-
-	if ($._scope == 'image') return;
-
 	$.CHORD = 0;
 	$.PIE = 1;
 	$.OPEN = 2;
@@ -684,7 +683,7 @@ Q5.modules.q2d_drawing = ($) => {
 		return x;
 	}
 
-	function arcImpl(x, y, w, h, start, stop, mode, detail) {
+	function arc(x, y, w, h, start, stop, mode, detail) {
 		if (!$._doFill && !$._doStroke) return;
 		let lo = normAng(start);
 		let hi = normAng(stop);
@@ -714,17 +713,17 @@ Q5.modules.q2d_drawing = ($) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
 		mode ??= $.PIE;
 		if ($._ellipseMode == $.CENTER) {
-			arcImpl(x, y, w, h, start, stop, mode, detail);
+			arc(x, y, w, h, start, stop, mode, detail);
 		} else if ($._ellipseMode == $.RADIUS) {
-			arcImpl(x, y, w * 2, h * 2, start, stop, mode, detail);
+			arc(x, y, w * 2, h * 2, start, stop, mode, detail);
 		} else if ($._ellipseMode == $.CORNER) {
-			arcImpl(x + w / 2, y + h / 2, w, h, start, stop, mode, detail);
+			arc(x + w / 2, y + h / 2, w, h, start, stop, mode, detail);
 		} else if ($._ellipseMode == $.CORNERS) {
-			arcImpl((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode, detail);
+			arc((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode, detail);
 		}
 	};
 
-	function ellipseImpl(x, y, w, h) {
+	function ellipse(x, y, w, h) {
 		if (!$._doFill && !$._doStroke) return;
 		if ($._da) {
 			x *= $._da;
@@ -739,24 +738,26 @@ Q5.modules.q2d_drawing = ($) => {
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
 		if ($._ellipseMode == $.CENTER) {
-			ellipseImpl(x, y, w, h);
+			ellipse(x, y, w, h);
 		} else if ($._ellipseMode == $.RADIUS) {
-			ellipseImpl(x, y, w * 2, h * 2);
+			ellipse(x, y, w * 2, h * 2);
 		} else if ($._ellipseMode == $.CORNER) {
-			ellipseImpl(x + w / 2, y + h / 2, w, h);
+			ellipse(x + w / 2, y + h / 2, w, h);
 		} else if ($._ellipseMode == $.CORNERS) {
-			ellipseImpl((x + w) / 2, (y + h) / 2, w - x, h - y);
+			ellipse((x + w) / 2, (y + h) / 2, w - x, h - y);
 		}
 	};
 	$.circle = (x, y, d) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			r *= $._da;
-		}
-		$.ctx.beginPath();
-		$.ctx.arc(x, y, d / 2, 0, $.TAU);
-		ink();
+		if ($._ellipseMode == $.CENTER) {
+			if ($._da) {
+				x *= $._da;
+				y *= $._da;
+				d *= $._da;
+			}
+			$.ctx.beginPath();
+			$.ctx.arc(x, y, d / 2, 0, $.TAU);
+			ink();
+		} else $.ellipse(x, y, d, d);
 	};
 	$.point = (x, y) => {
 		if (x.x) {
@@ -774,7 +775,7 @@ Q5.modules.q2d_drawing = ($) => {
 		$.ctx.fill();
 		$.ctx.restore();
 	};
-	function rectImpl(x, y, w, h) {
+	function rect(x, y, w, h) {
 		if ($._da) {
 			x *= $._da;
 			y *= $._da;
@@ -784,13 +785,13 @@ Q5.modules.q2d_drawing = ($) => {
 		if ($._doFill) $.ctx.fillRect(x, y, w, h);
 		if ($._doStroke) $.ctx.strokeRect(x, y, w, h);
 	}
-	function roundedRectImpl(x, y, w, h, tl, tr, br, bl) {
+	function roundedRect(x, y, w, h, tl, tr, br, bl) {
 		if (!$._doFill && !$._doStroke) return;
 		if (tl === undefined) {
-			return rectImpl(x, y, w, h);
+			return rect(x, y, w, h);
 		}
 		if (tr === undefined) {
-			return roundedRectImpl(x, y, w, h, tl, tl, tl, tl);
+			return roundedRect(x, y, w, h, tl, tl, tl, tl);
 		}
 		if ($._da) {
 			x *= $._da;
@@ -819,13 +820,13 @@ Q5.modules.q2d_drawing = ($) => {
 
 	$.rect = (x, y, w, h, tl, tr, br, bl) => {
 		if ($._rectMode == $.CENTER) {
-			roundedRectImpl(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
+			roundedRect(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
 		} else if ($._rectMode == $.RADIUS) {
-			roundedRectImpl(x - w, y - h, w * 2, h * 2, tl, tr, br, bl);
+			roundedRect(x - w, y - h, w * 2, h * 2, tl, tr, br, bl);
 		} else if ($._rectMode == $.CORNER) {
-			roundedRectImpl(x, y, w, h, tl, tr, br, bl);
+			roundedRect(x, y, w, h, tl, tr, br, bl);
 		} else if ($._rectMode == $.CORNERS) {
-			roundedRectImpl(x, y, w - x, h - y, tl, tr, br, bl);
+			roundedRect(x, y, w - x, h - y, tl, tr, br, bl);
 		}
 	};
 	$.square = (x, y, s, tl, tr, br, bl) => {
@@ -1050,29 +1051,11 @@ Q5.modules.q2d_drawing = ($) => {
 	};
 };
 Q5.modules.q2d_image = ($, p) => {
-	$.BLEND = 'source-over';
-	$.REMOVE = 'destination-out';
-	$.ADD = 'lighter';
-	$.DARKEST = 'darken';
-	$.LIGHTEST = 'lighten';
-	$.DIFFERENCE = 'difference';
-	$.SUBTRACT = 'subtract';
-	$.EXCLUSION = 'exclusion';
-	$.MULTIPLY = 'multiply';
-	$.SCREEN = 'screen';
-	$.REPLACE = 'copy';
-	$.OVERLAY = 'overlay';
-	$.HARD_LIGHT = 'hard-light';
-	$.SOFT_LIGHT = 'soft-light';
-	$.DODGE = 'color-dodge';
-	$.BURN = 'color-burn';
-
 	$._tint = null;
 
 	let imgData = null;
 	let tmpCtx = null;
 	let tmpCt2 = null;
-	let tmpBuf = null;
 
 	$.loadPixels = () => {
 		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
@@ -1086,7 +1069,7 @@ Q5.modules.q2d_image = ($, p) => {
 		h ??= w || $.canvas.height;
 		w ??= $.canvas.width;
 		if (tmpCtx == null) {
-			tmpCtx = new _OffscreenCanvas(w, h).getContext('2d', {
+			tmpCtx = new $._OffscreenCanvas(w, h).getContext('2d', {
 				colorSpace: $.canvas.colorSpace
 			});
 		}
@@ -1100,7 +1083,7 @@ Q5.modules.q2d_image = ($, p) => {
 		h ??= w || $.canvas.height;
 		w ??= $.canvas.width;
 		if (tmpCt2 == null) {
-			tmpCt2 = new _OffscreenCanvas(w, h).getContext('2d', {
+			tmpCt2 = new $._OffscreenCanvas(w, h).getContext('2d', {
 				colorSpace: $.canvas.colorSpace
 			});
 		}
@@ -1110,181 +1093,13 @@ Q5.modules.q2d_image = ($, p) => {
 		}
 	}
 
-	function makeTmpBuf() {
-		let l = $.canvas.width * $.canvas.height * 4;
-		if (!tmpBuf || l != tmpBuf.length) {
-			tmpBuf = new Uint8ClampedArray(l);
-		}
-	}
+	$._softFilter = () => {
+		throw 'Load q5-2d-soft-filters.js to use software filters.';
+	};
 
-	function initSoftFilters() {
-		$._filters = [];
-		$._filters[$.THRESHOLD] = (data, thresh) => {
-			if (thresh === undefined) thresh = 127.5;
-			else thresh *= 255;
-			for (let i = 0; i < data.length; i += 4) {
-				const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-				data[i] = data[i + 1] = data[i + 2] = gray >= thresh ? 255 : 0;
-			}
-		};
-		$._filters[$.GRAY] = (data) => {
-			for (let i = 0; i < data.length; i += 4) {
-				const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-				data[i] = data[i + 1] = data[i + 2] = gray;
-			}
-		};
-		$._filters[$.OPAQUE] = (data) => {
-			for (let i = 0; i < data.length; i += 4) {
-				data[i + 3] = 255;
-			}
-		};
-		$._filters[$.INVERT] = (data) => {
-			for (let i = 0; i < data.length; i += 4) {
-				data[i] = 255 - data[i];
-				data[i + 1] = 255 - data[i + 1];
-				data[i + 2] = 255 - data[i + 2];
-			}
-		};
-		$._filters[$.POSTERIZE] = (data, lvl = 4) => {
-			let lvl1 = lvl - 1;
-			for (let i = 0; i < data.length; i += 4) {
-				data[i] = (((data[i] * lvl) >> 8) * 255) / lvl1;
-				data[i + 1] = (((data[i + 1] * lvl) >> 8) * 255) / lvl1;
-				data[i + 2] = (((data[i + 2] * lvl) >> 8) * 255) / lvl1;
-			}
-		};
-		$._filters[$.DILATE] = (data) => {
-			makeTmpBuf();
-			tmpBuf.set(data);
-			let [w, h] = [$.canvas.width, $.canvas.height];
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let l = 4 * Math.max(j - 1, 0);
-					let r = 4 * Math.min(j + 1, w - 1);
-					let t = 4 * Math.max(i - 1, 0) * w;
-					let b = 4 * Math.min(i + 1, h - 1) * w;
-					let oi = 4 * i * w;
-					let oj = 4 * j;
-					for (let k = 0; k < 4; k++) {
-						let kt = k + t;
-						let kb = k + b;
-						let ko = k + oi;
-						data[oi + oj + k] = Math.max(
-							/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
-							tmpBuf[ko + l],
-							tmpBuf[ko + oj],
-							tmpBuf[ko + r],
-							/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
-						);
-					}
-				}
-			}
-		};
-		$._filters[$.ERODE] = (data) => {
-			makeTmpBuf();
-			tmpBuf.set(data);
-			let [w, h] = [$.canvas.width, $.canvas.height];
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let l = 4 * Math.max(j - 1, 0);
-					let r = 4 * Math.min(j + 1, w - 1);
-					let t = 4 * Math.max(i - 1, 0) * w;
-					let b = 4 * Math.min(i + 1, h - 1) * w;
-					let oi = 4 * i * w;
-					let oj = 4 * j;
-					for (let k = 0; k < 4; k++) {
-						let kt = k + t;
-						let kb = k + b;
-						let ko = k + oi;
-						data[oi + oj + k] = Math.min(
-							/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
-							tmpBuf[ko + l],
-							tmpBuf[ko + oj],
-							tmpBuf[ko + r],
-							/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
-						);
-					}
-				}
-			}
-		};
-		$._filters[$.BLUR] = (data, rad) => {
-			rad = rad || 1;
-			rad = Math.floor(rad * $._pixelDensity);
-			makeTmpBuf();
-			tmpBuf.set(data);
-
-			let ksize = rad * 2 + 1;
-
-			function gauss1d(ksize) {
-				let im = new Float32Array(ksize);
-				let sigma = 0.3 * rad + 0.8;
-				let ss2 = sigma * sigma * 2;
-				for (let i = 0; i < ksize; i++) {
-					let x = i - ksize / 2;
-					let z = Math.exp(-(x * x) / ss2) / (2.5066282746 * sigma);
-					im[i] = z;
-				}
-				return im;
-			}
-
-			let kern = gauss1d(ksize);
-			let [w, h] = [$.canvas.width, $.canvas.height];
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let s0 = 0,
-						s1 = 0,
-						s2 = 0,
-						s3 = 0;
-					for (let k = 0; k < ksize; k++) {
-						let jk = Math.min(Math.max(j - rad + k, 0), w - 1);
-						let idx = 4 * (i * w + jk);
-						s0 += tmpBuf[idx] * kern[k];
-						s1 += tmpBuf[idx + 1] * kern[k];
-						s2 += tmpBuf[idx + 2] * kern[k];
-						s3 += tmpBuf[idx + 3] * kern[k];
-					}
-					let idx = 4 * (i * w + j);
-					data[idx] = s0;
-					data[idx + 1] = s1;
-					data[idx + 2] = s2;
-					data[idx + 3] = s3;
-				}
-			}
-			tmpBuf.set(data);
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let s0 = 0,
-						s1 = 0,
-						s2 = 0,
-						s3 = 0;
-					for (let k = 0; k < ksize; k++) {
-						let ik = Math.min(Math.max(i - rad + k, 0), h - 1);
-						let idx = 4 * (ik * w + j);
-						s0 += tmpBuf[idx] * kern[k];
-						s1 += tmpBuf[idx + 1] * kern[k];
-						s2 += tmpBuf[idx + 2] * kern[k];
-						s3 += tmpBuf[idx + 3] * kern[k];
-					}
-					let idx = 4 * (i * w + j);
-					data[idx] = s0;
-					data[idx + 1] = s1;
-					data[idx + 2] = s2;
-					data[idx + 3] = s3;
-				}
-			}
-		};
-	}
-
-	function softFilter(typ, x) {
-		if (!$._filters) initSoftFilters();
-		let imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
-		$._filters[typ](imgData.data, x);
-		$.ctx.putImageData(imgData, 0, 0);
-	}
-
-	function nativeFilter(filtstr) {
+	function nativeFilter(filt) {
 		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.filter = filtstr;
+		tmpCtx.filter = filt;
 		tmpCtx.drawImage($.canvas, 0, 0);
 		$.ctx.save();
 		$.ctx.resetTransform();
@@ -1294,18 +1109,18 @@ Q5.modules.q2d_image = ($, p) => {
 	}
 
 	$.filter = (typ, x) => {
-		if (!$.ctx.filter) return softFilter(typ, x);
+		if (!$.ctx.filter) return $._softFilter(typ, x);
 		makeTmpCtx();
 		if (typeof typ == 'string') {
 			nativeFilter(typ);
-		} else if (typ == $.THRESHOLD) {
+		} else if (typ == Q5.THRESHOLD) {
 			x ??= 0.5;
 			x = Math.max(x, 0.00001);
 			let b = Math.floor((0.5 / x) * 100);
 			nativeFilter(`saturate(0%) brightness(${b}%) contrast(1000000%)`);
-		} else if (typ == $.GRAY) {
+		} else if (typ == Q5.GRAY) {
 			nativeFilter(`saturate(0%)`);
-		} else if (typ == $.OPAQUE) {
+		} else if (typ == Q5.OPAQUE) {
 			tmpCtx.fillStyle = 'black';
 			tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
 			tmpCtx.drawImage($.canvas, 0, 0);
@@ -1313,12 +1128,12 @@ Q5.modules.q2d_image = ($, p) => {
 			$.ctx.resetTransform();
 			$.ctx.drawImage(tmpCtx.canvas, 0, 0);
 			$.ctx.restore();
-		} else if (typ == $.INVERT) {
+		} else if (typ == Q5.INVERT) {
 			nativeFilter(`invert(100%)`);
-		} else if (typ == $.BLUR) {
+		} else if (typ == Q5.BLUR) {
 			nativeFilter(`blur(${Math.ceil((x * $._pixelDensity) / 1) || 1}px)`);
 		} else {
-			softFilter(typ, x);
+			$._softFilter(typ, x);
 		}
 	};
 
@@ -1621,6 +1436,208 @@ class _Q5Image extends Q5 {
 }
 
 Q5.Image ??= _Q5Image;
+
+Q5.THRESHOLD = 1;
+Q5.GRAY = 2;
+Q5.OPAQUE = 3;
+Q5.INVERT = 4;
+Q5.POSTERIZE = 5;
+Q5.DILATE = 6;
+Q5.ERODE = 7;
+Q5.BLUR = 8;
+
+Q5.BLEND = 'source-over';
+Q5.REMOVE = 'destination-out';
+Q5.ADD = 'lighter';
+Q5.DARKEST = 'darken';
+Q5.LIGHTEST = 'lighten';
+Q5.DIFFERENCE = 'difference';
+Q5.SUBTRACT = 'subtract';
+Q5.EXCLUSION = 'exclusion';
+Q5.MULTIPLY = 'multiply';
+Q5.SCREEN = 'screen';
+Q5.REPLACE = 'copy';
+Q5.OVERLAY = 'overlay';
+Q5.HARD_LIGHT = 'hard-light';
+Q5.SOFT_LIGHT = 'soft-light';
+Q5.DODGE = 'color-dodge';
+Q5.BURN = 'color-burn';
+/* software implementation of image filters */
+Q5.modules.q2d_soft_filters = ($) => {
+	let tmpBuf = null;
+
+	function makeTmpBuf() {
+		let l = $.canvas.width * $.canvas.height * 4;
+		if (!tmpBuf || l != tmpBuf.length) {
+			tmpBuf = new Uint8ClampedArray(l);
+		}
+	}
+
+	function initSoftFilters() {
+		$._filters = [];
+		$._filters[Q5.THRESHOLD] = (data, thresh) => {
+			if (thresh === undefined) thresh = 127.5;
+			else thresh *= 255;
+			for (let i = 0; i < data.length; i += 4) {
+				const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+				data[i] = data[i + 1] = data[i + 2] = gray >= thresh ? 255 : 0;
+			}
+		};
+		$._filters[Q5.GRAY] = (data) => {
+			for (let i = 0; i < data.length; i += 4) {
+				const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+				data[i] = data[i + 1] = data[i + 2] = gray;
+			}
+		};
+		$._filters[Q5.OPAQUE] = (data) => {
+			for (let i = 0; i < data.length; i += 4) {
+				data[i + 3] = 255;
+			}
+		};
+		$._filters[Q5.INVERT] = (data) => {
+			for (let i = 0; i < data.length; i += 4) {
+				data[i] = 255 - data[i];
+				data[i + 1] = 255 - data[i + 1];
+				data[i + 2] = 255 - data[i + 2];
+			}
+		};
+		$._filters[Q5.POSTERIZE] = (data, lvl = 4) => {
+			let lvl1 = lvl - 1;
+			for (let i = 0; i < data.length; i += 4) {
+				data[i] = (((data[i] * lvl) >> 8) * 255) / lvl1;
+				data[i + 1] = (((data[i + 1] * lvl) >> 8) * 255) / lvl1;
+				data[i + 2] = (((data[i + 2] * lvl) >> 8) * 255) / lvl1;
+			}
+		};
+		$._filters[Q5.DILATE] = (data) => {
+			makeTmpBuf();
+			tmpBuf.set(data);
+			let [w, h] = [$.canvas.width, $.canvas.height];
+			for (let i = 0; i < h; i++) {
+				for (let j = 0; j < w; j++) {
+					let l = 4 * Math.max(j - 1, 0);
+					let r = 4 * Math.min(j + 1, w - 1);
+					let t = 4 * Math.max(i - 1, 0) * w;
+					let b = 4 * Math.min(i + 1, h - 1) * w;
+					let oi = 4 * i * w;
+					let oj = 4 * j;
+					for (let k = 0; k < 4; k++) {
+						let kt = k + t;
+						let kb = k + b;
+						let ko = k + oi;
+						data[oi + oj + k] = Math.max(
+							/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
+							tmpBuf[ko + l],
+							tmpBuf[ko + oj],
+							tmpBuf[ko + r],
+							/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
+						);
+					}
+				}
+			}
+		};
+		$._filters[Q5.ERODE] = (data) => {
+			makeTmpBuf();
+			tmpBuf.set(data);
+			let [w, h] = [$.canvas.width, $.canvas.height];
+			for (let i = 0; i < h; i++) {
+				for (let j = 0; j < w; j++) {
+					let l = 4 * Math.max(j - 1, 0);
+					let r = 4 * Math.min(j + 1, w - 1);
+					let t = 4 * Math.max(i - 1, 0) * w;
+					let b = 4 * Math.min(i + 1, h - 1) * w;
+					let oi = 4 * i * w;
+					let oj = 4 * j;
+					for (let k = 0; k < 4; k++) {
+						let kt = k + t;
+						let kb = k + b;
+						let ko = k + oi;
+						data[oi + oj + k] = Math.min(
+							/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
+							tmpBuf[ko + l],
+							tmpBuf[ko + oj],
+							tmpBuf[ko + r],
+							/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
+						);
+					}
+				}
+			}
+		};
+		$._filters[Q5.BLUR] = (data, rad) => {
+			rad = rad || 1;
+			rad = Math.floor(rad * $._pixelDensity);
+			makeTmpBuf();
+			tmpBuf.set(data);
+
+			let ksize = rad * 2 + 1;
+
+			function gauss1d(ksize) {
+				let im = new Float32Array(ksize);
+				let sigma = 0.3 * rad + 0.8;
+				let ss2 = sigma * sigma * 2;
+				for (let i = 0; i < ksize; i++) {
+					let x = i - ksize / 2;
+					let z = Math.exp(-(x * x) / ss2) / (2.5066282746 * sigma);
+					im[i] = z;
+				}
+				return im;
+			}
+
+			let kern = gauss1d(ksize);
+			let [w, h] = [$.canvas.width, $.canvas.height];
+			for (let i = 0; i < h; i++) {
+				for (let j = 0; j < w; j++) {
+					let s0 = 0,
+						s1 = 0,
+						s2 = 0,
+						s3 = 0;
+					for (let k = 0; k < ksize; k++) {
+						let jk = Math.min(Math.max(j - rad + k, 0), w - 1);
+						let idx = 4 * (i * w + jk);
+						s0 += tmpBuf[idx] * kern[k];
+						s1 += tmpBuf[idx + 1] * kern[k];
+						s2 += tmpBuf[idx + 2] * kern[k];
+						s3 += tmpBuf[idx + 3] * kern[k];
+					}
+					let idx = 4 * (i * w + j);
+					data[idx] = s0;
+					data[idx + 1] = s1;
+					data[idx + 2] = s2;
+					data[idx + 3] = s3;
+				}
+			}
+			tmpBuf.set(data);
+			for (let i = 0; i < h; i++) {
+				for (let j = 0; j < w; j++) {
+					let s0 = 0,
+						s1 = 0,
+						s2 = 0,
+						s3 = 0;
+					for (let k = 0; k < ksize; k++) {
+						let ik = Math.min(Math.max(i - rad + k, 0), h - 1);
+						let idx = 4 * (ik * w + j);
+						s0 += tmpBuf[idx] * kern[k];
+						s1 += tmpBuf[idx + 1] * kern[k];
+						s2 += tmpBuf[idx + 2] * kern[k];
+						s3 += tmpBuf[idx + 3] * kern[k];
+					}
+					let idx = 4 * (i * w + j);
+					data[idx] = s0;
+					data[idx + 1] = s1;
+					data[idx + 2] = s2;
+					data[idx + 3] = s3;
+				}
+			}
+		};
+	}
+
+	$._softFilter = (typ, x) => {
+		if (!$._filters) initSoftFilters();
+		let imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		$._filters[typ](imgData.data, x);
+		$.ctx.putImageData(imgData, 0, 0);
+	};
+};
 Q5.modules.q2d_text = ($, p) => {
 	$.NORMAL = 'normal';
 	$.ITALIC = 'italic';
@@ -1688,7 +1705,7 @@ Q5.modules.q2d_text = ($, p) => {
 		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
-	$._textCache = true;
+	$._textCache = !!Q5.Image;
 	$._TimedCache = class extends Map {
 		constructor() {
 			super();
@@ -1843,12 +1860,12 @@ Q5.modules.ai = ($) => {
 	};
 
 	$._aiErrorAssistance = async (e) => {
-		let askAI = e.message.includes('Ask AI ✨');
+		let askAI = e.message?.includes('Ask AI ✨');
 		if (!askAI) console.error(e);
 		if (Q5.disableFriendlyErrors) return;
 		if (askAI || !Q5.errorTolerant) noLoop();
-		let stackLines = e.stack.split('\n');
-		if (stackLines.length <= 1) return;
+		let stackLines = e.stack?.split('\n');
+		if (!e.stack || stackLines.length <= 1) return;
 
 		let idx = 1;
 		let sep = '(';

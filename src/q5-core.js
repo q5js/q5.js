@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta18
+ * @version 2.0-beta19
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  */
@@ -84,7 +84,6 @@ function Q5(scope, parent) {
 		p.frameCount++;
 		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
-		// clearBuff(); TODO
 		firstVertex = true;
 		if ($.ctx) $.ctx.save();
 		$.draw();
@@ -148,6 +147,12 @@ function Q5(scope, parent) {
 	if (scope == 'image') return;
 
 	// INIT
+
+	for (let k in Q5) {
+		if (k[1] != '_' && k[1] == k[1].toUpperCase()) {
+			$[k] = Q5[k];
+		}
+	}
 
 	if (scope == 'global') {
 		Object.assign(Q5, $);
@@ -223,7 +228,7 @@ function Q5(scope, parent) {
 
 	function _start() {
 		$._startDone = true;
-		if ($.preloadCount > 0) return raf(_start);
+		if ($._preloadCount > 0) return raf(_start);
 		millisStart = performance.now();
 		$.setup();
 		if ($.frameCount) return;

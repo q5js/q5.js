@@ -1,6 +1,2 @@
-Q5.modules.dom = ($) => {
-	$.Element = function (a) {
-		this.elt = a;
-	};
-	$._elements = [];
-};
+/* help wanted! */
+Q5.modules.dom = ($) => {};

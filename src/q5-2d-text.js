@@ -65,7 +65,7 @@ Q5.modules.q2d_text = ($, p) => {
 		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
-	$._textCache = true;
+	$._textCache = !!Q5.Image;
 	$._TimedCache = class extends Map {
 		constructor() {
 			super();
