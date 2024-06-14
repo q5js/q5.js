@@ -24,6 +24,23 @@ Q5.modules.q2d_drawing = ($) => {
 	$.LANDSCAPE = 'landscape';
 	$.PORTRAIT = 'portrait';
 
+	$.BLEND = 'source-over';
+	$.REMOVE = 'destination-out';
+	$.ADD = 'lighter';
+	$.DARKEST = 'darken';
+	$.LIGHTEST = 'lighten';
+	$.DIFFERENCE = 'difference';
+	$.SUBTRACT = 'subtract';
+	$.EXCLUSION = 'exclusion';
+	$.MULTIPLY = 'multiply';
+	$.SCREEN = 'screen';
+	$.REPLACE = 'copy';
+	$.OVERLAY = 'overlay';
+	$.HARD_LIGHT = 'hard-light';
+	$.SOFT_LIGHT = 'soft-light';
+	$.DODGE = 'color-dodge';
+	$.BURN = 'color-burn';
+
 	$._doStroke = true;
 	$._doFill = true;
 	$._strokeSet = false;
@@ -86,7 +103,7 @@ Q5.modules.q2d_drawing = ($) => {
 	};
 
 	$.background = function (c) {
-		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
+		if (c.canvas) return $.image(c, 0, 0, $.width, $.height);
 		$.ctx.save();
 		$.ctx.resetTransform();
 		if (Q5.Color) {

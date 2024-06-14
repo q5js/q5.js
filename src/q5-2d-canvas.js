@@ -61,14 +61,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 		else document.addEventListener('DOMContentLoaded', appendCanvas);
 	}
 
-	$._defaultStyle = () => {
-		$.ctx.fillStyle = 'white';
-		$.ctx.strokeStyle = 'black';
-		$.ctx.lineCap = 'round';
-		$.ctx.lineJoin = 'miter';
-		$.ctx.textAlign = 'left';
-	};
-
 	$._adjustDisplay = () => {
 		if (c.style) {
 			c.style.width = c.w + 'px';
@@ -83,7 +75,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 		p.height = c.height = c.h = h || window.innerHeight;
 		c.hw = w / 2;
 		c.hh = h / 2;
-		$._da = 0;
 		c.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
@@ -91,7 +82,10 @@ Q5.modules.q2d_canvas = ($, p) => {
 		p.ctx = p.drawingContext = c.getContext('2d', opt);
 		Object.assign(c, opt);
 		if ($._colorMode == 'rgb') $.colorMode('rgb');
-		$._defaultStyle();
+		if ($._scope != 'image') {
+			$._defaultStyle();
+			$._da = 0;
+		}
 		$.ctx.save();
 		if ($._scope != 'image') {
 			let pd = $.displayDensity();
@@ -111,6 +105,14 @@ Q5.modules.q2d_canvas = ($, p) => {
 	$._createCanvas = $.createCanvas;
 
 	if ($._scope == 'image') return;
+
+	$._defaultStyle = () => {
+		$.ctx.fillStyle = 'white';
+		$.ctx.strokeStyle = 'black';
+		$.ctx.lineCap = 'round';
+		$.ctx.lineJoin = 'miter';
+		$.ctx.textAlign = 'left';
+	};
 
 	function cloneCtx() {
 		let t = {};
@@ -159,14 +161,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 		_resizeCanvas(w, h);
 	};
 
-	$.createGraphics = function (w, h, opt) {
-		let g = new Q5('graphics');
-		opt ??= {};
-		opt.alpha ??= true;
-		g._createCanvas.call($, w, h, opt);
-		return g;
-	};
-
 	$._pixelDensity = 1;
 	$.displayDensity = () => window.devicePixelRatio;
 	$.pixelDensity = (v) => {
@@ -175,6 +169,8 @@ Q5.modules.q2d_canvas = ($, p) => {
 		_resizeCanvas(c.w, c.h);
 		return v;
 	};
+
+	if ($._scope == 'image') return;
 
 	$.fullscreen = (v) => {
 		if (v === undefined) return document.fullscreenElement;
@@ -260,6 +256,14 @@ Q5.modules.q2d_canvas = ($, p) => {
 		vid.style.zIndex = -1000;
 		document.body.append(vid);
 		return vid;
+	};
+
+	$.createGraphics = function (w, h, opt) {
+		let g = new Q5('graphics');
+		opt ??= {};
+		opt.alpha ??= true;
+		g._createCanvas.call($, w, h, opt);
+		return g;
 	};
 
 	if (window && $._scope != 'graphics') {

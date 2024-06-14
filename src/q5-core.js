@@ -1,11 +1,8 @@
 /**
  * q5.js
- * @version 2.0-beta20
+ * @version 2.0-beta21
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
- */
-
-/**
  * @class Q5
  */
 function Q5(scope, parent) {
@@ -14,10 +11,11 @@ function Q5(scope, parent) {
 	$._scope = scope;
 	$._parent = parent;
 	$._preloadCount = 0;
-	if (!scope) scope = 'global';
+
+	scope ??= 'global';
 	if (scope == 'auto') {
 		if (!(window.setup || window.draw)) return;
-		else scope = 'global';
+		scope = 'global';
 	}
 	let globalScope;
 	if (scope == 'global') {
@@ -33,8 +31,7 @@ function Q5(scope, parent) {
 		}
 	});
 
-	$.ctx = $.drawingContext = null;
-	$.canvas = null;
+	$.canvas = $.ctx = $.drawingContext = null;
 	$.pixels = [];
 	let looper = null;
 
@@ -139,12 +136,8 @@ function Q5(scope, parent) {
 	$.describe = () => {};
 
 	for (let m in Q5.modules) {
-		if (scope != 'image' || Q5.imageModules.includes(m)) {
-			Q5.modules[m]($, p);
-		}
+		Q5.modules[m]($, p);
 	}
-
-	if (scope == 'image') return;
 
 	// INIT
 
@@ -159,7 +152,9 @@ function Q5(scope, parent) {
 		delete Q5.Q5;
 	}
 
-	for (let m of Q5.prototype._methods.init) m.call($);
+	for (let m of Q5.prototype._methods.init) {
+		m.call($);
+	}
 
 	for (let [n, fn] of Object.entries(Q5.prototype)) {
 		if (n[0] != '_' && typeof $[n] == 'function') $[n] = fn.bind($);
@@ -226,11 +221,11 @@ function Q5(scope, parent) {
 
 	$._startDone = false;
 
-	function _start() {
+	async function _start() {
 		$._startDone = true;
 		if ($._preloadCount > 0) return raf(_start);
 		millisStart = performance.now();
-		$.setup();
+		await $.setup();
 		if ($.frameCount) return;
 		if ($.ctx === null) $.createCanvas(100, 100);
 		$._setupDone = true;
@@ -250,7 +245,6 @@ function Q5(scope, parent) {
 }
 
 Q5.modules = {};
-Q5.imageModules = ['q2d_canvas', 'q2d_image'];
 
 Q5._nodejs = typeof process == 'object';
 

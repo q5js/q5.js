@@ -1,11 +1,8 @@
 /**
  * q5.js
- * @version 2.0-beta20
+ * @version 2.0-beta21
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
- */
-
-/**
  * @class Q5
  */
 function Q5(scope, parent) {
@@ -14,10 +11,11 @@ function Q5(scope, parent) {
 	$._scope = scope;
 	$._parent = parent;
 	$._preloadCount = 0;
-	if (!scope) scope = 'global';
+
+	scope ??= 'global';
 	if (scope == 'auto') {
 		if (!(window.setup || window.draw)) return;
-		else scope = 'global';
+		scope = 'global';
 	}
 	let globalScope;
 	if (scope == 'global') {
@@ -33,8 +31,7 @@ function Q5(scope, parent) {
 		}
 	});
 
-	$.ctx = $.drawingContext = null;
-	$.canvas = null;
+	$.canvas = $.ctx = $.drawingContext = null;
 	$.pixels = [];
 	let looper = null;
 
@@ -139,12 +136,8 @@ function Q5(scope, parent) {
 	$.describe = () => {};
 
 	for (let m in Q5.modules) {
-		if (scope != 'image' || Q5.imageModules.includes(m)) {
-			Q5.modules[m]($, p);
-		}
+		Q5.modules[m]($, p);
 	}
-
-	if (scope == 'image') return;
 
 	// INIT
 
@@ -159,7 +152,9 @@ function Q5(scope, parent) {
 		delete Q5.Q5;
 	}
 
-	for (let m of Q5.prototype._methods.init) m.call($);
+	for (let m of Q5.prototype._methods.init) {
+		m.call($);
+	}
 
 	for (let [n, fn] of Object.entries(Q5.prototype)) {
 		if (n[0] != '_' && typeof $[n] == 'function') $[n] = fn.bind($);
@@ -226,11 +221,11 @@ function Q5(scope, parent) {
 
 	$._startDone = false;
 
-	function _start() {
+	async function _start() {
 		$._startDone = true;
 		if ($._preloadCount > 0) return raf(_start);
 		millisStart = performance.now();
-		$.setup();
+		await $.setup();
 		if ($.frameCount) return;
 		if ($.ctx === null) $.createCanvas(100, 100);
 		$._setupDone = true;
@@ -250,7 +245,6 @@ function Q5(scope, parent) {
 }
 
 Q5.modules = {};
-Q5.imageModules = ['q2d_canvas', 'q2d_image'];
 
 Q5._nodejs = typeof process == 'object';
 
@@ -341,14 +335,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 		else document.addEventListener('DOMContentLoaded', appendCanvas);
 	}
 
-	$._defaultStyle = () => {
-		$.ctx.fillStyle = 'white';
-		$.ctx.strokeStyle = 'black';
-		$.ctx.lineCap = 'round';
-		$.ctx.lineJoin = 'miter';
-		$.ctx.textAlign = 'left';
-	};
-
 	$._adjustDisplay = () => {
 		if (c.style) {
 			c.style.width = c.w + 'px';
@@ -363,7 +349,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 		p.height = c.height = c.h = h || window.innerHeight;
 		c.hw = w / 2;
 		c.hh = h / 2;
-		$._da = 0;
 		c.renderer = '2d';
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (options) Object.assign(opt, options);
@@ -371,7 +356,10 @@ Q5.modules.q2d_canvas = ($, p) => {
 		p.ctx = p.drawingContext = c.getContext('2d', opt);
 		Object.assign(c, opt);
 		if ($._colorMode == 'rgb') $.colorMode('rgb');
-		$._defaultStyle();
+		if ($._scope != 'image') {
+			$._defaultStyle();
+			$._da = 0;
+		}
 		$.ctx.save();
 		if ($._scope != 'image') {
 			let pd = $.displayDensity();
@@ -391,6 +379,14 @@ Q5.modules.q2d_canvas = ($, p) => {
 	$._createCanvas = $.createCanvas;
 
 	if ($._scope == 'image') return;
+
+	$._defaultStyle = () => {
+		$.ctx.fillStyle = 'white';
+		$.ctx.strokeStyle = 'black';
+		$.ctx.lineCap = 'round';
+		$.ctx.lineJoin = 'miter';
+		$.ctx.textAlign = 'left';
+	};
 
 	function cloneCtx() {
 		let t = {};
@@ -439,14 +435,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 		_resizeCanvas(w, h);
 	};
 
-	$.createGraphics = function (w, h, opt) {
-		let g = new Q5('graphics');
-		opt ??= {};
-		opt.alpha ??= true;
-		g._createCanvas.call($, w, h, opt);
-		return g;
-	};
-
 	$._pixelDensity = 1;
 	$.displayDensity = () => window.devicePixelRatio;
 	$.pixelDensity = (v) => {
@@ -455,6 +443,8 @@ Q5.modules.q2d_canvas = ($, p) => {
 		_resizeCanvas(c.w, c.h);
 		return v;
 	};
+
+	if ($._scope == 'image') return;
 
 	$.fullscreen = (v) => {
 		if (v === undefined) return document.fullscreenElement;
@@ -542,6 +532,14 @@ Q5.modules.q2d_canvas = ($, p) => {
 		return vid;
 	};
 
+	$.createGraphics = function (w, h, opt) {
+		let g = new Q5('graphics');
+		opt ??= {};
+		opt.alpha ??= true;
+		g._createCanvas.call($, w, h, opt);
+		return g;
+	};
+
 	if (window && $._scope != 'graphics') {
 		window.addEventListener('resize', () => {
 			$._shouldResize = true;
@@ -586,6 +584,23 @@ Q5.modules.q2d_drawing = ($) => {
 
 	$.LANDSCAPE = 'landscape';
 	$.PORTRAIT = 'portrait';
+
+	$.BLEND = 'source-over';
+	$.REMOVE = 'destination-out';
+	$.ADD = 'lighter';
+	$.DARKEST = 'darken';
+	$.LIGHTEST = 'lighten';
+	$.DIFFERENCE = 'difference';
+	$.SUBTRACT = 'subtract';
+	$.EXCLUSION = 'exclusion';
+	$.MULTIPLY = 'multiply';
+	$.SCREEN = 'screen';
+	$.REPLACE = 'copy';
+	$.OVERLAY = 'overlay';
+	$.HARD_LIGHT = 'hard-light';
+	$.SOFT_LIGHT = 'soft-light';
+	$.DODGE = 'color-dodge';
+	$.BURN = 'color-burn';
 
 	$._doStroke = true;
 	$._doFill = true;
@@ -649,7 +664,7 @@ Q5.modules.q2d_drawing = ($) => {
 	};
 
 	$.background = function (c) {
-		if (c._q5) return $.image(c, 0, 0, $.width, $.height);
+		if (c.canvas) return $.image(c, 0, 0, $.width, $.height);
 		$.ctx.save();
 		$.ctx.resetTransform();
 		if (Q5.Color) {
@@ -1051,19 +1066,14 @@ Q5.modules.q2d_drawing = ($) => {
 	};
 };
 Q5.modules.q2d_image = ($, p) => {
-	$._tint = null;
+	$.createImage = (w, h, opt) => {
+		return new Q5.Image(w, h, opt);
+	};
 
+	$._tint = null;
 	let imgData = null;
 	let tmpCtx = null;
 	let tmpCt2 = null;
-
-	$.loadPixels = () => {
-		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
-		p.pixels = imgData.data;
-	};
-	$.updatePixels = () => {
-		if (imgData != null) $.ctx.putImageData(imgData, 0, 0);
-	};
 
 	function makeTmpCtx(w, h) {
 		h ??= w || $.canvas.height;
@@ -1179,83 +1189,6 @@ Q5.modules.q2d_image = ($, p) => {
 		return $.get(left, top, right - left + 1, bottom - top + 1);
 	};
 
-	$.get = (x, y, w, h) => {
-		let pd = $._pixelDensity || 1;
-		if (x !== undefined && w === undefined) {
-			let c = $.ctx.getImageData(x * pd, y * pd, 1, 1).data;
-			return new $.Color(c[0], c[1], c[2], c[3] / 255);
-		}
-		x = (x || 0) * pd;
-		y = (y || 0) * pd;
-		let _w = (w = w || $.width);
-		let _h = (h = h || $.height);
-		w *= pd;
-		h *= pd;
-		let img = $.createImage(w, h);
-		let imgData = $.ctx.getImageData(x, y, w, h);
-		img.ctx.putImageData(imgData, 0, 0);
-		img._pixelDensity = pd;
-		img.width = _w;
-		img.height = _h;
-		return img;
-	};
-
-	$.set = (x, y, c) => {
-		if (c._q5) {
-			let old = $._tint;
-			$._tint = null;
-			$.image(c, x, y);
-			$._tint = old;
-			return;
-		}
-		if (!$.pixels.length) $.loadPixels();
-		let mod = $._pixelDensity || 1;
-		for (let i = 0; i < mod; i++) {
-			for (let j = 0; j < mod; j++) {
-				let idx = 4 * ((y * mod + i) * $.canvas.width + x * mod + j);
-				$.pixels[idx] = c.r ?? c.l;
-				$.pixels[idx + 1] = c.g ?? c.c;
-				$.pixels[idx + 2] = c.b ?? c.h;
-				$.pixels[idx + 3] = c.a;
-			}
-		}
-	};
-
-	$.tinted = function (col) {
-		let alpha = col.a;
-		col.a = 255;
-		makeTmpCtx();
-		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.fillStyle = col.toString();
-		tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.globalCompositeOperation = 'multiply';
-		tmpCtx.drawImage($.ctx.canvas, 0, 0);
-		tmpCtx.globalCompositeOperation = 'source-over';
-
-		$.ctx.save();
-		$.ctx.resetTransform();
-		let old = $.ctx.globalCompositeOperation;
-		$.ctx.globalCompositeOperation = 'source-in';
-		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
-		$.ctx.globalCompositeOperation = old;
-		$.ctx.restore();
-
-		tmpCtx.globalAlpha = alpha / 255;
-		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
-		tmpCtx.drawImage($.ctx.canvas, 0, 0);
-		tmpCtx.globalAlpha = 1;
-
-		$.ctx.save();
-		$.ctx.resetTransform();
-		$.ctx.clearRect(0, 0, $.ctx.canvas.width, $.ctx.canvas.height);
-		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
-		$.ctx.restore();
-	};
-	$.tint = function (c) {
-		$._tint = c._q5Color ? c : $.color(...arguments);
-	};
-	$.noTint = () => ($._tint = null);
-
 	$.mask = (img) => {
 		$.ctx.save();
 		$.ctx.resetTransform();
@@ -1309,20 +1242,99 @@ Q5.modules.q2d_image = ($, p) => {
 			$._save(a, b[0], b.at(-1));
 		} else $._save(a);
 	};
-	$.canvas.save = $.save;
-	$.saveCanvas = $.save;
 
-	$.createImage = (w, h, opt) => {
-		return new Q5.Image(w, h, opt);
+	$.get = (x, y, w, h) => {
+		let pd = $._pixelDensity || 1;
+		if (x !== undefined && w === undefined) {
+			let c = $.ctx.getImageData(x * pd, y * pd, 1, 1).data;
+			return new $.Color(c[0], c[1], c[2], c[3] / 255);
+		}
+		x = (x || 0) * pd;
+		y = (y || 0) * pd;
+		let _w = (w = w || $.width);
+		let _h = (h = h || $.height);
+		w *= pd;
+		h *= pd;
+		let img = $.createImage(w, h);
+		let imgData = $.ctx.getImageData(x, y, w, h);
+		img.ctx.putImageData(imgData, 0, 0);
+		img._pixelDensity = pd;
+		img.width = _w;
+		img.height = _h;
+		return img;
 	};
 
-	$._clearTemporaryBuffers = () => {
-		tmpCtx = null;
-		tmpCt2 = null;
-		tmpBuf = null;
+	$.set = (x, y, c) => {
+		if (c.canvas) {
+			let old = $._tint;
+			$._tint = null;
+			$.image(c, x, y);
+			$._tint = old;
+			return;
+		}
+		if (!$.pixels.length) $.loadPixels();
+		let mod = $._pixelDensity || 1;
+		for (let i = 0; i < mod; i++) {
+			for (let j = 0; j < mod; j++) {
+				let idx = 4 * ((y * mod + i) * $.canvas.width + x * mod + j);
+				$.pixels[idx] = c.r ?? c.l;
+				$.pixels[idx + 1] = c.g ?? c.c;
+				$.pixels[idx + 2] = c.b ?? c.h;
+				$.pixels[idx + 3] = c.a;
+			}
+		}
 	};
+
+	$.loadPixels = () => {
+		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		p.pixels = imgData.data;
+	};
+	$.updatePixels = () => {
+		if (imgData != null) $.ctx.putImageData(imgData, 0, 0);
+	};
+
+	$._tinted = function (col) {
+		let alpha = col.a;
+		col.a = 255;
+		makeTmpCtx();
+		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+		tmpCtx.fillStyle = col.toString();
+		tmpCtx.fillRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+		tmpCtx.globalCompositeOperation = 'multiply';
+		tmpCtx.drawImage($.ctx.canvas, 0, 0);
+		tmpCtx.globalCompositeOperation = 'source-over';
+
+		$.ctx.save();
+		$.ctx.resetTransform();
+		let old = $.ctx.globalCompositeOperation;
+		$.ctx.globalCompositeOperation = 'source-in';
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.globalCompositeOperation = old;
+		$.ctx.restore();
+
+		tmpCtx.globalAlpha = alpha / 255;
+		tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+		tmpCtx.drawImage($.ctx.canvas, 0, 0);
+		tmpCtx.globalAlpha = 1;
+
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.ctx.canvas.width, $.ctx.canvas.height);
+		$.ctx.drawImage(tmpCtx.canvas, 0, 0);
+		$.ctx.restore();
+	};
+
+	$.smooth = () => ($.ctx.imageSmoothingEnabled = true);
+	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
 
 	if ($._scope == 'image') return;
+
+	$.saveCanvas = $.canvas.save = $.save;
+
+	$.tint = function (c) {
+		$._tint = c._q5Color ? c : $.color(...arguments);
+	};
+	$.noTint = () => ($._tint = null);
 
 	// IMAGING
 
@@ -1338,7 +1350,7 @@ Q5.modules.q2d_image = ($, p) => {
 			sWidth *= $._da;
 			sHeight *= $._da;
 		}
-		let drawable = img._q5 ? img.canvas : img;
+		let drawable = img.canvas || img;
 		if (Q5._createNodeJSCanvas) {
 			drawable = drawable.context.canvas;
 		}
@@ -1351,10 +1363,10 @@ Q5.modules.q2d_image = ($, p) => {
 			c.drawImage(tmpCt2.canvas, 0, 0);
 			c.restore();
 		}
-		if (img._q5 && $._tint != null) {
+		if (img.canvas && $._tint != null) {
 			makeTmpCt2(img.canvas.width, img.canvas.height);
 			tmpCt2.drawImage(img.canvas, 0, 0);
-			img.tinted($._tint);
+			img._tinted($._tint);
 		}
 		dWidth ??= img.width || img.videoWidth;
 		dHeight ??= img.height || img.videoHeight;
@@ -1374,6 +1386,10 @@ Q5.modules.q2d_image = ($, p) => {
 	};
 
 	$.loadImage = function (url, cb, opt) {
+		if (url.canvas) return url;
+		if (url.slice(-3).toLowerCase() == 'gif') {
+			throw `In q5, GIFs are not supported due to their impact on performance. Use a video or p5play animation instead.`;
+		}
 		p._preloadCount++;
 		let last = [...arguments].at(-1);
 		opt = typeof last == 'object' ? last : true;
@@ -1411,16 +1427,21 @@ Q5.modules.q2d_image = ($, p) => {
 		}
 		return g;
 	};
-
-	$.smooth = () => ($.ctx.imageSmoothingEnabled = true);
-	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
 };
 
 // IMAGE CLASS
 
-class _Q5Image extends Q5 {
+Q5.imageModules = ['q2d_canvas', 'q2d_image'];
+
+class _Q5Image {
 	constructor(w, h, opt) {
-		super('image');
+		let $ = this;
+		$._scope = 'image';
+		$.canvas = $.ctx = $.drawingContext = null;
+		$.pixels = [];
+		for (let m of Q5.imageModules) {
+			Q5.modules[m]($, $);
+		}
 		delete this.createCanvas;
 		opt ??= {};
 		opt.alpha ??= true;
@@ -1445,23 +1466,6 @@ Q5.POSTERIZE = 5;
 Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
-
-Q5.BLEND = 'source-over';
-Q5.REMOVE = 'destination-out';
-Q5.ADD = 'lighter';
-Q5.DARKEST = 'darken';
-Q5.LIGHTEST = 'lighten';
-Q5.DIFFERENCE = 'difference';
-Q5.SUBTRACT = 'subtract';
-Q5.EXCLUSION = 'exclusion';
-Q5.MULTIPLY = 'multiply';
-Q5.SCREEN = 'screen';
-Q5.REPLACE = 'copy';
-Q5.OVERLAY = 'overlay';
-Q5.HARD_LIGHT = 'hard-light';
-Q5.SOFT_LIGHT = 'soft-light';
-Q5.DODGE = 'color-dodge';
-Q5.BURN = 'color-burn';
 /* software implementation of image filters */
 Q5.modules.q2d_soft_filters = ($) => {
 	let tmpBuf = null;
