@@ -272,7 +272,7 @@ Q5.modules.q2d_drawing = ($) => {
 		ink();
 	}
 
-	$.rect = (x, y, w, h, tl, tr, br, bl) => {
+	$.rect = (x, y, w, h=w, tl, tr, br, bl) => {
 		if ($._rectMode == $.CENTER) {
 			roundedRect(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
 		} else if ($._rectMode == $.RADIUS) {
