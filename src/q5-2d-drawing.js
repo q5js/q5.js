@@ -236,8 +236,9 @@ Q5.modules.q2d_drawing = ($) => {
 			w *= $._da;
 			h *= $._da;
 		}
-		if ($._doFill) $.ctx.fillRect(x, y, w, h);
-		if ($._doStroke) $.ctx.strokeRect(x, y, w, h);
+		$.ctx.beginPath();
+		$.ctx.rect(x, y, w, h);
+		ink();
 	}
 	function roundedRect(x, y, w, h, tl, tr, br, bl) {
 		if (!$._doFill && !$._doStroke) return;
@@ -272,7 +273,7 @@ Q5.modules.q2d_drawing = ($) => {
 		ink();
 	}
 
-	$.rect = (x, y, w, h=w, tl, tr, br, bl) => {
+	$.rect = (x, y, w, h = w, tl, tr, br, bl) => {
 		if ($._rectMode == $.CENTER) {
 			roundedRect(x - w / 2, y - h / 2, w, h, tl, tr, br, bl);
 		} else if ($._rectMode == $.RADIUS) {
@@ -502,5 +503,15 @@ Q5.modules.q2d_drawing = ($) => {
 	$.noErase = function () {
 		$.ctx.globalCompositeOperation = 'source-over';
 		$.ctx.restore();
+	};
+
+	$.inFill = (x, y) => {
+		const pd = $._pixelDensity;
+		return $.ctx.isPointInPath(x * pd, y * pd);
+	};
+
+	$.inStroke = (x, y) => {
+		const pd = pixelDensity();
+		return $.ctx.isPointInStroke(x * pd, y * pd);
 	};
 };
