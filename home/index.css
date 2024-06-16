@@ -200,6 +200,10 @@ a {
 	min-width: 0;
 }
 
+#reel3 .minis>div {
+	width: 480px;
+}
+
 .minis md {
 	max-width: 45vw;
 }

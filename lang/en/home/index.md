@@ -20,11 +20,29 @@ q5 empowers artists with a [wider range of colors](https://github.com/quinton-as
 
 # 3-0
 
+## More interactive 🧑‍💻
+
+# 3-1
+
+In p5, making sketches interactive can be a pain for beginners. 😩
+
+# 3-2
+
+With q5, use `inFill` to check if the mouse is hovering on the most recently drawn shape. 🎯
+
+# 4-0
+
+## More flexible 💪
+
+The `flexibleCanvas` function enables you to stretch your art to fill any canvas size. A game changer for generative artists! 🌱
+
+# 5-0
+
 ## More help for beginners ✨
 
 Why doesn't this code work? `text('Hello!')` 🤔
 
-# 3-1
+# 5-1
 
 p5's error messages are often too vague, leaving users searching for help. 🙋
 
@@ -32,7 +50,7 @@ p5's error messages are often too vague, leaving users searching for help. 🙋
 🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
 ```
 
-# 3-2
+# 5-2
 
 Run q5's `askAI()` before code that isn't working as expected. 🤖
 
@@ -41,12 +59,6 @@ The `text` function requires the x and y coordinates where the text should be dr
 
 text('Hello!', 50, 50);
 ```
-
-# 4-0
-
-## More flexible 💪
-
-The `flexibleCanvas` function enables you to stretch your art to fill any canvas size. A game changer for generative artists! 🌱
 
 # 10-0
 
@@ -82,7 +94,7 @@ The `displayMode` function lets you customize how your canvas is presented. Make
 
 ## WebGPU support 🚀
 
-We're already working on a next-gen version of q5 that uses [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast rendering. Stay tuned! 🏎️
+We're working on a next-gen version of q5 that uses [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast rendering. Stay tuned! 🏎️
 
 # 11-0
 

@@ -137,22 +137,52 @@ function windowResized() {
 	</div>
 	<div id="reel3" class="reel">
 		<md id="md3-0">
-			<h2 id="more-help-for-beginners-✨">More help for beginners ✨</h2>
-			<p>Why doesn't this code work? <code>text('Hello!')</code> 🤔</p>
+			<h2 id="more-interactive-🧑💻">More interactive 🧑‍💻</h2>
 		</md>
 		<div class="minis horiz">
-			<md id="md3-1">
-				<p>p5's error messages are often too vague, leaving users searching for help. 🙋</p>
-				<pre><code>🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
-</code></pre>
-			</md>
-			<md id="md3-2">
-				<p>Run q5's <code>askAI()</code> before code that isn't working as expected. 🤖</p>
-				<pre><code>The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
+			<div>
+				<script type="mie/p5" id="boundary-check" lines="9" horiz="">
+function draw() {
+	fill('lime');
+	rect(20, 20, 100, 50);
 
-text('Hello!', 50, 50);
-</code></pre>
-			</md>
+	if (mouseX > 20 && mouseX < 120 &&
+	    mouseY > 20 && mouseY < 70) {
+		fill('blue');
+		rect(20, 20, 100, 50);
+	}
+}
+
+function setup() {
+	createCanvas(140, 80);
+	cursor('pointer');
+}
+			</script>
+				<md id="md3-1">
+					<p>In p5, making sketches interactive can be a pain for beginners. 😩</p>
+				</md>
+			</div>
+			<div>
+				<script type="mie/q5" id="inFill" lines="9" horiz="">
+function draw() {
+	fill('lime');
+	rect(20, 20, 100, 50);
+
+	if (inFill(mouseX, mouseY)) {
+		fill('blue');
+		rect(20, 20, 100, 50);
+	}
+}
+
+function setup() {
+	createCanvas(140, 80);
+	cursor('pointer');
+}
+			</script>
+				<md id="md3-2">
+					<p>With q5, use <code>inFill</code> to check if the mouse is hovering on the most recently drawn shape. 🎯</p>
+				</md>
+			</div>
 		</div>
 	</div>
 	<div id="reel4" class="reel">
@@ -170,6 +200,26 @@ function setup() {
 }
 			</script>
 		</div> -->
+	</div>
+	<div id="reel5" class="reel">
+		<md id="md5-0">
+			<h2 id="more-help-for-beginners-✨">More help for beginners ✨</h2>
+			<p>Why doesn't this code work? <code>text('Hello!')</code> 🤔</p>
+		</md>
+		<div class="minis horiz">
+			<md id="md5-1">
+				<p>p5's error messages are often too vague, leaving users searching for help. 🙋</p>
+				<pre><code>🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
+</code></pre>
+			</md>
+			<md id="md5-2">
+				<p>Run q5's <code>askAI()</code> before code that isn't working as expected. 🤖</p>
+				<pre><code>The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
+
+text('Hello!', 50, 50);
+</code></pre>
+			</md>
+		</div>
 	</div>
 	<div id="reel10" class="reel">
 		<div class="minis horiz">
@@ -202,7 +252,7 @@ createCanvas(400, 400);
 			</md>
 			<md id="md10-3">
 				<h2 id="webgpu-support-🚀">WebGPU support 🚀</h2>
-				<p>We're already working on a next-gen version of q5 that uses <a
+				<p>We're working on a next-gen version of q5 that uses <a
 						href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API" target="_blank">WebGPU</a> for blazing
 					fast rendering. Stay tuned! 🏎️</p>
 			</md>
@@ -242,35 +292,7 @@ createCanvas(400, 400);
 
 	<script src="../q5.js"></script>
 	<script>
-		let lavas = [];
-		let looping = true;
-		let darkMode = false;
-
-		function setup() {
-			createCanvas();
-			let amount = floor(width / 40);
-			for (let i = 0; i < amount; i++) {
-				let l = new Lava(random(width), random(height), random(10, 100));
-				lavas.push(l);
-			}
-		}
-
-		function draw() {
-			darkMode = document.body.classList.contains('dark');
-			if (darkMode) background('#00000040');
-			else background('#b7ebff40');
-
-			for (let l of lavas) {
-				l.move();
-				l.show();
-			}
-		}
-
-		function mousePressed() {
-			if (looping) noLoop();
-			else loop();
-			looping = !looping;
-		}
+		new Q5();
 
 		class Lava {
 			constructor(x, y, r) {
@@ -325,10 +347,39 @@ createCanvas(400, 400);
 			}
 		}
 
+		let lavas = [];
+		let looping = true;
+		let darkMode = false;
+
+		createCanvas();
+		let amount = floor(width / 40);
+		for (let i = 0; i < amount; i++) {
+			let l = new Lava(random(width), random(height), random(10, 100));
+			lavas.push(l);
+		}
+
+		function draw() {
+			darkMode = document.body.classList.contains('dark');
+			if (darkMode) background('#00000040');
+			else background('#b7ebff40');
+
+			for (let l of lavas) {
+				l.move();
+				l.show();
+			}
+		}
+
+		function mousePressed() {
+			if (looping) noLoop();
+			else loop();
+			looping = !looping;
+		}
+
 		function windowResized() {
 			resizeCanvas();
 		}
 
+		Q5.canvasOptions.alpha = true;
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ace.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ext-language_tools.js"></script>
