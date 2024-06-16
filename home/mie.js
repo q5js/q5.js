@@ -39,7 +39,7 @@ class MiniEditor {
 		mini.className = 'mie ' + this.lang;
 		if (props.horiz) mini.className += ' horiz';
 		else mini.className += ' vert';
-		mini.id = 'mie-' + this.id;
+		mini.id = script.id + '-mie';
 		mini.style = script.style.cssText;
 		if (!script.style.cssText.includes('width') && props.width) {
 			mini.style.width = props.width;

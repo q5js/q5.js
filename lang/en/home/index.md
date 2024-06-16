@@ -24,7 +24,7 @@ q5 empowers artists with a [wider range of colors](https://github.com/quinton-as
 
 # 3-1
 
-In p5, making sketches interactive can be a pain for beginners. 😩
+In p5, making interactive sketches can be tough for beginners. 😩
 
 # 3-2
 
@@ -34,7 +34,7 @@ With q5, use `inFill` to check if the mouse is hovering on the most recently dra
 
 ## More flexible 💪
 
-The `flexibleCanvas` function enables you to stretch your art to fill any canvas size. A game changer for generative artists! 🌱
+With the `flexibleCanvas` function you can scale your art to any canvas size. A game changer for generative artists! 🌱
 
 # 5-0
 

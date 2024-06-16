@@ -123,6 +123,7 @@ main {
 	justify-content: center;
 	align-items: start;
 	gap: 16px;
+	width: 100%;
 }
 
 a {
@@ -201,7 +202,19 @@ a {
 }
 
 #reel3 .minis>div {
-	width: 480px;
+	max-width: 480px;
+}
+
+#reel4 .minis {
+	align-items: center;
+}
+
+#small-mie {
+	width: 350px;
+}
+
+#big-mie {
+	width: 450px;
 }
 
 .minis md {

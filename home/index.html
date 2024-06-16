@@ -144,38 +144,38 @@ function windowResized() {
 				<script type="mie/p5" id="boundary-check" lines="9" horiz="">
 function draw() {
 	fill('lime');
-	rect(20, 20, 100, 50);
+	rect(20, 10, 100, 50);
 
 	if (mouseX > 20 && mouseX < 120 &&
-	    mouseY > 20 && mouseY < 70) {
+	    mouseY > 10 && mouseY < 60) {
 		fill('blue');
-		rect(20, 20, 100, 50);
+		rect(20, 10, 100, 50);
 	}
 }
 
 function setup() {
-	createCanvas(140, 80);
+	createCanvas(140, 70);
 	cursor('pointer');
 }
 			</script>
 				<md id="md3-1">
-					<p>In p5, making sketches interactive can be a pain for beginners. 😩</p>
+					<p>In p5, making interactive sketches can be tough for beginners. 😩</p>
 				</md>
 			</div>
 			<div>
 				<script type="mie/q5" id="inFill" lines="9" horiz="">
 function draw() {
 	fill('lime');
-	rect(20, 20, 100, 50);
+	rect(20, 10, 100, 50);
 
 	if (inFill(mouseX, mouseY)) {
 		fill('blue');
-		rect(20, 20, 100, 50);
+		rect(20, 10, 100, 50);
 	}
 }
 
 function setup() {
-	createCanvas(140, 80);
+	createCanvas(140, 70);
 	cursor('pointer');
 }
 			</script>
@@ -188,18 +188,25 @@ function setup() {
 	<div id="reel4" class="reel">
 		<md id="md4-0">
 			<h2 id="more-flexible-💪">More flexible 💪</h2>
-			<p>The <code>flexibleCanvas</code> function enables you to stretch your art to fill any canvas size. A game
-				changer for generative artists! 🌱</p>
+			<p>With the <code>flexibleCanvas</code> function you can scale your art to any canvas size. A game changer for
+				generative artists! 🌱</p>
 		</md>
-		<!-- <div class="minis">
-			<script type="mie/q5" id="flexible">
+		<div class="minis horiz">
+			<script type="mie/q5" id="small" horiz="">
 function setup() {
-	createCanvas(320, 240);
-	flexibleCanvas(100);
-	rect(20, 20, 80, 80);
+	createCanvas(100, 100);
+
+	rect(20, 20, 60, 60);
 }
 			</script>
-		</div> -->
+			<script type="mie/q5" id="big" horiz="">
+function setup() {
+	createCanvas(200, 200);
+	flexibleCanvas(100);
+	rect(20, 20, 60, 60);
+}
+			</script>
+		</div>
 	</div>
 	<div id="reel5" class="reel">
 		<md id="md5-0">
