@@ -4,7 +4,7 @@
 
 q5.js is a new implementation of the [p5](https://p5js.org) API that's performance optimized and packed with additional features to make creative coding even more fun and accessible.
 
-q5 works out of the box with your existing p5 2D sketches and even supports popular libraries like [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org).
+q5 works out of the box with your existing p5 2D sketches. It even supports popular libraries like [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org).
 
 # 2-0
 
@@ -62,7 +62,7 @@ text('Hello!', 50, 50);
 
 # 10-0
 
-## More dynamic 🎚️
+## Dynamic 🐙
 
 Q5 instances can be created manually, which makes the `setup` function optional. Use q5 functions anywhere! 👀
 
@@ -74,9 +74,25 @@ createCanvas(400, 400);
 
 # 10-1
 
-## Modular design 🧩
+## Melodic 🔊
 
-p5 is a whopping 5MB. q5 is already ~70x smaller, but for extremely lightweight use, load only the features you need from q5's [`src` folder](https://github.com/q5js/q5.js/tree/main/src). 📦
+[p5.sound](https://p5js.org/reference/#/libraries/p5.sound) is a great library but most use cases don't need it's extensive sound generation and filtering features. 🎛️
+
+That's why q5.js comes bundled with [q5-sound](/src/q5-sound.js), which enables sound loading, playback, and basic mixing. 🎚️
+
+# 10-2
+
+## Lightweight 🪶
+
+p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️
+
+q5.js is only 74kb, that's 70x smaller. 🌳
+
+# 10-3
+
+## Modular 🧩
+
+For extremely lightweight use, load only the features you need from q5's [`src` folder](https://github.com/q5js/q5.js/tree/main/src). 📦
 
 ```html
 <script src="https://q5js.org/src/q5-core.js">
@@ -84,15 +100,17 @@ p5 is a whopping 5MB. q5 is already ~70x smaller, but for extremely lightweight 
 <script src="https://q5js.org/src/q5-2d-drawing.js">
 ```
 
-# 10-2
+# 10-4
 
-## Frame your art 🖼️
+## Framing 🖼️
 
-The `displayMode` function lets you customize how your canvas is presented. Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
+The `displayMode` function lets you customize how your canvas is presented. 📽️
 
-# 10-3
+Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
 
-## WebGPU support 🚀
+# 10-5
+
+## WebGPU 🚀
 
 We're working on a next-gen version of q5 that uses [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast rendering. Stay tuned! 🏎️
 

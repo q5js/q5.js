@@ -9,7 +9,7 @@
 	<link rel="stylesheet" href="index.css">
 </head>
 
-<body class="light">
+<body class="dark">
 	<main></main>
 	<div id="reel0" class="reel">
 		<div class="brand">
@@ -33,7 +33,7 @@
 			<h2 id="the-sequel-to-p5js-is-here-🎉">The sequel to p5.js is here! 🎉</h2>
 			<p>q5.js is a new implementation of the <a href="https://p5js.org" target="_blank">p5</a> API that's performance
 				optimized and packed with additional features to make creative coding even more fun and accessible.</p>
-			<p>q5 works out of the box with your existing p5 2D sketches and even supports popular libraries like <a
+			<p>q5 works out of the box with your existing p5 2D sketches. It even supports popular libraries like <a
 					href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> and <a
 					href="https://p5play.org" target="_blank">p5play</a>.</p>
 		</md>
@@ -73,7 +73,9 @@ function setup() {
 function draw() {
 	if (!canvas.visible) return;
 
-	background('#eee');
+	darkMode = document.body.classList.contains('dark');
+	if (darkMode) background('#000');
+	else background('#eee');
 
 	let f = frameCount * 0.002;
 	let a = [];
@@ -108,7 +110,9 @@ function setup() {
 function draw() {
 	if (!canvas.visible) return;
 	
-	background('#eee');
+	darkMode = document.body.classList.contains('dark');
+	if (darkMode) background('#000');
+	else background('#eee');
 
 	let f = frameCount * 0.002;
 	let a = [];
@@ -231,7 +235,7 @@ text('Hello!', 50, 50);
 	<div id="reel10" class="reel">
 		<div class="minis horiz">
 			<md id="md10-0">
-				<h2 id="more-dynamic-🎚️">More dynamic 🎚️</h2>
+				<h2 id="dynamic-🐙">Dynamic 🐙</h2>
 				<p>Q5 instances can be created manually, which makes the <code>setup</code> function optional. Use q5 functions
 					anywhere! 👀</p>
 				<pre><code class="language-js">new Q5();
@@ -240,25 +244,34 @@ createCanvas(400, 400);
 </code></pre>
 			</md>
 			<md id="md10-1">
-				<h2 id="modular-design-🧩">Modular design 🧩</h2>
-				<p>p5 is a whopping 5MB. q5 is already ~70x smaller, but for extremely lightweight use, load only the features
-					you need from q5's <a href="https://github.com/q5js/q5.js/tree/main/src" target="_blank"><code>src</code>
-						folder</a>. 📦</p>
+				<h2 id="melodic-🔊">Melodic 🔊</h2>
+				<p><a href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> is a great library but
+					most use cases don't need it's extensive sound generation and filtering features. 🎛️</p>
+				<p>That's why q5.js comes bundled with <a href="/src/q5-sound.js" target="_blank">q5-sound</a>, which enables
+					sound loading, playback, and basic mixing. 🎚️</p>
+			</md>
+			<md id="md10-2">
+				<h2 id="lightweight-🪶">Lightweight 🪶</h2>
+				<p>p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️</p>
+				<p>q5.js is only 74kb, that's 70x smaller. 🌳</p>
+			</md>
+			<md id="md10-3">
+				<h2 id="modular-🧩">Modular 🧩</h2>
+				<p>For extremely lightweight use, load only the features you need from q5's <a
+						href="https://github.com/q5js/q5.js/tree/main/src" target="_blank"><code>src</code> folder</a>. 📦</p>
 				<pre><code class="language-html">&lt;script src="https://q5js.org/src/q5-core.js"&gt;
 &lt;script src="https://q5js.org/src/q5-2d-canvas.js"&gt;
 &lt;script src="https://q5js.org/src/q5-2d-drawing.js"&gt;
 </code></pre>
 			</md>
-		</div>
-		<div class="minis horiz">
-			<md id="md10-2">
-				<h2 id="frame-your-art-🖼️">Frame your art 🖼️</h2>
-				<p>The <code>displayMode</code> function lets you customize how your canvas is presented. Make it "centered",
-					"maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset
-					to make pixel art. 👾</p>
+			<md id="md10-4">
+				<h2 id="framing-🖼️">Framing 🖼️</h2>
+				<p>The <code>displayMode</code> function lets you customize how your canvas is presented. 📽️</p>
+				<p>Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the
+					"pixelated" rendering preset to make pixel art. 👾</p>
 			</md>
-			<md id="md10-3">
-				<h2 id="webgpu-support-🚀">WebGPU support 🚀</h2>
+			<md id="md10-5">
+				<h2 id="webgpu-🚀">WebGPU 🚀</h2>
 				<p>We're working on a next-gen version of q5 that uses <a
 						href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API" target="_blank">WebGPU</a> for blazing
 					fast rendering. Stay tuned! 🏎️</p>

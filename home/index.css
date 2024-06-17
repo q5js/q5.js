@@ -14,10 +14,10 @@ html {
 
 body.dark {
 	--brand-primary: #b7ebff;
-	--brand-secondary: #131516;
+	--brand-secondary: #232628;
 
 	--primary: #c8c3bc;
-	--secondary: #131516;
+	--secondary: #202324;
 	--background: #000;
 }
 
@@ -93,7 +93,7 @@ main {
 	width: 100%;
 	background-color: var(--background);
 	padding: 16px;
-	gap: 16px;
+	gap: 24px;
 	margin-bottom: 40vh;
 }
 
@@ -122,7 +122,7 @@ main {
 	flex-flow: row wrap;
 	justify-content: center;
 	align-items: start;
-	gap: 16px;
+	gap: 24px;
 	width: 100%;
 }
 
@@ -205,8 +205,13 @@ a {
 	max-width: 480px;
 }
 
-#reel4 .minis {
+#reel4 .minis,
+#reel10 .minis {
 	align-items: center;
+}
+
+#reel10 .minis {
+	gap: 32px;
 }
 
 #small-mie {
