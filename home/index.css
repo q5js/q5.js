@@ -14,7 +14,7 @@ html {
 
 body.dark {
 	--brand-primary: #b7ebff;
-	--brand-secondary: #232628;
+	--brand-secondary: #131516;
 
 	--primary: #c8c3bc;
 	--secondary: #202324;
@@ -220,6 +220,10 @@ a {
 
 #big-mie {
 	width: 450px;
+}
+
+#md10-3 code {
+	font-size: 14px;
 }
 
 .minis md {

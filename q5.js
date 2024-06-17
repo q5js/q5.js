@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.0-beta23
+ * @version 2.0-beta24
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -2259,7 +2259,7 @@ Q5.modules.input = ($, p) => {
 	let keysHeld = {};
 	let mouseBtns = [$.LEFT, $.CENTER, $.RIGHT];
 
-	let ce = $.canvas.addEventListener;
+	let c = $.canvas;
 
 	$._startAudio = () => {
 		if ($.getAudioContext && $.getAudioContext()?.state == 'suspended') $.userStartAudio();
@@ -2296,9 +2296,9 @@ Q5.modules.input = ($, p) => {
 		$.mouseClicked(e);
 		p.mouseIsPressed = false;
 	};
-	ce('mousedown', (e) => $._onmousedown(e));
-	ce('mouseup', (e) => $._onmouseup(e));
-	ce('click', (e) => $._onclick(e));
+	c.addEventListener('mousedown', (e) => $._onmousedown(e));
+	c.addEventListener('mouseup', (e) => $._onmouseup(e));
+	c.addEventListener('click', (e) => $._onclick(e));
 
 	$.cursor = (name, x, y) => {
 		let pfx = '';
@@ -2377,16 +2377,16 @@ Q5.modules.input = ($, p) => {
 		}
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
-	ce('touchstart', (e) => $._ontouchstart(e));
-	ce('touchmove', (e) => $._ontouchmove(e));
-	ce('touchcancel', (e) => $._ontouchend(e));
-	ce('touchend', (e) => $._ontouchend(e));
+	c.addEventListener('touchstart', (e) => $._ontouchstart(e));
+	c.addEventListener('touchmove', (e) => $._ontouchmove(e));
+	c.addEventListener('touchcancel', (e) => $._ontouchend(e));
+	c.addEventListener('touchend', (e) => $._ontouchend(e));
 
 	if (window) {
-		let we = window.addEventListener;
-		we('mousemove', (e) => $._onmousemove(e), false);
-		we('keydown', (e) => $._onkeydown(e), false);
-		we('keyup', (e) => $._onkeyup(e), false);
+		let l = window.addEventListener;
+		l('mousemove', (e) => $._onmousemove(e), false);
+		l('keydown', (e) => $._onkeydown(e), false);
+		l('keyup', (e) => $._onkeyup(e), false);
 	}
 };
 Q5.modules.math = ($, p) => {

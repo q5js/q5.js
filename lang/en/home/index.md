@@ -74,9 +74,9 @@ createCanvas(400, 400);
 
 # 10-1
 
-## Melodic 🔊
+## Sonic 🔊
 
-[p5.sound](https://p5js.org/reference/#/libraries/p5.sound) is a great library but most use cases don't need it's extensive sound generation and filtering features. 🎛️
+[p5.sound](https://p5js.org/reference/#/libraries/p5.sound) is a great library but most use cases don't need its extensive sound generation and filtering features. 🎛️
 
 That's why q5.js comes bundled with [q5-sound](/src/q5-sound.js), which enables sound loading, playback, and basic mixing. 🎚️
 
