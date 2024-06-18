@@ -120,11 +120,13 @@ We're working on a next-gen version of q5 that uses [WebGPU](https://developer.m
 
 Start coding with the [q5.js template](https://aijs.io/editor?user=AIJS&project=q5.js-Template) for the [Aijs](https://aijs.io) online code editor. 🖌️
 
-q5 is also available on [npm](https://www.npmjs.com/package/q5) and [GitHub](https://gitub.com/q5js/q5.js).
+Full documentation is coming soon, for now see q5's [GitHub README](https://github.com/q5js/q5.js).
 
 ```html
 <script src="https://q5js.org/q5.js"></script>
 ```
+
+q5 is also available on [npm](https://www.npmjs.com/package/q5). 📦
 
 # 11-1
 

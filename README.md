@@ -290,6 +290,8 @@ Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and 
 
 Features added by @quinton-ashley:
 
+- `inFill`: Check if a point is inside the fill of a previously drawn shape.
+- `async setup()`: enables users to await loading images and sounds before `draw` is called, though loading in parallel with `preload` is still more efficient.
 - `image.trim()`: removes transparent pixels from the edges of an image.
 - `opacity(globalAlpha)`: set the opacity multiplier for anything subsequently drawn to the canvas in a range between 0 (transparent) and 1 (opaque).
 - `textCache(enabled)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
