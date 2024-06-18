@@ -74,11 +74,11 @@ createCanvas(400, 400);
 
 # 10-1
 
-## Sonic 🔊
+## Sound On 🔊
 
-[p5.sound](https://p5js.org/reference/#/libraries/p5.sound) is a great library but most use cases don't need its extensive sound generation and filtering features. 🎛️
+[p5.sound](https://p5js.org/reference/#/libraries/p5.sound) is a great library but typical use doesn't require its extensive sound generation and filtering features. 🎛️
 
-That's why q5.js comes bundled with [q5-sound](/src/q5-sound.js), which enables sound loading, playback, and basic mixing. 🎚️
+That's why q5.js includes sound loading, playback, and basic mixing by default. 🎚️
 
 # 10-2
 
@@ -92,7 +92,7 @@ q5.js is only 74kb, that's 70x smaller. 🌳
 
 ## Modular 🧩
 
-For extremely lightweight use, load only the features you need from q5's [`src` folder](https://github.com/q5js/q5.js/tree/main/src). 📦
+For extremely lightweight use, load only the features you need from q5's [source folder](https://github.com/q5js/q5.js/tree/main/src). 📦
 
 ```html
 <script src="https://q5js.org/src/q5-core.js">
@@ -102,7 +102,7 @@ For extremely lightweight use, load only the features you need from q5's [`src` 
 
 # 10-4
 
-## Framing 🖼️
+## Frame your Art 🖼️
 
 The `displayMode` function lets you customize how your canvas is presented. 📽️
 
@@ -115,6 +115,18 @@ Make it "centered", "maxed", or "fullscreen" without clipping or changing the as
 We're working on a next-gen version of q5 that uses [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast rendering. Stay tuned! 🏎️
 
 # 11-0
+
+## Get started! 💻
+
+Start coding with the [q5.js template](https://aijs.io/editor?user=AIJS&project=q5.js-Template) for the [Aijs](https://aijs.io) online code editor. 🖌️
+
+q5 is also available on [npm](https://www.npmjs.com/package/q5) and [GitHub](https://gitub.com/q5js/q5.js).
+
+```html
+<script src="https://q5js.org/q5.js"></script>
+```
+
+# 11-1
 
 ## Join our community 🤝
 
@@ -134,4 +146,8 @@ When criticized, TPF staff play the victim, gaslight, silence dissent, and badmo
 
 The q5 team is not "anti-p5". We aim to carry on Processing's legacy by continuing to make creative coding fun and accessible. 🌸
 
-Creative coders deserve better: let's make it happen together! q5 will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative). All contributors will be fairly compensated for their work. 🤝
+Creative coders deserve better: let's make it happen together! q5 is open source under the [LGPL](../LICENSE.md) and will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative). All contributors will be fairly compensated for their work. 🤝
+
+# 100
+
+Created by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley) and [@Tezumie](https://github.com/Tezumie). Copyright 2024. 🌟

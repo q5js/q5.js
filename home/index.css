@@ -280,6 +280,10 @@ body.dark #fullscreenIcon {
 	filter: invert(0.9);
 }
 
+footer {
+	z-index: 1;
+}
+
 @media screen and (max-width: 800px) {
 	.reel {
 		padding-left: 0;

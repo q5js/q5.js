@@ -206,6 +206,7 @@ function setup() {
 			<script type="mie/q5" id="big" horiz="">
 function setup() {
 	createCanvas(200, 200);
+
 	flexibleCanvas(100);
 	rect(20, 20, 60, 60);
 }
@@ -244,11 +245,10 @@ createCanvas(400, 400);
 </code></pre>
 			</md>
 			<md id="md10-1">
-				<h2 id="sonic-🔊">Sonic 🔊</h2>
+				<h2 id="sound-on-🔊">Sound On 🔊</h2>
 				<p><a href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> is a great library but
-					most use cases don't need its extensive sound generation and filtering features. 🎛️</p>
-				<p>That's why q5.js comes bundled with <a href="/src/q5-sound.js" target="_blank">q5-sound</a>, which enables
-					sound loading, playback, and basic mixing. 🎚️</p>
+					typical use doesn't require its extensive sound generation and filtering features. 🎛️</p>
+				<p>That's why q5.js includes sound loading, playback, and basic mixing by default. 🎚️</p>
 			</md>
 			<md id="md10-2">
 				<h2 id="lightweight-🪶">Lightweight 🪶</h2>
@@ -258,14 +258,14 @@ createCanvas(400, 400);
 			<md id="md10-3">
 				<h2 id="modular-🧩">Modular 🧩</h2>
 				<p>For extremely lightweight use, load only the features you need from q5's <a
-						href="https://github.com/q5js/q5.js/tree/main/src" target="_blank"><code>src</code> folder</a>. 📦</p>
+						href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">source folder</a>. 📦</p>
 				<pre><code class="language-html">&lt;script src="https://q5js.org/src/q5-core.js"&gt;
 &lt;script src="https://q5js.org/src/q5-2d-canvas.js"&gt;
 &lt;script src="https://q5js.org/src/q5-2d-drawing.js"&gt;
 </code></pre>
 			</md>
 			<md id="md10-4">
-				<h2 id="framing-🖼️">Framing 🖼️</h2>
+				<h2 id="frame-your-art-🖼️">Frame your Art 🖼️</h2>
 				<p>The <code>displayMode</code> function lets you customize how your canvas is presented. 📽️</p>
 				<p>Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the
 					"pixelated" rendering preset to make pixel art. 👾</p>
@@ -280,6 +280,16 @@ createCanvas(400, 400);
 	</div>
 	<div id="reel11" class="reel">
 		<md id="md11-0">
+			<h2 id="get-started-💻">Get started! 💻</h2>
+			<p>Start coding with the <a href="https://aijs.io/editor?user=AIJS&amp;project=q5.js-Template"
+					target="_blank">q5.js template</a> for the <a href="https://aijs.io" target="_blank">Aijs</a> online code
+				editor. 🖌️</p>
+			<p>q5 is also available on <a href="https://www.npmjs.com/package/q5" target="_blank">npm</a> and <a
+					href="https://gitub.com/q5js/q5.js" target="_blank">GitHub</a>.</p>
+			<pre><code class="language-html">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;
+</code></pre>
+		</md>
+		<md id="md11-1">
 			<h2 id="join-our-community-🤝">Join our community 🤝</h2>
 			<p>The future of creative coding is here! Join us on the <a href="https://discord.gg/QuxQYwGWuB"
 					target="_blank">q5 community Discord</a>. 🗺️</p>
@@ -304,11 +314,18 @@ createCanvas(400, 400);
 				driving away the people who made Processing and p5 great. 🚪</p>
 			<p>The q5 team is not "anti-p5". We aim to carry on Processing's legacy by continuing to make creative coding fun
 				and accessible. 🌸</p>
-			<p>Creative coders deserve better: let's make it happen together! q5 will be run as a <a
+			<p>Creative coders deserve better: let's make it happen together! q5 is open source under the <a
+					href="../LICENSE.md" target="_blank">LGPL</a> and will be run as a <a
 					href="https://en.wikipedia.org/wiki/Worker_cooperative" target="_blank">worker co-op</a>. All contributors
 				will be fairly compensated for their work. 🤝</p>
 		</md>
 	</div>
+	<footer>
+		<md id="md100">
+			<p>Created by the q5 team: <a href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a
+					href="https://github.com/Tezumie" target="_blank">@Tezumie</a>. Copyright 2024. 🌟</p>
+		</md>
+	</footer>
 
 	<script src="../q5.js"></script>
 	<script>
