@@ -305,9 +305,12 @@ Features added by @LingDong-:
 - `curveAlpha()`: manipulate the `α` parameter of Catmull-Rom curves.
 - `relRotationX`, `relRotationY` and `relRotationZ`: Similar to `rotationX/Y/Z`, but are relative to the orientation of the mobile device.
 
-## Limitations
+## Porting from p5.js
 
-- `color` function only accepts numeric input, hex, and simple named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`. q5 supports oklch which is a superior color format so use it instead. The `fill`, `stroke`, and `background` functions can accept any css color string though.
+- `createCanvas` must be run before any functions that edit the canvas are called.
+- `color` function only accepts numeric input, hex, and simple named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`.
+- `colorMode` function only accepts "rgb", "srgb", or "oklch" because the other formats p5 still supports like hsv are obsolete.
+- `noise` function's default noise algorithm is true perlin noise, p5's noise is called "blocky" noise using it requires loading the src/q5-noisier.js module.
 
 ## Size Comparison
 
