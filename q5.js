@@ -183,6 +183,7 @@ function Q5(scope, parent) {
 		};
 
 	let t = globalScope || $;
+	$._isTouchAware = t.touchStarted || t.touchMoved || t.mouseReleased;
 	let preloadDefined = t.preload;
 	let userFns = [
 		'setup',
@@ -214,8 +215,6 @@ function Q5(scope, parent) {
 			};
 		}
 	}
-
-	$._isTouchAware = $.touchStarted || $.touchMoved || $.mouseReleased;
 
 	if (!($.setup || $.draw)) return;
 
