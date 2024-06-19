@@ -112,7 +112,7 @@ Make it "centered", "maxed", or "fullscreen" without clipping or changing the as
 
 ## WebGPU 🚀
 
-We're working on a next-gen version of q5 that uses [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast rendering. Stay tuned! 🏎️
+We're working on next-gen rendering modules for q5 that use [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast drawing. Stay tuned! 🏎️
 
 # 11-0
 
@@ -142,7 +142,7 @@ If you'd like to work on q5.js, check out our [Contributor Code of Conduct](http
 
 In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020).
 
-Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5. They think just because p5 is open source, volunteer contributors should do all the real work. Yet it still takes months for staff to simply review and publish updates. 🕵️
+Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5's development. They think just because p5 is open source, volunteer contributors should do all the real work. Yet it still takes months for management to simply review and publish updates. 🕵️
 
 When criticized, TPF staff play the victim, gaslight, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the people who made Processing and p5 great. 🚪
 
