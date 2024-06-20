@@ -307,7 +307,7 @@ Features added by @LingDong-:
 
 ## Porting from p5.js
 
-- `createCanvas` must be run before any rendering functions are called. If users don't do it before the draw loop starts, then q5 will run `createCanvas(100, 100)` automatically.
+- `createCanvas` must be run before any rendering functions are called. If it's not run before the draw loop starts, then q5 will run `createCanvas(100, 100)` automatically.
 - `color` function only accepts numeric input, hex, and simple named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`.
 - `fill` and `stroke` can accept any CSS color string.
 - `colorMode` function only accepts "rgb", "srgb", or "oklch" because other formats that p5 still supports like hsv are obsolete.

@@ -207,7 +207,7 @@ function Q5(scope, parent) {
 		else if ($._isGlobal) {
 			$[k] = () => {
 				try {
-					t[k]();
+					return t[k]();
 				} catch (e) {
 					if ($._aiErrorAssistance) $._aiErrorAssistance(e);
 					else console.error(e);

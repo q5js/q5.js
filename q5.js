@@ -207,7 +207,7 @@ function Q5(scope, parent) {
 		else if ($._isGlobal) {
 			$[k] = () => {
 				try {
-					t[k]();
+					return t[k]();
 				} catch (e) {
 					if ($._aiErrorAssistance) $._aiErrorAssistance(e);
 					else console.error(e);
@@ -690,21 +690,22 @@ Q5.modules.q2d_drawing = ($) => {
 		}
 	};
 
-	function normAng(x) {
-		let full = $._angleMode == $.DEGREES ? 360 : $.TAU;
-		x = x % full;
-		if (x < 0) x += full;
-		return x;
-	}
-
-	function arc(x, y, w, h, start, stop, mode, detail) {
+	function arc(x, y, w, h, lo, hi, mode, detail) {
 		if (!$._doFill && !$._doStroke) return;
-		let lo = normAng(start);
-		let hi = normAng(stop);
-		if (lo > hi) [lo, hi] = [hi, lo];
+		let d = $._angleMode == 'degrees';
+		let full = d ? 360 : $.TAU;
+		lo %= full;
+		hi %= full;
+		if (lo < 0) lo += full;
+		if (hi < 0) hi += full;
 		if (lo == 0 && hi == 0) return;
+		if (lo > hi) [lo, hi] = [hi, lo];
 		$.ctx.beginPath();
 		if (w == h) {
+			if (d) {
+				lo = $.radians(lo);
+				hi = $.radians(hi);
+			}
 			$.ctx.arc(x, y, w / 2, lo, hi);
 		} else {
 			for (let i = 0; i < detail + 1; i++) {
