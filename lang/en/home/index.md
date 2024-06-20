@@ -1,6 +1,6 @@
 # 1-0
 
-## The unsanctioned sequel to p5.js! 🎉
+## A sequel to p5.js! 🎉
 
 q5.js is a new implementation of the [p5](https://p5js.org) API that's performance optimized and packed with additional features to make creative coding even more fun and accessible.
 
