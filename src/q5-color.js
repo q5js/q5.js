@@ -17,7 +17,7 @@ Q5.modules.color = ($, p) => {
 		}
 	};
 
-	$._basicColors = {
+	$._namedColors = {
 		aqua: [0, 255, 255],
 		black: [0, 0, 0],
 		blue: [0, 0, 255],
@@ -58,14 +58,28 @@ Q5.modules.color = ($, p) => {
 		if (args.length == 1) {
 			if (typeof c0 == 'string') {
 				if (c0[0] == '#') {
-					return new C(
-						parseInt(c0.slice(1, 3), 16),
-						parseInt(c0.slice(3, 5), 16),
-						parseInt(c0.slice(5, 7), 16),
-						c0.length != 9 ? null : parseInt(c0.slice(7, 9), 16)
+					if (c0.length <= 5) {
+						return new C(
+							parseInt(c0[1] + c0[1], 16),
+							parseInt(c0[2] + c0[2], 16),
+							parseInt(c0[3] + c0[3], 16),
+							c0.length == 4 ? null : parseInt(c0[4] + c0[4], 16)
+						);
+					} else {
+						return new C(
+							parseInt(c0.slice(1, 3), 16),
+							parseInt(c0.slice(3, 5), 16),
+							parseInt(c0.slice(5, 7), 16),
+							c0.length == 7 ? null : parseInt(c0.slice(7, 9), 16)
+						);
+					}
+				} else if ($._namedColors[c0]) return new C(...$._namedColors[c0]);
+				else {
+					console.error(
+						"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
 					);
-				} else if ($._basicColors[c0]) return new C(...$._basicColors[c0]);
-				else return new C(0, 0, 0);
+					return new C(0, 0, 0);
+				}
 			} else if (Array.isArray(c0)) return new C(...c0);
 		}
 		if ($._colorMode == 'rgb') {

@@ -1,6 +1,6 @@
 # 1-0
 
-## The sequel to p5.js is here! 🎉
+## The unsanctioned sequel to p5.js! 🎉
 
 q5.js is a new implementation of the [p5](https://p5js.org) API that's performance optimized and packed with additional features to make creative coding even more fun and accessible.
 
@@ -16,7 +16,7 @@ In p5, bright colors can look dull on modern devices 😕
 
 # 2-2
 
-q5 empowers artists with a [wider range of colors](https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#new-features-hdr-color-support) 🤩
+q5 empowers artists with a [wider range of colors](https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support) 🤩
 
 # 3-0
 

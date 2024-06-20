@@ -1,6 +1,6 @@
 # <img src="q5js_logo.webp" height="64"> <img src="q5js_brand.webp" height="64">
 
-The sequel to p5.js is here!
+The unsanctioned sequel to p5.js is here!
 
 **q5.js** implements all of [p5][]'s 2D drawing, math, and user input functionality.
 
@@ -308,7 +308,7 @@ Features added by @LingDong-:
 ## Porting from p5.js
 
 - `createCanvas` must be run before any rendering functions are called. If it's not run before the draw loop starts, then q5 will run `createCanvas(100, 100)` automatically.
-- `color` function only accepts numeric input, hex, and simple named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`.
+- `color` function only accepts numeric input, hex, and common named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`.
 - `fill` and `stroke` can accept any CSS color string.
 - `colorMode` function only accepts "rgb", "srgb", or "oklch" because other formats that p5 still supports like hsv are obsolete.
 - `noise` function's default noise algorithm is perlin noise. p5's default noise is called "blocky" noise in q5 and using it requires loading the src/q5-noisier.js module.

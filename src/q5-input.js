@@ -98,20 +98,18 @@ Q5.modules.input = ($, p) => {
 		p.keyIsPressed = true;
 		p.key = e.key;
 		p.keyCode = e.keyCode;
-		keysHeld[$.keyCode] = keysHeld[$.key] = true;
+		keysHeld[$.keyCode] = keysHeld[$.key.toLowerCase()] = true;
 		$.keyPressed(e);
-		if (e.key.length == 1) {
-			$.keyTyped(e);
-		}
+		if (e.key.length == 1) $.keyTyped(e);
 	};
 	$._onkeyup = (e) => {
 		p.keyIsPressed = false;
 		p.key = e.key;
 		p.keyCode = e.keyCode;
-		keysHeld[$.keyCode] = keysHeld[$.key] = false;
+		keysHeld[$.keyCode] = keysHeld[$.key.toLowerCase()] = false;
 		$.keyReleased(e);
 	};
-	$.keyIsDown = (x) => !!keysHeld[x];
+	$.keyIsDown = (v) => !!keysHeld[typeof v == 'string' ? v.toLowerCase() : v];
 
 	function getTouchInfo(touch) {
 		const rect = $.canvas.getBoundingClientRect();

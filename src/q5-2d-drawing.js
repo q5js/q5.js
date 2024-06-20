@@ -70,7 +70,7 @@ Q5.modules.q2d_drawing = ($) => {
 		$._strokeSet = true;
 		if (Q5.Color) {
 			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
+			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 			if (c.a <= 0) return ($._doStroke = false);
 		}
 		$.ctx.strokeStyle = c.toString();
@@ -81,7 +81,7 @@ Q5.modules.q2d_drawing = ($) => {
 		$._fillSet = true;
 		if (Q5.Color) {
 			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
+			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 			if (c.a <= 0) return ($._doFill = false);
 		}
 		$.ctx.fillStyle = c.toString();
@@ -108,7 +108,7 @@ Q5.modules.q2d_drawing = ($) => {
 		$.ctx.resetTransform();
 		if (Q5.Color) {
 			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._basicColors[c]) c = $.color(...$._basicColors[c]);
+			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 		}
 		$.ctx.fillStyle = c.toString();
 		$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
