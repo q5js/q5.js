@@ -290,7 +290,7 @@ I think the problem is that management takes exorbitant salaries, 76% of the [an
 
 When criticized, TPF staff play the victim, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the people who made Processing and p5 great. 🚪
 
-In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020). I agree with Ben and I hope that TPF will hire full time devs to work on p5.js.
+In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020). I agree with Ben and I hope that TPF will hire full time developers to work on p5.js in the future. The summer 2024 pro5 grants are a great step in the right direction.
 
 ## More exclusive features
 

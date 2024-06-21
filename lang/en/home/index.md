@@ -136,6 +136,14 @@ The future of creative coding is here! Join us on the [q5 community Discord](htt
 
 If you'd like to work on q5.js, check out our [Contributor Code of Conduct](https://github.com/quinton-ashley/q5.js/?tab=readme-ov-file#contributor-code-of-conduct) and [Project Planning Board](https://github.com/orgs/q5js/projects/1/views/1).
 
+# 20-0
+
+## Credits 🌟
+
+The original q5xjs (v0) was created by [@LingDong~](https://github.com/LingDong-/q5xjs) under the open source MIT license. We were inspired by his brilliant work to fork and continue the project!
+
+q5.js v2 is open source under the LGPL, created by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley), [@Tezumie](https://github.com/Tezumie), and [@LingDong~](https://github.com/LingDong-/q5xjs).
+
 # 100
 
-Created by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley) and [@Tezumie](https://github.com/Tezumie). Copyright 2024. 🌟
+q5js.org was created by the q5 team. Copyright 2024. 🌟
