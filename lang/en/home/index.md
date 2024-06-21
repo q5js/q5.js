@@ -140,9 +140,9 @@ If you'd like to work on q5.js, check out our [Contributor Code of Conduct](http
 
 ## Credits 🌟
 
-The original q5xjs (v0) was created by [@LingDong~](https://github.com/LingDong-/q5xjs) under the open source MIT license. We were inspired by his brilliant work to fork and continue the project!
+The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) under the open source MIT license. We were inspired by his brilliant work to fork and continue the project!
 
-q5.js v2 is open source under the LGPL, created by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley), [@Tezumie](https://github.com/Tezumie), and [@LingDong~](https://github.com/LingDong-/q5xjs).
+q5.js v2 is open source under the LGPL, created by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley), [@Tezumie](https://github.com/Tezumie), and [@LingDong~](https://github.com/LingDong-).
 
 # 100
 
