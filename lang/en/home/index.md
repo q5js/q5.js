@@ -142,9 +142,11 @@ If you'd like to work on q5.js, check out our [Contributor Code of Conduct](http
 
 In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020).
 
-Despite taking exorbitant salaries, the foundation's executives are too [busy working other full-time jobs](https://www.linkedin.com/in/edsaber/) to focus on p5's development. They think just because p5 is open source, volunteer contributors should do all the real work. Yet it still takes months for management to simply review and publish updates. 🕵️
+Hi I'm Quinton Ashley, creator of p5play v3 and one of the developers of q5.
 
-When criticized, TPF staff play the victim, gaslight, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the people who made Processing and p5 great. 🚪
+Sadly based on my personal experience, I agree with Ben. My contributions to p5.js, simple bug fixes, all took over 5 months to be released. That's unacceptable given how well funded TPF is. The problem is that management takes exorbitant salaries, 76% of the [annual budget](https://processingfoundation.report/), yet many of them still work [other full time jobs](https://www.linkedin.com/in/edsaber/). They seem to expect that just because p5.js is open source that volunteers will do most of the dev work. 🕵️
+
+When criticized, TPF staff play the victim, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the people who made Processing and p5 great. 🚪
 
 The q5 team is not "anti-p5". We aim to carry on Processing's legacy by continuing to make creative coding fun and accessible. 🌸
 
