@@ -282,9 +282,15 @@ An increase in performance of even a few frames per second can make a significan
 
 I was also interested in working on q5 because for a lot of p5.js users, the library itself is a black box. Even as an expert JS programmer and someone who teaches CS for a living, I still find myself scratching my head when I look at the p5.js source code. p5 was initially released 10 years ago and bad design choices were made due to JS limitations at the time. It's also become an absolutely massive library, with literally over 100,000 lines of code and documentation!
 
-I think it'd be better if the canvas mode, webgl mode, Friendly Error System, and accessibility features of p5 were offered in separate files. Yet, the powers that be at the Processing Foundation have made it clear that they don't want to do that. So q5 is a good alternative that trims out the fat.
-
 Thanks in large part to @LingDong-'s design, q5 is well organized, concise, and utilizes many modern JS features! I think even without inline documentation, the source code is easier for experienced JS programmers to comprehend.
+
+I also started working on q5 because unfortunately I had a bad experience with The Processing Foundation. Simple bug fixes I contributed to p5.js all took over 5 months to be released. That's unacceptable given how well funded TPF is. I began to see p5play solely relying on p5.js as a liability. So being able to provide q5 as an alternative became a priority for me.
+
+I think the problem is that management takes exorbitant salaries, 76% of the [annual budget](https://processingfoundation.report/), yet many of them still work [other full time jobs](https://www.linkedin.com/in/edsaber/). They seem to expect that just because p5.js is open source that volunteers will do most of the dev work. 🕵️
+
+When criticized, TPF staff play the victim, silence dissent, and badmouth former contributors, regardless of how much time and effort they've donated to TPF projects. This behavior is inexcusable. Its driving away the people who made Processing and p5 great. 🚪
+
+In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020). I agree with Ben and I hope that TPF will hire full time devs to work on p5.js.
 
 ## More exclusive features
 
