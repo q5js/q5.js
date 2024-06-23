@@ -3,3 +3,4 @@ dev/tests
 dev/test.js
 node_modules
 package-lock.json
+jsconfig.json

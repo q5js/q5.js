@@ -19,9 +19,8 @@ Q5.modules.q2d_text = ($, p) => {
 
 	$.loadFont = (url, cb) => {
 		p._preloadCount++;
-		let sp = url.split('/');
-		let name = sp[sp.length - 1].split('.')[0].replace(' ', '');
-		let f = new FontFace(name, 'url(' + url + ')');
+		let name = url.split('/').pop().split('.')[0].replace(' ', '');
+		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
 		f.load().then(() => {
 			p._preloadCount--;
@@ -141,7 +140,6 @@ Q5.modules.q2d_text = ($, p) => {
 		}
 		if (!$._doFill && !$._doStroke) return;
 		let c, ti, tg, k, cX, cY, _ascent, _descent;
-		let pd = 1;
 		let t = $.ctx.getTransform();
 		let useCache = $._genTextImage || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
@@ -157,7 +155,6 @@ Q5.modules.q2d_text = ($, p) => {
 			}
 			tg = $.createGraphics.call($, 1, 1);
 			c = tg.ctx;
-			pd = $._pixelDensity;
 		}
 		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		let lines = str.split('\n');

@@ -313,9 +313,10 @@ Features added by @LingDong-:
 
 ## Porting from p5.js
 
-- `createCanvas` must be run before any rendering functions are called. If it's not run before the draw loop starts, then q5 will run `createCanvas(100, 100)` automatically.
+- `createCanvas` must be run before any rendering functions are called. It can be run in `preload`. If it's not run before the draw loop starts, then q5 will run `createCanvas(100, 100)` automatically.
+- `colorMode` supports 'rgb', 'srgb', and 'oklch'. Color modes like hsv are outdated, OKLCH is superior.
 - `color` function only accepts numeric input, hex, and common named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`.
-- `fill` and `stroke` can accept any CSS color string.
+- `fill`, `stroke`, and `background` can accept any CSS color string.
 - `colorMode` function only accepts "rgb", "srgb", or "oklch" because other formats that p5 still supports like hsv are obsolete.
 - `noise` function's default noise algorithm is perlin noise. p5's default noise is called "blocky" noise in q5 and using it requires loading the src/q5-noisier.js module.
 
@@ -370,25 +371,15 @@ Higher FPS (frames per second) is better.
 
 <sub>\* Only for browsers that support CanvasRenderingContext2D.filter ([75% of all](https://caniuse.com/#feat=mdn-api_canvasrenderingcontext2d_filter) as of Aug 2020, including Chrome, Firefox and Edge). For those that don't, performance is similar to p5.js, as identical implementations are usually used as fallbacks.</sub>
 
-## Contributor Code of Conduct
+## Contributing
 
-We aim to make contributing to the q5 project more approachable for non-experts by using modern JavaScript without any complicated build tools or frameworks.
-
-All contributors are required to check their ego at the door and be open to feedback. Critique of code is not a critique of the person who wrote it. We're all here to learn and work with others to collectively write the best code possible.
-
-Code is a language art that can be subjectively judged by its effectiveness at communicating its functionality to humans. Code can also be objectively measured by its performance. Since JavaScript is served over a network, size is a factor as well. Therefore, the q5 team strives to balance code readability with brevity and performance.
-
-Check out the [q5 planning board](https://github.com/orgs/q5js/projects/1/views/1).
-
-## Organization
-
-If the q5 project is successful, all contributing developers will be paid for their work. The project will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative).
+See the [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) files for more information.
 
 ## Licensing
 
 q5.js was created by the q5 team and is licensed under the LGPLv3. q5 is not affiliated with The Processing Foundation.
 
-@LingDong- created the original q5xjs library which is MIT licensed.
+@LingDong- created the original q5xjs library which is Unlicense licensed.
 
 p5.js is licensed under the LGPLv2, the two small sections of p5' code directly copied into q5 are credited below. The rest of q5 is a new implementation of part of the p5 API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Google v Oracle case.
 

@@ -81,7 +81,6 @@ function Q5(scope, parent) {
 		p.frameCount++;
 		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
-		firstVertex = true;
 		if ($.ctx) $.ctx.save();
 		$.draw();
 		for (let m of Q5.prototype._methods.post) m.call($);
@@ -264,7 +263,7 @@ Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
 if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
 else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
-else window = 0;
+else global.window = 0;
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -535,6 +534,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 		let g = new Q5('graphics');
 		opt ??= {};
 		opt.alpha ??= true;
+		opt.colorSpace ??= $.canvas.colorSpace;
 		g._createCanvas.call($, w, h, opt);
 		return g;
 	};
@@ -551,7 +551,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 
 Q5.canvasOptions = {
 	alpha: false,
-	desynchronized: false,
 	colorSpace: 'display-p3'
 };
 
@@ -1072,12 +1071,15 @@ Q5.modules.q2d_drawing = ($) => {
 	};
 
 	$.inStroke = (x, y) => {
-		const pd = pixelDensity();
+		const pd = $._pixelDensity;
 		return $.ctx.isPointInStroke(x * pd, y * pd);
 	};
 };
 Q5.modules.q2d_image = ($, p) => {
 	$.createImage = (w, h, opt) => {
+		opt ??= {};
+		opt.alpha ??= true;
+		opt.colorSpace ??= $.canvas.colorSpace || Q5.canvasOptions.colorSpace;
 		return new Q5.Image(w, h, opt);
 	};
 
@@ -1399,22 +1401,26 @@ Q5.modules.q2d_image = ($, p) => {
 	$.loadImage = function (url, cb, opt) {
 		if (url.canvas) return url;
 		if (url.slice(-3).toLowerCase() == 'gif') {
-			throw `In q5, GIFs are not supported due to their impact on performance. Use a video or p5play animation instead.`;
+			throw new Error(`q5 doesn't support GIFs due to their impact on performance. Use a video or animation instead.`);
 		}
 		p._preloadCount++;
 		let last = [...arguments].at(-1);
-		opt = typeof last == 'object' ? last : true;
-		let g = $.createImage(1, 1, opt.alpha);
-		let c = g.ctx;
+		opt = typeof last == 'object' ? last : null;
+
+		let g = $.createImage(1, 1, opt);
+
+		function loaded(img) {
+			let c = g.ctx;
+			g.width = c.canvas.width = img.naturalWidth || img.width;
+			g.height = c.canvas.height = img.naturalHeight || img.height;
+			c.drawImage(img, 0, 0);
+			p._preloadCount--;
+			if (cb) cb(g);
+		}
+
 		if (Q5._nodejs && global.CairoCanvas) {
-			CairoCanvas.loadImage(url)
-				.then((img) => {
-					g.width = c.canvas.width = img.width;
-					g.height = c.canvas.height = img.height;
-					c.drawImage(img, 0, 0);
-					p._preloadCount--;
-					if (cb) cb(g);
-				})
+			global.CairoCanvas.loadImage(url)
+				.then(loaded)
 				.catch((e) => {
 					p._preloadCount--;
 					throw e;
@@ -1424,13 +1430,7 @@ Q5.modules.q2d_image = ($, p) => {
 			img.src = url;
 			img.crossOrigin = 'Anonymous';
 			img._pixelDensity = 1;
-			img.onload = () => {
-				g.width = c.canvas.width = img.naturalWidth;
-				g.height = c.canvas.height = img.naturalHeight;
-				c.drawImage(img, 0, 0);
-				p._preloadCount--;
-				if (cb) cb(g);
-			};
+			img.onload = () => loaded(img);
 			img.onerror = (e) => {
 				p._preloadCount--;
 				throw e;
@@ -1454,8 +1454,7 @@ class _Q5Image {
 			Q5.modules[m]($, $);
 		}
 		delete this.createCanvas;
-		opt ??= {};
-		opt.alpha ??= true;
+
 		this._createCanvas(w, h, '2d', opt);
 		this._loop = false;
 	}
@@ -1674,9 +1673,8 @@ Q5.modules.q2d_text = ($, p) => {
 
 	$.loadFont = (url, cb) => {
 		p._preloadCount++;
-		let sp = url.split('/');
-		let name = sp[sp.length - 1].split('.')[0].replace(' ', '');
-		let f = new FontFace(name, 'url(' + url + ')');
+		let name = url.split('/').pop().split('.')[0].replace(' ', '');
+		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
 		f.load().then(() => {
 			p._preloadCount--;
@@ -1796,7 +1794,6 @@ Q5.modules.q2d_text = ($, p) => {
 		}
 		if (!$._doFill && !$._doStroke) return;
 		let c, ti, tg, k, cX, cY, _ascent, _descent;
-		let pd = 1;
 		let t = $.ctx.getTransform();
 		let useCache = $._genTextImage || ($._textCache && (t.b != 0 || t.c != 0));
 		if (!useCache) {
@@ -1812,7 +1809,6 @@ Q5.modules.q2d_text = ($, p) => {
 			}
 			tg = $.createGraphics.call($, 1, 1);
 			c = tg.ctx;
-			pd = $._pixelDensity;
 		}
 		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		let lines = str.split('\n');
@@ -1878,7 +1874,7 @@ Q5.modules.ai = ($) => {
 		let askAI = e.message?.includes('Ask AI ✨');
 		if (!askAI) console.error(e);
 		if (Q5.disableFriendlyErrors) return;
-		if (askAI || !Q5.errorTolerant) noLoop();
+		if (askAI || !Q5.errorTolerant) $.noLoop();
 		let stackLines = e.stack?.split('\n');
 		if (!e.stack || stackLines.length <= 1) return;
 
@@ -2333,7 +2329,7 @@ Q5.modules.input = ($, p) => {
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
-		$._startAudio;
+		$._startAudio();
 		p.keyIsPressed = true;
 		p.key = e.key;
 		p.keyCode = e.keyCode;
@@ -2705,9 +2701,7 @@ Q5.modules.math = ($, p) => {
 	};
 };
 
-Q5.Noise = class {
-	constructor() {}
-};
+Q5.Noise = class {};
 
 Q5.PerlinNoise = class extends Q5.Noise {
 	constructor(seed) {
@@ -3038,7 +3032,7 @@ Q5.Vector = class {
 	lerp() {
 		let args = [...arguments];
 		let u = this._arg2v(...args.slice(0, -1));
-		let amt = args[args.length - 1];
+		let amt = args.at(-1);
 		this.x += (u.x - this.x) * amt;
 		this.y += (u.y - this.y) * amt;
 		this.z += (u.z - this.z) * amt;

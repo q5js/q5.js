@@ -81,7 +81,6 @@ function Q5(scope, parent) {
 		p.frameCount++;
 		let pre = performance.now();
 		for (let m of Q5.prototype._methods.pre) m.call($);
-		firstVertex = true;
 		if ($.ctx) $.ctx.save();
 		$.draw();
 		for (let m of Q5.prototype._methods.post) m.call($);
@@ -264,7 +263,7 @@ Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
 if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
 else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
-else window = 0;
+else global.window = 0;
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

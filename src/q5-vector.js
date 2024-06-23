@@ -154,7 +154,7 @@ Q5.Vector = class {
 	lerp() {
 		let args = [...arguments];
 		let u = this._arg2v(...args.slice(0, -1));
-		let amt = args[args.length - 1];
+		let amt = args.at(-1);
 		this.x += (u.x - this.x) * amt;
 		this.y += (u.y - this.y) * amt;
 		this.z += (u.z - this.z) * amt;

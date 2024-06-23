@@ -512,7 +512,7 @@ Q5.modules.q2d_drawing = ($) => {
 	};
 
 	$.inStroke = (x, y) => {
-		const pd = pixelDensity();
+		const pd = $._pixelDensity;
 		return $.ctx.isPointInStroke(x * pd, y * pd);
 	};
 };

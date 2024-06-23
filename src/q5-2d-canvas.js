@@ -262,6 +262,7 @@ Q5.modules.q2d_canvas = ($, p) => {
 		let g = new Q5('graphics');
 		opt ??= {};
 		opt.alpha ??= true;
+		opt.colorSpace ??= $.canvas.colorSpace;
 		g._createCanvas.call($, w, h, opt);
 		return g;
 	};
@@ -278,7 +279,6 @@ Q5.modules.q2d_canvas = ($, p) => {
 
 Q5.canvasOptions = {
 	alpha: false,
-	desynchronized: false,
 	colorSpace: 'display-p3'
 };
 

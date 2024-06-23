@@ -142,10 +142,10 @@ If you'd like to work on q5.js, check out our [Contributor Code of Conduct](http
 
 This project aims to be the spiritual successor to the invaluable work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/) and [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org).
 
-The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) under the open source MIT license. We forked and extended his brilliant work to continue the project!
+The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and extended his brilliant codebase!
 
-q5.js v2 is open source under the LGPL, created by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley), [@Tezumie](https://github.com/Tezumie), and [@LingDong~](https://github.com/LingDong-).
+q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley) and [@Tezumie](https://github.com/Tezumie).
 
 # 100
 
-q5js.org was created by the q5 team. Copyright 2024. 🌟
+q5js.org was created by the q5 team. Copyright 2024.

@@ -302,9 +302,7 @@ Q5.modules.math = ($, p) => {
 	};
 };
 
-Q5.Noise = class {
-	constructor() {}
-};
+Q5.Noise = class {};
 
 Q5.PerlinNoise = class extends Q5.Noise {
 	constructor(seed) {

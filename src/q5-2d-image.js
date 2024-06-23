@@ -1,5 +1,8 @@
 Q5.modules.q2d_image = ($, p) => {
 	$.createImage = (w, h, opt) => {
+		opt ??= {};
+		opt.alpha ??= true;
+		opt.colorSpace ??= $.canvas.colorSpace || Q5.canvasOptions.colorSpace;
 		return new Q5.Image(w, h, opt);
 	};
 
@@ -321,22 +324,26 @@ Q5.modules.q2d_image = ($, p) => {
 	$.loadImage = function (url, cb, opt) {
 		if (url.canvas) return url;
 		if (url.slice(-3).toLowerCase() == 'gif') {
-			throw `In q5, GIFs are not supported due to their impact on performance. Use a video or p5play animation instead.`;
+			throw new Error(`q5 doesn't support GIFs due to their impact on performance. Use a video or animation instead.`);
 		}
 		p._preloadCount++;
 		let last = [...arguments].at(-1);
-		opt = typeof last == 'object' ? last : true;
-		let g = $.createImage(1, 1, opt.alpha);
-		let c = g.ctx;
+		opt = typeof last == 'object' ? last : null;
+
+		let g = $.createImage(1, 1, opt);
+
+		function loaded(img) {
+			let c = g.ctx;
+			g.width = c.canvas.width = img.naturalWidth || img.width;
+			g.height = c.canvas.height = img.naturalHeight || img.height;
+			c.drawImage(img, 0, 0);
+			p._preloadCount--;
+			if (cb) cb(g);
+		}
+
 		if (Q5._nodejs && global.CairoCanvas) {
-			CairoCanvas.loadImage(url)
-				.then((img) => {
-					g.width = c.canvas.width = img.width;
-					g.height = c.canvas.height = img.height;
-					c.drawImage(img, 0, 0);
-					p._preloadCount--;
-					if (cb) cb(g);
-				})
+			global.CairoCanvas.loadImage(url)
+				.then(loaded)
 				.catch((e) => {
 					p._preloadCount--;
 					throw e;
@@ -346,13 +353,7 @@ Q5.modules.q2d_image = ($, p) => {
 			img.src = url;
 			img.crossOrigin = 'Anonymous';
 			img._pixelDensity = 1;
-			img.onload = () => {
-				g.width = c.canvas.width = img.naturalWidth;
-				g.height = c.canvas.height = img.naturalHeight;
-				c.drawImage(img, 0, 0);
-				p._preloadCount--;
-				if (cb) cb(g);
-			};
+			img.onload = () => loaded(img);
 			img.onerror = (e) => {
 				p._preloadCount--;
 				throw e;
@@ -376,8 +377,7 @@ class _Q5Image {
 			Q5.modules[m]($, $);
 		}
 		delete this.createCanvas;
-		opt ??= {};
-		opt.alpha ??= true;
+
 		this._createCanvas(w, h, '2d', opt);
 		this._loop = false;
 	}

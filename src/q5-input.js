@@ -94,7 +94,7 @@ Q5.modules.input = ($, p) => {
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
-		$._startAudio;
+		$._startAudio();
 		p.keyIsPressed = true;
 		p.key = e.key;
 		p.keyCode = e.keyCode;
