@@ -20,20 +20,34 @@
 	<main></main>
 	<div id="reel0" class="reel">
 		<div class="brand">
-			<a href="https://github.com/q5js/q5.js">
+			<div id="q5_home">
 				<div class="img q5js_logo"></div>
 				<div class="img q5js_brand"></div>
-			</a>
+			</div>
 			<textarea rows="1" readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
+			<nav id="partners">
+				<a href="https://b5editor.app/"
+					title="b5 - A node based online editor for introducing q5.js to young programmers." target="_blank">
+					<img id="b5_brand" src="/assets/brands/b5_brand.svg" alt="">
+				</a>
+				<a href="https://aijs.io/editor?user=AIJS&amp;project=q5.js-Template"
+					title="Aijs - The most versatile browser-based IDE for creative coding." target="_blank">
+					<img id="aijs_brand" src="/assets/brands/aijs_brand.svg" alt="">
+				</a>
+				<a href="https://p5play.org"
+					title="p5play - A JavaScript game engine that uses q5.js for graphics and Box2D for physics." target="_blank">
+					<img id="p5play_logo" src="/assets/brands/p5play_logo.svg" alt="">
+				</a>
+			</nav>
 		</div>
-		<nav>
+		<div id="controls">
 			<div class="btn">
 				<div id="darkModeIcon"></div>
 			</div>
 			<div class="btn">
 				<div id="fullscreenIcon"></div>
 			</div>
-		</nav>
+		</div>
 	</div>
 	<div id="reel1" class="reel">
 		<md id="md1-0">
@@ -317,7 +331,7 @@ createCanvas(400, 400);
 					target="_blank">p5.js</a>.</p>
 			<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a
 					href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain
-				Unlicense license. We forked and extended his brilliant codebase!</p>
+				Unlicense license. We forked and significantly extended his brilliant codebase!</p>
 			<p>q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: <a
 					href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a
 					href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.</p>
@@ -425,9 +439,6 @@ createCanvas(400, 400);
 	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ext-beautify.js"></script>
 	<script src="main.js"></script>
 	<script src="/home/mie.js"></script>
-
-
-
 </body>
 
 </html>

@@ -131,8 +131,9 @@ a {
 	text-decoration: none;
 }
 
-.brand a {
+#q5_home {
 	display: flex;
+	justify-content: center;
 	gap: 8px;
 }
 
@@ -140,6 +141,7 @@ a {
 	height: 128px;
 	border-radius: 16px;
 	background-size: contain;
+	background-repeat: no-repeat;
 }
 
 .q5js_logo {
@@ -166,6 +168,7 @@ a {
 	color: var(--brand-secondary);
 	text-align: center;
 	margin-top: 8px;
+	margin-bottom: 6px;
 	padding: 0;
 	padding-top: 8px;
 	padding-bottom: 8px;
@@ -234,7 +237,33 @@ a {
 	cursor: pointer;
 }
 
-nav {
+#partners {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+}
+
+#partners a {
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: var(--secondary);
+	border: 3px solid var(--brand-primary);
+	border-radius: 16px;
+	width: 126px;
+	height: 90px;
+}
+
+#partners img {
+	width: 96px;
+}
+
+#partners #p5play_logo {
+	height: 80%;
+}
+
+#controls {
 	box-sizing: border-box;
 	position: absolute;
 	bottom: 0;
@@ -247,7 +276,7 @@ nav {
 	gap: 16px;
 }
 
-nav .btn {
+#controls .btn {
 	background-color: var(--brand-secondary);
 	padding: 8px;
 	border-radius: 8px;
@@ -296,17 +325,42 @@ footer {
 }
 
 @media screen and (max-width: 400px) {
+	.brand {
+		width: 92vw;
+		gap: 2vw;
+	}
+
 	.brand .img:first-child {
-		display: none;
+		width: 30vw;
+		height: 30vw;
+	}
+
+	.brand .img:nth-child(2) {
+		width: 60vw;
+		height: 30vw;
 	}
 
 	#reel0 textarea {
-		font-size: 8px;
+		font-size: 10px;
+	}
+
+	#partners a {
+		width: 32%;
+	}
+
+	#partners img {
+		width: 80%;
 	}
 }
 
 @media screen and (max-width: 384px) {
 	#reel1 .mie {
 		width: 240px !important;
+	}
+}
+
+@media screen and (max-width: 320px) {
+	#reel0 textarea {
+		font-size: 9px;
 	}
 }
