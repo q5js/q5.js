@@ -161,9 +161,7 @@ Q5.modules.q2d_image = ($, p) => {
 		let a = document.createElement('a');
 		a.href = data;
 		a.download = name + '.' + ext;
-		document.body.append(a);
 		a.click();
-		document.body.removeChild(a);
 		URL.revokeObjectURL(a.href);
 	};
 	$.save = (a, b, c) => {

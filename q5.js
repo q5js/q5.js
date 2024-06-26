@@ -1238,9 +1238,7 @@ Q5.modules.q2d_image = ($, p) => {
 		let a = document.createElement('a');
 		a.href = data;
 		a.download = name + '.' + ext;
-		document.body.append(a);
 		a.click();
-		document.body.removeChild(a);
 		URL.revokeObjectURL(a.href);
 	};
 	$.save = (a, b, c) => {
@@ -1932,6 +1930,7 @@ Q5.modules.ai = ($) => {
 };
 Q5.modules.color = ($, p) => {
 	$.RGB = $.RGBA = $._colorMode = 'rgb';
+	$.OKLCH = 'oklch';
 
 	if (Q5.supportsHDR) $.Color = Q5.ColorRGBA_P3;
 	else $.Color = Q5.ColorRGBA;
@@ -2818,30 +2817,44 @@ Q5.PerlinNoise = class extends Q5.Noise {
 	}
 };
 Q5.modules.sound = ($, p) => {
+	$.Sound = Q5.Sound;
 	$.loadSound = (path, cb) => {
 		p._preloadCount++;
-		$.aud ??= new window.AudioContext();
-		let a = new Audio(path);
+		Q5.aud ??= new window.AudioContext();
+		let a = new Q5.Sound(path, cb);
 		a.addEventListener('canplaythrough', () => {
 			p._preloadCount--;
 			if (cb) cb(a);
 		});
+		return a;
+	};
+	$.getAudioContext = () => Q5.aud;
+	$.userStartAudio = () => Q5.aud.resume();
+};
+
+Q5.Sound = class extends Audio {
+	constructor(path) {
+		super(path);
+		let a = this;
 		a.load();
-		a.setVolume = (l) => (a.volume = l);
-		a.setLoop = (l) => (a.loop = l);
-		a.panner = $.aud.createStereoPanner();
-		a.source = $.aud.createMediaElementSource(a);
+		a.panner = Q5.aud.createStereoPanner();
+		a.source = Q5.aud.createMediaElementSource(a);
 		a.source.connect(a.panner);
-		a.panner.connect($.aud.destination);
+		a.panner.connect(Q5.aud.destination);
 		Object.defineProperty(a, 'pan', {
 			get: () => a.panner.pan.value,
 			set: (v) => (a.panner.pan.value = v)
 		});
-		a.setPan = (v) => (a.pan = v);
-		return a;
-	};
-	$.getAudioContext = () => $.aud;
-	$.userStartAudio = () => $.aud.resume();
+	}
+	setVolume(level) {
+		this.volume = level;
+	}
+	setLoop(loop) {
+		this.loop = loop;
+	}
+	setPan(value) {
+		this.pan = value;
+	}
 };
 Q5.modules.util = ($, p) => {
 	$._loadFile = (path, cb, type) => {

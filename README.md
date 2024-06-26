@@ -200,7 +200,7 @@ In **p5** the only way to do dimension agnostic sketches is to set variables to 
 
 In **q5**, @Tezumie added a new feature called `flexibleCanvas`. It takes a unit as input, then any position coordinates or dimensions you use will be scaled based on that unit.
 
-In this example, the rect will appear in the middle of the canvas, regardless of its size.
+In this example, the rect will appear in the middle of the canvas.
 
 ```js
 new Q5();
@@ -373,7 +373,11 @@ Higher FPS (frames per second) is better.
 
 ## Contributing
 
-See the [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) files for more information.
+Check out the [q5 planning board](https://github.com/orgs/q5js/projects/1/views/1).
+
+If the q5 project is successful, all contributing developers will be paid for their work. The project will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative).
+
+Contributors must agree to the [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Licensing
 

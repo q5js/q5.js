@@ -16,7 +16,7 @@ In p5, bright colors can look dull on modern devices 😕
 
 # 2-2
 
-q5 empowers artists with a [wider range of colors](https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support) 🤩
+q5 empowers artists with [HDR color support](https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support) 🤩
 
 # 3-0
 
@@ -78,7 +78,7 @@ createCanvas(400, 400);
 
 [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) is a great library but typical use doesn't require its extensive sound generation and filtering features. 🎛️
 
-That's why q5.js includes sound loading, playback, and basic mixing by default. 🎚️
+That's why q5.js includes sounds loading, playback, and basic mixing by default. 🎚️
 
 # 10-2
 
@@ -140,7 +140,7 @@ If you'd like to work on q5.js, check out our [Contributor Code of Conduct](http
 
 ## Credits 🌟
 
-This project aims to be the spiritual successor to the invaluable work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/) and [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org).
+This project aims to be the spiritual successor to the invaluable work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/), [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org), and all contributors to these projects.
 
 The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended his brilliant codebase!
 

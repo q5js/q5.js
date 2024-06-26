@@ -68,7 +68,7 @@ Q5.modules.sensors = ($) => {
 		(A[8] * v[0] + A[9] * v[1] + A[10] * v[2] + A[11]) / (A[12] * v[0] + A[13] * v[1] + A[14] * v[2] + A[15])
 	];
 
-	window.ondeviceorientation = (e) => {
+	window.addEventListener('deviceorientation', (e) => {
 		$.pRotationX = $.rotationX;
 		$.pRotationY = $.rotationY;
 		$.pRotationZ = $.rotationZ;
@@ -82,8 +82,9 @@ Q5.modules.sensors = ($) => {
 		$.relRotationX = [-$.rotationY, -$.rotationX, $.rotationY][Math.trunc(window.orientation / 90) + 1];
 		$.relRotationY = [-$.rotationX, $.rotationY, $.rotationX][Math.trunc(window.orientation / 90) + 1];
 		$.relRotationZ = $.rotationZ;
-	};
-	window.ondevicemotion = (e) => {
+	});
+
+	window.addEventListener('devicemotion', (e) => {
 		$.pAccelerationX = $.accelerationX;
 		$.pAccelerationY = $.accelerationY;
 		$.pAccelerationZ = $.accelerationZ;
@@ -93,5 +94,5 @@ Q5.modules.sensors = ($) => {
 			$.accelerationY = e.accelerationIncludingGravity.y + grav[1];
 			$.accelerationZ = e.accelerationIncludingGravity.z - grav[2];
 		}
-	};
+	});
 };

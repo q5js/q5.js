@@ -1,5 +1,6 @@
 Q5.modules.color = ($, p) => {
 	$.RGB = $.RGBA = $._colorMode = 'rgb';
+	$.OKLCH = 'oklch';
 
 	if (Q5.supportsHDR) $.Color = Q5.ColorRGBA_P3;
 	else $.Color = Q5.ColorRGBA;
