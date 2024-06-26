@@ -66,29 +66,28 @@ Q5.modules.color = ($, p) => {
 							parseInt(c0[3] + c0[3], 16),
 							c0.length == 4 ? null : parseInt(c0[4] + c0[4], 16)
 						);
-					} else {
-						return new C(
-							parseInt(c0.slice(1, 3), 16),
-							parseInt(c0.slice(3, 5), 16),
-							parseInt(c0.slice(5, 7), 16),
-							c0.length == 7 ? null : parseInt(c0.slice(7, 9), 16)
-						);
 					}
-				} else if ($._namedColors[c0]) return new C(...$._namedColors[c0]);
-				else {
-					console.error(
-						"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
+					return new C(
+						parseInt(c0.slice(1, 3), 16),
+						parseInt(c0.slice(3, 5), 16),
+						parseInt(c0.slice(5, 7), 16),
+						c0.length == 7 ? null : parseInt(c0.slice(7, 9), 16)
 					);
-					return new C(0, 0, 0);
 				}
-			} else if (Array.isArray(c0)) return new C(...c0);
+				if ($._namedColors[c0]) return new C(...$._namedColors[c0]);
+				console.error(
+					"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
+				);
+				return new C(0, 0, 0);
+			}
+			if (Array.isArray(c0)) return new C(...c0);
 		}
 		if ($._colorMode == 'rgb') {
 			if (args.length == 1) return new C(c0, c0, c0);
-			else if (args.length == 2) return new C(c0, c0, c0, c1);
-			else if (args.length == 3) return new C(c0, c1, c2);
-			else if (args.length == 4) return new C(c0, c1, c2, c3);
+			if (args.length == 2) return new C(c0, c0, c0, c1);
 		}
+		if (args.length == 3) return new C(c0, c1, c2);
+		if (args.length == 4) return new C(c0, c1, c2, c3);
 	};
 
 	$.red = (c) => c.r;
@@ -140,7 +139,7 @@ Q5.ColorOKLCH = class extends Q5.Color {
 		this.a = a ?? 1;
 	}
 	toString() {
-		return `color(oklch ${this.l} ${this.c} ${this.h} / ${this.a})`;
+		return `oklch(${this.l} ${this.c} ${this.h} / ${this.a})`;
 	}
 };
 Q5.ColorRGBA = class extends Q5.Color {
