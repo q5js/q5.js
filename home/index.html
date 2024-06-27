@@ -347,6 +347,8 @@ createCanvas(400, 400);
 	<script>
 		new Q5();
 
+		createCanvas();
+
 		class Lava {
 			constructor(x, y, r) {
 				this.x = x;
@@ -357,6 +359,7 @@ createCanvas(400, 400);
 				this.xSpeed = random(-0.5, 0.5);
 				this.ySpeed = random(-0.5, -2);
 				this.res = r < 25 ? 5 : 8;
+				this.resF = this.res + 2;
 				this.offsets = Array.from({ length: this.res }, () => random(-5, 5));
 				this.noiseOffsets = Array.from({ length: this.res }, () => random(1000));
 				this.layer = round(random(1, 4));
@@ -378,33 +381,21 @@ createCanvas(400, 400);
 				if (darkMode) fill(183, 235, 255, 25 * this.layer);
 				else fill(0, 25 * this.layer);
 				translate(this.x, this.y);
-				beginShape();
 
-				let hv = this.res / 2;
-				for (let i = 0; i < this.res; i++) {
-					let rad = (i * PI) / hv;
-					let r = this.r + this.offsets[i];
-					let x = r * cos(rad);
-					let y = r * sin(rad);
-					curveVertex(x, y);
-				}
-				for (let i = 0; i < hv; i++) {
-					let rad = (i * PI) / hv;
-					let r = this.r + this.offsets[i];
-					let x = r * cos(rad);
-					let y = r * sin(rad);
-					curveVertex(x, y);
+				beginShape();
+				for (let i = 0; i <= this.resF; i++) {
+					let rad = (i * TAU) / this.res;
+					let r = this.r + this.offsets[i % this.offsets.length];
+					curveVertex(r * cos(rad), r * sin(rad));
 				}
 				endShape();
 				pop();
 			}
 		}
 
+		let darkMode = false;
 		let lavas = [];
 		let looping = true;
-		let darkMode = false;
-
-		createCanvas();
 		let amount = floor(width / 40);
 		for (let i = 0; i < amount; i++) {
 			let l = new Lava(random(width), random(height), random(10, 100));
