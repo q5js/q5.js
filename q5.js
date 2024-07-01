@@ -102,6 +102,7 @@ function Q5(scope, parent) {
 		$._loop = true;
 		if (looper == null) _draw();
 	};
+	$.isLooping = () => $._loop;
 	$.redraw = (n = 1) => {
 		$._redraw = true;
 		for (let i = 0; i < n; i++) {

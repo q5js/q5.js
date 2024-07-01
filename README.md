@@ -292,6 +292,18 @@ When criticized, TPF staff play the victim, silence dissent, and badmouth former
 
 In October 2023, The Processing Foundation's co-founder, Ben Fry, resigned and publicly criticized management for [squandering millions of dollars in donations](https://x.com/ben_fry/status/1709400641456501020). I agree with Ben and I hope that TPF will hire full time developers to work on p5.js in the future. The summer 2024 pro5 grants are a great step in the right direction.
 
+## Motivation: Part 3
+
+> This section was written by @Tezumie
+
+My journey into contributing to q5.js began with a deep passion for creative coding. I initially built my own library, T5.js, from scratch to learn more about the inner workings of a creative coding library. This project was driven by my desire to understand and enhance the process of creating visual art through code.
+
+The q5.js team took notice of my work on T5.js and reached out to suggest we combine our efforts to further develop q5. We shared similar goals: minimizing the size of the library, optimizing performance, and adding much-needed functionalities that p5.js had yet to implement.
+
+One of the aspects I love most about q5.js is its compatibility with p5.js add-ons, something my custom T5.js project lacked. Working with Quinton and the team has allowed me to get creative with new functionalities in q5 as well. We've collaborated on several features, such as FlexibleCanvas, which enables projects to be dimension-agnostic.
+
+I genuinely love creative coding and engage with it every day, giving me a deep insight into the needs and potential improvements for a library like q5. My hope is to bring this knowledge and enthusiasm to our work on q5, continually advancing the library to better serve the creative coding community.
+
 ## More exclusive features
 
 Features added by @quinton-ashley:
