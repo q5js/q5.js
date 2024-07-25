@@ -1,6 +1,7 @@
 dev/assets
 dev/tests
 dev/test.js
+dev/test-p5.js
 node_modules
 package-lock.json
 jsconfig.json

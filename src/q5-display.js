@@ -84,4 +84,10 @@ main {
 		Object.assign(c, { displayMode, renderQuality, displayScale });
 		$._adjustDisplay();
 	};
+
+	$.fullscreen = (v) => {
+		if (v === undefined) return document.fullscreenElement;
+		if (v) document.body.requestFullscreen();
+		else document.body.exitFullscreen();
+	};
 };

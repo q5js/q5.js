@@ -1390,182 +1390,6 @@ Q5.POSTERIZE = 5;
 Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
-/* software implementation of image filters */
-Q5.renderers.q2d.soft_filters = ($) => {
-	let tmpBuf = null;
-
-	function ensureTmpBuf() {
-		let l = $.canvas.width * $.canvas.height * 4;
-		if (!tmpBuf || tmpBuf.length != l) {
-			tmpBuf = new Uint8ClampedArray(l);
-		}
-	}
-
-	function initSoftFilters() {
-		$._filters = [];
-		$._filters[Q5.THRESHOLD] = (data, thresh) => {
-			if (thresh === undefined) thresh = 127.5;
-			else thresh *= 255;
-			for (let i = 0; i < data.length; i += 4) {
-				const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-				data[i] = data[i + 1] = data[i + 2] = gray >= thresh ? 255 : 0;
-			}
-		};
-		$._filters[Q5.GRAY] = (data) => {
-			for (let i = 0; i < data.length; i += 4) {
-				const gray = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-				data[i] = data[i + 1] = data[i + 2] = gray;
-			}
-		};
-		$._filters[Q5.OPAQUE] = (data) => {
-			for (let i = 0; i < data.length; i += 4) {
-				data[i + 3] = 255;
-			}
-		};
-		$._filters[Q5.INVERT] = (data) => {
-			for (let i = 0; i < data.length; i += 4) {
-				data[i] = 255 - data[i];
-				data[i + 1] = 255 - data[i + 1];
-				data[i + 2] = 255 - data[i + 2];
-			}
-		};
-		$._filters[Q5.POSTERIZE] = (data, lvl = 4) => {
-			let lvl1 = lvl - 1;
-			for (let i = 0; i < data.length; i += 4) {
-				data[i] = (((data[i] * lvl) >> 8) * 255) / lvl1;
-				data[i + 1] = (((data[i + 1] * lvl) >> 8) * 255) / lvl1;
-				data[i + 2] = (((data[i + 2] * lvl) >> 8) * 255) / lvl1;
-			}
-		};
-		$._filters[Q5.DILATE] = (data) => {
-			ensureTmpBuf();
-			tmpBuf.set(data);
-			let [w, h] = [$.canvas.width, $.canvas.height];
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let l = 4 * Math.max(j - 1, 0);
-					let r = 4 * Math.min(j + 1, w - 1);
-					let t = 4 * Math.max(i - 1, 0) * w;
-					let b = 4 * Math.min(i + 1, h - 1) * w;
-					let oi = 4 * i * w;
-					let oj = 4 * j;
-					for (let k = 0; k < 4; k++) {
-						let kt = k + t;
-						let kb = k + b;
-						let ko = k + oi;
-						data[oi + oj + k] = Math.max(
-							/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
-							tmpBuf[ko + l],
-							tmpBuf[ko + oj],
-							tmpBuf[ko + r],
-							/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
-						);
-					}
-				}
-			}
-		};
-		$._filters[Q5.ERODE] = (data) => {
-			ensureTmpBuf();
-			tmpBuf.set(data);
-			let [w, h] = [$.canvas.width, $.canvas.height];
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let l = 4 * Math.max(j - 1, 0);
-					let r = 4 * Math.min(j + 1, w - 1);
-					let t = 4 * Math.max(i - 1, 0) * w;
-					let b = 4 * Math.min(i + 1, h - 1) * w;
-					let oi = 4 * i * w;
-					let oj = 4 * j;
-					for (let k = 0; k < 4; k++) {
-						let kt = k + t;
-						let kb = k + b;
-						let ko = k + oi;
-						data[oi + oj + k] = Math.min(
-							/*tmpBuf[kt+l],*/ tmpBuf[kt + oj] /*tmpBuf[kt+r],*/,
-							tmpBuf[ko + l],
-							tmpBuf[ko + oj],
-							tmpBuf[ko + r],
-							/*tmpBuf[kb+l],*/ tmpBuf[kb + oj] /*tmpBuf[kb+r],*/
-						);
-					}
-				}
-			}
-		};
-		$._filters[Q5.BLUR] = (data, rad) => {
-			rad = rad || 1;
-			rad = Math.floor(rad * $._pixelDensity);
-			ensureTmpBuf();
-			tmpBuf.set(data);
-
-			let ksize = rad * 2 + 1;
-
-			function gauss1d(ksize) {
-				let im = new Float32Array(ksize);
-				let sigma = 0.3 * rad + 0.8;
-				let ss2 = sigma * sigma * 2;
-				for (let i = 0; i < ksize; i++) {
-					let x = i - ksize / 2;
-					let z = Math.exp(-(x * x) / ss2) / (2.5066282746 * sigma);
-					im[i] = z;
-				}
-				return im;
-			}
-
-			let kern = gauss1d(ksize);
-			let [w, h] = [$.canvas.width, $.canvas.height];
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let s0 = 0,
-						s1 = 0,
-						s2 = 0,
-						s3 = 0;
-					for (let k = 0; k < ksize; k++) {
-						let jk = Math.min(Math.max(j - rad + k, 0), w - 1);
-						let idx = 4 * (i * w + jk);
-						s0 += tmpBuf[idx] * kern[k];
-						s1 += tmpBuf[idx + 1] * kern[k];
-						s2 += tmpBuf[idx + 2] * kern[k];
-						s3 += tmpBuf[idx + 3] * kern[k];
-					}
-					let idx = 4 * (i * w + j);
-					data[idx] = s0;
-					data[idx + 1] = s1;
-					data[idx + 2] = s2;
-					data[idx + 3] = s3;
-				}
-			}
-			tmpBuf.set(data);
-			for (let i = 0; i < h; i++) {
-				for (let j = 0; j < w; j++) {
-					let s0 = 0,
-						s1 = 0,
-						s2 = 0,
-						s3 = 0;
-					for (let k = 0; k < ksize; k++) {
-						let ik = Math.min(Math.max(i - rad + k, 0), h - 1);
-						let idx = 4 * (ik * w + j);
-						s0 += tmpBuf[idx] * kern[k];
-						s1 += tmpBuf[idx + 1] * kern[k];
-						s2 += tmpBuf[idx + 2] * kern[k];
-						s3 += tmpBuf[idx + 3] * kern[k];
-					}
-					let idx = 4 * (i * w + j);
-					data[idx] = s0;
-					data[idx + 1] = s1;
-					data[idx + 2] = s2;
-					data[idx + 3] = s3;
-				}
-			}
-		};
-	}
-
-	$._softFilter = (typ, x) => {
-		if (!$._filters) initSoftFilters();
-		let imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
-		$._filters[typ](imgData.data, x);
-		$.ctx.putImageData(imgData, 0, 0);
-	};
-};
 Q5.renderers.q2d.text = ($, q) => {
 	$.NORMAL = 'normal';
 	$.ITALIC = 'italic';
@@ -3080,3 +2904,405 @@ Q5.Vector.sub = (v, u) => v.copy().sub(u);
 for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 }
+/**
+ * q5-webgpu
+ *
+ * EXPERIMENTAL, for developer testing only!
+ */
+Q5.renderers.webgpu = {};
+
+Q5.renderers.webgpu.canvas = ($, q) => {
+	let c = $.canvas;
+
+	c.width = $.width = 500;
+	c.height = $.height = 500;
+
+	if ($.colorMode) $.colorMode('rgb', 'float');
+
+	let colorsStack;
+
+	$._createCanvas = (w, h, opt) => {
+		q.ctx = q.drawingContext = c.getContext('webgpu');
+
+		$._canvasFormat = navigator.gpu.getPreferredCanvasFormat();
+		opt.format = $._canvasFormat;
+		opt.device = Q5.device;
+
+		$.ctx.configure(opt);
+
+		$.pipelines = [];
+
+		// pipeline changes for each draw call
+		$.pipelinesStack = [];
+
+		// vertices for each draw call
+		$.verticesStack = [];
+
+		// number of vertices for each draw call
+		$.drawStack = [];
+
+		// colors used for each draw call
+		colorsStack = $.colorsStack = [];
+
+		// current color index, used to associate a vertex with a color
+		$._colorIndex = -1;
+	};
+
+	$._resizeCanvas = (w, h) => {
+		$._setCanvasSize(w, h);
+	};
+
+	$.resetMatrix = () => {};
+	$.translate = () => {};
+
+	$._beginRender = () => {
+		$.encoder = Q5.device.createCommandEncoder();
+
+		q.pass = $.encoder.beginRenderPass({
+			colorAttachments: [
+				{
+					view: ctx.getCurrentTexture().createView(),
+					loadOp: 'clear',
+					storeOp: 'store'
+				}
+			]
+		});
+	};
+
+	$._render = () => {
+		// run pre-render methods
+		for (let m of $._hooks.preRender) m();
+
+		$.pass.setPipeline($.pipelines[0]);
+
+		let drawStack = $.drawStack; // local variables used for performance
+		let o = 0; // vertex offset
+		for (let i = 0; i < drawStack.length; i++) {
+			$.pass.draw(drawStack[i], 1, o, 0);
+			o += drawStack[i];
+		}
+	};
+
+	$._finishRender = () => {
+		$.pass.end();
+		const commandBuffer = $.encoder.finish();
+		Q5.device.queue.submit([commandBuffer]);
+		q.pass = $.encoder = null;
+
+		// clear the stacks for the next frame
+		$.verticesStack.length = 0;
+		$.drawStack.length = 0;
+		$.colorsStack.length = 0;
+		$.pipelinesStack.length = 0;
+		$._colorIndex = -1;
+	};
+
+	$.fill = (r, g, b, a = 1) => {
+		// grayscale mode `fill(1, 0.5)`
+		if (b == undefined) {
+			a = g;
+			g = b = r;
+		}
+		let levels;
+		if (r._q5Color) levels = r.levels;
+		else levels = [r, g, b, a];
+
+		colorsStack.push(...levels);
+		$._colorIndex++;
+	};
+};
+
+Q5.webgpu = async function (scope, parent) {
+	if (!navigator.gpu) {
+		console.error('q5 WebGPU not supported on this browser!');
+		return new Q5(scope, parent);
+	}
+	let adapter = await navigator.gpu.requestAdapter();
+	if (!adapter) throw new Error('No appropriate GPUAdapter found.');
+	Q5.device = await adapter.requestDevice();
+
+	return new Q5(scope, parent, 'webgpu');
+};
+Q5.renderers.webgpu.drawing = ($, q) => {
+	$.CLOSE = 1;
+
+	let verticesStack, drawStack, colorsStack;
+
+	$._hooks.postCanvas.push(() => {
+		verticesStack = $.verticesStack;
+		drawStack = $.drawStack;
+		colorsStack = $.colorsStack;
+
+		let vertexBufferLayout = {
+			arrayStride: 12, // 2 coordinates + 1 color index * 4 bytes each
+			attributes: [
+				{
+					format: 'float32x2',
+					offset: 0,
+					shaderLocation: 0 // position
+				},
+				{
+					format: 'float32',
+					offset: 8,
+					shaderLocation: 1 // colorIndex
+				}
+			]
+		};
+
+		let vertexShader = Q5.device.createShaderModule({
+			code: `
+struct VertexOutput {
+	@builtin(position) position: vec4<f32>,
+	@location(1) colorIndex: f32
+};
+
+@vertex
+fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32) -> VertexOutput {
+	var output: VertexOutput;
+	output.position = vec4<f32>(pos, 0.0, 1.0);
+	output.colorIndex = colorIndex;
+	return output;
+}
+`
+		});
+
+		let fragmentShader = Q5.device.createShaderModule({
+			code: `
+@group(0) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
+
+@fragment
+fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
+	let index = u32(colorIndex);
+	return mix(uColors[index], uColors[index + 1u], fract(colorIndex));
+}
+`
+		});
+
+		let bindGroupLayout = Q5.device.createBindGroupLayout({
+			entries: [
+				{
+					binding: 0,
+					visibility: GPUShaderStage.FRAGMENT,
+					buffer: {
+						type: 'read-only-storage',
+						hasDynamicOffset: false
+					}
+				}
+			]
+		});
+
+		let pipelineLayout = Q5.device.createPipelineLayout({
+			bindGroupLayouts: [bindGroupLayout]
+		});
+
+		$.pipelines[0] = Q5.device.createRenderPipeline({
+			layout: pipelineLayout,
+			vertex: {
+				module: vertexShader,
+				entryPoint: 'vertexMain',
+				buffers: [vertexBufferLayout]
+			},
+			fragment: {
+				module: fragmentShader,
+				entryPoint: 'fragmentMain',
+				targets: [
+					{
+						format: $._canvasFormat
+					}
+				]
+			},
+			primitive: {
+				topology: 'triangle-list'
+			}
+		});
+	});
+
+	let shapeVertices;
+
+	$.beginShape = () => {
+		shapeVertices = [];
+	};
+
+	$.vertex = (x, y) => {
+		shapeVertices.push(x / $.canvas.hw, -y / $.canvas.hh, $._colorIndex);
+	};
+
+	$.endShape = (close) => {
+		if (shapeVertices.length < 6) {
+			throw new Error('A shape must have at least 3 vertices.');
+		}
+		if (close) {
+			// Close the shape by adding the first vertex at the end
+			shapeVertices.push(shapeVertices[0], shapeVertices[1], shapeVertices[2]);
+		}
+		// Convert the shape to triangles
+		let triangles = [];
+		for (let i = 3; i < shapeVertices.length; i += 3) {
+			triangles.push(
+				shapeVertices[0],
+				shapeVertices[1],
+				shapeVertices[2], // First vertex
+				shapeVertices[i - 3],
+				shapeVertices[i - 2],
+				shapeVertices[i - 1], // Previous vertex
+				shapeVertices[i],
+				shapeVertices[i + 1],
+				shapeVertices[i + 2] // Current vertex
+			);
+		}
+
+		verticesStack.push(...triangles);
+		drawStack.push(triangles.length / 3);
+		shapeVertices = [];
+	};
+
+	$.triangle = (x1, y1, x2, y2, x3, y3) => {
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.vertex(x2, y2);
+		$.vertex(x3, y3);
+		$.endShape(1);
+	};
+
+	$.rect = (x, y, w, h) => {
+		let hw = w / 2;
+		let hh = h / 2;
+		// convert the coordinates from pixel space to NDC space
+		let left = (x - hw) / $.canvas.hw;
+		let right = (x + hw) / $.canvas.hw;
+		let top = -(y - hh) / $.canvas.hh; // y is inverted in WebGPU
+		let bottom = -(y + hh) / $.canvas.hh; // y is inverted in WebGPU
+
+		let ci = $._colorIndex;
+		// two triangles make a rectangle
+		verticesStack.push(
+			left,
+			top,
+			ci,
+			right,
+			top,
+			ci,
+			left,
+			bottom,
+			ci,
+			right,
+			top,
+			ci,
+			left,
+			bottom,
+			ci,
+			right,
+			bottom,
+			ci
+		);
+		drawStack.push(6);
+	};
+
+	/**
+	 * Derived from: ceil(Math.log(d) * 7) * 2 - ceil(28)
+	 * This lookup table is used for better performance.
+	 * @param {Number} d diameter of the circle
+	 * @returns n number of segments
+	 */
+	// prettier-ignore
+	const getArcSegments = (d) => 
+    d < 14 ? 8 :
+    d < 16 ? 10 :
+    d < 18 ? 12 :
+    d < 20 ? 14 :
+    d < 22 ? 16 :
+    d < 24 ? 18 :
+    d < 28 ? 20 :
+    d < 34 ? 22 :
+    d < 42 ? 24 :
+    d < 48 ? 26 :
+    d < 56 ? 28 :
+    d < 64 ? 30 :
+    d < 72 ? 32 :
+    d < 84 ? 34 :
+    d < 96 ? 36 :
+    d < 98 ? 38 :
+    d < 113 ? 40 :
+    d < 149 ? 44 :
+    d < 199 ? 48 :
+    d < 261 ? 52 :
+    d < 353 ? 56 :
+    d < 461 ? 60 :
+    d < 585 ? 64 :
+    d < 1200 ? 70 :
+		d < 1800 ? 80 :
+		d < 2400 ? 90 :
+		100;
+
+	$.ellipse = (x, y, w, h) => {
+		const n = getArcSegments(w == h ? w : Math.max(w, h));
+
+		let a = Math.max(w, 1) / 2;
+		let b = w == h ? a : Math.max(h, 1) / 2;
+
+		x /= $.canvas.hw;
+		y /= -$.canvas.hh;
+		a /= $.canvas.hw;
+		b /= -$.canvas.hh;
+
+		let t = 0; // theta
+		const angleIncrement = $.TAU / n;
+		const ci = $._colorIndex;
+		let vx1, vy1, vx2, vy2;
+		for (let i = 0; i <= n; i++) {
+			vx1 = vx2;
+			vy1 = vy2;
+			vx2 = x + a * Math.cos(t);
+			vy2 = y + b * Math.sin(t);
+			t += angleIncrement;
+
+			if (i == 0) continue;
+
+			verticesStack.push(x, y, ci, vx1, vy1, ci, vx2, vy2, ci);
+		}
+
+		drawStack.push(n * 3);
+	};
+
+	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
+
+	$.noStroke = () => {};
+
+	$.background = () => {};
+
+	$._hooks.preRender.push(() => {
+		const vertexBuffer = Q5.device.createBuffer({
+			size: verticesStack.length * 6,
+			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+		});
+
+		Q5.device.queue.writeBuffer(vertexBuffer, 0, new Float32Array(verticesStack));
+		$.pass.setVertexBuffer(0, vertexBuffer);
+
+		const colorBuffer = Q5.device.createBuffer({
+			size: colorsStack.length * 4,
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+		});
+
+		Q5.device.queue.writeBuffer(colorBuffer, 0, new Float32Array(colorsStack));
+
+		const bindGroup = Q5.device.createBindGroup({
+			layout: $.pipelines[0].getBindGroupLayout(0),
+			entries: [
+				{
+					binding: 0,
+					resource: {
+						buffer: colorBuffer,
+						offset: 0,
+						size: colorsStack.length * 4
+					}
+				}
+			]
+		});
+
+		// set the bind group once before rendering
+		$.pass.setBindGroup(0, bindGroup);
+	});
+};
+Q5.renderers.webgpu.image = ($, q) => {};
+Q5.renderers.webgpu.text = ($, q) => {};

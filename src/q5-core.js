@@ -1,15 +1,15 @@
 /**
  * q5.js
- * @version 2.0
+ * @version 2.1
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
  */
-function Q5(scope, parent) {
+function Q5(scope, parent, renderer) {
 	let $ = this;
 	$._q5 = true;
-	$._scope = scope;
 	$._parent = parent;
+	$._renderer = renderer || 'q2d';
 	$._preloadCount = 0;
 
 	scope ??= 'global';
@@ -17,13 +17,14 @@ function Q5(scope, parent) {
 		if (!(window.setup || window.draw)) return;
 		scope = 'global';
 	}
+	$._scope = scope;
 	let globalScope;
 	if (scope == 'global') {
 		Q5._hasGlobal = $._isGlobal = true;
 		globalScope = !Q5._nodejs ? window : global;
 	}
 
-	let p = new Proxy($, {
+	let q = new Proxy($, {
 		set: (t, p, v) => {
 			$[p] = v;
 			if ($._isGlobal) globalScope[p] = v;
@@ -41,6 +42,10 @@ function Q5(scope, parent) {
 	$._targetFrameDuration = 16.666666666666668;
 	$._frameRate = $._fps = 60;
 	$._loop = true;
+	$._hooks = {
+		postCanvas: [],
+		preRender: []
+	};
 
 	let millisStart = 0;
 	$.millis = () => performance.now() - millisStart;
@@ -48,7 +53,7 @@ function Q5(scope, parent) {
 	$.noCanvas = () => {
 		if ($.canvas?.remove) $.canvas.remove();
 		$.canvas = 0;
-		p.ctx = p.drawingContext = 0;
+		q.ctx = q.drawingContext = 0;
 	};
 
 	if (window) {
@@ -57,10 +62,10 @@ function Q5(scope, parent) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
-	$._incrementPreload = () => p._preloadCount++;
-	$._decrementPreload = () => p._preloadCount--;
+	$._incrementPreload = () => q._preloadCount++;
+	$._decrementPreload = () => q._preloadCount--;
 
-	function _draw(timestamp) {
+	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
 		$._lastFrameTime ??= ts - $._targetFrameDuration;
 
@@ -69,44 +74,43 @@ function Q5(scope, parent) {
 			$._shouldResize = false;
 		}
 
-		if ($._loop) looper = raf(_draw);
+		if ($._loop) looper = raf($._draw);
 		else if ($.frameCount && !$._redraw) return;
 
 		if (looper && $.frameCount) {
 			let time_since_last = ts - $._lastFrameTime;
-			if (time_since_last < $._targetFrameDuration - 1) return;
+			if (time_since_last < $._targetFrameDuration - 4) return;
 		}
-		p.deltaTime = ts - $._lastFrameTime;
+		q.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
-		p.frameCount++;
+		q.frameCount++;
 		let pre = performance.now();
-		for (let m of Q5.prototype._methods.pre) m.call($);
-		if ($.ctx) $.ctx.save();
+		if ($._beginRender) $._beginRender();
+		if ($.ctx) $.resetMatrix();
+		for (let m of Q5.methods.pre) m.call($);
 		$.draw();
-		for (let m of Q5.prototype._methods.post) m.call($);
-		if ($.ctx) {
-			$.ctx.restore();
-			$.resetMatrix();
-		}
-		p.pmouseX = $.mouseX;
-		p.pmouseY = $.mouseY;
+		if ($._render) $._render();
+		for (let m of Q5.methods.post) m.call($);
+		if ($._finishRender) $._finishRender();
+		q.pmouseX = $.mouseX;
+		q.pmouseY = $.mouseY;
 		$._lastFrameTime = ts;
 		let post = performance.now();
 		$._fps = Math.round(1000 / (post - pre));
-	}
+	};
 	$.noLoop = () => {
 		$._loop = false;
 		looper = null;
 	};
 	$.loop = () => {
 		$._loop = true;
-		if (looper == null) _draw();
+		if (looper == null) $._draw();
 	};
 	$.isLooping = () => $._loop;
 	$.redraw = (n = 1) => {
 		$._redraw = true;
 		for (let i = 0; i < n; i++) {
-			_draw();
+			$._draw();
 		}
 		$._redraw = false;
 	};
@@ -136,7 +140,12 @@ function Q5(scope, parent) {
 	$.describe = () => {};
 
 	for (let m in Q5.modules) {
-		Q5.modules[m]($, p);
+		Q5.modules[m]($, q);
+	}
+
+	let r = Q5.renderers[$._renderer];
+	for (let m in r) {
+		r[m]($, q);
 	}
 
 	// INIT
@@ -147,12 +156,14 @@ function Q5(scope, parent) {
 		}
 	}
 
+	if (scope == 'graphics') return;
+
 	if (scope == 'global') {
 		Object.assign(Q5, $);
 		delete Q5.Q5;
 	}
 
-	for (let m of Q5.prototype._methods.init) {
+	for (let m of Q5.methods.init) {
 		m.call($);
 	}
 
@@ -168,8 +179,6 @@ function Q5(scope, parent) {
 	}
 
 	if (typeof scope == 'function') scope($);
-
-	if (scope == 'graphics') return;
 
 	Q5._instanceCount++;
 
@@ -218,8 +227,6 @@ function Q5(scope, parent) {
 
 	if (!($.setup || $.draw)) return;
 
-	$._startDone = false;
-
 	async function _start() {
 		$._startDone = true;
 		if ($._preloadCount > 0) return raf(_start);
@@ -229,7 +236,7 @@ function Q5(scope, parent) {
 		if ($.ctx === null) $.createCanvas(100, 100);
 		$._setupDone = true;
 		if ($.ctx) $.resetMatrix();
-		raf(_draw);
+		raf($._draw);
 	}
 
 	if ((arguments.length && scope != 'namespace') || preloadDefined) {
@@ -243,6 +250,7 @@ function Q5(scope, parent) {
 	}
 }
 
+Q5.renderers = {};
 Q5.modules = {};
 
 Q5._nodejs = typeof process == 'object';
@@ -253,13 +261,13 @@ Q5._friendlyError = (msg, func) => {
 };
 Q5._validateParameters = () => true;
 
-Q5.prototype._methods = {
+Q5.methods = {
 	init: [],
 	pre: [],
 	post: [],
 	remove: []
 };
-Q5.prototype.registerMethod = (m, fn) => Q5.prototype._methods[m].push(fn);
+Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
 if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;

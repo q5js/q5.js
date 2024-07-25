@@ -314,7 +314,7 @@ Features added by @quinton-ashley:
 - `opacity(globalAlpha)`: set the opacity multiplier for anything subsequently drawn to the canvas in a range between 0 (transparent) and 1 (opaque).
 - `textCache(enabled)`: Text image caching is enabled by default. Rotated text is only rendered once, and then cached as an image. This can result in ridiculously high 90x performance boosts for text-heavy sketches. Users don't need to change their code, the `text` function can be used as normal, q5 takes care of everything behind the scenes.
 - `createImage`, `loadImage`, and `createGraphics`: as a last parameter to these functions, `opt` (options) object, users can specify canvas context attributes for an image or graphic. `opt.alpha` is set to true by default.
-- `loadSound(file)`: Returns a Web Audio object with `setVolume()` and `setLoop()` functions added to it. Not as powerful as p5.sound, but it's good enough in some cases.
+- `loadSound(file)`: Returns a Web Audio object with some basic functions added for changing the volume, setting the panning, and checking if the sound is loaded. Good enough in most cases.
 - `ctx`: an instance level alias for `drawingContext`
 
 Features added by @LingDong-:
@@ -325,12 +325,13 @@ Features added by @LingDong-:
 
 ## Porting from p5.js
 
-- `createCanvas` must be run before any rendering functions are called. It can be run in `preload`. If it's not run before the draw loop starts, then q5 will run `createCanvas(100, 100)` automatically.
-- `colorMode` supports 'rgb', 'srgb', and 'oklch'. Color modes like hsv are outdated, OKLCH is superior.
+- `createCanvas` must be run before any rendering functions are called. Unlike in p5, it can be run anytime after a `Q5` instance is created, even in `preload`. If `noCanvas` isn't run before the draw loop starts, then q5 will run `createCanvas(100, 100)` automatically.
+- `loadImage` and other loading functions don't support a failure callback. If the image fails to load, q5 will throw an error.
+- `colorMode` supports 'rgb', 'srgb', and 'oklch'. Other color modes, like hsv, are so outdated they're obsolete.
 - `color` function only accepts numeric input, hex, and common named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`.
 - `fill`, `stroke`, and `background` can accept any CSS color string.
-- `colorMode` function only accepts "rgb", "srgb", or "oklch" because other formats that p5 still supports like hsv are obsolete.
 - `noise` function's default noise algorithm is perlin noise. p5's default noise is called "blocky" noise in q5 and using it requires loading the src/q5-noisier.js module.
+- `tint` doesn't change the opacity of an image, instead the tint's alpha value specifies how strong the tint should be using the "multiply" blend mode. To dynamically change the opacity of anything drawn to the canvas, use `opacity(globalAlpha)`.
 
 ## Size Comparison
 
@@ -385,11 +386,13 @@ Higher FPS (frames per second) is better.
 
 ## Contributing
 
+Please comment on issues before attempting to implement them!
+
 Check out the [q5 planning board](https://github.com/orgs/q5js/projects/1/views/1).
 
 If the q5 project is successful, all contributing developers will be paid for their work. The project will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative).
 
-Contributors must agree to the [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+Contributors must agree to the [code of conduct](CODE_OF_CONDUCT.md) and follow the [q5 code style guide](https://github.com/q5js/q5.js/wiki/q5-Code-Style-Guide).
 
 ## Licensing
 

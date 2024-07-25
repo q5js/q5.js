@@ -5,6 +5,7 @@ home
 lang
 learn
 node_modules
+tests
 package-lock.json
 index.html
 jsconfig.json

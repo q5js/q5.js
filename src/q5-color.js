@@ -1,19 +1,21 @@
-Q5.modules.color = ($, p) => {
+Q5.modules.color = ($, q) => {
 	$.RGB = $.RGBA = $._colorMode = 'rgb';
 	$.OKLCH = 'oklch';
 
-	if (Q5.supportsHDR) $.Color = Q5.ColorRGBA_P3;
-	else $.Color = Q5.ColorRGBA;
-
-	$.colorMode = (mode) => {
+	$.colorMode = (mode, format) => {
 		$._colorMode = mode;
+		let srgb = $.canvas.colorSpace == 'srgb' || mode == 'srgb';
+		format ??= srgb ? 'integer' : 'float';
+		$._colorFormat = format;
 		if (mode == 'oklch') {
-			p.Color = Q5.ColorOKLCH;
-		} else if (mode == 'rgb') {
-			if ($.canvas.colorSpace == 'srgb') p.Color = Q5.ColorRGBA;
-			else p.Color = Q5.ColorRGBA_P3;
-		} else if (mode == 'srgb') {
-			p.Color = Q5.ColorRGBA;
+			q.Color = Q5.ColorOKLCH;
+		} else {
+			let srgb = $.canvas.colorSpace == 'srgb';
+			if ($._colorFormat == 'integer') {
+				q.Color = srgb ? Q5.ColorRGBA_8 : Q5.ColorRGBA_P3_8;
+			} else {
+				q.Color = srgb ? Q5.ColorRGBA : Q5.ColorRGBA_P3;
+			}
 			$._colorMode = 'rgb';
 		}
 	};
@@ -58,27 +60,33 @@ Q5.modules.color = ($, p) => {
 		let args = arguments;
 		if (args.length == 1) {
 			if (typeof c0 == 'string') {
+				let r, g, b, a;
 				if (c0[0] == '#') {
 					if (c0.length <= 5) {
-						return new C(
-							parseInt(c0[1] + c0[1], 16),
-							parseInt(c0[2] + c0[2], 16),
-							parseInt(c0[3] + c0[3], 16),
-							c0.length == 4 ? null : parseInt(c0[4] + c0[4], 16)
-						);
+						r = parseInt(c0[1] + c0[1], 16);
+						g = parseInt(c0[2] + c0[2], 16);
+						b = parseInt(c0[3] + c0[3], 16);
+						a = c0.length == 4 ? null : parseInt(c0[4] + c0[4], 16);
+					} else {
+						r = parseInt(c0.slice(1, 3), 16);
+						g = parseInt(c0.slice(3, 5), 16);
+						b = parseInt(c0.slice(5, 7), 16);
+						a = c0.length == 7 ? null : parseInt(c0.slice(7, 9), 16);
 					}
-					return new C(
-						parseInt(c0.slice(1, 3), 16),
-						parseInt(c0.slice(3, 5), 16),
-						parseInt(c0.slice(5, 7), 16),
-						c0.length == 7 ? null : parseInt(c0.slice(7, 9), 16)
+				} else if ($._namedColors[c0]) [r, g, b] = $._namedColors[c0];
+				else {
+					console.error(
+						"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
 					);
+					return new C(0, 0, 0);
 				}
-				if ($._namedColors[c0]) return new C(...$._namedColors[c0]);
-				console.error(
-					"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
-				);
-				return new C(0, 0, 0);
+				if ($._colorFormat != 'integer') {
+					r /= 255;
+					g /= 255;
+					b /= 255;
+					if (a != null) a /= 255;
+				}
+				return new C(r, g, b, a);
 			}
 			if (Array.isArray(c0)) return new C(...c0);
 		}
@@ -148,7 +156,24 @@ Q5.ColorRGBA = class extends Q5.Color {
 		this.r = r;
 		this.g = g;
 		this.b = b;
-		this.a = a ?? 255;
+		this.a = a ?? 1;
+	}
+	get levels() {
+		return [this.r, this.g, this.b, this.a];
+	}
+	toString() {
+		return `color(srgb ${this.r} ${this.g} ${this.b} / ${this.a})`;
+	}
+};
+Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
+	toString() {
+		return `color(display-p3 ${this.r} ${this.g} ${this.b} / ${this.a})`;
+	}
+};
+// legacy 8-bit (0-255) integer color format
+Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
+	constructor(r, g, b, a) {
+		super(r, g, b, a ?? 255);
 	}
 	setRed(v) {
 		this.r = v;
@@ -169,9 +194,10 @@ Q5.ColorRGBA = class extends Q5.Color {
 		return `rgb(${this.r} ${this.g} ${this.b} / ${this.a / 255})`;
 	}
 };
-Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
+// p3 10-bit color in integer color format, for backwards compatibility
+Q5.ColorRGBA_P3_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {
-		super(r, g, b, a);
+		super(r, g, b, a ?? 255);
 		this._edited = true;
 	}
 	get r() {

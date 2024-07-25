@@ -1,10 +1,10 @@
 /* software implementation of image filters */
-Q5.modules.q2d_soft_filters = ($) => {
+Q5.renderers.q2d.soft_filters = ($) => {
 	let tmpBuf = null;
 
-	function makeTmpBuf() {
+	function ensureTmpBuf() {
 		let l = $.canvas.width * $.canvas.height * 4;
-		if (!tmpBuf || l != tmpBuf.length) {
+		if (!tmpBuf || tmpBuf.length != l) {
 			tmpBuf = new Uint8ClampedArray(l);
 		}
 	}
@@ -46,7 +46,7 @@ Q5.modules.q2d_soft_filters = ($) => {
 			}
 		};
 		$._filters[Q5.DILATE] = (data) => {
-			makeTmpBuf();
+			ensureTmpBuf();
 			tmpBuf.set(data);
 			let [w, h] = [$.canvas.width, $.canvas.height];
 			for (let i = 0; i < h; i++) {
@@ -73,7 +73,7 @@ Q5.modules.q2d_soft_filters = ($) => {
 			}
 		};
 		$._filters[Q5.ERODE] = (data) => {
-			makeTmpBuf();
+			ensureTmpBuf();
 			tmpBuf.set(data);
 			let [w, h] = [$.canvas.width, $.canvas.height];
 			for (let i = 0; i < h; i++) {
@@ -102,7 +102,7 @@ Q5.modules.q2d_soft_filters = ($) => {
 		$._filters[Q5.BLUR] = (data, rad) => {
 			rad = rad || 1;
 			rad = Math.floor(rad * $._pixelDensity);
-			makeTmpBuf();
+			ensureTmpBuf();
 			tmpBuf.set(data);
 
 			let ksize = rad * 2 + 1;

@@ -1,4 +1,4 @@
-Q5.modules.math = ($, p) => {
+Q5.modules.math = ($, q) => {
 	$.DEGREES = 'degrees';
 	$.RADIANS = 'radians';
 
@@ -27,7 +27,7 @@ Q5.modules.math = ($, p) => {
 	$.degrees = (x) => x * $._RADTODEG;
 	$.radians = (x) => x * $._DEGTORAD;
 
-	$.map = (value, istart, istop, ostart, ostop, clamp) => {
+	$.map = Q5.prototype.map = (value, istart, istop, ostart, ostop, clamp) => {
 		let val = ostart + (ostop - ostart) * (((value - istart) * 1.0) / (istop - istart));
 		if (!clamp) {
 			return val;
@@ -285,7 +285,7 @@ Q5.modules.math = ($, p) => {
 	let _noise;
 
 	$.noiseMode = (mode) => {
-		p.Noise = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
+		q.Noise = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
 		_noise = null;
 	};
 	$.noiseSeed = (seed) => {

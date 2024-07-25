@@ -1,4 +1,4 @@
-Q5.modules.q2d_text = ($, p) => {
+Q5.renderers.q2d.text = ($, q) => {
 	$.NORMAL = 'normal';
 	$.ITALIC = 'italic';
 	$.BOLD = 'bold';
@@ -18,12 +18,12 @@ Q5.modules.q2d_text = ($, p) => {
 	$._textStyle = 'normal';
 
 	$.loadFont = (url, cb) => {
-		p._preloadCount++;
+		q._preloadCount++;
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
 		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
 		f.load().then(() => {
-			p._preloadCount--;
+			q._preloadCount--;
 			if (cb) cb(name);
 		});
 		return name;

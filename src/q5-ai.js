@@ -1,6 +1,6 @@
 Q5.modules.ai = ($) => {
-	$.askAI = (q = '') => {
-		throw Error('Ask AI ✨ ' + q);
+	$.askAI = (question = '') => {
+		throw Error('Ask AI ✨ ' + question);
 	};
 
 	$._aiErrorAssistance = async (e) => {

@@ -1,4 +1,4 @@
-Q5.modules.q2d_drawing = ($) => {
+Q5.renderers.q2d.drawing = ($) => {
 	$.CHORD = 0;
 	$.PIE = 1;
 	$.OPEN = 2;
@@ -60,33 +60,6 @@ Q5.modules.q2d_drawing = ($) => {
 
 	// DRAWING SETTINGS
 
-	$.strokeWeight = (n) => {
-		if (!n) $._doStroke = false;
-		if ($._da) n *= $._da;
-		$.ctx.lineWidth = n || 0.0001;
-	};
-	$.stroke = function (c) {
-		$._doStroke = true;
-		$._strokeSet = true;
-		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
-			if (c.a <= 0) return ($._doStroke = false);
-		}
-		$.ctx.strokeStyle = c.toString();
-	};
-	$.noStroke = () => ($._doStroke = false);
-	$.fill = function (c) {
-		$._doFill = true;
-		$._fillSet = true;
-		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
-			if (c.a <= 0) return ($._doFill = false);
-		}
-		$.ctx.fillStyle = c.toString();
-	};
-	$.noFill = () => ($._doFill = false);
 	$.blendMode = (x) => ($.ctx.globalCompositeOperation = x);
 	$.strokeCap = (x) => ($.ctx.lineCap = x);
 	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
@@ -289,22 +262,18 @@ Q5.modules.q2d_drawing = ($) => {
 		return $.rect(x, y, s, s, tl, tr, br, bl);
 	};
 
-	function clearBuff() {
-		curveBuff = [];
-	}
-
 	$.beginShape = () => {
-		clearBuff();
+		curveBuff = [];
 		$.ctx.beginPath();
 		firstVertex = true;
 	};
 	$.beginContour = () => {
 		$.ctx.closePath();
-		clearBuff();
+		curveBuff = [];
 		firstVertex = true;
 	};
 	$.endContour = () => {
-		clearBuff();
+		curveBuff = [];
 		firstVertex = true;
 	};
 	$.vertex = (x, y) => {
@@ -312,7 +281,7 @@ Q5.modules.q2d_drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		clearBuff();
+		curveBuff = [];
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
 		} else {
@@ -329,7 +298,7 @@ Q5.modules.q2d_drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		clearBuff();
+		curveBuff = [];
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
@@ -339,7 +308,7 @@ Q5.modules.q2d_drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		clearBuff();
+		curveBuff = [];
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
 	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
@@ -364,7 +333,7 @@ Q5.modules.q2d_drawing = ($) => {
 		$.endShape($.CLOSE);
 	};
 	$.endShape = (close) => {
-		clearBuff();
+		curveBuff = [];
 		if (close) $.ctx.closePath();
 		ink();
 	};

@@ -1,11 +1,12 @@
-Q5.modules.sound = ($, p) => {
+Q5.modules.sound = ($, q) => {
 	$.Sound = Q5.Sound;
 	$.loadSound = (path, cb) => {
-		p._preloadCount++;
+		q._preloadCount++;
 		Q5.aud ??= new window.AudioContext();
 		let a = new Q5.Sound(path, cb);
 		a.addEventListener('canplaythrough', () => {
-			p._preloadCount--;
+			q._preloadCount--;
+			a.loaded = true;
 			if (cb) cb(a);
 		});
 		return a;
@@ -36,5 +37,11 @@ Q5.Sound = class extends Audio {
 	}
 	setPan(value) {
 		this.pan = value;
+	}
+	isLoaded() {
+		return this.loaded;
+	}
+	isPlaying() {
+		return !this.paused;
 	}
 };

@@ -20,7 +20,7 @@ Q5.Vector = class {
 		return new Q5.Vector(this.x, this.y, this.z);
 	}
 	_arg2v(x, y, z) {
-		if (x.x !== undefined) return x;
+		if (x?.x !== undefined) return x;
 		if (y !== undefined) {
 			return { x, y, z: z || 0 };
 		}
