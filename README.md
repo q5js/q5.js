@@ -1,6 +1,6 @@
 # <img src="q5js_logo.webp" height="64"> <img src="q5js_brand.webp" height="64">
 
-The unsanctioned sequel to p5.js is here!
+A sequel to p5.js that's smaller, faster, and optimized for interactive art!
 
 **q5.js** implements all of [p5][]'s 2D drawing, math, and user input functionality.
 
@@ -331,7 +331,7 @@ Features added by @LingDong-:
 - `color` function only accepts numeric input, hex, and common named colors. It doesn't parse strings like `color('hsl(160, 100%, 50%)')`.
 - `fill`, `stroke`, and `background` can accept any CSS color string.
 - `noise` function's default noise algorithm is perlin noise. p5's default noise is called "blocky" noise in q5 and using it requires loading the src/q5-noisier.js module.
-- `tint` doesn't change the opacity of an image, instead the tint's alpha value specifies how strong the tint should be using the "multiply" blend mode. To dynamically change the opacity of anything drawn to the canvas, use `opacity(globalAlpha)`.
+- `tint` doesn't change the opacity of an image, instead the tint's alpha value specifies how strong the tint should be. To dynamically change the opacity of anything drawn to the canvas, use `opacity(globalAlpha)`.
 
 ## Size Comparison
 

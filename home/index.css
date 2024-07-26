@@ -74,13 +74,22 @@ md {
 	background-color: var(--secondary);
 	padding-left: 20px;
 	padding-right: 20px;
-	/* border-radius: 16px; */
 }
 
 main {
 	position: fixed;
 	top: 0;
 	z-index: 0;
+}
+
+#topNav {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	position: fixed;
+	top: 50%;
+	translate: 0 -50%;
+	z-index: 2;
 }
 
 .reel {
@@ -106,7 +115,6 @@ main {
 
 #reel1 {
 	margin-bottom: 50vh;
-	/* display: block; */
 }
 
 #reel2 {
@@ -131,17 +139,16 @@ a {
 	text-decoration: none;
 }
 
-#q5_home {
-	display: flex;
-	justify-content: center;
-	gap: 8px;
-}
-
-.brand .img {
+#topNav .img {
 	height: 128px;
 	border-radius: 16px;
 	background-size: contain;
 	background-repeat: no-repeat;
+}
+
+#q5_home {
+	display: flex;
+	gap: 8px;
 }
 
 .q5js_logo {
@@ -162,10 +169,97 @@ a {
 	background-image: url('/assets/q5js_brand-light.webp');
 }
 
-#reel0 textarea {
-	width: 100%;
+.nav-fixed #topNav .img {
+	height: 64px;
+}
+
+.nav-fixed .q5js_logo {
+	width: 64px;
+}
+
+.nav-fixed .q5js_brand {
+	width: 128px;
+}
+
+.nav-fixed #controls {
+	opacity: 0;
+}
+
+#topNav,
+#topNav .img {
+	transition: all 0.4s ease-in-out;
+}
+
+.nav-fixed #topNav {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	top: 0;
+	padding: 16px;
+	z-index: 1000;
+	opacity: 1;
+	translate: 0 0;
+	overflow: scroll;
+	max-width: 100%;
+	transition: all 0.8s ease-in-out;
+}
+
+#navLinks {
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 16px;
+	padding: 16px;
 	background-color: var(--brand-primary);
+	border-radius: 16px;
+	height: 48px;
+	min-width: max-content;
+}
+
+#navLinks a {
+	font-size: 24px;
 	color: var(--brand-secondary);
+}
+
+#navLinks a:hover {
+	scale: 1.1;
+}
+
+#partners {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	z-index: 1;
+	gap: 8px;
+}
+
+#partners a {
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: var(--secondary);
+	border: 3px solid var(--brand-primary);
+	border-radius: 16px;
+	width: 126px;
+	height: 90px;
+}
+
+#partners img {
+	width: 96px;
+}
+
+#partners #p5play_logo {
+	height: 80%;
+}
+
+#scriptLink {
+	width: 400px;
+	background-color: var(--brand-secondary);
+	color: var(--brand-primary);
 	text-align: center;
 	margin-top: 8px;
 	margin-bottom: 6px;
@@ -237,32 +331,6 @@ a {
 	cursor: pointer;
 }
 
-#partners {
-	display: flex;
-	flex-flow: row wrap;
-	justify-content: space-between;
-}
-
-#partners a {
-	box-sizing: border-box;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background-color: var(--secondary);
-	border: 3px solid var(--brand-primary);
-	border-radius: 16px;
-	width: 126px;
-	height: 90px;
-}
-
-#partners img {
-	width: 96px;
-}
-
-#partners #p5play_logo {
-	height: 80%;
-}
-
 #controls {
 	box-sizing: border-box;
 	position: absolute;
@@ -274,6 +342,7 @@ a {
 	padding: 16px;
 	align-items: center;
 	gap: 16px;
+	transition: opacity 0.5s ease-in-out;
 }
 
 #controls .btn {
@@ -324,20 +393,43 @@ footer {
 	}
 }
 
+@media screen and (max-width: 616px) {
+	.nav-fixed #topNav {
+		justify-content: start;
+	}
+
+	#scriptLink {
+		display: none;
+	}
+}
+
 @media screen and (max-width: 400px) {
-	.brand {
+	#topNav {
 		width: 92vw;
 		gap: 2vw;
 	}
 
-	.brand .img:first-child {
+	#navLinks {
+		flex-direction: column;
+		height: fit-content;
+	}
+
+	body:not(.nav-fixed) #topNav .img:first-child {
 		width: 30vw;
 		height: 30vw;
 	}
 
-	.brand .img:nth-child(2) {
+	body:not(.nav-fixed) #topNav .img:nth-child(2) {
 		width: 60vw;
 		height: 30vw;
+	}
+
+	.nav-fixed #topNav {
+		justify-content: center;
+	}
+
+	.nav-fixed #navLinks {
+		display: none;
 	}
 
 	#reel0 textarea {

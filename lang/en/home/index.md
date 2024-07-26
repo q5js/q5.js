@@ -96,8 +96,7 @@ For extremely lightweight use, load only the features you need from q5's [source
 
 ```html
 <script src="https://q5js.org/src/q5-core.js">
-<script src="https://q5js.org/src/q5-2d-canvas.js">
-<script src="https://q5js.org/src/q5-2d-drawing.js">
+<script src="https://q5js.org/src/q5-input.js">
 ```
 
 # 10-4
@@ -112,7 +111,11 @@ Make it "centered", "maxed", or "fullscreen" without clipping or changing the as
 
 ## WebGPU 🚀
 
-We're working on next-gen rendering modules for q5 that use [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) for blazing fast drawing. Stay tuned! 🏎️
+We're working on [q5-webgpu rendering modules](https://github.com/q5js/q5.js/tree/main/src#webgpu-canvas) for blazing fast drawing. Try out the dev build today! 🏎️
+
+```html
+<script src="https://q5js.org/q5-webgpu.js">
+```
 
 # 11-0
 

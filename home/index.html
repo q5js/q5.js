@@ -7,43 +7,35 @@
 	<title>q5</title>
 	<link rel="icon" href="/q5js_logo.webp">
 	<link rel="stylesheet" href="index.css">
-	<meta name="description" content="q5.js is the sequel to p5.js that's smaller and faster!">
+	<meta name="description" content="q5.js is a sequel to p5.js that's smaller and faster!">
 
 	<meta property="og:title" content="q5js">
 	<meta property="og:type" content="website">
 	<meta property="og:url" content="https://q5js.org">
 	<meta property="og:image" content="q5js_logo.webp">
-	<meta property="og:description" content="q5.js is the sequel to p5.js that's smaller and faster!">
+	<meta property="og:description" content="q5.js is a sequel to p5.js that's smaller and faster!">
 </head>
 
 <body class="dark">
 	<main></main>
-	<div id="reel0" class="reel">
-		<div class="brand">
-			<div id="q5_home">
-				<div class="img q5js_logo"></div>
-				<div class="img q5js_brand"></div>
-			</div>
-			<textarea rows="1" readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
-			<nav id="partners">
-				<a href="https://b5editor.app/"
-					title="b5 - A node based online editor for introducing q5.js to young programmers." target="_blank">
-					<img id="b5_brand" src="/assets/brands/b5_brand.svg" alt="">
-				</a>
-				<a href="https://aijs.io/editor?user=AIJS&amp;project=q5.js-Template"
-					title="Aijs - The most versatile browser-based IDE for creative coding." target="_blank">
-					<img id="aijs_brand" src="/assets/brands/aijs_brand.svg" alt="">
-				</a>
-				<a href="https://p5play.org"
-					title="p5play - A JavaScript game engine that uses q5.js for graphics and Box2D for physics." target="_blank">
-					<img id="p5play_logo" src="/assets/brands/p5play_logo.svg" alt="">
-				</a>
-			</nav>
+	<nav id="topNav">
+		<a id="q5_home" href="../home">
+			<div class="img q5js_logo"></div>
+			<div class="img q5js_brand"></div>
+		</a>
+		<div id="navLinks">
+			<a href="../learn">📖&nbsp;Learn</a>
+			<a href="../demos">⭐️&nbsp;Demos</a>
+			<a href="https://patreon.com/p5play">💙&nbsp;Donate</a>
 		</div>
+	</nav>
+	<div id="reel0" class="reel">
 		<div id="controls">
 			<div class="btn">
 				<div id="darkModeIcon"></div>
 			</div>
+			<textarea id="scriptLink" rows="1"
+				readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
 			<div class="btn">
 				<div id="fullscreenIcon"></div>
 			</div>
@@ -73,6 +65,25 @@ function setup() {
 			</script>
 		</div>
 	</div>
+	<!-- <div class="reel">
+		<md>
+			<h2>Used by</h2>
+		</md>
+		<div id="partners">
+			<a href="https://b5editor.app/"
+				title="b5 - A node based online editor for introducing q5.js to young programmers." target="_blank">
+				<img id="b5_brand" src="/assets/brands/b5_brand.svg" alt="">
+			</a>
+			<a href="https://aijs.io/editor?user=AIJS&amp;project=q5.js-Template"
+				title="Aijs - The most versatile browser-based IDE for creative coding." target="_blank">
+				<img id="aijs_brand" src="/assets/brands/aijs_brand.svg" alt="">
+			</a>
+			<a href="https://p5play.org"
+				title="p5play - A JavaScript game engine that uses q5.js for graphics and Box2D for physics." target="_blank">
+				<img id="p5play_logo" src="/assets/brands/p5play_logo.svg" alt="">
+			</a>
+		</div>
+	</div> -->
 	<div id="reel2" class="reel">
 		<md id="md2-0">
 			<h2 id="more-vibrant-colors-🎨">More vibrant colors! 🎨</h2>
@@ -80,7 +91,10 @@ function setup() {
 		<div class="minis horiz">
 			<div>
 				<script type="mie/p5" id="SDR" hide-editor="">
-window.calcMiniWidth = () => (min(windowWidth, 1200) - 72) / 2;
+window.calcMiniWidth = () => {
+	let w = min(windowWidth, 1200) - 100;
+	return (w > 700) ? w / 2 : w;
+};
 
 let colors = ['blue', 'yellow', 'cyan', 'lime', 'magenta', 'red', 'white', 'black'];
 
@@ -292,9 +306,11 @@ createCanvas(400, 400);
 			</md>
 			<md id="md10-5">
 				<h2 id="webgpu-🚀">WebGPU 🚀</h2>
-				<p>We're working on next-gen rendering modules for q5 that use <a
-						href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API" target="_blank">WebGPU</a> for blazing
-					fast drawing. Stay tuned! 🏎️</p>
+				<p>We're working on <a href="https://github.com/q5js/q5.js/tree/main/src#webgpu-canvas"
+						target="_blank">q5-webgpu rendering modules</a> for blazing fast drawing. Try out the dev build today! 🏎️
+				</p>
+				<pre><code class="language-html">&lt;script src="https://q5js.org/q5-webgpu.js"&gt;
+</code></pre>
 			</md>
 		</div>
 	</div>
@@ -429,6 +445,9 @@ createCanvas(400, 400);
 	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ext-beautify.js"></script>
 	<script src="main.js"></script>
 	<script src="/home/mie.js"></script>
+
+
+
 </body>
 
 </html>

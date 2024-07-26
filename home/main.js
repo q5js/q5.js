@@ -32,3 +32,12 @@ document.getElementById('fullscreenIcon').addEventListener('click', () => {
 	if (document.fullscreenElement) document.exitFullscreen();
 	else document.documentElement.requestFullscreen();
 });
+
+window.addEventListener('scroll', function () {
+	if (window.scrollY > 50) {
+		// Adjust the scroll position as needed
+		document.body.classList.add('nav-fixed');
+	} else {
+		document.body.classList.remove('nav-fixed');
+	}
+});
