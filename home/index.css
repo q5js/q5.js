@@ -201,7 +201,6 @@ a {
 	z-index: 1000;
 	opacity: 1;
 	translate: 0 0;
-	overflow: scroll;
 	max-width: 100%;
 	transition: all 0.8s ease-in-out;
 }
@@ -220,7 +219,7 @@ a {
 }
 
 #navLinks a {
-	font-size: 24px;
+	font-size: 22px;
 	color: var(--brand-secondary);
 }
 
@@ -398,6 +397,7 @@ footer {
 		justify-content: start;
 	}
 
+	.nav-fixed #navLinks,
 	#scriptLink {
 		display: none;
 	}
@@ -414,22 +414,18 @@ footer {
 		height: fit-content;
 	}
 
-	body:not(.nav-fixed) #topNav .img:first-child {
+	body:not(.nav-fixed) #topNav .q5js_logo {
 		width: 30vw;
 		height: 30vw;
 	}
 
-	body:not(.nav-fixed) #topNav .img:nth-child(2) {
+	body:not(.nav-fixed) #topNav .q5js_brand {
 		width: 60vw;
 		height: 30vw;
 	}
 
 	.nav-fixed #topNav {
 		justify-content: center;
-	}
-
-	.nav-fixed #navLinks {
-		display: none;
 	}
 
 	#reel0 textarea {
