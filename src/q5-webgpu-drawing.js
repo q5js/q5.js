@@ -4,56 +4,7 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 	let verticesStack, drawStack, colorsStack;
 
 	$._hooks.postCanvas.push(() => {
-		verticesStack = $.verticesStack;
-		drawStack = $.drawStack;
-		colorsStack = $.colorsStack;
-
-		let vertexBufferLayout = {
-			arrayStride: 12, // 2 coordinates + 1 color index * 4 bytes each
-			attributes: [
-				{
-					format: 'float32x2',
-					offset: 0,
-					shaderLocation: 0 // position
-				},
-				{
-					format: 'float32',
-					offset: 8,
-					shaderLocation: 1 // colorIndex
-				}
-			]
-		};
-
-		let vertexShader = Q5.device.createShaderModule({
-			code: `
-struct VertexOutput {
-	@builtin(position) position: vec4<f32>,
-	@location(1) colorIndex: f32
-};
-
-@vertex
-fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32) -> VertexOutput {
-	var output: VertexOutput;
-	output.position = vec4<f32>(pos, 0.0, 1.0);
-	output.colorIndex = colorIndex;
-	return output;
-}
-`
-		});
-
-		let fragmentShader = Q5.device.createShaderModule({
-			code: `
-@group(0) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
-
-@fragment
-fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
-	let index = u32(colorIndex);
-	return mix(uColors[index], uColors[index + 1u], fract(colorIndex));
-}
-`
-		});
-
-		let bindGroupLayout = Q5.device.createBindGroupLayout({
+		let colorsLayout = Q5.device.createBindGroupLayout({
 			entries: [
 				{
 					binding: 0,
@@ -66,31 +17,160 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 			]
 		});
 
-		let pipelineLayout = Q5.device.createPipelineLayout({
-			bindGroupLayouts: [bindGroupLayout]
+		$.bindGroupLayouts.push(colorsLayout);
+
+		verticesStack = $.verticesStack;
+		drawStack = $.drawStack;
+		colorsStack = $.colorsStack;
+
+		let vertexBufferLayout = {
+			arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
+			attributes: [
+				{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
+				{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex
+				{ format: 'float32', offset: 12, shaderLocation: 2 } // transformIndex
+			]
+		};
+
+		let vertexShader = Q5.device.createShaderModule({
+			code: `
+struct VertexOutput {
+	@builtin(position) position: vec4<f32>,
+	@location(1) colorIndex: f32
+};
+
+struct Uniforms {
+	halfWidth: f32,
+	halfHeight: f32
+};
+
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(1) @binding(0) var<storage, read> transforms: array<mat4x4<f32>>;
+
+@vertex
+fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @location(2) transformIndex: f32) -> VertexOutput {
+	var vert = vec4<f32>(pos, 0.0, 1.0);
+	vert *= transforms[i32(transformIndex)];
+	vert.x /= uniforms.halfWidth;
+	vert.y /= uniforms.halfHeight;
+
+	var output: VertexOutput;
+	output.position = vert;
+	output.colorIndex = colorIndex;
+	return output;
+}
+`
 		});
 
-		$.pipelines[0] = Q5.device.createRenderPipeline({
-			layout: pipelineLayout,
-			vertex: {
-				module: vertexShader,
-				entryPoint: 'vertexMain',
-				buffers: [vertexBufferLayout]
-			},
-			fragment: {
-				module: fragmentShader,
-				entryPoint: 'fragmentMain',
-				targets: [
-					{
-						format: $._canvasFormat
-					}
-				]
-			},
-			primitive: {
-				topology: 'triangle-list'
-			}
+		let fragmentShader = Q5.device.createShaderModule({
+			code: `
+@group(2) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
+
+@fragment
+fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
+	let index = u32(colorIndex);
+	return mix(uColors[index], uColors[index + 1u], fract(colorIndex));
+}
+`
 		});
+
+		let pipelineLayout = Q5.device.createPipelineLayout({
+			bindGroupLayouts: $.bindGroupLayouts
+		});
+
+		$._createPipeline = (blendConfig) => {
+			return Q5.device.createRenderPipeline({
+				layout: pipelineLayout,
+				vertex: {
+					module: vertexShader,
+					entryPoint: 'vertexMain',
+					buffers: [vertexBufferLayout]
+				},
+				fragment: {
+					module: fragmentShader,
+					entryPoint: 'fragmentMain',
+					targets: [
+						{
+							format: 'bgra8unorm',
+							blend: blendConfig
+						}
+					]
+				},
+				primitive: {
+					topology: 'triangle-list'
+				}
+			});
+		};
+
+		$.pipelines[0] = $._createPipeline(blendConfigs.normal);
 	});
+
+	// prettier-ignore
+	let blendFactors = [
+			'zero',                // 0
+			'one',                 // 1
+			'src-alpha',           // 2
+			'one-minus-src-alpha', // 3
+			'dst',                 // 4
+			'dst-alpha',           // 5
+			'one-minus-dst-alpha', // 6
+			'one-minus-src'        // 7
+	];
+	let blendOps = [
+		'add', // 0
+		'subtract', // 1
+		'reverse-subtract', // 2
+		'min', // 3
+		'max' // 4
+	];
+
+	const blendModes = {
+		normal: [2, 3, 0, 2, 3, 0],
+		lighter: [2, 1, 0, 2, 1, 0],
+		subtract: [2, 1, 2, 2, 1, 2],
+		multiply: [4, 0, 0, 5, 0, 0],
+		screen: [1, 3, 0, 1, 3, 0],
+		darken: [1, 3, 3, 1, 3, 3],
+		lighten: [1, 3, 4, 1, 3, 4],
+		overlay: [2, 3, 0, 2, 3, 0],
+		hard_light: [2, 3, 0, 2, 3, 0],
+		soft_light: [2, 3, 0, 2, 3, 0],
+		difference: [2, 3, 2, 2, 3, 2],
+		exclusion: [2, 3, 0, 2, 3, 0],
+		color_dodge: [1, 7, 0, 1, 7, 0],
+		color_burn: [6, 1, 0, 6, 1, 0],
+		linear_dodge: [2, 1, 0, 2, 1, 0],
+		linear_burn: [2, 7, 1, 2, 7, 1],
+		vivid_light: [2, 7, 0, 2, 7, 0],
+		pin_light: [2, 7, 0, 2, 7, 0],
+		hard_mix: [2, 7, 0, 2, 7, 0]
+	};
+
+	$.blendConfigs = {};
+
+	Object.entries(blendModes).forEach(([name, mode]) => {
+		$.blendConfigs[name] = {
+			color: {
+				srcFactor: blendFactors[mode[0]],
+				dstFactor: blendFactors[mode[1]],
+				operation: blendOps[mode[2]]
+			},
+			alpha: {
+				srcFactor: blendFactors[mode[3]],
+				dstFactor: blendFactors[mode[4]],
+				operation: blendOps[mode[5]]
+			}
+		};
+	});
+
+	$._blendMode = 'normal';
+	$.blendMode = (mode) => {
+		if (mode == $._blendMode) return;
+		if (mode == 'source-over') mode = 'normal';
+		mode = mode.toLowerCase().replace(/[ -]/g, '_');
+		$._blendMode = mode;
+		$.pipelines[0] = $._createPipeline($.blendConfigs[mode]);
+	};
 
 	let shapeVertices;
 
@@ -99,35 +179,40 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	};
 
 	$.vertex = (x, y) => {
-		shapeVertices.push(x / $.canvas.hw, -y / $.canvas.hh, $._colorIndex);
+		if ($._matrixDirty) $._saveMatrix();
+		shapeVertices.push(x, -y, $._colorIndex, $._transformIndex);
 	};
 
 	$.endShape = (close) => {
-		if (shapeVertices.length < 6) {
+		let v = shapeVertices;
+		if (v.length < 12) {
 			throw new Error('A shape must have at least 3 vertices.');
 		}
 		if (close) {
 			// Close the shape by adding the first vertex at the end
-			shapeVertices.push(shapeVertices[0], shapeVertices[1], shapeVertices[2]);
+			v.push(v[0], v[1], v[2], v[3]);
 		}
 		// Convert the shape to triangles
 		let triangles = [];
-		for (let i = 3; i < shapeVertices.length; i += 3) {
+		for (let i = 4; i < v.length; i += 4) {
 			triangles.push(
-				shapeVertices[0],
-				shapeVertices[1],
-				shapeVertices[2], // First vertex
-				shapeVertices[i - 3],
-				shapeVertices[i - 2],
-				shapeVertices[i - 1], // Previous vertex
-				shapeVertices[i],
-				shapeVertices[i + 1],
-				shapeVertices[i + 2] // Current vertex
+				v[0], // First vertex
+				v[1],
+				v[2],
+				v[3],
+				v[i - 4], // Previous vertex
+				v[i - 3],
+				v[i - 2],
+				v[i - 1],
+				v[i], // Current vertex
+				v[i + 1],
+				v[i + 2],
+				v[i + 3]
 			);
 		}
 
 		verticesStack.push(...triangles);
-		drawStack.push(triangles.length / 3);
+		drawStack.push(triangles.length / 4);
 		shapeVertices = [];
 	};
 
@@ -142,36 +227,46 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	$.rect = (x, y, w, h) => {
 		let hw = w / 2;
 		let hh = h / 2;
-		// convert the coordinates from pixel space to NDC space
-		let left = (x - hw) / $.canvas.hw;
-		let right = (x + hw) / $.canvas.hw;
-		let top = -(y - hh) / $.canvas.hh; // y is inverted in WebGPU
-		let bottom = -(y + hh) / $.canvas.hh; // y is inverted in WebGPU
+
+		let left = x - hw;
+		let right = x + hw;
+		let top = -(y - hh); // y is inverted in WebGPU
+		let bottom = -(y + hh);
 
 		let ci = $._colorIndex;
+		if ($._matrixDirty) $._saveMatrix();
+		let ti = $._transformIndex;
 		// two triangles make a rectangle
 		verticesStack.push(
 			left,
 			top,
 			ci,
+			ti,
 			right,
 			top,
 			ci,
+			ti,
 			left,
 			bottom,
 			ci,
+			ti,
 			right,
 			top,
 			ci,
+			ti,
 			left,
 			bottom,
 			ci,
+			ti,
 			right,
 			bottom,
-			ci
+			ci,
+			ti
 		);
 		drawStack.push(6);
 	};
+
+	$.background = () => {};
 
 	/**
 	 * Derived from: ceil(Math.log(d) * 7) * 2 - ceil(28)
@@ -215,14 +310,11 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		let a = Math.max(w, 1) / 2;
 		let b = w == h ? a : Math.max(h, 1) / 2;
 
-		x /= $.canvas.hw;
-		y /= -$.canvas.hh;
-		a /= $.canvas.hw;
-		b /= -$.canvas.hh;
-
 		let t = 0; // theta
 		const angleIncrement = $.TAU / n;
 		const ci = $._colorIndex;
+		if ($._matrixDirty) $._saveMatrix();
+		const ti = $._transformIndex;
 		let vx1, vy1, vx2, vy2;
 		for (let i = 0; i <= n; i++) {
 			vx1 = vx2;
@@ -233,17 +325,13 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 			if (i == 0) continue;
 
-			verticesStack.push(x, y, ci, vx1, vy1, ci, vx2, vy2, ci);
+			verticesStack.push(x, y, ci, ti, vx1, vy1, ci, ti, vx2, vy2, ci, ti);
 		}
 
 		drawStack.push(n * 3);
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
-
-	$.noStroke = () => {};
-
-	$.background = () => {};
 
 	$._hooks.preRender.push(() => {
 		const vertexBuffer = Q5.device.createBuffer({
@@ -254,20 +342,20 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		Q5.device.queue.writeBuffer(vertexBuffer, 0, new Float32Array(verticesStack));
 		$.pass.setVertexBuffer(0, vertexBuffer);
 
-		const colorBuffer = Q5.device.createBuffer({
+		const colorsBuffer = Q5.device.createBuffer({
 			size: colorsStack.length * 4,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 		});
 
-		Q5.device.queue.writeBuffer(colorBuffer, 0, new Float32Array(colorsStack));
+		Q5.device.queue.writeBuffer(colorsBuffer, 0, new Float32Array(colorsStack));
 
-		const bindGroup = Q5.device.createBindGroup({
-			layout: $.pipelines[0].getBindGroupLayout(0),
+		const colorsBindGroup = Q5.device.createBindGroup({
+			layout: $.bindGroupLayouts[2],
 			entries: [
 				{
 					binding: 0,
 					resource: {
-						buffer: colorBuffer,
+						buffer: colorsBuffer,
 						offset: 0,
 						size: colorsStack.length * 4
 					}
@@ -276,6 +364,6 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		});
 
 		// set the bind group once before rendering
-		$.pass.setBindGroup(0, bindGroup);
+		$.pass.setBindGroup(2, colorsBindGroup);
 	});
 };

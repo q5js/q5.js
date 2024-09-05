@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.1
+ * @version 2.2
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -85,8 +85,8 @@ function Q5(scope, parent, renderer) {
 		$._frameRate = 1000 / $.deltaTime;
 		q.frameCount++;
 		let pre = performance.now();
-		if ($._beginRender) $._beginRender();
 		if ($.ctx) $.resetMatrix();
+		if ($._beginRender) $._beginRender();
 		for (let m of Q5.methods.pre) m.call($);
 		$.draw();
 		if ($._render) $._render();

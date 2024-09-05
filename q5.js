@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.1
+ * @version 2.2
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -85,8 +85,8 @@ function Q5(scope, parent, renderer) {
 		$._frameRate = 1000 / $.deltaTime;
 		q.frameCount++;
 		let pre = performance.now();
-		if ($._beginRender) $._beginRender();
 		if ($.ctx) $.resetMatrix();
+		if ($._beginRender) $._beginRender();
 		for (let m of Q5.methods.pre) m.call($);
 		$.draw();
 		if ($._render) $._render();
@@ -524,22 +524,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.drawImage(o, 0, 0, o.w, o.h);
 	};
 
-	$.strokeWeight = (n) => {
-		if (!n) $._doStroke = false;
-		if ($._da) n *= $._da;
-		$.ctx.lineWidth = n || 0.0001;
-	};
-	$.stroke = function (c) {
-		$._doStroke = true;
-		$._strokeSet = true;
-		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
-			if (c.a <= 0) return ($._doStroke = false);
-		}
-		$.ctx.strokeStyle = c.toString();
-	};
-	$.noStroke = () => ($._doStroke = false);
 	$.fill = function (c) {
 		$._doFill = true;
 		$._fillSet = true;
@@ -551,6 +535,23 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.fillStyle = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
+	$.stroke = function (c) {
+		$._doStroke = true;
+		$._strokeSet = true;
+		if (Q5.Color) {
+			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (c.a <= 0) return ($._doStroke = false);
+		}
+		$.ctx.strokeStyle = c.toString();
+	};
+	$.strokeWeight = (n) => {
+		if (!n) $._doStroke = false;
+		if ($._da) n *= $._da;
+		$.ctx.lineWidth = n || 0.0001;
+	};
+	$.noStroke = () => ($._doStroke = false);
+	$.clear = () => $.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
 
 	// DRAWING MATRIX
 
@@ -715,10 +716,6 @@ Q5.renderers.q2d.drawing = ($) => {
 
 	// DRAWING
 
-	$.clear = () => {
-		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-	};
-
 	$.background = function (c) {
 		if (c.canvas) return $.image(c, 0, 0, $.width, $.height);
 		$.ctx.save();
@@ -876,18 +873,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			bl *= $._da;
 			br *= $._da;
 		}
-		const hh = Math.min(Math.abs(h), Math.abs(w)) / 2;
-		tl = Math.min(hh, tl);
-		tr = Math.min(hh, tr);
-		bl = Math.min(hh, bl);
-		br = Math.min(hh, br);
-		$.ctx.beginPath();
-		$.ctx.moveTo(x + tl, y);
-		$.ctx.arcTo(x + w, y, x + w, y + h, tr);
-		$.ctx.arcTo(x + w, y + h, x, y + h, br);
-		$.ctx.arcTo(x, y + h, x, y, bl);
-		$.ctx.arcTo(x, y, x + w, y, tl);
-		$.ctx.closePath();
+		$.ctx.roundRect(x, y, w, h, [tl, tr, br, bl]);
 		ink();
 	}
 
@@ -1852,12 +1838,12 @@ Q5.modules.color = ($, q) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || mode == 'srgb';
 		format ??= srgb ? 'integer' : 'float';
-		$._colorFormat = format;
+		$._colorFormat = format == 'float' || format == 1 ? 1 : 255;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
 		} else {
 			let srgb = $.canvas.colorSpace == 'srgb';
-			if ($._colorFormat == 'integer') {
+			if ($._colorFormat == 255) {
 				q.Color = srgb ? Q5.ColorRGBA_8 : Q5.ColorRGBA_P3_8;
 			} else {
 				q.Color = srgb ? Q5.ColorRGBA : Q5.ColorRGBA_P3;
@@ -1900,48 +1886,49 @@ Q5.modules.color = ($, q) => {
 		yellow: [255, 255, 0]
 	};
 
-	$.color = function (c0, c1, c2, c3) {
+	$.color = (c0, c1, c2, c3) => {
 		let C = $.Color;
 		if (c0._q5Color) return new C(...c0.levels);
-		let args = arguments;
-		if (args.length == 1) {
+		if (c1 == undefined) {
 			if (typeof c0 == 'string') {
-				let r, g, b, a;
 				if (c0[0] == '#') {
 					if (c0.length <= 5) {
-						r = parseInt(c0[1] + c0[1], 16);
-						g = parseInt(c0[2] + c0[2], 16);
-						b = parseInt(c0[3] + c0[3], 16);
-						a = c0.length == 4 ? null : parseInt(c0[4] + c0[4], 16);
+						if (c0.length > 4) c3 = parseInt(c0[4] + c0[4], 16);
+						c2 = parseInt(c0[3] + c0[3], 16);
+						c1 = parseInt(c0[2] + c0[2], 16);
+						c0 = parseInt(c0[1] + c0[1], 16);
 					} else {
-						r = parseInt(c0.slice(1, 3), 16);
-						g = parseInt(c0.slice(3, 5), 16);
-						b = parseInt(c0.slice(5, 7), 16);
-						a = c0.length == 7 ? null : parseInt(c0.slice(7, 9), 16);
+						if (c0.length > 7) c3 = parseInt(c0.slice(7, 9), 16);
+						c2 = parseInt(c0.slice(5, 7), 16);
+						c1 = parseInt(c0.slice(3, 5), 16);
+						c0 = parseInt(c0.slice(1, 3), 16);
 					}
-				} else if ($._namedColors[c0]) [r, g, b] = $._namedColors[c0];
-				else {
+				} else if ($._namedColors[c0]) {
+					c0 = $._namedColors[c0];
+				} else {
 					console.error(
 						"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
 					);
 					return new C(0, 0, 0);
 				}
-				if ($._colorFormat != 'integer') {
-					r /= 255;
-					g /= 255;
-					b /= 255;
-					if (a != null) a /= 255;
-				}
-				return new C(r, g, b, a);
 			}
-			if (Array.isArray(c0)) return new C(...c0);
+			if (Array.isArray(c0)) {
+				c1 = c0[1];
+				c2 = c0[2];
+				c3 = c0[3];
+				c0 = c0[0];
+			}
 		}
-		if ($._colorMode == 'rgb') {
-			if (args.length == 1) return new C(c0, c0, c0);
-			if (args.length == 2) return new C(c0, c0, c0, c1);
+
+		if ($._colorFormat == 1) {
+			c0 /= 255;
+			if (c1) c1 /= 255;
+			if (c2) c2 /= 255;
+			if (c3) c3 /= 255;
 		}
-		if (args.length == 3) return new C(c0, c1, c2);
-		if (args.length == 4) return new C(c0, c1, c2, c3);
+
+		if (c2 == undefined) return new C(c0, c0, c0, c1);
+		return new C(c0, c1, c2, c3);
 	};
 
 	$.red = (c) => c.r;

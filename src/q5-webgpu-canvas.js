@@ -13,13 +13,12 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 'float');
 
-	let colorsStack;
+	let colorsStack, envBindGroup, transformBindGroup;
 
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
 
-		$._canvasFormat = navigator.gpu.getPreferredCanvasFormat();
-		opt.format = $._canvasFormat;
+		opt.format = navigator.gpu.getPreferredCanvasFormat();
 		opt.device = Q5.device;
 
 		$.ctx.configure(opt);
@@ -36,18 +35,153 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$.drawStack = [];
 
 		// colors used for each draw call
-		colorsStack = $.colorsStack = [];
+		colorsStack = $.colorsStack = [1, 1, 1, 1];
 
 		// current color index, used to associate a vertex with a color
-		$._colorIndex = -1;
+		$._colorIndex = 0;
+
+		let envLayout = Q5.device.createBindGroupLayout({
+			entries: [
+				{
+					binding: 0,
+					visibility: GPUShaderStage.VERTEX,
+					buffer: {
+						type: 'uniform',
+						hasDynamicOffset: false
+					}
+				}
+			]
+		});
+
+		let transformLayout = Q5.device.createBindGroupLayout({
+			entries: [
+				{
+					binding: 0,
+					visibility: GPUShaderStage.VERTEX,
+					buffer: {
+						type: 'read-only-storage',
+						hasDynamicOffset: false
+					}
+				}
+			]
+		});
+
+		$.bindGroupLayouts = [envLayout, transformLayout];
+
+		const uniformBuffer = Q5.device.createBuffer({
+			size: 8, // Size of two floats
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+		});
+
+		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
+
+		envBindGroup = Q5.device.createBindGroup({
+			layout: envLayout,
+			entries: [
+				{
+					binding: 0,
+					resource: {
+						buffer: uniformBuffer
+					}
+				}
+			]
+		});
 	};
 
 	$._resizeCanvas = (w, h) => {
 		$._setCanvasSize(w, h);
 	};
 
-	$.resetMatrix = () => {};
-	$.translate = () => {};
+	$.resetMatrix = () => {
+		// Initialize the transformation matrix as 4x4 identity matrix
+
+		// prettier-ignore
+		$._matrix = [
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+		];
+		$._transformIndex = 0;
+	};
+	$.resetMatrix();
+
+	// Boolean to track if the matrix has been modified
+	$._matrixDirty = false;
+
+	// Array to store transformation matrices for the render pass
+	$.transformStates = [$._matrix.slice()];
+
+	// Stack to keep track of transformation matrix indexes
+	$._transformIndexStack = [];
+
+	$.push = () => {
+		// Push the current matrix index onto the stack
+		$._transformIndexStack.push($._transformIndex);
+	};
+
+	$.pop = () => {
+		if ($._transformIndexStack.length > 0) {
+			// Pop the last matrix index from the stack and set it as the current matrix index
+			let idx = $._transformIndexStack.pop();
+			$._matrix = $.transformStates[idx].slice();
+			$._transformIndex = idx;
+		} else {
+			console.warn('Matrix index stack is empty!');
+		}
+	};
+
+	$.translate = (x, y, z) => {
+		if (!x && !y && !z) return;
+		// Update the translation values
+		$._matrix[3] += x;
+		$._matrix[7] += y;
+		$._matrix[11] += z || 0;
+		$._matrixDirty = true;
+	};
+
+	$.rotate = (r) => {
+		if (!r) return;
+		if ($._angleMode == 'degrees') r = $.radians(r);
+
+		let cosR = Math.cos(r);
+		let sinR = Math.sin(r);
+
+		let m0 = $._matrix[0],
+			m1 = $._matrix[1],
+			m4 = $._matrix[4],
+			m5 = $._matrix[5];
+		if (!m0 && !m1 && !m4 && !m5) {
+			$._matrix[0] = cosR;
+			$._matrix[1] = sinR;
+			$._matrix[4] = -sinR;
+			$._matrix[5] = cosR;
+		} else {
+			$._matrix[0] = m0 * cosR + m4 * sinR;
+			$._matrix[1] = m1 * cosR + m5 * sinR;
+			$._matrix[4] = m0 * -sinR + m4 * cosR;
+			$._matrix[5] = m1 * -sinR + m5 * cosR;
+		}
+
+		$._matrixDirty = true;
+	};
+
+	$.scale = (sx = 1, sy, sz = 1) => {
+		sy ??= sx;
+
+		$._matrix[0] *= sx;
+		$._matrix[5] *= sy;
+		$._matrix[10] *= sz;
+
+		$._matrixDirty = true;
+	};
+
+	// Function to save the current matrix state if dirty
+	$._saveMatrix = () => {
+		$.transformStates.push($._matrix.slice());
+		$._transformIndex = $.transformStates.length - 1;
+		$._matrixDirty = false;
+	};
 
 	$._beginRender = () => {
 		$.encoder = Q5.device.createCommandEncoder();
@@ -64,12 +198,38 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._render = () => {
+		$.pass.setBindGroup(0, envBindGroup);
+
+		if (transformStates.length > 1 || !transformBindGroup) {
+			const transformBuffer = Q5.device.createBuffer({
+				size: transformStates.length * 64, // Size of 16 floats
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+			});
+
+			Q5.device.queue.writeBuffer(transformBuffer, 0, new Float32Array(transformStates.flat()));
+
+			transformBindGroup = Q5.device.createBindGroup({
+				layout: $.bindGroupLayouts[1],
+				entries: [
+					{
+						binding: 0,
+						resource: {
+							buffer: transformBuffer
+						}
+					}
+				]
+			});
+		}
+
+		$.pass.setBindGroup(1, transformBindGroup);
+
 		// run pre-render methods
 		for (let m of $._hooks.preRender) m();
 
 		$.pass.setPipeline($.pipelines[0]);
 
-		let drawStack = $.drawStack; // local variables used for performance
+		// local variables used for performance
+		let drawStack = $.drawStack;
 		let o = 0; // vertex offset
 		for (let i = 0; i < drawStack.length; i++) {
 			$.pass.draw(drawStack[i], 1, o, 0);
@@ -86,30 +246,41 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		// clear the stacks for the next frame
 		$.verticesStack.length = 0;
 		$.drawStack.length = 0;
-		$.colorsStack.length = 0;
+		$.colorsStack.length = 4;
 		$.pipelinesStack.length = 0;
-		$._colorIndex = -1;
+		$._colorIndex = 0;
+		rotation = 0;
+		$.resetMatrix();
+		$._matrixDirty = false;
+		$.transformStates.length = 1;
+		$._transformIndexStack.length = 0;
 	};
 
 	$.fill = (r, g, b, a = 1) => {
+		if (typeof r == 'string') r = Q5.color(r);
 		// grayscale mode `fill(1, 0.5)`
 		if (b == undefined) {
 			a = g;
 			g = b = r;
 		}
-		let levels;
-		if (r._q5Color) levels = r.levels;
-		else levels = [r, g, b, a];
-
-		colorsStack.push(...levels);
+		if (r._q5Color) colorsStack.push(...r.levels);
+		else colorsStack.push(r, g, b, a);
 		$._colorIndex++;
 	};
+	$.noFill = () => colorsStack.push(0, 0, 0, 0);
+	$.stroke = () => {};
+	$.noStroke = () => {};
+
+	$.clear = () => {};
 };
 
 Q5.webgpu = async function (scope, parent) {
 	if (!navigator.gpu) {
 		console.error('q5 WebGPU not supported on this browser!');
-		return new Q5(scope, parent);
+		let q = new Q5(scope, parent);
+		q.colorMode('rgb', 1);
+		q._beginRender = () => q.translate(q.canvas.hw, q.canvas.hh);
+		return q;
 	}
 	let adapter = await navigator.gpu.requestAdapter();
 	if (!adapter) throw new Error('No appropriate GPUAdapter found.');

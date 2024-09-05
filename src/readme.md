@@ -43,17 +43,17 @@ WebGPU rendering modules are in development:
 
 - [Modular Use](#modular-use)
 - [Module Info](#module-info)
-	- [core](#core)
-	- [canvas](#canvas)
-	- [q2d-canvas](#q2d-canvas)
-	- [q2d-drawing](#q2d-drawing)
-	- [q2d-image](#q2d-image)
-	- [q2d-soft-filters](#q2d-soft-filters)
-	- [q2d-text](#q2d-text)
-	- [webgpu-canvas](#webgpu-canvas)
-	- [webgpu-drawing](#webgpu-drawing)
-	- [math](#math)
-	- [noisier](#noisier)
+  - [core](#core)
+  - [canvas](#canvas)
+  - [q2d-canvas](#q2d-canvas)
+  - [q2d-drawing](#q2d-drawing)
+  - [q2d-image](#q2d-image)
+  - [q2d-soft-filters](#q2d-soft-filters)
+  - [q2d-text](#q2d-text)
+  - [webgpu-canvas](#webgpu-canvas)
+  - [webgpu-drawing](#webgpu-drawing)
+  - [math](#math)
+  - [noisier](#noisier)
 
 ## core
 
@@ -109,7 +109,7 @@ Image based features in this module require the q5-2d-image module.
 
 > ⚠️ Experimental features! ⚠️
 
-This module adds WebGPU rendering support to q5.
+This module adds WebGPU renderer support to q5. Note that images, text, and strokes can not be rendered yet.
 
 Instead of `new Q5()`, run the async function `Q5.webgpu()`. Explicit use of `createCanvas` is required.
 
@@ -135,25 +135,25 @@ q.draw = function () {
 };
 ```
 
+The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser.
+
+In that case, q5 will put a warning in the console and fall back to the q2d renderer. A compatibility layer is applied which sets the color mode to "rgba" in float format and translates the origin to the center of the canvas on every frame. For now, be sure to set `noStroke` in your setup code and `clear` the canvas at the start of your `draw` function to match current q5 webgpu limitations.
+
 Implemented functions:
 
-`createCanvas`, `resizeCanvas`
+`createCanvas`, `resizeCanvas`, `fill`, `clear`, `push`, `pop`, `resetMatrix`, `translate`, `rotate`, `scale`
 
 ## webgpu-drawing
 
 > Uses `colorMode('rgb', 'float')` by default. Changing it to 'oklch' is not supported yet for the webgpu renderer.
 
-> All basic shapes are drawn from their center. Strokes are not implemented yet.
+All basic shapes are drawn from their center. Strokes are not implemented yet.
 
-q5's WebGPU renderer drawing functions like `rect` don't actually draw anything to the canvas. Instead, they prepare vertex and color data to be sent to the GPU in bulk, which occurs after the user's `draw` function and any post-draw addon functions are run. This approach better utilizes the GPU, so it doesn't have to repeatedly wait for the CPU to send small chunks of data that describe each individual shape. It's why webgpu is typically 2-3x faster than canvas 2d.
-
-Hooks into the q5-core `draw` loop were added to support webgpu rendering: `_beginRender`, `_render`, `_finishRender`.
-
-The current implementation is provided to give developers a taste of what q5 programming will be like with webgpu. Significant changes need to be made to support transformations such as rotation and scaling.
+q5's WebGPU renderer drawing functions like `rect` don't immediately draw on the canvas. Instead, they prepare vertex and color data to be sent to the GPU in bulk, which occurs after the user's `draw` function and any post-draw functions are run. This approach better utilizes the GPU, so it doesn't have to repeatedly wait for the CPU to send small chunks of data that describe each individual shape. It's why WebGPU is faster than Canvas2D.
 
 Implemented functions:
 
-`fill`, `rect`, `circle`, `ellipse`, `triangle`, `beginShape`, `vertex`, `endShape`
+`rect`, `circle`, `ellipse`, `triangle`, `beginShape`, `vertex`, `endShape`, `blendMode`
 
 ## math
 

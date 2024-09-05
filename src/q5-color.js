@@ -6,12 +6,12 @@ Q5.modules.color = ($, q) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || mode == 'srgb';
 		format ??= srgb ? 'integer' : 'float';
-		$._colorFormat = format;
+		$._colorFormat = format == 'float' || format == 1 ? 1 : 255;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
 		} else {
 			let srgb = $.canvas.colorSpace == 'srgb';
-			if ($._colorFormat == 'integer') {
+			if ($._colorFormat == 255) {
 				q.Color = srgb ? Q5.ColorRGBA_8 : Q5.ColorRGBA_P3_8;
 			} else {
 				q.Color = srgb ? Q5.ColorRGBA : Q5.ColorRGBA_P3;
@@ -54,48 +54,49 @@ Q5.modules.color = ($, q) => {
 		yellow: [255, 255, 0]
 	};
 
-	$.color = function (c0, c1, c2, c3) {
+	$.color = (c0, c1, c2, c3) => {
 		let C = $.Color;
 		if (c0._q5Color) return new C(...c0.levels);
-		let args = arguments;
-		if (args.length == 1) {
+		if (c1 == undefined) {
 			if (typeof c0 == 'string') {
-				let r, g, b, a;
 				if (c0[0] == '#') {
 					if (c0.length <= 5) {
-						r = parseInt(c0[1] + c0[1], 16);
-						g = parseInt(c0[2] + c0[2], 16);
-						b = parseInt(c0[3] + c0[3], 16);
-						a = c0.length == 4 ? null : parseInt(c0[4] + c0[4], 16);
+						if (c0.length > 4) c3 = parseInt(c0[4] + c0[4], 16);
+						c2 = parseInt(c0[3] + c0[3], 16);
+						c1 = parseInt(c0[2] + c0[2], 16);
+						c0 = parseInt(c0[1] + c0[1], 16);
 					} else {
-						r = parseInt(c0.slice(1, 3), 16);
-						g = parseInt(c0.slice(3, 5), 16);
-						b = parseInt(c0.slice(5, 7), 16);
-						a = c0.length == 7 ? null : parseInt(c0.slice(7, 9), 16);
+						if (c0.length > 7) c3 = parseInt(c0.slice(7, 9), 16);
+						c2 = parseInt(c0.slice(5, 7), 16);
+						c1 = parseInt(c0.slice(3, 5), 16);
+						c0 = parseInt(c0.slice(1, 3), 16);
 					}
-				} else if ($._namedColors[c0]) [r, g, b] = $._namedColors[c0];
-				else {
+				} else if ($._namedColors[c0]) {
+					c0 = $._namedColors[c0];
+				} else {
 					console.error(
 						"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
 					);
 					return new C(0, 0, 0);
 				}
-				if ($._colorFormat != 'integer') {
-					r /= 255;
-					g /= 255;
-					b /= 255;
-					if (a != null) a /= 255;
-				}
-				return new C(r, g, b, a);
 			}
-			if (Array.isArray(c0)) return new C(...c0);
+			if (Array.isArray(c0)) {
+				c1 = c0[1];
+				c2 = c0[2];
+				c3 = c0[3];
+				c0 = c0[0];
+			}
 		}
-		if ($._colorMode == 'rgb') {
-			if (args.length == 1) return new C(c0, c0, c0);
-			if (args.length == 2) return new C(c0, c0, c0, c1);
+
+		if ($._colorFormat == 1) {
+			c0 /= 255;
+			if (c1) c1 /= 255;
+			if (c2) c2 /= 255;
+			if (c3) c3 /= 255;
 		}
-		if (args.length == 3) return new C(c0, c1, c2);
-		if (args.length == 4) return new C(c0, c1, c2, c3);
+
+		if (c2 == undefined) return new C(c0, c0, c0, c1);
+		return new C(c0, c1, c2, c3);
 	};
 
 	$.red = (c) => c.r;

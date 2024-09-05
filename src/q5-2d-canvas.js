@@ -43,22 +43,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.drawImage(o, 0, 0, o.w, o.h);
 	};
 
-	$.strokeWeight = (n) => {
-		if (!n) $._doStroke = false;
-		if ($._da) n *= $._da;
-		$.ctx.lineWidth = n || 0.0001;
-	};
-	$.stroke = function (c) {
-		$._doStroke = true;
-		$._strokeSet = true;
-		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
-			if (c.a <= 0) return ($._doStroke = false);
-		}
-		$.ctx.strokeStyle = c.toString();
-	};
-	$.noStroke = () => ($._doStroke = false);
 	$.fill = function (c) {
 		$._doFill = true;
 		$._fillSet = true;
@@ -70,6 +54,23 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.fillStyle = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
+	$.stroke = function (c) {
+		$._doStroke = true;
+		$._strokeSet = true;
+		if (Q5.Color) {
+			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (c.a <= 0) return ($._doStroke = false);
+		}
+		$.ctx.strokeStyle = c.toString();
+	};
+	$.strokeWeight = (n) => {
+		if (!n) $._doStroke = false;
+		if ($._da) n *= $._da;
+		$.ctx.lineWidth = n || 0.0001;
+	};
+	$.noStroke = () => ($._doStroke = false);
+	$.clear = () => $.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
 
 	// DRAWING MATRIX
 
