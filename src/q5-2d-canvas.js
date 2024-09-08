@@ -70,7 +70,12 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.lineWidth = n || 0.0001;
 	};
 	$.noStroke = () => ($._doStroke = false);
-	$.clear = () => $.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+	$.clear = () => {
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.restore();
+	};
 
 	// DRAWING MATRIX
 

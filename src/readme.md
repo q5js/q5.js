@@ -109,11 +109,9 @@ Image based features in this module require the q5-2d-image module.
 
 > ⚠️ Experimental features! ⚠️
 
-To use q5's WebGPU renderer, run `Q5.webgpu()` at the top of your sketch. Explicit use of `createCanvas` is required.
+To use q5's WebGPU renderer, run `Q5.webgpu()` at the bottom of your sketch. Explicit use of `createCanvas` is required.
 
 ```js
-Q5.webgpu();
-
 function setup() {
 	createCanvas(200, 200);
 	noStroke();
@@ -123,6 +121,8 @@ function draw() {
 	clear();
 	rect(50, 50, 100, 100);
 }
+
+Q5.webgpu();
 ```
 
 For now, be sure to set `noStroke` in your setup code and `clear` the canvas at the start of your `draw` function to match current q5 webgpu limitations.

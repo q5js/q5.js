@@ -298,7 +298,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 Q5.webgpu = async function (scope, parent) {
 	if (!scope || scope == 'global') Q5._hasGlobal = true;
 	if (!navigator.gpu) {
-		console.error('q5 WebGPU not supported on this browser!');
+		console.warn('q5 WebGPU not supported on this browser!');
 		let q = new Q5(scope, parent);
 		q.colorMode('rgb', 1);
 		q._beginRender = () => q.translate(q.canvas.hw, q.canvas.hh);

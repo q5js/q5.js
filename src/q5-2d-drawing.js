@@ -72,15 +72,17 @@ Q5.renderers.q2d.drawing = ($) => {
 	// DRAWING
 
 	$.background = function (c) {
-		if (c.canvas) return $.image(c, 0, 0, $.width, $.height);
 		$.ctx.save();
 		$.ctx.resetTransform();
-		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+		if (c.canvas) $.image(c, 0, 0, $.width, $.height);
+		else {
+			if (Q5.Color) {
+				if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
+			$.ctx.fillStyle = c.toString();
+			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		}
-		$.ctx.fillStyle = c.toString();
-		$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		$.ctx.restore();
 	};
 

@@ -551,7 +551,12 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.lineWidth = n || 0.0001;
 	};
 	$.noStroke = () => ($._doStroke = false);
-	$.clear = () => $.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+	$.clear = () => {
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.restore();
+	};
 
 	// DRAWING MATRIX
 
@@ -717,15 +722,17 @@ Q5.renderers.q2d.drawing = ($) => {
 	// DRAWING
 
 	$.background = function (c) {
-		if (c.canvas) return $.image(c, 0, 0, $.width, $.height);
 		$.ctx.save();
 		$.ctx.resetTransform();
-		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+		if (c.canvas) $.image(c, 0, 0, $.width, $.height);
+		else {
+			if (Q5.Color) {
+				if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
+			$.ctx.fillStyle = c.toString();
+			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		}
-		$.ctx.fillStyle = c.toString();
-		$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		$.ctx.restore();
 	};
 
@@ -1904,12 +1911,19 @@ Q5.modules.color = ($, q) => {
 						c0 = parseInt(c0.slice(1, 3), 16);
 					}
 				} else if ($._namedColors[c0]) {
-					c0 = $._namedColors[c0];
+					[c0, c1, c2, c3] = $._namedColors[c0];
 				} else {
 					console.error(
 						"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
 					);
 					return new C(0, 0, 0);
+				}
+
+				if ($._colorFormat == 1) {
+					c0 /= 255;
+					if (c1) c1 /= 255;
+					if (c2) c2 /= 255;
+					if (c3) c3 /= 255;
 				}
 			}
 			if (Array.isArray(c0)) {
@@ -1918,13 +1932,6 @@ Q5.modules.color = ($, q) => {
 				c3 = c0[3];
 				c0 = c0[0];
 			}
-		}
-
-		if ($._colorFormat == 1) {
-			c0 /= 255;
-			if (c1) c1 /= 255;
-			if (c2) c2 /= 255;
-			if (c3) c3 /= 255;
 		}
 
 		if (c2 == undefined) return new C(c0, c0, c0, c1);
