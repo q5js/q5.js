@@ -89,16 +89,9 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 				fragment: {
 					module: fragmentShader,
 					entryPoint: 'fragmentMain',
-					targets: [
-						{
-							format: 'bgra8unorm',
-							blend: blendConfig
-						}
-					]
+					targets: [{ format: 'bgra8unorm', blend: blendConfig }]
 				},
-				primitive: {
-					topology: 'triangle-list'
-				}
+				primitive: { topology: 'triangle-list' }
 			});
 		};
 
@@ -212,7 +205,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		}
 
 		verticesStack.push(...triangles);
-		drawStack.push(triangles.length / 4);
+		drawStack.push(0, triangles.length / 4);
 		shapeVertices = [];
 	};
 
@@ -237,33 +230,22 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 		// two triangles make a rectangle
+		// prettier-ignore
 		verticesStack.push(
-			left,
-			top,
-			ci,
-			ti,
-			right,
-			top,
-			ci,
-			ti,
-			left,
-			bottom,
-			ci,
-			ti,
-			right,
-			top,
-			ci,
-			ti,
-			left,
-			bottom,
-			ci,
-			ti,
-			right,
-			bottom,
-			ci,
-			ti
+			left, top, ci, ti,
+			right, top, ci, ti,
+			left, bottom, ci, ti,
+			right, top, ci, ti,
+			left, bottom, ci, ti,
+			right, bottom, ci, ti
 		);
-		drawStack.push(6);
+		drawStack.push(0, 6);
+	};
+
+	$.point = (x, y) => {
+		let sw = $._strokeWeight;
+		if (sw == 1) $.rect(x, y, 1, 1);
+		else $.ellipse(x, y, sw, sw);
 	};
 
 	$.background = () => {};
@@ -328,7 +310,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 			verticesStack.push(x, y, ci, ti, vx1, vy1, ci, ti, vx2, vy2, ci, ti);
 		}
 
-		drawStack.push(n * 3);
+		drawStack.push(0, n * 3);
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);

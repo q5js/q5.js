@@ -239,7 +239,7 @@ function Q5(scope, parent, renderer) {
 		raf($._draw);
 	}
 
-	if ((arguments.length && scope != 'namespace') || preloadDefined) {
+	if ((arguments.length && scope != 'namespace' && renderer != 'webgpu') || preloadDefined) {
 		$.preload();
 		_start();
 	} else {
@@ -1936,7 +1936,28 @@ Q5.modules.color = ($, q) => {
 	$.blue = (c) => c.b;
 	$.alpha = (c) => c.a;
 	$.lightness = (c) => {
+		if ($._colorMode == 'oklch') return c.l;
 		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
+	};
+	$.hue = (c) => {
+		if ($._colorMode == 'oklch') return c.h;
+		let r = c.r;
+		let g = c.g;
+		let b = c.b;
+		if ($._colorFormat == 255) {
+			r /= 255;
+			g /= 255;
+			b /= 255;
+		}
+		let max = Math.max(r, g, b);
+		let min = Math.min(r, g, b);
+		let h;
+		if (max == min) h = 0;
+		else if (max == r) h = (60 * (g - b)) / (max - min);
+		else if (max == g) h = (60 * (b - r)) / (max - min) + 120;
+		else h = (60 * (r - g)) / (max - min) + 240;
+		if (h < 0) h += 360;
+		return h;
 	};
 
 	$.lerpColor = (a, b, t) => {
@@ -2392,33 +2413,21 @@ Q5.modules.math = ($, q) => {
 	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
-	$.sin = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.sin(a);
-	};
-	$.cos = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.cos(a);
-	};
-	$.tan = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.tan(a);
-	};
-	$.asin = (x) => {
-		let a = Math.asin(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.acos = (x) => {
-		let a = Math.acos(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.atan = (x) => {
-		let a = Math.atan(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
+
+	for (let fn of ['sin', 'cos', 'tan']) {
+		$[fn] = (a) => {
+			if ($._angleMode == 'degrees') a = $.radians(a);
+			return Math[fn](a);
+		};
+	}
+
+	for (let fn of ['asin', 'acos', 'atan']) {
+		$[fn] = (x) => {
+			let a = Math[fn](x);
+			if ($._angleMode == 'degrees') a = $.degrees(a);
+			return a;
+		};
+	}
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
 		if ($._angleMode == 'degrees') a = $.degrees(a);

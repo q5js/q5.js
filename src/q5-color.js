@@ -104,7 +104,28 @@ Q5.modules.color = ($, q) => {
 	$.blue = (c) => c.b;
 	$.alpha = (c) => c.a;
 	$.lightness = (c) => {
+		if ($._colorMode == 'oklch') return c.l;
 		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
+	};
+	$.hue = (c) => {
+		if ($._colorMode == 'oklch') return c.h;
+		let r = c.r;
+		let g = c.g;
+		let b = c.b;
+		if ($._colorFormat == 255) {
+			r /= 255;
+			g /= 255;
+			b /= 255;
+		}
+		let max = Math.max(r, g, b);
+		let min = Math.min(r, g, b);
+		let h;
+		if (max == min) h = 0;
+		else if (max == r) h = (60 * (g - b)) / (max - min);
+		else if (max == g) h = (60 * (b - r)) / (max - min) + 120;
+		else h = (60 * (r - g)) / (max - min) + 240;
+		if (h < 0) h += 360;
+		return h;
 	};
 
 	$.lerpColor = (a, b, t) => {

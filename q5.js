@@ -239,7 +239,7 @@ function Q5(scope, parent, renderer) {
 		raf($._draw);
 	}
 
-	if ((arguments.length && scope != 'namespace') || preloadDefined) {
+	if ((arguments.length && scope != 'namespace' && renderer != 'webgpu') || preloadDefined) {
 		$.preload();
 		_start();
 	} else {
@@ -1760,7 +1760,28 @@ Q5.modules.color = ($, q) => {
 	$.blue = (c) => c.b;
 	$.alpha = (c) => c.a;
 	$.lightness = (c) => {
+		if ($._colorMode == 'oklch') return c.l;
 		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
+	};
+	$.hue = (c) => {
+		if ($._colorMode == 'oklch') return c.h;
+		let r = c.r;
+		let g = c.g;
+		let b = c.b;
+		if ($._colorFormat == 255) {
+			r /= 255;
+			g /= 255;
+			b /= 255;
+		}
+		let max = Math.max(r, g, b);
+		let min = Math.min(r, g, b);
+		let h;
+		if (max == min) h = 0;
+		else if (max == r) h = (60 * (g - b)) / (max - min);
+		else if (max == g) h = (60 * (b - r)) / (max - min) + 120;
+		else h = (60 * (r - g)) / (max - min) + 240;
+		if (h < 0) h += 360;
+		return h;
 	};
 
 	$.lerpColor = (a, b, t) => {
@@ -2216,33 +2237,21 @@ Q5.modules.math = ($, q) => {
 	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
-	$.sin = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.sin(a);
-	};
-	$.cos = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.cos(a);
-	};
-	$.tan = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.tan(a);
-	};
-	$.asin = (x) => {
-		let a = Math.asin(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.acos = (x) => {
-		let a = Math.acos(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.atan = (x) => {
-		let a = Math.atan(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
+
+	for (let fn of ['sin', 'cos', 'tan']) {
+		$[fn] = (a) => {
+			if ($._angleMode == 'degrees') a = $.radians(a);
+			return Math[fn](a);
+		};
+	}
+
+	for (let fn of ['asin', 'acos', 'atan']) {
+		$[fn] = (x) => {
+			let a = Math[fn](x);
+			if ($._angleMode == 'degrees') a = $.degrees(a);
+			return a;
+		};
+	}
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
 		if ($._angleMode == 'degrees') a = $.degrees(a);
@@ -2906,7 +2915,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 'float');
 
-	let colorsStack, envBindGroup, transformBindGroup;
+	let pass, colorsStack, envBindGroup, transformBindGroup;
 
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
@@ -3079,7 +3088,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$._beginRender = () => {
 		$.encoder = Q5.device.createCommandEncoder();
 
-		q.pass = $.encoder.beginRenderPass({
+		pass = q.pass = $.encoder.beginRenderPass({
 			colorAttachments: [
 				{
 					view: ctx.getCurrentTexture().createView(),
@@ -3091,7 +3100,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._render = () => {
-		$.pass.setBindGroup(0, envBindGroup);
+		pass.setBindGroup(0, envBindGroup);
 
 		if (transformStates.length > 1 || !transformBindGroup) {
 			const transformBuffer = Q5.device.createBuffer({
@@ -3114,24 +3123,31 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			});
 		}
 
-		$.pass.setBindGroup(1, transformBindGroup);
+		pass.setBindGroup(1, transformBindGroup);
 
 		// run pre-render methods
 		for (let m of $._hooks.preRender) m();
 
-		$.pass.setPipeline($.pipelines[0]);
-
 		// local variables used for performance
 		let drawStack = $.drawStack;
-		let o = 0; // vertex offset
-		for (let i = 0; i < drawStack.length; i++) {
-			$.pass.draw(drawStack[i], 1, o, 0);
-			o += drawStack[i];
+
+		let drawVertOffset = 0;
+		let curPipelineIndex = -1;
+
+		for (let i = 0; i < drawStack.length; i += 2) {
+			if (curPipelineIndex != drawStack[i]) {
+				curPipelineIndex = drawStack[i];
+				pass.setPipeline($.pipelines[curPipelineIndex]);
+			}
+
+			let vertCount = drawStack[i + 1];
+			pass.draw(vertCount, 1, drawVertOffset, 0);
+			drawVertOffset += vertCount;
 		}
 	};
 
 	$._finishRender = () => {
-		$.pass.end();
+		pass.end();
 		const commandBuffer = $.encoder.finish();
 		Q5.device.queue.submit([commandBuffer]);
 		q.pass = $.encoder = null;
@@ -3149,7 +3165,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._transformIndexStack.length = 0;
 	};
 
-	$.fill = (r, g, b, a = 1) => {
+	function addColor(r, g, b, a = 1) {
 		if (typeof r == 'string') r = Q5.color(r);
 		// grayscale mode `fill(1, 0.5)`
 		if (b == undefined) {
@@ -3159,15 +3175,30 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (r._q5Color) colorsStack.push(...r.levels);
 		else colorsStack.push(r, g, b, a);
 		$._colorIndex++;
+	}
+
+	$.fill = function () {
+		addColor(...arguments);
+		$._doFill = true;
+		$._fillIndex = $._colorIndex;
 	};
-	$.noFill = () => colorsStack.push(0, 0, 0, 0);
-	$.stroke = () => {};
-	$.noStroke = () => {};
+	$.stroke = function () {
+		addColor(...arguments);
+		$._doStroke = true;
+		$._fillIndex = $._colorIndex;
+	};
+
+	$.noFill = () => ($._doFill = false);
+	$.noStroke = () => ($._doStroke = false);
+
+	$._strokeWeight = 1;
+	$.strokeWeight = (v) => ($._strokeWeight = v);
 
 	$.clear = () => {};
 };
 
 Q5.webgpu = async function (scope, parent) {
+	if (!scope || scope == 'global') Q5._hasGlobal = true;
 	if (!navigator.gpu) {
 		console.error('q5 WebGPU not supported on this browser!');
 		let q = new Q5(scope, parent);
@@ -3272,16 +3303,9 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 				fragment: {
 					module: fragmentShader,
 					entryPoint: 'fragmentMain',
-					targets: [
-						{
-							format: 'bgra8unorm',
-							blend: blendConfig
-						}
-					]
+					targets: [{ format: 'bgra8unorm', blend: blendConfig }]
 				},
-				primitive: {
-					topology: 'triangle-list'
-				}
+				primitive: { topology: 'triangle-list' }
 			});
 		};
 
@@ -3395,7 +3419,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		}
 
 		verticesStack.push(...triangles);
-		drawStack.push(triangles.length / 4);
+		drawStack.push(0, triangles.length / 4);
 		shapeVertices = [];
 	};
 
@@ -3420,33 +3444,22 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 		// two triangles make a rectangle
+		// prettier-ignore
 		verticesStack.push(
-			left,
-			top,
-			ci,
-			ti,
-			right,
-			top,
-			ci,
-			ti,
-			left,
-			bottom,
-			ci,
-			ti,
-			right,
-			top,
-			ci,
-			ti,
-			left,
-			bottom,
-			ci,
-			ti,
-			right,
-			bottom,
-			ci,
-			ti
+			left, top, ci, ti,
+			right, top, ci, ti,
+			left, bottom, ci, ti,
+			right, top, ci, ti,
+			left, bottom, ci, ti,
+			right, bottom, ci, ti
 		);
-		drawStack.push(6);
+		drawStack.push(0, 6);
+	};
+
+	$.point = (x, y) => {
+		let sw = $._strokeWeight;
+		if (sw == 1) $.rect(x, y, 1, 1);
+		else $.ellipse(x, y, sw, sw);
 	};
 
 	$.background = () => {};
@@ -3511,7 +3524,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 			verticesStack.push(x, y, ci, ti, vx1, vy1, ci, ti, vx2, vy2, ci, ti);
 		}
 
-		drawStack.push(n * 3);
+		drawStack.push(0, n * 3);
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);

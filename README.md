@@ -4,7 +4,7 @@ A sequel to p5.js that's smaller, faster, and optimized for interactive art!
 
 **q5.js** implements all of [p5][]'s 2D drawing, math, and user input functionality.
 
-It's a drop-in replacement that's ~70x smaller than p5, while packing exclusive new features: HDR color support, modular use, top-level global mode, namespace mode, text image caching, dimension agnostic mode, and more.
+It's a drop-in replacement that's 98% smaller than p5, while packing exclusive new features: HDR color support, modular use, top-level global mode, namespace mode, text image caching, dimension agnostic mode, and more.
 
 ## Typical Use
 
@@ -339,13 +339,13 @@ Unminified:
 
 - p5.js **5112kb** ⚠️
 - p5.sound.js 488kb
-- q5.js 74kb
+- q5.js 83kb
 
 Minified:
 
 - p5.min.js 1034kb ⚠️
 - p5.sound.min.js 200kb
-- q5.min.js **48kb** 🎉
+- q5.min.js **54kb** 🎉
 
 ## Benchmarks
 

@@ -78,7 +78,7 @@ createCanvas(400, 400);
 
 [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) is a great library but typical use doesn't require its extensive sound generation and filtering features. 🎛️
 
-That's why q5.js includes sounds loading, playback, and basic mixing by default. 🎚️
+q5.js includes sound loading, playback, and basic mixing by default. 🎚️
 
 # 10-2
 
@@ -86,7 +86,7 @@ That's why q5.js includes sounds loading, playback, and basic mixing by default.
 
 p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️
 
-q5.js is only 74kb, that's 70x smaller. 🌳
+q5.js is only 84kb, that's 98% smaller. 🌳
 
 # 10-3
 
@@ -111,11 +111,9 @@ Make it "centered", "maxed", or "fullscreen" without clipping or changing the as
 
 ## WebGPU 🚀
 
-We're working on [q5-webgpu rendering modules](https://github.com/q5js/q5.js/tree/main/src#webgpu-canvas) for blazing fast drawing. Try out the dev build today! 🏎️
+We're working on [q5-webgpu rendering modules](https://github.com/q5js/q5.js/tree/main/src#webgpu-canvas) for blazing fast drawing, up to [16x faster](https://github.com/q5js/q5.js/wiki/Developer-Log#q5js-webgpu-is-16x-faster-than-p5js-webgl--july-25-2024) than p5! 🏎️
 
-```html
-<script src="https://q5js.org/q5-webgpu.js">
-```
+Check out the [rainbow loops](https://aijs.io/editor?user=quinton-ashley&project=rainbowLoops) and [butterfly](https://aijs.io/editor?user=quinton-ashley&project=q5-webgpu_transformations) demos. 🌈
 
 # 11-0
 

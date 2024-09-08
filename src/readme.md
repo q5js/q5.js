@@ -109,35 +109,43 @@ Image based features in this module require the q5-2d-image module.
 
 > ⚠️ Experimental features! ⚠️
 
-This module adds WebGPU renderer support to q5. Note that images, text, and strokes can not be rendered yet.
+To use q5's WebGPU renderer, run `Q5.webgpu()` at the top of your sketch. Explicit use of `createCanvas` is required.
 
-Instead of `new Q5()`, run the async function `Q5.webgpu()`. Explicit use of `createCanvas` is required.
+```js
+Q5.webgpu();
+
+function setup() {
+	createCanvas(200, 200);
+	noStroke();
+}
+
+function draw() {
+	clear();
+	rect(50, 50, 100, 100);
+}
+```
+
+For now, be sure to set `noStroke` in your setup code and `clear` the canvas at the start of your `draw` function to match current q5 webgpu limitations.
+
+The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and fall back to the q2d renderer. A compatibility layer is applied which sets the color mode to "rgba" in float format and translates the origin to the center of the canvas on every frame.
+
+Use of top level global mode with the WebGPU renderer requires that you make your sketch file a js module and await the `Q5.webgpu()` function.
+
+```html
+<script type="module" src="sketch.js">
+```
 
 ```js
 let q = await Q5.webgpu();
 
-createCanvas(500, 500);
-```
+createCanvas(200, 200);
+noStroke();
 
-Set the script type of your sketch to "module" to use `await` on the top level.
-
-```html
-<script type="module" src="sketch.js"></script>
-```
-
-Using q5 with the webgpu renderer requires a different approach to setting up sketches. That's because variables and functions declared in a module are not added to the global `window` object.
-
-Add functions like `setup` and `draw` as properties of `q`, the instance of Q5.
-
-```js
-q.draw = function () {
-	// draw stuff
+q.draw = () => {
+	clear();
+	rect(50, 50, 100, 100);
 };
 ```
-
-The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser.
-
-In that case, q5 will put a warning in the console and fall back to the q2d renderer. A compatibility layer is applied which sets the color mode to "rgba" in float format and translates the origin to the center of the canvas on every frame. For now, be sure to set `noStroke` in your setup code and `clear` the canvas at the start of your `draw` function to match current q5 webgpu limitations.
 
 Implemented functions:
 

@@ -13,7 +13,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 'float');
 
-	let colorsStack, envBindGroup, transformBindGroup;
+	let pass, colorsStack, envBindGroup, transformBindGroup;
 
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
@@ -186,7 +186,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$._beginRender = () => {
 		$.encoder = Q5.device.createCommandEncoder();
 
-		q.pass = $.encoder.beginRenderPass({
+		pass = q.pass = $.encoder.beginRenderPass({
 			colorAttachments: [
 				{
 					view: ctx.getCurrentTexture().createView(),
@@ -198,7 +198,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._render = () => {
-		$.pass.setBindGroup(0, envBindGroup);
+		pass.setBindGroup(0, envBindGroup);
 
 		if (transformStates.length > 1 || !transformBindGroup) {
 			const transformBuffer = Q5.device.createBuffer({
@@ -221,24 +221,31 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			});
 		}
 
-		$.pass.setBindGroup(1, transformBindGroup);
+		pass.setBindGroup(1, transformBindGroup);
 
 		// run pre-render methods
 		for (let m of $._hooks.preRender) m();
 
-		$.pass.setPipeline($.pipelines[0]);
-
 		// local variables used for performance
 		let drawStack = $.drawStack;
-		let o = 0; // vertex offset
-		for (let i = 0; i < drawStack.length; i++) {
-			$.pass.draw(drawStack[i], 1, o, 0);
-			o += drawStack[i];
+
+		let drawVertOffset = 0;
+		let curPipelineIndex = -1;
+
+		for (let i = 0; i < drawStack.length; i += 2) {
+			if (curPipelineIndex != drawStack[i]) {
+				curPipelineIndex = drawStack[i];
+				pass.setPipeline($.pipelines[curPipelineIndex]);
+			}
+
+			let vertCount = drawStack[i + 1];
+			pass.draw(vertCount, 1, drawVertOffset, 0);
+			drawVertOffset += vertCount;
 		}
 	};
 
 	$._finishRender = () => {
-		$.pass.end();
+		pass.end();
 		const commandBuffer = $.encoder.finish();
 		Q5.device.queue.submit([commandBuffer]);
 		q.pass = $.encoder = null;
@@ -256,7 +263,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._transformIndexStack.length = 0;
 	};
 
-	$.fill = (r, g, b, a = 1) => {
+	function addColor(r, g, b, a = 1) {
 		if (typeof r == 'string') r = Q5.color(r);
 		// grayscale mode `fill(1, 0.5)`
 		if (b == undefined) {
@@ -266,15 +273,30 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (r._q5Color) colorsStack.push(...r.levels);
 		else colorsStack.push(r, g, b, a);
 		$._colorIndex++;
+	}
+
+	$.fill = function () {
+		addColor(...arguments);
+		$._doFill = true;
+		$._fillIndex = $._colorIndex;
 	};
-	$.noFill = () => colorsStack.push(0, 0, 0, 0);
-	$.stroke = () => {};
-	$.noStroke = () => {};
+	$.stroke = function () {
+		addColor(...arguments);
+		$._doStroke = true;
+		$._fillIndex = $._colorIndex;
+	};
+
+	$.noFill = () => ($._doFill = false);
+	$.noStroke = () => ($._doStroke = false);
+
+	$._strokeWeight = 1;
+	$.strokeWeight = (v) => ($._strokeWeight = v);
 
 	$.clear = () => {};
 };
 
 Q5.webgpu = async function (scope, parent) {
+	if (!scope || scope == 'global') Q5._hasGlobal = true;
 	if (!navigator.gpu) {
 		console.error('q5 WebGPU not supported on this browser!');
 		let q = new Q5(scope, parent);

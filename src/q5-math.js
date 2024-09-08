@@ -48,33 +48,21 @@ Q5.modules.math = ($, q) => {
 	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
-	$.sin = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.sin(a);
-	};
-	$.cos = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.cos(a);
-	};
-	$.tan = (a) => {
-		if ($._angleMode == 'degrees') a = $.radians(a);
-		return Math.tan(a);
-	};
-	$.asin = (x) => {
-		let a = Math.asin(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.acos = (x) => {
-		let a = Math.acos(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
-	$.atan = (x) => {
-		let a = Math.atan(x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
-	};
+
+	for (let fn of ['sin', 'cos', 'tan']) {
+		$[fn] = (a) => {
+			if ($._angleMode == 'degrees') a = $.radians(a);
+			return Math[fn](a);
+		};
+	}
+
+	for (let fn of ['asin', 'acos', 'atan']) {
+		$[fn] = (x) => {
+			let a = Math[fn](x);
+			if ($._angleMode == 'degrees') a = $.degrees(a);
+			return a;
+		};
+	}
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
 		if ($._angleMode == 'degrees') a = $.degrees(a);

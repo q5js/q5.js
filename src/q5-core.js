@@ -239,7 +239,7 @@ function Q5(scope, parent, renderer) {
 		raf($._draw);
 	}
 
-	if ((arguments.length && scope != 'namespace') || preloadDefined) {
+	if ((arguments.length && scope != 'namespace' && renderer != 'webgpu') || preloadDefined) {
 		$.preload();
 		_start();
 	} else {
