@@ -5,8 +5,7 @@ Q5.modules.ai = ($) => {
 
 	$._aiErrorAssistance = async (e) => {
 		let askAI = e.message?.includes('Ask AI ✨');
-		if (!askAI) console.error(e);
-		if (Q5.disableFriendlyErrors) return;
+		if (Q5.disableFriendlyErrors && !askAI) return;
 		if (askAI || !Q5.errorTolerant) $.noLoop();
 		let stackLines = e.stack?.split('\n');
 		if (!e.stack || stackLines.length <= 1) return;
@@ -17,7 +16,7 @@ Q5.modules.ai = ($) => {
 			idx = 0;
 			sep = '@';
 		}
-		while (stackLines[idx].indexOf('q5.js:') >= 0) idx++;
+		while (stackLines[idx].indexOf('q5') >= 0) idx++;
 
 		let parts = stackLines[idx].split(sep).at(-1);
 		parts = parts.split(':');
@@ -55,11 +54,11 @@ Q5.modules.ai = ($) => {
 				'%0A%0AExcerpt+for+context%3A%0A%0A' +
 				encodeURIComponent(context);
 
-			if (!askAI) console.log('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
+			console.warn('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
 
 			console.warn('Ask AI ✨ ' + url);
 
-			if (askAI) window.open(url, '_blank');
+			if (askAI) return window.open(url, '_blank');
 		} catch (err) {}
 	};
 };

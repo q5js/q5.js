@@ -87,12 +87,7 @@ Q5.modules.color = ($, q) => {
 					if (c3) c3 /= 255;
 				}
 			}
-			if (Array.isArray(c0)) {
-				c1 = c0[1];
-				c2 = c0[2];
-				c3 = c0[3];
-				c0 = c0[0];
-			}
+			if (Array.isArray(c0)) [c0, c1, c2, c3] = c0;
 		}
 
 		if (c2 == undefined) return new C(c0, c0, c0, c1);
@@ -104,11 +99,11 @@ Q5.modules.color = ($, q) => {
 	$.blue = (c) => c.b;
 	$.alpha = (c) => c.a;
 	$.lightness = (c) => {
-		if ($._colorMode == 'oklch') return c.l;
+		if (c.l) return c.l;
 		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
 	};
 	$.hue = (c) => {
-		if ($._colorMode == 'oklch') return c.h;
+		if (c.h) return c.h;
 		let r = c.r;
 		let g = c.g;
 		let b = c.b;

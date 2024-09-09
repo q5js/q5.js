@@ -339,13 +339,13 @@ Unminified:
 
 - p5.js **5112kb** ⚠️
 - p5.sound.js 488kb
-- q5.js 83kb
+- q5.js 90kb
 
 Minified:
 
 - p5.min.js 1034kb ⚠️
 - p5.sound.min.js 200kb
-- q5.min.js **54kb** 🎉
+- q5.min.js **58kb** 🎉
 
 ## Benchmarks
 
@@ -409,6 +409,9 @@ https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline
 
 ziggurat:
 http://ziggurat.glitch.me/
+
+Vector.slerp:
+https://github.com/processing/p5.js/blob/v1.10.0/src/math/p5.Vector.js#L2803
 
 random:
 https://github.com/processing/p5.js/blob/1.1.9/src/math/noise.js

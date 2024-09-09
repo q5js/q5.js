@@ -2,8 +2,12 @@ Q5.renderers.webgpu.image = ($, q) => {
 	$.imageStack = [];
 	$.textures = [];
 
+	let verticesStack = [];
+	let previousTextureCount = 0;
+
 	$._hooks.postCanvas.push(() => {
-		let imageVertexShader = Q5.device.createShaderModule({
+		let vertexShader = Q5.device.createShaderModule({
+			label: 'imageVertexShader',
 			code: `
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -35,7 +39,8 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) texCoord: vec2<f32>, @lo
 `
 		});
 
-		let imageFragmentShader = Q5.device.createShaderModule({
+		let fragmentShader = Q5.device.createShaderModule({
+			label: 'imageFragmentShader',
 			code: `
 @group(0) @binding(0) var samp: sampler;
 @group(0) @binding(1) var textures: array<texture_2d<f32>>;
@@ -65,9 +70,10 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 		});
 
 		$.pipelines[1] = Q5.device.createRenderPipeline({
+			label: 'imagePipeline',
 			layout: pipelineLayout,
 			vertex: {
-				module: imageVertexShader,
+				module: vertexShader,
 				entryPoint: 'vertexMain',
 				buffers: [
 					{
@@ -81,7 +87,7 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 				]
 			},
 			fragment: {
-				module: imageFragmentShader,
+				module: fragmentShader,
 				entryPoint: 'fragmentMain',
 				targets: [{ format: 'bgra8unorm' }]
 			},
@@ -112,7 +118,6 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 			img.index = $.textures.length;
 			$.textures.push(texture);
 		};
-		img.onerror = reject;
 		img.src = src;
 		return img;
 	};
@@ -173,7 +178,7 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 		let ii = img.index;
 
 		// prettier-ignore
-		$.vertexStack.push(
+		verticesStack.push(
 			left, top, 0, 0, ti, ii,
 			right, top, 1, 0, ti, ii,
 			left, bottom, 0, 1, ti, ii,
@@ -182,6 +187,6 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 			right, bottom, 1, 1, ti, ii
 		);
 
-		$.drawStack.push(6);
+		$.drawStack.push(1, 6);
 	};
 };

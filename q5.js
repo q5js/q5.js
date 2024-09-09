@@ -219,7 +219,7 @@ function Q5(scope, parent, renderer) {
 					return t[k]();
 				} catch (e) {
 					if ($._aiErrorAssistance) $._aiErrorAssistance(e);
-					else console.error(e);
+					throw e;
 				}
 			};
 		}
@@ -1603,8 +1603,7 @@ Q5.modules.ai = ($) => {
 
 	$._aiErrorAssistance = async (e) => {
 		let askAI = e.message?.includes('Ask AI ✨');
-		if (!askAI) console.error(e);
-		if (Q5.disableFriendlyErrors) return;
+		if (Q5.disableFriendlyErrors && !askAI) return;
 		if (askAI || !Q5.errorTolerant) $.noLoop();
 		let stackLines = e.stack?.split('\n');
 		if (!e.stack || stackLines.length <= 1) return;
@@ -1615,7 +1614,7 @@ Q5.modules.ai = ($) => {
 			idx = 0;
 			sep = '@';
 		}
-		while (stackLines[idx].indexOf('q5.js:') >= 0) idx++;
+		while (stackLines[idx].indexOf('q5') >= 0) idx++;
 
 		let parts = stackLines[idx].split(sep).at(-1);
 		parts = parts.split(':');
@@ -1653,11 +1652,11 @@ Q5.modules.ai = ($) => {
 				'%0A%0AExcerpt+for+context%3A%0A%0A' +
 				encodeURIComponent(context);
 
-			if (!askAI) console.log('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
+			console.warn('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
 
 			console.warn('Ask AI ✨ ' + url);
 
-			if (askAI) window.open(url, '_blank');
+			if (askAI) return window.open(url, '_blank');
 		} catch (err) {}
 	};
 };
@@ -1750,12 +1749,7 @@ Q5.modules.color = ($, q) => {
 					if (c3) c3 /= 255;
 				}
 			}
-			if (Array.isArray(c0)) {
-				c1 = c0[1];
-				c2 = c0[2];
-				c3 = c0[3];
-				c0 = c0[0];
-			}
+			if (Array.isArray(c0)) [c0, c1, c2, c3] = c0;
 		}
 
 		if (c2 == undefined) return new C(c0, c0, c0, c1);
@@ -1767,11 +1761,11 @@ Q5.modules.color = ($, q) => {
 	$.blue = (c) => c.b;
 	$.alpha = (c) => c.a;
 	$.lightness = (c) => {
-		if ($._colorMode == 'oklch') return c.l;
+		if (c.l) return c.l;
 		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
 	};
 	$.hue = (c) => {
-		if ($._colorMode == 'oklch') return c.h;
+		if (c.h) return c.h;
 		let r = c.r;
 		let g = c.g;
 		let b = c.b;
@@ -2687,18 +2681,19 @@ Q5.modules.vector = ($) => {
 };
 
 Q5.Vector = class {
-	constructor(_x, _y, _z, _$) {
-		this.x = _x || 0;
-		this.y = _y || 0;
-		this.z = _z || 0;
-		this._$ = _$ || window;
+	constructor(x, y, z, $) {
+		this.x = x || 0;
+		this.y = y || 0;
+		this.z = z || 0;
+		this._$ = $ || window;
 		this._cn = null;
 		this._cnsq = null;
 	}
-	set(_x, _y, _z) {
-		this.x = _x || 0;
-		this.y = _y || 0;
-		this.z = _z || 0;
+	set(x, y, z) {
+		this.x = x?.x || x || 0;
+		this.y = x?.y || y || 0;
+		this.z = x?.z || z || 0;
+		return this;
 	}
 	copy() {
 		return new Q5.Vector(this.x, this.y, this.z);
@@ -2820,6 +2815,12 @@ Q5.Vector = class {
 	heading() {
 		return this._$.atan2(this.y, this.x);
 	}
+	setHeading(ang) {
+		let mag = this.mag(); // Calculate the magnitude of the vector
+		this.x = mag * this._$.cos(ang); // Set the new x component
+		this.y = mag * this._$.sin(ang); // Set the new y component
+		return this;
+	}
 	rotate(ang) {
 		let costh = this._$.cos(ang);
 		let sinth = this._$.sin(ang);
@@ -2837,11 +2838,50 @@ Q5.Vector = class {
 	}
 	lerp() {
 		let args = [...arguments];
-		let u = this._arg2v(...args.slice(0, -1));
 		let amt = args.at(-1);
+		if (amt == 0) return this;
+		let u = this._arg2v(...args.slice(0, -1));
 		this.x += (u.x - this.x) * amt;
 		this.y += (u.y - this.y) * amt;
 		this.z += (u.z - this.z) * amt;
+		return this;
+	}
+	slerp() {
+		let args = [...arguments];
+		let amt = args.at(-1);
+		if (amt == 0) return this;
+		let u = this._arg2v(...args.slice(0, -1));
+		if (amt == 1) return this.set(u);
+
+		let v0Mag = this.mag();
+		let v1Mag = u.mag();
+
+		if (v0Mag == 0 || v1Mag == 0) {
+			return this.mult(1 - amt).add(u.mult(amt));
+		}
+
+		let axis = Q5.Vector.cross(this, u);
+		let axisMag = axis.mag();
+		let theta = Math.atan2(axisMag, this.dot(u));
+
+		if (axisMag > 0) {
+			axis.div(axisMag);
+		} else if (theta < this._$.HALF_PI) {
+			return this.mult(1 - amt).add(u.mult(amt));
+		} else {
+			if (this.z == 0 && u.z == 0) axis.set(0, 0, 1);
+			else if (this.x != 0) axis.set(this.y, -this.x, 0).normalize();
+			else axis.set(1, 0, 0);
+		}
+
+		let ey = axis.cross(this);
+		let lerpedMagFactor = 1 - amt + (amt * v1Mag) / v0Mag;
+		let cosMultiplier = lerpedMagFactor * Math.cos(amt * theta);
+		let sinMultiplier = lerpedMagFactor * Math.sin(amt * theta);
+
+		this.x = this.x * cosMultiplier + ey.x * sinMultiplier;
+		this.y = this.y * cosMultiplier + ey.y * sinMultiplier;
+		this.z = this.z * cosMultiplier + ey.z * sinMultiplier;
 		return this;
 	}
 	reflect(n) {
@@ -2896,6 +2936,7 @@ Q5.Vector.div = (v, u) => v.copy().div(u);
 Q5.Vector.dot = (v, u) => v.copy().dot(u);
 Q5.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
 Q5.Vector.lerp = (v, u, amt) => v.copy().lerp(u, amt);
+Q5.Vector.slerp = (v, u, amt) => v.copy().slerp(u, amt);
 Q5.Vector.limit = (v, m) => v.copy().limit(m);
 Q5.Vector.heading = (v) => this._$.atan2(v.y, v.x);
 Q5.Vector.magSq = (v) => v.x * v.x + v.y * v.y + v.z * v.z;
@@ -3684,7 +3725,6 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 			img.index = $.textures.length;
 			$.textures.push(texture);
 		};
-		img.onerror = reject;
 		img.src = src;
 		return img;
 	};

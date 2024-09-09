@@ -33,6 +33,7 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 		};
 
 		let vertexShader = Q5.device.createShaderModule({
+			label: 'drawingVertexShader',
 			code: `
 struct VertexOutput {
 	@builtin(position) position: vec4<f32>,
@@ -63,6 +64,7 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @locati
 		});
 
 		let fragmentShader = Q5.device.createShaderModule({
+			label: 'drawingFragmentShader',
 			code: `
 @group(2) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
 
@@ -80,6 +82,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 		$._createPipeline = (blendConfig) => {
 			return Q5.device.createRenderPipeline({
+				label: 'drawingPipeline',
 				layout: pipelineLayout,
 				vertex: {
 					module: vertexShader,
