@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.2
+ * @version 2.3
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -44,7 +44,8 @@ function Q5(scope, parent, renderer) {
 	$._loop = true;
 	$._hooks = {
 		postCanvas: [],
-		preRender: []
+		preRender: [],
+		postRender: []
 	};
 
 	let millisStart = 0;
@@ -280,6 +281,55 @@ if (typeof document == 'object') {
 	});
 }
 Q5.modules.canvas = ($, q) => {
+	$.CENTER = 'center';
+	$.LEFT = 'left';
+	$.RIGHT = 'right';
+	$.TOP = 'top';
+	$.BOTTOM = 'bottom';
+
+	$.BASELINE = 'alphabetic';
+
+	$.NORMAL = 'normal';
+	$.ITALIC = 'italic';
+	$.BOLD = 'bold';
+	$.BOLDITALIC = 'italic bold';
+
+	$.ROUND = 'round';
+	$.SQUARE = 'butt';
+	$.PROJECT = 'square';
+	$.MITER = 'miter';
+	$.BEVEL = 'bevel';
+
+	$.CHORD = 0;
+	$.PIE = 1;
+	$.OPEN = 2;
+
+	$.RADIUS = 'radius';
+	$.CORNER = 'corner';
+	$.CORNERS = 'corners';
+
+	$.CLOSE = 1;
+
+	$.LANDSCAPE = 'landscape';
+	$.PORTRAIT = 'portrait';
+
+	$.BLEND = 'source-over';
+	$.REMOVE = 'destination-out';
+	$.ADD = 'lighter';
+	$.DARKEST = 'darken';
+	$.LIGHTEST = 'lighten';
+	$.DIFFERENCE = 'difference';
+	$.SUBTRACT = 'subtract';
+	$.EXCLUSION = 'exclusion';
+	$.MULTIPLY = 'multiply';
+	$.SCREEN = 'screen';
+	$.REPLACE = 'copy';
+	$.OVERLAY = 'overlay';
+	$.HARD_LIGHT = 'hard-light';
+	$.SOFT_LIGHT = 'soft-light';
+	$.DODGE = 'color-dodge';
+	$.BURN = 'color-burn';
+
 	$._OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
@@ -568,7 +618,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.translate(x, y);
 	};
 	$.rotate = (r) => {
-		if ($._angleMode == 'degrees') r = $.radians(r);
+		if ($._angleMode) r = $.radians(r);
 		$.ctx.rotate(r);
 	};
 	$.scale = (x, y) => {
@@ -649,48 +699,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	}
 };
 Q5.renderers.q2d.drawing = ($) => {
-	$.CHORD = 0;
-	$.PIE = 1;
-	$.OPEN = 2;
-
-	$.RADIUS = 'radius';
-	$.CORNER = 'corner';
-	$.CORNERS = 'corners';
-
-	$.ROUND = 'round';
-	$.SQUARE = 'butt';
-	$.PROJECT = 'square';
-	$.MITER = 'miter';
-	$.BEVEL = 'bevel';
-
-	$.CLOSE = 1;
-
-	$.CENTER = 'center';
-	$.LEFT = 'left';
-	$.RIGHT = 'right';
-	$.TOP = 'top';
-	$.BOTTOM = 'bottom';
-
-	$.LANDSCAPE = 'landscape';
-	$.PORTRAIT = 'portrait';
-
-	$.BLEND = 'source-over';
-	$.REMOVE = 'destination-out';
-	$.ADD = 'lighter';
-	$.DARKEST = 'darken';
-	$.LIGHTEST = 'lighten';
-	$.DIFFERENCE = 'difference';
-	$.SUBTRACT = 'subtract';
-	$.EXCLUSION = 'exclusion';
-	$.MULTIPLY = 'multiply';
-	$.SCREEN = 'screen';
-	$.REPLACE = 'copy';
-	$.OVERLAY = 'overlay';
-	$.HARD_LIGHT = 'hard-light';
-	$.SOFT_LIGHT = 'soft-light';
-	$.DODGE = 'color-dodge';
-	$.BURN = 'color-burn';
-
 	$._doStroke = true;
 	$._doFill = true;
 	$._strokeSet = false;
@@ -753,7 +761,7 @@ Q5.renderers.q2d.drawing = ($) => {
 
 	function arc(x, y, w, h, lo, hi, mode, detail) {
 		if (!$._doFill && !$._doStroke) return;
-		let d = $._angleMode == 'degrees';
+		let d = $._angleMode;
 		let full = d ? 360 : $.TAU;
 		lo %= full;
 		hi %= full;
@@ -1384,18 +1392,6 @@ Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
 Q5.renderers.q2d.text = ($, q) => {
-	$.NORMAL = 'normal';
-	$.ITALIC = 'italic';
-	$.BOLD = 'bold';
-	$.BOLDITALIC = 'italic bold';
-
-	$.CENTER = 'center';
-	$.LEFT = 'left';
-	$.RIGHT = 'right';
-	$.TOP = 'top';
-	$.BOTTOM = 'bottom';
-	$.BASELINE = 'alphabetic';
-
 	$._textFont = 'sans-serif';
 	$._textSize = 12;
 	$._textLeading = 15;
@@ -2189,8 +2185,8 @@ Q5.modules.input = ($, q) => {
 	}
 };
 Q5.modules.math = ($, q) => {
-	$.DEGREES = 'degrees';
-	$.RADIANS = 'radians';
+	$.RADIANS = 0;
+	$.DEGREES = 1;
 
 	$.PI = Math.PI;
 	$.HALF_PI = Math.PI / 2;
@@ -2211,9 +2207,14 @@ Q5.modules.math = ($, q) => {
 	$.SHR3 = 1;
 	$.LCG = 2;
 
-	$.angleMode = (mode) => ($._angleMode = mode);
-	$._DEGTORAD = Math.PI / 180;
-	$._RADTODEG = 180 / Math.PI;
+	let angleMode = 0;
+
+	$.angleMode = (mode) => {
+		if (mode == 'radians') mode = 0;
+		angleMode = $._angleMode = mode;
+	};
+	let DEGTORAD = ($._DEGTORAD = Math.PI / 180);
+	let RADTODEG = ($._RADTODEG = 180 / Math.PI);
 	$.degrees = (x) => x * $._RADTODEG;
 	$.radians = (x) => x * $._DEGTORAD;
 
@@ -2239,24 +2240,26 @@ Q5.modules.math = ($, q) => {
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
 
-	for (let fn of ['sin', 'cos', 'tan']) {
-		$[fn] = (a) => {
-			if ($._angleMode == 'degrees') a = $.radians(a);
-			return Math[fn](a);
-		};
-	}
+	$.sin = (a) => Math.sin(!angleMode ? a : a * DEGTORAD);
+	$.cos = (a) => Math.cos(!angleMode ? a : a * DEGTORAD);
+	$.tan = (a) => Math.tan(!angleMode ? a : a * DEGTORAD);
 
-	for (let fn of ['asin', 'acos', 'atan']) {
-		$[fn] = (x) => {
-			let a = Math[fn](x);
-			if ($._angleMode == 'degrees') a = $.degrees(a);
-			return a;
-		};
-	}
+	$.asin = (x) => {
+		let a = Math.asin(x);
+		return !angleMode ? a : a * RADTODEG;
+	};
+	$.acos = (x) => {
+		let a = Math.acos(x);
+		return !angleMode ? a : a * RADTODEG;
+	};
+	$.atan = (x) => {
+		let a = Math.atan(x);
+		return !angleMode ? a : a * RADTODEG;
+	};
+
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
+		return !angleMode ? a : a * RADTODEG;
 	};
 
 	function lcg() {
@@ -2963,7 +2966,52 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 'float');
 
-	let pass, colorsStack, envBindGroup, transformBindGroup;
+	let pass;
+
+	$.pipelines = [];
+
+	// local variables used for slightly better performance
+	// stores pipeline shifts and vertex counts/image indices
+	let drawStack = ($.drawStack = []);
+
+	// colors used for each draw call
+	let colorsStack = ($.colorsStack = [1, 1, 1, 1]);
+
+	// current color index, used to associate a vertex with a color
+	$._colorIndex = 0;
+
+	$._envLayout = Q5.device.createBindGroupLayout({
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.VERTEX,
+				buffer: {
+					type: 'uniform',
+					hasDynamicOffset: false
+				}
+			}
+		]
+	});
+
+	$._transformLayout = Q5.device.createBindGroupLayout({
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.VERTEX,
+				buffer: {
+					type: 'read-only-storage',
+					hasDynamicOffset: false
+				}
+			}
+		]
+	});
+
+	$.bindGroupLayouts = [$._envLayout, $._transformLayout];
+
+	const uniformBuffer = Q5.device.createBuffer({
+		size: 8, // Size of two floats
+		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+	});
 
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
@@ -2973,60 +3021,10 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		$.ctx.configure(opt);
 
-		$.pipelines = [];
-
-		// pipeline changes for each draw call
-		$.pipelinesStack = [];
-
-		// vertices for each draw call
-		$.verticesStack = [];
-
-		// number of vertices for each draw call
-		$.drawStack = [];
-
-		// colors used for each draw call
-		colorsStack = $.colorsStack = [1, 1, 1, 1];
-
-		// current color index, used to associate a vertex with a color
-		$._colorIndex = 0;
-
-		let envLayout = Q5.device.createBindGroupLayout({
-			entries: [
-				{
-					binding: 0,
-					visibility: GPUShaderStage.VERTEX,
-					buffer: {
-						type: 'uniform',
-						hasDynamicOffset: false
-					}
-				}
-			]
-		});
-
-		let transformLayout = Q5.device.createBindGroupLayout({
-			entries: [
-				{
-					binding: 0,
-					visibility: GPUShaderStage.VERTEX,
-					buffer: {
-						type: 'read-only-storage',
-						hasDynamicOffset: false
-					}
-				}
-			]
-		});
-
-		$.bindGroupLayouts = [envLayout, transformLayout];
-
-		const uniformBuffer = Q5.device.createBuffer({
-			size: 8, // Size of two floats
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-		});
-
 		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
 
-		envBindGroup = Q5.device.createBindGroup({
-			layout: envLayout,
+		$._envBindGroup = Q5.device.createBindGroup({
+			layout: $._envLayout,
 			entries: [
 				{
 					binding: 0,
@@ -3092,7 +3090,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$.rotate = (r) => {
 		if (!r) return;
-		if ($._angleMode == 'degrees') r = $.radians(r);
+		if ($._angleMode) r *= $._DEGTORAD;
 
 		let cosR = Math.cos(r);
 		let sinR = Math.sin(r);
@@ -3133,10 +3131,70 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._matrixDirty = false;
 	};
 
+	const addColor = (r, g, b, a = 1) => {
+		if (typeof r == 'string') r = Q5.color(r);
+		else if (b == undefined) {
+			// grayscale mode `fill(1, 0.5)`
+			a = g;
+			g = b = r;
+		}
+		if (r._q5Color) colorsStack.push(...r.levels);
+		else colorsStack.push(r, g, b, a);
+		$._colorIndex++;
+	};
+
+	$.fill = (r, g, b, a) => {
+		addColor(r, g, b, a);
+		$._doFill = true;
+		$._fillIndex = $._colorIndex;
+	};
+	$.stroke = (r, g, b, a) => {
+		addColor(r, g, b, a);
+		$._doStroke = true;
+		$._fillIndex = $._colorIndex;
+	};
+
+	$.noFill = () => ($._doFill = false);
+	$.noStroke = () => ($._doStroke = false);
+
+	$._strokeWeight = 1;
+	$.strokeWeight = (v) => ($._strokeWeight = v);
+
+	$._calcBox = (x, y, w, h, mode) => {
+		let hw = w / 2;
+		let hh = h / 2;
+
+		// left, right, top, bottom
+		let l, r, t, b;
+		if (!mode || mode == 'corner') {
+			// CORNER
+			l = x;
+			r = x + w;
+			t = -y;
+			b = -(y + h);
+		} else if (mode == 'center') {
+			l = x - hw;
+			r = x + hw;
+			t = -(y - hh);
+			b = -(y + hh);
+		} else {
+			// CORNERS
+			l = x;
+			r = w;
+			t = -y;
+			b = -h;
+		}
+
+		return [l, r, t, b];
+	};
+
+	$.clear = () => {};
+
 	$._beginRender = () => {
 		$.encoder = Q5.device.createCommandEncoder();
 
 		pass = q.pass = $.encoder.beginRenderPass({
+			label: 'q5-webgpu',
 			colorAttachments: [
 				{
 					view: ctx.getCurrentTexture().createView(),
@@ -3148,9 +3206,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._render = () => {
-		pass.setBindGroup(0, envBindGroup);
-
-		if (transformStates.length > 1 || !transformBindGroup) {
+		if (transformStates.length > 1 || !$._transformBindGroup) {
 			const transformBuffer = Q5.device.createBuffer({
 				size: transformStates.length * 64, // Size of 16 floats
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
@@ -3158,8 +3214,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 			Q5.device.queue.writeBuffer(transformBuffer, 0, new Float32Array(transformStates.flat()));
 
-			transformBindGroup = Q5.device.createBindGroup({
-				layout: $.bindGroupLayouts[1],
+			$._transformBindGroup = Q5.device.createBindGroup({
+				layout: $._transformLayout,
 				entries: [
 					{
 						binding: 0,
@@ -3171,27 +3227,39 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			});
 		}
 
-		pass.setBindGroup(1, transformBindGroup);
+		pass.setBindGroup(0, $._envBindGroup);
+		pass.setBindGroup(1, $._transformBindGroup);
 
-		// run pre-render methods
 		for (let m of $._hooks.preRender) m();
 
-		// local variables used for performance
-		let drawStack = $.drawStack;
-
 		let drawVertOffset = 0;
+		let imageVertOffset = 0;
 		let curPipelineIndex = -1;
+		let curTextureIndex = -1;
+
+		pass.setPipeline($.pipelines[0]);
 
 		for (let i = 0; i < drawStack.length; i += 2) {
+			let v = drawStack[i + 1];
+
 			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
 				pass.setPipeline($.pipelines[curPipelineIndex]);
 			}
 
-			let vertCount = drawStack[i + 1];
-			pass.draw(vertCount, 1, drawVertOffset, 0);
-			drawVertOffset += vertCount;
+			if (curPipelineIndex == 0) {
+				pass.draw(v, 1, drawVertOffset, 0);
+				drawVertOffset += v;
+			} else if (curPipelineIndex == 1) {
+				if (curTextureIndex != v) {
+					pass.setBindGroup(3, $._textureBindGroups[v]);
+				}
+				pass.draw(6, 1, imageVertOffset, 0);
+				imageVertOffset += 6;
+			}
 		}
+
+		for (let m of $._hooks.postRender) m();
 	};
 
 	$._finishRender = () => {
@@ -3201,10 +3269,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		q.pass = $.encoder = null;
 
 		// clear the stacks for the next frame
-		$.verticesStack.length = 0;
 		$.drawStack.length = 0;
 		$.colorsStack.length = 4;
-		$.pipelinesStack.length = 0;
 		$._colorIndex = 0;
 		rotation = 0;
 		$.resetMatrix();
@@ -3212,37 +3278,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$.transformStates.length = 1;
 		$._transformIndexStack.length = 0;
 	};
-
-	function addColor(r, g, b, a = 1) {
-		if (typeof r == 'string') r = Q5.color(r);
-		// grayscale mode `fill(1, 0.5)`
-		if (b == undefined) {
-			a = g;
-			g = b = r;
-		}
-		if (r._q5Color) colorsStack.push(...r.levels);
-		else colorsStack.push(r, g, b, a);
-		$._colorIndex++;
-	}
-
-	$.fill = function () {
-		addColor(...arguments);
-		$._doFill = true;
-		$._fillIndex = $._colorIndex;
-	};
-	$.stroke = function () {
-		addColor(...arguments);
-		$._doStroke = true;
-		$._fillIndex = $._colorIndex;
-	};
-
-	$.noFill = () => ($._doFill = false);
-	$.noStroke = () => ($._doStroke = false);
-
-	$._strokeWeight = 1;
-	$.strokeWeight = (v) => ($._strokeWeight = v);
-
-	$.clear = () => {};
 };
 
 Q5.webgpu = async function (scope, parent) {
@@ -3261,41 +3296,16 @@ Q5.webgpu = async function (scope, parent) {
 	return new Q5(scope, parent, 'webgpu');
 };
 Q5.renderers.webgpu.drawing = ($, q) => {
-	$.CLOSE = 1;
+	let drawStack = $.drawStack;
+	let colorsStack = $.colorsStack;
 
-	let verticesStack, drawStack, colorsStack;
+	let verticesStack = [];
 
-	$._hooks.postCanvas.push(() => {
-		let colorsLayout = Q5.device.createBindGroupLayout({
-			entries: [
-				{
-					binding: 0,
-					visibility: GPUShaderStage.FRAGMENT,
-					buffer: {
-						type: 'read-only-storage',
-						hasDynamicOffset: false
-					}
-				}
-			]
-		});
+	let colorsLayout;
 
-		$.bindGroupLayouts.push(colorsLayout);
-
-		verticesStack = $.verticesStack;
-		drawStack = $.drawStack;
-		colorsStack = $.colorsStack;
-
-		let vertexBufferLayout = {
-			arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
-			attributes: [
-				{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
-				{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex
-				{ format: 'float32', offset: 12, shaderLocation: 2 } // transformIndex
-			]
-		};
-
-		let vertexShader = Q5.device.createShaderModule({
-			code: `
+	let vertexShader = Q5.device.createShaderModule({
+		label: 'drawingVertexShader',
+		code: `
 struct VertexOutput {
 	@builtin(position) position: vec4<f32>,
 	@location(1) colorIndex: f32
@@ -3322,10 +3332,11 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @locati
 	return output;
 }
 `
-		});
+	});
 
-		let fragmentShader = Q5.device.createShaderModule({
-			code: `
+	let fragmentShader = Q5.device.createShaderModule({
+		label: 'drawingFragmentShader',
+		code: `
 @group(2) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
 
 @fragment
@@ -3334,31 +3345,31 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	return mix(uColors[index], uColors[index + 1u], fract(colorIndex));
 }
 `
-		});
-
-		let pipelineLayout = Q5.device.createPipelineLayout({
-			bindGroupLayouts: $.bindGroupLayouts
-		});
-
-		$._createPipeline = (blendConfig) => {
-			return Q5.device.createRenderPipeline({
-				layout: pipelineLayout,
-				vertex: {
-					module: vertexShader,
-					entryPoint: 'vertexMain',
-					buffers: [vertexBufferLayout]
-				},
-				fragment: {
-					module: fragmentShader,
-					entryPoint: 'fragmentMain',
-					targets: [{ format: 'bgra8unorm', blend: blendConfig }]
-				},
-				primitive: { topology: 'triangle-list' }
-			});
-		};
-
-		$.pipelines[0] = $._createPipeline(blendConfigs.normal);
 	});
+
+	colorsLayout = Q5.device.createBindGroupLayout({
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.FRAGMENT,
+				buffer: {
+					type: 'read-only-storage',
+					hasDynamicOffset: false
+				}
+			}
+		]
+	});
+
+	$.bindGroupLayouts.push(colorsLayout);
+
+	let vertexBufferLayout = {
+		arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
+		attributes: [
+			{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
+			{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex
+			{ format: 'float32', offset: 12, shaderLocation: 2 } // transformIndex
+		]
+	};
 
 	// prettier-ignore
 	let blendFactors = [
@@ -3403,7 +3414,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 	$.blendConfigs = {};
 
-	Object.entries(blendModes).forEach(([name, mode]) => {
+	for (const [name, mode] of Object.entries(blendModes)) {
 		$.blendConfigs[name] = {
 			color: {
 				srcFactor: blendFactors[mode[0]],
@@ -3416,7 +3427,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 				operation: blendOps[mode[5]]
 			}
 		};
-	});
+	}
 
 	$._blendMode = 'normal';
 	$.blendMode = (mode) => {
@@ -3426,6 +3437,31 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		$._blendMode = mode;
 		$.pipelines[0] = $._createPipeline($.blendConfigs[mode]);
 	};
+
+	let pipelineLayout = Q5.device.createPipelineLayout({
+		label: 'drawingPipelineLayout',
+		bindGroupLayouts: $.bindGroupLayouts
+	});
+
+	$._createPipeline = (blendConfig) => {
+		return Q5.device.createRenderPipeline({
+			label: 'drawingPipeline',
+			layout: pipelineLayout,
+			vertex: {
+				module: vertexShader,
+				entryPoint: 'vertexMain',
+				buffers: [vertexBufferLayout]
+			},
+			fragment: {
+				module: fragmentShader,
+				entryPoint: 'fragmentMain',
+				targets: [{ format: 'bgra8unorm', blend: blendConfig }]
+			},
+			primitive: { topology: 'triangle-list' }
+		});
+	};
+
+	$.pipelines[0] = $._createPipeline($.blendConfigs.normal);
 
 	let shapeVertices;
 
@@ -3479,14 +3515,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		$.endShape(1);
 	};
 
-	$.rect = (x, y, w, h) => {
-		let hw = w / 2;
-		let hh = h / 2;
+	$.rectMode = (x) => ($._rectMode = x);
 
-		let left = x - hw;
-		let right = x + hw;
-		let top = -(y - hh); // y is inverted in WebGPU
-		let bottom = -(y + hh);
+	$.rect = (x, y, w, h) => {
+		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 
 		let ci = $._colorIndex;
 		if ($._matrixDirty) $._saveMatrix();
@@ -3494,12 +3526,12 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		// two triangles make a rectangle
 		// prettier-ignore
 		verticesStack.push(
-			left, top, ci, ti,
-			right, top, ci, ti,
-			left, bottom, ci, ti,
-			right, top, ci, ti,
-			left, bottom, ci, ti,
-			right, bottom, ci, ti
+			l, t, ci, ti,
+			r, t, ci, ti,
+			l, b, ci, ti,
+			r, t, ci, ti,
+			l, b, ci, ti,
+			r, b, ci, ti
 		);
 		drawStack.push(0, 6);
 	};
@@ -3578,12 +3610,16 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
 
 	$._hooks.preRender.push(() => {
+		$.pass.setPipeline($.pipelines[0]);
+
+		const vertices = new Float32Array(verticesStack);
+
 		const vertexBuffer = Q5.device.createBuffer({
-			size: verticesStack.length * 6,
+			size: vertices.byteLength,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 		});
 
-		Q5.device.queue.writeBuffer(vertexBuffer, 0, new Float32Array(verticesStack));
+		Q5.device.queue.writeBuffer(vertexBuffer, 0, vertices);
 		$.pass.setVertexBuffer(0, vertexBuffer);
 
 		const colorsBuffer = Q5.device.createBuffer({
@@ -3593,8 +3629,8 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 		Q5.device.queue.writeBuffer(colorsBuffer, 0, new Float32Array(colorsStack));
 
-		const colorsBindGroup = Q5.device.createBindGroup({
-			layout: $.bindGroupLayouts[2],
+		$._colorsBindGroup = Q5.device.createBindGroup({
+			layout: colorsLayout,
 			entries: [
 				{
 					binding: 0,
@@ -3608,108 +3644,135 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		});
 
 		// set the bind group once before rendering
-		$.pass.setBindGroup(2, colorsBindGroup);
+		$.pass.setBindGroup(2, $._colorsBindGroup);
+	});
+
+	$._hooks.postRender.push(() => {
+		verticesStack.length = 0;
 	});
 };
 Q5.renderers.webgpu.image = ($, q) => {
-	$.imageStack = [];
-	$.textures = [];
+	$._textureBindGroups = [];
+	let verticesStack = [];
 
-	$._hooks.postCanvas.push(() => {
-		let imageVertexShader = Q5.device.createShaderModule({
-			code: `
+	let vertexShader = Q5.device.createShaderModule({
+		label: 'imageVertexShader',
+		code: `
 struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) texCoord: vec2<f32>,
-    @location(1) textureIndex: f32
+	@builtin(position) position: vec4<f32>,
+	@location(0) texCoord: vec2<f32>
 };
 
 struct Uniforms {
-    halfWidth: f32,
-    halfHeight: f32
+	halfWidth: f32,
+	halfHeight: f32
 };
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(1) @binding(0) var<storage, read> transforms: array<mat4x4<f32>>;
 
 @vertex
-fn vertexMain(@location(0) pos: vec2<f32>, @location(1) texCoord: vec2<f32>, @location(2) transformIndex: f32, @location(3) textureIndex: f32) -> VertexOutput {
-    var vert = vec4<f32>(pos, 0.0, 1.0);
-    vert *= transforms[i32(transformIndex)];
-    vert.x /= uniforms.halfWidth;
-    vert.y /= uniforms.halfHeight;
+fn vertexMain(@location(0) pos: vec2<f32>, @location(1) texCoord: vec2<f32>, @location(2) transformIndex: f32) -> VertexOutput {
+	var vert = vec4<f32>(pos, 0.0, 1.0);
+	vert *= transforms[i32(transformIndex)];
+	vert.x /= uniforms.halfWidth;
+	vert.y /= uniforms.halfHeight;
 
-    var output: VertexOutput;
-    output.position = vert;
-    output.texCoord = texCoord;
-    output.textureIndex = textureIndex;
-    return output;
+	var output: VertexOutput;
+	output.position = vert;
+	output.texCoord = texCoord;
+	return output;
 }
-`
-		});
-
-		let imageFragmentShader = Q5.device.createShaderModule({
-			code: `
-@group(0) @binding(0) var samp: sampler;
-@group(0) @binding(1) var textures: array<texture_2d<f32>>;
-
-@fragment
-fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32) -> @location(0) vec4<f32> {
-    return textureSample(textures[i32(textureIndex)], samp, texCoord);
-}
-`
-		});
-
-		const bindGroupLayouts = [
-			Q5.device.createBindGroupLayout({
-				entries: [
-					{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } },
-					{ binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {} },
-					{ binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: { viewDimension: '2d', sampleType: 'float' } }
-				]
-			}),
-			Q5.device.createBindGroupLayout({
-				entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } }]
-			})
-		];
-
-		const pipelineLayout = Q5.device.createPipelineLayout({
-			bindGroupLayouts: bindGroupLayouts
-		});
-
-		$.pipelines[1] = Q5.device.createRenderPipeline({
-			layout: pipelineLayout,
-			vertex: {
-				module: imageVertexShader,
-				entryPoint: 'vertexMain',
-				buffers: [
-					{
-						arrayStride: 5 * 4, // 4 floats for position and texCoord, 1 float for textureIndex
-						attributes: [
-							{ shaderLocation: 0, offset: 0, format: 'float32x2' },
-							{ shaderLocation: 1, offset: 2 * 4, format: 'float32x2' },
-							{ shaderLocation: 2, offset: 4 * 4, format: 'float32' } // textureIndex
-						]
-					}
-				]
-			},
-			fragment: {
-				module: imageFragmentShader,
-				entryPoint: 'fragmentMain',
-				targets: [{ format: 'bgra8unorm' }]
-			},
-			primitive: {
-				topology: 'triangle-list'
-			}
-		});
-
-		$.sampler = Q5.device.createSampler({
-			magFilter: 'linear',
-			minFilter: 'linear'
-		});
+	`
 	});
 
-	$.loadImage = async (src) => {
+	let fragmentShader = Q5.device.createShaderModule({
+		label: 'imageFragmentShader',
+		code: `
+@group(3) @binding(0) var samp: sampler;
+@group(3) @binding(1) var texture: texture_2d<f32>;
+
+@fragment
+fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
+	// Sample the texture using the interpolated texture coordinate
+	return textureSample(texture, samp, texCoord);
+}
+	`
+	});
+
+	let textureLayout = Q5.device.createBindGroupLayout({
+		label: 'textureLayout',
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.FRAGMENT,
+				sampler: { type: 'filtering' }
+			},
+			{
+				binding: 1,
+				visibility: GPUShaderStage.FRAGMENT,
+				texture: { viewDimension: '2d', sampleType: 'float' }
+			}
+		]
+	});
+
+	const vertexBufferLayout = {
+		arrayStride: 20,
+		attributes: [
+			{ shaderLocation: 0, offset: 0, format: 'float32x2' },
+			{ shaderLocation: 1, offset: 8, format: 'float32x2' },
+			{ shaderLocation: 2, offset: 16, format: 'float32' } // transformIndex
+		]
+	};
+
+	$.bindGroupLayouts.push(textureLayout);
+
+	const pipelineLayout = Q5.device.createPipelineLayout({
+		label: 'imagePipelineLayout',
+		bindGroupLayouts: $.bindGroupLayouts
+	});
+
+	$.pipelines[1] = Q5.device.createRenderPipeline({
+		label: 'imagePipeline',
+		layout: pipelineLayout,
+		vertex: {
+			module: vertexShader,
+			entryPoint: 'vertexMain',
+			buffers: [{ arrayStride: 0, attributes: [] }, vertexBufferLayout]
+		},
+		fragment: {
+			module: fragmentShader,
+			entryPoint: 'fragmentMain',
+			targets: [
+				{
+					format: 'bgra8unorm',
+					blend: $.blendConfigs?.normal || {
+						color: {
+							srcFactor: 'src-alpha',
+							dstFactor: 'one-minus-src-alpha',
+							operation: 'add'
+						},
+						alpha: {
+							srcFactor: 'src-alpha',
+							dstFactor: 'one-minus-src-alpha',
+							operation: 'add'
+						}
+					}
+				}
+			]
+		},
+		primitive: {
+			topology: 'triangle-list'
+		}
+	});
+
+	let sampler = Q5.device.createSampler({
+		magFilter: 'linear',
+		minFilter: 'linear'
+	});
+
+	$.loadImage = (src) => {
+		q._preloadCount++;
 		const img = new Image();
 		img.onload = async () => {
 			const imageBitmap = await createImageBitmap(img);
@@ -3721,22 +3784,55 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 
 			Q5.device.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, [img.width, img.height, 1]);
 
-			img.texture = texture;
-			img.index = $.textures.length;
-			$.textures.push(texture);
+			img.index = $._textureBindGroups.length;
+
+			const textureBindGroup = Q5.device.createBindGroup({
+				layout: textureLayout,
+				entries: [
+					{ binding: 0, resource: sampler },
+					{ binding: 1, resource: texture.createView() }
+				]
+			});
+			$._textureBindGroups.push(textureBindGroup);
+
+			q._preloadCount--;
 		};
 		img.src = src;
 		return img;
 	};
 
+	$.imageMode = (x) => ($._imageMode = x);
+
+	$.image = (img, x, y, w, h) => {
+		if ($._matrixDirty) $._saveMatrix();
+		let ti = $._transformIndex;
+
+		w ??= img.width;
+		h ??= img.height;
+
+		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
+
+		// prettier-ignore
+		verticesStack.push(
+			l, t, 0, 0, ti,
+			r, t, 1, 0, ti,
+			l, b, 0, 1, ti,
+			r, t, 1, 0, ti,
+			l, b, 0, 1, ti,
+			r, b, 1, 1, ti
+		);
+
+		$.drawStack.push(1, img.index);
+	};
+
 	$._hooks.preRender.push(() => {
-		if (!$.imageStack.length) return;
+		if (!$._textureBindGroups.length) return;
 
 		// Switch to image pipeline
 		$.pass.setPipeline($.pipelines[1]);
 
 		// Create a vertex buffer for the image quads
-		const vertices = new Float32Array($.vertexStack);
+		const vertices = new Float32Array(verticesStack);
 
 		const vertexBuffer = Q5.device.createBuffer({
 			size: vertices.byteLength,
@@ -3744,57 +3840,11 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>, @location(1) textureIndex: f32
 		});
 
 		Q5.device.queue.writeBuffer(vertexBuffer, 0, vertices);
-		$.pass.setVertexBuffer(0, vertexBuffer);
-
-		// Set the bind group for the sampler and textures
-		if ($.textures.length !== previousTextureCount) {
-			previousTextureCount = $.textures.length;
-
-			// Create the bind group for all textures
-			const textureViews = $.textures.map((tex) => tex.createView());
-
-			$.textureBindGroup = Q5.device.createBindGroup({
-				layout: $.pipelines[1].getBindGroupLayout(0),
-				entries: [
-					{ binding: 0, resource: $.sampler },
-					...textureViews.map((view, i) => ({ binding: i + 1, resource: view }))
-				]
-			});
-		}
-
-		// Set the bind group for the sampler and textures
-		$.pass.setBindGroup(0, $.textureBindGroup);
+		$.pass.setVertexBuffer(1, vertexBuffer);
 	});
 
-	$.image = (img, x, y, w, h) => {
-		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._transformIndex;
-
-		$.imageStack.push(img.index);
-
-		// Calculate half-width and half-height
-		let hw = w / 2;
-		let hh = h / 2;
-
-		// Calculate vertices positions
-		let left = x - hw;
-		let right = x + hw;
-		let top = -(y - hh); // y is inverted in WebGPU
-		let bottom = -(y + hh);
-
-		let ii = img.index;
-
-		// prettier-ignore
-		$.vertexStack.push(
-			left, top, 0, 0, ti, ii,
-			right, top, 1, 0, ti, ii,
-			left, bottom, 0, 1, ti, ii,
-			right, top, 1, 0, ti, ii,
-			left, bottom, 0, 1, ti, ii,
-			right, bottom, 1, 1, ti, ii
-		);
-
-		$.drawStack.push(6);
-	};
+	$._hooks.postRender.push(() => {
+		verticesStack.length = 0;
+	});
 };
 Q5.renderers.webgpu.text = ($, q) => {};

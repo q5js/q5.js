@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.2
+ * @version 2.3
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -44,7 +44,8 @@ function Q5(scope, parent, renderer) {
 	$._loop = true;
 	$._hooks = {
 		postCanvas: [],
-		preRender: []
+		preRender: [],
+		postRender: []
 	};
 
 	let millisStart = 0;

@@ -404,6 +404,9 @@ p5.js is licensed under the LGPLv2, the two small sections of p5' code directly 
 
 ## Credits
 
+q5-webgpu blendMode:
+https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html
+
 catmullRomSpline:
 https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline
 

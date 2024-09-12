@@ -1,16 +1,4 @@
 Q5.renderers.q2d.text = ($, q) => {
-	$.NORMAL = 'normal';
-	$.ITALIC = 'italic';
-	$.BOLD = 'bold';
-	$.BOLDITALIC = 'italic bold';
-
-	$.CENTER = 'center';
-	$.LEFT = 'left';
-	$.RIGHT = 'right';
-	$.TOP = 'top';
-	$.BOTTOM = 'bottom';
-	$.BASELINE = 'alphabetic';
-
 	$._textFont = 'sans-serif';
 	$._textSize = 12;
 	$._textLeading = 15;

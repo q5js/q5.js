@@ -1,6 +1,6 @@
 Q5.modules.math = ($, q) => {
-	$.DEGREES = 'degrees';
-	$.RADIANS = 'radians';
+	$.RADIANS = 0;
+	$.DEGREES = 1;
 
 	$.PI = Math.PI;
 	$.HALF_PI = Math.PI / 2;
@@ -21,9 +21,14 @@ Q5.modules.math = ($, q) => {
 	$.SHR3 = 1;
 	$.LCG = 2;
 
-	$.angleMode = (mode) => ($._angleMode = mode);
-	$._DEGTORAD = Math.PI / 180;
-	$._RADTODEG = 180 / Math.PI;
+	let angleMode = 0;
+
+	$.angleMode = (mode) => {
+		if (mode == 'radians') mode = 0;
+		angleMode = $._angleMode = mode;
+	};
+	let DEGTORAD = ($._DEGTORAD = Math.PI / 180);
+	let RADTODEG = ($._RADTODEG = 180 / Math.PI);
 	$.degrees = (x) => x * $._RADTODEG;
 	$.radians = (x) => x * $._DEGTORAD;
 
@@ -49,24 +54,26 @@ Q5.modules.math = ($, q) => {
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
 
-	for (let fn of ['sin', 'cos', 'tan']) {
-		$[fn] = (a) => {
-			if ($._angleMode == 'degrees') a = $.radians(a);
-			return Math[fn](a);
-		};
-	}
+	$.sin = (a) => Math.sin(!angleMode ? a : a * DEGTORAD);
+	$.cos = (a) => Math.cos(!angleMode ? a : a * DEGTORAD);
+	$.tan = (a) => Math.tan(!angleMode ? a : a * DEGTORAD);
 
-	for (let fn of ['asin', 'acos', 'atan']) {
-		$[fn] = (x) => {
-			let a = Math[fn](x);
-			if ($._angleMode == 'degrees') a = $.degrees(a);
-			return a;
-		};
-	}
+	$.asin = (x) => {
+		let a = Math.asin(x);
+		return !angleMode ? a : a * RADTODEG;
+	};
+	$.acos = (x) => {
+		let a = Math.acos(x);
+		return !angleMode ? a : a * RADTODEG;
+	};
+	$.atan = (x) => {
+		let a = Math.atan(x);
+		return !angleMode ? a : a * RADTODEG;
+	};
+
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
-		if ($._angleMode == 'degrees') a = $.degrees(a);
-		return a;
+		return !angleMode ? a : a * RADTODEG;
 	};
 
 	function lcg() {

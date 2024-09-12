@@ -1,4 +1,53 @@
 Q5.modules.canvas = ($, q) => {
+	$.CENTER = 'center';
+	$.LEFT = 'left';
+	$.RIGHT = 'right';
+	$.TOP = 'top';
+	$.BOTTOM = 'bottom';
+
+	$.BASELINE = 'alphabetic';
+
+	$.NORMAL = 'normal';
+	$.ITALIC = 'italic';
+	$.BOLD = 'bold';
+	$.BOLDITALIC = 'italic bold';
+
+	$.ROUND = 'round';
+	$.SQUARE = 'butt';
+	$.PROJECT = 'square';
+	$.MITER = 'miter';
+	$.BEVEL = 'bevel';
+
+	$.CHORD = 0;
+	$.PIE = 1;
+	$.OPEN = 2;
+
+	$.RADIUS = 'radius';
+	$.CORNER = 'corner';
+	$.CORNERS = 'corners';
+
+	$.CLOSE = 1;
+
+	$.LANDSCAPE = 'landscape';
+	$.PORTRAIT = 'portrait';
+
+	$.BLEND = 'source-over';
+	$.REMOVE = 'destination-out';
+	$.ADD = 'lighter';
+	$.DARKEST = 'darken';
+	$.LIGHTEST = 'lighten';
+	$.DIFFERENCE = 'difference';
+	$.SUBTRACT = 'subtract';
+	$.EXCLUSION = 'exclusion';
+	$.MULTIPLY = 'multiply';
+	$.SCREEN = 'screen';
+	$.REPLACE = 'copy';
+	$.OVERLAY = 'overlay';
+	$.HARD_LIGHT = 'hard-light';
+	$.SOFT_LIGHT = 'soft-light';
+	$.DODGE = 'color-dodge';
+	$.BURN = 'color-burn';
+
 	$._OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {

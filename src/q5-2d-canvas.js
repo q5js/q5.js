@@ -87,7 +87,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.translate(x, y);
 	};
 	$.rotate = (r) => {
-		if ($._angleMode == 'degrees') r = $.radians(r);
+		if ($._angleMode) r = $.radians(r);
 		$.ctx.rotate(r);
 	};
 	$.scale = (x, y) => {

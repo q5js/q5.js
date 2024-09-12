@@ -1,40 +1,14 @@
 Q5.renderers.webgpu.drawing = ($, q) => {
-	$.CLOSE = 1;
+	let drawStack = $.drawStack;
+	let colorsStack = $.colorsStack;
 
-	let verticesStack, drawStack, colorsStack;
+	let verticesStack = [];
 
-	$._hooks.postCanvas.push(() => {
-		let colorsLayout = Q5.device.createBindGroupLayout({
-			entries: [
-				{
-					binding: 0,
-					visibility: GPUShaderStage.FRAGMENT,
-					buffer: {
-						type: 'read-only-storage',
-						hasDynamicOffset: false
-					}
-				}
-			]
-		});
+	let colorsLayout;
 
-		$.bindGroupLayouts.push(colorsLayout);
-
-		verticesStack = $.verticesStack;
-		drawStack = $.drawStack;
-		colorsStack = $.colorsStack;
-
-		let vertexBufferLayout = {
-			arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
-			attributes: [
-				{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
-				{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex
-				{ format: 'float32', offset: 12, shaderLocation: 2 } // transformIndex
-			]
-		};
-
-		let vertexShader = Q5.device.createShaderModule({
-			label: 'drawingVertexShader',
-			code: `
+	let vertexShader = Q5.device.createShaderModule({
+		label: 'drawingVertexShader',
+		code: `
 struct VertexOutput {
 	@builtin(position) position: vec4<f32>,
 	@location(1) colorIndex: f32
@@ -61,11 +35,11 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @locati
 	return output;
 }
 `
-		});
+	});
 
-		let fragmentShader = Q5.device.createShaderModule({
-			label: 'drawingFragmentShader',
-			code: `
+	let fragmentShader = Q5.device.createShaderModule({
+		label: 'drawingFragmentShader',
+		code: `
 @group(2) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
 
 @fragment
@@ -74,32 +48,31 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	return mix(uColors[index], uColors[index + 1u], fract(colorIndex));
 }
 `
-		});
-
-		let pipelineLayout = Q5.device.createPipelineLayout({
-			bindGroupLayouts: $.bindGroupLayouts
-		});
-
-		$._createPipeline = (blendConfig) => {
-			return Q5.device.createRenderPipeline({
-				label: 'drawingPipeline',
-				layout: pipelineLayout,
-				vertex: {
-					module: vertexShader,
-					entryPoint: 'vertexMain',
-					buffers: [vertexBufferLayout]
-				},
-				fragment: {
-					module: fragmentShader,
-					entryPoint: 'fragmentMain',
-					targets: [{ format: 'bgra8unorm', blend: blendConfig }]
-				},
-				primitive: { topology: 'triangle-list' }
-			});
-		};
-
-		$.pipelines[0] = $._createPipeline(blendConfigs.normal);
 	});
+
+	colorsLayout = Q5.device.createBindGroupLayout({
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.FRAGMENT,
+				buffer: {
+					type: 'read-only-storage',
+					hasDynamicOffset: false
+				}
+			}
+		]
+	});
+
+	$.bindGroupLayouts.push(colorsLayout);
+
+	let vertexBufferLayout = {
+		arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
+		attributes: [
+			{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
+			{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex
+			{ format: 'float32', offset: 12, shaderLocation: 2 } // transformIndex
+		]
+	};
 
 	// prettier-ignore
 	let blendFactors = [
@@ -144,7 +117,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 	$.blendConfigs = {};
 
-	Object.entries(blendModes).forEach(([name, mode]) => {
+	for (const [name, mode] of Object.entries(blendModes)) {
 		$.blendConfigs[name] = {
 			color: {
 				srcFactor: blendFactors[mode[0]],
@@ -157,7 +130,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 				operation: blendOps[mode[5]]
 			}
 		};
-	});
+	}
 
 	$._blendMode = 'normal';
 	$.blendMode = (mode) => {
@@ -167,6 +140,31 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		$._blendMode = mode;
 		$.pipelines[0] = $._createPipeline($.blendConfigs[mode]);
 	};
+
+	let pipelineLayout = Q5.device.createPipelineLayout({
+		label: 'drawingPipelineLayout',
+		bindGroupLayouts: $.bindGroupLayouts
+	});
+
+	$._createPipeline = (blendConfig) => {
+		return Q5.device.createRenderPipeline({
+			label: 'drawingPipeline',
+			layout: pipelineLayout,
+			vertex: {
+				module: vertexShader,
+				entryPoint: 'vertexMain',
+				buffers: [vertexBufferLayout]
+			},
+			fragment: {
+				module: fragmentShader,
+				entryPoint: 'fragmentMain',
+				targets: [{ format: 'bgra8unorm', blend: blendConfig }]
+			},
+			primitive: { topology: 'triangle-list' }
+		});
+	};
+
+	$.pipelines[0] = $._createPipeline($.blendConfigs.normal);
 
 	let shapeVertices;
 
@@ -220,14 +218,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		$.endShape(1);
 	};
 
-	$.rect = (x, y, w, h) => {
-		let hw = w / 2;
-		let hh = h / 2;
+	$.rectMode = (x) => ($._rectMode = x);
 
-		let left = x - hw;
-		let right = x + hw;
-		let top = -(y - hh); // y is inverted in WebGPU
-		let bottom = -(y + hh);
+	$.rect = (x, y, w, h) => {
+		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 
 		let ci = $._colorIndex;
 		if ($._matrixDirty) $._saveMatrix();
@@ -235,12 +229,12 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		// two triangles make a rectangle
 		// prettier-ignore
 		verticesStack.push(
-			left, top, ci, ti,
-			right, top, ci, ti,
-			left, bottom, ci, ti,
-			right, top, ci, ti,
-			left, bottom, ci, ti,
-			right, bottom, ci, ti
+			l, t, ci, ti,
+			r, t, ci, ti,
+			l, b, ci, ti,
+			r, t, ci, ti,
+			l, b, ci, ti,
+			r, b, ci, ti
 		);
 		drawStack.push(0, 6);
 	};
@@ -319,12 +313,16 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
 
 	$._hooks.preRender.push(() => {
+		$.pass.setPipeline($.pipelines[0]);
+
+		const vertices = new Float32Array(verticesStack);
+
 		const vertexBuffer = Q5.device.createBuffer({
-			size: verticesStack.length * 6,
+			size: vertices.byteLength,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 		});
 
-		Q5.device.queue.writeBuffer(vertexBuffer, 0, new Float32Array(verticesStack));
+		Q5.device.queue.writeBuffer(vertexBuffer, 0, vertices);
 		$.pass.setVertexBuffer(0, vertexBuffer);
 
 		const colorsBuffer = Q5.device.createBuffer({
@@ -334,8 +332,8 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 		Q5.device.queue.writeBuffer(colorsBuffer, 0, new Float32Array(colorsStack));
 
-		const colorsBindGroup = Q5.device.createBindGroup({
-			layout: $.bindGroupLayouts[2],
+		$._colorsBindGroup = Q5.device.createBindGroup({
+			layout: colorsLayout,
 			entries: [
 				{
 					binding: 0,
@@ -349,6 +347,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		});
 
 		// set the bind group once before rendering
-		$.pass.setBindGroup(2, colorsBindGroup);
+		$.pass.setBindGroup(2, $._colorsBindGroup);
+	});
+
+	$._hooks.postRender.push(() => {
+		verticesStack.length = 0;
 	});
 };
