@@ -1,10 +1,12 @@
 Q5.renderers.webgpu.drawing = ($, q) => {
+	let c = $.canvas;
+
 	let drawStack = $.drawStack;
 	let colorsStack = $.colorsStack;
 
 	let verticesStack = [];
 
-	let colorsLayout;
+	let colorIndex, colorsLayout;
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'drawingVertexShader',
@@ -174,7 +176,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 	$.vertex = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		shapeVertices.push(x, -y, $._colorIndex, $._transformIndex);
+		shapeVertices.push(x, -y, $._fillIndex, $._transformIndex);
 	};
 
 	$.endShape = (close) => {
@@ -223,7 +225,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	$.rect = (x, y, w, h) => {
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 
-		let ci = $._colorIndex;
+		let ci = colorIndex ?? $._fillIndex;
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 		// two triangles make a rectangle
@@ -240,12 +242,25 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	};
 
 	$.point = (x, y) => {
+		colorIndex = $._strokeIndex;
 		let sw = $._strokeWeight;
-		if (sw == 1) $.rect(x, y, 1, 1);
-		else $.ellipse(x, y, sw, sw);
+		if (sw < 2) {
+			sw = Math.round(sw);
+			$.rect(x, y, sw, sw);
+		} else $.ellipse(x, y, sw, sw);
+		colorIndex = null;
 	};
 
-	$.background = () => {};
+	$.background = (r, g, b, a) => {
+		$.push();
+		$.resetMatrix();
+		if (r.src) $.image(r, -c.hw, -c.hh, c.w, c.h);
+		else {
+			$.fill(r, g, b, a);
+			$.rect(-c.hw, -c.hh, c.w, c.h);
+		}
+		$.pop();
+	};
 
 	/**
 	 * Derived from: ceil(Math.log(d) * 7) * 2 - ceil(28)
@@ -255,9 +270,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	 */
 	// prettier-ignore
 	const getArcSegments = (d) => 
-    d < 14 ? 8 :
-    d < 16 ? 10 :
-    d < 18 ? 12 :
+		d < 4 ? 6 :
+    d < 6 ? 8 :
+    d < 10 ? 10 :
+    d < 16 ? 12 :
     d < 20 ? 14 :
     d < 22 ? 16 :
     d < 24 ? 18 :
@@ -291,7 +307,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 		let t = 0; // theta
 		const angleIncrement = $.TAU / n;
-		const ci = $._colorIndex;
+		const ci = colorIndex ?? $._fillIndex;
 		if ($._matrixDirty) $._saveMatrix();
 		const ti = $._transformIndex;
 		let vx1, vy1, vx2, vy2;

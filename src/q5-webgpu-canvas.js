@@ -24,9 +24,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	// colors used for each draw call
 	let colorsStack = ($.colorsStack = [1, 1, 1, 1]);
 
-	// current color index, used to associate a vertex with a color
-	$._colorIndex = 0;
-
 	$._envLayout = Q5.device.createBindGroupLayout({
 		entries: [
 			{
@@ -178,34 +175,36 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._matrixDirty = false;
 	};
 
+	// current color index, used to associate a vertex with a color
+	let colorIndex = 0;
 	const addColor = (r, g, b, a = 1) => {
 		if (typeof r == 'string') r = Q5.color(r);
 		else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
-			a = g;
+			a = g ?? 1;
 			g = b = r;
 		}
 		if (r._q5Color) colorsStack.push(...r.levels);
 		else colorsStack.push(r, g, b, a);
-		$._colorIndex++;
+		colorIndex++;
 	};
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doFill = true;
-		$._fillIndex = $._colorIndex;
+		$._fillIndex = colorIndex;
 	};
 	$.stroke = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doStroke = true;
-		$._fillIndex = $._colorIndex;
+		$._strokeIndex = colorIndex;
 	};
 
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
 
 	$._strokeWeight = 1;
-	$.strokeWeight = (v) => ($._strokeWeight = v);
+	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
 
 	$._calcBox = (x, y, w, h, mode) => {
 		let hw = w / 2;
@@ -318,7 +317,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		// clear the stacks for the next frame
 		$.drawStack.length = 0;
 		$.colorsStack.length = 4;
-		$._colorIndex = 0;
+		colorIndex = 0;
 		rotation = 0;
 		$.resetMatrix();
 		$._matrixDirty = false;

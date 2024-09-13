@@ -3,6 +3,12 @@ Q5.modules.display = ($) => {
 
 	let c = $.canvas;
 
+	$.CENTERED = 'centered';
+	$.FULLSCREEN = 'fullscreen';
+	$.MAXED = 'maxed';
+
+	$.PIXELATED = 'pixelated';
+
 	if (Q5._instanceCount == 0 && !Q5._nodejs) {
 		document.head.insertAdjacentHTML(
 			'beforeend',

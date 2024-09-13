@@ -34,8 +34,8 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.resetTransform();
 		if (c.canvas) $.image(c, 0, 0, $.width, $.height);
 		else {
-			if (Q5.Color) {
-				if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+			if (Q5.Color && !c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
 				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 			}
 			$.ctx.fillStyle = c.toString();

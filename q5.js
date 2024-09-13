@@ -734,8 +734,8 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.resetTransform();
 		if (c.canvas) $.image(c, 0, 0, $.width, $.height);
 		else {
-			if (Q5.Color) {
-				if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
+			if (Q5.Color && !c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
 				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 			}
 			$.ctx.fillStyle = c.toString();
@@ -1920,6 +1920,12 @@ Q5.modules.display = ($) => {
 
 	let c = $.canvas;
 
+	$.CENTERED = 'centered';
+	$.FULLSCREEN = 'fullscreen';
+	$.MAXED = 'maxed';
+
+	$.PIXELATED = 'pixelated';
+
 	if (Q5._instanceCount == 0 && !Q5._nodejs) {
 		document.head.insertAdjacentHTML(
 			'beforeend',
@@ -2977,9 +2983,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	// colors used for each draw call
 	let colorsStack = ($.colorsStack = [1, 1, 1, 1]);
 
-	// current color index, used to associate a vertex with a color
-	$._colorIndex = 0;
-
 	$._envLayout = Q5.device.createBindGroupLayout({
 		entries: [
 			{
@@ -3131,34 +3134,36 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._matrixDirty = false;
 	};
 
+	// current color index, used to associate a vertex with a color
+	let colorIndex = 0;
 	const addColor = (r, g, b, a = 1) => {
 		if (typeof r == 'string') r = Q5.color(r);
 		else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
-			a = g;
+			a = g ?? 1;
 			g = b = r;
 		}
 		if (r._q5Color) colorsStack.push(...r.levels);
 		else colorsStack.push(r, g, b, a);
-		$._colorIndex++;
+		colorIndex++;
 	};
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doFill = true;
-		$._fillIndex = $._colorIndex;
+		$._fillIndex = colorIndex;
 	};
 	$.stroke = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doStroke = true;
-		$._fillIndex = $._colorIndex;
+		$._strokeIndex = colorIndex;
 	};
 
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
 
 	$._strokeWeight = 1;
-	$.strokeWeight = (v) => ($._strokeWeight = v);
+	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
 
 	$._calcBox = (x, y, w, h, mode) => {
 		let hw = w / 2;
@@ -3271,7 +3276,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		// clear the stacks for the next frame
 		$.drawStack.length = 0;
 		$.colorsStack.length = 4;
-		$._colorIndex = 0;
+		colorIndex = 0;
 		rotation = 0;
 		$.resetMatrix();
 		$._matrixDirty = false;
@@ -3296,12 +3301,14 @@ Q5.webgpu = async function (scope, parent) {
 	return new Q5(scope, parent, 'webgpu');
 };
 Q5.renderers.webgpu.drawing = ($, q) => {
+	let c = $.canvas;
+
 	let drawStack = $.drawStack;
 	let colorsStack = $.colorsStack;
 
 	let verticesStack = [];
 
-	let colorsLayout;
+	let colorIndex, colorsLayout;
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'drawingVertexShader',
@@ -3471,7 +3478,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 	$.vertex = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		shapeVertices.push(x, -y, $._colorIndex, $._transformIndex);
+		shapeVertices.push(x, -y, $._fillIndex, $._transformIndex);
 	};
 
 	$.endShape = (close) => {
@@ -3520,7 +3527,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	$.rect = (x, y, w, h) => {
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 
-		let ci = $._colorIndex;
+		let ci = colorIndex ?? $._fillIndex;
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 		// two triangles make a rectangle
@@ -3537,12 +3544,25 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	};
 
 	$.point = (x, y) => {
+		colorIndex = $._strokeIndex;
 		let sw = $._strokeWeight;
-		if (sw == 1) $.rect(x, y, 1, 1);
-		else $.ellipse(x, y, sw, sw);
+		if (sw < 2) {
+			sw = Math.round(sw);
+			$.rect(x, y, sw, sw);
+		} else $.ellipse(x, y, sw, sw);
+		colorIndex = null;
 	};
 
-	$.background = () => {};
+	$.background = (r, g, b, a) => {
+		$.push();
+		$.resetMatrix();
+		if (r.src) $.image(r, -c.hw, -c.hh, c.w, c.h);
+		else {
+			$.fill(r, g, b, a);
+			$.rect(-c.hw, -c.hh, c.w, c.h);
+		}
+		$.pop();
+	};
 
 	/**
 	 * Derived from: ceil(Math.log(d) * 7) * 2 - ceil(28)
@@ -3552,9 +3572,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	 */
 	// prettier-ignore
 	const getArcSegments = (d) => 
-    d < 14 ? 8 :
-    d < 16 ? 10 :
-    d < 18 ? 12 :
+		d < 4 ? 6 :
+    d < 6 ? 8 :
+    d < 10 ? 10 :
+    d < 16 ? 12 :
     d < 20 ? 14 :
     d < 22 ? 16 :
     d < 24 ? 18 :
@@ -3588,7 +3609,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 
 		let t = 0; // theta
 		const angleIncrement = $.TAU / n;
-		const ci = $._colorIndex;
+		const ci = colorIndex ?? $._fillIndex;
 		if ($._matrixDirty) $._saveMatrix();
 		const ti = $._transformIndex;
 		let vx1, vy1, vx2, vy2;
