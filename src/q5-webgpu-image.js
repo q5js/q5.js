@@ -118,30 +118,34 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		minFilter: 'linear'
 	});
 
-	$.loadImage = (src) => {
+	$._createTexture = (img) => {
+		let textureSize = [img.width, img.height, 1];
+
+		const texture = Q5.device.createTexture({
+			size: textureSize,
+			format: 'bgra8unorm',
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+		});
+
+		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, textureSize);
+
+		img.textureIndex = $._textureBindGroups.length;
+
+		const textureBindGroup = Q5.device.createBindGroup({
+			layout: textureLayout,
+			entries: [
+				{ binding: 0, resource: sampler },
+				{ binding: 1, resource: texture.createView() }
+			]
+		});
+		$._textureBindGroups.push(textureBindGroup);
+	};
+
+	$.loadImage = $.loadTexture = (src) => {
 		q._preloadCount++;
 		const img = new Image();
-		img.onload = async () => {
-			const imageBitmap = await createImageBitmap(img);
-			const texture = Q5.device.createTexture({
-				size: [img.width, img.height, 1],
-				format: 'bgra8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
-			});
-
-			Q5.device.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, [img.width, img.height, 1]);
-
-			img.index = $._textureBindGroups.length;
-
-			const textureBindGroup = Q5.device.createBindGroup({
-				layout: textureLayout,
-				entries: [
-					{ binding: 0, resource: sampler },
-					{ binding: 1, resource: texture.createView() }
-				]
-			});
-			$._textureBindGroups.push(textureBindGroup);
-
+		img.onload = () => {
+			$._createTexture(img);
 			q._preloadCount--;
 		};
 		img.src = src;
@@ -151,11 +155,17 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 	$.imageMode = (x) => ($._imageMode = x);
 
 	$.image = (img, x, y, w, h) => {
+		if (img.canvas) img = img.canvas;
+		if (img.textureIndex == undefined) return;
+
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
 		w ??= img.width;
 		h ??= img.height;
+
+		w /= $._pixelDensity;
+		h /= $._pixelDensity;
 
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
 
@@ -169,7 +179,7 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 			r, b, 1, 1, ti
 		);
 
-		$.drawStack.push(1, img.index);
+		$.drawStack.push(1, img.textureIndex);
 	};
 
 	$._hooks.preRender.push(() => {

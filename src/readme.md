@@ -52,6 +52,8 @@ WebGPU rendering modules are in development:
   - [q2d-text](#q2d-text)
   - [webgpu-canvas](#webgpu-canvas)
   - [webgpu-drawing](#webgpu-drawing)
+  - [webgpu-image](#webgpu-image)
+  - [webgpu-text](#webgpu-text)
   - [math](#math)
   - [noisier](#noisier)
 
@@ -125,11 +127,16 @@ function draw() {
 Q5.webgpu();
 ```
 
-For now, be sure to set `noStroke` in your setup code and `clear` the canvas at the start of your `draw` function to match current q5 webgpu limitations.
+WebGPU has different default settings compared to q5's q2d renderer and p5's P2D and WEBGL modes.
 
-The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and fall back to the q2d renderer. A compatibility layer is applied which sets the color mode to "rgba" in float format and translates the origin to the center of the canvas on every frame.
+- The default color mode is RGB in float format, `colorMode(RGB, 1)`.
+- The origin of the canvas (0, 0) is in the center, not the top left.
+- Mouse and touch coordinates correspond to canvas pixel coordinates.
+- For now, strokes are only implemented for `point` and `line` functions.
 
-Use of top level global mode with the WebGPU renderer requires that you make your sketch file a js module and await the `Q5.webgpu()` function.
+The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and a compatibility layer is applied to display sketches with the fallback q2d renderer.
+
+Use of top level global mode with the WebGPU renderer requires that you make your sketch file a js module and await for the `Q5.webgpu()` function to return the Q5 instance (`q`), which you can then use to set q5 functions such as `draw`.
 
 ```html
 <script type="module" src="sketch.js">
@@ -153,15 +160,39 @@ Implemented functions:
 
 ## webgpu-drawing
 
-> Uses `colorMode('rgb', 'float')` by default. Changing it to 'oklch' is not supported yet for the webgpu renderer.
+> Uses `colorMode(RGB, 1)` by default. Changing it to 'oklch' is not supported yet for the webgpu renderer.
 
 All basic shapes are drawn from their center. Strokes are not implemented yet.
 
-q5's WebGPU renderer drawing functions like `rect` don't immediately draw on the canvas. Instead, they prepare vertex and color data to be sent to the GPU in bulk, which occurs after the user's `draw` function and any post-draw functions are run. This approach better utilizes the GPU, so it doesn't have to repeatedly wait for the CPU to send small chunks of data that describe each individual shape. It's why WebGPU is faster than Canvas2D.
+q5's WebGPU renderer drawing functions like `rect` don't immediately draw on the canvas. Instead, they prepare vertex and color data to be sent to the GPU in bulk, which occurs after the user's `draw` function and any post-draw functions are run. This approach better utilizes the GPU, so it doesn't have to repeatedly wait for the CPU to send small chunks of data that describe each individual shape. It's the main reason why WebGPU is faster than Canvas2D.
 
 Implemented functions:
 
 `rect`, `circle`, `ellipse`, `triangle`, `beginShape`, `vertex`, `endShape`, `blendMode`
+
+## webgpu-image
+
+Implemented functions:
+
+`loadImage`, `loadTexture`, `image`, `imageMode`
+
+## webgpu-text
+
+Use `textFill` and `textStroke` to set text colors, not `fill` and `stroke`.
+
+WebGPU (and WebGL) don't have HTML5 based text rasterization functionality like Canvas2D does.
+
+In p5.js WebGL mode, text is drawn directly to the canvas. This is a complex task, since letters have intricate geometry: thus many triangles must be used to render text at high resolution. For typical use, the performance cost is actually negligible. Yet since p5.js depends on opentype.js for this, which is 528kb (171kb minified), a different approach was needed to keep q5 lightweight.
+
+Internally, q5's WebGPU renderer uses a q5 graphics object to draw text to a Canvas2D canvas via `createTextImage`, then converts that canvas to a WebGPU texture. Each texture is cached so it doesn't have to be recreated every frame that users want to display the same text.
+
+As long as text content doesn't change often, this method is 4x more efficient.
+
+As a best practice, separate static text from dynamic text rendering. For example render labels like "Score: " and corresponding values with separate calls to `text`.
+
+Complete implementation of text rendering in WebGPU.
+
+`loadFont`,`textFont`, `textSize`, `textLeading`, `textStyle`, `textAlign`, `textWidth`, `textAscent`, `textDescent`, `textFill`, `textStroke`, `text`
 
 ## math
 
@@ -175,4 +206,4 @@ Adds additional noise functions to q5.
 
 `SimplexNoise` is a simplex noise implementation in JavaScript by Tezumie. Kevin Perlin's patent on simplex noise expired in 2022. Simplex noise is slightly faster but arguably less visually appealing than perlin noise.
 
-`BlockyNoise` is similar to p5's default `noise` function, which is a bit notorious in the gen art community for not actually being perlin noise, despite its claims to be. It looks closer to value noise but is not a standard implementation of that either. When visualized in 2d it's a bit blocky at 1 octave, hence the name.
+`BlockyNoise` is similar to p5's default `noise` function, which is a bit notorious in the gen art community for not actually being perlin noise, despite its claims to be. It looks closer to value noise but is not a standard implementation of that either. When visualized in 2d it's a bit blocky at 1 octave, hence the name. This algorithm is however, very good at outputting a variety of values from less inputs, even just a single param.

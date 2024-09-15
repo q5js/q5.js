@@ -127,7 +127,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!x && !y && !z) return;
 		// Update the translation values
 		$._matrix[3] += x;
-		$._matrix[7] += y;
+		$._matrix[7] -= y;
 		$._matrix[11] += z || 0;
 		$._matrixDirty = true;
 	};
@@ -178,13 +178,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	// current color index, used to associate a vertex with a color
 	let colorIndex = 0;
 	const addColor = (r, g, b, a = 1) => {
-		if (typeof r == 'string') r = Q5.color(r);
+		if (typeof r == 'string') r = $.color(r);
 		else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
 			a = g ?? 1;
 			g = b = r;
 		}
-		if (r._q5Color) colorsStack.push(...r.levels);
+		if (r._q5Color) colorsStack.push(r.r, r.g, r.b, r.a);
 		else colorsStack.push(r, g, b, a);
 		colorIndex++;
 	};

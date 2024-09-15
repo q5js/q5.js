@@ -150,11 +150,15 @@ Q5.renderers.q2d.image = ($, q) => {
 		};
 	}
 
+	$._getImageData = (x, y, w, h) => {
+		return $.ctx.getImageData(x, y, w, h, { colorSpace: $.canvas.colorSpace });
+	};
+
 	$.trim = () => {
 		let pd = $._pixelDensity || 1;
 		let w = $.canvas.width;
 		let h = $.canvas.height;
-		let data = $.ctx.getImageData(0, 0, w, h).data;
+		let data = $._getImageData(0, 0, w, h).data;
 		let left = w,
 			right = 0,
 			top = h,
@@ -193,7 +197,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
-			let c = $.ctx.getImageData(x * pd, y * pd, 1, 1).data;
+			let c = $._getImageData(x * pd, y * pd, 1, 1).data;
 			return new $.Color(c[0], c[1], c[2], c[3] / 255);
 		}
 		x = (x || 0) * pd;
@@ -203,7 +207,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		w *= pd;
 		h *= pd;
 		let img = $.createImage(w, h);
-		let imgData = $.ctx.getImageData(x, y, w, h);
+		let imgData = $._getImageData(x, y, w, h);
 		img.ctx.putImageData(imgData, 0, 0);
 		img._pixelDensity = pd;
 		img.width = _w;
@@ -233,7 +237,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	};
 
 	$.loadPixels = () => {
-		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		imgData = $._getImageData(0, 0, $.canvas.width, $.canvas.height);
 		q.pixels = imgData.data;
 	};
 	$.updatePixels = () => {

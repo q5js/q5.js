@@ -251,6 +251,20 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		colorIndex = null;
 	};
 
+	$.line = (x1, y1, x2, y2) => {
+		colorIndex = $._strokeIndex;
+
+		$.push();
+		$.translate(x1, y1);
+		$.rotate($.atan2(y2 - y1, x2 - x1));
+		let length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+		let sw = $._strokeWeight;
+		$.rect(0, -sw / 2, length, sw);
+		$.pop();
+
+		colorIndex = null;
+	};
+
 	$.background = (r, g, b, a) => {
 		$.push();
 		$.resetMatrix();

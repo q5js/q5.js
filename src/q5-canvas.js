@@ -48,6 +48,9 @@ Q5.modules.canvas = ($, q) => {
 	$.DODGE = 'color-dodge';
 	$.BURN = 'color-burn';
 
+	$.P2D = '2d';
+	$.WEBGL = 'webgl';
+
 	$._OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
@@ -77,7 +80,7 @@ Q5.modules.canvas = ($, q) => {
 		c.renderer = $._renderer;
 		c[$._renderer] = true;
 	}
-	$._pixelDensity = 1;
+	$._pixelDensity = window?.devicePixelRatio || 1;
 
 	$._adjustDisplay = () => {
 		if (c.style) {
@@ -112,6 +115,15 @@ Q5.modules.canvas = ($, q) => {
 			for (let m of $._hooks.postCanvas) m();
 		}
 		return rend;
+	};
+
+	$.createGraphics = function (w, h, opt) {
+		let g = new Q5('graphics');
+		opt ??= {};
+		opt.alpha ??= true;
+		opt.colorSpace ??= $.canvas.colorSpace;
+		g.createCanvas.call($, w, h, opt);
+		return g;
 	};
 
 	$._save = async (data, name, ext) => {
@@ -222,7 +234,7 @@ Q5.modules.canvas = ($, q) => {
 	$.canvas.resize = $.resizeCanvas;
 	$.canvas.save = $.saveCanvas = $.save;
 
-	$.displayDensity = () => window.devicePixelRatio;
+	$.displayDensity = () => window.devicePixelRatio || 1;
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.3
+ * @version 2.4
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -330,6 +330,9 @@ Q5.modules.canvas = ($, q) => {
 	$.DODGE = 'color-dodge';
 	$.BURN = 'color-burn';
 
+	$.P2D = '2d';
+	$.WEBGL = 'webgl';
+
 	$._OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
@@ -359,7 +362,7 @@ Q5.modules.canvas = ($, q) => {
 		c.renderer = $._renderer;
 		c[$._renderer] = true;
 	}
-	$._pixelDensity = 1;
+	$._pixelDensity = window?.devicePixelRatio || 1;
 
 	$._adjustDisplay = () => {
 		if (c.style) {
@@ -394,6 +397,15 @@ Q5.modules.canvas = ($, q) => {
 			for (let m of $._hooks.postCanvas) m();
 		}
 		return rend;
+	};
+
+	$.createGraphics = function (w, h, opt) {
+		let g = new Q5('graphics');
+		opt ??= {};
+		opt.alpha ??= true;
+		opt.colorSpace ??= $.canvas.colorSpace;
+		g.createCanvas.call($, w, h, opt);
+		return g;
 	};
 
 	$._save = async (data, name, ext) => {
@@ -504,7 +516,7 @@ Q5.modules.canvas = ($, q) => {
 	$.canvas.resize = $.resizeCanvas;
 	$.canvas.save = $.saveCanvas = $.save;
 
-	$.displayDensity = () => window.devicePixelRatio;
+	$.displayDensity = () => window.devicePixelRatio || 1;
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
@@ -578,8 +590,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$._doFill = true;
 		$._fillSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
 		$.ctx.fillStyle = c.toString();
@@ -589,8 +603,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$._doStroke = true;
 		$._strokeSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
 		$.ctx.strokeStyle = c.toString();
@@ -678,15 +694,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		vid.style.zIndex = -1000;
 		document.body.append(vid);
 		return vid;
-	};
-
-	$.createGraphics = function (w, h, opt) {
-		let g = new Q5('graphics');
-		opt ??= {};
-		opt.alpha ??= true;
-		opt.colorSpace ??= $.canvas.colorSpace;
-		g.createCanvas.call($, w, h, opt);
-		return g;
 	};
 
 	if (window && $._scope != 'graphics') {
@@ -1282,11 +1289,15 @@ Q5.renderers.q2d.image = ($, q) => {
 		};
 	}
 
+	$._getImageData = (x, y, w, h) => {
+		return $.ctx.getImageData(x, y, w, h, { colorSpace: $.canvas.colorSpace });
+	};
+
 	$.trim = () => {
 		let pd = $._pixelDensity || 1;
 		let w = $.canvas.width;
 		let h = $.canvas.height;
-		let data = $.ctx.getImageData(0, 0, w, h).data;
+		let data = $._getImageData(0, 0, w, h).data;
 		let left = w,
 			right = 0,
 			top = h,
@@ -1325,7 +1336,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
-			let c = $.ctx.getImageData(x * pd, y * pd, 1, 1).data;
+			let c = $._getImageData(x * pd, y * pd, 1, 1).data;
 			return new $.Color(c[0], c[1], c[2], c[3] / 255);
 		}
 		x = (x || 0) * pd;
@@ -1335,7 +1346,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		w *= pd;
 		h *= pd;
 		let img = $.createImage(w, h);
-		let imgData = $.ctx.getImageData(x, y, w, h);
+		let imgData = $._getImageData(x, y, w, h);
 		img.ctx.putImageData(imgData, 0, 0);
 		img._pixelDensity = pd;
 		img.width = _w;
@@ -1365,7 +1376,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	};
 
 	$.loadPixels = () => {
-		imgData = $.ctx.getImageData(0, 0, $.canvas.width, $.canvas.height);
+		imgData = $._getImageData(0, 0, $.canvas.width, $.canvas.height);
 		q.pixels = imgData.data;
 	};
 	$.updatePixels = () => {
@@ -1503,12 +1514,14 @@ Q5.renderers.q2d.text = ($, q) => {
 		);
 	};
 	$.createTextImage = (str, w, h) => {
+		let k = $._genTextImageKey(str, w, h);
+		if ($._tic.get(k)) return $._tic.get(k);
+
 		let og = $._textCache;
 		$._textCache = true;
 		$._genTextImage = true;
 		$.text(str, 0, 0, w, h);
 		$._genTextImage = false;
-		let k = $._genTextImageKey(str, w, h);
 		$._textCache = og;
 		return $._tic.get(k);
 	};
@@ -1562,7 +1575,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 		if (!$._fillSet) c.fillStyle = f;
 		if (useCache) {
-			ti = tg.get();
+			ti = tg.canvas;
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);
@@ -3086,7 +3099,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!x && !y && !z) return;
 		// Update the translation values
 		$._matrix[3] += x;
-		$._matrix[7] += y;
+		$._matrix[7] -= y;
 		$._matrix[11] += z || 0;
 		$._matrixDirty = true;
 	};
@@ -3137,13 +3150,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	// current color index, used to associate a vertex with a color
 	let colorIndex = 0;
 	const addColor = (r, g, b, a = 1) => {
-		if (typeof r == 'string') r = Q5.color(r);
+		if (typeof r == 'string') r = $.color(r);
 		else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
 			a = g ?? 1;
 			g = b = r;
 		}
-		if (r._q5Color) colorsStack.push(...r.levels);
+		if (r._q5Color) colorsStack.push(r.r, r.g, r.b, r.a);
 		else colorsStack.push(r, g, b, a);
 		colorIndex++;
 	};
@@ -3553,6 +3566,20 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		colorIndex = null;
 	};
 
+	$.line = (x1, y1, x2, y2) => {
+		colorIndex = $._strokeIndex;
+
+		$.push();
+		$.translate(x1, y1);
+		$.rotate($.atan2(y2 - y1, x2 - x1));
+		let length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+		let sw = $._strokeWeight;
+		$.rect(0, -sw / 2, length, sw);
+		$.pop();
+
+		colorIndex = null;
+	};
+
 	$.background = (r, g, b, a) => {
 		$.push();
 		$.resetMatrix();
@@ -3792,30 +3819,34 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		minFilter: 'linear'
 	});
 
-	$.loadImage = (src) => {
+	$._createTexture = (img) => {
+		let textureSize = [img.width, img.height, 1];
+
+		const texture = Q5.device.createTexture({
+			size: textureSize,
+			format: 'bgra8unorm',
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+		});
+
+		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, textureSize);
+
+		img.textureIndex = $._textureBindGroups.length;
+
+		const textureBindGroup = Q5.device.createBindGroup({
+			layout: textureLayout,
+			entries: [
+				{ binding: 0, resource: sampler },
+				{ binding: 1, resource: texture.createView() }
+			]
+		});
+		$._textureBindGroups.push(textureBindGroup);
+	};
+
+	$.loadImage = $.loadTexture = (src) => {
 		q._preloadCount++;
 		const img = new Image();
-		img.onload = async () => {
-			const imageBitmap = await createImageBitmap(img);
-			const texture = Q5.device.createTexture({
-				size: [img.width, img.height, 1],
-				format: 'bgra8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
-			});
-
-			Q5.device.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, [img.width, img.height, 1]);
-
-			img.index = $._textureBindGroups.length;
-
-			const textureBindGroup = Q5.device.createBindGroup({
-				layout: textureLayout,
-				entries: [
-					{ binding: 0, resource: sampler },
-					{ binding: 1, resource: texture.createView() }
-				]
-			});
-			$._textureBindGroups.push(textureBindGroup);
-
+		img.onload = () => {
+			$._createTexture(img);
 			q._preloadCount--;
 		};
 		img.src = src;
@@ -3825,11 +3856,17 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 	$.imageMode = (x) => ($._imageMode = x);
 
 	$.image = (img, x, y, w, h) => {
+		if (img.canvas) img = img.canvas;
+		if (img.textureIndex == undefined) return;
+
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
 		w ??= img.width;
 		h ??= img.height;
+
+		w /= $._pixelDensity;
+		h /= $._pixelDensity;
 
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
 
@@ -3843,7 +3880,7 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 			r, b, 1, 1, ti
 		);
 
-		$.drawStack.push(1, img.index);
+		$.drawStack.push(1, img.textureIndex);
 	};
 
 	$._hooks.preRender.push(() => {
@@ -3868,4 +3905,41 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		verticesStack.length = 0;
 	});
 };
-Q5.renderers.webgpu.text = ($, q) => {};
+Q5.renderers.webgpu.text = ($, q) => {
+	let t = $.createGraphics(1, 1);
+
+	$.loadFont = (f) => {
+		q._preloadCount++;
+		return t.loadFont(f, () => {
+			q._preloadCount--;
+		});
+	};
+	$.textFont = t.textFont;
+	$.textSize = t.textSize;
+	$.textLeading = t.textLeading;
+	$.textStyle = t.textStyle;
+	$.textAlign = t.textAlign;
+	$.textWidth = t.textWidth;
+	$.textAscent = t.textAscent;
+	$.textDescent = t.textDescent;
+
+	$.textFill = (r, g, b, a) => t.fill($.color(r, g, b, a));
+	$.textStroke = (r, g, b, a) => t.stroke($.color(r, g, b, a));
+
+	$.text = (str, x, y, w, h) => {
+		let img = t.createTextImage(str, w, h);
+
+		if (img.textureIndex == undefined) $._createTexture(img);
+
+		let og = t._imageMode;
+		t._imageMode = 'corner';
+		if (t.ctx.textAlign == 'center') x -= img.width * 0.5;
+		else if (t.ctx.textAlign == 'right') x -= img.width;
+		if (t.ctx.textBaseline == 'alphabetic') y -= t._textLeading;
+		if (t.ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + t._textLeadDiff;
+		else if (t.ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + t._textLeadDiff;
+		else if (t.ctx.textBaseline == 'top') y -= img._descent + t._textLeadDiff;
+		$.image(img, x, y);
+		t._imageMode = og;
+	};
+};

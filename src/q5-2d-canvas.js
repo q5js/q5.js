@@ -47,8 +47,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$._doFill = true;
 		$._fillSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
 		$.ctx.fillStyle = c.toString();
@@ -58,8 +60,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$._doStroke = true;
 		$._strokeSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && typeof c != 'string') c = $.color(...arguments);
-			else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
 		$.ctx.strokeStyle = c.toString();
@@ -147,15 +151,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		vid.style.zIndex = -1000;
 		document.body.append(vid);
 		return vid;
-	};
-
-	$.createGraphics = function (w, h, opt) {
-		let g = new Q5('graphics');
-		opt ??= {};
-		opt.alpha ??= true;
-		opt.colorSpace ??= $.canvas.colorSpace;
-		g.createCanvas.call($, w, h, opt);
-		return g;
 	};
 
 	if (window && $._scope != 'graphics') {

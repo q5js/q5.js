@@ -110,12 +110,14 @@ Q5.renderers.q2d.text = ($, q) => {
 		);
 	};
 	$.createTextImage = (str, w, h) => {
+		let k = $._genTextImageKey(str, w, h);
+		if ($._tic.get(k)) return $._tic.get(k);
+
 		let og = $._textCache;
 		$._textCache = true;
 		$._genTextImage = true;
 		$.text(str, 0, 0, w, h);
 		$._genTextImage = false;
-		let k = $._genTextImageKey(str, w, h);
 		$._textCache = og;
 		return $._tic.get(k);
 	};
@@ -169,7 +171,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 		if (!$._fillSet) c.fillStyle = f;
 		if (useCache) {
-			ti = tg.get();
+			ti = tg.canvas;
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);
