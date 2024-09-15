@@ -144,6 +144,7 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 	$.loadImage = $.loadTexture = (src) => {
 		q._preloadCount++;
 		const img = new Image();
+		img.crossOrigin = 'Anonymous';
 		img.onload = () => {
 			$._createTexture(img);
 			q._preloadCount--;
