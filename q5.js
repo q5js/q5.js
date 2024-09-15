@@ -3863,11 +3863,8 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
-		w ??= img.width;
-		h ??= img.height;
-
-		w /= $._pixelDensity;
-		h /= $._pixelDensity;
+		w ??= img.width / $._pixelDensity;
+		h ??= img.height / $._pixelDensity;
 
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
 
