@@ -78,6 +78,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				}
 			]
 		});
+
+		return c;
 	};
 
 	$._resizeCanvas = (w, h) => {

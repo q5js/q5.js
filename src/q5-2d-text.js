@@ -52,6 +52,9 @@ Q5.renderers.q2d.text = ($, q) => {
 		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
+	$.textFill = $.fill;
+	$.textStroke = $.stroke;
+
 	$._textCache = !!Q5.Image;
 	$._TimedCache = class extends Map {
 		constructor() {
@@ -171,7 +174,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 		if (!$._fillSet) c.fillStyle = f;
 		if (useCache) {
-			ti = tg.canvas;
+			ti = tg;
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);

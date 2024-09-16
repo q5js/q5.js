@@ -69,19 +69,19 @@ The canvas module provides shared functionality for all canvas renderers, such a
 
 ## q2d-canvas
 
-Adds canvas 2D rendering support to q5.
+Adds Canvas2D rendering support to q5.
 
 All other 2D modules depend on this module.
 
+Though loading q5-color is recommend, it's not required since `fill` and `stroke` can be set to a CSS color string.
+
 ## q2d-drawing
 
-Adds canvas 2D drawing functions to q5.
-
-Though loading q5-color is recommend, it's not required since `fill` and `stroke` can be set to a CSS color string.
+Adds Canvas2D drawing functions to q5.
 
 ## q2d-image
 
-Adds canvas 2D image support to q5.
+Adds Canvas2D image support to q5.
 
 The filters in q5-image use the [CanvasRenderingContext2D.filter](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter) property to apply native hardware-accelerated filters to images.
 
@@ -97,7 +97,7 @@ As of April 2024, Safari Technology Preview supports `ctx.filter` under a flag. 
 
 ## q2d-text
 
-Adds canvas 2D text rendering support to q5.
+Adds Canvas2D text rendering support to q5.
 
 Image based features in this module require the q5-2d-image module.
 
@@ -129,14 +129,15 @@ Q5.webgpu();
 
 WebGPU has different default settings compared to q5's q2d renderer and p5's P2D and WEBGL modes.
 
-- The default color mode is RGB in float format, `colorMode(RGB, 1)`.
+- The default color mode is RGB in 0-1 "float" format: `colorMode(RGB, 1)`.
 - The origin of the canvas (0, 0) is in the center, not the top left.
-- Mouse and touch coordinates correspond to canvas pixel coordinates.
-- For now, strokes are only implemented for `point` and `line` functions.
+- Mouse and touch coordinates correspond to canvas pixels.
+- Use `textFill` and `textStroke` to set text colors.
+- For now, strokes are only implemented for the `point`, `line`, and `text` functions.
 
-The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and a compatibility layer is applied to display sketches with the fallback q2d renderer.
+The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and apply a compatibility layer to display sketches with the fallback q2d renderer.
 
-Use of top level global mode with the WebGPU renderer requires that you make your sketch file a js module and await for the `Q5.webgpu()` function to return the Q5 instance (`q`), which you can then use to set q5 functions such as `draw`.
+Use of top level global mode with the WebGPU renderer requires that you make your sketch file a js module and await for `Q5.webgpu()` to return the Q5 instance (`q`), which you can then use to set q5 functions such as `draw`.
 
 ```html
 <script type="module" src="sketch.js">
@@ -178,7 +179,7 @@ Implemented functions:
 
 ## webgpu-text
 
-Use `textFill` and `textStroke` to set text colors, not `fill` and `stroke`.
+> Use `textFill` and `textStroke` to set text colors.
 
 WebGPU (and WebGL) don't have HTML5 based text rasterization functionality like Canvas2D does.
 

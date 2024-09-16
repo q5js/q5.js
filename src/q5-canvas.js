@@ -76,11 +76,16 @@ Q5.modules.canvas = ($, q) => {
 	let c = $.canvas;
 	c.width = $.width = 100;
 	c.height = $.height = 100;
+	$._pixelDensity = 1;
+
+	$.displayDensity = () => window.devicePixelRatio || 1;
+
 	if ($._scope != 'image') {
 		c.renderer = $._renderer;
 		c[$._renderer] = true;
+
+		$._pixelDensity = Math.ceil($.displayDensity());
 	}
-	$._pixelDensity = window?.devicePixelRatio || 1;
 
 	$._adjustDisplay = () => {
 		if (c.style) {
@@ -96,14 +101,12 @@ Q5.modules.canvas = ($, q) => {
 		if (typeof options == 'object') Object.assign(opt, options);
 
 		if ($._scope != 'image') {
-			let pd = $.displayDensity();
-			if ($._scope == 'graphics') pd = this._pixelDensity;
+			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
 			else if (window.IntersectionObserver) {
 				new IntersectionObserver((e) => {
 					c.visible = e[0].isIntersecting;
 				}).observe(c);
 			}
-			$._pixelDensity = Math.ceil(pd);
 		}
 
 		$._setCanvasSize(w, h);
@@ -234,7 +237,6 @@ Q5.modules.canvas = ($, q) => {
 	$.canvas.resize = $.resizeCanvas;
 	$.canvas.save = $.saveCanvas = $.save;
 
-	$.displayDensity = () => window.devicePixelRatio || 1;
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;

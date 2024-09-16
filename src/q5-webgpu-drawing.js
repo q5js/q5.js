@@ -313,6 +313,8 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		d < 2400 ? 90 :
 		100;
 
+	$.ellipseMode = (x) => ($._ellipseMode = x);
+
 	$.ellipse = (x, y, w, h) => {
 		const n = getArcSegments(w == h ? w : Math.max(w, h));
 

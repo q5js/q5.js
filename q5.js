@@ -358,11 +358,16 @@ Q5.modules.canvas = ($, q) => {
 	let c = $.canvas;
 	c.width = $.width = 100;
 	c.height = $.height = 100;
+	$._pixelDensity = 1;
+
+	$.displayDensity = () => window.devicePixelRatio || 1;
+
 	if ($._scope != 'image') {
 		c.renderer = $._renderer;
 		c[$._renderer] = true;
+
+		$._pixelDensity = Math.ceil($.displayDensity());
 	}
-	$._pixelDensity = window?.devicePixelRatio || 1;
 
 	$._adjustDisplay = () => {
 		if (c.style) {
@@ -378,14 +383,12 @@ Q5.modules.canvas = ($, q) => {
 		if (typeof options == 'object') Object.assign(opt, options);
 
 		if ($._scope != 'image') {
-			let pd = $.displayDensity();
-			if ($._scope == 'graphics') pd = this._pixelDensity;
+			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
 			else if (window.IntersectionObserver) {
 				new IntersectionObserver((e) => {
 					c.visible = e[0].isIntersecting;
 				}).observe(c);
 			}
-			$._pixelDensity = Math.ceil(pd);
 		}
 
 		$._setCanvasSize(w, h);
@@ -516,7 +519,6 @@ Q5.modules.canvas = ($, q) => {
 	$.canvas.resize = $.resizeCanvas;
 	$.canvas.save = $.saveCanvas = $.save;
 
-	$.displayDensity = () => window.devicePixelRatio || 1;
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
@@ -1456,6 +1458,9 @@ Q5.renderers.q2d.text = ($, q) => {
 		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
+	$.textFill = $.fill;
+	$.textStroke = $.stroke;
+
 	$._textCache = !!Q5.Image;
 	$._TimedCache = class extends Map {
 		constructor() {
@@ -1575,7 +1580,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 		if (!$._fillSet) c.fillStyle = f;
 		if (useCache) {
-			ti = tg.canvas;
+			ti = tg;
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);
@@ -3050,6 +3055,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				}
 			]
 		});
+
+		return c;
 	};
 
 	$._resizeCanvas = (w, h) => {
@@ -3628,6 +3635,8 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		d < 2400 ? 90 :
 		100;
 
+	$.ellipseMode = (x) => ($._ellipseMode = x);
+
 	$.ellipse = (x, y, w, h) => {
 		const n = getArcSegments(w == h ? w : Math.max(w, h));
 
@@ -3820,6 +3829,8 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 	});
 
 	$._createTexture = (img) => {
+		if (img.canvas) img = img.canvas;
+
 		let textureSize = [img.width, img.height, 1];
 
 		const texture = Q5.device.createTexture({
@@ -3905,6 +3916,8 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 };
 Q5.renderers.webgpu.text = ($, q) => {
 	let t = $.createGraphics(1, 1);
+	t.pixelDensity($._pixelDensity);
+	t._imageMode = 'corner';
 
 	$.loadFont = (f) => {
 		q._preloadCount++;
@@ -3927,10 +3940,14 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		let img = t.createTextImage(str, w, h);
 
-		if (img.textureIndex == undefined) $._createTexture(img);
+		if (img.canvas.textureIndex == undefined) $._createTexture(img);
 
-		let og = t._imageMode;
-		t._imageMode = 'corner';
+		$.textImage(img, x, y);
+	};
+
+	$.createTextImage = t.createTextImage;
+
+	$.textImage = (img, x, y) => {
 		if (t.ctx.textAlign == 'center') x -= img.width * 0.5;
 		else if (t.ctx.textAlign == 'right') x -= img.width;
 		if (t.ctx.textBaseline == 'alphabetic') y -= t._textLeading;
@@ -3938,6 +3955,5 @@ Q5.renderers.webgpu.text = ($, q) => {
 		else if (t.ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + t._textLeadDiff;
 		else if (t.ctx.textBaseline == 'top') y -= img._descent + t._textLeadDiff;
 		$.image(img, x, y);
-		t._imageMode = og;
 	};
 };
