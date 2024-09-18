@@ -251,6 +251,36 @@ Q5.modules.canvas = ($, q) => {
 			q.height = (c.h / c.w) * unit;
 		} else $._da = 0;
 	};
+
+	$._styleNames = [
+		'_doStroke',
+		'_doFill',
+		'_strokeSet',
+		'_fillSet',
+		'_tint',
+		'_imageMode',
+		'_rectMode',
+		'_ellipseMode',
+		'_textFont',
+		'_textLeading',
+		'_leadingSet',
+		'_textSize',
+		'_textAlign',
+		'_textBaseline',
+		'_textStyle',
+		'_textWrap'
+	];
+	$._styles = [];
+
+	$._pushStyles = () => {
+		let styles = {};
+		for (let s of $._styleNames) styles[s] = $[s];
+		$._styles.push(styles);
+	};
+	$._popStyles = () => {
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+	};
 };
 
 Q5.canvasOptions = {

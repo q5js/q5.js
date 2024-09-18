@@ -86,12 +86,12 @@ function Q5(scope, parent, renderer) {
 		$._frameRate = 1000 / $.deltaTime;
 		q.frameCount++;
 		let pre = performance.now();
-		if ($.ctx) $.resetMatrix();
+		$.resetMatrix();
 		if ($._beginRender) $._beginRender();
 		for (let m of Q5.methods.pre) m.call($);
 		$.draw();
-		if ($._render) $._render();
 		for (let m of Q5.methods.post) m.call($);
+		if ($._render) $._render();
 		if ($._finishRender) $._finishRender();
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;

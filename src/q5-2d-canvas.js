@@ -107,36 +107,13 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.scale($._pixelDensity);
 	};
 
-	$._styleNames = [
-		'_doStroke',
-		'_doFill',
-		'_strokeSet',
-		'_fillSet',
-		'_tint',
-		'_imageMode',
-		'_rectMode',
-		'_ellipseMode',
-		'_textFont',
-		'_textLeading',
-		'_leadingSet',
-		'_textSize',
-		'_textAlign',
-		'_textBaseline',
-		'_textStyle',
-		'_textWrap'
-	];
-	$._styles = [];
-
 	$.push = $.pushMatrix = () => {
 		$.ctx.save();
-		let styles = {};
-		for (let s of $._styleNames) styles[s] = $[s];
-		$._styles.push(styles);
+		$._pushStyles();
 	};
 	$.pop = $.popMatrix = () => {
 		$.ctx.restore();
-		let styles = $._styles.pop();
-		for (let s of $._styleNames) $[s] = styles[s];
+		$._popStyles();
 	};
 
 	$.createCapture = (x) => {

@@ -180,6 +180,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	};
 
 	$.endShape = (close) => {
+		if (!$._doFill) {
+			shapeVertices = [];
+			return;
+		}
 		let v = shapeVertices;
 		if (v.length < 12) {
 			throw new Error('A shape must have at least 3 vertices.');
@@ -206,10 +210,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 				v[i + 3]
 			);
 		}
+		shapeVertices = [];
 
 		verticesStack.push(...triangles);
 		drawStack.push(0, triangles.length / 4);
-		shapeVertices = [];
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {

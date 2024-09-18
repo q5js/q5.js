@@ -339,13 +339,13 @@ Unminified:
 
 - p5.js **5112kb** ⚠️
 - p5.sound.js 488kb
-- q5.js 90kb
+- q5.js 93kb
 
 Minified:
 
 - p5.min.js 1034kb ⚠️
 - p5.sound.min.js 200kb
-- q5.min.js **58kb** 🎉
+- q5.min.js **61kb** 🎉
 
 ## Benchmarks
 

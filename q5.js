@@ -86,12 +86,12 @@ function Q5(scope, parent, renderer) {
 		$._frameRate = 1000 / $.deltaTime;
 		q.frameCount++;
 		let pre = performance.now();
-		if ($.ctx) $.resetMatrix();
+		$.resetMatrix();
 		if ($._beginRender) $._beginRender();
 		for (let m of Q5.methods.pre) m.call($);
 		$.draw();
-		if ($._render) $._render();
 		for (let m of Q5.methods.post) m.call($);
+		if ($._render) $._render();
 		if ($._finishRender) $._finishRender();
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;
@@ -533,6 +533,36 @@ Q5.modules.canvas = ($, q) => {
 			q.height = (c.h / c.w) * unit;
 		} else $._da = 0;
 	};
+
+	$._styleNames = [
+		'_doStroke',
+		'_doFill',
+		'_strokeSet',
+		'_fillSet',
+		'_tint',
+		'_imageMode',
+		'_rectMode',
+		'_ellipseMode',
+		'_textFont',
+		'_textLeading',
+		'_leadingSet',
+		'_textSize',
+		'_textAlign',
+		'_textBaseline',
+		'_textStyle',
+		'_textWrap'
+	];
+	$._styles = [];
+
+	$._pushStyles = () => {
+		let styles = {};
+		for (let s of $._styleNames) styles[s] = $[s];
+		$._styles.push(styles);
+	};
+	$._popStyles = () => {
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+	};
 };
 
 Q5.canvasOptions = {
@@ -652,36 +682,13 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.scale($._pixelDensity);
 	};
 
-	$._styleNames = [
-		'_doStroke',
-		'_doFill',
-		'_strokeSet',
-		'_fillSet',
-		'_tint',
-		'_imageMode',
-		'_rectMode',
-		'_ellipseMode',
-		'_textFont',
-		'_textLeading',
-		'_leadingSet',
-		'_textSize',
-		'_textAlign',
-		'_textBaseline',
-		'_textStyle',
-		'_textWrap'
-	];
-	$._styles = [];
-
 	$.push = $.pushMatrix = () => {
 		$.ctx.save();
-		let styles = {};
-		for (let s of $._styleNames) styles[s] = $[s];
-		$._styles.push(styles);
+		$._pushStyles();
 	};
 	$.pop = $.popMatrix = () => {
 		$.ctx.restore();
-		let styles = $._styles.pop();
-		for (let s of $._styleNames) $[s] = styles[s];
+		$._popStyles();
 	};
 
 	$.createCapture = (x) => {
@@ -3086,20 +3093,22 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	// Stack to keep track of transformation matrix indexes
 	$._transformIndexStack = [];
 
-	$.push = () => {
+	$.push = $.pushMatrix = () => {
 		// Push the current matrix index onto the stack
 		$._transformIndexStack.push($._transformIndex);
+		$._pushStyles();
 	};
 
-	$.pop = () => {
-		if ($._transformIndexStack.length > 0) {
-			// Pop the last matrix index from the stack and set it as the current matrix index
-			let idx = $._transformIndexStack.pop();
-			$._matrix = $.transformStates[idx].slice();
-			$._transformIndex = idx;
-		} else {
-			console.warn('Matrix index stack is empty!');
+	$.pop = $.popMatrix = () => {
+		if (!$._transformIndexStack.length) {
+			return console.warn('Matrix index stack is empty!');
 		}
+		// Pop the last matrix index from the stack and set it as the current matrix index
+		let idx = $._transformIndexStack.pop();
+		$._matrix = $.transformStates[idx].slice();
+		$._transformIndex = idx;
+		$._matrixDirty = false;
+		$._popStyles();
 	};
 
 	$.translate = (x, y, z) => {
@@ -3298,8 +3307,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$.colorsStack.length = 4;
 		colorIndex = 0;
 		rotation = 0;
-		$.resetMatrix();
-		$._matrixDirty = false;
 		$.transformStates.length = 1;
 		$._transformIndexStack.length = 0;
 	};
@@ -3502,6 +3509,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	};
 
 	$.endShape = (close) => {
+		if (!$._doFill) {
+			shapeVertices = [];
+			return;
+		}
 		let v = shapeVertices;
 		if (v.length < 12) {
 			throw new Error('A shape must have at least 3 vertices.');
@@ -3528,10 +3539,10 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 				v[i + 3]
 			);
 		}
+		shapeVertices = [];
 
 		verticesStack.push(...triangles);
 		drawStack.push(0, triangles.length / 4);
-		shapeVertices = [];
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {

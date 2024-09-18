@@ -109,20 +109,22 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	// Stack to keep track of transformation matrix indexes
 	$._transformIndexStack = [];
 
-	$.push = () => {
+	$.push = $.pushMatrix = () => {
 		// Push the current matrix index onto the stack
 		$._transformIndexStack.push($._transformIndex);
+		$._pushStyles();
 	};
 
-	$.pop = () => {
-		if ($._transformIndexStack.length > 0) {
-			// Pop the last matrix index from the stack and set it as the current matrix index
-			let idx = $._transformIndexStack.pop();
-			$._matrix = $.transformStates[idx].slice();
-			$._transformIndex = idx;
-		} else {
-			console.warn('Matrix index stack is empty!');
+	$.pop = $.popMatrix = () => {
+		if (!$._transformIndexStack.length) {
+			return console.warn('Matrix index stack is empty!');
 		}
+		// Pop the last matrix index from the stack and set it as the current matrix index
+		let idx = $._transformIndexStack.pop();
+		$._matrix = $.transformStates[idx].slice();
+		$._transformIndex = idx;
+		$._matrixDirty = false;
+		$._popStyles();
 	};
 
 	$.translate = (x, y, z) => {
@@ -321,8 +323,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$.colorsStack.length = 4;
 		colorIndex = 0;
 		rotation = 0;
-		$.resetMatrix();
-		$._matrixDirty = false;
 		$.transformStates.length = 1;
 		$._transformIndexStack.length = 0;
 	};
