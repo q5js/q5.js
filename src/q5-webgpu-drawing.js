@@ -224,6 +224,15 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		$.endShape(1);
 	};
 
+	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.vertex(x2, y2);
+		$.vertex(x3, y3);
+		$.vertex(x4, y4);
+		$.endShape(1);
+	};
+
 	$.rectMode = (x) => ($._rectMode = x);
 
 	$.rect = (x, y, w, h) => {
@@ -244,6 +253,8 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		);
 		drawStack.push(0, 6);
 	};
+
+	$.square = (x, y, s) => $.rect(x, y, s, s);
 
 	$.point = (x, y) => {
 		colorIndex = $._strokeIndex;

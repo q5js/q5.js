@@ -30,17 +30,21 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		delete t.canvas;
 
-		let o = new $._OffscreenCanvas(c.width, c.height);
-		o.w = c.w;
-		o.h = c.h;
-		let oCtx = o.getContext('2d');
-		oCtx.drawImage(c, 0, 0);
+		let o;
+		if ($.frameCount > 1) {
+			o = new $._OffscreenCanvas(c.width, c.height);
+			o.w = c.w;
+			o.h = c.h;
+			let oCtx = o.getContext('2d');
+			oCtx.drawImage(c, 0, 0);
+		}
 
 		$._setCanvasSize(w, h);
 
 		for (let prop in t) $.ctx[prop] = t[prop];
 		$.scale($._pixelDensity);
-		$.ctx.drawImage(o, 0, 0, o.w, o.h);
+
+		if (o) $.ctx.drawImage(o, 0, 0, o.w, o.h);
 	};
 
 	$.fill = function (c) {
@@ -74,6 +78,9 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.lineWidth = n || 0.0001;
 	};
 	$.noStroke = () => ($._doStroke = false);
+
+	$.opacity = (a) => ($.ctx.globalAlpha = a);
+
 	$.clear = () => {
 		$.ctx.save();
 		$.ctx.resetTransform();
@@ -98,7 +105,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		y ??= x;
 		$.ctx.scale(x, y);
 	};
-	$.opacity = (a) => ($.ctx.globalAlpha = a);
 	$.applyMatrix = (a, b, c, d, e, f) => $.ctx.transform(a, b, c, d, e, f);
 	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
 	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
@@ -107,13 +113,16 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.scale($._pixelDensity);
 	};
 
-	$.push = $.pushMatrix = () => {
+	$.pushMatrix = () => $.ctx.save();
+	$.popMatrix = () => $.ctx.restore();
+
+	$.push = () => {
 		$.ctx.save();
-		$._pushStyles();
+		$.pushStyles();
 	};
-	$.pop = $.popMatrix = () => {
+	$.pop = () => {
 		$.ctx.restore();
-		$._popStyles();
+		$.popStyles();
 	};
 
 	$.createCapture = (x) => {

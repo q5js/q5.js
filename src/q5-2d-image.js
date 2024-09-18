@@ -10,6 +10,7 @@ Q5.renderers.q2d.image = ($, q) => {
 			for (let m of ['canvas', 'image', 'soft_filters']) {
 				if (r[m]) r[m]($, $);
 			}
+			$._pixelDensity = opt.pixelDensity || 1;
 			$.createCanvas(w, h, opt);
 			delete $.createCanvas;
 			$._loop = false;

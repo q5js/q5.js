@@ -554,12 +554,12 @@ Q5.modules.canvas = ($, q) => {
 	];
 	$._styles = [];
 
-	$._pushStyles = () => {
+	$.pushStyles = () => {
 		let styles = {};
 		for (let s of $._styleNames) styles[s] = $[s];
 		$._styles.push(styles);
 	};
-	$._popStyles = () => {
+	$.popStyles = () => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
 	};
@@ -605,17 +605,21 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		delete t.canvas;
 
-		let o = new $._OffscreenCanvas(c.width, c.height);
-		o.w = c.w;
-		o.h = c.h;
-		let oCtx = o.getContext('2d');
-		oCtx.drawImage(c, 0, 0);
+		let o;
+		if ($.frameCount > 1) {
+			o = new $._OffscreenCanvas(c.width, c.height);
+			o.w = c.w;
+			o.h = c.h;
+			let oCtx = o.getContext('2d');
+			oCtx.drawImage(c, 0, 0);
+		}
 
 		$._setCanvasSize(w, h);
 
 		for (let prop in t) $.ctx[prop] = t[prop];
 		$.scale($._pixelDensity);
-		$.ctx.drawImage(o, 0, 0, o.w, o.h);
+
+		if (o) $.ctx.drawImage(o, 0, 0, o.w, o.h);
 	};
 
 	$.fill = function (c) {
@@ -649,6 +653,9 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.lineWidth = n || 0.0001;
 	};
 	$.noStroke = () => ($._doStroke = false);
+
+	$.opacity = (a) => ($.ctx.globalAlpha = a);
+
 	$.clear = () => {
 		$.ctx.save();
 		$.ctx.resetTransform();
@@ -673,7 +680,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		y ??= x;
 		$.ctx.scale(x, y);
 	};
-	$.opacity = (a) => ($.ctx.globalAlpha = a);
 	$.applyMatrix = (a, b, c, d, e, f) => $.ctx.transform(a, b, c, d, e, f);
 	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
 	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
@@ -682,13 +688,16 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.scale($._pixelDensity);
 	};
 
-	$.push = $.pushMatrix = () => {
+	$.pushMatrix = () => $.ctx.save();
+	$.popMatrix = () => $.ctx.restore();
+
+	$.push = () => {
 		$.ctx.save();
-		$._pushStyles();
+		$.pushStyles();
 	};
-	$.pop = $.popMatrix = () => {
+	$.pop = () => {
 		$.ctx.restore();
-		$._popStyles();
+		$.popStyles();
 	};
 
 	$.createCapture = (x) => {
@@ -1158,6 +1167,7 @@ Q5.renderers.q2d.image = ($, q) => {
 			for (let m of ['canvas', 'image', 'soft_filters']) {
 				if (r[m]) r[m]($, $);
 			}
+			$._pixelDensity = opt.pixelDensity || 1;
 			$.createCanvas(w, h, opt);
 			delete $.createCanvas;
 			$._loop = false;
@@ -1472,7 +1482,7 @@ Q5.renderers.q2d.text = ($, q) => {
 	$._TimedCache = class extends Map {
 		constructor() {
 			super();
-			this.maxSize = 500;
+			this.maxSize = 50000;
 		}
 		set(k, v) {
 			v.lastAccessed = Date.now();
@@ -1538,60 +1548,70 @@ Q5.renderers.q2d.text = ($, q) => {
 		return $._tic.get(k);
 	};
 	$.text = (str, x, y, w, h) => {
-		if (str === undefined) return;
+		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
+		let lines = str.split('\n');
 		if ($._da) {
 			x *= $._da;
 			y *= $._da;
 		}
-		if (!$._doFill && !$._doStroke) return;
-		let c, ti, tg, k, cX, cY, _ascent, _descent;
-		let t = $.ctx.getTransform();
-		let useCache = $._genTextImage || ($._textCache && (t.b != 0 || t.c != 0));
-		if (!useCache) {
-			c = $.ctx;
-			cX = x;
-			cY = y;
-		} else {
-			k = $._genTextImageKey(str, w, h);
-			ti = $._tic.get(k);
-			if (ti && !$._genTextImage) {
-				$.textImage(ti, x, y);
-				return;
-			}
-			tg = $.createGraphics.call($, 1, 1);
-			c = tg.ctx;
-		}
-		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		let lines = str.split('\n');
-		if (useCache) {
-			cX = 0;
-			cY = $._textLeading * lines.length;
-			let m = c.measureText(' ');
-			_ascent = m.fontBoundingBoxAscent;
-			_descent = m.fontBoundingBoxDescent;
-			h ??= cY + _descent;
-			tg.resizeCanvas(Math.ceil(c.measureText(str).width), Math.ceil(h));
+		let ctx = $.ctx;
+		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 
-			c.fillStyle = $.ctx.fillStyle;
-			c.strokeStyle = $.ctx.strokeStyle;
-			c.lineWidth = $.ctx.lineWidth;
+		let useCache, img, cacheKey, tX, tY, ascent, descent;
+
+		if (!(useCache = $._genTextImage) && $._textCache) {
+			let transform = $.ctx.getTransform();
+			useCache = transform.b != 0 || transform.c != 0;
 		}
-		let f = c.fillStyle;
-		if (!$._fillSet) c.fillStyle = 'black';
+
+		if (!useCache) {
+			tX = x;
+			tY = y;
+		} else {
+			cacheKey = $._genTextImageKey(str, w, h);
+			img = $._tic.get(cacheKey);
+			if (img && !$._genTextImage) return $.textImage(img, x, y);
+
+			tX = 0;
+			tY = $._textLeading * lines.length;
+			let measure = ctx.measureText(' ');
+			ascent = measure.fontBoundingBoxAscent;
+			descent = measure.fontBoundingBoxDescent;
+			h ??= tY + descent;
+
+			img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(h), {
+				pixelDensity: $._pixelDensity
+			});
+
+			ctx = img.ctx;
+
+			ctx.font = $.ctx.font;
+			ctx.fillStyle = $.ctx.fillStyle;
+			ctx.strokeStyle = $.ctx.strokeStyle;
+			ctx.lineWidth = $.ctx.lineWidth;
+		}
+
+		let ogFill;
+		if (!$._fillSet) {
+			ogFill = ctx.fillStyle;
+			ctx.fillStyle = 'black';
+		}
+
 		for (let i = 0; i < lines.length; i++) {
-			if ($._doStroke && $._strokeSet) c.strokeText(lines[i], cX, cY);
-			if ($._doFill) c.fillText(lines[i], cX, cY);
-			cY += $._textLeading;
-			if (cY > h) break;
+			if ($._doStroke && $._strokeSet) ctx.strokeText(lines[i], tX, tY);
+			if ($._doFill) ctx.fillText(lines[i], tX, tY);
+			tY += $._textLeading;
+			if (tY > h) break;
 		}
-		if (!$._fillSet) c.fillStyle = f;
+
+		if (!$._fillSet) ctx.fillStyle = ogFill;
+
 		if (useCache) {
-			ti = tg;
-			ti._ascent = _ascent;
-			ti._descent = _descent;
-			$._tic.set(k, ti);
-			if (!$._genTextImage) $.textImage(ti, x, y);
+			img._ascent = ascent;
+			img._descent = descent;
+			$._tic.set(cacheKey, img);
+			if (!$._genTextImage) $.textImage(img, x, y);
 		}
 	};
 	$.textImage = (img, x, y) => {
@@ -2850,9 +2870,9 @@ Q5.Vector = class {
 		return this._$.atan2(this.y, this.x);
 	}
 	setHeading(ang) {
-		let mag = this.mag(); // Calculate the magnitude of the vector
-		this.x = mag * this._$.cos(ang); // Set the new x component
-		this.y = mag * this._$.sin(ang); // Set the new y component
+		let mag = this.mag();
+		this.x = mag * this._$.cos(ang);
+		this.y = mag * this._$.sin(ang);
 		return this;
 	}
 	rotate(ang) {
@@ -3070,6 +3090,37 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._setCanvasSize(w, h);
 	};
 
+	// current color index, used to associate a vertex with a color
+	let colorIndex = 0;
+	const addColor = (r, g, b, a = 1) => {
+		if (typeof r == 'string') r = $.color(r);
+		else if (b == undefined) {
+			// grayscale mode `fill(1, 0.5)`
+			a = g ?? 1;
+			g = b = r;
+		}
+		if (r._q5Color) colorsStack.push(r.r, r.g, r.b, r.a);
+		else colorsStack.push(r, g, b, a);
+		colorIndex++;
+	};
+
+	$.fill = (r, g, b, a) => {
+		addColor(r, g, b, a);
+		$._doFill = true;
+		$._fillIndex = colorIndex;
+	};
+	$.stroke = (r, g, b, a) => {
+		addColor(r, g, b, a);
+		$._doStroke = true;
+		$._strokeIndex = colorIndex;
+	};
+
+	$.noFill = () => ($._doFill = false);
+	$.noStroke = () => ($._doStroke = false);
+
+	$._strokeWeight = 1;
+	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
+
 	$.resetMatrix = () => {
 		// Initialize the transformation matrix as 4x4 identity matrix
 
@@ -3092,24 +3143,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	// Stack to keep track of transformation matrix indexes
 	$._transformIndexStack = [];
-
-	$.push = $.pushMatrix = () => {
-		// Push the current matrix index onto the stack
-		$._transformIndexStack.push($._transformIndex);
-		$._pushStyles();
-	};
-
-	$.pop = $.popMatrix = () => {
-		if (!$._transformIndexStack.length) {
-			return console.warn('Matrix index stack is empty!');
-		}
-		// Pop the last matrix index from the stack and set it as the current matrix index
-		let idx = $._transformIndexStack.pop();
-		$._matrix = $.transformStates[idx].slice();
-		$._transformIndex = idx;
-		$._matrixDirty = false;
-		$._popStyles();
-	};
 
 	$.translate = (x, y, z) => {
 		if (!x && !y && !z) return;
@@ -3156,6 +3189,57 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._matrixDirty = true;
 	};
 
+	$.shearX = (ang) => {
+		if (!ang) return;
+		if ($._angleMode) ang *= $._DEGTORAD;
+
+		let tanAng = Math.tan(ang);
+
+		let m0 = $._matrix[0],
+			m1 = $._matrix[1],
+			m4 = $._matrix[4],
+			m5 = $._matrix[5];
+
+		$._matrix[0] = m0 + m4 * tanAng;
+		$._matrix[1] = m1 + m5 * tanAng;
+
+		$._matrixDirty = true;
+	};
+
+	$.shearY = (ang) => {
+		if (!ang) return;
+		if ($._angleMode) ang *= $._DEGTORAD;
+
+		let tanAng = Math.tan(ang);
+
+		let m0 = $._matrix[0],
+			m1 = $._matrix[1],
+			m4 = $._matrix[4],
+			m5 = $._matrix[5];
+
+		$._matrix[4] = m4 + m0 * tanAng;
+		$._matrix[5] = m5 + m1 * tanAng;
+
+		$._matrixDirty = true;
+	};
+
+	$.applyMatrix = (...args) => {
+		let m;
+		if (args.length == 1) m = args[0];
+		else m = args;
+
+		if (m.length == 9) {
+			// Convert 3x3 matrix to 4x4 matrix
+			m = [m[0], m[1], 0, m[2], m[3], m[4], 0, m[5], 0, 0, 1, 0, m[6], m[7], 0, m[8]];
+		} else if (m.length != 16) {
+			throw new Error('Matrix must be a 3x3 or 4x4 array.');
+		}
+
+		// Overwrite the current transformation matrix
+		$._matrix = m.slice();
+		$._matrixDirty = true;
+	};
+
 	// Function to save the current matrix state if dirty
 	$._saveMatrix = () => {
 		$.transformStates.push($._matrix.slice());
@@ -3163,36 +3247,30 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._matrixDirty = false;
 	};
 
-	// current color index, used to associate a vertex with a color
-	let colorIndex = 0;
-	const addColor = (r, g, b, a = 1) => {
-		if (typeof r == 'string') r = $.color(r);
-		else if (b == undefined) {
-			// grayscale mode `fill(1, 0.5)`
-			a = g ?? 1;
-			g = b = r;
+	// Push the current matrix index onto the stack
+	$.pushMatrix = () => {
+		if ($._matrixDirty) $._saveMatrix();
+		$._transformIndexStack.push($._transformIndex);
+	};
+	$.popMatrix = () => {
+		if (!$._transformIndexStack.length) {
+			return console.warn('Matrix index stack is empty!');
 		}
-		if (r._q5Color) colorsStack.push(r.r, r.g, r.b, r.a);
-		else colorsStack.push(r, g, b, a);
-		colorIndex++;
+		// Pop the last matrix index from the stack and set it as the current matrix index
+		let idx = $._transformIndexStack.pop();
+		$._matrix = $.transformStates[idx].slice();
+		$._transformIndex = idx;
+		$._matrixDirty = false;
 	};
 
-	$.fill = (r, g, b, a) => {
-		addColor(r, g, b, a);
-		$._doFill = true;
-		$._fillIndex = colorIndex;
+	$.push = () => {
+		$.pushMatrix();
+		$.pushStyles();
 	};
-	$.stroke = (r, g, b, a) => {
-		addColor(r, g, b, a);
-		$._doStroke = true;
-		$._strokeIndex = colorIndex;
+	$.pop = () => {
+		$.popMatrix();
+		$.popStyles();
 	};
-
-	$.noFill = () => ($._doFill = false);
-	$.noStroke = () => ($._doStroke = false);
-
-	$._strokeWeight = 1;
-	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
 
 	$._calcBox = (x, y, w, h, mode) => {
 		let hw = w / 2;
@@ -3553,6 +3631,15 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		$.endShape(1);
 	};
 
+	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.vertex(x2, y2);
+		$.vertex(x3, y3);
+		$.vertex(x4, y4);
+		$.endShape(1);
+	};
+
 	$.rectMode = (x) => ($._rectMode = x);
 
 	$.rect = (x, y, w, h) => {
@@ -3573,6 +3660,8 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		);
 		drawStack.push(0, 6);
 	};
+
+	$.square = (x, y, s) => $.rect(x, y, s, s);
 
 	$.point = (x, y) => {
 		colorIndex = $._strokeIndex;
@@ -3925,6 +4014,15 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		verticesStack.length = 0;
 	});
 };
+
+Q5.THRESHOLD = 1;
+Q5.GRAY = 2;
+Q5.OPAQUE = 3;
+Q5.INVERT = 4;
+Q5.POSTERIZE = 5;
+Q5.DILATE = 6;
+Q5.ERODE = 7;
+Q5.BLUR = 8;
 Q5.renderers.webgpu.text = ($, q) => {
 	let t = $.createGraphics(1, 1);
 	t.pixelDensity($._pixelDensity);

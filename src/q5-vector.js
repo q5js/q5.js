@@ -138,9 +138,9 @@ Q5.Vector = class {
 		return this._$.atan2(this.y, this.x);
 	}
 	setHeading(ang) {
-		let mag = this.mag(); // Calculate the magnitude of the vector
-		this.x = mag * this._$.cos(ang); // Set the new x component
-		this.y = mag * this._$.sin(ang); // Set the new y component
+		let mag = this.mag();
+		this.x = mag * this._$.cos(ang);
+		this.y = mag * this._$.sin(ang);
 		return this;
 	}
 	rotate(ang) {

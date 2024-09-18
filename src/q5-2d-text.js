@@ -59,7 +59,7 @@ Q5.renderers.q2d.text = ($, q) => {
 	$._TimedCache = class extends Map {
 		constructor() {
 			super();
-			this.maxSize = 500;
+			this.maxSize = 50000;
 		}
 		set(k, v) {
 			v.lastAccessed = Date.now();
@@ -125,60 +125,70 @@ Q5.renderers.q2d.text = ($, q) => {
 		return $._tic.get(k);
 	};
 	$.text = (str, x, y, w, h) => {
-		if (str === undefined) return;
+		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
+		let lines = str.split('\n');
 		if ($._da) {
 			x *= $._da;
 			y *= $._da;
 		}
-		if (!$._doFill && !$._doStroke) return;
-		let c, ti, tg, k, cX, cY, _ascent, _descent;
-		let t = $.ctx.getTransform();
-		let useCache = $._genTextImage || ($._textCache && (t.b != 0 || t.c != 0));
-		if (!useCache) {
-			c = $.ctx;
-			cX = x;
-			cY = y;
-		} else {
-			k = $._genTextImageKey(str, w, h);
-			ti = $._tic.get(k);
-			if (ti && !$._genTextImage) {
-				$.textImage(ti, x, y);
-				return;
-			}
-			tg = $.createGraphics.call($, 1, 1);
-			c = tg.ctx;
-		}
-		c.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-		let lines = str.split('\n');
-		if (useCache) {
-			cX = 0;
-			cY = $._textLeading * lines.length;
-			let m = c.measureText(' ');
-			_ascent = m.fontBoundingBoxAscent;
-			_descent = m.fontBoundingBoxDescent;
-			h ??= cY + _descent;
-			tg.resizeCanvas(Math.ceil(c.measureText(str).width), Math.ceil(h));
+		let ctx = $.ctx;
+		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 
-			c.fillStyle = $.ctx.fillStyle;
-			c.strokeStyle = $.ctx.strokeStyle;
-			c.lineWidth = $.ctx.lineWidth;
+		let useCache, img, cacheKey, tX, tY, ascent, descent;
+
+		if (!(useCache = $._genTextImage) && $._textCache) {
+			let transform = $.ctx.getTransform();
+			useCache = transform.b != 0 || transform.c != 0;
 		}
-		let f = c.fillStyle;
-		if (!$._fillSet) c.fillStyle = 'black';
+
+		if (!useCache) {
+			tX = x;
+			tY = y;
+		} else {
+			cacheKey = $._genTextImageKey(str, w, h);
+			img = $._tic.get(cacheKey);
+			if (img && !$._genTextImage) return $.textImage(img, x, y);
+
+			tX = 0;
+			tY = $._textLeading * lines.length;
+			let measure = ctx.measureText(' ');
+			ascent = measure.fontBoundingBoxAscent;
+			descent = measure.fontBoundingBoxDescent;
+			h ??= tY + descent;
+
+			img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(h), {
+				pixelDensity: $._pixelDensity
+			});
+
+			ctx = img.ctx;
+
+			ctx.font = $.ctx.font;
+			ctx.fillStyle = $.ctx.fillStyle;
+			ctx.strokeStyle = $.ctx.strokeStyle;
+			ctx.lineWidth = $.ctx.lineWidth;
+		}
+
+		let ogFill;
+		if (!$._fillSet) {
+			ogFill = ctx.fillStyle;
+			ctx.fillStyle = 'black';
+		}
+
 		for (let i = 0; i < lines.length; i++) {
-			if ($._doStroke && $._strokeSet) c.strokeText(lines[i], cX, cY);
-			if ($._doFill) c.fillText(lines[i], cX, cY);
-			cY += $._textLeading;
-			if (cY > h) break;
+			if ($._doStroke && $._strokeSet) ctx.strokeText(lines[i], tX, tY);
+			if ($._doFill) ctx.fillText(lines[i], tX, tY);
+			tY += $._textLeading;
+			if (tY > h) break;
 		}
-		if (!$._fillSet) c.fillStyle = f;
+
+		if (!$._fillSet) ctx.fillStyle = ogFill;
+
 		if (useCache) {
-			ti = tg;
-			ti._ascent = _ascent;
-			ti._descent = _descent;
-			$._tic.set(k, ti);
-			if (!$._genTextImage) $.textImage(ti, x, y);
+			img._ascent = ascent;
+			img._descent = descent;
+			$._tic.set(cacheKey, img);
+			if (!$._genTextImage) $.textImage(img, x, y);
 		}
 	};
 	$.textImage = (img, x, y) => {

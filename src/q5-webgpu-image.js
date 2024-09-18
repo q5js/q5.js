@@ -204,3 +204,12 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		verticesStack.length = 0;
 	});
 };
+
+Q5.THRESHOLD = 1;
+Q5.GRAY = 2;
+Q5.OPAQUE = 3;
+Q5.INVERT = 4;
+Q5.POSTERIZE = 5;
+Q5.DILATE = 6;
+Q5.ERODE = 7;
+Q5.BLUR = 8;

@@ -272,12 +272,12 @@ Q5.modules.canvas = ($, q) => {
 	];
 	$._styles = [];
 
-	$._pushStyles = () => {
+	$.pushStyles = () => {
 		let styles = {};
 		for (let s of $._styleNames) styles[s] = $[s];
 		$._styles.push(styles);
 	};
-	$._popStyles = () => {
+	$.popStyles = () => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
 	};
