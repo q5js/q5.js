@@ -118,6 +118,11 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		minFilter: 'linear'
 	});
 
+	let MAX_TEXTURES = 12000;
+	let texturesOffset = 0;
+
+	let textures = [];
+
 	$._createTexture = (img) => {
 		if (img.canvas) img = img.canvas;
 
@@ -131,6 +136,8 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, textureSize);
 
+		textures.push(texture);
+
 		img.textureIndex = $._textureBindGroups.length;
 
 		const textureBindGroup = Q5.device.createBindGroup({
@@ -141,6 +148,15 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 			]
 		});
 		$._textureBindGroups.push(textureBindGroup);
+
+		// Check if the maximum number of textures is reached
+		if ($._textureBindGroups.length >= MAX_TEXTURES) {
+			// Unload the least recently used texture
+			$._textureBindGroups[texturesOffset] = null;
+			textures[texturesOffset].destroy();
+			textures[texturesOffset] = null;
+			texturesOffset++;
+		}
 	};
 
 	$.loadImage = $.loadTexture = (src) => {

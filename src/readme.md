@@ -105,7 +105,7 @@ Image based features in this module require the q5-2d-image module.
 
 `textImage(img, x, y)` displays text images, complying with the user's text position settings instead of their image position settings. The idea is that text will appear in the same place as it would if it were drawn with the `text` function.
 
-`textCache(bool, maxSize)` enables or disables text caching. As of June 2024, drawing rotated text is super slow in all browsers, so q5 creates and stores images of text and rotates that instead. Can improve rendering performance 90x but uses more memory. `maxSize` param determines the maximum number of text images to cache, default is 500 since these images will typically be quite small. The text image cache (tic) is a timed cache, so the oldest images are removed first.
+`textCache(bool, maxSize)` enables or disables text caching.
 
 ## webgpu-canvas
 

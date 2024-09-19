@@ -596,6 +596,13 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		return c;
 	};
 
+	$.clear = () => {
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.restore();
+	};
+
 	if ($._scope == 'image') return;
 
 	$._resizeCanvas = (w, h) => {
@@ -632,7 +639,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
-		$.ctx.fillStyle = c.toString();
+		$.ctx.fillStyle = $._fillStyle = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
 	$.stroke = function (c) {
@@ -645,7 +652,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
-		$.ctx.strokeStyle = c.toString();
+		$.ctx.strokeStyle = $._strokeStyle = c.toString();
 	};
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
@@ -655,13 +662,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	$.noStroke = () => ($._doStroke = false);
 
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
-
-	$.clear = () => {
-		$.ctx.save();
-		$.ctx.resetTransform();
-		$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-		$.ctx.restore();
-	};
 
 	// DRAWING MATRIX
 
@@ -1422,6 +1422,8 @@ Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
 Q5.renderers.q2d.text = ($, q) => {
+	$._textAlign = 'left';
+	$._textBaseline = 'alphabetic';
 	$._textFont = 'sans-serif';
 	$._textSize = 12;
 	$._textLeading = 15;
@@ -1439,15 +1441,36 @@ Q5.renderers.q2d.text = ($, q) => {
 		});
 		return name;
 	};
-	$.textFont = (x) => ($._textFont = x);
+
+	let _styleHash = 0;
+
+	const updateStyleHash = () => {
+		const styleString = $._textFont + $._textSize + $._textStyle + $._textLeading + $._fillStyle + $._strokeStyle;
+		let hash = 5381;
+		for (let i = 0; i < styleString.length; i++) {
+			hash = (hash * 33) ^ styleString.charCodeAt(i);
+		}
+		_styleHash = hash >>> 0;
+	};
+
+	// Update _styleHash in text style setting functions
+	$.textFont = (x) => {
+		$._textFont = x;
+		updateStyleHash();
+	};
 	$.textSize = (x) => {
 		if (x === undefined) return $._textSize;
 		if ($._da) x *= $._da;
 		$._textSize = x;
+		updateStyleHash();
 		if (!$._leadingSet) {
 			$._textLeading = x * 1.25;
 			$._textLeadDiff = $._textLeading - x;
 		}
+	};
+	$.textStyle = (x) => {
+		$._textStyle = x;
+		updateStyleHash();
 	};
 	$.textLeading = (x) => {
 		if (x === undefined) return $._textLeading;
@@ -1455,97 +1478,55 @@ Q5.renderers.q2d.text = ($, q) => {
 		$._textLeading = x;
 		$._textLeadDiff = x - $._textSize;
 		$._leadingSet = true;
+		updateStyleHash();
 	};
-	$.textStyle = (x) => ($._textStyle = x);
 	$.textAlign = (horiz, vert) => {
-		$.ctx.textAlign = horiz;
+		$.ctx.textAlign = $._textAlign = horiz;
 		if (vert) {
-			$.ctx.textBaseline = vert == $.CENTER ? 'middle' : vert;
+			$.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? 'middle' : vert;
 		}
+		updateStyleHash();
+	};
+
+	$._genTextImageKey = (str, w = '', h = '') => {
+		return str.slice(0, 200) + _styleHash + w + h;
+	};
+
+	const updateFont = () => {
+		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 	};
 	$.textWidth = (str) => {
-		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		updateFont();
 		return $.ctx.measureText(str).width;
 	};
 	$.textAscent = (str) => {
-		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		updateFont();
 		return $.ctx.measureText(str).actualBoundingBoxAscent;
 	};
 	$.textDescent = (str) => {
-		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		updateFont();
 		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
 	$.textFill = $.fill;
 	$.textStroke = $.stroke;
 
 	$._textCache = !!Q5.Image;
-	$._TimedCache = class extends Map {
-		constructor() {
-			super();
-			this.maxSize = 50000;
-		}
-		set(k, v) {
-			v.lastAccessed = Date.now();
-			super.set(k, v);
-			if (this.size > this.maxSize) this.gc();
-		}
-		get(k) {
-			const v = super.get(k);
-			if (v) v.lastAccessed = Date.now();
-			return v;
-		}
-		gc() {
-			let t = Infinity;
-			let oldest;
-			let i = 0;
-			for (const [k, v] of this.entries()) {
-				if (v.lastAccessed < t) {
-					t = v.lastAccessed;
-					oldest = i;
-				}
-				i++;
-			}
-			i = oldest;
-			for (const k of this.keys()) {
-				if (i == 0) {
-					oldest = k;
-					break;
-				}
-				i--;
-			}
-			this.delete(oldest);
-		}
-	};
-	$._tic = new $._TimedCache();
+	$._tic = {};
+	let textCacheSize = 0;
+	let textCacheMaxSize = 12000;
+	let genTextImage = false;
 	$.textCache = (b, maxSize) => {
-		if (maxSize) $._tic.maxSize = maxSize;
+		if (maxSize) textCacheMaxSize = maxSize;
 		if (b !== undefined) $._textCache = b;
 		return $._textCache;
 	};
-	$._genTextImageKey = (str, w, h) => {
-		return (
-			str.slice(0, 200) +
-			$._textStyle +
-			$._textSize +
-			$._textFont +
-			($._doFill ? $.ctx.fillStyle : '') +
-			'_' +
-			($._doStroke && $._strokeSet ? $.ctx.lineWidth + $.ctx.strokeStyle + '_' : '') +
-			(w || '') +
-			(h ? 'x' + h : '')
-		);
-	};
 	$.createTextImage = (str, w, h) => {
-		let k = $._genTextImageKey(str, w, h);
-		if ($._tic.get(k)) return $._tic.get(k);
-
 		let og = $._textCache;
-		$._textCache = true;
-		$._genTextImage = true;
-		$.text(str, 0, 0, w, h);
-		$._genTextImage = false;
+		$._textCache = genTextImage = true;
+		img = $.text(str, 0, 0, w, h);
+		genTextImage = false;
 		$._textCache = og;
-		return $._tic.get(k);
+		return img;
 	};
 	$.text = (str, x, y, w, h) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
@@ -1558,37 +1539,57 @@ Q5.renderers.q2d.text = ($, q) => {
 		let ctx = $.ctx;
 		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
 
-		let useCache, img, cacheKey, tX, tY, ascent, descent;
+		let useCache, img, cacheKey, tX, tY;
 
-		if (!(useCache = $._genTextImage) && $._textCache) {
+		if (!(useCache = genTextImage) && $._textCache) {
 			let transform = $.ctx.getTransform();
 			useCache = transform.b != 0 || transform.c != 0;
+		}
+
+		if (useCache) {
+			cacheKey = $._genTextImageKey(str, w, h);
+			img = $._tic[cacheKey];
+
+			if (img) {
+				// if (img.ctx.fillStyle == $._fillStyle && img.ctx.strokeStyle == $._strokeStyle) {
+				if (genTextImage) return img;
+				return $.textImage(img, x, y);
+				// } else if (!genTextImage) useCache = false;
+				// else img.clear();
+			}
 		}
 
 		if (!useCache) {
 			tX = x;
 			tY = y;
 		} else {
-			cacheKey = $._genTextImageKey(str, w, h);
-			img = $._tic.get(cacheKey);
-			if (img && !$._genTextImage) return $.textImage(img, x, y);
-
 			tX = 0;
 			tY = $._textLeading * lines.length;
-			let measure = ctx.measureText(' ');
-			ascent = measure.fontBoundingBoxAscent;
-			descent = measure.fontBoundingBoxDescent;
-			h ??= tY + descent;
 
-			img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(h), {
-				pixelDensity: $._pixelDensity
-			});
+			if (!img) {
+				let measure = ctx.measureText(' ');
+				let ascent = measure.fontBoundingBoxAscent;
+				let descent = measure.fontBoundingBoxDescent;
+				h ??= tY + descent;
+
+				img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(h), {
+					pixelDensity: $._pixelDensity
+				});
+
+				img._ascent = ascent;
+				img._descent = descent;
+				img._top = descent + $._textLeadDiff;
+				img._middle = img._top + ascent * 0.5;
+				img._bottom = img._top + ascent;
+			}
+
+			img.canvas.textureIndex = undefined;
 
 			ctx = img.ctx;
 
 			ctx.font = $.ctx.font;
-			ctx.fillStyle = $.ctx.fillStyle;
-			ctx.strokeStyle = $.ctx.strokeStyle;
+			ctx.fillStyle = $._fillStyle;
+			ctx.strokeStyle = $._strokeStyle;
 			ctx.lineWidth = $.ctx.lineWidth;
 		}
 
@@ -1608,21 +1609,30 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 
 		if (useCache) {
-			img._ascent = ascent;
-			img._descent = descent;
-			$._tic.set(cacheKey, img);
-			if (!$._genTextImage) $.textImage(img, x, y);
+			textCacheSize++;
+			if (textCacheSize > textCacheMaxSize) {
+				textCacheSize = 0;
+				$._tic = {};
+			}
+			$._tic[cacheKey] = img;
+			if (genTextImage) return img;
+			$.textImage(img, x, y);
 		}
 	};
 	$.textImage = (img, x, y) => {
 		let og = $._imageMode;
 		$._imageMode = 'corner';
-		if ($.ctx.textAlign == 'center') x -= img.width * 0.5;
-		else if ($.ctx.textAlign == 'right') x -= img.width;
-		if ($.ctx.textBaseline == 'alphabetic') y -= $._textLeading;
-		if ($.ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + $._textLeadDiff;
-		else if ($.ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + $._textLeadDiff;
-		else if ($.ctx.textBaseline == 'top') y -= img._descent + $._textLeadDiff;
+
+		let ta = $._textAlign;
+		if (ta == 'center') x -= img.canvas.hw;
+		else if (ta == 'right') x -= img.width;
+
+		let bl = $._textBaseline;
+		if (bl == 'alphabetic') y -= $._textLeading;
+		else if (bl == 'middle') y -= img._middle;
+		else if (bl == 'bottom') y -= img._bottom;
+		else if (bl == 'top') y -= img._top;
+
 		$.image(img, x, y);
 		$._imageMode = og;
 	};
@@ -3928,6 +3938,11 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		minFilter: 'linear'
 	});
 
+	let MAX_TEXTURES = 12000;
+	let texturesOffset = 0;
+
+	let textures = [];
+
 	$._createTexture = (img) => {
 		if (img.canvas) img = img.canvas;
 
@@ -3941,6 +3956,8 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, textureSize);
 
+		textures.push(texture);
+
 		img.textureIndex = $._textureBindGroups.length;
 
 		const textureBindGroup = Q5.device.createBindGroup({
@@ -3951,6 +3968,15 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 			]
 		});
 		$._textureBindGroups.push(textureBindGroup);
+
+		// Check if the maximum number of textures is reached
+		if ($._textureBindGroups.length >= MAX_TEXTURES) {
+			// Unload the least recently used texture
+			$._textureBindGroups[texturesOffset] = null;
+			textures[texturesOffset].destroy();
+			textures[texturesOffset] = null;
+			texturesOffset++;
+		}
 	};
 
 	$.loadImage = $.loadTexture = (src) => {
@@ -4034,6 +4060,8 @@ Q5.renderers.webgpu.text = ($, q) => {
 			q._preloadCount--;
 		});
 	};
+
+	// directly add these text setting functions to the webgpu renderer
 	$.textFont = t.textFont;
 	$.textSize = t.textSize;
 	$.textLeading = t.textLeading;
@@ -4049,7 +4077,7 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		let img = t.createTextImage(str, w, h);
 
-		if (img.canvas.textureIndex == undefined) $._createTexture(img);
+		if (img.canvas.textureIndex === undefined) $._createTexture(img);
 
 		$.textImage(img, x, y);
 	};
@@ -4057,12 +4085,20 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.createTextImage = t.createTextImage;
 
 	$.textImage = (img, x, y) => {
-		if (t.ctx.textAlign == 'center') x -= img.width * 0.5;
-		else if (t.ctx.textAlign == 'right') x -= img.width;
-		if (t.ctx.textBaseline == 'alphabetic') y -= t._textLeading;
-		if (t.ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + t._textLeadDiff;
-		else if (t.ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + t._textLeadDiff;
-		else if (t.ctx.textBaseline == 'top') y -= img._descent + t._textLeadDiff;
+		let og = $._imageMode;
+		$._imageMode = 'corner';
+
+		let ta = t._textAlign;
+		if (ta == 'center') x -= img.canvas.hw;
+		else if (ta == 'right') x -= img.width;
+
+		let bl = t._textBaseline;
+		if (bl == 'alphabetic') y -= t._textLeading;
+		else if (bl == 'middle') y -= img._middle;
+		else if (bl == 'bottom') y -= img._bottom;
+		else if (bl == 'top') y -= img._top;
+
 		$.image(img, x, y);
+		$._imageMode = og;
 	};
 };

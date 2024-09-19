@@ -9,6 +9,8 @@ Q5.renderers.webgpu.text = ($, q) => {
 			q._preloadCount--;
 		});
 	};
+
+	// directly add these text setting functions to the webgpu renderer
 	$.textFont = t.textFont;
 	$.textSize = t.textSize;
 	$.textLeading = t.textLeading;
@@ -24,7 +26,7 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		let img = t.createTextImage(str, w, h);
 
-		if (img.canvas.textureIndex == undefined) $._createTexture(img);
+		if (img.canvas.textureIndex === undefined) $._createTexture(img);
 
 		$.textImage(img, x, y);
 	};
@@ -32,12 +34,20 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.createTextImage = t.createTextImage;
 
 	$.textImage = (img, x, y) => {
-		if (t.ctx.textAlign == 'center') x -= img.width * 0.5;
-		else if (t.ctx.textAlign == 'right') x -= img.width;
-		if (t.ctx.textBaseline == 'alphabetic') y -= t._textLeading;
-		if (t.ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + t._textLeadDiff;
-		else if (t.ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + t._textLeadDiff;
-		else if (t.ctx.textBaseline == 'top') y -= img._descent + t._textLeadDiff;
+		let og = $._imageMode;
+		$._imageMode = 'corner';
+
+		let ta = t._textAlign;
+		if (ta == 'center') x -= img.canvas.hw;
+		else if (ta == 'right') x -= img.width;
+
+		let bl = t._textBaseline;
+		if (bl == 'alphabetic') y -= t._textLeading;
+		else if (bl == 'middle') y -= img._middle;
+		else if (bl == 'bottom') y -= img._bottom;
+		else if (bl == 'top') y -= img._top;
+
 		$.image(img, x, y);
+		$._imageMode = og;
 	};
 };
