@@ -1,11 +1,14 @@
 Q5.renderers.q2d.text = ($, q) => {
 	$._textAlign = 'left';
 	$._textBaseline = 'alphabetic';
-	$._textFont = 'sans-serif';
-	$._textSize = 12;
-	$._textLeading = 15;
-	$._textLeadDiff = 3;
-	$._textStyle = 'normal';
+
+	let font = 'sans-serif',
+		tSize = 12,
+		leading = 15,
+		leadDiff = 3,
+		emphasis = 'normal',
+		styleHash = 0,
+		fontMod = false;
 
 	$.loadFont = (url, cb) => {
 		q._preloadCount++;
@@ -19,129 +22,138 @@ Q5.renderers.q2d.text = ($, q) => {
 		return name;
 	};
 
-	let _styleHash = 0;
-
-	const updateStyleHash = () => {
-		const styleString = $._textFont + $._textSize + $._textStyle + $._textLeading + $._fillStyle + $._strokeStyle;
-		let hash = 5381;
-		for (let i = 0; i < styleString.length; i++) {
-			hash = (hash * 33) ^ styleString.charCodeAt(i);
-		}
-		_styleHash = hash >>> 0;
-	};
-
-	// Update _styleHash in text style setting functions
 	$.textFont = (x) => {
-		$._textFont = x;
-		updateStyleHash();
+		font = x;
+		fontMod = true;
+		styleHash = -1;
 	};
 	$.textSize = (x) => {
-		if (x === undefined) return $._textSize;
+		if (x === undefined) return tSize;
 		if ($._da) x *= $._da;
-		$._textSize = x;
-		updateStyleHash();
+		tSize = x;
+		fontMod = true;
+		styleHash = -1;
 		if (!$._leadingSet) {
-			$._textLeading = x * 1.25;
-			$._textLeadDiff = $._textLeading - x;
+			leading = x * 1.25;
+			leadDiff = leading - x;
 		}
 	};
 	$.textStyle = (x) => {
-		$._textStyle = x;
-		updateStyleHash();
+		emphasis = x;
+		fontMod = true;
+		styleHash = -1;
 	};
 	$.textLeading = (x) => {
-		if (x === undefined) return $._textLeading;
+		if (x === undefined) return leading;
 		if ($._da) x *= $._da;
-		$._textLeading = x;
-		$._textLeadDiff = x - $._textSize;
+		leading = x;
+		leadDiff = x - tSize;
 		$._leadingSet = true;
-		updateStyleHash();
+		styleHash = -1;
 	};
 	$.textAlign = (horiz, vert) => {
 		$.ctx.textAlign = $._textAlign = horiz;
 		if (vert) {
 			$.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? 'middle' : vert;
 		}
-		updateStyleHash();
+		styleHash = -1;
 	};
 
-	$._genTextImageKey = (str, w = '', h = '') => {
-		return str.slice(0, 200) + _styleHash + w + h;
-	};
+	$.textWidth = (str) => $.ctx.measureText(str).width;
+	$.textAscent = (str) => $.ctx.measureText(str).actualBoundingBoxAscent;
+	$.textDescent = (str) => $.ctx.measureText(str).actualBoundingBoxDescent;
 
-	const updateFont = () => {
-		$.ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
-	};
-	$.textWidth = (str) => {
-		updateFont();
-		return $.ctx.measureText(str).width;
-	};
-	$.textAscent = (str) => {
-		updateFont();
-		return $.ctx.measureText(str).actualBoundingBoxAscent;
-	};
-	$.textDescent = (str) => {
-		updateFont();
-		return $.ctx.measureText(str).actualBoundingBoxDescent;
-	};
 	$.textFill = $.fill;
 	$.textStroke = $.stroke;
 
-	$._textCache = !!Q5.Image;
-	$._tic = {};
-	let textCacheSize = 0;
-	let textCacheMaxSize = 12000;
-	let genTextImage = false;
-	$.textCache = (b, maxSize) => {
-		if (maxSize) textCacheMaxSize = maxSize;
-		if (b !== undefined) $._textCache = b;
-		return $._textCache;
+	let cache = ($._textCache = {});
+	let styleHashes = [],
+		useCache = false,
+		genTextImage = false,
+		cacheSize = 0,
+		cacheMax = 12000;
+
+	let updateStyleHash = () => {
+		let styleString = font + tSize + emphasis + leading + $._fillStyle + $._strokeStyle;
+
+		let hash = 5381;
+		for (let i = 0; i < styleString.length; i++) {
+			hash = (hash * 33) ^ styleString.charCodeAt(i);
+		}
+		styleHash = hash >>> 0;
+	};
+
+	$.textCache = (enable, maxSize) => {
+		if (maxSize) cacheMax = maxSize;
+		if (enable !== undefined) useCache = enable;
+		return useCache;
 	};
 	$.createTextImage = (str, w, h) => {
-		let og = $._textCache;
-		$._textCache = genTextImage = true;
+		genTextImage = true;
 		img = $.text(str, 0, 0, w, h);
 		genTextImage = false;
-		$._textCache = og;
 		return img;
 	};
+
+	let lines = [];
 	$.text = (str, x, y, w, h) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
-		let lines = str.split('\n');
 		if ($._da) {
 			x *= $._da;
 			y *= $._da;
 		}
 		let ctx = $.ctx;
-		ctx.font = `${$._textStyle} ${$._textSize}px ${$._textFont}`;
+		let img, tX, tY;
 
-		let useCache, img, cacheKey, tX, tY;
-
-		if (!(useCache = genTextImage) && $._textCache) {
-			let transform = $.ctx.getTransform();
-			useCache = transform.b != 0 || transform.c != 0;
+		if (fontMod) {
+			ctx.font = `${emphasis} ${tSize}px ${font}`;
+			fontMod = false;
 		}
 
-		if (useCache) {
-			cacheKey = $._genTextImageKey(str, w, h);
-			img = $._tic[cacheKey];
+		if (useCache || genTextImage) {
+			if (styleHash == -1) updateStyleHash();
+
+			img = cache[str];
+			if (img) img = img[styleHash];
 
 			if (img) {
-				// if (img.ctx.fillStyle == $._fillStyle && img.ctx.strokeStyle == $._strokeStyle) {
 				if (genTextImage) return img;
 				return $.textImage(img, x, y);
-				// } else if (!genTextImage) useCache = false;
-				// else img.clear();
 			}
 		}
 
-		if (!useCache) {
+		if (str.indexOf('\n') == -1) lines[0] = str;
+		else lines = str.split('\n');
+
+		if (w) {
+			let wrapped = [];
+			for (let line of lines) {
+				let i = 0;
+
+				while (i < line.length) {
+					let max = i + w;
+					if (max >= line.length) {
+						wrapped.push(line.slice(i));
+						break;
+					}
+					let end = line.lastIndexOf(' ', max);
+					if (end === -1 || end < i) {
+						end = max;
+					}
+					wrapped.push(line.slice(i, end));
+					i = end;
+				}
+			}
+			lines = wrapped;
+		}
+
+		if (!useCache && !genTextImage) {
 			tX = x;
 			tY = y;
 		} else {
 			tX = 0;
-			tY = $._textLeading * lines.length;
+			tY = leading * lines.length;
 
 			if (!img) {
 				let measure = ctx.measureText(' ');
@@ -155,7 +167,7 @@ Q5.renderers.q2d.text = ($, q) => {
 
 				img._ascent = ascent;
 				img._descent = descent;
-				img._top = descent + $._textLeadDiff;
+				img._top = descent + leadDiff;
 				img._middle = img._top + ascent * 0.5;
 				img._bottom = img._top + ascent;
 			}
@@ -176,22 +188,31 @@ Q5.renderers.q2d.text = ($, q) => {
 			ctx.fillStyle = 'black';
 		}
 
-		for (let i = 0; i < lines.length; i++) {
-			if ($._doStroke && $._strokeSet) ctx.strokeText(lines[i], tX, tY);
-			if ($._doFill) ctx.fillText(lines[i], tX, tY);
-			tY += $._textLeading;
+		for (let line of lines) {
+			if ($._doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
+			if ($._doFill) ctx.fillText(line, tX, tY);
+			tY += leading;
 			if (tY > h) break;
 		}
+		lines.length = 0;
 
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 
-		if (useCache) {
-			textCacheSize++;
-			if (textCacheSize > textCacheMaxSize) {
-				textCacheSize = 0;
-				$._tic = {};
+		if (useCache || genTextImage) {
+			styleHashes.push(styleHash);
+			(cache[str] ??= {})[styleHash] = img;
+
+			cacheSize++;
+			if (cacheSize > cacheMax) {
+				let half = Math.ceil(cacheSize / 2);
+				let hashes = styleHashes.splice(0, half);
+				for (let s in cache) {
+					s = cache[s];
+					for (let h of hashes) delete s[h];
+				}
+				cacheSize -= half;
 			}
-			$._tic[cacheKey] = img;
+
 			if (genTextImage) return img;
 			$.textImage(img, x, y);
 		}
@@ -205,7 +226,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		else if (ta == 'right') x -= img.width;
 
 		let bl = $._textBaseline;
-		if (bl == 'alphabetic') y -= $._textLeading;
+		if (bl == 'alphabetic') y -= leading;
 		else if (bl == 'middle') y -= img._middle;
 		else if (bl == 'bottom') y -= img._bottom;
 		else if (bl == 'top') y -= img._top;

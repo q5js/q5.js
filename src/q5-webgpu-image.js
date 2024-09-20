@@ -119,9 +119,9 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 	});
 
 	let MAX_TEXTURES = 12000;
-	let texturesOffset = 0;
 
 	let textures = [];
+	let tIdx = 0;
 
 	$._createTexture = (img) => {
 		if (img.canvas) img = img.canvas;
@@ -136,9 +136,15 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, textureSize);
 
-		textures.push(texture);
+		// If the texture array is full, destroy the oldest texture
+		if (textures[tIdx]) {
+			textures[tIdx].destroy();
+			delete textures[tIdx];
+			delete $._textureBindGroups[tIdx];
+		}
 
-		img.textureIndex = $._textureBindGroups.length;
+		textures[tIdx] = texture;
+		img.textureIndex = tIdx;
 
 		const textureBindGroup = Q5.device.createBindGroup({
 			layout: textureLayout,
@@ -147,16 +153,9 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 				{ binding: 1, resource: texture.createView() }
 			]
 		});
-		$._textureBindGroups.push(textureBindGroup);
+		$._textureBindGroups[tIdx] = textureBindGroup;
 
-		// Check if the maximum number of textures is reached
-		if ($._textureBindGroups.length >= MAX_TEXTURES) {
-			// Unload the least recently used texture
-			$._textureBindGroups[texturesOffset] = null;
-			textures[texturesOffset].destroy();
-			textures[texturesOffset] = null;
-			texturesOffset++;
-		}
+		tIdx = (tIdx + 1) % MAX_TEXTURES;
 	};
 
 	$.loadImage = $.loadTexture = (src) => {
