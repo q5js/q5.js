@@ -128,20 +128,26 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 		let textureSize = [img.width, img.height, 1];
 
-		const texture = Q5.device.createTexture({
-			size: textureSize,
-			format: 'bgra8unorm',
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
-		});
-
-		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, textureSize);
-
-		// If the texture array is full, destroy the oldest texture
-		if (textures[tIdx]) {
-			textures[tIdx].destroy();
-			delete textures[tIdx];
-			delete $._textureBindGroups[tIdx];
+		let texture, createdTexture;
+		if (img.textureIndex != undefined) {
+			texture = textures[img.textureIndex];
+			img.modified = false;
+		} else {
+			texture = Q5.device.createTexture({
+				size: textureSize,
+				format: 'bgra8unorm',
+				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+			});
+			createdTexture = true;
 		}
+
+		Q5.device.queue.copyExternalImageToTexture(
+			{ source: img },
+			{ texture, colorSpace: $.canvas.colorSpace },
+			textureSize
+		);
+
+		if (!createdTexture) return;
 
 		textures[tIdx] = texture;
 		img.textureIndex = tIdx;
@@ -156,6 +162,13 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		$._textureBindGroups[tIdx] = textureBindGroup;
 
 		tIdx = (tIdx + 1) % MAX_TEXTURES;
+
+		// If the texture array is full, destroy the oldest texture
+		if (textures[tIdx]) {
+			textures[tIdx].destroy();
+			delete textures[tIdx];
+			delete $._textureBindGroups[tIdx];
+		}
 	};
 
 	$.loadImage = $.loadTexture = (src) => {

@@ -26,7 +26,9 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		let img = t.createTextImage(str, w, h);
 
-		if (img.canvas.textureIndex === undefined) $._createTexture(img);
+		if (img.canvas.textureIndex === undefined || img.canvas.modified) {
+			$._createTexture(img);
+		}
 
 		$.textImage(img, x, y);
 	};

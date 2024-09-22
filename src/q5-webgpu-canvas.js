@@ -60,8 +60,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
 
-		opt.format = navigator.gpu.getPreferredCanvasFormat();
-		opt.device = Q5.device;
+		opt.format ??= navigator.gpu.getPreferredCanvasFormat();
+		opt.device ??= Q5.device;
 
 		$.ctx.configure(opt);
 

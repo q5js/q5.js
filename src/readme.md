@@ -181,15 +181,9 @@ Implemented functions:
 
 > Use `textFill` and `textStroke` to set text colors.
 
-The WebGPU and WebGL APIs lack Canvas2D's built-in, fast HTML5 based text rasterization.
-
-In p5.js WebGL mode, text is drawn directly to the canvas. This is a complex task, since letters have intricate geometry: thus many triangles must be used to render text at high resolution. Unless a user wants to render a lot of text, the performance cost is actually negligible. Yet since p5.js depends on opentype.js for this, which is 528kb (171kb minified), a different approach was needed to keep q5 lightweight.
-
 Internally, q5's WebGPU renderer uses a q5 graphics object to draw text to a Canvas2D canvas via `createTextImage`, then converts that canvas to a WebGPU texture. Each texture is cached, so it doesn't have to be recreated every frame that users want to display the same text.
 
-Creating a text image is way slower than rendering text if it's only displayed for one frame, but displaying static text multiple frames from a cached image is faster than re-rendering the text. So just try not to have long strings of text that change every frame.
-
-Complete implementation of text rendering in WebGPU.
+Implemented functions:
 
 `loadFont`,`textFont`, `textSize`, `textLeading`, `textStyle`, `textAlign`, `textWidth`, `textAscent`, `textDescent`, `textFill`, `textStroke`, `text`
 

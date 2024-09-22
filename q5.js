@@ -639,7 +639,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
-		$.ctx.fillStyle = $._fillStyle = c.toString();
+		$.ctx.fillStyle = $._fill = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
 	$.stroke = function (c) {
@@ -652,12 +652,12 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
-		$.ctx.strokeStyle = $._strokeStyle = c.toString();
+		$.ctx.strokeStyle = $._stroke = c.toString();
 	};
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
 		if ($._da) n *= $._da;
-		$.ctx.lineWidth = n || 0.0001;
+		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
 	$.noStroke = () => ($._doStroke = false);
 
@@ -1430,8 +1430,15 @@ Q5.renderers.q2d.text = ($, q) => {
 		leading = 15,
 		leadDiff = 3,
 		emphasis = 'normal',
+		fontMod = false,
 		styleHash = 0,
-		fontMod = false;
+		styleHashes = [],
+		useCache = false,
+		genTextImage = false,
+		cacheSize = 0,
+		cacheMax = 12000;
+
+	let cache = ($._textCache = {});
 
 	$.loadFont = (url, cb) => {
 		q._preloadCount++;
@@ -1489,15 +1496,8 @@ Q5.renderers.q2d.text = ($, q) => {
 	$.textFill = $.fill;
 	$.textStroke = $.stroke;
 
-	let cache = ($._textCache = {});
-	let styleHashes = [],
-		useCache = false,
-		genTextImage = false,
-		cacheSize = 0,
-		cacheMax = 12000;
-
 	let updateStyleHash = () => {
-		let styleString = font + tSize + emphasis + leading + $._fillStyle + $._strokeStyle;
+		let styleString = font + tSize + emphasis + leading;
 
 		let hash = 5381;
 		for (let i = 0; i < styleString.length; i++) {
@@ -1541,8 +1541,10 @@ Q5.renderers.q2d.text = ($, q) => {
 			if (img) img = img[styleHash];
 
 			if (img) {
-				if (genTextImage) return img;
-				return $.textImage(img, x, y);
+				if (img._fill == $._fill && img._stroke == $._stroke && img._strokeWeight == $._strokeWeight) {
+					if (genTextImage) return img;
+					return $.textImage(img, x, y);
+				} else img.clear();
 			}
 		}
 
@@ -1595,13 +1597,16 @@ Q5.renderers.q2d.text = ($, q) => {
 				img._bottom = img._top + ascent;
 			}
 
-			img.canvas.textureIndex = undefined;
+			img._fill = $._fill;
+			img._stroke = $._stroke;
+			img._strokeWeight = $._strokeWeight;
+			img.canvas.modified = true;
 
 			ctx = img.ctx;
 
 			ctx.font = $.ctx.font;
-			ctx.fillStyle = $._fillStyle;
-			ctx.strokeStyle = $._strokeStyle;
+			ctx.fillStyle = $._fill;
+			ctx.strokeStyle = $._stroke;
 			ctx.lineWidth = $.ctx.lineWidth;
 		}
 
@@ -3095,8 +3100,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
 
-		opt.format = navigator.gpu.getPreferredCanvasFormat();
-		opt.device = Q5.device;
+		opt.format ??= navigator.gpu.getPreferredCanvasFormat();
+		opt.device ??= Q5.device;
 
 		$.ctx.configure(opt);
 
@@ -3969,20 +3974,26 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 		let textureSize = [img.width, img.height, 1];
 
-		const texture = Q5.device.createTexture({
-			size: textureSize,
-			format: 'bgra8unorm',
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
-		});
-
-		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, textureSize);
-
-		// If the texture array is full, destroy the oldest texture
-		if (textures[tIdx]) {
-			textures[tIdx].destroy();
-			delete textures[tIdx];
-			delete $._textureBindGroups[tIdx];
+		let texture, createdTexture;
+		if (img.textureIndex != undefined) {
+			texture = textures[img.textureIndex];
+			img.modified = false;
+		} else {
+			texture = Q5.device.createTexture({
+				size: textureSize,
+				format: 'bgra8unorm',
+				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+			});
+			createdTexture = true;
 		}
+
+		Q5.device.queue.copyExternalImageToTexture(
+			{ source: img },
+			{ texture, colorSpace: $.canvas.colorSpace },
+			textureSize
+		);
+
+		if (!createdTexture) return;
 
 		textures[tIdx] = texture;
 		img.textureIndex = tIdx;
@@ -3997,6 +4008,13 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		$._textureBindGroups[tIdx] = textureBindGroup;
 
 		tIdx = (tIdx + 1) % MAX_TEXTURES;
+
+		// If the texture array is full, destroy the oldest texture
+		if (textures[tIdx]) {
+			textures[tIdx].destroy();
+			delete textures[tIdx];
+			delete $._textureBindGroups[tIdx];
+		}
 	};
 
 	$.loadImage = $.loadTexture = (src) => {
@@ -4097,7 +4115,9 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		let img = t.createTextImage(str, w, h);
 
-		if (img.canvas.textureIndex === undefined) $._createTexture(img);
+		if (img.canvas.textureIndex === undefined || img.canvas.modified) {
+			$._createTexture(img);
+		}
 
 		$.textImage(img, x, y);
 	};

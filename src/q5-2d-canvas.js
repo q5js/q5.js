@@ -64,7 +64,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
-		$.ctx.fillStyle = $._fillStyle = c.toString();
+		$.ctx.fillStyle = $._fill = c.toString();
 	};
 	$.noFill = () => ($._doFill = false);
 	$.stroke = function (c) {
@@ -77,12 +77,12 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
-		$.ctx.strokeStyle = $._strokeStyle = c.toString();
+		$.ctx.strokeStyle = $._stroke = c.toString();
 	};
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
 		if ($._da) n *= $._da;
-		$.ctx.lineWidth = n || 0.0001;
+		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
 	$.noStroke = () => ($._doStroke = false);
 

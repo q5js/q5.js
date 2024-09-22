@@ -7,8 +7,15 @@ Q5.renderers.q2d.text = ($, q) => {
 		leading = 15,
 		leadDiff = 3,
 		emphasis = 'normal',
+		fontMod = false,
 		styleHash = 0,
-		fontMod = false;
+		styleHashes = [],
+		useCache = false,
+		genTextImage = false,
+		cacheSize = 0,
+		cacheMax = 12000;
+
+	let cache = ($._textCache = {});
 
 	$.loadFont = (url, cb) => {
 		q._preloadCount++;
@@ -66,15 +73,8 @@ Q5.renderers.q2d.text = ($, q) => {
 	$.textFill = $.fill;
 	$.textStroke = $.stroke;
 
-	let cache = ($._textCache = {});
-	let styleHashes = [],
-		useCache = false,
-		genTextImage = false,
-		cacheSize = 0,
-		cacheMax = 12000;
-
 	let updateStyleHash = () => {
-		let styleString = font + tSize + emphasis + leading + $._fillStyle + $._strokeStyle;
+		let styleString = font + tSize + emphasis + leading;
 
 		let hash = 5381;
 		for (let i = 0; i < styleString.length; i++) {
@@ -118,8 +118,10 @@ Q5.renderers.q2d.text = ($, q) => {
 			if (img) img = img[styleHash];
 
 			if (img) {
-				if (genTextImage) return img;
-				return $.textImage(img, x, y);
+				if (img._fill == $._fill && img._stroke == $._stroke && img._strokeWeight == $._strokeWeight) {
+					if (genTextImage) return img;
+					return $.textImage(img, x, y);
+				} else img.clear();
 			}
 		}
 
@@ -172,13 +174,16 @@ Q5.renderers.q2d.text = ($, q) => {
 				img._bottom = img._top + ascent;
 			}
 
-			img.canvas.textureIndex = undefined;
+			img._fill = $._fill;
+			img._stroke = $._stroke;
+			img._strokeWeight = $._strokeWeight;
+			img.canvas.modified = true;
 
 			ctx = img.ctx;
 
 			ctx.font = $.ctx.font;
-			ctx.fillStyle = $._fillStyle;
-			ctx.strokeStyle = $._strokeStyle;
+			ctx.fillStyle = $._fill;
+			ctx.strokeStyle = $._stroke;
 			ctx.lineWidth = $.ctx.lineWidth;
 		}
 
