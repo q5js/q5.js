@@ -31,7 +31,7 @@ Q5.renderers.webgpu.text = ($, q) => {
 		} else if (img.modified) {
 			let cnv = img.canvas;
 			let textureSize = [cnv.width, cnv.height, 1];
-			let texture = textures[cnv.textureIndex];
+			let texture = $._textures[cnv.textureIndex];
 
 			Q5.device.queue.copyExternalImageToTexture(
 				{ source: cnv },

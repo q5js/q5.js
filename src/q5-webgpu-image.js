@@ -120,7 +120,7 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 	let MAX_TEXTURES = 12000;
 
-	let textures = [];
+	$._textures = [];
 	let tIdx = 0;
 
 	$._createTexture = (img) => {
@@ -140,7 +140,7 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 			textureSize
 		);
 
-		textures[tIdx] = texture;
+		$._textures[tIdx] = texture;
 		img.textureIndex = tIdx;
 
 		const textureBindGroup = Q5.device.createBindGroup({
@@ -155,9 +155,9 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		tIdx = (tIdx + 1) % MAX_TEXTURES;
 
 		// If the texture array is full, destroy the oldest texture
-		if (textures[tIdx]) {
-			textures[tIdx].destroy();
-			delete textures[tIdx];
+		if ($._textures[tIdx]) {
+			$._textures[tIdx].destroy();
+			delete $._textures[tIdx];
 			delete $._textureBindGroups[tIdx];
 		}
 	};
