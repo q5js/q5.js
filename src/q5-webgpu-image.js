@@ -128,26 +128,17 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 		let textureSize = [img.width, img.height, 1];
 
-		let texture, createdTexture;
-		if (img.textureIndex != undefined) {
-			texture = textures[img.textureIndex];
-			img.modified = false;
-		} else {
-			texture = Q5.device.createTexture({
-				size: textureSize,
-				format: 'bgra8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
-			});
-			createdTexture = true;
-		}
+		let texture = Q5.device.createTexture({
+			size: textureSize,
+			format: 'bgra8unorm',
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+		});
 
 		Q5.device.queue.copyExternalImageToTexture(
 			{ source: img },
 			{ texture, colorSpace: $.canvas.colorSpace },
 			textureSize
 		);
-
-		if (!createdTexture) return;
 
 		textures[tIdx] = texture;
 		img.textureIndex = tIdx;

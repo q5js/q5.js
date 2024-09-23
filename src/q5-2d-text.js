@@ -177,7 +177,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			img._fill = $._fill;
 			img._stroke = $._stroke;
 			img._strokeWeight = $._strokeWeight;
-			img.canvas.modified = true;
+			img.modified = true;
 
 			ctx = img.ctx;
 

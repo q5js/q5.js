@@ -26,8 +26,19 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		let img = t.createTextImage(str, w, h);
 
-		if (img.canvas.textureIndex === undefined || img.canvas.modified) {
+		if (img.canvas.textureIndex === undefined) {
 			$._createTexture(img);
+		} else if (img.modified) {
+			let cnv = img.canvas;
+			let textureSize = [cnv.width, cnv.height, 1];
+			let texture = textures[cnv.textureIndex];
+
+			Q5.device.queue.copyExternalImageToTexture(
+				{ source: cnv },
+				{ texture, colorSpace: $.canvas.colorSpace },
+				textureSize
+			);
+			img.modified = false;
 		}
 
 		$.textImage(img, x, y);

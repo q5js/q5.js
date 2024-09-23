@@ -1600,7 +1600,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			img._fill = $._fill;
 			img._stroke = $._stroke;
 			img._strokeWeight = $._strokeWeight;
-			img.canvas.modified = true;
+			img.modified = true;
 
 			ctx = img.ctx;
 
@@ -3974,26 +3974,17 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 
 		let textureSize = [img.width, img.height, 1];
 
-		let texture, createdTexture;
-		if (img.textureIndex != undefined) {
-			texture = textures[img.textureIndex];
-			img.modified = false;
-		} else {
-			texture = Q5.device.createTexture({
-				size: textureSize,
-				format: 'bgra8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
-			});
-			createdTexture = true;
-		}
+		let texture = Q5.device.createTexture({
+			size: textureSize,
+			format: 'bgra8unorm',
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+		});
 
 		Q5.device.queue.copyExternalImageToTexture(
 			{ source: img },
 			{ texture, colorSpace: $.canvas.colorSpace },
 			textureSize
 		);
-
-		if (!createdTexture) return;
 
 		textures[tIdx] = texture;
 		img.textureIndex = tIdx;
@@ -4115,8 +4106,19 @@ Q5.renderers.webgpu.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		let img = t.createTextImage(str, w, h);
 
-		if (img.canvas.textureIndex === undefined || img.canvas.modified) {
+		if (img.canvas.textureIndex === undefined) {
 			$._createTexture(img);
+		} else if (img.modified) {
+			let cnv = img.canvas;
+			let textureSize = [cnv.width, cnv.height, 1];
+			let texture = textures[cnv.textureIndex];
+
+			Q5.device.queue.copyExternalImageToTexture(
+				{ source: cnv },
+				{ texture, colorSpace: $.canvas.colorSpace },
+				textureSize
+			);
+			img.modified = false;
 		}
 
 		$.textImage(img, x, y);
