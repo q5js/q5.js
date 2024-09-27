@@ -70,9 +70,9 @@ function Q5(scope, parent, renderer) {
 		let ts = timestamp || performance.now();
 		$._lastFrameTime ??= ts - $._targetFrameDuration;
 
-		if ($._shouldResize) {
+		if ($._didResize) {
 			$.windowResized();
-			$._shouldResize = false;
+			$._didResize = false;
 		}
 
 		if ($._loop) looper = raf($._draw);

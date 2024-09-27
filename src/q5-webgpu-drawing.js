@@ -12,8 +12,8 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 		label: 'drawingVertexShader',
 		code: `
 struct VertexOutput {
-	@builtin(position) position: vec4<f32>,
-	@location(1) colorIndex: f32
+	@builtin(position) position: vec4f,
+	@location(0) colorIndex: f32
 };
 
 struct Uniforms {
@@ -22,12 +22,12 @@ struct Uniforms {
 };
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(1) @binding(0) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
 
 @vertex
-fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @location(2) transformIndex: f32) -> VertexOutput {
-	var vert = vec4<f32>(pos, 0.0, 1.0);
-	vert *= transforms[i32(transformIndex)];
+fn vertexMain(@location(0) pos: vec2f, @location(1) colorIndex: f32, @location(2) transformIndex: f32) -> VertexOutput {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(transformIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
@@ -42,17 +42,18 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @locati
 	let fragmentShader = Q5.device.createShaderModule({
 		label: 'drawingFragmentShader',
 		code: `
-@group(2) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
+@group(1) @binding(0) var<storage, read> colors : array<vec4f>;
 
 @fragment
-fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
-	let index = u32(colorIndex);
-	return mix(uColors[index], uColors[index + 1u], fract(colorIndex));
+fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
+	let index = i32(colorIndex);
+	return mix(colors[index], colors[index + 1], fract(colorIndex));
 }
 `
 	});
 
 	colorsLayout = Q5.device.createBindGroupLayout({
+		label: 'colorsLayout',
 		entries: [
 			{
 				binding: 0,
@@ -283,10 +284,17 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	$.background = (r, g, b, a) => {
 		$.push();
 		$.resetMatrix();
-		if (r.src) $.image(r, -c.hw, -c.hh, c.w, c.h);
-		else {
+		if (r.src) {
+			let og = $._imageMode;
+			$._imageMode = 'corner';
+			$.image(r, -c.hw, -c.hh, c.w, c.h);
+			$._imageMode = og;
+		} else {
+			let og = $._rectMode;
+			$._rectMode = 'corner';
 			$.fill(r, g, b, a);
 			$.rect(-c.hw, -c.hh, c.w, c.h);
+			$._rectMode = og;
 		}
 		$.pop();
 	};
@@ -394,7 +402,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		});
 
 		// set the bind group once before rendering
-		$.pass.setBindGroup(2, $._colorsBindGroup);
+		$.pass.setBindGroup(1, $._colorsBindGroup);
 	});
 
 	$._hooks.postRender.push(() => {

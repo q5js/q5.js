@@ -87,6 +87,22 @@ declare global {
 	var deviceOrientation: string | null;
 
 	/** ⭐️
+	 * Use preload to load assets before the sketch starts and the
+	 * setup function is run.
+	 */
+	function preload(): void;
+
+	/** ⭐️
+	 * The setup function is called once when the program starts.
+	 */
+	function setup(): void;
+
+	/** ⭐️
+	 * The draw function is run 60 times per second by default.
+	 */
+	function draw(): void;
+
+	/** ⭐️
 	 * Stops the draw loop.
 	 */
 	function noLoop(): void;
@@ -312,6 +328,8 @@ declare global {
 
 	/** ⬜️
 	 * Saves the current drawing style settings.
+	 *
+	 * This includes the fill, stroke, stroke weight, tint, image mode, rect mode, ellipse mode, text size, text align, and text baseline.
 	 */
 	function pushStyles(): void;
 
@@ -775,6 +793,11 @@ declare global {
 
 	/** ✍️
 	 * Loads a font from a URL and optionally runs a callback function with the font name once it's loaded
+	 *
+	 * WebGPU: Fonts must be in MSDF format with the file ending
+	 * "-msdf.json". If no font is loaded before `text` is run, then 
+	 * the default font is loaded:
+	 * https://q5js.org/fonts/YaHei-msdf.json
 	 * @param url - URL of the font to load
 	 * @param cb - Optional callback function that receives the font name as an argument once the font is loaded
 	 * @returns name of the loaded font
@@ -782,7 +805,7 @@ declare global {
 	function loadFont(url: string, cb?: (fontName: string) => void): string;
 
 	/** ✍️
-	 * Sets the current font to be used for text elements
+	 * Sets the current font to be used for rendering text
 	 * @param fontName - name of the font
 	 */
 	function textFont(fontName: string): void;
@@ -812,7 +835,7 @@ declare global {
 	 * @param horiz - horizontal alignment ('left', 'center', 'right')
 	 * @param vert - vertical alignment ('top', 'middle', 'bottom', 'alphabetic')
 	 */
-	function textAlign(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
+	function textAlign(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'center' | 'bottom' | 'alphabetic'): void;
 
 	/** ✍️
 	 * Calculates and returns the width of a given string of text
@@ -894,7 +917,7 @@ declare global {
 
 	/** 🎨
 	 * Sets the color mode for the sketch. Changes the type of color object created by color functions.
-	 * 
+	 *
 	 * In WebGPU, the default color mode is 'rgb' in float format.
 	 * @param mode - color mode ('rgb', 'srgb', or 'oklch')
 	 * @param format - color format (1 or 255) for floating point or legacy 8-bit integer representation
@@ -1145,7 +1168,7 @@ declare global {
 	 */
 	function noiseDetail(lod: number, falloff: number): void;
 
-	// 🔊 q5-sound
+	// 🔊 sound
 
 	/** 🔊
 	 * Represents a sound object, extending the native `Audio` to

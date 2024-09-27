@@ -6,8 +6,8 @@ Q5.renderers.webgpu.image = ($, q) => {
 		label: 'imageVertexShader',
 		code: `
 struct VertexOutput {
-	@builtin(position) position: vec4<f32>,
-	@location(0) texCoord: vec2<f32>
+	@builtin(position) position: vec4f,
+	@location(0) texCoord: vec2f
 };
 
 struct Uniforms {
@@ -16,12 +16,12 @@ struct Uniforms {
 };
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(1) @binding(0) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
 
 @vertex
-fn vertexMain(@location(0) pos: vec2<f32>, @location(1) texCoord: vec2<f32>, @location(2) transformIndex: f32) -> VertexOutput {
-	var vert = vec4<f32>(pos, 0.0, 1.0);
-	vert *= transforms[i32(transformIndex)];
+fn vertexMain(@location(0) pos: vec2f, @location(1) texCoord: vec2f, @location(2) transformIndex: f32) -> VertexOutput {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(transformIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
@@ -36,11 +36,11 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) texCoord: vec2<f32>, @lo
 	let fragmentShader = Q5.device.createShaderModule({
 		label: 'imageFragmentShader',
 		code: `
-@group(3) @binding(0) var samp: sampler;
-@group(3) @binding(1) var texture: texture_2d<f32>;
+@group(2) @binding(0) var samp: sampler;
+@group(2) @binding(1) var texture: texture_2d<f32>;
 
 @fragment
-fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
+fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 	// Sample the texture using the interpolated texture coordinate
 	return textureSample(texture, samp, texCoord);
 }
@@ -72,11 +72,9 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		]
 	};
 
-	$.bindGroupLayouts.push(textureLayout);
-
 	const pipelineLayout = Q5.device.createPipelineLayout({
 		label: 'imagePipelineLayout',
-		bindGroupLayouts: $.bindGroupLayouts
+		bindGroupLayouts: [...$.bindGroupLayouts, textureLayout]
 	});
 
 	$.pipelines[1] = Q5.device.createRenderPipeline({

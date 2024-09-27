@@ -201,7 +201,7 @@ Q5.modules.canvas = ($, q) => {
 
 			function parentResized() {
 				if ($.frameCount > 1) {
-					$._shouldResize = true;
+					$._didResize = true;
 					$._adjustDisplay();
 				}
 			}
@@ -261,14 +261,9 @@ Q5.modules.canvas = ($, q) => {
 		'_imageMode',
 		'_rectMode',
 		'_ellipseMode',
-		'_textFont',
-		'_textLeading',
-		'_leadingSet',
 		'_textSize',
 		'_textAlign',
-		'_textBaseline',
-		'_textStyle',
-		'_textWrap'
+		'_textBaseline'
 	];
 	$._styles = [];
 
@@ -281,6 +276,15 @@ Q5.modules.canvas = ($, q) => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
 	};
+
+	if (window && $._scope != 'graphics') {
+		window.addEventListener('resize', () => {
+			$._didResize = true;
+			q.windowWidth = window.innerWidth;
+			q.windowHeight = window.innerHeight;
+			q.deviceOrientation = window.screen?.orientation?.type;
+		});
+	}
 };
 
 Q5.canvasOptions = {

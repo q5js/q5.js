@@ -339,13 +339,13 @@ Unminified:
 
 - p5.js **5112kb** ⚠️
 - p5.sound.js 488kb
-- q5.js 93kb
+- q5.js 110kb
 
 Minified:
 
 - p5.min.js 1034kb ⚠️
 - p5.sound.min.js 200kb
-- q5.min.js **61kb** 🎉
+- q5.min.js **70kb** 🎉
 
 ## Benchmarks
 
@@ -403,6 +403,9 @@ q5.js was created by the q5 team and is licensed under the LGPLv3. q5 is not aff
 p5.js is licensed under the LGPLv2, the two small sections of p5' code directly copied into q5 are credited below. The rest of q5 is a new implementation of part of the p5 API. APIs are not copyrightable in the United States, as decided by the Supreme Court in the Google v Oracle case.
 
 ## Credits
+
+q5-webgpu msdf text rendering:
+https://webgpu.github.io/webgpu-samples/?sample=textRenderingMsdf
 
 q5-webgpu blendMode:
 https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html

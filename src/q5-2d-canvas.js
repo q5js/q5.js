@@ -138,13 +138,4 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		document.body.append(vid);
 		return vid;
 	};
-
-	if (window && $._scope != 'graphics') {
-		window.addEventListener('resize', () => {
-			$._shouldResize = true;
-			q.windowWidth = window.innerWidth;
-			q.windowHeight = window.innerHeight;
-			q.deviceOrientation = window.screen?.orientation?.type;
-		});
-	}
 };

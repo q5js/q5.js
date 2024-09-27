@@ -1,9 +1,10 @@
 Q5.renderers.q2d.text = ($, q) => {
 	$._textAlign = 'left';
 	$._textBaseline = 'alphabetic';
+	$._textSize = 12;
 
 	let font = 'sans-serif',
-		tSize = 12,
+		leadingSet = false,
 		leading = 15,
 		leadDiff = 3,
 		emphasis = 'normal',
@@ -35,12 +36,12 @@ Q5.renderers.q2d.text = ($, q) => {
 		styleHash = -1;
 	};
 	$.textSize = (x) => {
-		if (x === undefined) return tSize;
+		if (x === undefined) return $._textSize;
 		if ($._da) x *= $._da;
-		tSize = x;
+		$._textSize = x;
 		fontMod = true;
 		styleHash = -1;
-		if (!$._leadingSet) {
+		if (!leadingSet) {
 			leading = x * 1.25;
 			leadDiff = leading - x;
 		}
@@ -54,8 +55,8 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (x === undefined) return leading;
 		if ($._da) x *= $._da;
 		leading = x;
-		leadDiff = x - tSize;
-		$._leadingSet = true;
+		leadDiff = x - $._textSize;
+		leadingSet = true;
 		styleHash = -1;
 	};
 	$.textAlign = (horiz, vert) => {
@@ -63,7 +64,6 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (vert) {
 			$.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? 'middle' : vert;
 		}
-		styleHash = -1;
 	};
 
 	$.textWidth = (str) => $.ctx.measureText(str).width;
@@ -74,7 +74,7 @@ Q5.renderers.q2d.text = ($, q) => {
 	$.textStroke = $.stroke;
 
 	let updateStyleHash = () => {
-		let styleString = font + tSize + emphasis + leading;
+		let styleString = font + $._textSize + emphasis + leading;
 
 		let hash = 5381;
 		for (let i = 0; i < styleString.length; i++) {
@@ -107,7 +107,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		let img, tX, tY;
 
 		if (fontMod) {
-			ctx.font = `${emphasis} ${tSize}px ${font}`;
+			ctx.font = `${emphasis} ${$._textSize}px ${font}`;
 			fontMod = false;
 		}
 
@@ -128,7 +128,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (str.indexOf('\n') == -1) lines[0] = str;
 		else lines = str.split('\n');
 
-		if (w) {
+		if (str.length > w) {
 			let wrapped = [];
 			for (let line of lines) {
 				let i = 0;
@@ -140,11 +140,9 @@ Q5.renderers.q2d.text = ($, q) => {
 						break;
 					}
 					let end = line.lastIndexOf(' ', max);
-					if (end === -1 || end < i) {
-						end = max;
-					}
+					if (end === -1 || end < i) end = max;
 					wrapped.push(line.slice(i, end));
-					i = end;
+					i = end + 1;
 				}
 			}
 			lines = wrapped;
@@ -172,6 +170,7 @@ Q5.renderers.q2d.text = ($, q) => {
 				img._top = descent + leadDiff;
 				img._middle = img._top + ascent * 0.5;
 				img._bottom = img._top + ascent;
+				img._leading = leading;
 			}
 
 			img._fill = $._fill;
@@ -231,7 +230,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		else if (ta == 'right') x -= img.width;
 
 		let bl = $._textBaseline;
-		if (bl == 'alphabetic') y -= leading;
+		if (bl == 'alphabetic') y -= img._leading;
 		else if (bl == 'middle') y -= img._middle;
 		else if (bl == 'bottom') y -= img._bottom;
 		else if (bl == 'top') y -= img._top;

@@ -70,9 +70,9 @@ function Q5(scope, parent, renderer) {
 		let ts = timestamp || performance.now();
 		$._lastFrameTime ??= ts - $._targetFrameDuration;
 
-		if ($._shouldResize) {
+		if ($._didResize) {
 			$.windowResized();
-			$._shouldResize = false;
+			$._didResize = false;
 		}
 
 		if ($._loop) looper = raf($._draw);
@@ -483,7 +483,7 @@ Q5.modules.canvas = ($, q) => {
 
 			function parentResized() {
 				if ($.frameCount > 1) {
-					$._shouldResize = true;
+					$._didResize = true;
 					$._adjustDisplay();
 				}
 			}
@@ -543,14 +543,9 @@ Q5.modules.canvas = ($, q) => {
 		'_imageMode',
 		'_rectMode',
 		'_ellipseMode',
-		'_textFont',
-		'_textLeading',
-		'_leadingSet',
 		'_textSize',
 		'_textAlign',
-		'_textBaseline',
-		'_textStyle',
-		'_textWrap'
+		'_textBaseline'
 	];
 	$._styles = [];
 
@@ -563,6 +558,15 @@ Q5.modules.canvas = ($, q) => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
 	};
+
+	if (window && $._scope != 'graphics') {
+		window.addEventListener('resize', () => {
+			$._didResize = true;
+			q.windowWidth = window.innerWidth;
+			q.windowHeight = window.innerHeight;
+			q.deviceOrientation = window.screen?.orientation?.type;
+		});
+	}
 };
 
 Q5.canvasOptions = {
@@ -713,15 +717,6 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		document.body.append(vid);
 		return vid;
 	};
-
-	if (window && $._scope != 'graphics') {
-		window.addEventListener('resize', () => {
-			$._shouldResize = true;
-			q.windowWidth = window.innerWidth;
-			q.windowHeight = window.innerHeight;
-			q.deviceOrientation = window.screen?.orientation?.type;
-		});
-	}
 };
 Q5.renderers.q2d.drawing = ($) => {
 	$._doStroke = true;
@@ -1424,9 +1419,10 @@ Q5.BLUR = 8;
 Q5.renderers.q2d.text = ($, q) => {
 	$._textAlign = 'left';
 	$._textBaseline = 'alphabetic';
+	$._textSize = 12;
 
 	let font = 'sans-serif',
-		tSize = 12,
+		leadingSet = false,
 		leading = 15,
 		leadDiff = 3,
 		emphasis = 'normal',
@@ -1458,12 +1454,12 @@ Q5.renderers.q2d.text = ($, q) => {
 		styleHash = -1;
 	};
 	$.textSize = (x) => {
-		if (x === undefined) return tSize;
+		if (x === undefined) return $._textSize;
 		if ($._da) x *= $._da;
-		tSize = x;
+		$._textSize = x;
 		fontMod = true;
 		styleHash = -1;
-		if (!$._leadingSet) {
+		if (!leadingSet) {
 			leading = x * 1.25;
 			leadDiff = leading - x;
 		}
@@ -1477,8 +1473,8 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (x === undefined) return leading;
 		if ($._da) x *= $._da;
 		leading = x;
-		leadDiff = x - tSize;
-		$._leadingSet = true;
+		leadDiff = x - $._textSize;
+		leadingSet = true;
 		styleHash = -1;
 	};
 	$.textAlign = (horiz, vert) => {
@@ -1486,7 +1482,6 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (vert) {
 			$.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? 'middle' : vert;
 		}
-		styleHash = -1;
 	};
 
 	$.textWidth = (str) => $.ctx.measureText(str).width;
@@ -1497,7 +1492,7 @@ Q5.renderers.q2d.text = ($, q) => {
 	$.textStroke = $.stroke;
 
 	let updateStyleHash = () => {
-		let styleString = font + tSize + emphasis + leading;
+		let styleString = font + $._textSize + emphasis + leading;
 
 		let hash = 5381;
 		for (let i = 0; i < styleString.length; i++) {
@@ -1530,7 +1525,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		let img, tX, tY;
 
 		if (fontMod) {
-			ctx.font = `${emphasis} ${tSize}px ${font}`;
+			ctx.font = `${emphasis} ${$._textSize}px ${font}`;
 			fontMod = false;
 		}
 
@@ -1551,7 +1546,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (str.indexOf('\n') == -1) lines[0] = str;
 		else lines = str.split('\n');
 
-		if (w) {
+		if (str.length > w) {
 			let wrapped = [];
 			for (let line of lines) {
 				let i = 0;
@@ -1563,11 +1558,9 @@ Q5.renderers.q2d.text = ($, q) => {
 						break;
 					}
 					let end = line.lastIndexOf(' ', max);
-					if (end === -1 || end < i) {
-						end = max;
-					}
+					if (end === -1 || end < i) end = max;
 					wrapped.push(line.slice(i, end));
-					i = end;
+					i = end + 1;
 				}
 			}
 			lines = wrapped;
@@ -1595,6 +1588,7 @@ Q5.renderers.q2d.text = ($, q) => {
 				img._top = descent + leadDiff;
 				img._middle = img._top + ascent * 0.5;
 				img._bottom = img._top + ascent;
+				img._leading = leading;
 			}
 
 			img._fill = $._fill;
@@ -1654,7 +1648,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		else if (ta == 'right') x -= img.width;
 
 		let bl = $._textBaseline;
-		if (bl == 'alphabetic') y -= leading;
+		if (bl == 'alphabetic') y -= img._leading;
 		else if (bl == 'middle') y -= img._middle;
 		else if (bl == 'bottom') y -= img._bottom;
 		else if (bl == 'top') y -= img._top;
@@ -2740,10 +2734,11 @@ Q5.modules.util = ($, q) => {
 		fetch(path)
 			.then((r) => {
 				if (type == 'json') return r.json();
-				if (type == 'text') return r.text();
+				return r.text();
 			})
 			.then((r) => {
 				q._preloadCount--;
+				if (type == 'csv') r = $.CSV.parse(r);
 				Object.assign(ret, r);
 				if (cb) cb(r);
 			});
@@ -2752,6 +2747,21 @@ Q5.modules.util = ($, q) => {
 
 	$.loadStrings = (path, cb) => $._loadFile(path, cb, 'text');
 	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
+	$.loadCSV = (path, cb) => $._loadFile(path, cb, 'csv');
+
+	$.CSV = {};
+	$.CSV.parse = (csv, sep = ',', lineSep = '\n') => {
+		let a = [],
+			lns = csv.split(lineSep),
+			headers = lns[0].split(sep);
+		for (let i = 1; i < lns.length; i++) {
+			let o = {},
+				ln = lns[i].split(sep);
+			headers.forEach((h, i) => (o[h] = JSON.parse(ln[i])));
+			a.push(o);
+		}
+		return a;
+	};
 
 	if (typeof localStorage == 'object') {
 		$.storeItem = localStorage.setItem;
@@ -3064,7 +3074,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	// colors used for each draw call
 	let colorsStack = ($.colorsStack = [1, 1, 1, 1]);
 
-	$._envLayout = Q5.device.createBindGroupLayout({
+	$._transformLayout = Q5.device.createBindGroupLayout({
+		label: 'transformLayout',
 		entries: [
 			{
 				binding: 0,
@@ -3073,14 +3084,9 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 					type: 'uniform',
 					hasDynamicOffset: false
 				}
-			}
-		]
-	});
-
-	$._transformLayout = Q5.device.createBindGroupLayout({
-		entries: [
+			},
 			{
-				binding: 0,
+				binding: 1,
 				visibility: GPUShaderStage.VERTEX,
 				buffer: {
 					type: 'read-only-storage',
@@ -3090,9 +3096,9 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		]
 	});
 
-	$.bindGroupLayouts = [$._envLayout, $._transformLayout];
+	$.bindGroupLayouts = [$._transformLayout];
 
-	const uniformBuffer = Q5.device.createBuffer({
+	let uniformBuffer = Q5.device.createBuffer({
 		size: 8, // Size of two floats
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 	});
@@ -3107,18 +3113,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
 
-		$._envBindGroup = Q5.device.createBindGroup({
-			layout: $._envLayout,
-			entries: [
-				{
-					binding: 0,
-					resource: {
-						buffer: uniformBuffer
-					}
-				}
-			]
-		});
-
 		return c;
 	};
 
@@ -3128,7 +3122,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	// current color index, used to associate a vertex with a color
 	let colorIndex = 0;
-	const addColor = (r, g, b, a = 1) => {
+	let addColor = (r, g, b, a = 1) => {
 		if (typeof r == 'string') r = $.color(r);
 		else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
@@ -3139,6 +3133,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		else colorsStack.push(r, g, b, a);
 		colorIndex++;
 	};
+
+	$._fillIndex = $._strokeIndex = -1;
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
@@ -3171,56 +3167,70 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 	$.resetMatrix();
 
-	// Boolean to track if the matrix has been modified
+	// tracks if the matrix has been modified
 	$._matrixDirty = false;
 
-	// Array to store transformation matrices for the render pass
+	// array to store transformation matrices for the render pass
 	$.transformStates = [$._matrix.slice()];
 
-	// Stack to keep track of transformation matrix indexes
+	// stack to keep track of transformation matrix indexes
 	$._transformIndexStack = [];
 
 	$.translate = (x, y, z) => {
 		if (!x && !y && !z) return;
 		// Update the translation values
-		$._matrix[3] += x;
-		$._matrix[7] -= y;
-		$._matrix[11] += z || 0;
+		$._matrix[12] += x;
+		$._matrix[13] -= y;
+		$._matrix[14] += z || 0;
 		$._matrixDirty = true;
 	};
 
-	$.rotate = (r) => {
-		if (!r) return;
-		if ($._angleMode) r *= $._DEGTORAD;
+	$.rotate = (a) => {
+		if (!a) return;
+		if ($._angleMode) a *= $._DEGTORAD;
 
-		let cosR = Math.cos(r);
-		let sinR = Math.sin(r);
+		let cosR = Math.cos(a);
+		let sinR = Math.sin(a);
 
-		let m0 = $._matrix[0],
-			m1 = $._matrix[1],
-			m4 = $._matrix[4],
-			m5 = $._matrix[5];
+		let m = $._matrix;
+
+		let m0 = m[0],
+			m1 = m[1],
+			m4 = m[4],
+			m5 = m[5];
+
 		if (!m0 && !m1 && !m4 && !m5) {
-			$._matrix[0] = cosR;
-			$._matrix[1] = sinR;
-			$._matrix[4] = -sinR;
-			$._matrix[5] = cosR;
+			m[0] = cosR;
+			m[1] = sinR;
+			m[4] = -sinR;
+			m[5] = cosR;
 		} else {
-			$._matrix[0] = m0 * cosR + m4 * sinR;
-			$._matrix[1] = m1 * cosR + m5 * sinR;
-			$._matrix[4] = m0 * -sinR + m4 * cosR;
-			$._matrix[5] = m1 * -sinR + m5 * cosR;
+			m[0] = m0 * cosR + m4 * sinR;
+			m[1] = m1 * cosR + m5 * sinR;
+			m[4] = m4 * cosR - m0 * sinR;
+			m[5] = m5 * cosR - m1 * sinR;
 		}
 
 		$._matrixDirty = true;
 	};
 
-	$.scale = (sx = 1, sy, sz = 1) => {
-		sy ??= sx;
+	$.scale = (x = 1, y, z = 1) => {
+		y ??= x;
 
-		$._matrix[0] *= sx;
-		$._matrix[5] *= sy;
-		$._matrix[10] *= sz;
+		let m = $._matrix;
+
+		m[0] *= x;
+		m[1] *= x;
+		m[2] *= x;
+		m[3] *= x;
+		m[4] *= y;
+		m[5] *= y;
+		m[6] *= y;
+		m[7] *= y;
+		m[8] *= z;
+		m[9] *= z;
+		m[10] *= z;
+		m[11] *= z;
 
 		$._matrixDirty = true;
 	};
@@ -3292,7 +3302,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!$._transformIndexStack.length) {
 			return console.warn('Matrix index stack is empty!');
 		}
-		// Pop the last matrix index from the stack and set it as the current matrix index
+		// Pop the last matrix index and set it as the current matrix index
 		let idx = $._transformIndexStack.pop();
 		$._matrix = $.transformStates[idx].slice();
 		$._transformIndex = idx;
@@ -3315,7 +3325,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		// left, right, top, bottom
 		let l, r, t, b;
 		if (!mode || mode == 'corner') {
-			// CORNER
 			l = x;
 			r = x + w;
 			t = -y;
@@ -3355,7 +3364,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$._render = () => {
 		if (transformStates.length > 1 || !$._transformBindGroup) {
-			const transformBuffer = Q5.device.createBuffer({
+			let transformBuffer = Q5.device.createBuffer({
 				size: transformStates.length * 64, // Size of 16 floats
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
@@ -3368,6 +3377,12 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 					{
 						binding: 0,
 						resource: {
+							buffer: uniformBuffer
+						}
+					},
+					{
+						binding: 1,
+						resource: {
 							buffer: transformBuffer
 						}
 					}
@@ -3375,20 +3390,23 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			});
 		}
 
-		pass.setBindGroup(0, $._envBindGroup);
-		pass.setBindGroup(1, $._transformBindGroup);
+		pass.setBindGroup(0, $._transformBindGroup);
 
 		for (let m of $._hooks.preRender) m();
 
 		let drawVertOffset = 0;
 		let imageVertOffset = 0;
+		let textCharOffset = 0;
 		let curPipelineIndex = -1;
 		let curTextureIndex = -1;
 
-		pass.setPipeline($.pipelines[0]);
-
 		for (let i = 0; i < drawStack.length; i += 2) {
 			let v = drawStack[i + 1];
+
+			if (drawStack[i] == -1) {
+				v();
+				continue;
+			}
 
 			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
@@ -3396,14 +3414,23 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			}
 
 			if (curPipelineIndex == 0) {
-				pass.draw(v, 1, drawVertOffset, 0);
+				// v is the number of vertices
+				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
 				if (curTextureIndex != v) {
-					pass.setBindGroup(3, $._textureBindGroups[v]);
+					// v is the texture index
+					pass.setBindGroup(2, $._textureBindGroups[v]);
 				}
-				pass.draw(6, 1, imageVertOffset, 0);
+				pass.draw(6, 1, imageVertOffset);
 				imageVertOffset += 6;
+			} else if (curPipelineIndex == 2) {
+				pass.setBindGroup(2, $._font.bindGroup);
+				pass.setBindGroup(3, $._textBindGroup);
+
+				// v is the number of characters in the text
+				pass.draw(4, v, 0, textCharOffset);
+				textCharOffset += v;
 			}
 		}
 
@@ -3412,7 +3439,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$._finishRender = () => {
 		pass.end();
-		const commandBuffer = $.encoder.finish();
+		let commandBuffer = $.encoder.finish();
 		Q5.device.queue.submit([commandBuffer]);
 		q.pass = $.encoder = null;
 
@@ -3455,8 +3482,8 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 		label: 'drawingVertexShader',
 		code: `
 struct VertexOutput {
-	@builtin(position) position: vec4<f32>,
-	@location(1) colorIndex: f32
+	@builtin(position) position: vec4f,
+	@location(0) colorIndex: f32
 };
 
 struct Uniforms {
@@ -3465,12 +3492,12 @@ struct Uniforms {
 };
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(1) @binding(0) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
 
 @vertex
-fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @location(2) transformIndex: f32) -> VertexOutput {
-	var vert = vec4<f32>(pos, 0.0, 1.0);
-	vert *= transforms[i32(transformIndex)];
+fn vertexMain(@location(0) pos: vec2f, @location(1) colorIndex: f32, @location(2) transformIndex: f32) -> VertexOutput {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(transformIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
@@ -3485,17 +3512,18 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) colorIndex: f32, @locati
 	let fragmentShader = Q5.device.createShaderModule({
 		label: 'drawingFragmentShader',
 		code: `
-@group(2) @binding(0) var<storage, read> uColors : array<vec4<f32>>;
+@group(1) @binding(0) var<storage, read> colors : array<vec4f>;
 
 @fragment
-fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
-	let index = u32(colorIndex);
-	return mix(uColors[index], uColors[index + 1u], fract(colorIndex));
+fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
+	let index = i32(colorIndex);
+	return mix(colors[index], colors[index + 1], fract(colorIndex));
 }
 `
 	});
 
 	colorsLayout = Q5.device.createBindGroupLayout({
+		label: 'colorsLayout',
 		entries: [
 			{
 				binding: 0,
@@ -3726,10 +3754,17 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 	$.background = (r, g, b, a) => {
 		$.push();
 		$.resetMatrix();
-		if (r.src) $.image(r, -c.hw, -c.hh, c.w, c.h);
-		else {
+		if (r.src) {
+			let og = $._imageMode;
+			$._imageMode = 'corner';
+			$.image(r, -c.hw, -c.hh, c.w, c.h);
+			$._imageMode = og;
+		} else {
+			let og = $._rectMode;
+			$._rectMode = 'corner';
 			$.fill(r, g, b, a);
 			$.rect(-c.hw, -c.hh, c.w, c.h);
+			$._rectMode = og;
 		}
 		$.pop();
 	};
@@ -3837,7 +3872,7 @@ fn fragmentMain(@location(1) colorIndex: f32) -> @location(0) vec4<f32> {
 		});
 
 		// set the bind group once before rendering
-		$.pass.setBindGroup(2, $._colorsBindGroup);
+		$.pass.setBindGroup(1, $._colorsBindGroup);
 	});
 
 	$._hooks.postRender.push(() => {
@@ -3852,8 +3887,8 @@ Q5.renderers.webgpu.image = ($, q) => {
 		label: 'imageVertexShader',
 		code: `
 struct VertexOutput {
-	@builtin(position) position: vec4<f32>,
-	@location(0) texCoord: vec2<f32>
+	@builtin(position) position: vec4f,
+	@location(0) texCoord: vec2f
 };
 
 struct Uniforms {
@@ -3862,12 +3897,12 @@ struct Uniforms {
 };
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(1) @binding(0) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
 
 @vertex
-fn vertexMain(@location(0) pos: vec2<f32>, @location(1) texCoord: vec2<f32>, @location(2) transformIndex: f32) -> VertexOutput {
-	var vert = vec4<f32>(pos, 0.0, 1.0);
-	vert *= transforms[i32(transformIndex)];
+fn vertexMain(@location(0) pos: vec2f, @location(1) texCoord: vec2f, @location(2) transformIndex: f32) -> VertexOutput {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(transformIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
@@ -3882,11 +3917,11 @@ fn vertexMain(@location(0) pos: vec2<f32>, @location(1) texCoord: vec2<f32>, @lo
 	let fragmentShader = Q5.device.createShaderModule({
 		label: 'imageFragmentShader',
 		code: `
-@group(3) @binding(0) var samp: sampler;
-@group(3) @binding(1) var texture: texture_2d<f32>;
+@group(2) @binding(0) var samp: sampler;
+@group(2) @binding(1) var texture: texture_2d<f32>;
 
 @fragment
-fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
+fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 	// Sample the texture using the interpolated texture coordinate
 	return textureSample(texture, samp, texCoord);
 }
@@ -3918,11 +3953,9 @@ fn fragmentMain(@location(0) texCoord: vec2<f32>) -> @location(0) vec4<f32> {
 		]
 	};
 
-	$.bindGroupLayouts.push(textureLayout);
-
 	const pipelineLayout = Q5.device.createPipelineLayout({
 		label: 'imagePipelineLayout',
-		bindGroupLayouts: $.bindGroupLayouts
+		bindGroupLayouts: [...$.bindGroupLayouts, textureLayout]
 	});
 
 	$.pipelines[1] = Q5.device.createRenderPipeline({
@@ -4079,34 +4112,522 @@ Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
 Q5.renderers.webgpu.text = ($, q) => {
-	let t = $.createGraphics(1, 1);
-	t.pixelDensity($._pixelDensity);
-	t._imageMode = 'corner';
+	let textShader = Q5.device.createShaderModule({
+		label: 'MSDF text shader',
+		code: `
+// Positions for simple quad geometry
+const pos = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 
-	$.loadFont = (f) => {
+struct VertexInput {
+	@builtin(vertex_index) vertex : u32,
+	@builtin(instance_index) instance : u32,
+};
+struct VertexOutput {
+	@builtin(position) position : vec4f,
+	@location(0) texcoord : vec2f,
+	@location(1) colorIndex : f32
+};
+struct Char {
+	texOffset: vec2f,
+	texExtent: vec2f,
+	size: vec2f,
+	offset: vec2f,
+};
+struct Text {
+	pos: vec2f,
+	scale: f32,
+	transformIndex: f32,
+	fillIndex: f32,
+	strokeIndex: f32
+};
+struct Uniforms {
+	halfWidth: f32,
+	halfHeight: f32
+};
+
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
+
+@group(1) @binding(0) var<storage, read> colors : array<vec4f>;
+
+@group(2) @binding(0) var fontTexture: texture_2d<f32>;
+@group(2) @binding(1) var fontSampler: sampler;
+@group(2) @binding(2) var<storage> fontChars: array<Char>;
+
+@group(3) @binding(0) var<storage> textChars: array<vec4f>;
+@group(3) @binding(1) var<storage> textMetadata: array<Text>;
+
+@vertex
+fn vertexMain(input : VertexInput) -> VertexOutput {
+	let char = textChars[input.instance];
+
+	let text = textMetadata[i32(char.w)];
+
+	let fontChar = fontChars[i32(char.z)];
+
+	let charPos = ((pos[input.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
+
+	var vert = vec4f(charPos, 0.0, 1.0);
+	vert = transforms[i32(text.transformIndex)] * vert;
+	vert.x /= uniforms.halfWidth;
+	vert.y /= uniforms.halfHeight;
+
+	var output : VertexOutput;
+	output.position = vert;
+	output.texcoord = (pos[input.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
+	output.colorIndex = text.fillIndex;
+	return output;
+}
+
+fn sampleMsdf(texcoord: vec2f) -> f32 {
+	let c = textureSample(fontTexture, fontSampler, texcoord);
+	return max(min(c.r, c.g), min(max(c.r, c.g), c.b));
+}
+
+@fragment
+fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
+	// pxRange (AKA distanceRange) comes from the msdfgen tool,
+	// uses the default which is 4.
+	let pxRange = 4.0;
+	let sz = vec2f(textureDimensions(fontTexture, 0));
+	let dx = sz.x*length(vec2f(dpdxFine(input.texcoord.x), dpdyFine(input.texcoord.x)));
+	let dy = sz.y*length(vec2f(dpdxFine(input.texcoord.y), dpdyFine(input.texcoord.y)));
+	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
+	let sigDist = sampleMsdf(input.texcoord) - 0.5;
+	let pxDist = sigDist * toPixels;
+	let edgeWidth = 0.5;
+	let alpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
+	if (alpha < 0.001) {
+		discard;
+	}
+	let fillColor = colors[i32(input.colorIndex)];
+	return vec4f(fillColor.rgb, fillColor.a * alpha);
+}
+`
+	});
+
+	class MsdfFont {
+		constructor(pipeline, bindGroup, lineHeight, chars, kernings) {
+			this.pipeline = pipeline;
+			this.bindGroup = bindGroup;
+			this.lineHeight = lineHeight;
+			this.chars = chars;
+			this.kernings = kernings;
+			let charArray = Object.values(chars);
+			this.charCount = charArray.length;
+			this.defaultChar = charArray[0];
+		}
+		getChar(charCode) {
+			return this.chars[charCode] ?? this.defaultChar;
+		}
+		// Gets the distance in pixels a line should advance for a given character code. If the upcoming
+		// character code is given any kerning between the two characters will be taken into account.
+		getXAdvance(charCode, nextCharCode = -1) {
+			let char = this.getChar(charCode);
+			if (nextCharCode >= 0) {
+				let kerning = this.kernings.get(charCode);
+				if (kerning) {
+					return char.xadvance + (kerning.get(nextCharCode) ?? 0);
+				}
+			}
+			return char.xadvance;
+		}
+	}
+
+	let textBindGroupLayout = Q5.device.createBindGroupLayout({
+		label: 'MSDF text group layout',
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+				buffer: { type: 'read-only-storage' }
+			},
+			{
+				binding: 1,
+				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+				buffer: { type: 'read-only-storage' }
+			}
+		]
+	});
+
+	let fonts = {};
+
+	let createFont = async (fontJsonUrl, fontName, cb) => {
 		q._preloadCount++;
-		return t.loadFont(f, () => {
+
+		let res = await fetch(fontJsonUrl);
+		if (res.status == 404) {
 			q._preloadCount--;
+			return '';
+		}
+		let atlas = await res.json();
+
+		let slashIdx = fontJsonUrl.lastIndexOf('/');
+		let baseUrl = slashIdx != -1 ? fontJsonUrl.substring(0, slashIdx + 1) : '';
+		// load font image
+		res = await fetch(baseUrl + atlas.pages[0]);
+		let img = await createImageBitmap(await res.blob());
+
+		// convert image to texture
+		let imgSize = [img.width, img.height, 1];
+		let texture = Q5.device.createTexture({
+			label: `MSDF ${fontName}`,
+			size: imgSize,
+			format: 'rgba8unorm',
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
 		});
+		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, imgSize);
+
+		// to make q5's default font file smaller,
+		// the chars and kernings are stored as csv strings
+		if (typeof atlas.chars == 'string') {
+			atlas.chars = $.CSV.parse(atlas.chars, ' ');
+			atlas.kernings = $.CSV.parse(atlas.kernings, ' ');
+		}
+
+		let charCount = atlas.chars.length;
+		let charsBuffer = Q5.device.createBuffer({
+			size: charCount * 32,
+			usage: GPUBufferUsage.STORAGE,
+			mappedAtCreation: true
+		});
+
+		let fontChars = new Float32Array(charsBuffer.getMappedRange());
+		let u = 1 / atlas.common.scaleW;
+		let v = 1 / atlas.common.scaleH;
+		let chars = {};
+		let o = 0; // offset
+		for (let [i, char] of atlas.chars.entries()) {
+			chars[char.id] = char;
+			chars[char.id].charIndex = i;
+			fontChars[o] = char.x * u; // texOffset.x
+			fontChars[o + 1] = char.y * v; // texOffset.y
+			fontChars[o + 2] = char.width * u; // texExtent.x
+			fontChars[o + 3] = char.height * v; // texExtent.y
+			fontChars[o + 4] = char.width; // size.x
+			fontChars[o + 5] = char.height; // size.y
+			fontChars[o + 6] = char.xoffset; // offset.x
+			fontChars[o + 7] = -char.yoffset; // offset.y
+			o += 8;
+		}
+		charsBuffer.unmap();
+
+		let fontSampler = Q5.device.createSampler({
+			minFilter: 'linear',
+			magFilter: 'linear',
+			mipmapFilter: 'linear',
+			maxAnisotropy: 16
+		});
+		let fontBindGroupLayout = Q5.device.createBindGroupLayout({
+			label: 'MSDF font group layout',
+			entries: [
+				{
+					binding: 0,
+					visibility: GPUShaderStage.FRAGMENT,
+					texture: {}
+				},
+				{
+					binding: 1,
+					visibility: GPUShaderStage.FRAGMENT,
+					sampler: {}
+				},
+				{
+					binding: 2,
+					visibility: GPUShaderStage.VERTEX,
+					buffer: { type: 'read-only-storage' }
+				}
+			]
+		});
+		let fontPipeline = Q5.device.createRenderPipeline({
+			label: 'msdf font pipeline',
+			layout: Q5.device.createPipelineLayout({
+				bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
+			}),
+			vertex: {
+				module: textShader,
+				entryPoint: 'vertexMain'
+			},
+			fragment: {
+				module: textShader,
+				entryPoint: 'fragmentMain',
+				targets: [
+					{
+						format: 'bgra8unorm',
+						blend: {
+							color: {
+								srcFactor: 'src-alpha',
+								dstFactor: 'one-minus-src-alpha'
+							},
+							alpha: {
+								srcFactor: 'one',
+								dstFactor: 'one'
+							}
+						}
+					}
+				]
+			},
+			primitive: {
+				topology: 'triangle-strip',
+				stripIndexFormat: 'uint32'
+			}
+		});
+
+		let fontBindGroup = Q5.device.createBindGroup({
+			label: 'msdf font bind group',
+			layout: fontBindGroupLayout,
+			entries: [
+				{
+					binding: 0,
+					resource: texture.createView()
+				},
+				{ binding: 1, resource: fontSampler },
+				{ binding: 2, resource: { buffer: charsBuffer } }
+			]
+		});
+
+		let kernings = new Map();
+		if (atlas.kernings) {
+			for (let kerning of atlas.kernings) {
+				let charKerning = kernings.get(kerning.first);
+				if (!charKerning) {
+					charKerning = new Map();
+					kernings.set(kerning.first, charKerning);
+				}
+				charKerning.set(kerning.second, kerning.amount);
+			}
+		}
+
+		$._font = new MsdfFont(fontPipeline, fontBindGroup, atlas.common.lineHeight, chars, kernings);
+
+		fonts[fontName] = $._font;
+		$.pipelines[2] = $._font.pipeline;
+
+		q._preloadCount--;
+
+		if (cb) cb(fontName);
 	};
 
-	// directly add these text setting functions to the webgpu renderer
-	$.textFont = t.textFont;
-	$.textSize = t.textSize;
-	$.textLeading = t.textLeading;
-	$.textStyle = t.textStyle;
-	$.textAlign = t.textAlign;
-	$.textWidth = t.textWidth;
-	$.textAscent = t.textAscent;
-	$.textDescent = t.textDescent;
+	// q2d graphics context to use for text image creation
+	let g = $.createGraphics(1, 1);
+	g.colorMode($.RGB, 1);
 
-	$.textFill = (r, g, b, a) => t.fill($.color(r, g, b, a));
-	$.textStroke = (r, g, b, a) => t.stroke($.color(r, g, b, a));
+	$.loadFont = (url, cb) => {
+		let ext = url.slice(url.lastIndexOf('.') + 1);
+		if (ext != 'json') return g.loadFont(url, cb);
+		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
+		createFont(url, fontName, cb);
+		return fontName;
+	};
+
+	$._textSize = 18;
+	$._textAlign = 'left';
+	$._textBaseline = 'alphabetic';
+	let leadingSet = false,
+		leading = 22.5,
+		leadDiff = 4.5,
+		leadPercent = 1.25;
+
+	$.textFont = (fontName) => {
+		$._font = fonts[fontName];
+
+		// replay the change of font in the draw stack
+		$.drawStack.push(-1, () => {
+			$._font = fonts[fontName];
+			$.pipelines[2] = $._font.pipeline;
+		});
+	};
+	$.textSize = (size) => {
+		$._textSize = size;
+		if (!leadingSet) {
+			leading = size * leadPercent;
+			leadDiff = leading - size;
+		}
+	};
+	$.textLeading = (lineHeight) => {
+		$._font.lineHeight = leading = lineHeight;
+		leadDiff = leading - $._textSize;
+		leadPercent = leading / $._textSize;
+		leadingSet = true;
+	};
+	$.textAlign = (horiz, vert) => {
+		$._textAlign = horiz;
+		if (vert) $._textBaseline = vert;
+	};
+
+	$._charStack = [];
+	$._textStack = [];
+
+	let measureText = (font, text, charCallback) => {
+		let maxWidth = 0,
+			offsetX = 0,
+			offsetY = 0,
+			line = 0,
+			printedCharCount = 0,
+			lineWidths = [],
+			nextCharCode = text.charCodeAt(0);
+
+		for (let i = 0; i < text.length; ++i) {
+			let charCode = nextCharCode;
+			nextCharCode = i < text.length - 1 ? text.charCodeAt(i + 1) : -1;
+			switch (charCode) {
+				case 10: // Newline
+					lineWidths.push(offsetX);
+					line++;
+					maxWidth = Math.max(maxWidth, offsetX);
+					offsetX = 0;
+					offsetY -= font.lineHeight * leadPercent;
+					break;
+				case 13: // CR
+					break;
+				case 32: // Space
+					// advance the offset without actually adding a character
+					offsetX += font.getXAdvance(charCode);
+					break;
+				case 9: // Tab
+					offsetX += font.getXAdvance(charCode) * 2;
+					break;
+				default:
+					if (charCallback) {
+						charCallback(offsetX, offsetY, line, font.getChar(charCode));
+					}
+					offsetX += font.getXAdvance(charCode, nextCharCode);
+					printedCharCount++;
+			}
+		}
+		lineWidths.push(offsetX);
+		maxWidth = Math.max(maxWidth, offsetX);
+		return {
+			width: maxWidth,
+			height: lineWidths.length * font.lineHeight * leadPercent,
+			lineWidths,
+			printedCharCount
+		};
+	};
+
+	let initLoadDefaultFont;
 
 	$.text = (str, x, y, w, h) => {
-		let img = t.createTextImage(str, w, h);
+		if (!$._font) {
+			// check if online and loading the default font hasn't been attempted yet
+			if (navigator.onLine && !initLoadDefaultFont) {
+				initLoadDefaultFont = true;
+				$.loadFont('https://q5js.org/fonts/YaHei-msdf.json');
+			}
+			return;
+		}
 
-		if (img.canvas.textureIndex === undefined) {
+		if (str.length > w) {
+			let wrapped = [];
+			let i = 0;
+			while (i < str.length) {
+				let max = i + w;
+				if (max >= str.length) {
+					wrapped.push(str.slice(i));
+					break;
+				}
+				let end = str.lastIndexOf(' ', max);
+				if (end == -1 || end < i) end = max;
+				wrapped.push(str.slice(i, end));
+				i = end + 1;
+			}
+			str = wrapped.join('\n');
+		}
+
+		let spaces = 0, // whitespace char count, not literal spaces
+			hasNewline;
+		for (let i = 0; i < str.length; i++) {
+			let c = str[i];
+			switch (c) {
+				case '\n':
+					hasNewline = true;
+				case '\r':
+				case '\t':
+				case ' ':
+					spaces++;
+			}
+		}
+
+		let charsData = new Float32Array((str.length - spaces) * 4);
+
+		let ta = $._textAlign,
+			tb = $._textBaseline,
+			textIndex = $._textStack.length,
+			o = 0, // offset
+			measurements;
+
+		if (ta == 'left' && !hasNewline) {
+			measurements = measureText($._font, str, (textX, textY, line, char) => {
+				charsData[o] = textX;
+				charsData[o + 1] = textY;
+				charsData[o + 2] = char.charIndex;
+				charsData[o + 3] = textIndex;
+				o += 4;
+			});
+
+			if (tb == 'alphabetic') y -= $._textSize;
+			else if (tb == 'center') y -= $._textSize * 0.5;
+			else if (tb == 'bottom') y -= leading;
+		} else {
+			// measure the text to get the line widths before setting
+			// the x position to properly align the text
+			measurements = measureText($._font, str);
+
+			let offsetY = 0;
+			if (tb == 'alphabetic') y -= $._textSize;
+			else if (tb == 'center') offsetY = measurements.height * 0.5;
+			else if (tb == 'bottom') offsetY = measurements.height;
+
+			measureText($._font, str, (textX, textY, line, char) => {
+				let offsetX = 0;
+				if (ta == 'center') {
+					offsetX = measurements.width * -0.5 - (measurements.width - measurements.lineWidths[line]) * -0.5;
+				} else if (ta == 'right') {
+					offsetX = measurements.width - measurements.lineWidths[line];
+				}
+				charsData[o] = textX + offsetX;
+				charsData[o + 1] = textY + offsetY;
+				charsData[o + 2] = char.charIndex;
+				charsData[o + 3] = textIndex;
+				o += 4;
+			});
+		}
+		$._charStack.push(charsData);
+
+		let text = new Float32Array(6);
+
+		if ($._matrixDirty) $._saveMatrix();
+
+		text[0] = x;
+		text[1] = -y;
+		text[2] = $._textSize / 44;
+		text[3] = $._transformIndex;
+		text[4] = $._fillIndex;
+		text[5] = $._strokeIndex;
+
+		$._textStack.push(text);
+		$.drawStack.push(2, measurements.printedCharCount);
+	};
+
+	$.textWidth = (str) => {
+		if (!$._font) return 0;
+		return measureText($._font, str).width;
+	};
+
+	$.createTextImage = (str, w, h) => {
+		g.textSize($._textSize);
+
+		if ($._doFill) {
+			let fi = $._fillIndex * 4;
+			g.fill(colorsStack.slice(fi, fi + 4));
+		}
+		if ($._doStroke) {
+			let si = $._strokeIndex * 4;
+			g.stroke(colorsStack.slice(si, si + 4));
+		}
+
+		let img = g.createTextImage(str, w, h);
+
+		if (img.canvas.textureIndex == undefined) {
 			$._createTexture(img);
 		} else if (img.modified) {
 			let cnv = img.canvas;
@@ -4120,27 +4641,92 @@ Q5.renderers.webgpu.text = ($, q) => {
 			);
 			img.modified = false;
 		}
-
-		$.textImage(img, x, y);
+		return img;
 	};
-
-	$.createTextImage = t.createTextImage;
 
 	$.textImage = (img, x, y) => {
 		let og = $._imageMode;
 		$._imageMode = 'corner';
 
-		let ta = t._textAlign;
+		let ta = $._textAlign;
 		if (ta == 'center') x -= img.canvas.hw;
 		else if (ta == 'right') x -= img.width;
 
-		let bl = t._textBaseline;
-		if (bl == 'alphabetic') y -= t._textLeading;
-		else if (bl == 'middle') y -= img._middle;
+		let bl = $._textBaseline;
+		if (bl == 'alphabetic') y -= img._leading;
+		else if (bl == 'center') y -= img._middle;
 		else if (bl == 'bottom') y -= img._bottom;
 		else if (bl == 'top') y -= img._top;
 
 		$.image(img, x, y);
 		$._imageMode = og;
 	};
+
+	$._hooks.preRender.push(() => {
+		if (!$._charStack.length) return;
+
+		// Calculate total buffer size for text data
+		let totalTextSize = 0;
+		for (let charsData of $._charStack) {
+			totalTextSize += charsData.length * 4;
+		}
+
+		// Create a single buffer for all text data
+		let charBuffer = Q5.device.createBuffer({
+			label: 'charBuffer',
+			size: totalTextSize,
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
+		});
+
+		// Copy all text data into the buffer
+		let textArray = new Float32Array(charBuffer.getMappedRange());
+		let o = 0;
+		for (let array of $._charStack) {
+			textArray.set(array, o);
+			o += array.length;
+		}
+		charBuffer.unmap();
+
+		// Calculate total buffer size for metadata
+		let totalMetadataSize = $._textStack.length * 6 * 4;
+
+		// Create a single buffer for all metadata
+		let textBuffer = Q5.device.createBuffer({
+			label: 'textBuffer',
+			size: totalMetadataSize,
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
+		});
+
+		// Copy all metadata into the buffer
+		let metadataArray = new Float32Array(textBuffer.getMappedRange());
+		o = 0;
+		for (let array of $._textStack) {
+			metadataArray.set(array, o);
+			o += array.length;
+		}
+		textBuffer.unmap();
+
+		// Create a single bind group for the text buffer and metadata buffer
+		$._textBindGroup = Q5.device.createBindGroup({
+			label: 'msdf text bind group',
+			layout: textBindGroupLayout,
+			entries: [
+				{
+					binding: 0,
+					resource: { buffer: charBuffer }
+				},
+				{
+					binding: 1,
+					resource: { buffer: textBuffer }
+				}
+			]
+		});
+	});
+
+	$._hooks.postRender.push(() => {
+		$._charStack.length = 0;
+		$._textStack.length = 0;
+	});
 };

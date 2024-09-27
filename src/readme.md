@@ -54,6 +54,11 @@ WebGPU rendering modules are in development:
   - [webgpu-drawing](#webgpu-drawing)
   - [webgpu-image](#webgpu-image)
   - [webgpu-text](#webgpu-text)
+    - [Default Font](#default-font)
+    - [Loading Custom Fonts](#loading-custom-fonts)
+    - [Displaying Emojis](#displaying-emojis)
+    - [Lightweight Use](#lightweight-use)
+    - [Implemented functions](#implemented-functions)
   - [math](#math)
   - [noisier](#noisier)
 
@@ -179,13 +184,83 @@ Implemented functions:
 
 ## webgpu-text
 
-> Use `textFill` and `textStroke` to set text colors.
+The q5 WebGPU text renderer uses the multi-channel signed distance fields (MSDF) technique for high performance and high quality real-time text rendering. Text can be rapidly recolored, rotated, and scaled without any loss in quality or performance.
 
-Internally, q5's WebGPU renderer uses a q5 graphics object to draw text to a Canvas2D canvas via `createTextImage`, then converts that canvas to a WebGPU texture. Each texture is cached, so it doesn't have to be recreated every frame that users want to display the same text.
+MSDF, introduced by Chlumsky Viktor in his master's thesis ["Shape Decomposition for Multi-channel Distance Fields" (2015)](https://dspace.cvut.cz/bitstream/handle/10467/62770/F8-DP-2015-Chlumsky-Viktor-thesis.pdf), improves upon the signed distance field (SDF) technique, popularized by Chris Green and [Valve Software](https://www.valvesoftware.com/en/) in ["Improved Alpha-Tested Magnification for Vector Textures and Special Effects" (2007)](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf).
 
-Implemented functions:
+| SDF                                                                                                                  | MSDF                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| ![demo-sdf16](https://user-images.githubusercontent.com/18639794/106391905-e679af00-63ef-11eb-96c3-993176330911.png) | ![demo-msdf16](https://user-images.githubusercontent.com/18639794/106391899-e37ebe80-63ef-11eb-988b-4764004bb196.png) |
 
-`loadFont`,`textFont`, `textSize`, `textLeading`, `textStyle`, `textAlign`, `textWidth`, `textAscent`, `textDescent`, `textFill`, `textStroke`, `text`
+### Default Font
+
+For convenience, if no font is loaded before `text` is run, then q5's default MSDF font is loaded: https://q5js.org/fonts/YaHei-msdf.json
+
+![YaHei msdf texture](https://q5js.org/fonts/YaHei.png)
+
+This 512x512 msdf texture (207kb) was made with the [Microsoft YaHei](https://learn.microsoft.com/en-us/typography/font-list/microsoft-yahei) font and stores every character visible on a standard English keyboard, letters with diacritics (accents) used in European languages, and mathematical symbols.
+
+```
+!"#$%&'()\*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^\_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¥©®°²³´·¹º¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ‘’“”π
+```
+
+> Do you think any other characters ought to be included in the default set? Let us know! https://github.com/q5js/q5.js/issues
+
+### Loading Custom Fonts
+
+You can choose a custom set of characters and convert fonts to MSDF format by using the [msdf-bmfont-xml](https://msdf-bmfont.donmccurdy.com/) website, created by Don McCurdy.
+
+Here's how to load an MSDF font:
+
+```js
+function preload() {
+	loadFont('arial-msdf.json');
+}
+
+function setup() {
+	createCanvas(200, 200);
+}
+
+function draw() {
+	fill(0.71, 0.92, 1);
+	text('Hello, World!', mouseX, mouseY);
+}
+
+Q5.webgpu();
+```
+
+### Displaying Emojis
+
+Full color emoji characters can't be rendered using the MSDF technique, so use `createTextImage` and display them with `textImage`:
+
+```js
+let puppy;
+
+function setup() {
+	createCanvas(200, 200);
+	textSize(100);
+	puppy = createTextImage('🐶');
+}
+
+function draw() {
+	textAlign(CENTER, CENTER);
+	textImage(puppy, 0, 0);
+}
+
+Q5.webgpu();
+```
+
+### Lightweight Use
+
+For super lightweight use load <https://q5js.org/fonts/YaHei-256-msdf.json>, which has a limited character set of english letters and some common punctuation symbols that completely fill in a 256x256 texture (73kb).
+
+```
+!@'",-.0123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+```
+
+### Implemented functions
+
+`loadFont`, `text`, `textSize`, `textAlign`, `textWidth`, `createTextImage`, `textImage`
 
 ## math
 
