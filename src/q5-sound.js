@@ -4,6 +4,7 @@ Q5.modules.sound = ($, q) => {
 		q._preloadCount++;
 		Q5.aud ??= new window.AudioContext();
 		let a = new Q5.Sound(path, cb);
+		a.crossOrigin = 'Anonymous';
 		a.addEventListener('canplaythrough', () => {
 			q._preloadCount--;
 			a.loaded = true;
