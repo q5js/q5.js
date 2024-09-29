@@ -583,9 +583,11 @@ declare global {
 	function resize(w: number, h: number): void;
 
 	/** 🌆
-	 * Trims the image, cropping out transparent pixels from the edges.
+	 * Returns a trimmed image, cropping out transparent pixels
+	 * from the edges.
+	 * @returns {Image}
 	 */
-	function trim(): void;
+	function trim(): Image;
 
 	/** 🌆
 	 * Masks the image with another image
@@ -602,29 +604,61 @@ declare global {
 	function save(a: string, b: string, c?: number): void;
 
 	/** 🌆
-	 * Retrieves pixel data from an image.
+	 * Displays a region of the image on another region of the image.
+	 * 
+	 * Can be used to create a detail inset, aka a magnifying glass effect.
+	 * 
+	 * @param srcX - x-coordinate of the source region
+	 * @param srcY - y-coordinate of the source region
+	 * @param srcW - width of the source region
+	 * @param srcH - height of the source region
+	 * @param dstX - x-coordinate of the destination region
+	 * @param dstY - y-coordinate of the destination region
+	 * @param dstW - width of the destination region
+	 * @param dstH - height of the destination region
+	 */
+	function inset(srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH): void;
+
+	/** 🌆
+	 * Returns a copy of the image.
+	 * @returns {Image}
+	 */
+	function copy(): Image;
+
+	/** 🌆
+	 * Retrieves a subsection of an image or canvas, as a q5 Image.
+	 *
+	 * Or if width and height are both 1, returns the color of the pixel at
+	 * the given coordinates in `[R, G, B, A]` array format.
+	 * 
+	 * To edit the color value of multiple pixels, it's faster to use 
+	 * `loadPixels` and `updatePixels`.
 	 * @param x
 	 * @param y
 	 * @param w - width of the area
 	 * @param h - height of the area
+	 * @returns {Image}
 	 */
 	function get(x: number, y: number, w?: number, h?: number): any;
 
 	/** 🌆
-	 * Sets pixel data in the image.
+	 * Sets a pixel's color in the image or canvas.
+	 * 
+	 * Or if a canvas or image is provided, it's drawn on top of the 
+	 * destination image or canvas ignoring its tint setting.
 	 * @param x
 	 * @param y
-	 * @param c - color or pixel data
+	 * @param c - color, canvas, or image
 	 */
 	function set(x: number, y: number, c: any): void;
 
 	/** 🌆
-	 * Loads pixel data into the image's pixel array.
+	 * Loads pixel data into the image's `pixels` array.
 	 */
 	function loadPixels(): void;
 
 	/** 🌆
-	 * Updates the image's pixels array to the canvas.
+	 * Updates the image's `pixels` array to the canvas.
 	 */
 	function updatePixels(): void;
 
@@ -795,7 +829,7 @@ declare global {
 	 * Loads a font from a URL and optionally runs a callback function with the font name once it's loaded
 	 *
 	 * WebGPU: Fonts must be in MSDF format with the file ending
-	 * "-msdf.json". If no font is loaded before `text` is run, then 
+	 * "-msdf.json". If no font is loaded before `text` is run, then
 	 * the default font is loaded:
 	 * https://q5js.org/fonts/YaHei-msdf.json
 	 * @param url - URL of the font to load

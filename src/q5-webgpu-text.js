@@ -532,6 +532,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	};
 
 	$.textImage = (img, x, y) => {
+		if (typeof img == 'string') img = $.createTextImage(img);
+
 		let og = $._imageMode;
 		$._imageMode = 'corner';
 

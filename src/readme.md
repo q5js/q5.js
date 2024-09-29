@@ -55,7 +55,8 @@ WebGPU rendering modules are in development:
   - [webgpu-image](#webgpu-image)
   - [webgpu-text](#webgpu-text)
     - [Default Font](#default-font)
-    - [Loading Custom Fonts](#loading-custom-fonts)
+    - [Create a MSDF Font](#create-a-msdf-font)
+    - [Load a MSDF font](#load-a-msdf-font)
     - [Displaying Emojis](#displaying-emojis)
     - [Lightweight Use](#lightweight-use)
     - [Implemented functions](#implemented-functions)
@@ -184,7 +185,7 @@ Implemented functions:
 
 ## webgpu-text
 
-The q5 WebGPU text renderer uses the multi-channel signed distance fields (MSDF) technique for high performance and high quality real-time text rendering. Text can be rapidly recolored, rotated, and scaled without any loss in quality or performance.
+The q5 WebGPU text renderer uses multi-channel signed distance fields (MSDF) for high performance and high quality real-time text rendering. Text can be rapidly recolored, rotated, and scaled without any loss in quality or performance.
 
 MSDF, introduced by Chlumsky Viktor in his master's thesis ["Shape Decomposition for Multi-channel Distance Fields" (2015)](https://dspace.cvut.cz/bitstream/handle/10467/62770/F8-DP-2015-Chlumsky-Viktor-thesis.pdf), improves upon the signed distance field (SDF) technique, popularized by Chris Green and [Valve Software](https://www.valvesoftware.com/en/) in ["Improved Alpha-Tested Magnification for Vector Textures and Special Effects" (2007)](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf).
 
@@ -206,11 +207,13 @@ This 512x512 msdf texture (207kb) was made with the [Microsoft YaHei](https://le
 
 > Do you think any other characters ought to be included in the default set? Let us know! https://github.com/q5js/q5.js/issues
 
-### Loading Custom Fonts
+### Create a MSDF Font
 
 You can choose a custom set of characters and convert fonts to MSDF format by using the [msdf-bmfont-xml](https://msdf-bmfont.donmccurdy.com/) website, created by Don McCurdy.
 
-Here's how to load an MSDF font:
+### Load a MSDF font
+
+Fonts must be in MSDF format with the file ending "-msdf.json".
 
 ```js
 function preload() {
@@ -231,24 +234,23 @@ Q5.webgpu();
 
 ### Displaying Emojis
 
-Full color emoji characters can't be rendered using the MSDF technique, so use `createTextImage` and display them with `textImage`:
+Full color emoji characters can't be rendered using the MSDF technique, so draw them using `textImage`.
 
 ```js
-let puppy;
-
 function setup() {
 	createCanvas(200, 200);
 	textSize(100);
-	puppy = createTextImage('🐶');
 }
 
 function draw() {
 	textAlign(CENTER, CENTER);
-	textImage(puppy, 0, 0);
+	textImage('🐶', 0, 0);
 }
 
 Q5.webgpu();
 ```
+
+You can also use `createTextImage` and display it with `textImage`.
 
 ### Lightweight Use
 
@@ -260,7 +262,7 @@ For super lightweight use load <https://q5js.org/fonts/YaHei-256-msdf.json>, whi
 
 ### Implemented functions
 
-`loadFont`, `text`, `textSize`, `textAlign`, `textWidth`, `createTextImage`, `textImage`
+`loadFont`, `text`, `textFont`, `textSize`, `textAlign`, `textWidth`, `createTextImage`, `textImage`
 
 ## math
 

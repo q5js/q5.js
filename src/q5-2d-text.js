@@ -31,12 +31,13 @@ Q5.renderers.q2d.text = ($, q) => {
 	};
 
 	$.textFont = (x) => {
+		if (!x || x == font) return font;
 		font = x;
 		fontMod = true;
 		styleHash = -1;
 	};
 	$.textSize = (x) => {
-		if (x === undefined) return $._textSize;
+		if (x == undefined || x == $._textSize) return $._textSize;
 		if ($._da) x *= $._da;
 		$._textSize = x;
 		fontMod = true;
@@ -47,16 +48,17 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 	};
 	$.textStyle = (x) => {
+		if (!x || x == emphasis) return emphasis;
 		emphasis = x;
 		fontMod = true;
 		styleHash = -1;
 	};
 	$.textLeading = (x) => {
-		if (x === undefined) return leading;
+		leadingSet = true;
+		if (x == undefined || x == leading) return leading;
 		if ($._da) x *= $._da;
 		leading = x;
 		leadDiff = x - $._textSize;
-		leadingSet = true;
 		styleHash = -1;
 	};
 	$.textAlign = (horiz, vert) => {
@@ -222,6 +224,8 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 	};
 	$.textImage = (img, x, y) => {
+		if (typeof img == 'string') img = $.createTextImage(img);
+
 		let og = $._imageMode;
 		$._imageMode = 'corner';
 

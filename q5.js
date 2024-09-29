@@ -1347,11 +1347,18 @@ Q5.renderers.q2d.image = ($, q) => {
 		$.ctx.restore();
 	};
 
+	$.inset = (x, y, w, h, dx, dy, dw, dh) => {
+		let pd = $._pixelDensity || 1;
+		$.ctx.drawImage($.canvas, x * pd, y * pd, w * pd, h * pd, dx, dy, dw, dh);
+	};
+
+	$.copy = () => $.get();
+
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
 			let c = $._getImageData(x * pd, y * pd, 1, 1).data;
-			return new $.Color(c[0], c[1], c[2], c[3] / 255);
+			return [c[0], c[1], c[2], c[3] / 255];
 		}
 		x = (x || 0) * pd;
 		y = (y || 0) * pd;
@@ -1360,8 +1367,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		w *= pd;
 		h *= pd;
 		let img = $.createImage(w, h);
-		let imgData = $._getImageData(x, y, w, h);
-		img.ctx.putImageData(imgData, 0, 0);
+		img.ctx.drawImage($.canvas, x, y, w, h, 0, 0, w, h);
 		img._pixelDensity = pd;
 		img.width = _w;
 		img.height = _h;
@@ -1381,9 +1387,9 @@ Q5.renderers.q2d.image = ($, q) => {
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
 				let idx = 4 * ((y * mod + i) * $.canvas.width + x * mod + j);
-				$.pixels[idx] = c.r ?? c.l;
-				$.pixels[idx + 1] = c.g ?? c.c;
-				$.pixels[idx + 2] = c.b ?? c.h;
+				$.pixels[idx] = c.r;
+				$.pixels[idx + 1] = c.g;
+				$.pixels[idx + 2] = c.b;
 				$.pixels[idx + 3] = c.a;
 			}
 		}
@@ -1449,12 +1455,13 @@ Q5.renderers.q2d.text = ($, q) => {
 	};
 
 	$.textFont = (x) => {
+		if (!x || x == font) return font;
 		font = x;
 		fontMod = true;
 		styleHash = -1;
 	};
 	$.textSize = (x) => {
-		if (x === undefined) return $._textSize;
+		if (x == undefined || x == $._textSize) return $._textSize;
 		if ($._da) x *= $._da;
 		$._textSize = x;
 		fontMod = true;
@@ -1465,16 +1472,17 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 	};
 	$.textStyle = (x) => {
+		if (!x || x == emphasis) return emphasis;
 		emphasis = x;
 		fontMod = true;
 		styleHash = -1;
 	};
 	$.textLeading = (x) => {
-		if (x === undefined) return leading;
+		leadingSet = true;
+		if (x == undefined || x == leading) return leading;
 		if ($._da) x *= $._da;
 		leading = x;
 		leadDiff = x - $._textSize;
-		leadingSet = true;
 		styleHash = -1;
 	};
 	$.textAlign = (horiz, vert) => {
@@ -1640,6 +1648,8 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 	};
 	$.textImage = (img, x, y) => {
+		if (typeof img == 'string') img = $.createTextImage(img);
+
 		let og = $._imageMode;
 		$._imageMode = 'corner';
 
@@ -4645,6 +4655,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	};
 
 	$.textImage = (img, x, y) => {
+		if (typeof img == 'string') img = $.createTextImage(img);
+
 		let og = $._imageMode;
 		$._imageMode = 'corner';
 
