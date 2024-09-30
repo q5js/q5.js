@@ -56,6 +56,8 @@ Q5.modules.input = ($, q) => {
 			q.mouseX = e.clientX;
 			q.mouseY = e.clientY;
 		}
+		q.moveX = e.movementX;
+		q.moveY = e.movementY;
 	};
 	$._onmousedown = (e) => {
 		$._startAudio();

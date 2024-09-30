@@ -95,6 +95,7 @@ function Q5(scope, parent, renderer) {
 		if ($._finishRender) $._finishRender();
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;
+		q.moveX = q.moveY = 0;
 		$._lastFrameTime = ts;
 		let post = performance.now();
 		$._fps = Math.round(1000 / (post - pre));
@@ -233,9 +234,9 @@ function Q5(scope, parent, renderer) {
 		if ($._preloadCount > 0) return raf(_start);
 		millisStart = performance.now();
 		await $.setup();
+		$._setupDone = true;
 		if ($.frameCount) return;
 		if ($.ctx === null) $.createCanvas(100, 100);
-		$._setupDone = true;
 		if ($.ctx) $.resetMatrix();
 		raf($._draw);
 	}
@@ -2157,6 +2158,8 @@ Q5.modules.input = ($, q) => {
 			q.mouseX = e.clientX;
 			q.mouseY = e.clientY;
 		}
+		q.moveX = e.movementX;
+		q.moveY = e.movementY;
 	};
 	$._onmousedown = (e) => {
 		$._startAudio();
