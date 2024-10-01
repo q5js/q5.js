@@ -8,6 +8,11 @@
 	mie.ready = () => {
 		mie.theme = pref;
 	};
+	mie.autoLoad = false;
+	(async () => {
+		await Q5.initWebGPU();
+		mie.load();
+	})();
 }
 
 function toggleDarkMode() {

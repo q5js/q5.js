@@ -127,12 +127,15 @@ declare global {
 
 	/** ⭐️
 	 * The desired frame rate of the sketch.
-	 * @returns target frame rate.
+	 * @returns target frame rate
 	 */
 	function getTargetFrameRate(): number;
 
 	/** ⭐️
-	 * @returns frames per second.
+	 * Gets the current FPS, in terms of how many frames could be generated
+	 * in one second, which can be higher than the target frame rate. Useful
+	 * for analyzing performance.
+	 * @returns frames per second
 	 */
 	function getFPS(): number;
 
@@ -144,7 +147,7 @@ declare global {
 
 	/** ⭐️
 	 * Prints a message to the JavaScript console.
-	 * @param message The message to print.
+	 * @param message The message to print
 	 */
 	function print(message: any): void;
 
@@ -184,8 +187,8 @@ declare global {
 	function createCanvas(w: number, h: number, options?: CanvasRenderingContext2DSettings): HTMLCanvasElement;
 
 	/** ⬜️
-	 * Any position coordinates or dimensions you use will be scaled based on the unit
-	 * provided to this function.
+	 * Any position coordinates or dimensions you use will be scaled based 
+	 * on the unit provided to this function.
 	 * @param unit
 	 * @example
 	 * new Q5();
@@ -376,6 +379,54 @@ declare global {
 	function displayMode(displayMode: string, renderQuality: string, displayScale: string | number): void;
 
 	// 🧑‍🎨 drawing
+
+	/** 🧑‍🎨
+	 * Sets the global composite operation for the canvas context.
+	 * @param x - The composite operation to set.
+	 */
+	function blendMode(x: string): void;
+
+	/** 🧑‍🎨
+	 * Ses the line cap style for the canvas context.
+	 * @param x - The line cap style to set ('butt', 'round', 'square').
+	 */
+	function strokeCap(x: CanvasLineCap): void;
+
+	/** 🧑‍🎨
+	 * Sets the line join style for the canvas context.
+	 * @param x - The line join style to set ('round', 'bevel', 'miter').
+	 */
+	function strokeJoin(x: CanvasLineJoin): void;
+
+	/** 🧑‍🎨
+	 * Sets the ellipse mode.
+	 * @param x - The ellipse mode to set.
+	 */
+	function ellipseMode(x: string): void;
+
+	/** 🧑‍🎨
+	 * Sets the rectangle mode.
+	 * @param x - The rectangle mode to set.
+	 */
+	function rectMode(x: string): void;
+
+	/** 🧑‍🎨
+	 * Sets the curve detail level.
+	 * @param x - The curve detail level to set.
+	 */
+	function curveDetail(x: number): void;
+
+	/** 🧑‍🎨
+	 * Sets the curve alpha value.
+	 * @param x - The curve alpha value to set.
+	 */
+	function curveAlpha(x: number): void;
+
+	/** 🧑‍🎨
+	 * Sets the curve tightness value.
+	 * @param x - The curve tightness value to set.
+	 */
+	function curveTightness(x: number): void;
 
 	/** 🧑‍🎨
 	 * Draws over the entire canvas with a color or image.
@@ -605,9 +656,9 @@ declare global {
 
 	/** 🌆
 	 * Displays a region of the image on another region of the image.
-	 * 
+	 *
 	 * Can be used to create a detail inset, aka a magnifying glass effect.
-	 * 
+	 *
 	 * @param srcX - x-coordinate of the source region
 	 * @param srcY - y-coordinate of the source region
 	 * @param srcW - width of the source region
@@ -630,8 +681,8 @@ declare global {
 	 *
 	 * Or if width and height are both 1, returns the color of the pixel at
 	 * the given coordinates in `[R, G, B, A]` array format.
-	 * 
-	 * To edit the color value of multiple pixels, it's faster to use 
+	 *
+	 * To edit the color value of multiple pixels, it's faster to use
 	 * `loadPixels` and `updatePixels`.
 	 * @param x
 	 * @param y
@@ -643,8 +694,8 @@ declare global {
 
 	/** 🌆
 	 * Sets a pixel's color in the image or canvas.
-	 * 
-	 * Or if a canvas or image is provided, it's drawn on top of the 
+	 *
+	 * Or if a canvas or image is provided, it's drawn on top of the
 	 * destination image or canvas ignoring its tint setting.
 	 * @param x
 	 * @param y
@@ -939,13 +990,14 @@ declare global {
 
 	/** ✨
 	 * Run this function before a line of code that isn't working as expected.
+	 * @param question - optional question to ask the AI
 	 * @example
 	 * function draw() {
 	 * 	askAI();
 	 * 	text('Hello!');
 	 * }
 	 */
-	function askAI(): void;
+	function askAI(question?: string): void;
 
 	// 🎨 color
 
@@ -1259,18 +1311,27 @@ declare global {
 	// 🛠️ utilities
 
 	/** 🛠️
-	 * Loads a text file from the specified path and returns an array of strings.
-	 * @param path - The path to the text file.
-	 * @param cb - A callback function that is called when the file is loaded.
+	 * Loads a text file from the specified path. Result is one string.
+	 * @param path - the path to the text file
+	 * @param cb - a callback function that is run when the file is loaded
 	 */
-	function loadStrings(path: string, cb: (result: string[]) => void): void;
+	function loadText(path: string, cb: (result: string) => void): void;
 
 	/** 🛠️
-	 * Loads a JSON file from the specified path.
-	 * @param path - The path to the JSON file.
-	 * @param cb - A callback function that is called when the file is loaded.
+	 * Loads a JSON file from the specified path. Result depends on the
+	 * JSON file's contents, but is typically an object or array.
+	 * @param path - the path to the JSON file
+	 * @param cb - a callback function that is run when the file is loaded
 	 */
-	function loadJSON(path: string, cb: (result: object) => void): void;
+	function loadJSON(path: string, cb: (result: any) => void): void;
+
+	/** 🛠️
+	 * Loads a CSV file from the specified path. Result is an array
+	 * of objects.
+	 * @param path - the path to the CSV file
+	 * @param cb - a callback function that is run when the file is loaded
+	 */
+	function loadCSV(path: string, cb: (result: object[]) => void): void;
 
 	/** 🛠️
 	 * Stores an item in localStorage.

@@ -1,6 +1,6 @@
-# Modular Use
+# q5.js Source Documentation
 
-To use q5 modules, "q5.js" (the default bundle) or the "q5-core.js" module must be loaded first!
+For modular use, the "q5-core.js" module must be loaded first.
 
 ```html
 <script src="https://q5js.org/src/q5-core.js"></script>
@@ -9,6 +9,7 @@ To use q5 modules, "q5.js" (the default bundle) or the "q5-core.js" module must 
 These modules are included in the default "q5.js" bundle:
 
 ```html
+<script src="https://q5js.org/src/q5-core.js"></script>
 <script src="https://q5js.org/src/q5-2d-canvas.js"></script>
 <script src="https://q5js.org/src/q5-2d-drawing.js"></script>
 <script src="https://q5js.org/src/q5-2d-image.js"></script>
@@ -37,19 +38,21 @@ WebGPU rendering modules are in development:
 ```html
 <script src="https://q5js.org/src/q5-webgpu-canvas.js"></script>
 <script src="https://q5js.org/src/q5-webgpu-drawing.js"></script>
+<script src="https://q5js.org/src/q5-webgpu-image.js"></script>
+<script src="https://q5js.org/src/q5-webgpu-text.js"></script>
 ```
 
 # Module Info
 
-- [Modular Use](#modular-use)
+- [q5.js Source Documentation](#q5js-source-documentation)
 - [Module Info](#module-info)
-  - [core](#core)
-  - [canvas](#canvas)
+  - [q5-core](#q5-core)
+  - [q5-canvas](#q5-canvas)
   - [q2d-canvas](#q2d-canvas)
-  - [q2d-drawing](#q2d-drawing)
-  - [q2d-image](#q2d-image)
-  - [q2d-soft-filters](#q2d-soft-filters)
-  - [q2d-text](#q2d-text)
+  - [q5-q2d-drawing](#q5-q2d-drawing)
+  - [q5-q2d-image](#q5-q2d-image)
+  - [q5-q2d-soft-filters](#q5-q2d-soft-filters)
+  - [q5-q2d-text](#q5-q2d-text)
   - [webgpu-canvas](#webgpu-canvas)
   - [webgpu-drawing](#webgpu-drawing)
   - [webgpu-image](#webgpu-image)
@@ -63,15 +66,15 @@ WebGPU rendering modules are in development:
   - [math](#math)
   - [noisier](#noisier)
 
-## core
+## q5-core
 
 The core module provides the absolute basic functionality necessary to run q5.
 
 It loads other modules by passing `$` (alias for `this`) and `q` (which in global mode is a proxy for `this` and `window` or `global`).
 
-## canvas
+## q5-canvas
 
-The canvas module provides shared functionality for all canvas renderers, such as adding the canvas to the DOM, resizing the canvas, setting pixel density,
+The canvas module provides shared functionality for all canvas renderers, such as adding the canvas to the DOM, resizing the canvas, setting pixel density.
 
 ## q2d-canvas
 
@@ -81,17 +84,17 @@ All other 2D modules depend on this module.
 
 Though loading q5-color is recommend, it's not required since `fill` and `stroke` can be set to a CSS color string.
 
-## q2d-drawing
+## q5-q2d-drawing
 
 Adds Canvas2D drawing functions to q5.
 
-## q2d-image
+## q5-q2d-image
 
 Adds Canvas2D image support to q5.
 
 The filters in q5-image use the [CanvasRenderingContext2D.filter](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter) property to apply native hardware-accelerated filters to images.
 
-## q2d-soft-filters
+## q5-q2d-soft-filters
 
 Software implementation of image filters.
 
@@ -101,17 +104,11 @@ These filters are slow. Real-time use of them is not recommended.
 
 As of April 2024, Safari Technology Preview supports `ctx.filter` under a flag. Hopefully in the near future this module can be omitted from the default bundle.
 
-## q2d-text
+## q5-q2d-text
 
 Adds Canvas2D text rendering support to q5.
 
 Image based features in this module require the q5-2d-image module.
-
-`createTextImage(str, w, h)` provides a simple way for users to create images from text.
-
-`textImage(img, x, y)` displays text images, complying with the user's text position settings instead of their image position settings. The idea is that text will appear in the same place as it would if it were drawn with the `text` function.
-
-`textCache(bool, maxSize)` enables or disables text caching.
 
 ## webgpu-canvas
 
@@ -138,28 +135,9 @@ WebGPU has different default settings compared to q5's q2d renderer and p5's P2D
 - The default color mode is RGB in 0-1 "float" format: `colorMode(RGB, 1)`.
 - The origin of the canvas (0, 0) is in the center, not the top left.
 - Mouse and touch coordinates correspond to canvas pixels.
-- Use `textFill` and `textStroke` to set text colors.
-- For now, strokes are only implemented for the `point`, `line`, and `text` functions.
+- For now, strokes are only implemented for the `point`, `line`, and `textImage` functions.
 
 The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and apply a compatibility layer to display sketches with the fallback q2d renderer.
-
-Use of top level global mode with the WebGPU renderer requires that you make your sketch file a js module and await for `Q5.webgpu()` to return the Q5 instance (`q`), which you can then use to set q5 functions such as `draw`.
-
-```html
-<script type="module" src="sketch.js">
-```
-
-```js
-let q = await Q5.webgpu();
-
-createCanvas(200, 200);
-noStroke();
-
-q.draw = () => {
-	clear();
-	rect(50, 50, 100, 100);
-};
-```
 
 Implemented functions:
 

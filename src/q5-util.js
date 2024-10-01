@@ -16,7 +16,7 @@ Q5.modules.util = ($, q) => {
 		return ret;
 	};
 
-	$.loadStrings = (path, cb) => $._loadFile(path, cb, 'text');
+	$.loadText = (path, cb) => $._loadFile(path, cb, 'text');
 	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
 	$.loadCSV = (path, cb) => $._loadFile(path, cb, 'csv');
 

@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<!DOCTYPE html><html lang="en"><head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>q5</title>
@@ -34,8 +31,7 @@
 			<div class="btn">
 				<div id="darkModeIcon"></div>
 			</div>
-			<textarea id="scriptLink" rows="1"
-				readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
+			<textarea id="scriptLink" rows="1" readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
 			<div class="btn">
 				<div id="fullscreenIcon"></div>
 			</div>
@@ -43,13 +39,11 @@
 	</div>
 	<div id="reel1" class="reel">
 		<md id="md1-0">
-			<h2 id="a-sequel-to-p5js-🎉">A sequel to p5.js! 🎉</h2>
-			<p>q5.js is a new implementation of the <a href="https://p5js.org" target="_blank">p5</a> API that's performance
-				optimized and packed with additional features to make creative coding even more fun and accessible.</p>
-			<p>q5 works out of the box with your existing p5 2D sketches. It even supports popular libraries like <a
-					href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> and <a
-					href="https://p5play.org" target="_blank">p5play</a>.</p>
-		</md>
+<h2 id="a-sequel-to-p5js-🎉">A sequel to p5.js! 🎉</h2>
+<p><strong>q5.js</strong> is a spiritual successor to the <a href="https://p5js.org" target="_blank">p5.js</a> and <a href="https://processing.org/" target="_blank">Processing Java</a> graphics libraries.</p>
+<p>The q5 team aims to make creative coding even more fun and accessible for a new generation of artists, designers, educators, and beginners!</p>
+<p>If you're already familiar with p5, you'll find yourself right at home with q5. It's also compatible with popular addons, including <a href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> and <a href="https://p5play.org" target="_blank">p5play</a>.</p>
+</md>
 		<div class="minis horiz">
 			<script type="mie/p5" id="p5.js" horiz="" width="350px">
 function setup() {
@@ -86,8 +80,47 @@ function setup() {
 	</div> -->
 	<div id="reel2" class="reel">
 		<md id="md2-0">
-			<h2 id="more-vibrant-colors-🎨">More vibrant colors! 🎨</h2>
-		</md>
+<h2 id="blazing-fast-🚀">Blazing fast! 🚀</h2>
+<p>q5 is performance optimized for the modern web. Create interactive art that runs in real-time on more devices than ever before. 🏎️</p>
+<p><a href="https://github.com/q5js/q5.js/wiki/Developer-Log#q5js-webgpu-is-16x-faster-than-p5js-webgl--july-25-2024" target="_blank">Draw 16x more</a> per frame with <a href="https://developer.mozilla.org/docs/Web/API/WebGPU_API" target="_blank">q5 WebGPU</a>, compared to the limit of p5 WebGL. Or save battery by getting the same results with less power consumption. 🌱</p>
+</md>
+		<script type="mie/q5" id="rainbowLoops" renderer="webgpu" hide-editor="">
+let size;
+
+function setup() {
+	createCanvas(windowWidth/1.1, windowWidth/4);
+	noStroke();
+	angleMode('degrees');
+
+	size = width / 2.5;
+}
+
+function draw() {
+	background(0);
+
+	log(frameCount);
+
+	for (let i = 0; i < 720; i++) {
+		let r = cos(frameCount + i * 2) * 0.5 + 0.5;
+		let g = sin(frameCount + i * 3) * 0.5 + 0.5;
+		let b = cos(frameCount + i) * 0.5 + 0.5;
+		fill(r, g, b);
+
+		let x = cos(frameCount + i / 2 + mouseX) * size * sin(frameCount + i);
+		x *= sin(frameCount + i);
+		let y = sin(frameCount + i / 2 + mouseY) * size * cos(frameCount + i);
+		for (let j = -5; j <= 5; j++) {
+			rect(x + j * 20, y, 10, 10);
+		}
+	}
+}
+</script>
+	</div>
+
+	<div id="reel3" class="reel">
+		<md id="md3-0">
+<h2 id="more-vibrant-colors-🎨">More vibrant colors! 🎨</h2>
+</md>
 		<div class="minis horiz">
 			<div>
 				<script type="mie/p5" id="SDR" hide-editor="">
@@ -129,9 +162,9 @@ function windowResized() {
 	resizeCanvas(calcMiniWidth(), 200);
 }
 				</script>
-				<md id="md2-1">
-					<p>In p5, bright colors can look dull on modern devices 😕</p>
-				</md>
+				<md id="md3-1">
+<p>In p5, bright colors can look dull 😕</p>
+</md>
 			</div>
 			<div>
 				<script type="mie/q5" id="HDR" hide-editor="">
@@ -166,199 +199,87 @@ function windowResized() {
 	resizeCanvas(calcMiniWidth(), 200);
 }
 			</script>
-				<md id="md2-2">
-					<p>q5 empowers artists with <a
-							href="https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support" target="_blank">HDR
-							color support</a> 🤩</p>
-				</md>
-			</div>
-		</div>
-	</div>
-	<div id="reel3" class="reel">
-		<md id="md3-0">
-			<h2 id="more-interactive-🧑💻">More interactive 🧑‍💻</h2>
-		</md>
-		<div class="minis horiz">
-			<div>
-				<script type="mie/p5" id="boundary-check" lines="9" horiz="">
-function draw() {
-	fill('lime');
-	rect(20, 10, 100, 50);
-
-	if (mouseX > 20 && mouseX < 120 &&
-	    mouseY > 10 && mouseY < 60) {
-		fill('blue');
-		rect(20, 10, 100, 50);
-	}
-}
-
-function setup() {
-	createCanvas(140, 70);
-	cursor('pointer');
-}
-			</script>
-				<md id="md3-1">
-					<p>In p5, making interactive sketches can be tough for beginners. 😩</p>
-				</md>
-			</div>
-			<div>
-				<script type="mie/q5" id="inFill" lines="9" horiz="">
-function draw() {
-	fill('lime');
-	rect(20, 10, 100, 50);
-
-	if (inFill(mouseX, mouseY)) {
-		fill('blue');
-		rect(20, 10, 100, 50);
-	}
-}
-
-function setup() {
-	createCanvas(140, 70);
-	cursor('pointer');
-}
-			</script>
 				<md id="md3-2">
-					<p>With q5, use <code>inFill</code> to check if the mouse is hovering on the most recently drawn shape. 🎯</p>
-				</md>
+<p>q5 empowers artists with <a href="https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support" target="_blank">HDR color support</a> 🤩</p>
+</md>
 			</div>
 		</div>
 	</div>
 	<div id="reel4" class="reel">
 		<md id="md4-0">
-			<h2 id="more-flexible-💪">More flexible 💪</h2>
-			<p>With the <code>flexibleCanvas</code> function you can scale your art to any canvas size. A game changer for
-				generative artists! 🌱</p>
-		</md>
+<h2 id="more-help-for-beginners-✨">More help for beginners ✨</h2>
+<p>Why doesn't this code work? <code>text('Hello!')</code> 🤔</p>
+</md>
 		<div class="minis horiz">
-			<script type="mie/q5" id="small" horiz="">
-function setup() {
-	createCanvas(100, 100);
-
-	rect(20, 20, 60, 60);
-}
-			</script>
-			<script type="mie/q5" id="big" horiz="">
-function setup() {
-	createCanvas(200, 200);
-
-	flexibleCanvas(100);
-	rect(20, 20, 60, 60);
-}
-			</script>
-		</div>
-	</div>
-	<div id="reel5" class="reel">
-		<md id="md5-0">
-			<h2 id="more-help-for-beginners-✨">More help for beginners ✨</h2>
-			<p>Why doesn't this code work? <code>text('Hello!')</code> 🤔</p>
-		</md>
-		<div class="minis horiz">
-			<md id="md5-1">
-				<p>p5's error messages are often too vague, leaving users searching for help. 🙋</p>
-				<pre><code>🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
+			<md id="md4-1">
+<p>p5's error messages are often too vague, leaving users searching for help. 🙋</p>
+<pre><code>🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
 </code></pre>
-			</md>
-			<md id="md5-2">
-				<p>Run q5's <code>askAI()</code> before code that isn't working as expected. 🤖</p>
-				<pre><code>The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
+</md>
+			<md id="md4-2">
+<p>Run q5's <code>askAI()</code> before code that isn't working as expected. 🤖</p>
+<pre><code>The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
 
 text('Hello!', 50, 50);
 </code></pre>
-			</md>
+</md>
 		</div>
 	</div>
 	<div id="reel10" class="reel">
 		<div class="minis horiz">
 			<md id="md10-0">
-				<h2 id="dynamic-🐙">Dynamic 🐙</h2>
-				<p>Q5 instances can be created manually, which makes the <code>setup</code> function optional. Use q5 functions
-					anywhere! 👀</p>
-				<pre><code class="language-js">new Q5();
+<h2 id="dynamic-🐙">Dynamic 🐙</h2>
+<p>Q5 instances can be created manually, which makes the <code>setup</code> function optional. Use q5 functions anywhere with <a href="https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode" target="_blank">top-level global mode</a>! 👀</p>
+<pre><code class="language-js">new Q5();
 
 createCanvas(400, 400);
 </code></pre>
-			</md>
+</md>
 			<md id="md10-1">
-				<h2 id="sound-on-🔊">Sound On 🔊</h2>
-				<p><a href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> is a great library but
-					typical use doesn't require its extensive sound generation and filtering features. 🎛️</p>
-				<p>q5.js includes sound loading, playback, and basic mixing by default. 🎚️</p>
-			</md>
+<h2 id="sound-on-🔊">Sound On 🔊</h2>
+<p>p5.sound is a great library, but typical use doesn't require its extensive sound generation and filtering features. 🎛️</p>
+<p>q5.js includes sound loading, playback, and basic mixing by default. 🎚️</p>
+</md>
 			<md id="md10-2">
-				<h2 id="lightweight-🪶">Lightweight 🪶</h2>
-				<p>p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️</p>
-				<p>q5.js is only 84kb, that's 98% smaller. 🌳</p>
-			</md>
+<h2 id="lightweight-🪶">Lightweight 🪶</h2>
+<p>p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️</p>
+<p>q5.js is only 111kb, that's 98% smaller. 🌳</p>
+<p>For extremely lightweight use, load only the features you need from the <a href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">q5 source folder</a>. 📦</p>
+</md>
 			<md id="md10-3">
-				<h2 id="modular-🧩">Modular 🧩</h2>
-				<p>For extremely lightweight use, load only the features you need from q5's <a
-						href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">source folder</a>. 📦</p>
-				<pre><code class="language-html">&lt;script src="https://q5js.org/src/q5-core.js"&gt;
-&lt;script src="https://q5js.org/src/q5-input.js"&gt;
-</code></pre>
-			</md>
-			<md id="md10-4">
-				<h2 id="frame-your-art-🖼️">Frame your Art 🖼️</h2>
-				<p>The <code>displayMode</code> function lets you customize how your canvas is presented. 📽️</p>
-				<p>Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the
-					"pixelated" rendering preset to make pixel art. 👾</p>
-			</md>
-			<md id="md10-5">
-				<h2 id="webgpu-🚀">WebGPU 🚀</h2>
-				<p>We're working on <a href="https://github.com/q5js/q5.js/tree/main/src#webgpu-canvas"
-						target="_blank">q5-webgpu rendering modules</a> for blazing fast drawing, up to <a
-						href="https://github.com/q5js/q5.js/wiki/Developer-Log#q5js-webgpu-is-16x-faster-than-p5js-webgl--july-25-2024"
-						target="_blank">16x faster</a> than p5! 🏎️</p>
-				<p>Check out the <a href="https://aijs.io/editor?user=quinton-ashley&amp;project=rainbowLoops"
-						target="_blank">rainbow loops</a> and <a
-						href="https://aijs.io/editor?user=quinton-ashley&amp;project=q5-webgpu_transformations"
-						target="_blank">butterfly</a> demos. 🌈</p>
-			</md>
+<h2 id="frame-your-art-🖼️">Frame your Art 🖼️</h2>
+<p>The <code>displayMode</code> function lets you frame your art within the browser window, no CSS skills required! 📽️</p>
+<p>Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾</p>
+</md>
 		</div>
 	</div>
 	<div id="reel11" class="reel">
 		<md id="md11-0">
-			<h2 id="get-started-💻">Get started! 💻</h2>
-			<p>Start coding with the <a href="https://aijs.io/editor?user=AIJS&amp;project=q5.js-Template"
-					target="_blank">q5.js template</a> for the <a href="https://aijs.io" target="_blank">Aijs</a> online code
-				editor. 🖌️</p>
-			<p>Full documentation is coming soon, for now see q5's <a href="https://github.com/q5js/q5.js"
-					target="_blank">GitHub README</a>.</p>
-			<pre><code class="language-html">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;
+<h2 id="no-installation-required-💻">No Installation Required! 💻</h2>
+<p>Start coding with the <a href="https://aijs.io/editor?user=quinton-ashley&amp;project=logoSpin" target="_blank">q5.js template</a> for the <a href="https://aijs.io" target="_blank">Aijs</a> online code editor. 🖌️</p>
+<p>Use q5.js in your own project by adding this line to your HTML file:</p>
+<pre><code class="language-html">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;
 </code></pre>
-			<p>q5 is also available on <a href="https://www.npmjs.com/package/q5" target="_blank">npm</a>. 📦</p>
-		</md>
+<p>Full documentation is coming soon, for now see q5's <a href="https://github.com/q5js/q5.js" target="_blank">GitHub README</a>.</p>
+</md>
 		<md id="md11-1">
-			<h2 id="join-our-community-🤝">Join our community 🤝</h2>
-			<p>The future of creative coding is here! Join us on the <a href="https://discord.gg/QuxQYwGWuB"
-					target="_blank">q5 community Discord</a>. 🗺️</p>
-			<p>If you'd like to work on q5.js, check out our <a
-					href="https://github.com/quinton-ashley/q5.js/?tab=readme-ov-file#contributor-code-of-conduct"
-					target="_blank">Contributor Code of Conduct</a> and <a href="https://github.com/orgs/q5js/projects/1/views/1"
-					target="_blank">Project Planning Board</a>.</p>
-		</md>
+<h2 id="join-our-community-🤝">Join our community 🤝</h2>
+<p>The future of creative coding is here! Join us on the <a href="https://discord.gg/QuxQYwGWuB" target="_blank">q5 community Discord</a>. 🗺️</p>
+<p>If you'd like to work on q5.js, check out our <a href="https://github.com/orgs/q5js/projects/1/views/1" target="_blank">Project Planning Board</a>.</p>
+</md>
 	</div>
 	<div id="reel20" class="reel">
 		<md id="md20-0">
-			<h2 id="credits-🌟">Credits 🌟</h2>
-			<p>This project aims to be the spiritual successor to the invaluable work done by <a href="https://benfry.com"
-					target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a
-					href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com"
-					target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all
-				contributors to these projects.</p>
-			<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a
-					href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain
-				Unlicense license. We forked and significantly extended his brilliant codebase!</p>
-			<p>q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: <a
-					href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a
-					href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.</p>
-		</md>
+<h2 id="credits-🌟">Credits 🌟</h2>
+<p>This project aims to be the spiritual successor to the invaluable work done by <a href="https://benfry.com" target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com" target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all contributors to these projects.</p>
+<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain Unlicense license. We forked and significantly extended his brilliant codebase!</p>
+<p>q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: <a href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.</p>
+</md>
 	</div>
 	<footer>
 		<md id="md100">
-			<p>q5js.org was created by the q5 team. Copyright 2024.</p>
-		</md>
+<p>q5js.org was created by the q5 team. Copyright 2024.</p>
+</md>
 	</footer>
 
 	<script src="../q5.js"></script>
@@ -443,11 +364,19 @@ createCanvas(400, 400);
 
 		Q5.canvasOptions.alpha = true;
 	</script>
+
 	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ace.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ext-language_tools.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ext-beautify.js"></script>
 	<script src="main.js"></script>
 	<script src="/home/mie.js"></script>
-</body>
 
-</html>
+
+
+
+
+
+
+
+
+</body></html>

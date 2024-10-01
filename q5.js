@@ -2759,7 +2759,7 @@ Q5.modules.util = ($, q) => {
 		return ret;
 	};
 
-	$.loadStrings = (path, cb) => $._loadFile(path, cb, 'text');
+	$.loadText = (path, cb) => $._loadFile(path, cb, 'text');
 	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
 	$.loadCSV = (path, cb) => $._loadFile(path, cb, 'csv');
 
@@ -3185,7 +3185,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$._matrixDirty = false;
 
 	// array to store transformation matrices for the render pass
-	$.transformStates = [$._matrix.slice()];
+	let transformStates = [$._matrix.slice()];
 
 	// stack to keep track of transformation matrix indexes
 	$._transformIndexStack = [];
@@ -3302,8 +3302,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	// Function to save the current matrix state if dirty
 	$._saveMatrix = () => {
-		$.transformStates.push($._matrix.slice());
-		$._transformIndex = $.transformStates.length - 1;
+		transformStates.push($._matrix.slice());
+		$._transformIndex = transformStates.length - 1;
 		$._matrixDirty = false;
 	};
 
@@ -3318,7 +3318,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		}
 		// Pop the last matrix index and set it as the current matrix index
 		let idx = $._transformIndexStack.pop();
-		$._matrix = $.transformStates[idx].slice();
+		$._matrix = transformStates[idx].slice();
 		$._transformIndex = idx;
 		$._matrixDirty = false;
 	};
@@ -3368,7 +3368,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			label: 'q5-webgpu',
 			colorAttachments: [
 				{
-					view: ctx.getCurrentTexture().createView(),
+					view: $.ctx.getCurrentTexture().createView(),
 					loadOp: 'clear',
 					storeOp: 'store'
 				}
@@ -3462,24 +3462,32 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$.colorsStack.length = 4;
 		colorIndex = 0;
 		rotation = 0;
-		$.transformStates.length = 1;
+		transformStates.length = 1;
 		$._transformIndexStack.length = 0;
 	};
 };
 
-Q5.webgpu = async function (scope, parent) {
-	if (!scope || scope == 'global') Q5._hasGlobal = true;
+Q5.initWebGPU = async () => {
 	if (!navigator.gpu) {
 		console.warn('q5 WebGPU not supported on this browser!');
+		return false;
+	}
+	if (!Q5.device) {
+		let adapter = await navigator.gpu.requestAdapter();
+		if (!adapter) throw new Error('No appropriate GPUAdapter found.');
+		Q5.device = await adapter.requestDevice();
+	}
+	return true;
+};
+
+Q5.webgpu = async function (scope, parent) {
+	if (!scope || scope == 'global') Q5._hasGlobal = true;
+	if (!(await Q5.initWebGPU())) {
 		let q = new Q5(scope, parent);
 		q.colorMode('rgb', 1);
 		q._beginRender = () => q.translate(q.canvas.hw, q.canvas.hh);
 		return q;
 	}
-	let adapter = await navigator.gpu.requestAdapter();
-	if (!adapter) throw new Error('No appropriate GPUAdapter found.');
-	Q5.device = await adapter.requestDevice();
-
 	return new Q5(scope, parent, 'webgpu');
 };
 Q5.renderers.webgpu.drawing = ($, q) => {

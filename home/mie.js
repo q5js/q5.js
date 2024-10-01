@@ -24,6 +24,7 @@ class MiniEditor {
 		for (let prop of attrs) {
 			props[prop] = script.getAttribute(prop) || true;
 		}
+		Object.assign(this, props);
 
 		let lines = props.lines || 0;
 		if (!lines) {
@@ -227,7 +228,7 @@ mie.load = () => {
 		console.log('mie will run without the ace editor, which was not loaded.');
 		mie.editorDisabled = true;
 	}
-	if (mie.autoLoad !== false) mie.loadMinis();
+	mie.loadMinis();
 	if (mie.ready) mie.ready();
 };
 
@@ -262,7 +263,7 @@ mie.lang.p5.play = function (code) {
 		with (p) eval(code);
 	}
 	this.previewElem.innerHTML = ''; // avoid duplicate canvases
-	return new p5(s, this.previewElem);
+	return new p5(s, this.previewElem, this.renderer);
 };
 
 mie.lang.p5.remove = function () {
