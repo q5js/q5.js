@@ -1,12 +1,8 @@
 Q5.renderers.webgpu.drawing = ($, q) => {
-	let c = $.canvas;
-
-	let drawStack = $.drawStack;
-	let colorsStack = $.colorsStack;
-
-	let verticesStack = [];
-
-	let colorIndex, colorsLayout;
+	let c = $.canvas,
+		drawStack = $.drawStack,
+		verticesStack = [],
+		colorIndex;
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'drawingVertexShader',
@@ -52,22 +48,6 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 `
 	});
 
-	colorsLayout = Q5.device.createBindGroupLayout({
-		label: 'colorsLayout',
-		entries: [
-			{
-				binding: 0,
-				visibility: GPUShaderStage.FRAGMENT,
-				buffer: {
-					type: 'read-only-storage',
-					hasDynamicOffset: false
-				}
-			}
-		]
-	});
-
-	$.bindGroupLayouts.push(colorsLayout);
-
 	let vertexBufferLayout = {
 		arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
 		attributes: [
@@ -77,97 +57,28 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 		]
 	};
 
-	// prettier-ignore
-	let blendFactors = [
-			'zero',                // 0
-			'one',                 // 1
-			'src-alpha',           // 2
-			'one-minus-src-alpha', // 3
-			'dst',                 // 4
-			'dst-alpha',           // 5
-			'one-minus-dst-alpha', // 6
-			'one-minus-src'        // 7
-	];
-	let blendOps = [
-		'add', // 0
-		'subtract', // 1
-		'reverse-subtract', // 2
-		'min', // 3
-		'max' // 4
-	];
-
-	const blendModes = {
-		normal: [2, 3, 0, 2, 3, 0],
-		lighter: [2, 1, 0, 2, 1, 0],
-		subtract: [2, 1, 2, 2, 1, 2],
-		multiply: [4, 0, 0, 5, 0, 0],
-		screen: [1, 3, 0, 1, 3, 0],
-		darken: [1, 3, 3, 1, 3, 3],
-		lighten: [1, 3, 4, 1, 3, 4],
-		overlay: [2, 3, 0, 2, 3, 0],
-		hard_light: [2, 3, 0, 2, 3, 0],
-		soft_light: [2, 3, 0, 2, 3, 0],
-		difference: [2, 3, 2, 2, 3, 2],
-		exclusion: [2, 3, 0, 2, 3, 0],
-		color_dodge: [1, 7, 0, 1, 7, 0],
-		color_burn: [6, 1, 0, 6, 1, 0],
-		linear_dodge: [2, 1, 0, 2, 1, 0],
-		linear_burn: [2, 7, 1, 2, 7, 1],
-		vivid_light: [2, 7, 0, 2, 7, 0],
-		pin_light: [2, 7, 0, 2, 7, 0],
-		hard_mix: [2, 7, 0, 2, 7, 0]
-	};
-
-	$.blendConfigs = {};
-
-	for (const [name, mode] of Object.entries(blendModes)) {
-		$.blendConfigs[name] = {
-			color: {
-				srcFactor: blendFactors[mode[0]],
-				dstFactor: blendFactors[mode[1]],
-				operation: blendOps[mode[2]]
-			},
-			alpha: {
-				srcFactor: blendFactors[mode[3]],
-				dstFactor: blendFactors[mode[4]],
-				operation: blendOps[mode[5]]
-			}
-		};
-	}
-
-	$._blendMode = 'normal';
-	$.blendMode = (mode) => {
-		if (mode == $._blendMode) return;
-		if (mode == 'source-over') mode = 'normal';
-		mode = mode.toLowerCase().replace(/[ -]/g, '_');
-		$._blendMode = mode;
-		$.pipelines[0] = $._createPipeline($.blendConfigs[mode]);
-	};
-
 	let pipelineLayout = Q5.device.createPipelineLayout({
 		label: 'drawingPipelineLayout',
 		bindGroupLayouts: $.bindGroupLayouts
 	});
 
-	$._createPipeline = (blendConfig) => {
-		return Q5.device.createRenderPipeline({
-			label: 'drawingPipeline',
-			layout: pipelineLayout,
-			vertex: {
-				module: vertexShader,
-				entryPoint: 'vertexMain',
-				buffers: [vertexBufferLayout]
-			},
-			fragment: {
-				module: fragmentShader,
-				entryPoint: 'fragmentMain',
-				targets: [{ format: 'bgra8unorm', blend: blendConfig }]
-			},
-			primitive: { topology: 'triangle-list' }
-		});
+	$._pipelineConfigs[0] = {
+		label: 'drawingPipeline',
+		layout: pipelineLayout,
+		vertex: {
+			module: vertexShader,
+			entryPoint: 'vertexMain',
+			buffers: [vertexBufferLayout]
+		},
+		fragment: {
+			module: fragmentShader,
+			entryPoint: 'fragmentMain',
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+		},
+		primitive: { topology: 'triangle-list' }
 	};
 
-	$.pipelines[0] = $._createPipeline($.blendConfigs.normal);
+	$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
 
 	let shapeVertices;
 
@@ -238,21 +149,71 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 
 	$.rect = (x, y, w, h) => {
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
+		let ci, ti;
 
-		let ci = colorIndex ?? $._fillIndex;
-		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._transformIndex;
-		// two triangles make a rectangle
-		// prettier-ignore
-		verticesStack.push(
-			l, t, ci, ti,
-			r, t, ci, ti,
-			l, b, ci, ti,
-			r, t, ci, ti,
-			l, b, ci, ti,
-			r, b, ci, ti
-		);
-		drawStack.push(0, 6);
+		if ($._doFill) {
+			ci = colorIndex ?? $._fillIndex;
+			if ($._matrixDirty) $._saveMatrix();
+			ti = $._transformIndex;
+			// two triangles make a rectangle
+			// prettier-ignore
+			verticesStack.push(
+				l, t, ci, ti,
+				r, t, ci, ti,
+				l, b, ci, ti,
+				r, t, ci, ti,
+				l, b, ci, ti,
+				r, b, ci, ti
+			);
+			drawStack.push(0, 6);
+		}
+
+		if ($._doStroke) {
+			ci = $._strokeIndex;
+			let sw = $._strokeWeight / 2;
+			// Outer rectangle coordinates
+			let to = t - sw,
+				bo = b + sw,
+				lo = l - sw,
+				ro = r + sw;
+
+			// Inner rectangle coordinates
+			let ti = t + sw,
+				bi = b - sw,
+				li = l + sw,
+				ri = r - sw;
+
+			// Create vertices for the stroke as a shape
+			// prettier-ignore
+			verticesStack.push(
+				lo, to, ci, ti, // Top side
+				ro, to, ci, ti,
+				lo, ti, ci, ti,
+				lo, ti, ci, ti,
+				ro, to, ci, ti,
+				ro, ti, ci, ti,
+				ro, to, ci, ti, // right side
+				ro, bo, ci, ti,
+				ri, to, ci, ti,
+				ri, to, ci, ti,
+				ro, bo, ci, ti,
+				ri, bo, ci, ti,
+				ro, bo, ci, ti, // Bottom side
+				lo, bo, ci, ti,
+				ro, bi, ci, ti,
+				ro, bi, ci, ti,
+				lo, bo, ci, ti,
+				lo, bi, ci, ti,
+				lo, bo, ci, ti, // Left side
+				lo, to, ci, ti,
+				li, bo, ci, ti,
+				li, bo, ci, ti,
+				lo, to, ci, ti,
+				li, to, ci, ti
+			);
+
+			drawStack.push(0, 24);
+		}
 	};
 
 	$.square = (x, y, s) => $.rect(x, y, s, s);
@@ -284,6 +245,7 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 	$.background = (r, g, b, a) => {
 		$.push();
 		$.resetMatrix();
+		$._doStroke = false;
 		if (r.src) {
 			let og = $._imageMode;
 			$._imageMode = 'corner';
@@ -297,6 +259,7 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 			$._rectMode = og;
 		}
 		$.pop();
+		if (!$._fillSet) $._fillIndex = 1;
 	};
 
 	/**
@@ -368,41 +331,18 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
 
 	$._hooks.preRender.push(() => {
-		$.pass.setPipeline($.pipelines[0]);
-
-		const vertices = new Float32Array(verticesStack);
+		$.pass.setPipeline($._pipelines[0]);
 
 		const vertexBuffer = Q5.device.createBuffer({
-			size: vertices.byteLength,
-			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+			size: verticesStack.length * 4,
+			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
 		});
 
-		Q5.device.queue.writeBuffer(vertexBuffer, 0, vertices);
+		new Float32Array(vertexBuffer.getMappedRange()).set(verticesStack);
+		vertexBuffer.unmap();
+
 		$.pass.setVertexBuffer(0, vertexBuffer);
-
-		const colorsBuffer = Q5.device.createBuffer({
-			size: colorsStack.length * 4,
-			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-		});
-
-		Q5.device.queue.writeBuffer(colorsBuffer, 0, new Float32Array(colorsStack));
-
-		$._colorsBindGroup = Q5.device.createBindGroup({
-			layout: colorsLayout,
-			entries: [
-				{
-					binding: 0,
-					resource: {
-						buffer: colorsBuffer,
-						offset: 0,
-						size: colorsStack.length * 4
-					}
-				}
-			]
-		});
-
-		// set the bind group once before rendering
-		$.pass.setBindGroup(1, $._colorsBindGroup);
 	});
 
 	$._hooks.postRender.push(() => {

@@ -55,8 +55,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	};
 
 	$.fill = function (c) {
-		$._doFill = true;
-		$._fillSet = true;
+		$._doFill = $._fillSet = true;
 		if (Q5.Color) {
 			if (!c._q5Color) {
 				if (typeof c != 'string') c = $.color(...arguments);
@@ -68,8 +67,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	};
 	$.noFill = () => ($._doFill = false);
 	$.stroke = function (c) {
-		$._doStroke = true;
-		$._strokeSet = true;
+		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
 			if (!c._q5Color) {
 				if (typeof c != 'string') c = $.color(...arguments);

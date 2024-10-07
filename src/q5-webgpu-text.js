@@ -93,9 +93,68 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 `
 	});
 
+	let textBindGroupLayout = Q5.device.createBindGroupLayout({
+		label: 'MSDF text group layout',
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+				buffer: { type: 'read-only-storage' }
+			},
+			{
+				binding: 1,
+				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+				buffer: { type: 'read-only-storage' }
+			}
+		]
+	});
+
+	let fontSampler = Q5.device.createSampler({
+		minFilter: 'linear',
+		magFilter: 'linear',
+		mipmapFilter: 'linear',
+		maxAnisotropy: 16
+	});
+	let fontBindGroupLayout = Q5.device.createBindGroupLayout({
+		label: 'MSDF font group layout',
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.FRAGMENT,
+				texture: {}
+			},
+			{
+				binding: 1,
+				visibility: GPUShaderStage.FRAGMENT,
+				sampler: {}
+			},
+			{
+				binding: 2,
+				visibility: GPUShaderStage.VERTEX,
+				buffer: { type: 'read-only-storage' }
+			}
+		]
+	});
+
+	let fontPipelineLayout = Q5.device.createPipelineLayout({
+		bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
+	});
+
+	$._pipelineConfigs[2] = {
+		label: 'msdf font pipeline',
+		layout: fontPipelineLayout,
+		vertex: { module: textShader, entryPoint: 'vertexMain' },
+		fragment: {
+			module: textShader,
+			entryPoint: 'fragmentMain',
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+		},
+		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' }
+	};
+	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
+
 	class MsdfFont {
-		constructor(pipeline, bindGroup, lineHeight, chars, kernings) {
-			this.pipeline = pipeline;
+		constructor(bindGroup, lineHeight, chars, kernings) {
 			this.bindGroup = bindGroup;
 			this.lineHeight = lineHeight;
 			this.chars = chars;
@@ -120,22 +179,6 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			return char.xadvance;
 		}
 	}
-
-	let textBindGroupLayout = Q5.device.createBindGroupLayout({
-		label: 'MSDF text group layout',
-		entries: [
-			{
-				binding: 0,
-				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-				buffer: { type: 'read-only-storage' }
-			},
-			{
-				binding: 1,
-				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-				buffer: { type: 'read-only-storage' }
-			}
-		]
-	});
 
 	let fonts = {};
 
@@ -199,74 +242,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		}
 		charsBuffer.unmap();
 
-		let fontSampler = Q5.device.createSampler({
-			minFilter: 'linear',
-			magFilter: 'linear',
-			mipmapFilter: 'linear',
-			maxAnisotropy: 16
-		});
-		let fontBindGroupLayout = Q5.device.createBindGroupLayout({
-			label: 'MSDF font group layout',
-			entries: [
-				{
-					binding: 0,
-					visibility: GPUShaderStage.FRAGMENT,
-					texture: {}
-				},
-				{
-					binding: 1,
-					visibility: GPUShaderStage.FRAGMENT,
-					sampler: {}
-				},
-				{
-					binding: 2,
-					visibility: GPUShaderStage.VERTEX,
-					buffer: { type: 'read-only-storage' }
-				}
-			]
-		});
-		let fontPipeline = Q5.device.createRenderPipeline({
-			label: 'msdf font pipeline',
-			layout: Q5.device.createPipelineLayout({
-				bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
-			}),
-			vertex: {
-				module: textShader,
-				entryPoint: 'vertexMain'
-			},
-			fragment: {
-				module: textShader,
-				entryPoint: 'fragmentMain',
-				targets: [
-					{
-						format: 'bgra8unorm',
-						blend: {
-							color: {
-								srcFactor: 'src-alpha',
-								dstFactor: 'one-minus-src-alpha'
-							},
-							alpha: {
-								srcFactor: 'one',
-								dstFactor: 'one'
-							}
-						}
-					}
-				]
-			},
-			primitive: {
-				topology: 'triangle-strip',
-				stripIndexFormat: 'uint32'
-			}
-		});
-
 		let fontBindGroup = Q5.device.createBindGroup({
 			label: 'msdf font bind group',
 			layout: fontBindGroupLayout,
 			entries: [
-				{
-					binding: 0,
-					resource: texture.createView()
-				},
+				{ binding: 0, resource: texture.createView() },
 				{ binding: 1, resource: fontSampler },
 				{ binding: 2, resource: { buffer: charsBuffer } }
 			]
@@ -284,10 +264,9 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			}
 		}
 
-		$._font = new MsdfFont(fontPipeline, fontBindGroup, atlas.common.lineHeight, chars, kernings);
+		$._font = new MsdfFont(fontBindGroup, atlas.common.lineHeight, chars, kernings);
 
 		fonts[fontName] = $._font;
-		$.pipelines[2] = $._font.pipeline;
 
 		q._preloadCount--;
 
@@ -320,7 +299,6 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		// replay the change of font in the draw stack
 		$.drawStack.push(-1, () => {
 			$._font = fonts[fontName];
-			$.pipelines[2] = $._font.pipeline;
 		});
 	};
 	$.textSize = (size) => {
@@ -488,7 +466,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		text[1] = -y;
 		text[2] = $._textSize / 44;
 		text[3] = $._transformIndex;
-		text[4] = $._fillIndex;
+		text[4] = $._fillSet ? $._fillIndex : 0;
 		text[5] = $._strokeIndex;
 
 		$._textStack.push(text);
@@ -562,7 +540,6 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 		// Create a single buffer for all text data
 		let charBuffer = Q5.device.createBuffer({
-			label: 'charBuffer',
 			size: totalTextSize,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
@@ -571,9 +548,9 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		// Copy all text data into the buffer
 		let textArray = new Float32Array(charBuffer.getMappedRange());
 		let o = 0;
-		for (let array of $._charStack) {
-			textArray.set(array, o);
-			o += array.length;
+		for (let arr of $._charStack) {
+			textArray.set(arr, o);
+			o += arr.length;
 		}
 		charBuffer.unmap();
 
@@ -602,14 +579,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			label: 'msdf text bind group',
 			layout: textBindGroupLayout,
 			entries: [
-				{
-					binding: 0,
-					resource: { buffer: charBuffer }
-				},
-				{
-					binding: 1,
-					resource: { buffer: textBuffer }
-				}
+				{ binding: 0, resource: { buffer: charBuffer } },
+				{ binding: 1, resource: { buffer: textBuffer } }
 			]
 		});
 	});

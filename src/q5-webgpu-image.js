@@ -77,7 +77,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		bindGroupLayouts: [...$.bindGroupLayouts, textureLayout]
 	});
 
-	$.pipelines[1] = Q5.device.createRenderPipeline({
+	$._pipelineConfigs[1] = {
 		label: 'imagePipeline',
 		layout: pipelineLayout,
 		vertex: {
@@ -88,28 +88,12 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		fragment: {
 			module: fragmentShader,
 			entryPoint: 'fragmentMain',
-			targets: [
-				{
-					format: 'bgra8unorm',
-					blend: $.blendConfigs?.normal || {
-						color: {
-							srcFactor: 'src-alpha',
-							dstFactor: 'one-minus-src-alpha',
-							operation: 'add'
-						},
-						alpha: {
-							srcFactor: 'src-alpha',
-							dstFactor: 'one-minus-src-alpha',
-							operation: 'add'
-						}
-					}
-				}
-			]
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: {
-			topology: 'triangle-list'
-		}
-	});
+		primitive: { topology: 'triangle-list' }
+	};
+
+	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
 
 	let sampler = Q5.device.createSampler({
 		magFilter: 'linear',
@@ -134,7 +118,11 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 
 		Q5.device.queue.copyExternalImageToTexture(
 			{ source: img },
-			{ texture, colorSpace: $.canvas.colorSpace },
+			{
+				texture,
+				colorSpace: $.canvas.colorSpace
+				// premultipliedAlpha: true
+			},
 			textureSize
 		);
 
@@ -203,17 +191,17 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		if (!$._textureBindGroups.length) return;
 
 		// Switch to image pipeline
-		$.pass.setPipeline($.pipelines[1]);
-
-		// Create a vertex buffer for the image quads
-		const vertices = new Float32Array(verticesStack);
+		$.pass.setPipeline($._pipelines[1]);
 
 		const vertexBuffer = Q5.device.createBuffer({
-			size: vertices.byteLength,
-			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+			size: verticesStack.length * 4,
+			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
 		});
 
-		Q5.device.queue.writeBuffer(vertexBuffer, 0, vertices);
+		new Float32Array(vertexBuffer.getMappedRange()).set(vertices);
+		vertexBuffer.unmap();
+
 		$.pass.setVertexBuffer(1, vertexBuffer);
 	});
 

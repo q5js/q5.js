@@ -1,7 +1,7 @@
 {
 	"name": "q5",
-	"version": "2.5.5",
-	"description": "A sequel to p5.js that's smaller and faster",
+	"version": "2.5.6",
+	"description": "A sequel to p5.js that's optimized for interactive art",
 	"author": "quinton-ashley",
 	"contributors": [
 		"Tezumie",

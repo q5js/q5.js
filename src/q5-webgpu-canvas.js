@@ -11,18 +11,23 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	c.width = $.width = 500;
 	c.height = $.height = 500;
 
-	if ($.colorMode) $.colorMode('rgb', 'float');
+	if ($.colorMode) $.colorMode('rgb', 1);
 
-	let pass;
+	let pass, colorsLayout;
 
-	$.pipelines = [];
+	$._pipelineConfigs = [];
+	$._pipelines = [];
 
 	// local variables used for slightly better performance
 	// stores pipeline shifts and vertex counts/image indices
 	let drawStack = ($.drawStack = []);
 
 	// colors used for each draw call
-	let colorsStack = ($.colorsStack = [1, 1, 1, 1]);
+	// prettier-ignore
+	let colorsStack = ($.colorsStack = [
+		0, 0, 0, 1, // black
+		1, 1, 1, 1 // white
+	]);
 
 	$._transformLayout = Q5.device.createBindGroupLayout({
 		label: 'transformLayout',
@@ -46,7 +51,21 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		]
 	});
 
-	$.bindGroupLayouts = [$._transformLayout];
+	colorsLayout = Q5.device.createBindGroupLayout({
+		label: 'colorsLayout',
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.FRAGMENT,
+				buffer: {
+					type: 'read-only-storage',
+					hasDynamicOffset: false
+				}
+			}
+		]
+	});
+
+	$.bindGroupLayouts = [$._transformLayout, colorsLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
 		size: 8, // Size of two floats
@@ -58,6 +77,9 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		opt.format ??= navigator.gpu.getPreferredCanvasFormat();
 		opt.device ??= Q5.device;
+
+		// needed for blend modes but couldn't get it working
+		// opt.alphaMode = 'premultiplied';
 
 		$.ctx.configure(opt);
 
@@ -71,7 +93,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	// current color index, used to associate a vertex with a color
-	let colorIndex = 0;
+	let colorIndex = 1;
 	let addColor = (r, g, b, a = 1) => {
 		if (typeof r == 'string') r = $.color(r);
 		else if (b == undefined) {
@@ -84,16 +106,17 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		colorIndex++;
 	};
 
-	$._fillIndex = $._strokeIndex = -1;
+	$._fillIndex = $._strokeIndex = 0;
+	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
-		$._doFill = true;
+		$._doFill = $._fillSet = true;
 		$._fillIndex = colorIndex;
 	};
 	$.stroke = (r, g, b, a) => {
 		addColor(r, g, b, a);
-		$._doStroke = true;
+		$._doStroke = $._strokeSet = true;
 		$._strokeIndex = colorIndex;
 	};
 
@@ -295,6 +318,68 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		return [l, r, t, b];
 	};
 
+	// prettier-ignore
+	let blendFactors = [
+			'zero',                // 0
+			'one',                 // 1
+			'src-alpha',           // 2
+			'one-minus-src-alpha', // 3
+			'dst',                 // 4
+			'dst-alpha',           // 5
+			'one-minus-dst-alpha', // 6
+			'one-minus-src'        // 7
+	];
+	let blendOps = [
+		'add', // 0
+		'subtract', // 1
+		'reverse-subtract', // 2
+		'min', // 3
+		'max' // 4
+	];
+
+	const blendModes = {
+		normal: [2, 3, 0, 2, 3, 0],
+		// destination_over: [6, 1, 0, 6, 1, 0],
+		additive: [1, 1, 0, 1, 1, 0]
+		// source_in: [5, 0, 0, 5, 0, 0],
+		// destination_in: [0, 2, 0, 0, 2, 0],
+		// source_out: [6, 0, 0, 6, 0, 0],
+		// destination_out: [0, 3, 0, 0, 3, 0],
+		// source_atop: [5, 3, 0, 5, 3, 0],
+		// destination_atop: [6, 2, 0, 6, 2, 0]
+	};
+
+	$.blendConfigs = {};
+
+	for (const [name, mode] of Object.entries(blendModes)) {
+		$.blendConfigs[name] = {
+			color: {
+				srcFactor: blendFactors[mode[0]],
+				dstFactor: blendFactors[mode[1]],
+				operation: blendOps[mode[2]]
+			},
+			alpha: {
+				srcFactor: blendFactors[mode[3]],
+				dstFactor: blendFactors[mode[4]],
+				operation: blendOps[mode[5]]
+			}
+		};
+	}
+
+	$._blendMode = 'normal';
+	$.blendMode = (mode) => {
+		if (mode == $._blendMode) return;
+		if (mode == 'source-over') mode = 'normal';
+		if (mode == 'lighter') mode = 'additive';
+		mode = mode.toLowerCase().replace(/[ -]/g, '_');
+		$._blendMode = mode;
+
+		for (let i = 0; i < $._pipelines.length; i++) {
+			$._pipelineConfigs[i].fragment.targets[0].blend = $.blendConfigs[mode];
+			$._pipelines[i] = Q5.device.createRenderPipeline($._pipelineConfigs[i]);
+		}
+	};
+
 	$.clear = () => {};
 
 	$._beginRender = () => {
@@ -315,32 +400,42 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$._render = () => {
 		if (transformStates.length > 1 || !$._transformBindGroup) {
 			let transformBuffer = Q5.device.createBuffer({
-				size: transformStates.length * 64, // Size of 16 floats
-				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+				size: transformStates.length * 64, // 64 is the size of 16 floats
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+				mappedAtCreation: true
 			});
 
-			Q5.device.queue.writeBuffer(transformBuffer, 0, new Float32Array(transformStates.flat()));
+			new Float32Array(transformBuffer.getMappedRange()).set(transformStates.flat());
+
+			transformBuffer.unmap();
 
 			$._transformBindGroup = Q5.device.createBindGroup({
 				layout: $._transformLayout,
 				entries: [
-					{
-						binding: 0,
-						resource: {
-							buffer: uniformBuffer
-						}
-					},
-					{
-						binding: 1,
-						resource: {
-							buffer: transformBuffer
-						}
-					}
+					{ binding: 0, resource: { buffer: uniformBuffer } },
+					{ binding: 1, resource: { buffer: transformBuffer } }
 				]
 			});
 		}
 
 		pass.setBindGroup(0, $._transformBindGroup);
+
+		const colorsBuffer = Q5.device.createBuffer({
+			size: colorsStack.length * 4,
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
+		});
+
+		new Float32Array(colorsBuffer.getMappedRange()).set(colorsStack);
+
+		colorsBuffer.unmap();
+
+		$._colorsBindGroup = Q5.device.createBindGroup({
+			layout: colorsLayout,
+			entries: [{ binding: 0, resource: { buffer: colorsBuffer } }]
+		});
+
+		$.pass.setBindGroup(1, $._colorsBindGroup);
 
 		for (let m of $._hooks.preRender) m();
 
@@ -360,7 +455,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
-				pass.setPipeline($.pipelines[curPipelineIndex]);
+				pass.setPipeline($._pipelines[curPipelineIndex]);
 			}
 
 			if (curPipelineIndex == 0) {
@@ -395,8 +490,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		// clear the stacks for the next frame
 		$.drawStack.length = 0;
-		$.colorsStack.length = 4;
-		colorIndex = 0;
+		$.colorsStack.length = 8;
+		colorIndex = 1;
 		rotation = 0;
 		transformStates.length = 1;
 		$._transformIndexStack.length = 0;
