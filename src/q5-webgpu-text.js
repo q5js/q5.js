@@ -7,35 +7,35 @@ const pos = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 
 struct VertexInput {
 	@builtin(vertex_index) vertex : u32,
-	@builtin(instance_index) instance : u32,
-};
+	@builtin(instance_index) instance : u32
+}
 struct VertexOutput {
 	@builtin(position) position : vec4f,
-	@location(0) texcoord : vec2f,
-	@location(1) colorIndex : f32
-};
+	@location(0) texCoord : vec2f,
+	@location(1) fillColor : vec4f
+}
 struct Char {
 	texOffset: vec2f,
 	texExtent: vec2f,
 	size: vec2f,
 	offset: vec2f,
-};
+}
 struct Text {
 	pos: vec2f,
 	scale: f32,
 	transformIndex: f32,
 	fillIndex: f32,
 	strokeIndex: f32
-};
+}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
-};
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 
-@group(1) @binding(0) var<storage, read> colors : array<vec4f>;
+@group(1) @binding(0) var<storage> colors : array<vec4f>;
 
 @group(2) @binding(0) var fontTexture: texture_2d<f32>;
 @group(2) @binding(1) var fontSampler: sampler;
@@ -61,13 +61,13 @@ fn vertexMain(input : VertexInput) -> VertexOutput {
 
 	var output : VertexOutput;
 	output.position = vert;
-	output.texcoord = (pos[input.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
-	output.colorIndex = text.fillIndex;
+	output.texCoord = (pos[input.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
+	output.fillColor = colors[i32(text.fillIndex)];
 	return output;
 }
 
-fn sampleMsdf(texcoord: vec2f) -> f32 {
-	let c = textureSample(fontTexture, fontSampler, texcoord);
+fn sampleMsdf(texCoord: vec2f) -> f32 {
+	let c = textureSample(fontTexture, fontSampler, texCoord);
 	return max(min(c.r, c.g), min(max(c.r, c.g), c.b));
 }
 
@@ -77,18 +77,17 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	// uses the default which is 4.
 	let pxRange = 4.0;
 	let sz = vec2f(textureDimensions(fontTexture, 0));
-	let dx = sz.x*length(vec2f(dpdxFine(input.texcoord.x), dpdyFine(input.texcoord.x)));
-	let dy = sz.y*length(vec2f(dpdxFine(input.texcoord.y), dpdyFine(input.texcoord.y)));
+	let dx = sz.x*length(vec2f(dpdxFine(input.texCoord.x), dpdyFine(input.texCoord.x)));
+	let dy = sz.y*length(vec2f(dpdxFine(input.texCoord.y), dpdyFine(input.texCoord.y)));
 	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
-	let sigDist = sampleMsdf(input.texcoord) - 0.5;
+	let sigDist = sampleMsdf(input.texCoord) - 0.5;
 	let pxDist = sigDist * toPixels;
 	let edgeWidth = 0.5;
 	let alpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
 	if (alpha < 0.001) {
 		discard;
 	}
-	let fillColor = colors[i32(input.colorIndex)];
-	return vec4f(fillColor.rgb, fillColor.a * alpha);
+	return vec4f(input.fillColor.rgb, input.fillColor.a * alpha);
 }
 `
 	});
@@ -180,6 +179,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		}
 	}
 
+	$._fonts = [];
 	let fonts = {};
 
 	let createFont = async (fontJsonUrl, fontName, cb) => {
@@ -266,6 +266,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 		$._font = new MsdfFont(fontBindGroup, atlas.common.lineHeight, chars, kernings);
 
+		$._font.index = $._fonts.length;
+		$._fonts.push($._font);
 		fonts[fontName] = $._font;
 
 		q._preloadCount--;
@@ -295,11 +297,6 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 	$.textFont = (fontName) => {
 		$._font = fonts[fontName];
-
-		// replay the change of font in the draw stack
-		$.drawStack.push(-1, () => {
-			$._font = fonts[fontName];
-		});
 	};
 	$.textSize = (size) => {
 		$._textSize = size;
@@ -412,7 +409,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			}
 		}
 
-		let charsData = new Float32Array((str.length - spaces) * 4);
+		let charsData = [];
 
 		let ta = $._textAlign,
 			tb = $._textBaseline,
@@ -458,7 +455,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		}
 		$._charStack.push(charsData);
 
-		let text = new Float32Array(6);
+		let text = [];
 
 		if ($._matrixDirty) $._saveMatrix();
 
@@ -470,7 +467,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		text[5] = $._strokeIndex;
 
 		$._textStack.push(text);
-		$.drawStack.push(2, measurements.printedCharCount);
+		$.drawStack.push(2, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {
@@ -483,11 +480,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 		if ($._doFill) {
 			let fi = $._fillIndex * 4;
-			g.fill(colorsStack.slice(fi, fi + 4));
+			g.fill(colorStack.slice(fi, fi + 4));
 		}
 		if ($._doStroke) {
 			let si = $._strokeIndex * 4;
-			g.stroke(colorsStack.slice(si, si + 4));
+			g.stroke(colorStack.slice(si, si + 4));
 		}
 
 		let img = g.createTextImage(str, w, h);
@@ -538,7 +535,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			totalTextSize += charsData.length * 4;
 		}
 
-		// Create a single buffer for all text data
+		// Create a single buffer for all char data
 		let charBuffer = Q5.device.createBuffer({
 			size: totalTextSize,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -546,12 +543,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		});
 
 		// Copy all text data into the buffer
-		let textArray = new Float32Array(charBuffer.getMappedRange());
-		let o = 0;
-		for (let arr of $._charStack) {
-			textArray.set(arr, o);
-			o += arr.length;
-		}
+		new Float32Array(charBuffer.getMappedRange()).set($._charStack.flat());
 		charBuffer.unmap();
 
 		// Calculate total buffer size for metadata
@@ -566,12 +558,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		});
 
 		// Copy all metadata into the buffer
-		let metadataArray = new Float32Array(textBuffer.getMappedRange());
-		o = 0;
-		for (let array of $._textStack) {
-			metadataArray.set(array, o);
-			o += array.length;
-		}
+		new Float32Array(textBuffer.getMappedRange()).set($._textStack.flat());
 		textBuffer.unmap();
 
 		// Create a single bind group for the text buffer and metadata buffer

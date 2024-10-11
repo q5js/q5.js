@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.5
+ * @version 2.6
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -3075,7 +3075,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 1);
 
-	let pass, colorsLayout;
+	let pass,
+		mainView,
+		colorsLayout,
+		colorIndex = 1,
+		colorStackIndex = 8;
 
 	$._pipelineConfigs = [];
 	$._pipelines = [];
@@ -3085,8 +3089,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	let drawStack = ($.drawStack = []);
 
 	// colors used for each draw call
+
+	let colorStack = ($.colorStack = new Float32Array(1e6));
+
 	// prettier-ignore
-	let colorsStack = ($.colorsStack = [
+	colorStack.set([
 		0, 0, 0, 1, // black
 		1, 1, 1, 1 // white
 	]);
@@ -3118,7 +3125,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		entries: [
 			{
 				binding: 0,
-				visibility: GPUShaderStage.FRAGMENT,
+				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
 				buffer: {
 					type: 'read-only-storage',
 					hasDynamicOffset: false
@@ -3134,28 +3141,49 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 	});
 
+	let createMainView = () => {
+		mainView = Q5.device
+			.createTexture({
+				size: [$.canvas.width, $.canvas.height],
+				sampleCount: 4,
+				format: 'bgra8unorm',
+				usage: GPUTextureUsage.RENDER_ATTACHMENT
+			})
+			.createView();
+	};
+
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
 
 		opt.format ??= navigator.gpu.getPreferredCanvasFormat();
 		opt.device ??= Q5.device;
 
-		// needed for blend modes but couldn't get it working
+		// needed for other blend modes but couldn't get it working
 		// opt.alphaMode = 'premultiplied';
 
 		$.ctx.configure(opt);
 
 		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
 
+		createMainView();
+
 		return c;
 	};
 
 	$._resizeCanvas = (w, h) => {
 		$._setCanvasSize(w, h);
+		createMainView();
+	};
+
+	$.pixelDensity = (v) => {
+		if (!v || v == $._pixelDensity) return $._pixelDensity;
+		$._pixelDensity = v;
+		$._setCanvasSize(c.w, c.h);
+		createMainView();
+		return v;
 	};
 
 	// current color index, used to associate a vertex with a color
-	let colorIndex = 1;
 	let addColor = (r, g, b, a = 1) => {
 		if (typeof r == 'string') r = $.color(r);
 		else if (b == undefined) {
@@ -3163,8 +3191,21 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			a = g ?? 1;
 			g = b = r;
 		}
-		if (r._q5Color) colorsStack.push(r.r, r.g, r.b, r.a);
-		else colorsStack.push(r, g, b, a);
+		if (r._q5Color) {
+			a = r.a;
+			b = r.b;
+			g = r.g;
+			r = r.r;
+		}
+
+		let cs = colorStack,
+			i = colorStackIndex;
+		cs[i++] = r;
+		cs[i++] = g;
+		cs[i++] = b;
+		cs[i++] = a;
+		colorStackIndex = i;
+
 		colorIndex++;
 	};
 
@@ -3451,7 +3492,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			label: 'q5-webgpu',
 			colorAttachments: [
 				{
-					view: $.ctx.getCurrentTexture().createView(),
+					view: mainView,
+					resolveTarget: $.ctx.getCurrentTexture().createView(),
 					loadOp: 'clear',
 					storeOp: 'store'
 				}
@@ -3468,7 +3510,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			});
 
 			new Float32Array(transformBuffer.getMappedRange()).set(transformStates.flat());
-
 			transformBuffer.unmap();
 
 			$._transformBindGroup = Q5.device.createBindGroup({
@@ -3482,14 +3523,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		pass.setBindGroup(0, $._transformBindGroup);
 
-		const colorsBuffer = Q5.device.createBuffer({
-			size: colorsStack.length * 4,
+		let colorsBuffer = Q5.device.createBuffer({
+			size: colorStackIndex * 4,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
 
-		new Float32Array(colorsBuffer.getMappedRange()).set(colorsStack);
-
+		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
 
 		$._colorsBindGroup = Q5.device.createBindGroup({
@@ -3501,19 +3541,15 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		for (let m of $._hooks.preRender) m();
 
-		let drawVertOffset = 0;
-		let imageVertOffset = 0;
-		let textCharOffset = 0;
-		let curPipelineIndex = -1;
-		let curTextureIndex = -1;
+		let drawVertOffset = 0,
+			imageVertOffset = 0,
+			textCharOffset = 0,
+			curPipelineIndex = -1,
+			curTextureIndex = -1;
 
-		for (let i = 0; i < drawStack.length; i += 2) {
+		for (let i = 0; i < drawStack.length; i += 3) {
 			let v = drawStack[i + 1];
-
-			if (drawStack[i] == -1) {
-				v();
-				continue;
-			}
+			let o = drawStack[i + 2];
 
 			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
@@ -3522,8 +3558,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 			if (curPipelineIndex == 0) {
 				// v is the number of vertices
-				pass.draw(v, 1, drawVertOffset);
-				drawVertOffset += v;
+				pass.drawIndexed(v, 1, 0, drawVertOffset);
+				drawVertOffset += o;
 			} else if (curPipelineIndex == 1) {
 				if (curTextureIndex != v) {
 					// v is the texture index
@@ -3532,7 +3568,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(6, 1, imageVertOffset);
 				imageVertOffset += 6;
 			} else if (curPipelineIndex == 2) {
-				pass.setBindGroup(2, $._font.bindGroup);
+				pass.setBindGroup(2, $._fonts[o].bindGroup);
 				pass.setBindGroup(3, $._textBindGroup);
 
 				// v is the number of characters in the text
@@ -3548,12 +3584,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		pass.end();
 		let commandBuffer = $.encoder.finish();
 		Q5.device.queue.submit([commandBuffer]);
+
 		q.pass = $.encoder = null;
 
 		// clear the stacks for the next frame
 		$.drawStack.length = 0;
-		$.colorsStack.length = 8;
 		colorIndex = 1;
+		colorStackIndex = 8;
 		rotation = 0;
 		transformStates.length = 1;
 		$._transformIndexStack.length = 0;
@@ -3586,35 +3623,45 @@ Q5.webgpu = async function (scope, parent) {
 Q5.renderers.webgpu.drawing = ($, q) => {
 	let c = $.canvas,
 		drawStack = $.drawStack,
-		verticesStack = [],
+		vertexStack = new Float32Array(1e7),
+		indexStack = new Uint32Array(1e6),
+		vertIndex = 0,
+		vertCount = 0,
+		idxBufferIndex = 0,
 		colorIndex;
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'drawingVertexShader',
 		code: `
+struct VertexInput {
+	@location(0) pos: vec2f,
+	@location(1) colorIndex: f32,
+	@location(2) transformIndex: f32
+}
 struct VertexOutput {
 	@builtin(position) position: vec4f,
-	@location(0) colorIndex: f32
-};
-
+	@location(0) color: vec4f
+}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
-};
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+
+@group(1) @binding(0) var<storage> colors : array<vec4f>;
 
 @vertex
-fn vertexMain(@location(0) pos: vec2f, @location(1) colorIndex: f32, @location(2) transformIndex: f32) -> VertexOutput {
-	var vert = vec4f(pos, 0.0, 1.0);
-	vert = transforms[i32(transformIndex)] * vert;
+fn vertexMain(input: VertexInput) -> VertexOutput {
+	var vert = vec4f(input.pos, 0.0, 1.0);
+	vert = transforms[i32(input.transformIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
 	var output: VertexOutput;
 	output.position = vert;
-	output.colorIndex = colorIndex;
+	output.color = colors[i32(input.colorIndex)];
 	return output;
 }
 `
@@ -3623,12 +3670,9 @@ fn vertexMain(@location(0) pos: vec2f, @location(1) colorIndex: f32, @location(2
 	let fragmentShader = Q5.device.createShaderModule({
 		label: 'drawingFragmentShader',
 		code: `
-@group(1) @binding(0) var<storage, read> colors : array<vec4f>;
-
 @fragment
-fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
-	let index = i32(colorIndex);
-	return mix(colors[index], colors[index + 1], fract(colorIndex));
+fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
+	return color;
 }
 `
 	});
@@ -3660,57 +3704,269 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-list' }
+		primitive: { topology: 'triangle-list' },
+		multisample: {
+			count: 4
+		}
 	};
 
 	$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
 
-	let shapeVertices;
+	const addVert = (x, y, ci, ti) => {
+		let v = vertexStack,
+			i = vertIndex;
+		v[i++] = x;
+		v[i++] = y;
+		v[i++] = ci;
+		v[i++] = ti;
+		vertIndex = i;
+		vertCount++;
+	};
+
+	const addIndex = (i1, i2, i3) => {
+		let is = indexStack,
+			ii = idxBufferIndex;
+		is[ii++] = i1;
+		is[ii++] = i2;
+		is[ii++] = i3;
+		idxBufferIndex = ii;
+	};
+
+	const addQuad = (x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) => {
+		let v = vertexStack,
+			i = vertIndex;
+
+		let i1 = vertCount++;
+		v[i++] = x1;
+		v[i++] = y1;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		let i2 = vertCount++;
+		v[i++] = x2;
+		v[i++] = y2;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		let i3 = vertCount++;
+		v[i++] = x3;
+		v[i++] = y3;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		let i4 = vertCount++;
+		v[i++] = x4;
+		v[i++] = y4;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		vertIndex = i;
+
+		let is = indexStack,
+			ii = idxBufferIndex;
+		is[ii++] = i1;
+		is[ii++] = i2;
+		is[ii++] = i3;
+		is[ii++] = i1;
+		is[ii++] = i3;
+		is[ii++] = i4;
+		idxBufferIndex = ii;
+
+		drawStack.push(0, 6, 4);
+	};
+
+	const addEllipse = (x, y, a, b, n, ci, ti) => {
+		let t = 0,
+			angleIncrement = $.TAU / n,
+			indicesStart = vertIndex / 4;
+		addVert(x, y, ci, ti); // Center vertex
+		for (let i = 0; i <= n; i++) {
+			let vx = x + a * Math.cos(t),
+				vy = y + b * Math.sin(t);
+			addVert(vx, vy, ci, ti);
+			if (i > 0) {
+				addIndex(indicesStart, indicesStart + i, indicesStart + i + 1);
+			}
+			t += angleIncrement;
+		}
+		drawStack.push(0, n * 3, n + 2);
+	};
+
+	$.rectMode = (x) => ($._rectMode = x);
+
+	$.rect = (x, y, w, h) => {
+		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
+		let ci, ti;
+		if ($._matrixDirty) $._saveMatrix();
+		ti = $._transformIndex;
+
+		if ($._doStroke) {
+			ci = $._strokeIndex;
+
+			// outer rectangle coordinates
+			let sw = $._strokeWeight / 2;
+			let to = t + sw,
+				bo = b - sw,
+				lo = l - sw,
+				ro = r + sw;
+
+			// stroke is simply a bigger rectangle drawn first
+			addQuad(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
+
+			// inner rectangle coordinates
+			t -= sw;
+			b += sw;
+			l += sw;
+			r -= sw;
+		}
+
+		if ($._doFill) {
+			ci = colorIndex ?? $._fillIndex;
+
+			// two triangles make a rectangle
+			addQuad(l, t, r, t, r, b, l, b, ci, ti);
+		}
+	};
+
+	$.square = (x, y, s) => $.rect(x, y, s, s);
+
+	// prettier-ignore
+	const getArcSegments = (d) =>
+		d < 4 ? 6 :
+		d < 6 ? 8 :
+		d < 10 ? 10 :
+		d < 16 ? 12 :
+		d < 20 ? 14 :
+		d < 22 ? 16 :
+		d < 24 ? 18 :
+		d < 28 ? 20 :
+		d < 34 ? 22 :
+		d < 42 ? 24 :
+		d < 48 ? 26 :
+		d < 56 ? 28 :
+		d < 64 ? 30 :
+		d < 72 ? 32 :
+		d < 84 ? 34 :
+		d < 96 ? 36 :
+		d < 98 ? 38 :
+		d < 113 ? 40 :
+		d < 149 ? 44 :
+		d < 199 ? 48 :
+		d < 261 ? 52 :
+		d < 353 ? 56 :
+		d < 461 ? 60 :
+		d < 585 ? 64 :
+		d < 1200 ? 70 :
+		d < 1800 ? 80 :
+		d < 2400 ? 90 :
+		100;
+
+	$.ellipseMode = (x) => ($._ellipseMode = x);
+
+	$.ellipse = (x, y, w, h) => {
+		let n = getArcSegments(w == h ? w : Math.max(w, h));
+		let a = Math.max(w, 1) / 2;
+		let b = w == h ? a : Math.max(h, 1) / 2;
+		let ci;
+		if ($._matrixDirty) $._saveMatrix();
+		let ti = $._transformIndex;
+		if ($._doStroke) {
+			let sw = $._strokeWeight / 2;
+			addEllipse(x, y, a + sw, b + sw, n, $._strokeIndex, ti);
+			a -= sw;
+			b -= sw;
+		}
+		if ($._doFill) {
+			addEllipse(x, y, a, b, n, colorIndex ?? $._fillIndex, ti);
+		}
+	};
+
+	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
+
+	$.point = (x, y) => {
+		colorIndex = $._strokeIndex;
+		$._doStroke = false;
+		let sw = $._strokeWeight;
+		if (sw < 2) {
+			sw = Math.round(sw);
+			$.rect(x, y, sw, sw);
+		} else $.ellipse(x, y, sw, sw);
+		$._doStroke = true;
+		colorIndex = null;
+	};
+
+	$.line = (x1, y1, x2, y2) => {
+		colorIndex = $._strokeIndex;
+
+		$.push();
+		$._doStroke = false;
+		$.translate(x1, -y1);
+		$.rotate($.atan2(y2 - y1, x2 - x1));
+		let length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+		let sw = $._strokeWeight,
+			hsw = sw / 2;
+		$._rectMode = 'corner';
+		if (sw < 4) {
+			$.rect(-hsw, -hsw, length + hsw, sw);
+		} else {
+			$._ellipseMode = 'center';
+			$.ellipse(0, 0, sw, sw);
+			$.ellipse(length, 0, sw, sw);
+			$.rect(0, -hsw, length, sw);
+		}
+
+		$.pop();
+
+		colorIndex = null;
+	};
+
+	let shapeVertCount;
 
 	$.beginShape = () => {
-		shapeVertices = [];
+		shapeVertCount = 0;
 	};
 
 	$.vertex = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		shapeVertices.push(x, -y, $._fillIndex, $._transformIndex);
+		addVert(x, -y, $._fillIndex, $._transformIndex);
+		shapeVertCount++;
 	};
 
 	$.endShape = (close) => {
-		if (!$._doFill) {
-			shapeVertices = [];
-			return;
-		}
-		let v = shapeVertices;
-		if (v.length < 12) {
+		if (shapeVertCount < 3) {
 			throw new Error('A shape must have at least 3 vertices.');
 		}
-		if (close) {
-			// Close the shape by adding the first vertex at the end
-			v.push(v[0], v[1], v[2], v[3]);
-		}
-		// Convert the shape to triangles
-		let triangles = [];
-		for (let i = 4; i < v.length; i += 4) {
-			triangles.push(
-				v[0], // First vertex
-				v[1],
-				v[2],
-				v[3],
-				v[i - 4], // Previous vertex
-				v[i - 3],
-				v[i - 2],
-				v[i - 1],
-				v[i], // Current vertex
-				v[i + 1],
-				v[i + 2],
-				v[i + 3]
-			);
-		}
-		shapeVertices = [];
 
-		verticesStack.push(...triangles);
-		drawStack.push(0, triangles.length / 4);
+		let firstVert = vertCount - shapeVertCount;
+
+		if ($._doFill) {
+			// make a simple triangle fan, starting from the first vertex
+			for (let i = firstVert + 1; i < vertCount - 1; i++) {
+				addIndex(firstVert, i, i + 1);
+			}
+			drawStack.push(0, (shapeVertCount - 2) * 3, shapeVertCount);
+		}
+
+		if ($._doStroke) {
+			let first = firstVert * 4,
+				last = vertIndex - 4;
+			for (let i = first; i < last; i += 4) {
+				let x1 = vertexStack[i],
+					y1 = vertexStack[i + 1],
+					x2 = vertexStack[i + 4],
+					y2 = vertexStack[i + 5];
+				$.line(x1, y1, x2, y2);
+			}
+			if (close) {
+				let x1 = vertexStack[last],
+					y1 = vertexStack[last + 1],
+					x2 = vertexStack[first],
+					y2 = vertexStack[first + 1];
+				$.line(x1, y1, x2, y2);
+			}
+		}
+
+		shapeVertCount = 0;
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {
@@ -3718,7 +3974,7 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 		$.vertex(x1, y1);
 		$.vertex(x2, y2);
 		$.vertex(x3, y3);
-		$.endShape(1);
+		$.endShape();
 	};
 
 	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
@@ -3727,104 +3983,7 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 		$.vertex(x2, y2);
 		$.vertex(x3, y3);
 		$.vertex(x4, y4);
-		$.endShape(1);
-	};
-
-	$.rectMode = (x) => ($._rectMode = x);
-
-	$.rect = (x, y, w, h) => {
-		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
-		let ci, ti;
-
-		if ($._doFill) {
-			ci = colorIndex ?? $._fillIndex;
-			if ($._matrixDirty) $._saveMatrix();
-			ti = $._transformIndex;
-			// two triangles make a rectangle
-			// prettier-ignore
-			verticesStack.push(
-				l, t, ci, ti,
-				r, t, ci, ti,
-				l, b, ci, ti,
-				r, t, ci, ti,
-				l, b, ci, ti,
-				r, b, ci, ti
-			);
-			drawStack.push(0, 6);
-		}
-
-		if ($._doStroke) {
-			ci = $._strokeIndex;
-			let sw = $._strokeWeight / 2;
-			// Outer rectangle coordinates
-			let to = t - sw,
-				bo = b + sw,
-				lo = l - sw,
-				ro = r + sw;
-
-			// Inner rectangle coordinates
-			let ti = t + sw,
-				bi = b - sw,
-				li = l + sw,
-				ri = r - sw;
-
-			// Create vertices for the stroke as a shape
-			// prettier-ignore
-			verticesStack.push(
-				lo, to, ci, ti, // Top side
-				ro, to, ci, ti,
-				lo, ti, ci, ti,
-				lo, ti, ci, ti,
-				ro, to, ci, ti,
-				ro, ti, ci, ti,
-				ro, to, ci, ti, // right side
-				ro, bo, ci, ti,
-				ri, to, ci, ti,
-				ri, to, ci, ti,
-				ro, bo, ci, ti,
-				ri, bo, ci, ti,
-				ro, bo, ci, ti, // Bottom side
-				lo, bo, ci, ti,
-				ro, bi, ci, ti,
-				ro, bi, ci, ti,
-				lo, bo, ci, ti,
-				lo, bi, ci, ti,
-				lo, bo, ci, ti, // Left side
-				lo, to, ci, ti,
-				li, bo, ci, ti,
-				li, bo, ci, ti,
-				lo, to, ci, ti,
-				li, to, ci, ti
-			);
-
-			drawStack.push(0, 24);
-		}
-	};
-
-	$.square = (x, y, s) => $.rect(x, y, s, s);
-
-	$.point = (x, y) => {
-		colorIndex = $._strokeIndex;
-		let sw = $._strokeWeight;
-		if (sw < 2) {
-			sw = Math.round(sw);
-			$.rect(x, y, sw, sw);
-		} else $.ellipse(x, y, sw, sw);
-		colorIndex = null;
-	};
-
-	$.line = (x1, y1, x2, y2) => {
-		colorIndex = $._strokeIndex;
-
-		$.push();
-		$.translate(x1, y1);
-		$.rotate($.atan2(y2 - y1, x2 - x1));
-		let length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-		let sw = $._strokeWeight;
-		$.rect(0, -sw / 2, length, sw);
-		$.pop();
-
-		colorIndex = null;
+		$.endShape();
 	};
 
 	$.background = (r, g, b, a) => {
@@ -3847,96 +4006,41 @@ fn fragmentMain(@location(0) colorIndex: f32) -> @location(0) vec4f {
 		if (!$._fillSet) $._fillIndex = 1;
 	};
 
-	/**
-	 * Derived from: ceil(Math.log(d) * 7) * 2 - ceil(28)
-	 * This lookup table is used for better performance.
-	 * @param {Number} d diameter of the circle
-	 * @returns n number of segments
-	 */
-	// prettier-ignore
-	const getArcSegments = (d) => 
-		d < 4 ? 6 :
-    d < 6 ? 8 :
-    d < 10 ? 10 :
-    d < 16 ? 12 :
-    d < 20 ? 14 :
-    d < 22 ? 16 :
-    d < 24 ? 18 :
-    d < 28 ? 20 :
-    d < 34 ? 22 :
-    d < 42 ? 24 :
-    d < 48 ? 26 :
-    d < 56 ? 28 :
-    d < 64 ? 30 :
-    d < 72 ? 32 :
-    d < 84 ? 34 :
-    d < 96 ? 36 :
-    d < 98 ? 38 :
-    d < 113 ? 40 :
-    d < 149 ? 44 :
-    d < 199 ? 48 :
-    d < 261 ? 52 :
-    d < 353 ? 56 :
-    d < 461 ? 60 :
-    d < 585 ? 64 :
-    d < 1200 ? 70 :
-		d < 1800 ? 80 :
-		d < 2400 ? 90 :
-		100;
-
-	$.ellipseMode = (x) => ($._ellipseMode = x);
-
-	$.ellipse = (x, y, w, h) => {
-		const n = getArcSegments(w == h ? w : Math.max(w, h));
-
-		let a = Math.max(w, 1) / 2;
-		let b = w == h ? a : Math.max(h, 1) / 2;
-
-		let t = 0; // theta
-		const angleIncrement = $.TAU / n;
-		const ci = colorIndex ?? $._fillIndex;
-		if ($._matrixDirty) $._saveMatrix();
-		const ti = $._transformIndex;
-		let vx1, vy1, vx2, vy2;
-		for (let i = 0; i <= n; i++) {
-			vx1 = vx2;
-			vy1 = vy2;
-			vx2 = x + a * Math.cos(t);
-			vy2 = y + b * Math.sin(t);
-			t += angleIncrement;
-
-			if (i == 0) continue;
-
-			verticesStack.push(x, y, ci, ti, vx1, vy1, ci, ti, vx2, vy2, ci, ti);
-		}
-
-		drawStack.push(0, n * 3);
-	};
-
-	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
-
 	$._hooks.preRender.push(() => {
 		$.pass.setPipeline($._pipelines[0]);
 
-		const vertexBuffer = Q5.device.createBuffer({
-			size: verticesStack.length * 4,
+		let vertexBuffer = Q5.device.createBuffer({
+			size: vertIndex * 4,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
 
-		new Float32Array(vertexBuffer.getMappedRange()).set(verticesStack);
+		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
 		$.pass.setVertexBuffer(0, vertexBuffer);
+
+		let indexBuffer = Q5.device.createBuffer({
+			size: idxBufferIndex * 4,
+			usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
+		});
+
+		new Uint32Array(indexBuffer.getMappedRange()).set(indexStack.slice(0, idxBufferIndex));
+		indexBuffer.unmap();
+
+		$.pass.setIndexBuffer(indexBuffer, 'uint32');
 	});
 
 	$._hooks.postRender.push(() => {
-		verticesStack.length = 0;
+		vertIndex = 0;
+		vertCount = 0;
+		idxBufferIndex = 0;
 	});
 };
 Q5.renderers.webgpu.image = ($, q) => {
 	$._textureBindGroups = [];
-	let verticesStack = [];
+	let vertexStack = [];
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'imageVertexShader',
@@ -3944,15 +4048,14 @@ Q5.renderers.webgpu.image = ($, q) => {
 struct VertexOutput {
 	@builtin(position) position: vec4f,
 	@location(0) texCoord: vec2f
-};
-
+}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
-};
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 
 @vertex
 fn vertexMain(@location(0) pos: vec2f, @location(1) texCoord: vec2f, @location(2) transformIndex: f32) -> VertexOutput {
@@ -4111,7 +4214,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
 
 		// prettier-ignore
-		verticesStack.push(
+		vertexStack.push(
 			l, t, 0, 0, ti,
 			r, t, 1, 0, ti,
 			l, b, 0, 1, ti,
@@ -4120,7 +4223,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			r, b, 1, 1, ti
 		);
 
-		$.drawStack.push(1, img.textureIndex);
+		$.drawStack.push(1, img.textureIndex, 0);
 	};
 
 	$._hooks.preRender.push(() => {
@@ -4130,7 +4233,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		$.pass.setPipeline($._pipelines[1]);
 
 		const vertexBuffer = Q5.device.createBuffer({
-			size: verticesStack.length * 4,
+			size: vertexStack.length * 4,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
@@ -4142,7 +4245,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
-		verticesStack.length = 0;
+		vertexStack.length = 0;
 	});
 };
 
@@ -4163,35 +4266,35 @@ const pos = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 
 struct VertexInput {
 	@builtin(vertex_index) vertex : u32,
-	@builtin(instance_index) instance : u32,
-};
+	@builtin(instance_index) instance : u32
+}
 struct VertexOutput {
 	@builtin(position) position : vec4f,
-	@location(0) texcoord : vec2f,
-	@location(1) colorIndex : f32
-};
+	@location(0) texCoord : vec2f,
+	@location(1) fillColor : vec4f
+}
 struct Char {
 	texOffset: vec2f,
 	texExtent: vec2f,
 	size: vec2f,
 	offset: vec2f,
-};
+}
 struct Text {
 	pos: vec2f,
 	scale: f32,
 	transformIndex: f32,
 	fillIndex: f32,
 	strokeIndex: f32
-};
+}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
-};
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 
-@group(1) @binding(0) var<storage, read> colors : array<vec4f>;
+@group(1) @binding(0) var<storage> colors : array<vec4f>;
 
 @group(2) @binding(0) var fontTexture: texture_2d<f32>;
 @group(2) @binding(1) var fontSampler: sampler;
@@ -4217,13 +4320,13 @@ fn vertexMain(input : VertexInput) -> VertexOutput {
 
 	var output : VertexOutput;
 	output.position = vert;
-	output.texcoord = (pos[input.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
-	output.colorIndex = text.fillIndex;
+	output.texCoord = (pos[input.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
+	output.fillColor = colors[i32(text.fillIndex)];
 	return output;
 }
 
-fn sampleMsdf(texcoord: vec2f) -> f32 {
-	let c = textureSample(fontTexture, fontSampler, texcoord);
+fn sampleMsdf(texCoord: vec2f) -> f32 {
+	let c = textureSample(fontTexture, fontSampler, texCoord);
 	return max(min(c.r, c.g), min(max(c.r, c.g), c.b));
 }
 
@@ -4233,18 +4336,17 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	// uses the default which is 4.
 	let pxRange = 4.0;
 	let sz = vec2f(textureDimensions(fontTexture, 0));
-	let dx = sz.x*length(vec2f(dpdxFine(input.texcoord.x), dpdyFine(input.texcoord.x)));
-	let dy = sz.y*length(vec2f(dpdxFine(input.texcoord.y), dpdyFine(input.texcoord.y)));
+	let dx = sz.x*length(vec2f(dpdxFine(input.texCoord.x), dpdyFine(input.texCoord.x)));
+	let dy = sz.y*length(vec2f(dpdxFine(input.texCoord.y), dpdyFine(input.texCoord.y)));
 	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
-	let sigDist = sampleMsdf(input.texcoord) - 0.5;
+	let sigDist = sampleMsdf(input.texCoord) - 0.5;
 	let pxDist = sigDist * toPixels;
 	let edgeWidth = 0.5;
 	let alpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
 	if (alpha < 0.001) {
 		discard;
 	}
-	let fillColor = colors[i32(input.colorIndex)];
-	return vec4f(fillColor.rgb, fillColor.a * alpha);
+	return vec4f(input.fillColor.rgb, input.fillColor.a * alpha);
 }
 `
 	});
@@ -4336,6 +4438,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		}
 	}
 
+	$._fonts = [];
 	let fonts = {};
 
 	let createFont = async (fontJsonUrl, fontName, cb) => {
@@ -4422,6 +4525,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 		$._font = new MsdfFont(fontBindGroup, atlas.common.lineHeight, chars, kernings);
 
+		$._font.index = $._fonts.length;
+		$._fonts.push($._font);
 		fonts[fontName] = $._font;
 
 		q._preloadCount--;
@@ -4451,11 +4556,6 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 	$.textFont = (fontName) => {
 		$._font = fonts[fontName];
-
-		// replay the change of font in the draw stack
-		$.drawStack.push(-1, () => {
-			$._font = fonts[fontName];
-		});
 	};
 	$.textSize = (size) => {
 		$._textSize = size;
@@ -4568,7 +4668,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			}
 		}
 
-		let charsData = new Float32Array((str.length - spaces) * 4);
+		let charsData = [];
 
 		let ta = $._textAlign,
 			tb = $._textBaseline,
@@ -4614,7 +4714,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		}
 		$._charStack.push(charsData);
 
-		let text = new Float32Array(6);
+		let text = [];
 
 		if ($._matrixDirty) $._saveMatrix();
 
@@ -4626,7 +4726,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		text[5] = $._strokeIndex;
 
 		$._textStack.push(text);
-		$.drawStack.push(2, measurements.printedCharCount);
+		$.drawStack.push(2, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {
@@ -4639,11 +4739,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 		if ($._doFill) {
 			let fi = $._fillIndex * 4;
-			g.fill(colorsStack.slice(fi, fi + 4));
+			g.fill(colorStack.slice(fi, fi + 4));
 		}
 		if ($._doStroke) {
 			let si = $._strokeIndex * 4;
-			g.stroke(colorsStack.slice(si, si + 4));
+			g.stroke(colorStack.slice(si, si + 4));
 		}
 
 		let img = g.createTextImage(str, w, h);
@@ -4694,7 +4794,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			totalTextSize += charsData.length * 4;
 		}
 
-		// Create a single buffer for all text data
+		// Create a single buffer for all char data
 		let charBuffer = Q5.device.createBuffer({
 			size: totalTextSize,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -4702,12 +4802,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		});
 
 		// Copy all text data into the buffer
-		let textArray = new Float32Array(charBuffer.getMappedRange());
-		let o = 0;
-		for (let arr of $._charStack) {
-			textArray.set(arr, o);
-			o += arr.length;
-		}
+		new Float32Array(charBuffer.getMappedRange()).set($._charStack.flat());
 		charBuffer.unmap();
 
 		// Calculate total buffer size for metadata
@@ -4722,12 +4817,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		});
 
 		// Copy all metadata into the buffer
-		let metadataArray = new Float32Array(textBuffer.getMappedRange());
-		o = 0;
-		for (let array of $._textStack) {
-			metadataArray.set(array, o);
-			o += array.length;
-		}
+		new Float32Array(textBuffer.getMappedRange()).set($._textStack.flat());
 		textBuffer.unmap();
 
 		// Create a single bind group for the text buffer and metadata buffer

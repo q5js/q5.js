@@ -13,7 +13,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 1);
 
-	let pass, colorsLayout;
+	let pass,
+		mainView,
+		colorsLayout,
+		colorIndex = 1,
+		colorStackIndex = 8;
 
 	$._pipelineConfigs = [];
 	$._pipelines = [];
@@ -23,8 +27,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	let drawStack = ($.drawStack = []);
 
 	// colors used for each draw call
+
+	let colorStack = ($.colorStack = new Float32Array(1e6));
+
 	// prettier-ignore
-	let colorsStack = ($.colorsStack = [
+	colorStack.set([
 		0, 0, 0, 1, // black
 		1, 1, 1, 1 // white
 	]);
@@ -56,7 +63,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		entries: [
 			{
 				binding: 0,
-				visibility: GPUShaderStage.FRAGMENT,
+				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
 				buffer: {
 					type: 'read-only-storage',
 					hasDynamicOffset: false
@@ -72,28 +79,49 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 	});
 
+	let createMainView = () => {
+		mainView = Q5.device
+			.createTexture({
+				size: [$.canvas.width, $.canvas.height],
+				sampleCount: 4,
+				format: 'bgra8unorm',
+				usage: GPUTextureUsage.RENDER_ATTACHMENT
+			})
+			.createView();
+	};
+
 	$._createCanvas = (w, h, opt) => {
 		q.ctx = q.drawingContext = c.getContext('webgpu');
 
 		opt.format ??= navigator.gpu.getPreferredCanvasFormat();
 		opt.device ??= Q5.device;
 
-		// needed for blend modes but couldn't get it working
+		// needed for other blend modes but couldn't get it working
 		// opt.alphaMode = 'premultiplied';
 
 		$.ctx.configure(opt);
 
 		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
 
+		createMainView();
+
 		return c;
 	};
 
 	$._resizeCanvas = (w, h) => {
 		$._setCanvasSize(w, h);
+		createMainView();
+	};
+
+	$.pixelDensity = (v) => {
+		if (!v || v == $._pixelDensity) return $._pixelDensity;
+		$._pixelDensity = v;
+		$._setCanvasSize(c.w, c.h);
+		createMainView();
+		return v;
 	};
 
 	// current color index, used to associate a vertex with a color
-	let colorIndex = 1;
 	let addColor = (r, g, b, a = 1) => {
 		if (typeof r == 'string') r = $.color(r);
 		else if (b == undefined) {
@@ -101,8 +129,21 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			a = g ?? 1;
 			g = b = r;
 		}
-		if (r._q5Color) colorsStack.push(r.r, r.g, r.b, r.a);
-		else colorsStack.push(r, g, b, a);
+		if (r._q5Color) {
+			a = r.a;
+			b = r.b;
+			g = r.g;
+			r = r.r;
+		}
+
+		let cs = colorStack,
+			i = colorStackIndex;
+		cs[i++] = r;
+		cs[i++] = g;
+		cs[i++] = b;
+		cs[i++] = a;
+		colorStackIndex = i;
+
 		colorIndex++;
 	};
 
@@ -389,7 +430,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			label: 'q5-webgpu',
 			colorAttachments: [
 				{
-					view: $.ctx.getCurrentTexture().createView(),
+					view: mainView,
+					resolveTarget: $.ctx.getCurrentTexture().createView(),
 					loadOp: 'clear',
 					storeOp: 'store'
 				}
@@ -406,7 +448,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			});
 
 			new Float32Array(transformBuffer.getMappedRange()).set(transformStates.flat());
-
 			transformBuffer.unmap();
 
 			$._transformBindGroup = Q5.device.createBindGroup({
@@ -420,14 +461,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		pass.setBindGroup(0, $._transformBindGroup);
 
-		const colorsBuffer = Q5.device.createBuffer({
-			size: colorsStack.length * 4,
+		let colorsBuffer = Q5.device.createBuffer({
+			size: colorStackIndex * 4,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
 
-		new Float32Array(colorsBuffer.getMappedRange()).set(colorsStack);
-
+		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
 
 		$._colorsBindGroup = Q5.device.createBindGroup({
@@ -439,19 +479,15 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		for (let m of $._hooks.preRender) m();
 
-		let drawVertOffset = 0;
-		let imageVertOffset = 0;
-		let textCharOffset = 0;
-		let curPipelineIndex = -1;
-		let curTextureIndex = -1;
+		let drawVertOffset = 0,
+			imageVertOffset = 0,
+			textCharOffset = 0,
+			curPipelineIndex = -1,
+			curTextureIndex = -1;
 
-		for (let i = 0; i < drawStack.length; i += 2) {
+		for (let i = 0; i < drawStack.length; i += 3) {
 			let v = drawStack[i + 1];
-
-			if (drawStack[i] == -1) {
-				v();
-				continue;
-			}
+			let o = drawStack[i + 2];
 
 			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
@@ -460,8 +496,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 			if (curPipelineIndex == 0) {
 				// v is the number of vertices
-				pass.draw(v, 1, drawVertOffset);
-				drawVertOffset += v;
+				pass.drawIndexed(v, 1, 0, drawVertOffset);
+				drawVertOffset += o;
 			} else if (curPipelineIndex == 1) {
 				if (curTextureIndex != v) {
 					// v is the texture index
@@ -470,7 +506,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(6, 1, imageVertOffset);
 				imageVertOffset += 6;
 			} else if (curPipelineIndex == 2) {
-				pass.setBindGroup(2, $._font.bindGroup);
+				pass.setBindGroup(2, $._fonts[o].bindGroup);
 				pass.setBindGroup(3, $._textBindGroup);
 
 				// v is the number of characters in the text
@@ -486,12 +522,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		pass.end();
 		let commandBuffer = $.encoder.finish();
 		Q5.device.queue.submit([commandBuffer]);
+
 		q.pass = $.encoder = null;
 
 		// clear the stacks for the next frame
 		$.drawStack.length = 0;
-		$.colorsStack.length = 8;
 		colorIndex = 1;
+		colorStackIndex = 8;
 		rotation = 0;
 		transformStates.length = 1;
 		$._transformIndexStack.length = 0;

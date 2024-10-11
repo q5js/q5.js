@@ -1,6 +1,6 @@
 Q5.renderers.webgpu.image = ($, q) => {
 	$._textureBindGroups = [];
-	let verticesStack = [];
+	let vertexStack = [];
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'imageVertexShader',
@@ -8,15 +8,14 @@ Q5.renderers.webgpu.image = ($, q) => {
 struct VertexOutput {
 	@builtin(position) position: vec4f,
 	@location(0) texCoord: vec2f
-};
-
+}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
-};
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var<storage, read> transforms: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 
 @vertex
 fn vertexMain(@location(0) pos: vec2f, @location(1) texCoord: vec2f, @location(2) transformIndex: f32) -> VertexOutput {
@@ -175,7 +174,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
 
 		// prettier-ignore
-		verticesStack.push(
+		vertexStack.push(
 			l, t, 0, 0, ti,
 			r, t, 1, 0, ti,
 			l, b, 0, 1, ti,
@@ -184,7 +183,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			r, b, 1, 1, ti
 		);
 
-		$.drawStack.push(1, img.textureIndex);
+		$.drawStack.push(1, img.textureIndex, 0);
 	};
 
 	$._hooks.preRender.push(() => {
@@ -194,7 +193,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		$.pass.setPipeline($._pipelines[1]);
 
 		const vertexBuffer = Q5.device.createBuffer({
-			size: verticesStack.length * 4,
+			size: vertexStack.length * 4,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
@@ -206,7 +205,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
-		verticesStack.length = 0;
+		vertexStack.length = 0;
 	});
 };
 

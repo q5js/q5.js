@@ -153,7 +153,7 @@ q5's WebGPU renderer drawing functions like `rect` don't immediately draw on the
 
 Implemented functions:
 
-`rect`, `circle`, `ellipse`, `triangle`, `beginShape`, `vertex`, `endShape`, `blendMode`
+- `rect`, `circle`, `ellipse`, `triangle`, `line`, `point`, `beginShape`, `vertex`, `endShape`, `rectMode`, `ellipseMode`
 
 ## webgpu-image
 
