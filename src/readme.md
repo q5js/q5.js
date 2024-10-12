@@ -62,7 +62,7 @@ WebGPU rendering modules are in development:
     - [Load a MSDF font](#load-a-msdf-font)
     - [Displaying Emojis](#displaying-emojis)
     - [Lightweight Use](#lightweight-use)
-    - [Implemented functions](#implemented-functions)
+    - [Limitations](#limitations)
   - [math](#math)
   - [noisier](#noisier)
 
@@ -114,7 +114,7 @@ Image based features in this module require the q5-2d-image module.
 
 > ⚠️ Experimental features! ⚠️
 
-To use q5's WebGPU renderer, run `Q5.webgpu()` at the bottom of your sketch. Explicit use of `createCanvas` is required.
+To use q5's WebGPU renderer, run `Q5.webgpu()` at the bottom of your sketch.
 
 ```js
 function setup() {
@@ -132,34 +132,24 @@ Q5.webgpu();
 
 WebGPU has different default settings compared to q5's q2d renderer and p5's P2D and WEBGL modes.
 
+- Explicit use of `createCanvas` is required before anything can be drawn.
 - The default color mode is RGB in 0-1 "float" format: `colorMode(RGB, 1)`.
 - The origin of the canvas (0, 0) is in the center, not the top left.
-- Mouse and touch coordinates correspond to canvas pixels.
-- For now, strokes are only implemented for the `point`, `line`, and `textImage` functions.
+- Mouse and touch coordinates correspond to canvas pixels (unlike in p5 WEBGL mode).
 
 The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and apply a compatibility layer to display sketches with the fallback q2d renderer.
-
-Implemented functions:
-
-`createCanvas`, `resizeCanvas`, `fill`, `clear`, `push`, `pop`, `resetMatrix`, `translate`, `rotate`, `scale`
 
 ## webgpu-drawing
 
 > Uses `colorMode(RGB, 1)` by default. Changing it to 'oklch' is not supported yet for the webgpu renderer.
 
-All basic shapes are drawn from their center. Strokes are not implemented yet.
-
 q5's WebGPU renderer drawing functions like `rect` don't immediately draw on the canvas. Instead, they prepare vertex and color data to be sent to the GPU in bulk, which occurs after the user's `draw` function and any post-draw functions are run. This approach better utilizes the GPU, so it doesn't have to repeatedly wait for the CPU to send small chunks of data that describe each individual shape. It's the main reason why WebGPU is faster than Canvas2D.
 
-Implemented functions:
-
-- `rect`, `circle`, `ellipse`, `triangle`, `line`, `point`, `beginShape`, `vertex`, `endShape`, `rectMode`, `ellipseMode`
+Rounded rectangles, stroke modes, and functions for drawing curves like `bezier` and `curve` are not implemented yet.
 
 ## webgpu-image
 
-Implemented functions:
-
-`loadImage`, `loadTexture`, `image`, `imageMode`
+Using `image` to drawn a subsection of an image and most blending modes are not yet implemented.
 
 ## webgpu-text
 
@@ -238,9 +228,9 @@ For super lightweight use load <https://q5js.org/fonts/YaHei-256-msdf.json>, whi
 !@'",-.0123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 ```
 
-### Implemented functions
+### Limitations
 
-`loadFont`, `text`, `textFont`, `textSize`, `textAlign`, `textWidth`, `createTextImage`, `textImage`
+Text strokes are not supported yet, except with `textImage`.
 
 ## math
 
