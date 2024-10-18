@@ -21,6 +21,8 @@ declare global {
 		 *   - "auto": if users don't create a new instance of Q5 themselves, an instance will be created automatically with this scope, which replicates p5's global mode
 		 *   - "instance": enables users to assign a Q5 instance to a variable, not to the global scope
 		 * @param {HTMLElement} [parent] - element that the canvas will be placed inside
+		 * @example
+		 * new Q5();
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
@@ -104,6 +106,21 @@ declare global {
 	 * Sets the target frame rate or gets the sketch's current frame rate.
 	 * @param {number} [hertz] - desired frame rate, default is 60
 	 * @returns {number} current frame rate
+	 * @example
+function draw() {
+	background(200);
+
+	if (mouseIsPressed) frameRate(10);
+	else frameRate(60);
+
+	circle(frameCount % 200, 100, 50);
+}
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	text(round(frameRate()), 65, 120);
+}
 	 */
 	function frameRate(hertz?: number): number;
 
@@ -132,7 +149,7 @@ declare global {
 	/** ⬜️
 	 * Creates a canvas element. If no input parameters are provided, the
 	 * canvas will be the size of the window.
-	 * 
+	 *
 	 * If this function is not run by the user, a 200x200 canvas will be
 	 * created automatically.
 	 * @param {number} [w] - width of the canvas
@@ -191,11 +208,11 @@ declare global {
 	 * on the unit provided to this function.
 	 * @param {number} unit - unit to scale by
 	 * @example
-	 * new Q5();
-	 * createCanvas(200, 200);
-	 * flexibleCanvas(100);
-	 * // rect will appear in the middle of the canvas
-	 * rect(20, 20, 60, 60);
+new Q5();
+createCanvas(200, 200);
+flexibleCanvas(100);
+// rect will appear in the middle of the canvas
+rect(20, 20, 60, 60);
 	 */
 	function flexibleCanvas(unit: number): void;
 
@@ -976,10 +993,10 @@ declare global {
 	 * Run this function before a line of code that isn't working as expected.
 	 * @param {string} [question] - optional question to ask the AI
 	 * @example
-	 * function draw() {
-	 *   askAI();
-	 *   text('Hello!');
-	 * }
+function draw() {
+  askAI();
+  text('Hello!');
+}
 	 */
 	function askAI(question?: string): void;
 

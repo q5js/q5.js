@@ -381,9 +381,9 @@ iframe:not(.output) {
 }
 
 .editor-container {
-	margin: 15px;
+	margin: 16px 32px;
 	padding: 0px;
-	height: 400px;
+	height: 204px;
 	overflow: hidden;
 	border-radius: 11px;
 	border: 1px solid var(--borderColor);

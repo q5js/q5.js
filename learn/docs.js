@@ -129,7 +129,9 @@ function convertToMarkdown(data) {
 		curEmoji = '';
 
 	for (let line of lines) {
-		line = line.trim();
+		if (!insideExample) {
+			line = line.trim();
+		}
 
 		if (line.startsWith('/**')) {
 			insideJSDoc = true;
@@ -168,6 +170,9 @@ function convertToMarkdown(data) {
 					}
 				} else if (line.startsWith('@example')) {
 					line = '```js';
+					if (insideExample) {
+						line = '```\n\n' + line;
+					}
 					insideExample = true;
 				}
 				jsDocBuffer += line + '\n';
@@ -479,7 +484,7 @@ let currentLoadedSectionId = '';
 function executeDataScripts(content) {
 	const scripts = content.querySelectorAll('script[type="aijs"]');
 	scripts.forEach((script) => {
-		let scriptContent = script.innerHTML;
+		let scriptContent = script.innerHTML.slice(0, -1).replaceAll('\t', '  ');
 		let id = 'editor-' + script.id.slice(7);
 		script.insertAdjacentHTML('beforebegin', `<div id="${id}" class="editor-container"></div>`);
 		new MiniEditor({
