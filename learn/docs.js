@@ -493,30 +493,19 @@ function executeDataScripts(content) {
 			autoRun: true,
 			title: 'Example',
 			image: 'https://aijs.io/images/newLogo.png',
-			dependencies: ['/q5.js'],
+			canvasWidth: 200,
 			options: {
-				theme: 'vs-light',
 				wordWrap: 'on',
 				wordWrapColumn: 0,
 				wrappingIndent: 'same',
-				canvasWidth: 200,
-				autoRun: true,
-				title: 'Example',
-				image: 'https://aijs.io/images/newLogo.png',
-				canvasWidth: 200,
-				options: {
-					wordWrap: 'on',
-					wordWrapColumn: 0,
-					wrappingIndent: 'same',
-					minimap: {
-						enabled: false
-					},
-					scrollbar: {
-						verticalScrollbarSize: 0,
-						vertical: 'hidden',
-						horizontal: 'hidden',
-						handleMouseWheel: false
-					}
+				minimap: {
+					enabled: false
+				},
+				scrollbar: {
+					verticalScrollbarSize: 0,
+					vertical: 'hidden',
+					horizontal: 'hidden',
+					handleMouseWheel: false
 				}
 			}
 		});
