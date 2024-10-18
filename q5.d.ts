@@ -13,16 +13,15 @@ declare global {
 		 *
 		 * Running `new Q5()` enables the use of q5 functions and variables
 		 * anywhere in your code.
-		 *
-		 * More info: https://github.com/q5js/q5.js/wiki/Instance-Mode
 		 * @param {string | Function} [scope] -
 		 *   - "global": (default) top-level global mode, adds q5 functions
 		 * and variables to the global scope
 		 *   - "auto": if users don't create a new instance of Q5 themselves, an instance will be created automatically with this scope, which replicates p5's global mode
-		 *   - "instance": enables users to assign a Q5 instance to a variable, not to the global scope
+		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode), not to the global scope
 		 * @param {HTMLElement} [parent] - element that the canvas will be placed inside
 		 * @example
 		 * new Q5();
+		 * createCanvas(200, 100);
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
@@ -45,62 +44,79 @@ declare global {
 	}
 
 	/** ⭐️
-	 * The number of frames that have been displayed since the program started.
-	 */
-	var frameCount: number;
-
-	/** ⭐️
-	 * The time passed since the last frame was drawn.
-	 */
-	var deltaTime: number;
-
-	/** ⭐️
-	 * The width of the window.
-	 */
-	var windowWidth: number;
-
-	/** ⭐️
-	 * The height of the window.
-	 */
-	var windowHeight: number;
-
-	/** ⭐️
-	 * The current orientation of the device.
-	 */
-	var deviceOrientation: string;
-
-	/** ⭐️
-	 * Use preload to load assets before the sketch starts and the
-	 * setup function is run.
-	 */
-	function preload(): void;
-
-	/** ⭐️
 	 * The setup function is called once when the program starts.
+	 * @example
+function setup() {
+	createCanvas(400, 200);
+	background('aqua');
+}
 	 */
 	function setup(): void;
 
 	/** ⭐️
 	 * The draw function is run 60 times per second by default.
+	 * @example
+function draw() {
+  background('lightgray');
+	circle(frameCount % 200, 100, 50);
+}
 	 */
 	function draw(): void;
 
 	/** ⭐️
-	 * Stops the draw loop.
+	 * The number of frames that have been displayed since the program started.
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	text(frameCount, 8, 120);
+}
 	 */
-	function noLoop(): void;
+	var frameCount: number;
 
 	/** ⭐️
-	 * Starts the draw loop, which calls the `draw` function at the target frame rate.
+	 * Stops the draw loop.
+	 * @example
+function draw() {
+  circle(frameCount * 5, 100, 50);
+  noLoop();
+}
 	 */
-	function loop(): void;
+	function noLoop(): void;
 
 	/** ⭐️
 	 * Redraws the canvas n times. If no input parameter is provided,
 	 * it calls the draw function once.
 	 * @param {number} [n] - number of times to redraw the canvas, default is 1
+	 * @example
+new Q5();
+noLoop();
+
+function draw() {
+  circle(frameCount * 5, 100, 50);
+}
+
+function mouseClicked() {
+  redraw();
+}
 	 */
 	function redraw(n?: number): void;
+
+	/** ⭐️
+	 * Starts the draw loop again if it was stopped.
+	 * @example
+new Q5();
+noLoop();
+
+function draw() {
+  circle(frameCount * 5, 100, 50);
+}
+
+function mouseClicked() {
+  loop();
+}
+	 */
+	function loop(): void;
 
 	/** ⭐️
 	 * Sets the target frame rate or gets the sketch's current frame rate.
@@ -143,6 +159,27 @@ function draw() {
 	 * @param {*} message - message to log
 	 */
 	function log(message: any): void;
+
+	/** ⭐️
+	 * Use preload to load assets before the sketch starts and the
+	 * setup function is run.
+	 */
+	function preload(): void;
+
+	/** ⭐️
+	 * The time passed since the last frame was drawn.
+	 */
+	var deltaTime: number;
+
+	/** ⭐️
+	 * The width of the window.
+	 */
+	var windowWidth: number;
+
+	/** ⭐️
+	 * The height of the window.
+	 */
+	var windowHeight: number;
 
 	// ⬜️ canvas
 

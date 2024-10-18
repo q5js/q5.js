@@ -144,7 +144,7 @@ function convertToMarkdown(data) {
 				}
 				insideJSDoc = insideParams = false;
 			} else {
-				line = line.replace(/\s*\* {0,1}/, '');
+				line = line.replace(/^\s*\* {0,1}/, '');
 				if (line.startsWith('@param')) {
 					if (!insideParams) jsDocBuffer += '### Params\n\n';
 					insideParams = true;
@@ -214,12 +214,10 @@ function convertToMarkdown(data) {
 			markdownCode += line + '\n';
 		}
 	}
-
-	markdownCode = makeCodeEditors(markdownCode);
 	return markdownCode;
 }
 
-function makeCodeEditors(markdown) {
+function makeScripts(markdown) {
 	let codeBlockCount = 0;
 
 	return markdown.replace(/```js([\s\S]*?)```/g, (match) => {
@@ -237,6 +235,7 @@ fetch('../q5.d.ts')
 	.then((res) => res.text())
 	.then((data) => {
 		markdownText = convertToMarkdown(data);
+		markdownText = makeScripts(markdownText);
 		markdownSections = parseMarkdownIntoSections(markdownText);
 		populateNavigation(markdownSections);
 		loadInitialContent(markdownSections);
@@ -488,6 +487,7 @@ function executeDataScripts(content) {
 		let id = 'editor-' + script.id.slice(7);
 		script.insertAdjacentHTML('beforebegin', `<div id="${id}" class="editor-container"></div>`);
 		new MiniEditor({
+			Q5InstancedMode: true,
 			containerId: id,
 			scriptId: scriptContent,
 			autoRun: true,
