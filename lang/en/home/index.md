@@ -14,7 +14,7 @@ If you're already familiar with p5, you'll find yourself right at home with q5. 
 
 q5 is performance optimized for the modern web. Create interactive art that runs in real-time on more devices than ever before. 🏎️
 
-[Draw 16x more](https://github.com/q5js/q5.js/wiki/Developer-Log#q5js-webgpu-is-16x-faster-than-p5js-webgl--july-25-2024) per frame with [q5 WebGPU](https://developer.mozilla.org/docs/Web/API/WebGPU_API), compared to the limit of p5 WebGL. Or save battery by getting the same results with less power consumption. 🌱
+[Draw up to 32x more](https://github.com/q5js/q5.js/wiki/Developer-Log) per frame with [q5 WebGPU](https://developer.mozilla.org/docs/Web/API/WebGPU_API), compared to the limits of p5. Or save battery by getting the same results with less power consumption. 🌱
 
 # 3-0
 

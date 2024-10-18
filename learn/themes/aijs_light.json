@@ -1,0 +1,105 @@
+{
+	"base": "vs",
+	"inherit": false,
+	"rules": [
+		{ "token": "", "foreground": "#1f2344", "background": "#ffffff" },
+		{ "token": "invalid", "foreground": "#f44747" },
+		{ "token": "emphasis", "fontStyle": "italic" },
+		{ "token": "strong", "fontStyle": "bold" },
+
+		{ "token": "variable", "foreground": "#74B0DF" },
+		{ "token": "variable.predefined", "foreground": "#DCD399" },
+		{ "token": "variable.parameter", "foreground": "#DCD399" },
+		{ "token": "constant", "foreground": "#cf057b" },
+		{ "token": "comment", "foreground": "#8d8e92" },
+		{ "token": "number", "foreground": "#ac8901" },
+		{ "token": "number.hex", "foreground": "#009465" },
+		{ "token": "regexp", "foreground": "#009465" },
+		{ "token": "annotation", "foreground": "#cc6666" },
+
+		{ "token": "type", "foreground": "#d35020" },
+		{ "token": "delimiter", "foreground": "#1f2344" },
+		{ "token": "delimiter.html", "foreground": "#767F8B" },
+		{ "token": "delimiter.xml", "foreground": "#767F8B" },
+
+		{ "token": "tag.html", "foreground": "#cf057b" },
+		{ "token": "tag", "foreground": "#ac8901" },
+		{ "token": "tag.id.pug", "foreground": "#DCD399" },
+		{ "token": "tag.class.pug", "foreground": "#cf057b" },
+		{ "token": "meta.scss", "foreground": "#ac8901" },
+		{ "token": "meta.tag", "foreground": "#009465" },
+		{ "token": "metatag", "foreground": "#DD6A6F" },
+		{ "token": "metatag.content.html", "foreground": "#1f2344" },
+		{ "token": "metatag.html", "foreground": "#cf057b" },
+		{ "token": "metatag.xml", "foreground": "#cf057b" },
+		{ "token": "metatag.php", "fontStyle": "bold" },
+
+		{ "token": "key", "foreground": "#DCD399" },
+		{ "token": "string.key.json", "foreground": "#1f2344" },
+		{ "token": "string.value.json", "foreground": "#009465" },
+		{ "token": "attribute.name", "foreground": "#1f2344" },
+		{ "token": "attribute.name.html", "foreground": "#1f2344" },
+		{ "token": "attribute.value", "foreground": "#009465" },
+		{ "token": "attribute.value.css", "foreground": "#009465" },
+
+		{ "token": "attribute.value.number.css", "foreground": "#d35020" },
+		{ "token": "attribute.value.unit.css", "foreground": "#d35020" },
+		{ "token": "attribute.value.hex.css", "foreground": "#009465" },
+
+		{ "token": "string", "foreground": "#009465" },
+		{ "token": "string.sql", "foreground": "#009465" },
+
+		{ "token": "keyword", "foreground": "#cf057b" },
+		{ "token": "keyword.flow", "foreground": "#cf057b" },
+		{ "token": "keyword.json", "foreground": "#009465" },
+		{ "token": "keyword.flow.scss", "foreground": "#cf057b" },
+		{ "token": "operator.scss", "foreground": "#909090" },
+		{ "token": "operator.sql", "foreground": "#778899" },
+		{ "token": "operator.swift", "foreground": "#909090" },
+		{ "token": "predefined.sql", "foreground": "#FF00FF" },
+		{ "token": "custom.function", "foreground": "#DCD399" },
+		{ "token": "keyword.function", "foreground": "#cf057b" },
+
+		{ "token": "functionName", "foreground": "#0564c4" }
+	],
+	"colors": {
+		"editor.background": "#ffffff",
+		"editor.foreground": "#1f2344",
+		"editor.inactiveSelectionBackground": "#eaeef2",
+		"editorIndentGuide.background": "#eaeef2",
+		"editorIndentGuide.activeBackground": "#a1a1a1",
+		"editor.selectionBackground": "#cee1f8",
+		"editor.selectionHighlightBorder": "#a1a1a1",
+
+		"editor.lineHighlightBackground": "#ffffff",
+		"editor.lineHighlightBorder": "#eaeef2",
+
+		"editorCursor.foreground": "#ccd1d9",
+		"editorWhitespace.foreground": "#a0a5b5",
+
+		"editorBracketHighlight.foreground1": "#1f2344",
+		"editorBracketHighlight.foreground2": "#009465",
+		"editorBracketHighlight.foreground3": "#d35020",
+		"editorBracketHighlight.foreground4": "#ce70d6",
+		"editorBracketHighlight.foreground5": "#b68b00",
+		"editorBracketHighlight.foreground6": "#0051ff",
+		"editorBracketHighlight.unexpectedBracket.foreground": "#e36575",
+
+		"textHighlight": "#cee1f8",
+		"accent": "#ab68ff",
+		"secondary": "#ffffff",
+		"primary": "#ffffff",
+		"pageHeader": "#ffffff",
+
+		"codePrimary": "#fbfbfb",
+		"codeHeader": "#eaeef2",
+		"backGround": "#eaeef2",
+		"darker": "#f6f7f8",
+		"hover": "#eaeef2",
+		"borderColor": "#d0d7de",
+
+		"textColor": "#1f2344",
+		"dimText": "#595959",
+		"noteText": "#8d8e92"
+	}
+}

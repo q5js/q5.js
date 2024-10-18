@@ -1,0 +1,107 @@
+{
+	"base": "vs-dark",
+	"inherit": false,
+	"rules": [
+		{ "token": "", "foreground": "#CECEDF", "background": "#131314" },
+		{ "token": "invalid", "foreground": "#f44747" },
+		{ "token": "emphasis", "fontStyle": "italic" },
+		{ "token": "strong", "fontStyle": "bold" },
+
+		{ "token": "variable", "foreground": "#74B0DF" },
+		{ "token": "variable.predefined", "foreground": "#DCD399" },
+		{ "token": "variable.parameter", "foreground": "#DCD399" },
+		{ "token": "constant", "foreground": "#e394dc" },
+		{ "token": "comment", "foreground": "#6A727C" },
+		{ "token": "number", "foreground": "#EED160" },
+		{ "token": "number.hex", "foreground": "#5BB498" },
+		{ "token": "regexp", "foreground": "#6ED6AD" },
+		{ "token": "annotation", "foreground": "#cc6666" },
+
+		{ "token": "type", "foreground": "#87c3ff" },
+		{ "token": "type.identifier.js", "foreground": "#E79679" },
+
+		{ "token": "delimiter", "foreground": "#CECEDF" },
+		{ "token": "delimiter.html", "foreground": "#767F8B" },
+		{ "token": "delimiter.xml", "foreground": "#767F8B" },
+
+		{ "token": "tag.html", "foreground": "#e394dc" },
+		{ "token": "tag", "foreground": "#EED160" },
+		{ "token": "tag.id.pug", "foreground": "#DCD399" },
+		{ "token": "tag.class.pug", "foreground": "#e394dc" },
+		{ "token": "meta.scss", "foreground": "#EED160" },
+		{ "token": "meta.tag", "foreground": "#87c3ff" },
+		{ "token": "metatag", "foreground": "#DD6A6F" },
+		{ "token": "metatag.content.html", "foreground": "#CECEDF" },
+		{ "token": "metatag.html", "foreground": "#e394dc" },
+		{ "token": "metatag.xml", "foreground": "#e394dc" },
+		{ "token": "metatag.php", "fontStyle": "bold" },
+
+		{ "token": "key", "foreground": "#DCD399" },
+		{ "token": "string.key.json", "foreground": "#CECEDF" },
+		{ "token": "string.value.json", "foreground": "#6ED6AD" },
+		{ "token": "attribute.name", "foreground": "#CECEDF" },
+		{ "token": "attribute.name.html", "foreground": "#87c3ff" },
+		{ "token": "attribute.value", "foreground": "#6ED6AD" },
+		{ "token": "attribute.value.css", "foreground": "#87c3ff" },
+
+		{ "token": "attribute.value.number.css", "foreground": "#E79679" },
+		{ "token": "attribute.value.unit.css", "foreground": "#E79679" },
+		{ "token": "attribute.value.hex.css", "foreground": "#6ED6AD" },
+
+		{ "token": "string", "foreground": "#6ED6AD" },
+		{ "token": "string.sql", "foreground": "#6ED6AD" },
+
+		{ "token": "keyword", "foreground": "#e394dc" },
+		{ "token": "keyword.flow", "foreground": "#e394dc" },
+		{ "token": "keyword.json", "foreground": "#87c3ff" },
+		{ "token": "keyword.flow.scss", "foreground": "#e394dc" },
+		{ "token": "operator.scss", "foreground": "#909090" },
+		{ "token": "operator.sql", "foreground": "#778899" },
+		{ "token": "operator.swift", "foreground": "#909090" },
+		{ "token": "predefined.sql", "foreground": "#FF00FF" },
+		{ "token": "custom.function", "foreground": "#DCD399" },
+		{ "token": "keyword.function", "foreground": "#e394dc" },
+
+		{ "token": "functionName", "foreground": "#87c3ff" }
+	],
+	"colors": {
+		"editor.background": "#131314",
+		"editor.foreground": "#bac1c3",
+		"editor.inactiveSelectionBackground": "#282a2c",
+		"editorIndentGuide.background": "#292b34",
+		"editorIndentGuide.activeBackground": "#44474e",
+		"editor.selectionBackground": "#1a4a7d",
+		"editor.selectionHighlightBorder": "#44474e",
+
+		"editor.lineHighlightBackground": "#131314",
+		"editor.lineHighlightBorder": "#282a2c",
+
+		"editorCursor.foreground": "#ccd1d9",
+		"editorWhitespace.foreground": "#a0a5b5",
+
+		"editorBracketHighlight.foreground6": "#E79679",
+		"editorBracketHighlight.foreground2": "#179fff",
+		"editorBracketHighlight.foreground3": "#E79679",
+		"editorBracketHighlight.foreground4": "#ce70d6",
+		"editorBracketHighlight.foreground5": "#ffc810",
+		"editorBracketHighlight.foreground1": "#CECEDF",
+		"editorBracketHighlight.unexpectedBracket.foreground": "#e36575",
+
+		"textHighlight": "#1a4a7d",
+		"accent": "#ab68ff",
+		"secondary": "#1b1b1c",
+		"primary": "#131314",
+		"pageHeader": "#131314",
+
+		"codePrimary": "#1e1f20",
+		"codeHeader": "#333537",
+		"backGround": "#0e0e0f",
+		"darker": "#252728",
+		"hover": "#333537",
+		"borderColor": "#242526",
+
+		"textColor": "#e3e3e3",
+		"dimText": "#bac1c3",
+		"noteText": "#767676"
+	}
+}

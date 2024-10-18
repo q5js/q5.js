@@ -6,11 +6,11 @@ Q5.modules.input = ($, q) => {
 	$.pmouseX = 0;
 	$.pmouseY = 0;
 	$.touches = [];
-	$.mouseButton = null;
+	$.mouseButton = '';
 	$.keyIsPressed = false;
 	$.mouseIsPressed = false;
-	$.key = null;
-	$.keyCode = null;
+	$.key = '';
+	$.keyCode = 0;
 
 	$.UP_ARROW = 38;
 	$.DOWN_ARROW = 40;

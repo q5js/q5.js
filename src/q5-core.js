@@ -236,12 +236,12 @@ function Q5(scope, parent, renderer) {
 		await $.setup();
 		$._setupDone = true;
 		if ($.frameCount) return;
-		if ($.ctx === null) $.createCanvas(100, 100);
+		if ($.ctx === null) $.createCanvas(200, 200);
 		if ($.ctx) $.resetMatrix();
 		raf($._draw);
 	}
 
-	if ((arguments.length && scope != 'namespace' && renderer != 'webgpu') || preloadDefined) {
+	if ((arguments.length && scope != 'instance' && scope != 'namespace' && renderer != 'webgpu') || preloadDefined) {
 		$.preload();
 		_start();
 	} else {

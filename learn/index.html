@@ -1,24 +1,47 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-	<style>
-		html,
-		body {
-			color: white;
-			background-color: black;
-			font-family: sans-serif;
-		}
-
-		a {
-			color: #b7ebff;
-		}
-	</style>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>q5 : Learn</title>
+	<link rel="icon" href="/q5js_logo.webp">
+	<link rel="stylesheet" type="text/css" href="docs.css" />
 </head>
 
-<body>
-	<h1>q5js.org/learn</h1>
-	<p>Coming soon...</p>
-	<p>For now, check out the <a href="https://github.com/q5js/q5.js">GitHub</a> readme file.</p>
+<body class="dark">
+	<header>
+		<div class="header-container">
+			<button id="toggleNavButton" class="toggle-nav-button"></button>
+			<button id="homeButton" class="home-button"></button>
+			<div class="input-wrapper search-bar">
+				<span class="magnify-glass"></span>
+				<input autocomplete="off" type="text" id="listSearch" class="dialog-input" placeholder="Search">
+				<div id="searchResultsContainer" class="search-results">
+					<div class="search-result prompt-message">Start typing to search the documentation</div>
+				</div>
+			</div><button id="themeToggle" class="light-theme"></button>
+		</div>
+	</header>
+	<div class="allContent">
+		<nav id="navbar" class="navopen">
+		</nav>
+		<main id="content" class="fade-in" style="scroll-behavior: auto;"></main>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.2/split.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/Tezumie/aijs-mini-editor@latest/mini-editor.js"></script>
+	<script>
+		//configuration
+		window.docsConfig = {
+			// theme: "dark",
+			// url: "https://github.com/your-repo",
+			// logo: "https://your-logo",
+		}
+	</script>
+	<script src="docs.js"></script>
 </body>
 
 </html>
