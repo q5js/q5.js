@@ -499,14 +499,24 @@ function executeDataScripts(content) {
 				wordWrap: 'on',
 				wordWrapColumn: 0,
 				wrappingIndent: 'same',
-				automaticLayout: true,
-				minimap: {
-					enabled: false
-				},
-				scrollbar: {
-					vertical: 'hidden',
-					horizontal: 'hidden',
-					handleMouseWheel: false
+				canvasWidth: 200,
+				autoRun: true,
+				title: 'Example',
+				image: 'https://aijs.io/images/newLogo.png',
+				canvasWidth: 200,
+				options: {
+					wordWrap: 'on',
+					wordWrapColumn: 0,
+					wrappingIndent: 'same',
+					minimap: {
+						enabled: false
+					},
+					scrollbar: {
+						verticalScrollbarSize: 0,
+						vertical: 'hidden',
+						horizontal: 'hidden',
+						handleMouseWheel: false
+					}
 				}
 			}
 		});
