@@ -148,7 +148,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' }
+		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
+		multisample: { count: 4 }
 	};
 	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
 

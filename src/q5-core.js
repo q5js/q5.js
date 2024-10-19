@@ -206,11 +206,11 @@ function Q5(scope, parent, renderer) {
 		$.preload = t.preload;
 		$.setup = t.setup;
 		$.draw = t.draw;
-	} else {
-		$.preload ??= () => {};
-		$.setup ??= () => {};
-		$.draw ??= () => {};
 	}
+	$.preload ??= () => {};
+	$.setup ??= () => {};
+	$.draw ??= () => {};
+
 	let userFns = [
 		'mouseMoved',
 		'mousePressed',
@@ -261,7 +261,7 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	if (preloadDefined || (arguments.length && scope != 'instance' && renderer != 'webgpu')) {
+	if (preloadDefined || $._isGlobal) {
 		_preStart();
 	} else {
 		setTimeout(_preStart, 32);

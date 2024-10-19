@@ -206,11 +206,11 @@ function Q5(scope, parent, renderer) {
 		$.preload = t.preload;
 		$.setup = t.setup;
 		$.draw = t.draw;
-	} else {
-		$.preload ??= () => {};
-		$.setup ??= () => {};
-		$.draw ??= () => {};
 	}
+	$.preload ??= () => {};
+	$.setup ??= () => {};
+	$.draw ??= () => {};
+
 	let userFns = [
 		'mouseMoved',
 		'mousePressed',
@@ -261,7 +261,7 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	if (preloadDefined || (arguments.length && scope != 'instance' && renderer != 'webgpu')) {
+	if (preloadDefined || $._isGlobal) {
 		_preStart();
 	} else {
 		setTimeout(_preStart, 32);
@@ -4152,7 +4152,8 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-list' }
+		primitive: { topology: 'triangle-list' },
+		multisample: { count: 4 }
 	};
 
 	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
@@ -4261,7 +4262,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			mappedAtCreation: true
 		});
 
-		new Float32Array(vertexBuffer.getMappedRange()).set(vertices);
+		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack);
 		vertexBuffer.unmap();
 
 		$.pass.setVertexBuffer(1, vertexBuffer);
@@ -4430,7 +4431,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' }
+		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
+		multisample: { count: 4 }
 	};
 	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
 

@@ -89,7 +89,8 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-list' }
+		primitive: { topology: 'triangle-list' },
+		multisample: { count: 4 }
 	};
 
 	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
@@ -198,7 +199,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			mappedAtCreation: true
 		});
 
-		new Float32Array(vertexBuffer.getMappedRange()).set(vertices);
+		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack);
 		vertexBuffer.unmap();
 
 		$.pass.setVertexBuffer(1, vertexBuffer);
