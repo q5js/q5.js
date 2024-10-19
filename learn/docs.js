@@ -619,6 +619,11 @@ function updateMainContent(sectionId, sections, callback) {
 			header.style.setProperty('--header-color', color);
 		}
 	});
+	document.querySelectorAll('code').forEach((code) => {
+		if (code.innerText[0] == '<') {
+			code.classList.add('type');
+		}
+	});
 }
 function updateStickyHeader() {
 	const h2Wrappers = document.querySelectorAll('.h2-wrapper');

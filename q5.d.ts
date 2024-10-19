@@ -101,7 +101,6 @@ noLoop();
 function draw() {
   circle(frameCount * 5, 100, 50);
 }
-
 function mouseClicked() {
   redraw();
 }
@@ -117,7 +116,6 @@ noLoop();
 function draw() {
   circle(frameCount * 5, 100, 50);
 }
-
 function mouseClicked() {
   loop();
 }
@@ -126,7 +124,7 @@ function mouseClicked() {
 
 	/** ⭐️
 	 * Sets the target frame rate or gets the sketch's current frame rate.
-	 * @param {number} [hertz] - desired frame rate, default is 60
+	 * @param {number} [hertz] - target frame rate, default is 60
 	 * @returns {number} current frame rate
 	 * @example
 function draw() {
