@@ -1,12 +1,11 @@
 Q5.modules.ai = ($) => {
 	$.askAI = (question = '') => {
+		Q5.disableFriendlyErrors = false;
 		throw Error('Ask AI ✨ ' + question);
 	};
 
-	$._aiErrorAssistance = async (e) => {
+	$._askAI = async (e) => {
 		let askAI = e.message?.includes('Ask AI ✨');
-		if (Q5.disableFriendlyErrors && !askAI) return;
-		if (askAI || !Q5.errorTolerant) $.noLoop();
 		let stackLines = e.stack?.split('\n');
 		if (!e.stack || stackLines.length <= 1) return;
 

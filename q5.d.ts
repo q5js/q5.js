@@ -50,16 +50,6 @@ declare global {
 	}
 
 	/** ⭐️
-	 * The setup function is called once when the program starts.
-	 * @example
-function setup() {
-	createCanvas(400, 200);
-	background('aqua');
-}
-	 */
-	function setup(): void;
-
-	/** ⭐️
 	 * The draw function is run 60 times per second by default.
 	 * @example
 function draw() {
@@ -68,6 +58,30 @@ function draw() {
 }
 	 */
 	function draw(): void;
+
+	/** ⭐️
+	 * The setup function is called once when the program starts.
+	 * @example
+function setup() {
+	createCanvas(200, 100);
+	background('aqua');
+}
+	 */
+	function setup(): void;
+
+	/** ⭐️
+	 * Use preload to load assets before the sketch starts and the
+	 * setup and draw functions are run.
+	 * @example
+let logo;
+function preload() {
+	logo = loadImage('/q5js_logo.webp');
+}
+function draw() {
+	background(logo);
+}
+	 */
+	function preload(): void;
 
 	/** ⭐️
 	 * The number of frames that have been displayed since the program started.
@@ -147,6 +161,12 @@ function draw() {
 	/** ⭐️
 	 * The desired frame rate of the sketch.
 	 * @returns {number} target frame rate
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	text(getTargetFrameRate(), 65, 120);
+}
 	 */
 	function getTargetFrameRate(): number;
 
@@ -155,35 +175,74 @@ function draw() {
 	 * in one second, which can be higher than the target frame rate. Useful
 	 * for analyzing performance.
 	 * @returns {number} frames per second
+	 * @example
+function draw() {
+	background(200);
+	frameRate(1);
+	textSize(64);
+	text(getFPS(), 8, 120);
+}
 	 */
 	function getFPS(): number;
 
 	/** ⭐️
-	 * Logs a message to the JavaScript console. Alias for the standard `console.log` function.
+	 * Logs a message to the JavaScript console. Alias for the standard
+	 * [`console.log`](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static) function.
 	 * @param {*} message - message to log
 	 */
 	function log(message: any): void;
 
 	/** ⭐️
-	 * Use preload to load assets before the sketch starts and the
-	 * setup function is run.
-	 */
-	function preload(): void;
-
-	/** ⭐️
-	 * The time passed since the last frame was drawn.
-	 */
-	var deltaTime: number;
-
-	/** ⭐️
 	 * The width of the window.
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	textAlign(CENTER, CENTER);
+	text(windowWidth, 100, 100);
+}
 	 */
 	var windowWidth: number;
 
 	/** ⭐️
 	 * The height of the window.
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	textAlign(CENTER, CENTER);
+	text(windowHeight, 100, 100);
+}
 	 */
 	var windowHeight: number;
+
+	/** ⭐️
+	 * The time passed since the last frame was drawn.
+	 * 
+	 * With the default frame rate of 60, delta time will be
+	 * approximately 16.6
+	 * 
+	 * Can be used to keep movements tied to real time if the sketch
+	 * is often dropping below the target frame rate. Although if frame 
+	 * rates are consistently low, consider reducing the target frame
+	 * rate instead.
+	 * @example
+function draw() {
+	background(200);
+	text(deltaTime, 60, 106);
+}
+	 * @example
+let x = 0;
+function draw() {
+	background(200);
+	// simulate frame rate drops
+	frameRate(random(30, 60));
+
+	x += deltaTime * 0.2;
+	circle(x % 200, 100, 50);
+}
+	 */
+	var deltaTime: number;
 
 	// ⬜️ canvas
 

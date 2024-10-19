@@ -32,7 +32,7 @@ Q5.renderers.q2d.drawing = ($) => {
 	$.background = function (c) {
 		$.ctx.save();
 		$.ctx.resetTransform();
-		if (c.canvas) $.image(c, 0, 0, $.width, $.height);
+		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
 		else {
 			if (Q5.Color && !c._q5Color) {
 				if (typeof c != 'string') c = $.color(...arguments);

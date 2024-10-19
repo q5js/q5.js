@@ -107,7 +107,7 @@ Q5.modules.canvas = ($, q) => {
 				new IntersectionObserver((e) => {
 					c.visible = e[0].isIntersecting;
 					if (c.visible) {
-						if ($._wasLooping) $.loop();
+						if ($._wasLooping && !$._loop) $.loop();
 					} else {
 						$._wasLooping = $._loop;
 						$.noLoop();

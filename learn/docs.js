@@ -221,10 +221,11 @@ function makeScripts(markdown) {
 	let codeBlockCount = 0;
 
 	return markdown.replace(/```js([\s\S]*?)```/g, (match) => {
-		const scriptContent = match.slice(5, -3);
+		const js = match.slice(5, -3);
+		js.replace(/new Q5\(\);/g, '');
 		return `
 <script id="script-${codeBlockCount++}" type="aijs">
-${scriptContent}
+${js}
 </script>`;
 	});
 }

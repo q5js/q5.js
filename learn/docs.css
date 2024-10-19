@@ -117,7 +117,15 @@ p {
 }
 
 a:not(.section-link) {
-	color: var(--href-color);
+	color: var(--blue1);
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
 }
 
 a img {
@@ -270,10 +278,6 @@ header {
 	width: 88%;
 	gap: 16px;
 	padding: 0 16px;
-}
-
-a {
-	text-decoration: none;
 }
 
 .search-filter-buttons {
