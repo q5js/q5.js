@@ -26,6 +26,12 @@ declare global {
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
 		/** ⭐️
+		 * Q5 reformats some errors to make them more readable for beginners.
+		 * @default false
+		 */
+		static disableFriendlyErrors: boolean;
+
+		/** ⭐️
 		 * Sets the default canvas context attributes for all Q5 instances
 		 * and graphics.
 		 * @default { alpha: false, colorSpace: 'display-p3' }

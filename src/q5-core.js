@@ -259,7 +259,7 @@ Q5._nodejs = typeof process == 'object';
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
-	console.error(func + ': ' + msg);
+	if (!Q5.disableFriendlyErrors) console.error(func + ': ' + msg);
 };
 Q5._validateParameters = () => true;
 

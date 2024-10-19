@@ -103,8 +103,15 @@ Q5.modules.canvas = ($, q) => {
 		if ($._scope != 'image') {
 			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
 			else if (window.IntersectionObserver) {
+				$._wasLooping = $._loop;
 				new IntersectionObserver((e) => {
 					c.visible = e[0].isIntersecting;
+					if (c.visible) {
+						if ($._wasLooping) $.loop();
+					} else {
+						$._wasLooping = $._loop;
+						$.noLoop();
+					}
 				}).observe(c);
 			}
 		}

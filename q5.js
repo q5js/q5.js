@@ -259,7 +259,7 @@ Q5._nodejs = typeof process == 'object';
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
-	console.error(func + ': ' + msg);
+	if (!Q5.disableFriendlyErrors) console.error(func + ': ' + msg);
 };
 Q5._validateParameters = () => true;
 
@@ -386,8 +386,15 @@ Q5.modules.canvas = ($, q) => {
 		if ($._scope != 'image') {
 			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
 			else if (window.IntersectionObserver) {
+				$._wasLooping = $._loop;
 				new IntersectionObserver((e) => {
 					c.visible = e[0].isIntersecting;
+					if (c.visible) {
+						if ($._wasLooping) $.loop();
+					} else {
+						$._wasLooping = $._loop;
+						$.noLoop();
+					}
 				}).observe(c);
 			}
 		}
