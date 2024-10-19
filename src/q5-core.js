@@ -202,9 +202,15 @@ function Q5(scope, parent, renderer) {
 	let t = globalScope || $;
 	$._isTouchAware = t.touchStarted || t.touchMoved || t.mouseReleased;
 	let preloadDefined = t.preload;
-	$.preload ??= () => {};
-	$.setup ??= () => {};
-	$.draw ??= () => {};
+	if ($._isGlobal) {
+		$.preload = t.preload;
+		$.setup = t.setup;
+		$.draw = t.draw;
+	} else {
+		$.preload ??= () => {};
+		$.setup ??= () => {};
+		$.draw ??= () => {};
+	}
 	let userFns = [
 		'mouseMoved',
 		'mousePressed',
