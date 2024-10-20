@@ -319,12 +319,35 @@ rect(20, 20, 60, 60);
 	/** ⬜️
 	 * Sets the fill color for shapes.
 	 * @param {string | number} color - fill color
+	 * @example
+  function draw() {
+  background(0);
+
+  fill(255, 0, 0);
+  circle(50, 100, 40);
+  fill(0, 255, 0);
+  circle(100, 100, 40);
+  fill(0, 0, 255);
+  circle(150, 100, 40);
+}
 	 */
 	function fill(color: string | number): void;
 
 	/** ⬜️
 	 * Sets the stroke (outline) color for shapes.
 	 * @param {string | number} color - stroke color
+	 * @example
+function draw() {
+  background(0);
+  noFill();
+
+  stroke(255, 0, 0);
+  circle(50, 100, 40);
+  stroke(0, 255, 0);
+  circle(100, 100, 40);
+  stroke(0, 0, 255);
+  circle(150, 100, 40);
+}
 	 */
 	function stroke(color: string | number): void;
 
