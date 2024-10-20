@@ -320,7 +320,7 @@ rect(20, 20, 60, 60);
 	 * Sets the fill color for shapes.
 	 * @param {string | number} color - fill color
 	 * @example
-  function draw() {
+function draw() {
   background(0);
 
   fill(255, 0, 0);
@@ -353,17 +353,48 @@ function draw() {
 
 	/** ⬜️
 	 * After calling this function, shapes will not be filled.
+	 * @example
+function draw() {
+  background(0);
+  stroke(255);
+  
+  fill(255);
+  circle(50, 100, 70);
+  noFill();
+  circle(150, 100, 70)
+}
 	 */
 	function noFill(): void;
 
 	/** ⬜️
 	 * After calling this function, shapes will not have a stroke (outline).
+	 * @example
+function draw() {
+  background(0);
+  fill(32, 88, 121);
+
+  stroke(255);
+  circle(50, 100, 70);
+  noStroke();
+  circle(150, 100, 70)
+}
 	 */
 	function noStroke(): void;
 
 	/** ⬜️
 	 * Sets the size of the stroke used for lines and the border around shapes.
 	 * @param {number} weight - size of the stroke in pixels
+	 * @example
+function draw() {
+  background(0);
+  fill(0);
+  stroke(255);
+
+  strokeWeight(1);
+  circle(50, 100, 70);
+  strokeWeight(5);
+  circle(150, 100, 70)
+}
 	 */
 	function strokeWeight(weight: number): void;
 
