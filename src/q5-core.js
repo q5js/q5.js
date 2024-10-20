@@ -12,6 +12,7 @@ function Q5(scope, parent, renderer) {
 	$._renderer = renderer || 'q2d';
 	$._preloadCount = 0;
 
+	let autoLoaded = scope == 'auto';
 	scope ??= 'global';
 	if (scope == 'auto') {
 		if (!(window.setup || window.draw)) return;
@@ -201,7 +202,7 @@ function Q5(scope, parent, renderer) {
 
 	let t = globalScope || $;
 	$._isTouchAware = t.touchStarted || t.touchMoved || t.mouseReleased;
-	let preloadDefined = t.preload;
+
 	if ($._isGlobal) {
 		$.preload = t.preload;
 		$.setup = t.setup;
@@ -239,9 +240,9 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	async function _start() {
+	async function _setup() {
 		$._startDone = true;
-		if ($._preloadCount > 0) return raf(_start);
+		if ($._preloadCount > 0) return raf(_setup);
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
@@ -251,21 +252,18 @@ function Q5(scope, parent, renderer) {
 		raf($._draw);
 	}
 
-	function _preStart() {
+	function _start() {
 		try {
 			$.preload();
-			if (!$._startDone) _start();
+			if (!$._startDone) _setup();
 		} catch (e) {
 			if ($._askAI) $._askAI(e);
 			throw e;
 		}
 	}
 
-	if (preloadDefined || $._isGlobal) {
-		_preStart();
-	} else {
-		setTimeout(_preStart, 32);
-	}
+	if (autoLoaded) _start();
+	else setTimeout(_start, 32);
 }
 
 Q5.renderers = {};
