@@ -37,7 +37,7 @@ To use addons, simply load them after q5.js:
 
 ## Documentation
 
-Documentation pages are coming to q5js.org soon! For now check out the [q5.d.ts](q5.d.ts) file.
+Browse the [q5 reference pages](https://q5js.org/learn) to learn how to use q5.js.
 
 See the [wiki](https://github.com/q5js/q5.js/wiki) for extended documentation of q5's exclusive features.
 

@@ -1091,12 +1091,7 @@ rect(20, 20, 60, 60);
 
 	/** ✨
 	 * Run this function before a line of code that isn't working as expected.
-	 * @param {string} [question] - optional question to ask the AI
-	 * @example
-function draw() {
-  askAI();
-  text('Hello!');
-}
+	 * @param {string} [question] - question to ask the AI
 	 */
 	function askAI(question?: string): void;
 

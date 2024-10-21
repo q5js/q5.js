@@ -21,7 +21,8 @@ Q5.modules.ai = ($) => {
 		parts = parts.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		if (askAI) lineNum++;
-		let fileUrl = parts.slice(0, -2).join(':');
+		parts[3] = parts[3].split(')')[0];
+		let fileUrl = parts.slice(0, 2).join(':');
 		let fileBase = fileUrl.split('/').at(-1);
 
 		try {

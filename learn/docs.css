@@ -863,13 +863,7 @@ img:not(.logo) {
 }
 
 .link-copy-button.copied::before {
-	content: "\f00c";
-}
-
-.link-copy-button.copied::after {
 	content: "Copied!";
-	padding-left: 5px;
-	padding-right: 4px;
 	font-size: 16px;
 }
 

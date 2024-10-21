@@ -400,9 +400,13 @@ Q5.modules.canvas = ($, q) => {
 		if ($._scope != 'image') {
 			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
 			else if (window.IntersectionObserver) {
-				$._wasLooping = $._loop;
+				let wasObserved = false;
 				new IntersectionObserver((e) => {
 					c.visible = e[0].isIntersecting;
+					if (!wasObserved) {
+						$._wasLooping = $._loop;
+						wasObserved = true;
+					}
 					if (c.visible) {
 						if ($._wasLooping && !$._loop) $.loop();
 					} else {
@@ -1721,7 +1725,8 @@ Q5.modules.ai = ($) => {
 		parts = parts.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		if (askAI) lineNum++;
-		let fileUrl = parts.slice(0, -2).join(':');
+		parts[3] = parts[3].split(')')[0];
+		let fileUrl = parts.slice(0, 2).join(':');
 		let fileBase = fileUrl.split('/').at(-1);
 
 		try {
