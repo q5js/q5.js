@@ -712,8 +712,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
 	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
 	$.resetMatrix = () => {
-		$.ctx.resetTransform();
-		$.scale($._pixelDensity);
+		if ($.ctx) {
+			$.ctx.resetTransform();
+			$.scale($._pixelDensity);
+		}
 	};
 
 	$.pushMatrix = () => $.ctx.save();
@@ -3590,8 +3592,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 					// v is the texture index
 					pass.setBindGroup(2, $._textureBindGroups[v]);
 				}
-				pass.draw(6, 1, imageVertOffset);
-				imageVertOffset += 6;
+				pass.draw(4, 1, imageVertOffset);
+				imageVertOffset += 4;
 			} else if (curPipelineIndex == 2) {
 				let o = drawStack[i + 2];
 				pass.setBindGroup(2, $._fonts[o].bindGroup);
@@ -4178,7 +4180,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-list' },
+		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
 	};
 
@@ -4266,8 +4268,6 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		// prettier-ignore
 		vertexStack.push(
 			l, t, 0, 0, ti,
-			r, t, 1, 0, ti,
-			l, b, 0, 1, ti,
 			r, t, 1, 0, ti,
 			l, b, 0, 1, ti,
 			r, b, 1, 1, ti

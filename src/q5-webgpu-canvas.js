@@ -502,8 +502,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 					// v is the texture index
 					pass.setBindGroup(2, $._textureBindGroups[v]);
 				}
-				pass.draw(6, 1, imageVertOffset);
-				imageVertOffset += 6;
+				pass.draw(4, 1, imageVertOffset);
+				imageVertOffset += 4;
 			} else if (curPipelineIndex == 2) {
 				let o = drawStack[i + 2];
 				pass.setBindGroup(2, $._fonts[o].bindGroup);

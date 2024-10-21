@@ -89,7 +89,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-list' },
+		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
 	};
 
@@ -177,8 +177,6 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		// prettier-ignore
 		vertexStack.push(
 			l, t, 0, 0, ti,
-			r, t, 1, 0, ti,
-			l, b, 0, 1, ti,
 			r, t, 1, 0, ti,
 			l, b, 0, 1, ti,
 			r, b, 1, 1, ti

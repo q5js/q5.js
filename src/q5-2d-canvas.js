@@ -107,8 +107,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
 	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
 	$.resetMatrix = () => {
-		$.ctx.resetTransform();
-		$.scale($._pixelDensity);
+		if ($.ctx) {
+			$.ctx.resetTransform();
+			$.scale($._pixelDensity);
+		}
 	};
 
 	$.pushMatrix = () => $.ctx.save();
