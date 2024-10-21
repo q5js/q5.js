@@ -485,9 +485,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			curPipelineIndex = -1,
 			curTextureIndex = -1;
 
-		for (let i = 0; i < drawStack.length; i += 3) {
+		for (let i = 0; i < drawStack.length; i += 2) {
 			let v = drawStack[i + 1];
-			let o = drawStack[i + 2];
 
 			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
@@ -496,8 +495,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 			if (curPipelineIndex == 0) {
 				// v is the number of vertices
-				pass.drawIndexed(v, 1, 0, drawVertOffset);
-				drawVertOffset += o;
+				pass.draw(v, 1, drawVertOffset);
+				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
 				if (curTextureIndex != v) {
 					// v is the texture index
@@ -506,12 +505,14 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(6, 1, imageVertOffset);
 				imageVertOffset += 6;
 			} else if (curPipelineIndex == 2) {
+				let o = drawStack[i + 2];
 				pass.setBindGroup(2, $._fonts[o].bindGroup);
 				pass.setBindGroup(3, $._textBindGroup);
 
 				// v is the number of characters in the text
 				pass.draw(4, v, 0, textCharOffset);
 				textCharOffset += v;
+				i++;
 			}
 		}
 

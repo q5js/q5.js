@@ -3573,9 +3573,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			curPipelineIndex = -1,
 			curTextureIndex = -1;
 
-		for (let i = 0; i < drawStack.length; i += 3) {
+		for (let i = 0; i < drawStack.length; i += 2) {
 			let v = drawStack[i + 1];
-			let o = drawStack[i + 2];
 
 			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
@@ -3584,8 +3583,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 			if (curPipelineIndex == 0) {
 				// v is the number of vertices
-				pass.drawIndexed(v, 1, 0, drawVertOffset);
-				drawVertOffset += o;
+				pass.draw(v, 1, drawVertOffset);
+				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
 				if (curTextureIndex != v) {
 					// v is the texture index
@@ -3594,12 +3593,14 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(6, 1, imageVertOffset);
 				imageVertOffset += 6;
 			} else if (curPipelineIndex == 2) {
+				let o = drawStack[i + 2];
 				pass.setBindGroup(2, $._fonts[o].bindGroup);
 				pass.setBindGroup(3, $._textBindGroup);
 
 				// v is the number of characters in the text
 				pass.draw(4, v, 0, textCharOffset);
 				textCharOffset += v;
+				i++;
 			}
 		}
 
@@ -3650,10 +3651,7 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 	let c = $.canvas,
 		drawStack = $.drawStack,
 		vertexStack = new Float32Array(1e7),
-		indexStack = new Uint32Array(1e6),
 		vertIndex = 0,
-		vertCount = 0,
-		idxBufferIndex = 0,
 		colorIndex;
 
 	let vertexShader = Q5.device.createShaderModule({
@@ -3730,7 +3728,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
-		primitive: { topology: 'triangle-list' },
+		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: {
 			count: 4
 		}
@@ -3746,76 +3744,79 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		v[i++] = ci;
 		v[i++] = ti;
 		vertIndex = i;
-		vertCount++;
 	};
 
-	const addIndex = (i1, i2, i3) => {
-		let is = indexStack,
-			ii = idxBufferIndex;
-		is[ii++] = i1;
-		is[ii++] = i2;
-		is[ii++] = i3;
-		idxBufferIndex = ii;
-	};
-
-	const addQuad = (x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) => {
+	const addRect = (x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) => {
 		let v = vertexStack,
 			i = vertIndex;
 
-		let i1 = vertCount++;
 		v[i++] = x1;
 		v[i++] = y1;
 		v[i++] = ci;
 		v[i++] = ti;
 
-		let i2 = vertCount++;
 		v[i++] = x2;
 		v[i++] = y2;
 		v[i++] = ci;
 		v[i++] = ti;
 
-		let i3 = vertCount++;
-		v[i++] = x3;
-		v[i++] = y3;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		let i4 = vertCount++;
 		v[i++] = x4;
 		v[i++] = y4;
 		v[i++] = ci;
 		v[i++] = ti;
 
+		v[i++] = x3;
+		v[i++] = y3;
+		v[i++] = ci;
+		v[i++] = ti;
+
 		vertIndex = i;
 
-		let is = indexStack,
-			ii = idxBufferIndex;
-		is[ii++] = i1;
-		is[ii++] = i2;
-		is[ii++] = i3;
-		is[ii++] = i1;
-		is[ii++] = i3;
-		is[ii++] = i4;
-		idxBufferIndex = ii;
-
-		drawStack.push(0, 6, 4);
+		drawStack.push(0, 4);
 	};
 
 	const addEllipse = (x, y, a, b, n, ci, ti) => {
 		let t = 0,
-			angleIncrement = $.TAU / n,
-			indicesStart = vertIndex / 4;
-		addVert(x, y, ci, ti); // Center vertex
-		for (let i = 0; i <= n; i++) {
-			let vx = x + a * Math.cos(t),
-				vy = y + b * Math.sin(t);
-			addVert(vx, vy, ci, ti);
-			if (i > 0) {
-				addIndex(indicesStart, indicesStart + i, indicesStart + i + 1);
-			}
+			angleIncrement = $.TAU / n;
+
+		let v = vertexStack,
+			i = vertIndex;
+
+		for (let j = 0; j <= n; j++) {
+			// add center vertex
+			v[i++] = x;
+			v[i++] = y;
+			v[i++] = ci;
+			v[i++] = ti;
+
+			// calculate perimeter vertex
+			let vx = x + a * Math.cos(t);
+			let vy = y + b * Math.sin(t);
+
+			// add perimeter vertex
+			v[i++] = vx;
+			v[i++] = vy;
+			v[i++] = ci;
+			v[i++] = ti;
+
 			t += angleIncrement;
 		}
-		drawStack.push(0, n * 3, n + 2);
+
+		// close the triangle strip
+		// add center vertex
+		v[i++] = x;
+		v[i++] = y;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		// add first perimeter vertex
+		v[i++] = x + a;
+		v[i++] = y;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		vertIndex = i;
+		drawStack.push(0, (n + 1) * 2 + 2);
 	};
 
 	$.rectMode = (x) => ($._rectMode = x);
@@ -3837,7 +3838,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 				ro = r + sw;
 
 			// stroke is simply a bigger rectangle drawn first
-			addQuad(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
+			addRect(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
 
 			// inner rectangle coordinates
 			t -= sw;
@@ -3848,9 +3849,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 		if ($._doFill) {
 			ci = colorIndex ?? $._fillIndex;
-
-			// two triangles make a rectangle
-			addQuad(l, t, r, t, r, b, l, b, ci, ti);
+			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		}
 	};
 
@@ -3947,14 +3946,16 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	let shapeVertCount;
+	let sv = []; // shape vertices
 
 	$.beginShape = () => {
 		shapeVertCount = 0;
+		sv = [];
 	};
 
 	$.vertex = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		addVert(x, -y, $._fillIndex, $._transformIndex);
+		sv.push(x, -y, $._fillIndex, $._transformIndex);
 		shapeVertCount++;
 	};
 
@@ -3963,36 +3964,54 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			throw new Error('A shape must have at least 3 vertices.');
 		}
 
-		let firstVert = vertCount - shapeVertCount;
+		// close the stroke if required
+		if (close) {
+			let firstIndex = 0;
+			let lastIndex = (shapeVertCount - 1) * 4;
+
+			let firstX = sv[firstIndex];
+			let firstY = sv[firstIndex + 1];
+			let lastX = sv[lastIndex];
+			let lastY = sv[lastIndex + 1];
+
+			if (firstX !== lastX || firstY !== lastY) {
+				// append the first vertex to close the shape
+				sv.push(firstX, firstY, sv[firstIndex + 2], sv[firstIndex + 3]);
+				shapeVertCount++;
+			}
+		}
 
 		if ($._doFill) {
-			// make a simple triangle fan, starting from the first vertex
-			for (let i = firstVert + 1; i < vertCount - 1; i++) {
-				addIndex(firstVert, i, i + 1);
+			// triangulate the shape
+			for (let i = 1; i < shapeVertCount - 1; i++) {
+				let v0 = 0;
+				let v1 = i * 4;
+				let v2 = (i + 1) * 4;
+
+				addVert(sv[v0], sv[v0 + 1], sv[v0 + 2], sv[v0 + 3]);
+				addVert(sv[v1], sv[v1 + 1], sv[v1 + 2], sv[v1 + 3]);
+				addVert(sv[v2], sv[v2 + 1], sv[v2 + 2], sv[v2 + 3]);
 			}
-			drawStack.push(0, (shapeVertCount - 2) * 3, shapeVertCount);
+			drawStack.push(0, (shapeVertCount - 2) * 3);
 		}
 
 		if ($._doStroke) {
-			let first = firstVert * 4,
-				last = vertIndex - 4;
-			for (let i = first; i < last; i += 4) {
-				let x1 = vertexStack[i],
-					y1 = vertexStack[i + 1],
-					x2 = vertexStack[i + 4],
-					y2 = vertexStack[i + 5];
-				$.line(x1, y1, x2, y2);
+			// draw lines between vertices
+			for (let i = 0; i < shapeVertCount - 1; i++) {
+				let v1 = i * 4;
+				let v2 = (i + 1) * 4;
+				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
 			}
 			if (close) {
-				let x1 = vertexStack[last],
-					y1 = vertexStack[last + 1],
-					x2 = vertexStack[first],
-					y2 = vertexStack[first + 1];
-				$.line(x1, y1, x2, y2);
+				let v1 = (shapeVertCount - 1) * 4;
+				let v2 = 0;
+				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
 			}
 		}
 
+		// reset for the next shape
 		shapeVertCount = 0;
+		sv = [];
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {
@@ -4004,12 +4023,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
-		$.beginShape();
-		$.vertex(x1, y1);
-		$.vertex(x2, y2);
-		$.vertex(x3, y3);
-		$.vertex(x4, y4);
-		$.endShape();
+		addRect(x1, y1, x2, y2, x3, y3, x4, y4, $._fillIndex, $._transformIndex);
 	};
 
 	$.background = (r, g, b, a) => {
@@ -4045,23 +4059,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		vertexBuffer.unmap();
 
 		$.pass.setVertexBuffer(0, vertexBuffer);
-
-		let indexBuffer = Q5.device.createBuffer({
-			size: idxBufferIndex * 4,
-			usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-			mappedAtCreation: true
-		});
-
-		new Uint32Array(indexBuffer.getMappedRange()).set(indexStack.slice(0, idxBufferIndex));
-		indexBuffer.unmap();
-
-		$.pass.setIndexBuffer(indexBuffer, 'uint32');
 	});
 
 	$._hooks.postRender.push(() => {
 		vertIndex = 0;
-		vertCount = 0;
-		idxBufferIndex = 0;
 	});
 };
 Q5.renderers.webgpu.image = ($, q) => {
