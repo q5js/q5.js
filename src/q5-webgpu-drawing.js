@@ -97,6 +97,29 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		vertIndex = i;
 	};
 
+	const addTri = (x1, y1, x2, y2, x3, y3, ci, ti) => {
+		let v = vertexStack,
+			i = vertIndex;
+
+		v[i++] = x1;
+		v[i++] = y1;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		v[i++] = x2;
+		v[i++] = y2;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		v[i++] = x3;
+		v[i++] = y3;
+		v[i++] = ci;
+		v[i++] = ti;
+
+		vertIndex = i;
+		drawStack.push(0, 3);
+	};
+
 	const addRect = (x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) => {
 		let v = vertexStack,
 			i = vertIndex;
@@ -122,7 +145,6 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		v[i++] = ti;
 
 		vertIndex = i;
-
 		drawStack.push(0, 4);
 	};
 

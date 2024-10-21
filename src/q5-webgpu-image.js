@@ -184,7 +184,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			r, b, 1, 1, ti
 		);
 
-		$.drawStack.push(1, img.textureIndex, 0);
+		$.drawStack.push(1, img.textureIndex);
 	};
 
 	$._hooks.preRender.push(() => {
