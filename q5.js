@@ -2316,7 +2316,7 @@ Q5.modules.math = ($, q) => {
 	$.abs = Math.abs;
 	$.ceil = Math.ceil;
 	$.exp = Math.exp;
-	$.floor = Math.floor;
+	$.floor = $.int = Math.floor;
 	$.loge = Math.log;
 	$.mag = Math.hypot;
 	$.max = Math.max;
