@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.7
+ * @version 2.8
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5

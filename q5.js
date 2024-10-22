@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.7
+ * @version 2.8
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -890,20 +890,20 @@ Q5.renderers.q2d.drawing = ($) => {
 		} else $.ellipse(x, y, d, d);
 	};
 	$.point = (x, y) => {
-		if (x.x) {
-			y = x.y;
-			x = x.x;
+		if ($._doStroke) {
+			if (x.x) {
+				y = x.y;
+				x = x.x;
+			}
+			if ($._da) {
+				x *= $._da;
+				y *= $._da;
+			}
+			$.ctx.beginPath();
+			$.ctx.moveTo(x, y);
+			$.ctx.lineTo(x, y);
+			$.ctx.stroke();
 		}
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
-		$.ctx.save();
-		$.ctx.beginPath();
-		$.ctx.arc(x, y, $.ctx.lineWidth / 2, 0, $.TAU);
-		$.ctx.fillStyle = $.ctx.strokeStyle;
-		$.ctx.fill();
-		$.ctx.restore();
 	};
 	function rect(x, y, w, h) {
 		if ($._da) {
@@ -3748,29 +3748,6 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		vertIndex = i;
 	};
 
-	const addTri = (x1, y1, x2, y2, x3, y3, ci, ti) => {
-		let v = vertexStack,
-			i = vertIndex;
-
-		v[i++] = x1;
-		v[i++] = y1;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		v[i++] = x2;
-		v[i++] = y2;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		v[i++] = x3;
-		v[i++] = y3;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		vertIndex = i;
-		drawStack.push(0, 3);
-	};
-
 	const addRect = (x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) => {
 		let v = vertexStack,
 			i = vertIndex;
@@ -4043,11 +4020,16 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		$.vertex(x1, y1);
 		$.vertex(x2, y2);
 		$.vertex(x3, y3);
-		$.endShape();
+		$.endShape(true);
 	};
 
 	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
-		addRect(x1, y1, x2, y2, x3, y3, x4, y4, $._fillIndex, $._transformIndex);
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.vertex(x2, y2);
+		$.vertex(x3, y3);
+		$.vertex(x4, y4);
+		$.endShape(true);
 	};
 
 	$.background = (r, g, b, a) => {

@@ -102,8 +102,6 @@ Use q5.js in your own project by adding this line to your HTML file:
 <script src="https://q5js.org/q5.js"></script>
 ```
 
-Full documentation is coming soon, for now see q5's [GitHub README](https://github.com/q5js/q5.js).
-
 # 11-1
 
 ## Join our community 🤝
@@ -118,7 +116,7 @@ If you'd like to work on q5.js, check out our [Project Planning Board](https://g
 
 This project aims to be the spiritual successor to the invaluable work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/), [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org), and all contributors to these projects.
 
-The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended his brilliant codebase!
+The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended his codebase.
 
 q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley) and [@Tezumie](https://github.com/Tezumie).
 

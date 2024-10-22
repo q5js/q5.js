@@ -144,20 +144,20 @@ Q5.renderers.q2d.drawing = ($) => {
 		} else $.ellipse(x, y, d, d);
 	};
 	$.point = (x, y) => {
-		if (x.x) {
-			y = x.y;
-			x = x.x;
+		if ($._doStroke) {
+			if (x.x) {
+				y = x.y;
+				x = x.x;
+			}
+			if ($._da) {
+				x *= $._da;
+				y *= $._da;
+			}
+			$.ctx.beginPath();
+			$.ctx.moveTo(x, y);
+			$.ctx.lineTo(x, y);
+			$.ctx.stroke();
 		}
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
-		$.ctx.save();
-		$.ctx.beginPath();
-		$.ctx.arc(x, y, $.ctx.lineWidth / 2, 0, $.TAU);
-		$.ctx.fillStyle = $.ctx.strokeStyle;
-		$.ctx.fill();
-		$.ctx.restore();
 	};
 	function rect(x, y, w, h) {
 		if ($._da) {
