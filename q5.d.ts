@@ -54,7 +54,7 @@ declare global {
 	 * @example
 function draw() {
   background('lightgray');
-	circle(frameCount % 200, 100, 50);
+	circle(frameCount % 200, 100, 80);
 }
 	 */
 	function draw(): void;
@@ -98,7 +98,7 @@ function draw() {
 	 * Stops the draw loop.
 	 * @example
 function draw() {
-  circle(frameCount * 5, 100, 50);
+  circle(frameCount * 5, 100, 80);
   noLoop();
 }
 	 */
@@ -113,7 +113,7 @@ new Q5();
 noLoop();
 
 function draw() {
-  circle(frameCount * 5, 100, 50);
+  circle(frameCount * 5, 100, 80);
 }
 function mouseClicked() {
   redraw();
@@ -128,7 +128,7 @@ new Q5();
 noLoop();
 
 function draw() {
-  circle(frameCount * 5, 100, 50);
+  circle(frameCount * 5, 100, 80);
 }
 function mouseClicked() {
   loop();
@@ -147,7 +147,7 @@ function draw() {
 	if (mouseIsPressed) frameRate(10);
 	else frameRate(60);
 
-	circle(frameCount % 200, 100, 50);
+	circle(frameCount % 200, 100, 80);
 }
 	 * @example
 function draw() {
@@ -239,7 +239,7 @@ function draw() {
 	frameRate(random(30, 60));
 
 	x += deltaTime * 0.2;
-	circle(x % 200, 100, 50);
+	circle(x % 200, 100, 20);
 }
 	 */
 	var deltaTime: number;
@@ -255,9 +255,18 @@ function draw() {
 	 * @param {number} [w] - width of the canvas
 	 * @param {number} [h] - height of the canvas
 	 * @param {Object} [options] - options for the canvas
-	 * @param {boolean} [options.alpha] - whether the canvas should have an alpha channel, default is false
+	 * @param {boolean} [options.alpha] - whether the canvas should have an alpha channel that allows it to be seen through, default is false
 	 * @param {string} [options.colorSpace] - color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
 	 * @returns {HTMLCanvasElement} created canvas element
+	 * @example
+function setup() {
+	createCanvas(200, 200, { alpha: true });
+}
+
+function draw() {
+	clear();
+	circle(frameCount % 200, 100, 80);
+}
 	 */
 	function createCanvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): HTMLCanvasElement;
 
@@ -268,100 +277,70 @@ function draw() {
 
 	/** ⬜️
 	 * The width of the canvas.
+	 * Can also be accessed via `canvas.w`/`canvas.width`.
 	 */
 	var width: number;
 
 	/** ⬜️
 	 * The height of the canvas.
+	 * Can also be accessed via `canvas.h`/`canvas.height`.
 	 */
 	var height: number;
 
 	/** ⬜️
-	 * Resizes the canvas to the specified width and height.
-	 * @param {number} w - width of the canvas
-	 * @param {number} h - height of the canvas
+	 * Clears the canvas, making every pixel completely transparent.
+	 *
+	 * The canvas can only be seen through if it has an alpha channel though.
 	 */
-	function resizeCanvas(w: number, h: number): void;
+	function clear(): void;
 
 	/** ⬜️
-	 * Sets the pixel density of the canvas.
-	 * @param {number} v - pixel density value
-	 * @returns {number} pixel density
-	 */
-	function pixelDensity(v: number): number;
-
-	/** ⬜️
-	 * Returns the current display density.
-	 * @returns {number} display density
-	 */
-	function displayDensity(): number;
-
-	/** ⬜️
-	 * Enables or disables fullscreen mode.
-	 * @param {boolean} [v] - boolean indicating whether to enable or disable fullscreen mode
-	 * @returns {void | boolean} true if fullscreen mode is enabled, false otherwise
-	 */
-	function fullscreen(v?: boolean): void | boolean;
-
-	/** ⬜️
-	 * Any position coordinates or dimensions you use will be scaled based
-	 * on the unit provided to this function.
-	 * @param {number} unit - unit to scale by
-	 * @example
-new Q5();
-createCanvas(200, 200);
-flexibleCanvas(100);
-// rect will appear in the middle of the canvas
-rect(20, 20, 60, 60);
-	 */
-	function flexibleCanvas(unit: number): void;
-
-	/** ⬜️
-	 * Sets the fill color for shapes.
-	 * @param {string | number} color - fill color
+	 * Sets the fill color for shapes. The default is white.
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
+	 * @param {string | Color} color - fill color
 	 * @example
 function draw() {
-  background(0);
+	background(200);
 
-  fill(255, 0, 0);
-  circle(50, 100, 40);
-  fill(0, 255, 0);
-  circle(100, 100, 40);
-  fill(0, 0, 255);
-  circle(150, 100, 40);
+  fill('red');
+  circle(80, 80, 80);
+
+	fill('lime');
+  square(80, 80, 80);
 }
 	 */
-	function fill(color: string | number): void;
+	function fill(color: string | Color): void;
 
 	/** ⬜️
-	 * Sets the stroke (outline) color for shapes.
-	 * @param {string | number} color - stroke color
+	 * Sets the stroke (outline) color for shapes. The default is black.
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
+	 * @param {string | Color} color - stroke color
 	 * @example
 function draw() {
-  background(0);
-  noFill();
+  background(200);
+	fill(36);
 
-  stroke(255, 0, 0);
-  circle(50, 100, 40);
-  stroke(0, 255, 0);
-  circle(100, 100, 40);
-  stroke(0, 0, 255);
-  circle(150, 100, 40);
+  stroke('red');
+  circle(80, 80, 80);
+	stroke('lime');
+  square(80, 80, 80);
 }
 	 */
-	function stroke(color: string | number): void;
+	function stroke(color: string | Color): void;
 
 	/** ⬜️
 	 * After calling this function, shapes will not be filled.
 	 * @example
 function draw() {
-  background(0);
-  stroke(255);
-  
-  fill(255);
-  circle(50, 100, 70);
-  noFill();
-  circle(150, 100, 70)
+  background(200);
+
+	noFill();
+  stroke('red');
+  circle(80, 80, 80);
+	stroke('lime');
+  square(80, 80, 80);
 }
 	 */
 	function noFill(): void;
@@ -370,13 +349,13 @@ function draw() {
 	 * After calling this function, shapes will not have a stroke (outline).
 	 * @example
 function draw() {
-  background(0);
-  fill(32, 88, 121);
+  background(200);
+  fill(36);
+  stroke('red');
+  circle(80, 80, 80);
 
-  stroke(255);
-  circle(50, 100, 70);
-  noStroke();
-  circle(150, 100, 70)
+	noStroke();
+  square(80, 80, 80);
 }
 	 */
 	function noStroke(): void;
@@ -385,24 +364,31 @@ function draw() {
 	 * Sets the size of the stroke used for lines and the border around shapes.
 	 * @param {number} weight - size of the stroke in pixels
 	 * @example
-function draw() {
-  background(0);
-  fill(0);
-  stroke(255);
+function setup() {
+	createCanvas(200, 200);
+	background(200);
+	stroke('red');
+  circle(50, 100, 80);
 
-  strokeWeight(1);
-  circle(50, 100, 70);
-  strokeWeight(5);
-  circle(150, 100, 70)
+  strokeWeight(20);
+  circle(150, 100, 80)
 }
 	 */
 	function strokeWeight(weight: number): void;
 
 	/** ⬜️
-	 * Sets the global opacity, `ctx.globalAlpha`, which
-	 * affects all subsequent drawing operations.
-	 * 0 is completely transparent, 255 is completely opaque.
-	 * @param {number} alpha - opacity level
+	 * Sets the global opacity, which affects all subsequent drawing operations, except `background`. Default is 1, fully opaque.
+	 * @param {number} alpha - opacity level, ranging from 0 to 1
+	 * @example
+function draw() {
+	background(200);
+	
+	opacity(1);
+	circle(80, 80, 80);
+
+	opacity(0.2);
+	square(80, 80, 80);
+}
 	 */
 	function opacity(alpha: number): void;
 
@@ -489,10 +475,50 @@ function draw() {
 	function pop(): void;
 
 	/** ⬜️
+	 * Resizes the canvas to the specified width and height.
+	 * @param {number} w - width of the canvas
+	 * @param {number} h - height of the canvas
+	 */
+	function resizeCanvas(w: number, h: number): void;
+
+	/** ⬜️
+	 * Sets the pixel density of the canvas.
+	 * @param {number} v - pixel density value
+	 * @returns {number} pixel density
+	 */
+	function pixelDensity(v: number): number;
+
+	/** ⬜️
+	 * Returns the current display density.
+	 * @returns {number} display density
+	 */
+	function displayDensity(): number;
+
+	/** ⬜️
+	 * Enables or disables fullscreen mode.
+	 * @param {boolean} [v] - boolean indicating whether to enable or disable fullscreen mode
+	 * @returns {void | boolean} true if fullscreen mode is enabled, false otherwise
+	 */
+	function fullscreen(v?: boolean): void | boolean;
+
+	/** ⬜️
+	 * Any position coordinates or dimensions you use will be scaled based
+	 * on the unit provided to this function.
+	 * @param {number} unit - unit to scale by
+	 * @example
+new Q5();
+createCanvas(200, 200);
+flexibleCanvas(100);
+// rect will appear in the middle of the canvas
+rect(20, 20, 60, 60);
+	 */
+	function flexibleCanvas(unit: number): void;
+
+	/** ⬜️
 	 * Creates a graphics buffer.
 	 * @param {number} w - width
 	 * @param {number} h - height
-	 * @param {CanvasRenderingContext2DSettings} [opt] - options
+	 * @param {Object} [opt] - options
 	 * @returns {Q5} a new Q5 graphics buffer
 	 */
 	function createGraphics(w: number, h: number, opt?: CanvasRenderingContext2DSettings): Q5;
