@@ -45,8 +45,8 @@ Q5.renderers.q2d.image = ($, q) => {
 		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
 
 		function loaded(img) {
-			g.canvas.defaultWidth = img.width * $._defaultImageScale;
-			g.canvas.defaultHeight = img.height * $._defaultImageScale;
+			g.defaultWidth = img.width * $._defaultImageScale;
+			g.defaultHeight = img.height * $._defaultImageScale;
 			g.naturalWidth = img.naturalWidth;
 			g.naturalHeight = img.naturalHeight;
 			g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
@@ -85,8 +85,8 @@ Q5.renderers.q2d.image = ($, q) => {
 			drawable = drawable.context.canvas;
 		}
 
-		dw ??= drawable.defaultWidth || drawable.width || img.videoWidth;
-		dh ??= drawable.defaultHeight || drawable.height || img.videoHeight;
+		dw ??= img.defaultWidth || drawable.width || img.videoWidth;
+		dh ??= img.defaultHeight || drawable.height || img.videoHeight;
 		if ($._imageMode == 'center') {
 			dx -= dw * 0.5;
 			dy -= dh * 0.5;
