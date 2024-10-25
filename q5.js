@@ -441,6 +441,8 @@ Q5.modules.canvas = ($, q) => {
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
 		g.createCanvas.call($, w, h, opt);
+		g.defaultWidth = w * $._defaultImageScale;
+		g.defaultHeight = h * $._defaultImageScale;
 		return g;
 	};
 
@@ -1238,7 +1240,10 @@ Q5.renderers.q2d.image = ($, q) => {
 		opt ??= {};
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace || Q5.canvasOptions.colorSpace;
-		return new Q5.Image(w, h, opt);
+		let img = new Q5.Image(w, h, opt);
+		img.defaultWidth = w * $._defaultImageScale;
+		img.defaultHeight = h * $._defaultImageScale;
+		return img;
 	};
 
 	$.loadImage = function (url, cb, opt) {
