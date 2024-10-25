@@ -2124,6 +2124,7 @@ main {
 		if (c.renderQuality == 'pixelated') {
 			c.classList.add('q5-pixelated');
 			$.pixelDensity(1);
+			$.defaultImageScale(1);
 			if ($.noSmooth) $.noSmooth();
 			if ($.textFont) $.textFont('monospace');
 		}
