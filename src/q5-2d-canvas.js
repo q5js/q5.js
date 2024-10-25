@@ -100,6 +100,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.rotate(r);
 	};
 	$.scale = (x, y) => {
+		if (x.x) {
+			y = x.y;
+			x = x.x;
+		}
 		y ??= x;
 		$.ctx.scale(x, y);
 	};

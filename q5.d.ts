@@ -12,7 +12,8 @@ declare global {
 		 * Creates an instance of Q5.
 		 *
 		 * Running `new Q5()` enables the use of q5 functions and variables
-		 * anywhere in your code.
+		 * anywhere in your code. You can also start Q5 in global mode by 
+		 * running [`createCanvas`](https://q5js.org/learn/#canvas-createCanvas).
 		 * @param {string | Function} [scope] -
 		 *   - "global": (default) top-level global mode, adds q5 functions
 		 * and variables to the global scope
@@ -22,6 +23,7 @@ declare global {
 		 * @example
 		 * new Q5();
 		 * createCanvas(200, 100);
+		 * circle(100, 50, 80);
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
@@ -109,7 +111,7 @@ function draw() {
 	 * it calls the draw function once.
 	 * @param {number} [n] - number of times to redraw the canvas, default is 1
 	 * @example
-new Q5();
+createCanvas(200, 200);
 noLoop();
 
 function draw() {
@@ -124,7 +126,7 @@ function mouseClicked() {
 	/** ⭐️
 	 * Starts the draw loop again if it was stopped.
 	 * @example
-new Q5();
+createCanvas(200, 200);
 noLoop();
 
 function draw() {
@@ -249,6 +251,9 @@ function draw() {
 	/** ⬜️
 	 * Creates a canvas element. If no input parameters are provided, the
 	 * canvas will be the size of the window.
+	 * 
+	 * You can start q5 in top level global mode by running this function
+	 * before the rest of your code.
 	 *
 	 * If this function is not run by the user, a 200x200 canvas will be
 	 * created automatically.
@@ -259,9 +264,7 @@ function draw() {
 	 * @param {string} [options.colorSpace] - color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
 	 * @returns {HTMLCanvasElement} created canvas element
 	 * @example
-function setup() {
-	createCanvas(200, 200, { alpha: true });
-}
+createCanvas(200, 200, { alpha: true });
 
 function draw() {
 	clear();
@@ -506,7 +509,6 @@ function draw() {
 	 * on the unit provided to this function.
 	 * @param {number} unit - unit to scale by
 	 * @example
-new Q5();
 createCanvas(200, 200);
 flexibleCanvas(100);
 // rect will appear in the middle of the canvas
@@ -538,12 +540,12 @@ rect(20, 20, 60, 60);
 	/** 💻
 	 * The `displayMode` function lets you customize how your canvas is presented.
 	 * @param {string} mode -
-	 *   - "normal": no styling to canvas or its parent element
+	 *   - "normal": (default) no styling to canvas or its parent element
 	 *   - "centered": canvas will be centered horizontally and vertically within its parent and if it's display size is bigger than its parent it will not clip
 	 *   - "maxed": canvas will fill the parent element, same as fullscreen for a global mode canvas inside a `main` element
 	 *   - "fullscreen": canvas will fill the screen with letterboxing if necessary to preserve its aspect ratio, like css object-fit contain
 	 * @param {string} renderQuality -
-	 *   - "default": pixelDensity set to displayDensity
+	 *   - "smooth": (default) no changes to the default render quality
 	 *   - "pixelated": pixelDensity set to 1 and various css styles are applied to the canvas to make it render without image smoothing
 	 * @param {number} scale - can be given as a string (for example "x2") or a number
 	 */
@@ -610,16 +612,7 @@ rect(20, 20, 60, 60);
 	 * @param {number} [mode] - drawing mode, can be `PIE`, `CHORD`, or `OPEN`
 	 * @param {number} [detail] - resolution of the arc
 	 */
-	function arc(
-		x: number,
-		y: number,
-		w: number,
-		h: number,
-		start: number,
-		stop: number,
-		mode?: number,
-		detail?: number
-	): void;
+	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number, detail?: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a line on the canvas.
@@ -795,16 +788,74 @@ rect(20, 20, 60, 60);
 	// 🌆 image
 
 	/** 🌆
-	 * Applies a filter to the image.
-	 * @param {string} type - type of filter
-	 * @param {number} [value] - optional parameter, depending on filter type
+	 * Loads an image from a URL and optionally runs a callback function.
+	 * @param {string} url - url of the image to load
+	 * @param {(img: any) => void} [cb] - callback function after the image is loaded
+	 * @param {any} [opt] - optional parameters for loading the image
+	 * @example
+createCanvas(200, 200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function draw() {
+	image(logo, 0, 0, 200, 200);
+}
 	 */
-	function filter(type: string, value?: number): void;
+	function loadImage(url: string, cb?: (img: any) => void, opt?: any): void;
+
+	/** 🌆
+	 * Draws an image to the canvas.
+	 * @param {any} img - image to draw
+	 * @param {number} dx - x position to draw the image at
+	 * @param {number} dy - y position to draw the image at
+	 * @param {number} [dw] - width of the destination image
+	 * @param {number} [dh] - height of the destination image
+	 * @param {number} [sx] - x position in the source to start clipping a subsection from
+	 * @param {number} [sy] - y position in the source to start clipping a subsection from
+	 * @param {number} [sw] - width of the subsection of the source image
+	 * @param {number} [sh] - height of the subsection of the source image
+	 * @example
+createCanvas(200, 200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function draw() {
+  image(logo, 0, 0, 200, 200, 256, 256, 512, 512);
+}
+	 */
+	function image(img: any, dx: number, dy: number, dw?: number, dh?: number, sx?: number, sy?: number, sw?: number, sh?: number): void;
+
+	/** 🌆
+	 * Sets the image mode, which determines the position and alignment of images drawn on the canvas.
+	 * - `CORNER`: (default) images will be drawn from the top-left corner
+	 * - `CORNERS`: images will be drawn from the top-left to the bottom-right corner
+	 * - `CENTER`: images will be drawn centered at (dx, dy)
+	 * @param {string} mode
+	 * @example
+createCanvas(200, 200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function draw() {
+	imageMode(CENTER);
+	image(logo, 100, 100, 200, 200);
+}
+	 */
+	function imageMode(mode: string): void;
 
 	/** 🌆
 	 * Resizes the image.
 	 * @param {number} w - new width
 	 * @param {number} h - new height
+	 * @example
+createCanvas(200, 200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function setup() {
+	logo.resize(128, 128);
+	image(logo, 0, 0, 200, 200);
+}
 	 */
 	function resize(w: number, h: number): void;
 
@@ -813,6 +864,28 @@ rect(20, 20, 60, 60);
 	 * @returns {Image}
 	 */
 	function trim(): Image;
+
+	/** 🌆
+	 * Enables smooth image rendering.
+	 */
+	function smooth(): void;
+
+	/** 🌆
+	 * Disables smooth image rendering for a pixelated look.
+	 */
+	function noSmooth(): void;
+
+	/** 🌆
+	 * Applies a tint (color overlay) to the drawing.
+	 * Tinting affects all subsequent images drawn.
+	 * @param {string | number} color - tint color
+	 */
+	function tint(color: string | number): void;
+
+	/** 🌆
+	 * Images drawn after this function is run will not be tinted.
+	 */
+	function noTint(): void;
 
 	/** 🌆
 	 * Masks the image with another image.
@@ -831,25 +904,27 @@ rect(20, 20, 60, 60);
 	/** 🌆
 	 * Displays a region of the image on another region of the image.
 	 * Can be used to create a detail inset, aka a magnifying glass effect.
-	 * @param {number} srcX - x-coordinate of the source region
-	 * @param {number} srcY - y-coordinate of the source region
-	 * @param {number} srcW - width of the source region
-	 * @param {number} srcH - height of the source region
-	 * @param {number} dstX - x-coordinate of the destination region
-	 * @param {number} dstY - y-coordinate of the destination region
-	 * @param {number} dstW - width of the destination region
-	 * @param {number} dstH - height of the destination region
+	 * @param {number} sx - x-coordinate of the source region
+	 * @param {number} sy - y-coordinate of the source region
+	 * @param {number} sw - width of the source region
+	 * @param {number} sh - height of the source region
+	 * @param {number} dx - x-coordinate of the destination region
+	 * @param {number} dy - y-coordinate of the destination region
+	 * @param {number} dw - width of the destination region
+	 * @param {number} dh - height of the destination region
+	 * @example
+let logo;
+function preload() {
+  logo = loadImage('/q5js_logo.webp');
+}
+function setup() {
+	logo.inset(256, 256, 512, 512, 0, 0, 200, 200);
+}
+function draw() {
+  
+}
 	 */
-	function inset(
-		srcX: number,
-		srcY: number,
-		srcW: number,
-		srcH: number,
-		dstX: number,
-		dstY: number,
-		dstW: number,
-		dstH: number
-	): void;
+	function inset(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
 
 	/** 🌆
 	 * Returns a copy of the image.
@@ -894,76 +969,17 @@ rect(20, 20, 60, 60);
 	function updatePixels(): void;
 
 	/** 🌆
-	 * Enables smooth image rendering.
+	 * Masks the image with another image.
+	 * @param {Image} img - image to use as a mask
 	 */
-	function smooth(): void;
+	function mask(img: Image): void;
 
 	/** 🌆
-	 * Disables smooth image rendering for a pixelated look.
+	 * Applies a filter to the image.
+	 * @param {string} type - type of filter
+	 * @param {number} [value] - optional parameter, depending on filter type
 	 */
-	function noSmooth(): void;
-
-	/** 🌆
-	 * Applies a tint (color overlay) to the drawing.
-	 * Tinting affects all subsequent images drawn.
-	 * @param {string | number} color - tint color
-	 */
-	function tint(color: string | number): void;
-
-	/** 🌆
-	 * Images drawn after this function is run will not be tinted.
-	 */
-	function noTint(): void;
-
-	/** 🌆
-	 * Creates a new image.
-	 * @param {number} w - width
-	 * @param {number} h - height
-	 * @param {any} [opt] - optional settings for the image
-	 * @returns {Image}
-	 */
-	function createImage(w: number, h: number, opt?: any): Image;
-
-	/** 🌆
-	 * Sets the image mode, which determines the position and alignment of images drawn on the canvas.
-	 * - 'CORNER': images will be drawn from the top-left corner (default).
-	 * - 'CORNERS': images will be drawn from the top-left to the bottom-right corner.
-	 * - 'CENTER': images will be drawn centered at (dx, dy).
-	 * @param {string} mode
-	 */
-	function imageMode(mode: string): void;
-
-	/** 🌆
-	 * Draws an image to the canvas.
-	 * @param {any} img - image to draw
-	 * @param {number} dx - x-coordinate of the destination corner
-	 * @param {number} dy - y-coordinate of the destination corner
-	 * @param {number} [dWidth] - width of the destination image
-	 * @param {number} [dHeight] - height of the destination image
-	 * @param {number} [sx] - x-coordinate of the source corner
-	 * @param {number} [sy] - y-coordinate of the source corner
-	 * @param {number} [sWidth] - width of the source image
-	 * @param {number} [sHeight] - height of the source image
-	 */
-	function image(
-		img: any,
-		dx: number,
-		dy: number,
-		dWidth?: number,
-		dHeight?: number,
-		sx?: number,
-		sy?: number,
-		sWidth?: number,
-		sHeight?: number
-	): void;
-
-	/** 🌆
-	 * Loads an image from a URL and optionally runs a callback function.
-	 * @param {string} url - uRL of the image to load
-	 * @param {(img: any) => void} [cb] - callback function after the image is loaded
-	 * @param {any} [opt] - optional parameters for loading the image
-	 */
-	function loadImage(url: string, cb?: (img: any) => void, opt?: any): void;
+	function filter(type: string, value?: number): void;
 
 	/** 🌆
 	 * Converts the image to black and white pixels depending if they are above or below a certain threshold.
@@ -1004,6 +1020,15 @@ rect(20, 20, 60, 60);
 	 * Applies a Gaussian blur to the image.
 	 */
 	const BLUR: 8;
+
+	/** 🌆
+	 * Creates a new image.
+	 * @param {number} w - width
+	 * @param {number} h - height
+	 * @param {any} [opt] - optional settings for the image
+	 * @returns {Image}
+	 */
+	function createImage(w: number, h: number, opt?: any): Image;
 
 	// ✍️ text
 

@@ -42,9 +42,15 @@ Q5.renderers.q2d.image = ($, q) => {
 		opt = typeof last == 'object' ? last : null;
 
 		let g = $.createImage(1, 1, opt);
+		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
 
 		function loaded(img) {
-			g.resize(img.naturalWidth || img.width, img.naturalHeight || img.height);
+			g.canvas.defaultWidth = img.width * $._defaultImageScale;
+			g.canvas.defaultHeight = img.height * $._defaultImageScale;
+			g.naturalWidth = img.naturalWidth;
+			g.naturalHeight = img.naturalHeight;
+			g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
+
 			g.ctx.drawImage(img, 0, 0);
 			q._preloadCount--;
 			if (cb) cb(g);
@@ -61,7 +67,7 @@ Q5.renderers.q2d.image = ($, q) => {
 			let img = new window.Image();
 			img.src = url;
 			img.crossOrigin = 'Anonymous';
-			img._pixelDensity = 1;
+			img._pixelDensity = pd;
 			img.onload = () => loaded(img);
 			img.onerror = (e) => {
 				q._preloadCount--;
@@ -78,8 +84,9 @@ Q5.renderers.q2d.image = ($, q) => {
 		if (Q5._createNodeJSCanvas) {
 			drawable = drawable.context.canvas;
 		}
-		dw ??= img.width || img.videoWidth;
-		dh ??= img.height || img.videoHeight;
+
+		dw ??= drawable.defaultWidth || drawable.width || img.videoWidth;
+		dh ??= drawable.defaultHeight || drawable.height || img.videoHeight;
 		if ($._imageMode == 'center') {
 			dx -= dw * 0.5;
 			dy -= dh * 0.5;
@@ -140,15 +147,16 @@ Q5.renderers.q2d.image = ($, q) => {
 
 	if ($._scope == 'image') {
 		$.resize = (w, h) => {
-			let o = new $._OffscreenCanvas($.canvas.width, $.canvas.height);
+			let c = $.canvas;
+			let o = new $._OffscreenCanvas(c.width, c.height);
 			let tmpCtx = o.getContext('2d', {
-				colorSpace: $.canvas.colorSpace
+				colorSpace: c.colorSpace
 			});
-			tmpCtx.drawImage($.canvas, 0, 0);
-			$._setCanvasSize(w, h);
+			tmpCtx.drawImage(c, 0, 0);
+			$._setImageSize(w, h);
 
-			$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-			$.ctx.drawImage(o, 0, 0, $.canvas.width, $.canvas.height);
+			$.ctx.clearRect(0, 0, c.width, c.height);
+			$.ctx.drawImage(o, 0, 0, c.width, c.height);
 		};
 	}
 

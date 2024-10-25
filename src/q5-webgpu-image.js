@@ -121,7 +121,6 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			{
 				texture,
 				colorSpace: $.canvas.colorSpace
-				// premultipliedAlpha: true
 			},
 			textureSize
 		);
@@ -153,6 +152,11 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		const img = new Image();
 		img.crossOrigin = 'Anonymous';
 		img.onload = () => {
+			// calculate the default width and height that the image
+			// should be drawn at if the user doesn't specify a display size
+			img.defaultWidth = img.width * $._defaultImageScale;
+			img.defaultHeight = img.height * $._defaultImageScale;
+
 			$._createTexture(img);
 			q._preloadCount--;
 		};
@@ -169,8 +173,8 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
-		w ??= img.width / $._pixelDensity;
-		h ??= img.height / $._pixelDensity;
+		w ??= img.defaultWidth;
+		h ??= img.defaultHeight;
 
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
 

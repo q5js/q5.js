@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.8
+ * @version 2.9
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -290,6 +290,13 @@ if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
 else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
 else global.window = 0;
 
+function createCanvas(w, h, opt) {
+	if (!Q5._hasGlobal) {
+		let q = new Q5();
+		q.createCanvas(w, h, opt);
+	}
+}
+
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
 		if (!Q5._hasGlobal) new Q5('auto');
@@ -486,6 +493,8 @@ Q5.modules.canvas = ($, q) => {
 		c.h = h = Math.ceil(h);
 		c.hw = w / 2;
 		c.hh = h / 2;
+
+		// changes the actual size of the canvas
 		c.width = Math.ceil(w * $._pixelDensity);
 		c.height = Math.ceil(h * $._pixelDensity);
 
@@ -496,6 +505,17 @@ Q5.modules.canvas = ($, q) => {
 
 		if ($.displayMode && !c.displayMode) $.displayMode();
 		else $._adjustDisplay();
+	};
+
+	$._setImageSize = (w, h) => {
+		q.width = c.w = w;
+		q.height = c.h = h;
+		c.hw = w / 2;
+		c.hh = h / 2;
+
+		// changes the actual size of the canvas
+		c.width = Math.ceil(w * $._pixelDensity);
+		c.height = Math.ceil(h * $._pixelDensity);
 	};
 
 	if ($._scope == 'image') return;
@@ -551,6 +571,12 @@ Q5.modules.canvas = ($, q) => {
 		$._setCanvasSize(c.w, c.h);
 		return v;
 	};
+
+	$.defaultImageScale = (scale) => {
+		if (!scale) return $._defaultImageScale;
+		return ($._defaultImageScale = scale);
+	};
+	$.defaultImageScale(0.5);
 
 	$.flexibleCanvas = (unit = 400) => {
 		if (unit) {
@@ -705,6 +731,10 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		$.ctx.rotate(r);
 	};
 	$.scale = (x, y) => {
+		if (x.x) {
+			y = x.y;
+			x = x.x;
+		}
 		y ??= x;
 		$.ctx.scale(x, y);
 	};
@@ -1221,9 +1251,15 @@ Q5.renderers.q2d.image = ($, q) => {
 		opt = typeof last == 'object' ? last : null;
 
 		let g = $.createImage(1, 1, opt);
+		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
 
 		function loaded(img) {
-			g.resize(img.naturalWidth || img.width, img.naturalHeight || img.height);
+			g.canvas.defaultWidth = img.width * $._defaultImageScale;
+			g.canvas.defaultHeight = img.height * $._defaultImageScale;
+			g.naturalWidth = img.naturalWidth;
+			g.naturalHeight = img.naturalHeight;
+			g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
+
 			g.ctx.drawImage(img, 0, 0);
 			q._preloadCount--;
 			if (cb) cb(g);
@@ -1240,7 +1276,7 @@ Q5.renderers.q2d.image = ($, q) => {
 			let img = new window.Image();
 			img.src = url;
 			img.crossOrigin = 'Anonymous';
-			img._pixelDensity = 1;
+			img._pixelDensity = pd;
 			img.onload = () => loaded(img);
 			img.onerror = (e) => {
 				q._preloadCount--;
@@ -1257,8 +1293,9 @@ Q5.renderers.q2d.image = ($, q) => {
 		if (Q5._createNodeJSCanvas) {
 			drawable = drawable.context.canvas;
 		}
-		dw ??= img.width || img.videoWidth;
-		dh ??= img.height || img.videoHeight;
+
+		dw ??= drawable.defaultWidth || drawable.width || img.videoWidth;
+		dh ??= drawable.defaultHeight || drawable.height || img.videoHeight;
 		if ($._imageMode == 'center') {
 			dx -= dw * 0.5;
 			dy -= dh * 0.5;
@@ -1319,15 +1356,16 @@ Q5.renderers.q2d.image = ($, q) => {
 
 	if ($._scope == 'image') {
 		$.resize = (w, h) => {
-			let o = new $._OffscreenCanvas($.canvas.width, $.canvas.height);
+			let c = $.canvas;
+			let o = new $._OffscreenCanvas(c.width, c.height);
 			let tmpCtx = o.getContext('2d', {
-				colorSpace: $.canvas.colorSpace
+				colorSpace: c.colorSpace
 			});
-			tmpCtx.drawImage($.canvas, 0, 0);
-			$._setCanvasSize(w, h);
+			tmpCtx.drawImage(c, 0, 0);
+			$._setImageSize(w, h);
 
-			$.ctx.clearRect(0, 0, $.canvas.width, $.canvas.height);
-			$.ctx.drawImage(o, 0, 0, $.canvas.width, $.canvas.height);
+			$.ctx.clearRect(0, 0, c.width, c.height);
+			$.ctx.drawImage(o, 0, 0, c.width, c.height);
 		};
 	}
 
@@ -1724,8 +1762,9 @@ Q5.modules.ai = ($) => {
 		}
 		while (stackLines[idx].indexOf('q5') >= 0) idx++;
 
-		let parts = stackLines[idx].split(sep).at(-1);
-		parts = parts.split(':');
+		let errFile = stackLines[idx].split(sep).at(-1);
+		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
+		let parts = errFile.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		if (askAI) lineNum++;
 		parts[3] = parts[3].split(')')[0];
@@ -2088,7 +2127,7 @@ main {
 			if ($.noSmooth) $.noSmooth();
 			if ($.textFont) $.textFont('monospace');
 		}
-		if (c.displayMode == 'normal') {
+		if (c.displayMode == 'default' || c.displayMode == 'normal') {
 			p.classList.remove('q5-centered', 'q5-maxed', 'q5-fullscreen');
 			s.width = c.w * c.displayScale + 'px';
 			s.height = c.h * c.displayScale + 'px';
@@ -2113,7 +2152,7 @@ main {
 		}
 	};
 
-	$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
+	$.displayMode = (displayMode = 'normal', renderQuality = 'smooth', displayScale = 1) => {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
@@ -3832,21 +3871,40 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		if ($._doStroke) {
 			ci = $._strokeIndex;
 
-			// outer rectangle coordinates
+			// stroke weight adjustment
 			let sw = $._strokeWeight / 2;
-			let to = t + sw,
-				bo = b - sw,
-				lo = l - sw,
-				ro = r + sw;
 
-			// stroke is simply a bigger rectangle drawn first
-			addRect(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
+			if ($._doFill) {
+				// existing behavior: draw stroke as one big rectangle
+				let to = t + sw,
+					bo = b - sw,
+					lo = l - sw,
+					ro = r + sw;
 
-			// inner rectangle coordinates
-			t -= sw;
-			b += sw;
-			l += sw;
-			r -= sw;
+				// draw stroke rectangle
+				addRect(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
+
+				// adjust inner rectangle coordinates
+				t -= sw;
+				b += sw;
+				l += sw;
+				r -= sw;
+			} else {
+				// new behavior: draw stroke as four rectangles (sides)
+				let lsw = l - sw,
+					rsw = r + sw,
+					tsw = t + sw,
+					bsw = b - sw,
+					lpsw = l + sw,
+					rpsw = r - sw,
+					tpsw = t - sw,
+					bpsw = b + sw;
+
+				addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // top
+				addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // bottom
+				addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // left
+				addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // right
+			}
 		}
 
 		if ($._doFill) {
@@ -4195,7 +4253,6 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			{
 				texture,
 				colorSpace: $.canvas.colorSpace
-				// premultipliedAlpha: true
 			},
 			textureSize
 		);
@@ -4227,6 +4284,11 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		const img = new Image();
 		img.crossOrigin = 'Anonymous';
 		img.onload = () => {
+			// calculate the default width and height that the image
+			// should be drawn at if the user doesn't specify a display size
+			img.defaultWidth = img.width * $._defaultImageScale;
+			img.defaultHeight = img.height * $._defaultImageScale;
+
 			$._createTexture(img);
 			q._preloadCount--;
 		};
@@ -4243,8 +4305,8 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
-		w ??= img.width / $._pixelDensity;
-		h ??= img.height / $._pixelDensity;
+		w ??= img.defaultWidth;
+		h ??= img.defaultHeight;
 
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
 

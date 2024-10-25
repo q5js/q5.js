@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.8
+ * @version 2.9
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -289,6 +289,13 @@ Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
 else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
 else global.window = 0;
+
+function createCanvas(w, h, opt) {
+	if (!Q5._hasGlobal) {
+		let q = new Q5();
+		q.createCanvas(w, h, opt);
+	}
+}
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

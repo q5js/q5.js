@@ -17,8 +17,9 @@ Q5.modules.ai = ($) => {
 		}
 		while (stackLines[idx].indexOf('q5') >= 0) idx++;
 
-		let parts = stackLines[idx].split(sep).at(-1);
-		parts = parts.split(':');
+		let errFile = stackLines[idx].split(sep).at(-1);
+		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
+		let parts = errFile.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		if (askAI) lineNum++;
 		parts[3] = parts[3].split(')')[0];

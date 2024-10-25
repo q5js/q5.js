@@ -6,7 +6,7 @@
 
 The q5 team aims to make creative coding even more fun and accessible for a new generation of artists, designers, educators, and beginners!
 
-If you're already familiar with p5, you'll find yourself right at home with q5. It's also compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org).
+If you're already familiar with p5, you'll find yourself right at home with q5. It's also compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound), [p5.capture](https://github.com/tapioca24/p5.capture), and [p5play](https://p5play.org).
 
 # 2-0
 

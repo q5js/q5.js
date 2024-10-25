@@ -58,7 +58,7 @@ main {
 			if ($.noSmooth) $.noSmooth();
 			if ($.textFont) $.textFont('monospace');
 		}
-		if (c.displayMode == 'normal') {
+		if (c.displayMode == 'default' || c.displayMode == 'normal') {
 			p.classList.remove('q5-centered', 'q5-maxed', 'q5-fullscreen');
 			s.width = c.w * c.displayScale + 'px';
 			s.height = c.h * c.displayScale + 'px';
@@ -83,7 +83,7 @@ main {
 		}
 	};
 
-	$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
+	$.displayMode = (displayMode = 'normal', renderQuality = 'smooth', displayScale = 1) => {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}

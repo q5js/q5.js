@@ -180,21 +180,40 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		if ($._doStroke) {
 			ci = $._strokeIndex;
 
-			// outer rectangle coordinates
+			// stroke weight adjustment
 			let sw = $._strokeWeight / 2;
-			let to = t + sw,
-				bo = b - sw,
-				lo = l - sw,
-				ro = r + sw;
 
-			// stroke is simply a bigger rectangle drawn first
-			addRect(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
+			if ($._doFill) {
+				// existing behavior: draw stroke as one big rectangle
+				let to = t + sw,
+					bo = b - sw,
+					lo = l - sw,
+					ro = r + sw;
 
-			// inner rectangle coordinates
-			t -= sw;
-			b += sw;
-			l += sw;
-			r -= sw;
+				// draw stroke rectangle
+				addRect(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
+
+				// adjust inner rectangle coordinates
+				t -= sw;
+				b += sw;
+				l += sw;
+				r -= sw;
+			} else {
+				// new behavior: draw stroke as four rectangles (sides)
+				let lsw = l - sw,
+					rsw = r + sw,
+					tsw = t + sw,
+					bsw = b - sw,
+					lpsw = l + sw,
+					rpsw = r - sw,
+					tpsw = t - sw,
+					bpsw = b + sw;
+
+				addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // top
+				addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // bottom
+				addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // left
+				addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // right
+			}
 		}
 
 		if ($._doFill) {
