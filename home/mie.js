@@ -263,6 +263,9 @@ mie.lang.p5.play = function (code) {
 		with (p) eval(code);
 	}
 	this.previewElem.innerHTML = ''; // avoid duplicate canvases
+	if (this.renderer == 'webgpu') {
+		return Q5.webgpu(s, this.previewElem);
+	}
 	return new p5(s, this.previewElem, this.renderer);
 };
 

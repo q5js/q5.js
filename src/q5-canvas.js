@@ -128,6 +128,8 @@ Q5.modules.canvas = ($, q) => {
 		if ($._hooks) {
 			for (let m of $._hooks.postCanvas) m();
 		}
+		if ($._beginRender) $._beginRender();
+
 		return rend;
 	};
 
