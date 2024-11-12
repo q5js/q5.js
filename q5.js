@@ -218,6 +218,7 @@ function Q5(scope, parent, renderer) {
 		'mouseReleased',
 		'mouseDragged',
 		'mouseClicked',
+		'mouseWheel',
 		'keyPressed',
 		'keyReleased',
 		'keyTyped',
@@ -229,9 +230,9 @@ function Q5(scope, parent, renderer) {
 	for (let k of userFns) {
 		if (!t[k]) $[k] = () => {};
 		else if ($._isGlobal) {
-			$[k] = () => {
+			$[k] = (event) => {
 				try {
-					return t[k]();
+					return t[k](event);
 				} catch (e) {
 					if ($._askAI) $._askAI(e);
 					throw e;
@@ -2337,10 +2338,17 @@ Q5.modules.input = ($, q) => {
 		}
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
+	$._onwheel = (e) => {
+		if ($.mouseWheel) return $.mouseWheel(e);
+	};
 
 	if (c) {
 		c.addEventListener('mousedown', (e) => $._onmousedown(e));
 		c.addEventListener('mouseup', (e) => $._onmouseup(e));
+		c.addEventListener('wheel', (e) => {
+			e.delta = e.deltaY;
+			if (!$._onwheel(e)) e.preventDefault();
+		});
 		c.addEventListener('click', (e) => $._onclick(e));
 		c.addEventListener('touchstart', (e) => $._ontouchstart(e));
 		c.addEventListener('touchmove', (e) => $._ontouchmove(e));

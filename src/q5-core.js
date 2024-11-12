@@ -218,6 +218,7 @@ function Q5(scope, parent, renderer) {
 		'mouseReleased',
 		'mouseDragged',
 		'mouseClicked',
+		'mouseWheel',
 		'keyPressed',
 		'keyReleased',
 		'keyTyped',
@@ -229,9 +230,9 @@ function Q5(scope, parent, renderer) {
 	for (let k of userFns) {
 		if (!t[k]) $[k] = () => {};
 		else if ($._isGlobal) {
-			$[k] = () => {
+			$[k] = (event) => {
 				try {
-					return t[k]();
+					return t[k](event);
 				} catch (e) {
 					if ($._askAI) $._askAI(e);
 					throw e;
