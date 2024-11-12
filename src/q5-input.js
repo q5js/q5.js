@@ -82,6 +82,11 @@ Q5.modules.input = ($, q) => {
 		$.mouseClicked(e);
 		q.mouseIsPressed = false;
 	};
+	$._onwheel = (e) => {
+		$._updateMouse(e);
+		e.delta = e.deltaY;
+		if ($.mouseWheel(e) == false) e.preventDefault();
+	};
 
 	$.cursor = (name, x, y) => {
 		let pfx = '';
@@ -160,17 +165,11 @@ Q5.modules.input = ($, q) => {
 		}
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
-	$._onwheel = (e) => {
-		if ($.mouseWheel) return $.mouseWheel(e);
-	};
 
 	if (c) {
 		c.addEventListener('mousedown', (e) => $._onmousedown(e));
 		c.addEventListener('mouseup', (e) => $._onmouseup(e));
-		c.addEventListener('wheel', (e) => {
-			e.delta = e.deltaY;
-			if (!$._onwheel(e)) e.preventDefault();
-		});
+		c.addEventListener('wheel', (e) => $._onwheel(e));
 		c.addEventListener('click', (e) => $._onclick(e));
 		c.addEventListener('touchstart', (e) => $._ontouchstart(e));
 		c.addEventListener('touchmove', (e) => $._ontouchmove(e));

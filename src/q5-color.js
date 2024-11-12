@@ -124,13 +124,9 @@ Q5.modules.color = ($, q) => {
 	};
 
 	$.lerpColor = (a, b, t) => {
+		t = Math.max(0, Math.min(1, t));
 		if ($._colorMode == 'rgb') {
-			return new $.Color(
-				$.constrain($.lerp(a.r, b.r, t), 0, 255),
-				$.constrain($.lerp(a.g, b.g, t), 0, 255),
-				$.constrain($.lerp(a.b, b.b, t), 0, 255),
-				$.constrain($.lerp(a.a, b.a, t), 0, 255)
-			);
+			return new $.Color($.lerp(a.r, b.r, t), $.lerp(a.g, b.g, t), $.lerp(a.b, b.b, t), $.lerp(a.a, b.a, t));
 		} else {
 			let deltaH = b.h - a.h;
 			if (deltaH > 180) deltaH -= 360;
@@ -138,12 +134,7 @@ Q5.modules.color = ($, q) => {
 			let h = a.h + t * deltaH;
 			if (h < 0) h += 360;
 			if (h > 360) h -= 360;
-			return new $.Color(
-				$.constrain($.lerp(a.l, b.l, t), 0, 100),
-				$.constrain($.lerp(a.c, b.c, t), 0, 100),
-				h,
-				$.constrain($.lerp(a.a, b.a, t), 0, 255)
-			);
+			return new $.Color($.lerp(a.l, b.l, t), $.lerp(a.c, b.c, t), h, $.lerp(a.a, b.a, t));
 		}
 	};
 };

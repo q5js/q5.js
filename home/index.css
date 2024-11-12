@@ -107,7 +107,7 @@ main {
 }
 
 #reel0 {
-	width: unset;
+	width: 100%;
 	background-color: unset;
 	height: 100vh;
 	margin-bottom: 0;
