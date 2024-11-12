@@ -16,33 +16,35 @@ Q5.modules.sound = ($, q) => {
 	$.userStartAudio = () => Q5.aud.resume();
 };
 
-Q5.Sound = class extends Audio {
-	constructor(path) {
-		super(path);
-		let a = this;
-		a.load();
-		a.panner = Q5.aud.createStereoPanner();
-		a.source = Q5.aud.createMediaElementSource(a);
-		a.source.connect(a.panner);
-		a.panner.connect(Q5.aud.destination);
-		Object.defineProperty(a, 'pan', {
-			get: () => a.panner.pan.value,
-			set: (v) => (a.panner.pan.value = v)
-		});
-	}
-	setVolume(level) {
-		this.volume = level;
-	}
-	setLoop(loop) {
-		this.loop = loop;
-	}
-	setPan(value) {
-		this.pan = value;
-	}
-	isLoaded() {
-		return this.loaded;
-	}
-	isPlaying() {
-		return !this.paused;
-	}
-};
+if (window.Audio) {
+	Q5.Sound = class extends Audio {
+		constructor(path) {
+			super(path);
+			let a = this;
+			a.load();
+			a.panner = Q5.aud.createStereoPanner();
+			a.source = Q5.aud.createMediaElementSource(a);
+			a.source.connect(a.panner);
+			a.panner.connect(Q5.aud.destination);
+			Object.defineProperty(a, 'pan', {
+				get: () => a.panner.pan.value,
+				set: (v) => (a.panner.pan.value = v)
+			});
+		}
+		setVolume(level) {
+			this.volume = level;
+		}
+		setLoop(loop) {
+			this.loop = loop;
+		}
+		setPan(value) {
+			this.pan = value;
+		}
+		isLoaded() {
+			return this.loaded;
+		}
+		isPlaying() {
+			return !this.paused;
+		}
+	};
+}

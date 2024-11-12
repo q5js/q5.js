@@ -106,9 +106,11 @@ Use q5.js in your own project by adding this line to your HTML file:
 
 ## Join our community 🤝
 
-The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB). 🗺️
+The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB). 🙋
 
-If you'd like to work on q5.js, check out our [Project Planning Board](https://github.com/orgs/q5js/projects/1/views/1).
+Support the development of q5 on [Patreon](https://www.patreon.com/c/p5play). 💙
+
+If you'd like to work on q5, check out our [Project Planning Board](https://github.com/orgs/q5js/projects/1/views/1). 🧑‍💻
 
 # 20-0
 

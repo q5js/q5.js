@@ -287,7 +287,8 @@ Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
 if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
-else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
+
+if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
 else global.window = 0;
 
 function createCanvas(w, h, opt) {
@@ -2271,8 +2272,10 @@ Q5.modules.input = ($, q) => {
 	$.noCursor = () => {
 		$.canvas.style.cursor = 'none';
 	};
-	$.requestPointerLock = document.body?.requestPointerLock;
-	$.exitPointerLock = document.exitPointerLock;
+	if (window) {
+		$.requestPointerLock = document.body?.requestPointerLock;
+		$.exitPointerLock = document.exitPointerLock;
+	}
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
@@ -2783,36 +2786,38 @@ Q5.modules.sound = ($, q) => {
 	$.userStartAudio = () => Q5.aud.resume();
 };
 
-Q5.Sound = class extends Audio {
-	constructor(path) {
-		super(path);
-		let a = this;
-		a.load();
-		a.panner = Q5.aud.createStereoPanner();
-		a.source = Q5.aud.createMediaElementSource(a);
-		a.source.connect(a.panner);
-		a.panner.connect(Q5.aud.destination);
-		Object.defineProperty(a, 'pan', {
-			get: () => a.panner.pan.value,
-			set: (v) => (a.panner.pan.value = v)
-		});
-	}
-	setVolume(level) {
-		this.volume = level;
-	}
-	setLoop(loop) {
-		this.loop = loop;
-	}
-	setPan(value) {
-		this.pan = value;
-	}
-	isLoaded() {
-		return this.loaded;
-	}
-	isPlaying() {
-		return !this.paused;
-	}
-};
+if (window.Audio) {
+	Q5.Sound = class extends Audio {
+		constructor(path) {
+			super(path);
+			let a = this;
+			a.load();
+			a.panner = Q5.aud.createStereoPanner();
+			a.source = Q5.aud.createMediaElementSource(a);
+			a.source.connect(a.panner);
+			a.panner.connect(Q5.aud.destination);
+			Object.defineProperty(a, 'pan', {
+				get: () => a.panner.pan.value,
+				set: (v) => (a.panner.pan.value = v)
+			});
+		}
+		setVolume(level) {
+			this.volume = level;
+		}
+		setLoop(loop) {
+			this.loop = loop;
+		}
+		setPan(value) {
+			this.pan = value;
+		}
+		isLoaded() {
+			return this.loaded;
+		}
+		isPlaying() {
+			return !this.paused;
+		}
+	};
+}
 Q5.modules.util = ($, q) => {
 	$._loadFile = (path, cb, type) => {
 		q._preloadCount++;

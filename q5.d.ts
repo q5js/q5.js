@@ -264,6 +264,9 @@ function draw() {
 	 * @param {string} [options.colorSpace] - color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
 	 * @returns {HTMLCanvasElement} created canvas element
 	 * @example
+createCanvas(200, 100);
+circle(100, 50, 80);
+	 * @example
 createCanvas(200, 200, { alpha: true });
 
 function draw() {
@@ -523,7 +526,7 @@ rect(20, 20, 60, 60);
 	 * @param {Object} [opt] - options
 	 * @returns {Q5} a new Q5 graphics buffer
 	 */
-	function createGraphics(w: number, h: number, opt?: CanvasRenderingContext2DSettings): Q5;
+	function createGraphics(w: number, h: number, opt?: any): Q5;
 
 	/** ⬜️
 	 * The 2D rendering context for the canvas.

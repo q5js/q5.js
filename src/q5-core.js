@@ -287,7 +287,8 @@ Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
 if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
-else if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
+
+if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
 else global.window = 0;
 
 function createCanvas(w, h, opt) {

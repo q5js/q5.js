@@ -97,8 +97,10 @@ Q5.modules.input = ($, q) => {
 	$.noCursor = () => {
 		$.canvas.style.cursor = 'none';
 	};
-	$.requestPointerLock = document.body?.requestPointerLock;
-	$.exitPointerLock = document.exitPointerLock;
+	if (window) {
+		$.requestPointerLock = document.body?.requestPointerLock;
+		$.exitPointerLock = document.exitPointerLock;
+	}
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
