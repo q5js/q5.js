@@ -166,24 +166,34 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 
 	$.imageMode = (x) => ($._imageMode = x);
 
-	$.image = (img, x, y, w, h) => {
+	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		if (img.canvas) img = img.canvas;
 		if (img.textureIndex == undefined) return;
 
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
-		w ??= img.defaultWidth;
-		h ??= img.defaultHeight;
+		let w = img.defaultWidth;
+		let h = img.defaultHeight;
 
-		let [l, r, t, b] = $._calcBox(x, y, w, h, $._imageMode);
+		dw ??= w;
+		dh ??= h;
+		sw ??= w;
+		sh ??= h;
+
+		let [l, r, t, b] = $._calcBox(dx, dy, dw, dh, $._imageMode);
+
+		let u0 = sx / w;
+		let v0 = sy / h;
+		let u1 = (sx + sw) / w;
+		let v1 = (sy + sh) / h;
 
 		// prettier-ignore
 		vertexStack.push(
-			l, t, 0, 0, ti,
-			r, t, 1, 0, ti,
-			l, b, 0, 1, ti,
-			r, b, 1, 1, ti
+			l, t, u0, v0, ti,
+			r, t, u1, v0, ti,
+			l, b, u0, v1, ti,
+			r, b, u1, v1, ti
 		);
 
 		$.drawStack.push(1, img.textureIndex);
