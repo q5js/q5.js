@@ -126,6 +126,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	const addEllipse = (x, y, a, b, n, ci, ti) => {
+		y = -y;
 		let t = 0,
 			angleIncrement = $.TAU / n;
 
