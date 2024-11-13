@@ -62,14 +62,15 @@ Q5.renderers.q2d.drawing = ($) => {
 
 	function arc(x, y, w, h, lo, hi, mode, detail) {
 		if (!$._doFill && !$._doStroke) return;
+
 		let d = $._angleMode;
 		let full = d ? 360 : $.TAU;
 		lo %= full;
 		hi %= full;
 		if (lo < 0) lo += full;
 		if (hi < 0) hi += full;
-		if (lo == 0 && hi == 0) return;
-		if (lo > hi) [lo, hi] = [hi, lo];
+		if (lo > hi) hi += full;
+
 		$.ctx.beginPath();
 		if (w == h) {
 			if (d) {
@@ -77,6 +78,15 @@ Q5.renderers.q2d.drawing = ($) => {
 				hi = $.radians(hi);
 			}
 			$.ctx.arc(x, y, w / 2, lo, hi);
+
+			if (mode == $.CHORD) {
+				$.ctx.lineTo(x + (Math.cos(hi) * w) / 2, y + (Math.sin(hi) * h) / 2);
+				$.ctx.lineTo(x + (Math.cos(lo) * w) / 2, y + (Math.sin(lo) * h) / 2);
+				$.ctx.closePath();
+			} else if (mode == $.PIE) {
+				$.ctx.lineTo(x, y);
+				$.ctx.closePath();
+			}
 		} else {
 			for (let i = 0; i < detail + 1; i++) {
 				let t = i / detail;
@@ -85,7 +95,10 @@ Q5.renderers.q2d.drawing = ($) => {
 				let dy = ($.sin(a) * h) / 2;
 				$.ctx[i ? 'lineTo' : 'moveTo'](x + dx, y + dy);
 			}
+
 			if (mode == $.CHORD) {
+				$.ctx.lineTo(x + ($.cos(hi) * w) / 2, y + ($.sin(hi) * h) / 2);
+				$.ctx.lineTo(x + ($.cos(lo) * w) / 2, y + ($.sin(lo) * h) / 2);
 				$.ctx.closePath();
 			} else if (mode == $.PIE) {
 				$.ctx.lineTo(x, y);
@@ -144,6 +157,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			ink();
 		} else $.ellipse(x, y, d, d);
 	};
+
 	$.point = (x, y) => {
 		if ($._doStroke) {
 			if (x.x) {
@@ -160,6 +174,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			$.ctx.stroke();
 		}
 	};
+
 	function rect(x, y, w, h) {
 		if ($._da) {
 			x *= $._da;
