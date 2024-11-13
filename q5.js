@@ -445,8 +445,8 @@ Q5.modules.canvas = ($, q) => {
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
 		g.createCanvas.call($, w, h, opt);
-		g.defaultWidth = w * $._defaultImageScale;
-		g.defaultHeight = h * $._defaultImageScale;
+		g.defaultWidth = w;
+		g.defaultHeight = h;
 		return g;
 	};
 
