@@ -10,8 +10,8 @@ Q5.renderers.q2d.canvas = ($, q) => {
 
 		if ($._scope != 'image') {
 			// default styles
-			$.ctx.fillStyle = 'white';
-			$.ctx.strokeStyle = 'black';
+			$.ctx.fillStyle = $._fill = 'white';
+			$.ctx.strokeStyle = $._stroke = 'black';
 			$.ctx.lineCap = 'round';
 			$.ctx.lineJoin = 'miter';
 			$.ctx.textAlign = 'left';
@@ -119,6 +119,15 @@ Q5.renderers.q2d.canvas = ($, q) => {
 
 	$.pushMatrix = () => $.ctx.save();
 	$.popMatrix = () => $.ctx.restore();
+
+	$.popStyles = () => {
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+
+		$.ctx.fillStyle = $._fill;
+		$.ctx.strokeStyle = $._stroke;
+		$.ctx.lineWidth = $._strokeWeight;
+	};
 
 	$.push = () => {
 		$.ctx.save();

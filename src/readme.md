@@ -137,7 +137,7 @@ WebGPU has different default settings compared to q5's q2d renderer and p5's P2D
 - The origin of the canvas (0, 0) is in the center, not the top left.
 - Mouse and touch coordinates correspond to canvas pixels (unlike in p5 WEBGL mode).
 
-The sketches you create with the q5-webgpu renderer will still display properly if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and apply a compatibility layer to display sketches with the fallback q2d renderer.
+The sketches you create with the q5-webgpu renderer will still display if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and apply a compatibility layer to display sketches with the fallback q2d renderer.
 
 ## webgpu-drawing
 

@@ -402,31 +402,74 @@ function draw() {
 	 * Translates the origin of the drawing context.
 	 * @param {number} x - translation along the x-axis
 	 * @param {number} y - translation along the y-axis
+	 * @example
+function draw() {
+	background(200);
+	
+	translate(100, 100);
+	circle(0, 0, 80);
+}
 	 */
 	function translate(x: number, y: number): void;
 
 	/** ⬜️
 	 * Rotates the drawing context.
 	 * @param {number} angle - rotation angle in radians
+	 * @example
+function draw() {
+	background(200);
+	
+	translate(100, 100);
+	rotate(QUARTER_PI);
+
+	// drawn from its top-left corner by default
+	square(0, 0, 50);
+}
 	 */
 	function rotate(angle: number): void;
 
 	/** ⬜️
 	 * Scales the drawing context.
+	 * 
+	 * If only one input parameter is provided,
+	 * the drawing context will be scaled uniformly.
 	 * @param {number} x - scaling factor along the x-axis
 	 * @param {number} [y] - scaling factor along the y-axis
+	 * @example
+function draw() {
+	background(200);
+	
+	scale(4);
+	circle(0, 0, 80);
+}
 	 */
 	function scale(x: number, y?: number): void;
 
 	/** ⬜️
 	 * Shears the drawing context along the x-axis.
 	 * @param {number} angle - shear angle in radians
+	 * @example
+function draw() {
+	background(200);
+	
+	translate(25, 60);
+	shearX(QUARTER_PI);
+	square(0, 0, 80);
+}
 	 */
 	function shearX(angle: number): void;
 
 	/** ⬜️
 	 * Shears the drawing context along the y-axis.
 	 * @param {number} angle - shear angle in radians
+	 * @example
+function draw() {
+	background(200);
+	
+	translate(25, 60);
+	shearY(QUARTER_PI);
+	square(0, 0, 80);
+}
 	 */
 	function shearY(angle: number): void;
 
@@ -440,16 +483,46 @@ function draw() {
 	 * @param {number} d - vertical scaling
 	 * @param {number} e - horizontal moving
 	 * @param {number} f - vertical moving
+	 * @example
+function draw() {
+	background(200);
+
+	applyMatrix(2, 1, 1, 1, 100, 100);
+	circle(0, 0, 80);
+}
 	 */
 	function applyMatrix(a: number, b: number, c: number, d: number, e: number, f: number): void;
 
 	/** ⬜️
 	 * Resets the transformation matrix.
+	 * 
+	 * q5 runs this function before every time the `draw` function is run,
+	 * so that transformations don't carry over to the next frame.
+	 * @example
+function draw() {
+	background(200);
+
+	translate(100, 100);
+	circle(0, 0, 80);
+
+	resetMatrix();
+	square(0, 0, 50);
+}
 	 */
 	function resetMatrix(): void;
 
 	/** ⬜️
 	 * Saves the current transformation matrix.
+	 * @example
+function draw() {
+	background(200);
+	translate(100, 100);
+	pushMatrix();
+	rotate(QUARTER_PI);
+	ellipse(0, 0, 120, 40);
+	popMatrix();
+	ellipse(0, 0, 120, 40);
+}
 	 */
 	function pushMatrix(): void;
 
@@ -461,7 +534,18 @@ function draw() {
 	/** ⬜️
 	 * Saves the current drawing style settings.
 	 *
-	 * This includes the fill, stroke, stroke weight, tint, image mode, rect mode, ellipse mode, text size, text align, and text baseline.
+	 * This includes the fill, stroke, stroke weight, tint, image mode, 
+	 * rect mode, ellipse mode, text size, text align, and text baseline.
+	 * @example
+function draw() {
+	background(200);
+
+	pushStyles();
+	fill('blue');
+	circle(50, 50, 80);
+	popStyles();
+	circle(150, 150, 80);
+}
 	 */
 	function pushStyles(): void;
 
@@ -472,6 +556,16 @@ function draw() {
 
 	/** ⬜️
 	 * Saves the current drawing style settings and transformations.
+	 * @example
+createCanvas(200, 200);
+
+push();
+fill('blue');
+translate(100, 100);
+circle(0, 0, 80);
+pop();
+
+square(0, 0, 50);
 	 */
 	function push(): void;
 

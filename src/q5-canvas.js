@@ -287,6 +287,8 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$._styleNames = [
+		'_fill',
+		'_stroke',
 		'_doStroke',
 		'_doFill',
 		'_strokeSet',

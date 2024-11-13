@@ -464,8 +464,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		text[1] = -y;
 		text[2] = $._textSize / 44;
 		text[3] = $._transformIndex;
-		text[4] = $._fillSet ? $._fillIndex : 0;
-		text[5] = $._strokeIndex;
+		text[4] = $._fillSet ? $._fill : 0;
+		text[5] = $._stroke;
 
 		$._textStack.push(text);
 		$.drawStack.push(2, measurements.printedCharCount, $._font.index);
@@ -480,11 +480,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		g.textSize($._textSize);
 
 		if ($._doFill) {
-			let fi = $._fillIndex * 4;
+			let fi = $._fill * 4;
 			g.fill(colorStack.slice(fi, fi + 4));
 		}
 		if ($._doStroke) {
-			let si = $._strokeIndex * 4;
+			let si = $._stroke * 4;
 			g.stroke(colorStack.slice(si, si + 4));
 		}
 

@@ -178,7 +178,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		ti = $._transformIndex;
 
 		if ($._doStroke) {
-			ci = $._strokeIndex;
+			ci = $._stroke;
 
 			// stroke weight adjustment
 			let sw = $._strokeWeight / 2;
@@ -217,7 +217,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doFill) {
-			ci = colorIndex ?? $._fillIndex;
+			ci = colorIndex ?? $._fill;
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		}
 	};
@@ -266,19 +266,19 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		let ti = $._transformIndex;
 		if ($._doStroke) {
 			let sw = $._strokeWeight / 2;
-			addEllipse(x, y, a + sw, b + sw, n, $._strokeIndex, ti);
+			addEllipse(x, y, a + sw, b + sw, n, $._stroke, ti);
 			a -= sw;
 			b -= sw;
 		}
 		if ($._doFill) {
-			addEllipse(x, y, a, b, n, colorIndex ?? $._fillIndex, ti);
+			addEllipse(x, y, a, b, n, colorIndex ?? $._fill, ti);
 		}
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
 
 	$.point = (x, y) => {
-		colorIndex = $._strokeIndex;
+		colorIndex = $._stroke;
 		$._doStroke = false;
 		let sw = $._strokeWeight;
 		if (sw < 2) {
@@ -290,7 +290,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	$.line = (x1, y1, x2, y2) => {
-		colorIndex = $._strokeIndex;
+		colorIndex = $._stroke;
 
 		$.push();
 		$._doStroke = false;
@@ -324,7 +324,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	$.vertex = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		sv.push(x, -y, $._fillIndex, $._transformIndex);
+		sv.push(x, -y, $._fill, $._transformIndex);
 		shapeVertCount++;
 	};
 
@@ -417,7 +417,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			$._rectMode = og;
 		}
 		$.pop();
-		if (!$._fillSet) $._fillIndex = 1;
+		if (!$._fillSet) $._fill = 1;
 	};
 
 	$._hooks.preRender.push(() => {

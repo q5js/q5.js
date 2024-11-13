@@ -593,6 +593,8 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$._styleNames = [
+		'_fill',
+		'_stroke',
 		'_doStroke',
 		'_doFill',
 		'_strokeSet',
@@ -647,8 +649,8 @@ Q5.renderers.q2d.canvas = ($, q) => {
 
 		if ($._scope != 'image') {
 			// default styles
-			$.ctx.fillStyle = 'white';
-			$.ctx.strokeStyle = 'black';
+			$.ctx.fillStyle = $._fill = 'white';
+			$.ctx.strokeStyle = $._stroke = 'black';
 			$.ctx.lineCap = 'round';
 			$.ctx.lineJoin = 'miter';
 			$.ctx.textAlign = 'left';
@@ -756,6 +758,15 @@ Q5.renderers.q2d.canvas = ($, q) => {
 
 	$.pushMatrix = () => $.ctx.save();
 	$.popMatrix = () => $.ctx.restore();
+
+	$.popStyles = () => {
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+
+		$.ctx.fillStyle = $._fill;
+		$.ctx.strokeStyle = $._stroke;
+		$.ctx.lineWidth = $._strokeWeight;
+	};
 
 	$.push = () => {
 		$.ctx.save();
@@ -3288,18 +3299,18 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		colorIndex++;
 	};
 
-	$._fillIndex = $._strokeIndex = 0;
+	$._fill = $._stroke = 0;
 	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doFill = $._fillSet = true;
-		$._fillIndex = colorIndex;
+		$._fill = colorIndex;
 	};
 	$.stroke = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doStroke = $._strokeSet = true;
-		$._strokeIndex = colorIndex;
+		$._stroke = colorIndex;
 	};
 
 	$.noFill = () => ($._doFill = false);
@@ -3880,7 +3891,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		ti = $._transformIndex;
 
 		if ($._doStroke) {
-			ci = $._strokeIndex;
+			ci = $._stroke;
 
 			// stroke weight adjustment
 			let sw = $._strokeWeight / 2;
@@ -3919,7 +3930,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doFill) {
-			ci = colorIndex ?? $._fillIndex;
+			ci = colorIndex ?? $._fill;
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		}
 	};
@@ -3968,19 +3979,19 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		let ti = $._transformIndex;
 		if ($._doStroke) {
 			let sw = $._strokeWeight / 2;
-			addEllipse(x, y, a + sw, b + sw, n, $._strokeIndex, ti);
+			addEllipse(x, y, a + sw, b + sw, n, $._stroke, ti);
 			a -= sw;
 			b -= sw;
 		}
 		if ($._doFill) {
-			addEllipse(x, y, a, b, n, colorIndex ?? $._fillIndex, ti);
+			addEllipse(x, y, a, b, n, colorIndex ?? $._fill, ti);
 		}
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
 
 	$.point = (x, y) => {
-		colorIndex = $._strokeIndex;
+		colorIndex = $._stroke;
 		$._doStroke = false;
 		let sw = $._strokeWeight;
 		if (sw < 2) {
@@ -3992,7 +4003,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	$.line = (x1, y1, x2, y2) => {
-		colorIndex = $._strokeIndex;
+		colorIndex = $._stroke;
 
 		$.push();
 		$._doStroke = false;
@@ -4026,7 +4037,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	$.vertex = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		sv.push(x, -y, $._fillIndex, $._transformIndex);
+		sv.push(x, -y, $._fill, $._transformIndex);
 		shapeVertCount++;
 	};
 
@@ -4119,7 +4130,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			$._rectMode = og;
 		}
 		$.pop();
-		if (!$._fillSet) $._fillIndex = 1;
+		if (!$._fillSet) $._fill = 1;
 	};
 
 	$._hooks.preRender.push(() => {
@@ -4839,8 +4850,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		text[1] = -y;
 		text[2] = $._textSize / 44;
 		text[3] = $._transformIndex;
-		text[4] = $._fillSet ? $._fillIndex : 0;
-		text[5] = $._strokeIndex;
+		text[4] = $._fillSet ? $._fill : 0;
+		text[5] = $._stroke;
 
 		$._textStack.push(text);
 		$.drawStack.push(2, measurements.printedCharCount, $._font.index);
@@ -4855,11 +4866,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		g.textSize($._textSize);
 
 		if ($._doFill) {
-			let fi = $._fillIndex * 4;
+			let fi = $._fill * 4;
 			g.fill(colorStack.slice(fi, fi + 4));
 		}
 		if ($._doStroke) {
-			let si = $._strokeIndex * 4;
+			let si = $._stroke * 4;
 			g.stroke(colorStack.slice(si, si + 4));
 		}
 

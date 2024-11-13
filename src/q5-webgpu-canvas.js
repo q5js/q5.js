@@ -147,18 +147,18 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		colorIndex++;
 	};
 
-	$._fillIndex = $._strokeIndex = 0;
+	$._fill = $._stroke = 0;
 	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doFill = $._fillSet = true;
-		$._fillIndex = colorIndex;
+		$._fill = colorIndex;
 	};
 	$.stroke = (r, g, b, a) => {
 		addColor(r, g, b, a);
 		$._doStroke = $._strokeSet = true;
-		$._strokeIndex = colorIndex;
+		$._stroke = colorIndex;
 	};
 
 	$.noFill = () => ($._doFill = false);
