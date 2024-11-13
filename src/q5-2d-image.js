@@ -157,6 +157,8 @@ Q5.renderers.q2d.image = ($, q) => {
 			});
 			tmpCtx.drawImage(c, 0, 0);
 			$._setImageSize(w, h);
+			$.defaultWidth = c.width * $._defaultImageScale;
+			$.defaultHeight = c.height * $._defaultImageScale;
 
 			$.ctx.clearRect(0, 0, c.width, c.height);
 			$.ctx.drawImage(o, 0, 0, c.width, c.height);

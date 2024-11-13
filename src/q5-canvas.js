@@ -189,8 +189,8 @@ Q5.modules.canvas = ($, q) => {
 	$._setCanvasSize = (w, h) => {
 		w ??= window.innerWidth;
 		h ??= window.innerHeight;
-		c.w = w = Math.ceil(w);
-		c.h = h = Math.ceil(h);
+		$.defaultWidth = c.w = w = Math.ceil(w);
+		$.defaultHeight = c.h = h = Math.ceil(h);
 		c.hw = w / 2;
 		c.hh = h / 2;
 
@@ -217,6 +217,12 @@ Q5.modules.canvas = ($, q) => {
 		c.width = Math.ceil(w * $._pixelDensity);
 		c.height = Math.ceil(h * $._pixelDensity);
 	};
+
+	$.defaultImageScale = (scale) => {
+		if (!scale) return $._defaultImageScale;
+		return ($._defaultImageScale = scale);
+	};
+	$.defaultImageScale(0.5);
 
 	if ($._scope == 'image') return;
 
@@ -271,12 +277,6 @@ Q5.modules.canvas = ($, q) => {
 		$._setCanvasSize(c.w, c.h);
 		return v;
 	};
-
-	$.defaultImageScale = (scale) => {
-		if (!scale) return $._defaultImageScale;
-		return ($._defaultImageScale = scale);
-	};
-	$.defaultImageScale(0.5);
 
 	$.flexibleCanvas = (unit = 400) => {
 		if (unit) {
