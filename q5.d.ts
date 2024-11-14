@@ -709,6 +709,15 @@ rect(20, 20, 60, 60);
 	 * @param {number} start - angle to start the arc
 	 * @param {number} stop - angle to stop the arc
 	 * @param {number} [mode] - shape and stroke style setting, default is `PIE_OPEN` for a pie shape with an unclosed stroke, can be `PIE`, `CHORD`, or `CHORD_OPEN`
+	 * @example
+function draw() {
+	background(200);
+
+	arc(40, 40, 40, 40, 0.8, -0.8);
+  arc(80, 80, 40, 40, 0.8, -0.8, PIE);
+  arc(120, 120, 40, 40, 0.8, -0.8, CHORD_OPEN);
+  arc(160, 160, 40, 40, 0.8, -0.8, CHORD);
+}
 	 */
 	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number): void;
 

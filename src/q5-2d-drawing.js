@@ -68,10 +68,10 @@ Q5.renderers.q2d.drawing = ($) => {
 		let full = $.TAU;
 		lo %= full;
 		hi %= full;
-		if (lo == hi) return $.ellipse(x, y, w, h);
 		if (lo < 0) lo += full;
 		if (hi < 0) hi += full;
 		if (lo > hi) hi += full;
+		if (lo == hi) return $.ellipse(x, y, w, h);
 
 		w /= 2;
 		h /= 2;
