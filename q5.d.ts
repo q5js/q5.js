@@ -699,17 +699,18 @@ rect(20, 20, 60, 60);
 	function ellipse(x: number, y: number, width: number, height?: number): void;
 
 	/** 🧑‍🎨
-	 * Draws an arc.
+	 * Draws an arc, which is a section of an ellipse.
+	 * 
+	 * `ellipseMode` affects how this function draws arcs.
 	 * @param {number} x - x-coordinate
 	 * @param {number} y - y-coordinate
-	 * @param {number} w - width of the arc
-	 * @param {number} h - height of the arc
+	 * @param {number} w - width of the ellipse
+	 * @param {number} h - height of the ellipse
 	 * @param {number} start - angle to start the arc
 	 * @param {number} stop - angle to stop the arc
 	 * @param {number} [mode] - drawing mode, can be `PIE`, `CHORD`, or `OPEN`
-	 * @param {number} [detail] - resolution of the arc
 	 */
-	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number, detail?: number): void;
+	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a line on the canvas.

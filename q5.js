@@ -324,14 +324,16 @@ Q5.modules.canvas = ($, q) => {
 	$.MITER = 'miter';
 	$.BEVEL = 'bevel';
 
-	$.CHORD = 0;
-	$.PIE = 1;
-	$.OPEN = 2;
+	$.CHORD_OPEN = 0;
+	$.PIE_OPEN = 1;
+	$.PIE = 2;
+	$.CHORD = 3;
 
 	$.RADIUS = 'radius';
 	$.CORNER = 'corner';
 	$.CORNERS = 'corners';
 
+	$.OPEN = 0;
 	$.CLOSE = 1;
 
 	$.LANDSCAPE = 'landscape';
@@ -853,64 +855,48 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 	};
 
-	function arc(x, y, w, h, lo, hi, mode, detail) {
-		if (!$._doFill && !$._doStroke) return;
-
-		let d = $._angleMode;
-		let full = d ? 360 : $.TAU;
+	function arc(x, y, w, h, lo, hi, mode) {
+		if ($._angleMode) {
+			lo = $.radians(lo);
+			hi = $.radians(hi);
+		}
+		let full = $.TAU;
 		lo %= full;
 		hi %= full;
 		if (lo < 0) lo += full;
 		if (hi < 0) hi += full;
 		if (lo > hi) hi += full;
 
+		w /= 2;
+		h /= 2;
+
+		if (!$._doFill && mode == $.PIE_OPEN) mode = $.CHORD_OPEN;
+
 		$.ctx.beginPath();
-		if (w == h) {
-			if (d) {
-				lo = $.radians(lo);
-				hi = $.radians(hi);
-			}
-			$.ctx.arc(x, y, w / 2, lo, hi);
+		$.ctx.ellipse(x, y, w, h, 0, lo, hi);
+		if (mode == $.PIE || mode == $.PIE_OPEN) $.ctx.lineTo(x, y);
+		if ($._doFill) $.ctx.fill();
 
-			if (mode == $.CHORD) {
-				$.ctx.lineTo(x + (Math.cos(hi) * w) / 2, y + (Math.sin(hi) * h) / 2);
-				$.ctx.lineTo(x + (Math.cos(lo) * w) / 2, y + (Math.sin(lo) * h) / 2);
-				$.ctx.closePath();
-			} else if (mode == $.PIE) {
-				$.ctx.lineTo(x, y);
-				$.ctx.closePath();
-			}
-		} else {
-			for (let i = 0; i < detail + 1; i++) {
-				let t = i / detail;
-				let a = $.lerp(lo, hi, t);
-				let dx = ($.cos(a) * w) / 2;
-				let dy = ($.sin(a) * h) / 2;
-				$.ctx[i ? 'lineTo' : 'moveTo'](x + dx, y + dy);
-			}
+		if ($._doStroke) {
+			if (mode == $.PIE || mode == $.CHORD) $.ctx.closePath();
+			if (mode != $.PIE_OPEN) return $.ctx.stroke();
 
-			if (mode == $.CHORD) {
-				$.ctx.lineTo(x + ($.cos(hi) * w) / 2, y + ($.sin(hi) * h) / 2);
-				$.ctx.lineTo(x + ($.cos(lo) * w) / 2, y + ($.sin(lo) * h) / 2);
-				$.ctx.closePath();
-			} else if (mode == $.PIE) {
-				$.ctx.lineTo(x, y);
-				$.ctx.closePath();
-			}
+			$.ctx.beginPath();
+			$.ctx.ellipse(x, y, w, h, 0, lo, hi);
+			$.ctx.stroke();
 		}
-		ink();
 	}
-	$.arc = (x, y, w, h, start, stop, mode, detail = 25) => {
+	$.arc = (x, y, w, h, start, stop, mode) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
-		mode ??= $.PIE;
+		mode ??= $.PIE_OPEN;
 		if ($._ellipseMode == $.CENTER) {
-			arc(x, y, w, h, start, stop, mode, detail);
+			arc(x, y, w, h, start, stop, mode);
 		} else if ($._ellipseMode == $.RADIUS) {
-			arc(x, y, w * 2, h * 2, start, stop, mode, detail);
+			arc(x, y, w * 2, h * 2, start, stop, mode);
 		} else if ($._ellipseMode == $.CORNER) {
-			arc(x + w / 2, y + h / 2, w, h, start, stop, mode, detail);
+			arc(x + w / 2, y + h / 2, w, h, start, stop, mode);
 		} else if ($._ellipseMode == $.CORNERS) {
-			arc((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode, detail);
+			arc((x + w) / 2, (y + h) / 2, w - x, h - y, start, stop, mode);
 		}
 	};
 
@@ -2185,6 +2171,7 @@ main {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
+		if (displayMode == 'center') displayMode = 'centered';
 		Object.assign(c, { displayMode, renderQuality, displayScale });
 		$._adjustDisplay();
 	};

@@ -18,14 +18,16 @@ Q5.modules.canvas = ($, q) => {
 	$.MITER = 'miter';
 	$.BEVEL = 'bevel';
 
-	$.CHORD = 0;
-	$.PIE = 1;
-	$.OPEN = 2;
+	$.CHORD_OPEN = 0;
+	$.PIE_OPEN = 1;
+	$.PIE = 2;
+	$.CHORD = 3;
 
 	$.RADIUS = 'radius';
 	$.CORNER = 'corner';
 	$.CORNERS = 'corners';
 
+	$.OPEN = 0;
 	$.CLOSE = 1;
 
 	$.LANDSCAPE = 'landscape';
