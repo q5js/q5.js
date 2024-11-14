@@ -21,11 +21,10 @@ Q5.modules.math = ($, q) => {
 	$.SHR3 = 1;
 	$.LCG = 2;
 
-	let angleMode = 0;
+	let angleMode = ($._angleMode = 0);
 
 	$.angleMode = (mode) => {
-		if (mode == 'radians') mode = 0;
-		angleMode = $._angleMode = mode;
+		angleMode = $._angleMode = mode == 0 || mode == 'radians' ? 0 : 1;
 	};
 	let DEGTORAD = ($._DEGTORAD = Math.PI / 180);
 	let RADTODEG = ($._RADTODEG = 180 / Math.PI);
