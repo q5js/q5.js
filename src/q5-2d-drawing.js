@@ -68,6 +68,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		let full = $.TAU;
 		lo %= full;
 		hi %= full;
+		if (lo == hi) return $.ellipse(x, y, w, h);
 		if (lo < 0) lo += full;
 		if (hi < 0) hi += full;
 		if (lo > hi) hi += full;
@@ -93,7 +94,16 @@ Q5.renderers.q2d.drawing = ($) => {
 	}
 	$.arc = (x, y, w, h, start, stop, mode) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
+
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+			w *= $._da;
+			h *= $._da;
+		}
+
 		mode ??= $.PIE_OPEN;
+
 		if ($._ellipseMode == $.CENTER) {
 			arc(x, y, w, h, start, stop, mode);
 		} else if ($._ellipseMode == $.RADIUS) {
@@ -106,19 +116,18 @@ Q5.renderers.q2d.drawing = ($) => {
 	};
 
 	function ellipse(x, y, w, h) {
-		if (!$._doFill && !$._doStroke) return;
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-		}
 		$.ctx.beginPath();
 		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
 		ink();
 	}
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
+		if ($._da) {
+			x *= $._da;
+			y *= $._da;
+			w *= $._da;
+			h *= $._da;
+		}
 		if ($._ellipseMode == $.CENTER) {
 			ellipse(x, y, w, h);
 		} else if ($._ellipseMode == $.RADIUS) {
@@ -171,7 +180,6 @@ Q5.renderers.q2d.drawing = ($) => {
 		ink();
 	}
 	function roundedRect(x, y, w, h, tl, tr, br, bl) {
-		if (!$._doFill && !$._doStroke) return;
 		if (tl === undefined) {
 			return rect(x, y, w, h);
 		}

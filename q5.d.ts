@@ -701,14 +701,14 @@ rect(20, 20, 60, 60);
 	/** 🧑‍🎨
 	 * Draws an arc, which is a section of an ellipse.
 	 * 
-	 * `ellipseMode` affects how this function draws arcs.
+	 * `ellipseMode` affects how the arc is drawn.
 	 * @param {number} x - x-coordinate
 	 * @param {number} y - y-coordinate
 	 * @param {number} w - width of the ellipse
 	 * @param {number} h - height of the ellipse
 	 * @param {number} start - angle to start the arc
 	 * @param {number} stop - angle to stop the arc
-	 * @param {number} [mode] - drawing mode, can be `PIE`, `CHORD`, or `OPEN`
+	 * @param {number} [mode] - shape and stroke style setting, default is `PIE_OPEN` for a pie shape with an unclosed stroke, can be `PIE`, `CHORD`, or `CHORD_OPEN`
 	 */
 	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number): void;
 
