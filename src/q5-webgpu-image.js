@@ -147,7 +147,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		}
 	};
 
-	$.loadImage = $.loadTexture = (src) => {
+	$.loadImage = (src, cb) => {
 		q._preloadCount++;
 		const img = new Image();
 		img.crossOrigin = 'Anonymous';
@@ -156,9 +156,11 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 			// should be drawn at if the user doesn't specify a display size
 			img.defaultWidth = img.width * $._defaultImageScale;
 			img.defaultHeight = img.height * $._defaultImageScale;
+			img.pixelDensity = 1;
 
 			$._createTexture(img);
 			q._preloadCount--;
+			if (cb) cb(img);
 		};
 		img.src = src;
 		return img;
@@ -173,13 +175,17 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
-		let w = img.defaultWidth;
-		let h = img.defaultHeight;
+		let w = img.width;
+		let h = img.height;
 
-		dw ??= w;
-		dh ??= h;
+		dw ??= img.defaultWidth;
+		dh ??= img.defaultHeight;
 		sw ??= w;
 		sh ??= h;
+
+		let pd = img.pixelDensity || 1;
+		dw *= pd;
+		dh *= pd;
 
 		let [l, r, t, b] = $._calcBox(dx, dy, dw, dh, $._imageMode);
 
