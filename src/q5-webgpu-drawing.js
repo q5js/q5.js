@@ -289,36 +289,35 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
-			let n = getArcSegments(hsw);
+			let n = getArcSegments(sw);
 			addEllipse(x, y, hsw, hsw, n, ci, ti);
 		}
 	};
 
+	// Remove the internal transformations from the line function
 	$.line = (x1, y1, x2, y2) => {
-		$.pushMatrix();
-		$.translate(x1, y1);
-		$.rotate($.atan2(y1 - y2, x2 - x1));
-		$._saveMatrix();
-
+		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex,
 			ci = $._stroke,
-			length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2),
 			sw = $._strokeWeight,
 			hsw = sw / 2;
 
-		if (sw < 4) {
-			let [l, r, t, b] = $._calcBox(-hsw, -hsw, length + hsw, sw, 'corner');
-			addRect(l, t, r, t, r, b, l, b, ci, ti);
-		} else {
-			let n = getArcSegments(hsw);
-			addEllipse(0, 0, hsw, hsw, n, ci, ti);
-			addEllipse(length, 0, hsw, hsw, n, ci, ti);
+		// Calculate the direction vector and length
+		let dx = x2 - x1,
+			dy = y2 - y1,
+			length = Math.hypot(dx, dy);
 
-			let [l, r, t, b] = $._calcBox(0, -hsw, length, sw, 'corner');
-			addRect(l, t, r, t, r, b, l, b, ci, ti);
+		// Calculate the perpendicular vector for line thickness
+		let px = -(dy / length) * hsw,
+			py = (dx / length) * hsw;
+
+		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
+
+		if (sw > 2) {
+			let n = getArcSegments(sw);
+			addEllipse(x1, y1, hsw, hsw, n, ci, ti);
+			addEllipse(x2, y2, hsw, hsw, n, ci, ti);
 		}
-
-		$.popMatrix();
 	};
 
 	let shapeVertCount;

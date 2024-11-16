@@ -213,16 +213,18 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			m4 = m[4],
 			m5 = m[5];
 
-		if (!m0 && !m1 && !m4 && !m5) {
+		// if identity matrix, just set the rotation values
+		if (m0 == 1 && !m1 && !m4 && m5 == 1) {
 			m[0] = cosR;
-			m[1] = sinR;
-			m[4] = -sinR;
+			m[1] = -sinR;
+			m[4] = sinR;
 			m[5] = cosR;
 		} else {
-			m[0] = m0 * cosR + m4 * sinR;
-			m[1] = m1 * cosR + m5 * sinR;
-			m[4] = m4 * cosR - m0 * sinR;
-			m[5] = m5 * cosR - m1 * sinR;
+			// combine the current rotation with the new rotation
+			m[0] = m0 * cosR + m1 * sinR;
+			m[1] = m1 * cosR - m0 * sinR;
+			m[4] = m4 * cosR + m5 * sinR;
+			m[5] = m5 * cosR - m4 * sinR;
 		}
 
 		$._matrixDirty = true;
