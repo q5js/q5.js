@@ -2,8 +2,7 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 	let c = $.canvas,
 		drawStack = $.drawStack,
 		vertexStack = new Float32Array(1e7),
-		vertIndex = 0,
-		colorIndex;
+		vertIndex = 0;
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'drawingVertexShader',
@@ -185,7 +184,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			let sw = $._strokeWeight / 2;
 
 			if ($._doFill) {
-				// existing behavior: draw stroke as one big rectangle
+				// draw stroke as one big rectangle
 				let to = t + sw,
 					bo = b - sw,
 					lo = l - sw,
@@ -200,7 +199,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 				l += sw;
 				r -= sw;
 			} else {
-				// new behavior: draw stroke as four rectangles (sides)
+				// draw stroke as four rectangles (sides)
 				let lsw = l - sw,
 					rsw = r + sw,
 					tsw = t + sw,
@@ -218,7 +217,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doFill) {
-			ci = colorIndex ?? $._fill;
+			ci = $._fill;
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		}
 	};
@@ -259,12 +258,13 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	$.ellipseMode = (x) => ($._ellipseMode = x);
 
 	$.ellipse = (x, y, w, h) => {
-		let n = getArcSegments(w == h ? w : Math.max(w, h));
+		let n = getArcSegments(Math.max(w, h));
 		let a = Math.max(w, 1) / 2;
 		let b = w == h ? a : Math.max(h, 1) / 2;
-		let ci;
+
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
+
 		if ($._doStroke) {
 			let sw = $._strokeWeight / 2;
 			addEllipse(x, y, a + sw, b + sw, n, $._stroke, ti);
@@ -272,47 +272,53 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			b -= sw;
 		}
 		if ($._doFill) {
-			addEllipse(x, y, a, b, n, colorIndex ?? $._fill, ti);
+			addEllipse(x, y, a, b, n, $._fill, ti);
 		}
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
 
 	$.point = (x, y) => {
-		colorIndex = $._stroke;
-		$._doStroke = false;
-		let sw = $._strokeWeight;
+		if ($._matrixDirty) $._saveMatrix();
+		let ti = $._transformIndex,
+			ci = $._stroke,
+			sw = $._strokeWeight,
+			hsw = sw / 2;
+
 		if (sw < 2) {
-			sw = Math.round(sw);
-			$.rect(x, y, sw, sw);
-		} else $.ellipse(x, y, sw, sw);
-		$._doStroke = true;
-		colorIndex = null;
+			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
+			addRect(l, t, r, t, r, b, l, b, ci, ti);
+		} else {
+			let n = getArcSegments(hsw);
+			addEllipse(x, y, hsw, hsw, n, ci, ti);
+		}
 	};
 
 	$.line = (x1, y1, x2, y2) => {
-		colorIndex = $._stroke;
+		$.pushMatrix();
+		$.translate(x1, y1);
+		$.rotate($.atan2(y1 - y2, x2 - x1));
+		$._saveMatrix();
 
-		$.push();
-		$._doStroke = false;
-		$.translate(x1, -y1);
-		$.rotate($.atan2(y2 - y1, x2 - x1));
-		let length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-		let sw = $._strokeWeight,
+		let ti = $._transformIndex,
+			ci = $._stroke,
+			length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2),
+			sw = $._strokeWeight,
 			hsw = sw / 2;
-		$._rectMode = 'corner';
+
 		if (sw < 4) {
-			$.rect(-hsw, -hsw, length + hsw, sw);
+			let [l, r, t, b] = $._calcBox(-hsw, -hsw, length + hsw, sw, 'corner');
+			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
-			$._ellipseMode = 'center';
-			$.ellipse(0, 0, sw, sw);
-			$.ellipse(length, 0, sw, sw);
-			$.rect(0, -hsw, length, sw);
+			let n = getArcSegments(hsw);
+			addEllipse(0, 0, hsw, hsw, n, ci, ti);
+			addEllipse(length, 0, hsw, hsw, n, ci, ti);
+
+			let [l, r, t, b] = $._calcBox(0, -hsw, length, sw, 'corner');
+			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		}
 
-		$.pop();
-
-		colorIndex = null;
+		$.popMatrix();
 	};
 
 	let shapeVertCount;
@@ -370,12 +376,12 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
-				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
+				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
 			}
 			if (close) {
 				let v1 = (shapeVertCount - 1) * 4;
 				let v2 = 0;
-				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
+				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
 			}
 		}
 

@@ -95,10 +95,22 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 
 	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
 
-	let sampler = Q5.device.createSampler({
-		magFilter: 'linear',
-		minFilter: 'linear'
-	});
+	let sampler;
+
+	let makeSampler = (filter) => {
+		sampler = Q5.device.createSampler({
+			magFilter: filter,
+			minFilter: filter
+		});
+	};
+	makeSampler('linear');
+
+	$.smooth = () => {
+		makeSampler('linear');
+	};
+	$.noSmooth = () => {
+		makeSampler('nearest');
+	};
 
 	let MAX_TEXTURES = 12000;
 
