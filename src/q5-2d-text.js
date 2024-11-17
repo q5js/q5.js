@@ -36,6 +36,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		fontMod = true;
 		styleHash = -1;
 	};
+
 	$.textSize = (x) => {
 		if (x == undefined || x == $._textSize) return $._textSize;
 		if ($._da) x *= $._da;
@@ -47,12 +48,14 @@ Q5.renderers.q2d.text = ($, q) => {
 			leadDiff = leading - x;
 		}
 	};
+
 	$.textStyle = (x) => {
 		if (!x || x == emphasis) return emphasis;
 		emphasis = x;
 		fontMod = true;
 		styleHash = -1;
 	};
+
 	$.textLeading = (x) => {
 		leadingSet = true;
 		if (x == undefined || x == leading) return leading;
@@ -61,6 +64,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		leadDiff = x - $._textSize;
 		styleHash = -1;
 	};
+
 	$.textAlign = (horiz, vert) => {
 		$.ctx.textAlign = $._textAlign = horiz;
 		if (vert) {
@@ -90,6 +94,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (enable !== undefined) useCache = enable;
 		return useCache;
 	};
+
 	$.createTextImage = (str, w, h) => {
 		genTextImage = true;
 		img = $.text(str, 0, 0, w, h);
@@ -98,6 +103,7 @@ Q5.renderers.q2d.text = ($, q) => {
 	};
 
 	let lines = [];
+
 	$.text = (str, x, y, w, h) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
@@ -223,6 +229,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			$.textImage(img, x, y);
 		}
 	};
+
 	$.textImage = (img, x, y) => {
 		if (typeof img == 'string') img = $.createTextImage(img);
 

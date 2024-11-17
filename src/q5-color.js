@@ -146,6 +146,7 @@ Q5.Color = class {
 		this._q5Color = true;
 	}
 };
+
 Q5.ColorOKLCH = class extends Q5.Color {
 	constructor(l, c, h, a) {
 		super();
@@ -158,6 +159,7 @@ Q5.ColorOKLCH = class extends Q5.Color {
 		return `oklch(${this.l} ${this.c} ${this.h} / ${this.a})`;
 	}
 };
+
 Q5.ColorRGBA = class extends Q5.Color {
 	constructor(r, g, b, a) {
 		super();
@@ -173,11 +175,13 @@ Q5.ColorRGBA = class extends Q5.Color {
 		return `color(srgb ${this.r} ${this.g} ${this.b} / ${this.a})`;
 	}
 };
+
 Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
 	toString() {
 		return `color(display-p3 ${this.r} ${this.g} ${this.b} / ${this.a})`;
 	}
 };
+
 // legacy 8-bit (0-255) integer color format
 Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {
@@ -202,6 +206,7 @@ Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
 		return `rgb(${this.r} ${this.g} ${this.b} / ${this.a / 255})`;
 	}
 };
+
 // p3 10-bit color in integer color format, for backwards compatibility
 Q5.ColorRGBA_P3_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {

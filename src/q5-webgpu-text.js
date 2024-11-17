@@ -114,6 +114,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		mipmapFilter: 'linear',
 		maxAnisotropy: 16
 	});
+
 	let fontBindGroupLayout = Q5.device.createBindGroupLayout({
 		label: 'MSDF font group layout',
 		entries: [
@@ -151,6 +152,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
 	};
+
 	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
 
 	class MsdfFont {
@@ -299,6 +301,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	$.textFont = (fontName) => {
 		$._font = fonts[fontName];
 	};
+
 	$.textSize = (size) => {
 		$._textSize = size;
 		if (!leadingSet) {
@@ -306,12 +309,14 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			leadDiff = leading - size;
 		}
 	};
+
 	$.textLeading = (lineHeight) => {
 		$._font.lineHeight = leading = lineHeight;
 		leadDiff = leading - $._textSize;
 		leadPercent = leading / $._textSize;
 		leadingSet = true;
 	};
+
 	$.textAlign = (horiz, vert) => {
 		$._textAlign = horiz;
 		if (vert) $._textBaseline = vert;

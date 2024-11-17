@@ -314,6 +314,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if ($._matrixDirty) $._saveMatrix();
 		$._transformIndexStack.push($._transformIndex);
 	};
+
 	$.popMatrix = () => {
 		if (!$._transformIndexStack.length) {
 			return console.warn('Matrix index stack is empty!');
@@ -329,6 +330,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$.pushMatrix();
 		$.pushStyles();
 	};
+
 	$.pop = () => {
 		$.popMatrix();
 		$.popStyles();
@@ -410,6 +412,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	}
 
 	$._blendMode = 'normal';
+
 	$.blendMode = (mode) => {
 		if (mode == $._blendMode) return;
 		if (mode == 'source-over') mode = 'normal';

@@ -146,7 +146,7 @@ Q5.modules.canvas = ($, q) => {
 		return g;
 	};
 
-	$._save = async (data, name, ext) => {
+	async function saveFile(data, name, ext) {
 		name = name || 'untitled';
 		ext = ext || 'png';
 		if (ext == 'jpg' || ext == 'png' || ext == 'webp') {
@@ -174,18 +174,19 @@ Q5.modules.canvas = ($, q) => {
 		a.download = name + '.' + ext;
 		a.click();
 		URL.revokeObjectURL(a.href);
-	};
+	}
+
 	$.save = (a, b, c) => {
 		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
 			c = b;
 			b = a;
 			a = $.canvas;
 		}
-		if (c) return $._save(a, b, c);
+		if (c) return saveFile(a, b, c);
 		if (b) {
 			b = b.split('.');
-			$._save(a, b[0], b.at(-1));
-		} else $._save(a);
+			saveFile(a, b[0], b.at(-1));
+		} else saveFile(a);
 	};
 
 	$._setCanvasSize = (w, h) => {

@@ -65,7 +65,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		$.ctx.fillStyle = $._fill = c.toString();
 	};
-	$.noFill = () => ($._doFill = false);
+
 	$.stroke = function (c) {
 		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
@@ -77,13 +77,15 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		$.ctx.strokeStyle = $._stroke = c.toString();
 	};
+
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
 		if ($._da) n *= $._da;
 		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
-	$.noStroke = () => ($._doStroke = false);
 
+	$.noFill = () => ($._doFill = false);
+	$.noStroke = () => ($._doStroke = false);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
 	// DRAWING MATRIX
@@ -95,10 +97,12 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		$.ctx.translate(x, y);
 	};
+
 	$.rotate = (r) => {
 		if ($._angleMode) r = $.radians(r);
 		$.ctx.rotate(r);
 	};
+
 	$.scale = (x, y) => {
 		if (x.x) {
 			y = x.y;
@@ -107,9 +111,11 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		y ??= x;
 		$.ctx.scale(x, y);
 	};
+
 	$.applyMatrix = (a, b, c, d, e, f) => $.ctx.transform(a, b, c, d, e, f);
 	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
 	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
+
 	$.resetMatrix = () => {
 		if ($.ctx) {
 			$.ctx.resetTransform();

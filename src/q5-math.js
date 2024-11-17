@@ -42,13 +42,15 @@ Q5.modules.math = ($, q) => {
 			return Math.min(Math.max(val, ostop), ostart);
 		}
 	};
-	$.lerp = (a, b, t) => a * (1 - t) + b * t;
-	$.constrain = (x, lo, hi) => Math.min(Math.max(x, lo), hi);
+
 	$.dist = function () {
 		let a = arguments;
 		if (a.length == 4) return Math.hypot(a[0] - a[2], a[1] - a[3]);
 		else return Math.hypot(a[0] - a[3], a[1] - a[4], a[2] - a[5]);
 	};
+
+	$.lerp = (a, b, t) => a * (1 - t) + b * t;
+	$.constrain = (x, lo, hi) => Math.min(Math.max(x, lo), hi);
 	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
@@ -69,7 +71,6 @@ Q5.modules.math = ($, q) => {
 		let a = Math.atan(x);
 		return !angleMode ? a : a * RADTODEG;
 	};
-
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
 		return !angleMode ? a : a * RADTODEG;
@@ -93,6 +94,7 @@ Q5.modules.math = ($, q) => {
 			}
 		};
 	}
+
 	function shr3() {
 		let jsr, seed;
 		let m = 4294967295;
@@ -111,6 +113,7 @@ Q5.modules.math = ($, q) => {
 			}
 		};
 	}
+
 	let rng1 = shr3();
 	rng1.setSeed();
 
@@ -127,6 +130,7 @@ Q5.modules.math = ($, q) => {
 			return a[Math.trunc(a.length * rng1.rand())];
 		}
 	};
+
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();
 		else if (method == $.SHR3) rng1 = shr3();
@@ -282,13 +286,16 @@ Q5.modules.math = ($, q) => {
 		q.Noise = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
 		_noise = null;
 	};
+
 	$.noiseSeed = (seed) => {
 		_noise = new $.Noise(seed);
 	};
+
 	$.noise = (x = 0, y = 0, z = 0) => {
 		_noise ??= new $.Noise();
 		return _noise.noise(x, y, z);
 	};
+
 	$.noiseDetail = (lod, falloff) => {
 		_noise ??= new $.Noise();
 		if (lod > 0) _noise.octaves = lod;

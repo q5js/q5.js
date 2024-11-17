@@ -462,7 +462,7 @@ Q5.modules.canvas = ($, q) => {
 		return g;
 	};
 
-	$._save = async (data, name, ext) => {
+	async function saveFile(data, name, ext) {
 		name = name || 'untitled';
 		ext = ext || 'png';
 		if (ext == 'jpg' || ext == 'png' || ext == 'webp') {
@@ -490,18 +490,19 @@ Q5.modules.canvas = ($, q) => {
 		a.download = name + '.' + ext;
 		a.click();
 		URL.revokeObjectURL(a.href);
-	};
+	}
+
 	$.save = (a, b, c) => {
 		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
 			c = b;
 			b = a;
 			a = $.canvas;
 		}
-		if (c) return $._save(a, b, c);
+		if (c) return saveFile(a, b, c);
 		if (b) {
 			b = b.split('.');
-			$._save(a, b[0], b.at(-1));
-		} else $._save(a);
+			saveFile(a, b[0], b.at(-1));
+		} else saveFile(a);
 	};
 
 	$._setCanvasSize = (w, h) => {
@@ -716,7 +717,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		$.ctx.fillStyle = $._fill = c.toString();
 	};
-	$.noFill = () => ($._doFill = false);
+
 	$.stroke = function (c) {
 		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
@@ -728,13 +729,15 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		$.ctx.strokeStyle = $._stroke = c.toString();
 	};
+
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
 		if ($._da) n *= $._da;
 		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
-	$.noStroke = () => ($._doStroke = false);
 
+	$.noFill = () => ($._doFill = false);
+	$.noStroke = () => ($._doStroke = false);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
 	// DRAWING MATRIX
@@ -746,10 +749,12 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		}
 		$.ctx.translate(x, y);
 	};
+
 	$.rotate = (r) => {
 		if ($._angleMode) r = $.radians(r);
 		$.ctx.rotate(r);
 	};
+
 	$.scale = (x, y) => {
 		if (x.x) {
 			y = x.y;
@@ -758,9 +763,11 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		y ??= x;
 		$.ctx.scale(x, y);
 	};
+
 	$.applyMatrix = (a, b, c, d, e, f) => $.ctx.transform(a, b, c, d, e, f);
 	$.shearX = (ang) => $.ctx.transform(1, 0, $.tan(ang), 1, 0, 0);
 	$.shearY = (ang) => $.ctx.transform(1, $.tan(ang), 0, 1, 0, 0);
+
 	$.resetMatrix = () => {
 		if ($.ctx) {
 			$.ctx.resetTransform();
@@ -852,12 +859,7 @@ Q5.renderers.q2d.drawing = ($) => {
 
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
-			if ($._da) {
-				x0 *= $._da;
-				y0 *= $._da;
-				x1 *= $._da;
-				y1 *= $._da;
-			}
+			$._da && ((x0 *= $._da), (y0 *= $._da), (x1 *= $._da), (y1 *= $._da));
 			$.ctx.beginPath();
 			$.ctx.moveTo(x0, y0);
 			$.ctx.lineTo(x1, y1);
@@ -897,6 +899,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			$.ctx.stroke();
 		}
 	}
+
 	$.arc = (x, y, w, h, start, stop, mode) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
 
@@ -906,7 +909,6 @@ Q5.renderers.q2d.drawing = ($) => {
 			w *= $._da;
 			h *= $._da;
 		}
-
 		mode ??= $.PIE_OPEN;
 
 		if ($._ellipseMode == $.CENTER) {
@@ -925,6 +927,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
 		ink();
 	}
+
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
 		if ($._da) {
@@ -943,6 +946,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			ellipse((x + w) / 2, (y + h) / 2, w - x, h - y);
 		}
 	};
+
 	$.circle = (x, y, d) => {
 		if ($._ellipseMode == $.CENTER) {
 			if ($._da) {
@@ -984,6 +988,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.rect(x, y, w, h);
 		ink();
 	}
+
 	function roundedRect(x, y, w, h, tl, tr, br, bl) {
 		if (tl === undefined) {
 			return rect(x, y, w, h);
@@ -1016,6 +1021,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			roundedRect(x, y, w - x, h - y, tl, tr, br, bl);
 		}
 	};
+
 	$.square = (x, y, s, tl, tr, br, bl) => {
 		return $.rect(x, y, s, s, tl, tr, br, bl);
 	};
@@ -1025,15 +1031,18 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.beginPath();
 		firstVertex = true;
 	};
+
 	$.beginContour = () => {
 		$.ctx.closePath();
 		curveBuff.length = 0;
 		firstVertex = true;
 	};
+
 	$.endContour = () => {
 		curveBuff.length = 0;
 		firstVertex = true;
 	};
+
 	$.vertex = (x, y) => {
 		if ($._da) {
 			x *= $._da;
@@ -1047,6 +1056,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 		firstVertex = false;
 	};
+
 	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
 		if ($._da) {
 			cp1x *= $._da;
@@ -1059,6 +1069,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		curveBuff.length = 0;
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
+
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
 		if ($._da) {
 			cp1x *= $._da;
@@ -1069,12 +1080,14 @@ Q5.renderers.q2d.drawing = ($) => {
 		curveBuff.length = 0;
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
+
 	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
 		$.vertex(x1, y1);
 		$.bezierVertex(x2, y2, x3, y3, x4, y4);
 		$.endShape();
 	};
+
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {
 		$.beginShape();
 		$.vertex(x1, y1);
@@ -1082,6 +1095,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.vertex(x3, y3);
 		$.endShape($.CLOSE);
 	};
+
 	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
 		$.vertex(x1, y1);
@@ -1090,6 +1104,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.vertex(x4, y4);
 		$.endShape($.CLOSE);
 	};
+
 	$.endShape = (close) => {
 		curveBuff.length = 0;
 		if (close) $.ctx.closePath();
@@ -1120,6 +1135,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
 	};
+
 	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
 		$.curveVertex(x1, y1);
@@ -1128,6 +1144,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.curveVertex(x4, y4);
 		$.endShape();
 	};
+
 	$.curvePoint = (a, b, c, d, t) => {
 		const t3 = t * t * t,
 			t2 = t * t,
@@ -1137,6 +1154,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			f4 = 0.5 * t3 - 0.5 * t2;
 		return a * f1 + b * f2 + c * f3 + d * f4;
 	};
+
 	$.bezierPoint = (a, b, c, d, t) => {
 		const adjustedT = 1 - t;
 		return (
@@ -1146,6 +1164,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			Math.pow(t, 3) * d
 		);
 	};
+
 	$.curveTangent = (a, b, c, d, t) => {
 		const t2 = t * t,
 			f1 = (-3 * t2) / 2 + 2 * t - 0.5,
@@ -1154,6 +1173,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			f4 = (3 * t2) / 2 - t;
 		return a * f1 + b * f2 + c * f3 + d * f4;
 	};
+
 	$.bezierTangent = (a, b, c, d, t) => {
 		const adjustedT = 1 - t;
 		return (
@@ -1271,6 +1291,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	};
 
 	$.imageMode = (mode) => ($._imageMode = mode);
+
 	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		if (!img) return;
 		let drawable = img?.canvas || img;
@@ -1512,6 +1533,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		fontMod = true;
 		styleHash = -1;
 	};
+
 	$.textSize = (x) => {
 		if (x == undefined || x == $._textSize) return $._textSize;
 		if ($._da) x *= $._da;
@@ -1523,12 +1545,14 @@ Q5.renderers.q2d.text = ($, q) => {
 			leadDiff = leading - x;
 		}
 	};
+
 	$.textStyle = (x) => {
 		if (!x || x == emphasis) return emphasis;
 		emphasis = x;
 		fontMod = true;
 		styleHash = -1;
 	};
+
 	$.textLeading = (x) => {
 		leadingSet = true;
 		if (x == undefined || x == leading) return leading;
@@ -1537,6 +1561,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		leadDiff = x - $._textSize;
 		styleHash = -1;
 	};
+
 	$.textAlign = (horiz, vert) => {
 		$.ctx.textAlign = $._textAlign = horiz;
 		if (vert) {
@@ -1566,6 +1591,7 @@ Q5.renderers.q2d.text = ($, q) => {
 		if (enable !== undefined) useCache = enable;
 		return useCache;
 	};
+
 	$.createTextImage = (str, w, h) => {
 		genTextImage = true;
 		img = $.text(str, 0, 0, w, h);
@@ -1574,6 +1600,7 @@ Q5.renderers.q2d.text = ($, q) => {
 	};
 
 	let lines = [];
+
 	$.text = (str, x, y, w, h) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
@@ -1699,6 +1726,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			$.textImage(img, x, y);
 		}
 	};
+
 	$.textImage = (img, x, y) => {
 		if (typeof img == 'string') img = $.createTextImage(img);
 
@@ -1942,6 +1970,7 @@ Q5.Color = class {
 		this._q5Color = true;
 	}
 };
+
 Q5.ColorOKLCH = class extends Q5.Color {
 	constructor(l, c, h, a) {
 		super();
@@ -1954,6 +1983,7 @@ Q5.ColorOKLCH = class extends Q5.Color {
 		return `oklch(${this.l} ${this.c} ${this.h} / ${this.a})`;
 	}
 };
+
 Q5.ColorRGBA = class extends Q5.Color {
 	constructor(r, g, b, a) {
 		super();
@@ -1969,11 +1999,13 @@ Q5.ColorRGBA = class extends Q5.Color {
 		return `color(srgb ${this.r} ${this.g} ${this.b} / ${this.a})`;
 	}
 };
+
 Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
 	toString() {
 		return `color(display-p3 ${this.r} ${this.g} ${this.b} / ${this.a})`;
 	}
 };
+
 // legacy 8-bit (0-255) integer color format
 Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {
@@ -1998,6 +2030,7 @@ Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
 		return `rgb(${this.r} ${this.g} ${this.b} / ${this.a / 255})`;
 	}
 };
+
 // p3 10-bit color in integer color format, for backwards compatibility
 Q5.ColorRGBA_P3_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {
@@ -2206,6 +2239,7 @@ Q5.modules.input = ($, q) => {
 		q.moveX = e.movementX;
 		q.moveY = e.movementY;
 	};
+
 	$._onmousedown = (e) => {
 		$._startAudio();
 		$._updateMouse(e);
@@ -2213,22 +2247,26 @@ Q5.modules.input = ($, q) => {
 		q.mouseButton = mouseBtns[e.button];
 		$.mousePressed(e);
 	};
+
 	$._onmousemove = (e) => {
 		$._updateMouse(e);
 		if ($.mouseIsPressed) $.mouseDragged(e);
 		else $.mouseMoved(e);
 	};
+
 	$._onmouseup = (e) => {
 		$._updateMouse(e);
 		q.mouseIsPressed = false;
 		$.mouseReleased(e);
 	};
+
 	$._onclick = (e) => {
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
 		$.mouseClicked(e);
 		q.mouseIsPressed = false;
 	};
+
 	$._onwheel = (e) => {
 		$._updateMouse(e);
 		e.delta = e.deltaY;
@@ -2246,9 +2284,11 @@ Q5.modules.input = ($, q) => {
 		}
 		$.canvas.style.cursor = name + pfx;
 	};
+
 	$.noCursor = () => {
 		$.canvas.style.cursor = 'none';
 	};
+
 	if (window) {
 		$.requestPointerLock = document.body?.requestPointerLock;
 		$.exitPointerLock = document.exitPointerLock;
@@ -2264,6 +2304,7 @@ Q5.modules.input = ($, q) => {
 		$.keyPressed(e);
 		if (e.key.length == 1) $.keyTyped(e);
 	};
+
 	$._onkeyup = (e) => {
 		q.keyIsPressed = false;
 		q.key = e.key;
@@ -2271,6 +2312,7 @@ Q5.modules.input = ($, q) => {
 		keysHeld[$.keyCode] = keysHeld[$.key.toLowerCase()] = false;
 		$.keyReleased(e);
 	};
+
 	$.keyIsDown = (v) => !!keysHeld[typeof v == 'string' ? v.toLowerCase() : v];
 
 	function getTouchInfo(touch) {
@@ -2283,6 +2325,7 @@ Q5.modules.input = ($, q) => {
 			id: touch.identifier
 		};
 	}
+
 	$._ontouchstart = (e) => {
 		$._startAudio();
 		q.touches = [...e.touches].map(getTouchInfo);
@@ -2295,6 +2338,7 @@ Q5.modules.input = ($, q) => {
 		}
 		if (!$.touchStarted(e)) e.preventDefault();
 	};
+
 	$._ontouchmove = (e) => {
 		q.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
@@ -2304,6 +2348,7 @@ Q5.modules.input = ($, q) => {
 		}
 		if (!$.touchMoved(e)) e.preventDefault();
 	};
+
 	$._ontouchend = (e) => {
 		q.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware && !$.touches.length) {
@@ -2375,13 +2420,15 @@ Q5.modules.math = ($, q) => {
 			return Math.min(Math.max(val, ostop), ostart);
 		}
 	};
-	$.lerp = (a, b, t) => a * (1 - t) + b * t;
-	$.constrain = (x, lo, hi) => Math.min(Math.max(x, lo), hi);
+
 	$.dist = function () {
 		let a = arguments;
 		if (a.length == 4) return Math.hypot(a[0] - a[2], a[1] - a[3]);
 		else return Math.hypot(a[0] - a[3], a[1] - a[4], a[2] - a[5]);
 	};
+
+	$.lerp = (a, b, t) => a * (1 - t) + b * t;
+	$.constrain = (x, lo, hi) => Math.min(Math.max(x, lo), hi);
 	$.norm = (value, start, stop) => $.map(value, start, stop, 0, 1);
 	$.sq = (x) => x * x;
 	$.fract = (x) => x - Math.floor(x);
@@ -2402,7 +2449,6 @@ Q5.modules.math = ($, q) => {
 		let a = Math.atan(x);
 		return !angleMode ? a : a * RADTODEG;
 	};
-
 	$.atan2 = (y, x) => {
 		let a = Math.atan2(y, x);
 		return !angleMode ? a : a * RADTODEG;
@@ -2426,6 +2472,7 @@ Q5.modules.math = ($, q) => {
 			}
 		};
 	}
+
 	function shr3() {
 		let jsr, seed;
 		let m = 4294967295;
@@ -2444,6 +2491,7 @@ Q5.modules.math = ($, q) => {
 			}
 		};
 	}
+
 	let rng1 = shr3();
 	rng1.setSeed();
 
@@ -2460,6 +2508,7 @@ Q5.modules.math = ($, q) => {
 			return a[Math.trunc(a.length * rng1.rand())];
 		}
 	};
+
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();
 		else if (method == $.SHR3) rng1 = shr3();
@@ -2615,13 +2664,16 @@ Q5.modules.math = ($, q) => {
 		q.Noise = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
 		_noise = null;
 	};
+
 	$.noiseSeed = (seed) => {
 		_noise = new $.Noise(seed);
 	};
+
 	$.noise = (x = 0, y = 0, z = 0) => {
 		_noise ??= new $.Noise();
 		return _noise.noise(x, y, z);
 	};
+
 	$.noiseDetail = (lod, falloff) => {
 		_noise ??= new $.Noise();
 		if (lod > 0) _noise.octaves = lod;
@@ -2857,15 +2909,18 @@ Q5.Vector = class {
 		this._cn = null;
 		this._cnsq = null;
 	}
+
 	set(x, y, z) {
 		this.x = x?.x || x || 0;
 		this.y = x?.y || y || 0;
 		this.z = x?.z || z || 0;
 		return this;
 	}
+
 	copy() {
 		return new Q5.Vector(this.x, this.y, this.z);
 	}
+
 	_arg2v(x, y, z) {
 		if (x?.x !== undefined) return x;
 		if (y !== undefined) {
@@ -2873,10 +2928,12 @@ Q5.Vector = class {
 		}
 		return { x: x, y: x, z: x };
 	}
+
 	_calcNorm() {
 		this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
 		this._cn = Math.sqrt(this._cnsq);
 	}
+
 	add() {
 		let u = this._arg2v(...arguments);
 		this.x += u.x;
@@ -2884,6 +2941,7 @@ Q5.Vector = class {
 		this.z += u.z;
 		return this;
 	}
+
 	rem() {
 		let u = this._arg2v(...arguments);
 		this.x %= u.x;
@@ -2891,6 +2949,7 @@ Q5.Vector = class {
 		this.z %= u.z;
 		return this;
 	}
+
 	sub() {
 		let u = this._arg2v(...arguments);
 		this.x -= u.x;
@@ -2898,6 +2957,7 @@ Q5.Vector = class {
 		this.z -= u.z;
 		return this;
 	}
+
 	mult() {
 		let u = this._arg2v(...arguments);
 		this.x *= u.x;
@@ -2905,6 +2965,7 @@ Q5.Vector = class {
 		this.z *= u.z;
 		return this;
 	}
+
 	div() {
 		let u = this._arg2v(...arguments);
 		if (u.x) this.x /= u.x;
@@ -2915,18 +2976,22 @@ Q5.Vector = class {
 		else this.z = 0;
 		return this;
 	}
+
 	mag() {
 		this._calcNorm();
 		return this._cn;
 	}
+
 	magSq() {
 		this._calcNorm();
 		return this._cnsq;
 	}
+
 	dot() {
 		let u = this._arg2v(...arguments);
 		return this.x * u.x + this.y * u.y + this.z * u.z;
 	}
+
 	dist() {
 		let u = this._arg2v(...arguments);
 		let x = this.x - u.x;
@@ -2934,6 +2999,7 @@ Q5.Vector = class {
 		let z = this.z - u.z;
 		return Math.sqrt(x * x + y * y + z * z);
 	}
+
 	cross() {
 		let u = this._arg2v(...arguments);
 		let x = this.y * u.z - this.z * u.y;
@@ -2944,6 +3010,7 @@ Q5.Vector = class {
 		this.z = z;
 		return this;
 	}
+
 	normalize() {
 		this._calcNorm();
 		let n = this._cn;
@@ -2956,6 +3023,7 @@ Q5.Vector = class {
 		this._cnsq = 1;
 		return this;
 	}
+
 	limit(m) {
 		this._calcNorm();
 		let n = this._cn;
@@ -2969,6 +3037,7 @@ Q5.Vector = class {
 		}
 		return this;
 	}
+
 	setMag(m) {
 		this._calcNorm();
 		let n = this._cn;
@@ -2980,15 +3049,18 @@ Q5.Vector = class {
 		this._cnsq = m * m;
 		return this;
 	}
+
 	heading() {
 		return this._$.atan2(this.y, this.x);
 	}
+
 	setHeading(ang) {
 		let mag = this.mag();
 		this.x = mag * this._$.cos(ang);
 		this.y = mag * this._$.sin(ang);
 		return this;
 	}
+
 	rotate(ang) {
 		let costh = this._$.cos(ang);
 		let sinth = this._$.sin(ang);
@@ -2998,12 +3070,14 @@ Q5.Vector = class {
 		this.y = vy;
 		return this;
 	}
+
 	angleBetween() {
 		let u = this._arg2v(...arguments);
 		let o = Q5.Vector.cross(this, u);
 		let ang = this._$.atan2(o.mag(), this.dot(u));
 		return ang * Math.sign(o.z || 1);
 	}
+
 	lerp() {
 		let args = [...arguments];
 		let amt = args.at(-1);
@@ -3014,6 +3088,7 @@ Q5.Vector = class {
 		this.z += (u.z - this.z) * amt;
 		return this;
 	}
+
 	slerp() {
 		let args = [...arguments];
 		let amt = args.at(-1);
@@ -3052,17 +3127,21 @@ Q5.Vector = class {
 		this.z = this.z * cosMultiplier + ey.z * sinMultiplier;
 		return this;
 	}
+
 	reflect(n) {
 		n.normalize();
 		return this.sub(n.mult(2 * this.dot(n)));
 	}
+
 	array() {
 		return [this.x, this.y, this.z];
 	}
+
 	equals(u, epsilon) {
 		epsilon ??= Number.EPSILON || 0;
 		return Math.abs(u.x - this.x) < epsilon && Math.abs(u.y - this.y) < epsilon && Math.abs(u.z - this.z) < epsilon;
 	}
+
 	fromAngle(th, l) {
 		if (l === undefined) l = 1;
 		this._cn = l;
@@ -3072,6 +3151,7 @@ Q5.Vector = class {
 		this.z = 0;
 		return this;
 	}
+
 	fromAngles(th, ph, l) {
 		if (l === undefined) l = 1;
 		this._cn = l;
@@ -3085,18 +3165,22 @@ Q5.Vector = class {
 		this.z = l * sinth * cosph;
 		return this;
 	}
+
 	random2D() {
 		this._cn = this._cnsq = 1;
 		return this.fromAngle(Math.random() * Math.PI * 2);
 	}
+
 	random3D() {
 		this._cn = this._cnsq = 1;
 		return this.fromAngles(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
 	}
+
 	toString() {
 		return `[${this.x}, ${this.y}, ${this.z}]`;
 	}
 };
+
 Q5.Vector.add = (v, u) => v.copy().add(u);
 Q5.Vector.cross = (v, u) => v.copy().cross(u);
 Q5.Vector.dist = (v, u) => Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
@@ -3113,6 +3197,7 @@ Q5.Vector.mult = (v, u) => v.copy().mult(u);
 Q5.Vector.normalize = (v) => v.copy().normalize();
 Q5.Vector.rem = (v, u) => v.copy().rem(u);
 Q5.Vector.sub = (v, u) => v.copy().sub(u);
+
 for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 }
@@ -3432,6 +3517,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if ($._matrixDirty) $._saveMatrix();
 		$._transformIndexStack.push($._transformIndex);
 	};
+
 	$.popMatrix = () => {
 		if (!$._transformIndexStack.length) {
 			return console.warn('Matrix index stack is empty!');
@@ -3447,6 +3533,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$.pushMatrix();
 		$.pushStyles();
 	};
+
 	$.pop = () => {
 		$.popMatrix();
 		$.popStyles();
@@ -3528,6 +3615,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	}
 
 	$._blendMode = 'normal';
+
 	$.blendMode = (mode) => {
 		if (mode == $._blendMode) return;
 		if (mode == 'source-over') mode = 'normal';
@@ -4537,6 +4625,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		mipmapFilter: 'linear',
 		maxAnisotropy: 16
 	});
+
 	let fontBindGroupLayout = Q5.device.createBindGroupLayout({
 		label: 'MSDF font group layout',
 		entries: [
@@ -4574,6 +4663,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
 	};
+
 	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
 
 	class MsdfFont {
@@ -4722,6 +4812,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	$.textFont = (fontName) => {
 		$._font = fonts[fontName];
 	};
+
 	$.textSize = (size) => {
 		$._textSize = size;
 		if (!leadingSet) {
@@ -4729,12 +4820,14 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			leadDiff = leading - size;
 		}
 	};
+
 	$.textLeading = (lineHeight) => {
 		$._font.lineHeight = leading = lineHeight;
 		leadDiff = leading - $._textSize;
 		leadPercent = leading / $._textSize;
 		leadingSet = true;
 	};
+
 	$.textAlign = (horiz, vert) => {
 		$._textAlign = horiz;
 		if (vert) $._textBaseline = vert;

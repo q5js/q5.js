@@ -11,15 +11,18 @@ Q5.Vector = class {
 		this._cn = null;
 		this._cnsq = null;
 	}
+
 	set(x, y, z) {
 		this.x = x?.x || x || 0;
 		this.y = x?.y || y || 0;
 		this.z = x?.z || z || 0;
 		return this;
 	}
+
 	copy() {
 		return new Q5.Vector(this.x, this.y, this.z);
 	}
+
 	_arg2v(x, y, z) {
 		if (x?.x !== undefined) return x;
 		if (y !== undefined) {
@@ -27,10 +30,12 @@ Q5.Vector = class {
 		}
 		return { x: x, y: x, z: x };
 	}
+
 	_calcNorm() {
 		this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
 		this._cn = Math.sqrt(this._cnsq);
 	}
+
 	add() {
 		let u = this._arg2v(...arguments);
 		this.x += u.x;
@@ -38,6 +43,7 @@ Q5.Vector = class {
 		this.z += u.z;
 		return this;
 	}
+
 	rem() {
 		let u = this._arg2v(...arguments);
 		this.x %= u.x;
@@ -45,6 +51,7 @@ Q5.Vector = class {
 		this.z %= u.z;
 		return this;
 	}
+
 	sub() {
 		let u = this._arg2v(...arguments);
 		this.x -= u.x;
@@ -52,6 +59,7 @@ Q5.Vector = class {
 		this.z -= u.z;
 		return this;
 	}
+
 	mult() {
 		let u = this._arg2v(...arguments);
 		this.x *= u.x;
@@ -59,6 +67,7 @@ Q5.Vector = class {
 		this.z *= u.z;
 		return this;
 	}
+
 	div() {
 		let u = this._arg2v(...arguments);
 		if (u.x) this.x /= u.x;
@@ -69,18 +78,22 @@ Q5.Vector = class {
 		else this.z = 0;
 		return this;
 	}
+
 	mag() {
 		this._calcNorm();
 		return this._cn;
 	}
+
 	magSq() {
 		this._calcNorm();
 		return this._cnsq;
 	}
+
 	dot() {
 		let u = this._arg2v(...arguments);
 		return this.x * u.x + this.y * u.y + this.z * u.z;
 	}
+
 	dist() {
 		let u = this._arg2v(...arguments);
 		let x = this.x - u.x;
@@ -88,6 +101,7 @@ Q5.Vector = class {
 		let z = this.z - u.z;
 		return Math.sqrt(x * x + y * y + z * z);
 	}
+
 	cross() {
 		let u = this._arg2v(...arguments);
 		let x = this.y * u.z - this.z * u.y;
@@ -98,6 +112,7 @@ Q5.Vector = class {
 		this.z = z;
 		return this;
 	}
+
 	normalize() {
 		this._calcNorm();
 		let n = this._cn;
@@ -110,6 +125,7 @@ Q5.Vector = class {
 		this._cnsq = 1;
 		return this;
 	}
+
 	limit(m) {
 		this._calcNorm();
 		let n = this._cn;
@@ -123,6 +139,7 @@ Q5.Vector = class {
 		}
 		return this;
 	}
+
 	setMag(m) {
 		this._calcNorm();
 		let n = this._cn;
@@ -134,15 +151,18 @@ Q5.Vector = class {
 		this._cnsq = m * m;
 		return this;
 	}
+
 	heading() {
 		return this._$.atan2(this.y, this.x);
 	}
+
 	setHeading(ang) {
 		let mag = this.mag();
 		this.x = mag * this._$.cos(ang);
 		this.y = mag * this._$.sin(ang);
 		return this;
 	}
+
 	rotate(ang) {
 		let costh = this._$.cos(ang);
 		let sinth = this._$.sin(ang);
@@ -152,12 +172,14 @@ Q5.Vector = class {
 		this.y = vy;
 		return this;
 	}
+
 	angleBetween() {
 		let u = this._arg2v(...arguments);
 		let o = Q5.Vector.cross(this, u);
 		let ang = this._$.atan2(o.mag(), this.dot(u));
 		return ang * Math.sign(o.z || 1);
 	}
+
 	lerp() {
 		let args = [...arguments];
 		let amt = args.at(-1);
@@ -168,6 +190,7 @@ Q5.Vector = class {
 		this.z += (u.z - this.z) * amt;
 		return this;
 	}
+
 	slerp() {
 		let args = [...arguments];
 		let amt = args.at(-1);
@@ -206,17 +229,21 @@ Q5.Vector = class {
 		this.z = this.z * cosMultiplier + ey.z * sinMultiplier;
 		return this;
 	}
+
 	reflect(n) {
 		n.normalize();
 		return this.sub(n.mult(2 * this.dot(n)));
 	}
+
 	array() {
 		return [this.x, this.y, this.z];
 	}
+
 	equals(u, epsilon) {
 		epsilon ??= Number.EPSILON || 0;
 		return Math.abs(u.x - this.x) < epsilon && Math.abs(u.y - this.y) < epsilon && Math.abs(u.z - this.z) < epsilon;
 	}
+
 	fromAngle(th, l) {
 		if (l === undefined) l = 1;
 		this._cn = l;
@@ -226,6 +253,7 @@ Q5.Vector = class {
 		this.z = 0;
 		return this;
 	}
+
 	fromAngles(th, ph, l) {
 		if (l === undefined) l = 1;
 		this._cn = l;
@@ -239,18 +267,22 @@ Q5.Vector = class {
 		this.z = l * sinth * cosph;
 		return this;
 	}
+
 	random2D() {
 		this._cn = this._cnsq = 1;
 		return this.fromAngle(Math.random() * Math.PI * 2);
 	}
+
 	random3D() {
 		this._cn = this._cnsq = 1;
 		return this.fromAngles(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
 	}
+
 	toString() {
 		return `[${this.x}, ${this.y}, ${this.z}]`;
 	}
 };
+
 Q5.Vector.add = (v, u) => v.copy().add(u);
 Q5.Vector.cross = (v, u) => v.copy().cross(u);
 Q5.Vector.dist = (v, u) => Math.hypot(v.x - u.x, v.y - u.y, v.z - u.z);
@@ -267,6 +299,7 @@ Q5.Vector.mult = (v, u) => v.copy().mult(u);
 Q5.Vector.normalize = (v) => v.copy().normalize();
 Q5.Vector.rem = (v, u) => v.copy().rem(u);
 Q5.Vector.sub = (v, u) => v.copy().sub(u);
+
 for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
 }

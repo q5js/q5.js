@@ -47,12 +47,7 @@ Q5.renderers.q2d.drawing = ($) => {
 
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
-			if ($._da) {
-				x0 *= $._da;
-				y0 *= $._da;
-				x1 *= $._da;
-				y1 *= $._da;
-			}
+			$._da && ((x0 *= $._da), (y0 *= $._da), (x1 *= $._da), (y1 *= $._da));
 			$.ctx.beginPath();
 			$.ctx.moveTo(x0, y0);
 			$.ctx.lineTo(x1, y1);
@@ -92,6 +87,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			$.ctx.stroke();
 		}
 	}
+
 	$.arc = (x, y, w, h, start, stop, mode) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
 
@@ -101,7 +97,6 @@ Q5.renderers.q2d.drawing = ($) => {
 			w *= $._da;
 			h *= $._da;
 		}
-
 		mode ??= $.PIE_OPEN;
 
 		if ($._ellipseMode == $.CENTER) {
@@ -120,6 +115,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
 		ink();
 	}
+
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
 		if ($._da) {
@@ -138,6 +134,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			ellipse((x + w) / 2, (y + h) / 2, w - x, h - y);
 		}
 	};
+
 	$.circle = (x, y, d) => {
 		if ($._ellipseMode == $.CENTER) {
 			if ($._da) {
@@ -179,6 +176,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.rect(x, y, w, h);
 		ink();
 	}
+
 	function roundedRect(x, y, w, h, tl, tr, br, bl) {
 		if (tl === undefined) {
 			return rect(x, y, w, h);
@@ -211,6 +209,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			roundedRect(x, y, w - x, h - y, tl, tr, br, bl);
 		}
 	};
+
 	$.square = (x, y, s, tl, tr, br, bl) => {
 		return $.rect(x, y, s, s, tl, tr, br, bl);
 	};
@@ -220,15 +219,18 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.ctx.beginPath();
 		firstVertex = true;
 	};
+
 	$.beginContour = () => {
 		$.ctx.closePath();
 		curveBuff.length = 0;
 		firstVertex = true;
 	};
+
 	$.endContour = () => {
 		curveBuff.length = 0;
 		firstVertex = true;
 	};
+
 	$.vertex = (x, y) => {
 		if ($._da) {
 			x *= $._da;
@@ -242,6 +244,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 		firstVertex = false;
 	};
+
 	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
 		if ($._da) {
 			cp1x *= $._da;
@@ -254,6 +257,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		curveBuff.length = 0;
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
+
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
 		if ($._da) {
 			cp1x *= $._da;
@@ -264,12 +268,14 @@ Q5.renderers.q2d.drawing = ($) => {
 		curveBuff.length = 0;
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
+
 	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
 		$.vertex(x1, y1);
 		$.bezierVertex(x2, y2, x3, y3, x4, y4);
 		$.endShape();
 	};
+
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {
 		$.beginShape();
 		$.vertex(x1, y1);
@@ -277,6 +283,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.vertex(x3, y3);
 		$.endShape($.CLOSE);
 	};
+
 	$.quad = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
 		$.vertex(x1, y1);
@@ -285,6 +292,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.vertex(x4, y4);
 		$.endShape($.CLOSE);
 	};
+
 	$.endShape = (close) => {
 		curveBuff.length = 0;
 		if (close) $.ctx.closePath();
@@ -315,6 +323,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
 	};
+
 	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
 		$.curveVertex(x1, y1);
@@ -323,6 +332,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.curveVertex(x4, y4);
 		$.endShape();
 	};
+
 	$.curvePoint = (a, b, c, d, t) => {
 		const t3 = t * t * t,
 			t2 = t * t,
@@ -332,6 +342,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			f4 = 0.5 * t3 - 0.5 * t2;
 		return a * f1 + b * f2 + c * f3 + d * f4;
 	};
+
 	$.bezierPoint = (a, b, c, d, t) => {
 		const adjustedT = 1 - t;
 		return (
@@ -341,6 +352,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			Math.pow(t, 3) * d
 		);
 	};
+
 	$.curveTangent = (a, b, c, d, t) => {
 		const t2 = t * t,
 			f1 = (-3 * t2) / 2 + 2 * t - 0.5,
@@ -349,6 +361,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			f4 = (3 * t2) / 2 - t;
 		return a * f1 + b * f2 + c * f3 + d * f4;
 	};
+
 	$.bezierTangent = (a, b, c, d, t) => {
 		const adjustedT = 1 - t;
 		return (

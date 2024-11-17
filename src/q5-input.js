@@ -59,6 +59,7 @@ Q5.modules.input = ($, q) => {
 		q.moveX = e.movementX;
 		q.moveY = e.movementY;
 	};
+
 	$._onmousedown = (e) => {
 		$._startAudio();
 		$._updateMouse(e);
@@ -66,22 +67,26 @@ Q5.modules.input = ($, q) => {
 		q.mouseButton = mouseBtns[e.button];
 		$.mousePressed(e);
 	};
+
 	$._onmousemove = (e) => {
 		$._updateMouse(e);
 		if ($.mouseIsPressed) $.mouseDragged(e);
 		else $.mouseMoved(e);
 	};
+
 	$._onmouseup = (e) => {
 		$._updateMouse(e);
 		q.mouseIsPressed = false;
 		$.mouseReleased(e);
 	};
+
 	$._onclick = (e) => {
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
 		$.mouseClicked(e);
 		q.mouseIsPressed = false;
 	};
+
 	$._onwheel = (e) => {
 		$._updateMouse(e);
 		e.delta = e.deltaY;
@@ -99,9 +104,11 @@ Q5.modules.input = ($, q) => {
 		}
 		$.canvas.style.cursor = name + pfx;
 	};
+
 	$.noCursor = () => {
 		$.canvas.style.cursor = 'none';
 	};
+
 	if (window) {
 		$.requestPointerLock = document.body?.requestPointerLock;
 		$.exitPointerLock = document.exitPointerLock;
@@ -117,6 +124,7 @@ Q5.modules.input = ($, q) => {
 		$.keyPressed(e);
 		if (e.key.length == 1) $.keyTyped(e);
 	};
+
 	$._onkeyup = (e) => {
 		q.keyIsPressed = false;
 		q.key = e.key;
@@ -124,6 +132,7 @@ Q5.modules.input = ($, q) => {
 		keysHeld[$.keyCode] = keysHeld[$.key.toLowerCase()] = false;
 		$.keyReleased(e);
 	};
+
 	$.keyIsDown = (v) => !!keysHeld[typeof v == 'string' ? v.toLowerCase() : v];
 
 	function getTouchInfo(touch) {
@@ -136,6 +145,7 @@ Q5.modules.input = ($, q) => {
 			id: touch.identifier
 		};
 	}
+
 	$._ontouchstart = (e) => {
 		$._startAudio();
 		q.touches = [...e.touches].map(getTouchInfo);
@@ -148,6 +158,7 @@ Q5.modules.input = ($, q) => {
 		}
 		if (!$.touchStarted(e)) e.preventDefault();
 	};
+
 	$._ontouchmove = (e) => {
 		q.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
@@ -157,6 +168,7 @@ Q5.modules.input = ($, q) => {
 		}
 		if (!$.touchMoved(e)) e.preventDefault();
 	};
+
 	$._ontouchend = (e) => {
 		q.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware && !$.touches.length) {
