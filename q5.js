@@ -9,7 +9,12 @@ function Q5(scope, parent, renderer) {
 	let $ = this;
 	$._q5 = true;
 	$._parent = parent;
-	$._renderer = renderer || 'q2d';
+	if (renderer == 'webgpu-fallback') {
+		$._webgpuFallback = true;
+		$._renderer = 'q2d';
+	} else {
+		$._renderer = renderer || 'q2d';
+	}
 	$._preloadCount = 0;
 
 	let autoLoaded = scope == 'auto';
@@ -170,6 +175,11 @@ function Q5(scope, parent, renderer) {
 	if (scope == 'global') {
 		Object.assign(Q5, $);
 		delete Q5.Q5;
+	}
+
+	if ($._webgpuFallback) {
+		$.colorMode('rgb', 1);
+		$._beginRender = () => $.translate($.canvas.hw, $.canvas.hh);
 	}
 
 	for (let m of Q5.methods.init) {
@@ -1011,17 +1021,17 @@ Q5.renderers.q2d.drawing = ($) => {
 	};
 
 	$.beginShape = () => {
-		curveBuff = [];
+		curveBuff.length = 0;
 		$.ctx.beginPath();
 		firstVertex = true;
 	};
 	$.beginContour = () => {
 		$.ctx.closePath();
-		curveBuff = [];
+		curveBuff.length = 0;
 		firstVertex = true;
 	};
 	$.endContour = () => {
-		curveBuff = [];
+		curveBuff.length = 0;
 		firstVertex = true;
 	};
 	$.vertex = (x, y) => {
@@ -1029,7 +1039,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff = [];
+		curveBuff.length = 0;
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
 		} else {
@@ -1046,7 +1056,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff = [];
+		curveBuff.length = 0;
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
@@ -1056,7 +1066,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff = [];
+		curveBuff.length = 0;
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
 	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
@@ -1081,68 +1091,10 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.endShape($.CLOSE);
 	};
 	$.endShape = (close) => {
-		curveBuff = [];
+		curveBuff.length = 0;
 		if (close) $.ctx.closePath();
 		ink();
 	};
-	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
-		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
-			let a = Math.pow(p1x - p0x, 2.0) + Math.pow(p1y - p0y, 2.0);
-			let b = Math.pow(a, alpha * 0.5);
-			return b + t;
-		}
-		let pts = [];
-
-		let t0 = 0.0;
-		let t1 = catmullromSplineGetT(t0, p0x, p0y, p1x, p1y, alpha);
-		let t2 = catmullromSplineGetT(t1, p1x, p1y, p2x, p2y, alpha);
-		let t3 = catmullromSplineGetT(t2, p2x, p2y, p3x, p3y, alpha);
-
-		for (let i = 0; i < numPts; i++) {
-			let t = t1 + (i / (numPts - 1)) * (t2 - t1);
-			let s = [
-				(t1 - t) / (t1 - t0),
-				(t - t0) / (t1 - t0),
-				(t2 - t) / (t2 - t1),
-				(t - t1) / (t2 - t1),
-				(t3 - t) / (t3 - t2),
-				(t - t2) / (t3 - t2),
-				(t2 - t) / (t2 - t0),
-				(t - t0) / (t2 - t0),
-				(t3 - t) / (t3 - t1),
-				(t - t1) / (t3 - t1)
-			];
-			for (let j = 0; j < s.length; j += 2) {
-				if (isNaN(s[j])) {
-					s[j] = 1;
-					s[j + 1] = 0;
-				}
-				if (!isFinite(s[j])) {
-					if (s[j] > 0) {
-						s[j] = 1;
-						s[j + 1] = 0;
-					} else {
-						s[j] = 0;
-						s[j + 1] = 1;
-					}
-				}
-			}
-			let a1x = p0x * s[0] + p1x * s[1];
-			let a1y = p0y * s[0] + p1y * s[1];
-			let a2x = p1x * s[2] + p2x * s[3];
-			let a2y = p1y * s[2] + p2y * s[3];
-			let a3x = p2x * s[4] + p3x * s[5];
-			let a3y = p2y * s[4] + p3y * s[5];
-			let b1x = a1x * s[6] + a2x * s[7];
-			let b1y = a1y * s[6] + a2y * s[7];
-			let b2x = a2x * s[8] + a3x * s[9];
-			let b2y = a2y * s[8] + a3y * s[9];
-			let cx = b1x * s[2] + b2x * s[3];
-			let cy = b1y * s[2] + b2y * s[3];
-			pts.push([cx, cy]);
-		}
-		return pts;
-	}
 
 	$.curveVertex = (x, y) => {
 		if ($._da) {
@@ -1151,19 +1103,22 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 		curveBuff.push([x, y]);
 		if (curveBuff.length < 4) return;
-		let p0 = curveBuff.at(-4);
-		let p1 = curveBuff.at(-3);
-		let p2 = curveBuff.at(-2);
-		let p3 = curveBuff.at(-1);
-		let pts = catmullRomSpline(...p0, ...p1, ...p2, ...p3, $._curveDetail, $._curveAlpha);
-		for (let i = 0; i < pts.length; i++) {
-			if (firstVertex) {
-				$.ctx.moveTo(...pts[i]);
-			} else {
-				$.ctx.lineTo(...pts[i]);
-			}
+
+		let p0 = curveBuff.at(-4),
+			p1 = curveBuff.at(-3),
+			p2 = curveBuff.at(-2),
+			p3 = curveBuff.at(-1);
+
+		let cp1x = p1[0] + (p2[0] - p0[0]) / 6,
+			cp1y = p1[1] + (p2[1] - p0[1]) / 6,
+			cp2x = p2[0] - (p3[0] - p1[0]) / 6,
+			cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+
+		if (firstVertex) {
+			$.ctx.moveTo(p1[0], p1[1]);
 			firstVertex = false;
 		}
+		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
 	};
 	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();
@@ -3717,10 +3672,7 @@ Q5.initWebGPU = async () => {
 Q5.webgpu = async function (scope, parent) {
 	if (!scope || scope == 'global') Q5._hasGlobal = true;
 	if (!(await Q5.initWebGPU())) {
-		let q = new Q5(scope, parent);
-		q.colorMode('rgb', 1);
-		q._beginRender = () => q.translate(q.canvas.hw, q.canvas.hh);
-		return q;
+		return new Q5(scope, parent, 'webgpu-fallback');
 	}
 	return new Q5(scope, parent, 'webgpu');
 };
@@ -4048,10 +4000,12 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	let shapeVertCount;
 	let sv = []; // shape vertices
+	let curveVertices = []; // curve vertices
 
 	$.beginShape = () => {
 		shapeVertCount = 0;
 		sv = [];
+		curveVertices = [];
 	};
 
 	$.vertex = (x, y) => {
@@ -4060,12 +4014,58 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		shapeVertCount++;
 	};
 
+	$.curveVertex = (x, y) => {
+		if ($._matrixDirty) $._saveMatrix();
+		curveVertices.push({ x: x, y: -y });
+	};
+
 	$.endShape = (close) => {
+		if (curveVertices.length > 0) {
+			// Duplicate start and end points if necessary
+			let points = [...curveVertices];
+			if (points.length < 4) {
+				// Duplicate first and last points
+				while (points.length < 4) {
+					points.unshift(points[0]);
+					points.push(points[points.length - 1]);
+				}
+			}
+
+			for (let i = 0; i < points.length - 3; i++) {
+				let p0 = points[i];
+				let p1 = points[i + 1];
+				let p2 = points[i + 2];
+				let p3 = points[i + 3];
+
+				for (let t = 0; t <= 1; t += 0.1) {
+					let t2 = t * t;
+					let t3 = t2 * t;
+
+					let x =
+						0.5 *
+						(2 * p1.x +
+							(-p0.x + p2.x) * t +
+							(2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+							(-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
+
+					let y =
+						0.5 *
+						(2 * p1.y +
+							(-p0.y + p2.y) * t +
+							(2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+							(-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
+
+					sv.push(x, y, $._fill, $._transformIndex);
+					shapeVertCount++;
+				}
+			}
+		}
+
 		if (shapeVertCount < 3) {
 			throw new Error('A shape must have at least 3 vertices.');
 		}
 
-		// close the stroke if required
+		// Close the shape if needed
 		if (close) {
 			let firstIndex = 0;
 			let lastIndex = (shapeVertCount - 1) * 4;
@@ -4076,14 +4076,13 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			let lastY = sv[lastIndex + 1];
 
 			if (firstX !== lastX || firstY !== lastY) {
-				// append the first vertex to close the shape
 				sv.push(firstX, firstY, sv[firstIndex + 2], sv[firstIndex + 3]);
 				shapeVertCount++;
 			}
 		}
 
 		if ($._doFill) {
-			// triangulate the shape
+			// Triangulate the shape
 			for (let i = 1; i < shapeVertCount - 1; i++) {
 				let v0 = 0;
 				let v1 = i * 4;
@@ -4097,7 +4096,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doStroke) {
-			// draw lines between vertices
+			// Draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
@@ -4110,9 +4109,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			}
 		}
 
-		// reset for the next shape
+		// Reset for the next shape
 		shapeVertCount = 0;
 		sv = [];
+		curveVertices = [];
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {

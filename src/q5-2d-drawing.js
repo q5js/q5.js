@@ -216,17 +216,17 @@ Q5.renderers.q2d.drawing = ($) => {
 	};
 
 	$.beginShape = () => {
-		curveBuff = [];
+		curveBuff.length = 0;
 		$.ctx.beginPath();
 		firstVertex = true;
 	};
 	$.beginContour = () => {
 		$.ctx.closePath();
-		curveBuff = [];
+		curveBuff.length = 0;
 		firstVertex = true;
 	};
 	$.endContour = () => {
-		curveBuff = [];
+		curveBuff.length = 0;
 		firstVertex = true;
 	};
 	$.vertex = (x, y) => {
@@ -234,7 +234,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff = [];
+		curveBuff.length = 0;
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
 		} else {
@@ -251,7 +251,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff = [];
+		curveBuff.length = 0;
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
@@ -261,7 +261,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff = [];
+		curveBuff.length = 0;
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
 	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
@@ -286,68 +286,10 @@ Q5.renderers.q2d.drawing = ($) => {
 		$.endShape($.CLOSE);
 	};
 	$.endShape = (close) => {
-		curveBuff = [];
+		curveBuff.length = 0;
 		if (close) $.ctx.closePath();
 		ink();
 	};
-	function catmullRomSpline(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, numPts, alpha) {
-		function catmullromSplineGetT(t, p0x, p0y, p1x, p1y, alpha) {
-			let a = Math.pow(p1x - p0x, 2.0) + Math.pow(p1y - p0y, 2.0);
-			let b = Math.pow(a, alpha * 0.5);
-			return b + t;
-		}
-		let pts = [];
-
-		let t0 = 0.0;
-		let t1 = catmullromSplineGetT(t0, p0x, p0y, p1x, p1y, alpha);
-		let t2 = catmullromSplineGetT(t1, p1x, p1y, p2x, p2y, alpha);
-		let t3 = catmullromSplineGetT(t2, p2x, p2y, p3x, p3y, alpha);
-
-		for (let i = 0; i < numPts; i++) {
-			let t = t1 + (i / (numPts - 1)) * (t2 - t1);
-			let s = [
-				(t1 - t) / (t1 - t0),
-				(t - t0) / (t1 - t0),
-				(t2 - t) / (t2 - t1),
-				(t - t1) / (t2 - t1),
-				(t3 - t) / (t3 - t2),
-				(t - t2) / (t3 - t2),
-				(t2 - t) / (t2 - t0),
-				(t - t0) / (t2 - t0),
-				(t3 - t) / (t3 - t1),
-				(t - t1) / (t3 - t1)
-			];
-			for (let j = 0; j < s.length; j += 2) {
-				if (isNaN(s[j])) {
-					s[j] = 1;
-					s[j + 1] = 0;
-				}
-				if (!isFinite(s[j])) {
-					if (s[j] > 0) {
-						s[j] = 1;
-						s[j + 1] = 0;
-					} else {
-						s[j] = 0;
-						s[j + 1] = 1;
-					}
-				}
-			}
-			let a1x = p0x * s[0] + p1x * s[1];
-			let a1y = p0y * s[0] + p1y * s[1];
-			let a2x = p1x * s[2] + p2x * s[3];
-			let a2y = p1y * s[2] + p2y * s[3];
-			let a3x = p2x * s[4] + p3x * s[5];
-			let a3y = p2y * s[4] + p3y * s[5];
-			let b1x = a1x * s[6] + a2x * s[7];
-			let b1y = a1y * s[6] + a2y * s[7];
-			let b2x = a2x * s[8] + a3x * s[9];
-			let b2y = a2y * s[8] + a3y * s[9];
-			let cx = b1x * s[2] + b2x * s[3];
-			let cy = b1y * s[2] + b2y * s[3];
-			pts.push([cx, cy]);
-		}
-		return pts;
-	}
 
 	$.curveVertex = (x, y) => {
 		if ($._da) {
@@ -356,19 +298,22 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 		curveBuff.push([x, y]);
 		if (curveBuff.length < 4) return;
-		let p0 = curveBuff.at(-4);
-		let p1 = curveBuff.at(-3);
-		let p2 = curveBuff.at(-2);
-		let p3 = curveBuff.at(-1);
-		let pts = catmullRomSpline(...p0, ...p1, ...p2, ...p3, $._curveDetail, $._curveAlpha);
-		for (let i = 0; i < pts.length; i++) {
-			if (firstVertex) {
-				$.ctx.moveTo(...pts[i]);
-			} else {
-				$.ctx.lineTo(...pts[i]);
-			}
+
+		let p0 = curveBuff.at(-4),
+			p1 = curveBuff.at(-3),
+			p2 = curveBuff.at(-2),
+			p3 = curveBuff.at(-1);
+
+		let cp1x = p1[0] + (p2[0] - p0[0]) / 6,
+			cp1y = p1[1] + (p2[1] - p0[1]) / 6,
+			cp2x = p2[0] - (p3[0] - p1[0]) / 6,
+			cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+
+		if (firstVertex) {
+			$.ctx.moveTo(p1[0], p1[1]);
 			firstVertex = false;
 		}
+		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
 	};
 	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
 		$.beginShape();

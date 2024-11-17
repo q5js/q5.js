@@ -60,25 +60,33 @@ We need your support though! If you enjoy using q5.js, please donate via [GitHub
 
 ## Size Comparison
 
+q5 is 98% smaller than p5.
+
+p5.js is nearly 5MB in size due to lengthy JSDoc comments, [the WebGL render, and the dependencies corejs and opentype](https://github.com/processing/p5.js/issues/6776#issuecomment-1918238317).
+
+q5's JSDoc comments are stored separately in the q5.d.ts file, which includes type definitions for Visual Studio Code autocompletion. q5 also has no dependencies.
+
+npm packages:
+
+- p5 **7800kb** ⚠️
+- @types/p5 1070kb
+- q5 415kb
+
 Unminified:
 
 - p5.js **5112kb** ⚠️
 - p5.sound.js 488kb
-- q5.js 110kb
+- q5.js 117kb
 
 Minified:
 
 - p5.min.js 1034kb ⚠️
 - p5.sound.min.js 200kb
-- q5.min.js **70kb** 🎉
+- q5.min.js **73kb** 🎉
 
 ## Modular Use
 
-**p5.js** is nearly 5MB in size. This is mainly due to lengthy JSDoc comments, [the WebGL render, and the dependencies corejs and opentype](https://github.com/processing/p5.js/issues/6776#issuecomment-1918238317). If 2d rendering is all a sketch needs, p5 wastes user bandwidth and is slower to load, parse, and run.
-
-**q5.js** (the default bundle) is 98% smaller than p5, which is already great for typical use. For extremely lightweight use you can load a subset of scripts from the `src` folder.
-
-See the [src/readme.md](src/readme.md) for more info on modular use.
+For extremely lightweight use you can load a subset of scripts from the `src` folder. See the [src/readme.md](src/readme.md) for more info on modular use.
 
 ## Contributing
 
@@ -100,26 +108,20 @@ p5.js is licensed under the LGPLv2, small sections of p5' code directly copied i
 
 ## Credits
 
-webgpu msdf text rendering:
+WebGPU MSDF text rendering:
 https://webgpu.github.io/webgpu-samples/?sample=textRenderingMsdf
 
-webgpu blendMode:
+WebGPU blendMode:
 https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html
 
-catmullRomSpline:
-https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline
-
-ziggurat:
+A JS Implementation of Ziggurat Algorithm:
 http://ziggurat.glitch.me/
 
-Vector.slerp:
+p5.js Vector.slerp:
 https://github.com/processing/p5.js/blob/v1.10.0/src/math/p5.Vector.js#L2803
 
-random:
+p5.js random:
 https://github.com/processing/p5.js/blob/1.1.9/src/math/noise.js
-
-Curve query:
-https://github.com/processing/p5.js/blob/1.1.9/src/core/shape/curves.js
 
 [p5]: https://p5js.org
 [p5.js]: https://p5js.org

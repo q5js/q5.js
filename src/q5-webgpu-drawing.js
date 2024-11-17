@@ -322,10 +322,12 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	let shapeVertCount;
 	let sv = []; // shape vertices
+	let curveVertices = []; // curve vertices
 
 	$.beginShape = () => {
 		shapeVertCount = 0;
 		sv = [];
+		curveVertices = [];
 	};
 
 	$.vertex = (x, y) => {
@@ -334,12 +336,58 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		shapeVertCount++;
 	};
 
+	$.curveVertex = (x, y) => {
+		if ($._matrixDirty) $._saveMatrix();
+		curveVertices.push({ x: x, y: -y });
+	};
+
 	$.endShape = (close) => {
+		if (curveVertices.length > 0) {
+			// Duplicate start and end points if necessary
+			let points = [...curveVertices];
+			if (points.length < 4) {
+				// Duplicate first and last points
+				while (points.length < 4) {
+					points.unshift(points[0]);
+					points.push(points[points.length - 1]);
+				}
+			}
+
+			for (let i = 0; i < points.length - 3; i++) {
+				let p0 = points[i];
+				let p1 = points[i + 1];
+				let p2 = points[i + 2];
+				let p3 = points[i + 3];
+
+				for (let t = 0; t <= 1; t += 0.1) {
+					let t2 = t * t;
+					let t3 = t2 * t;
+
+					let x =
+						0.5 *
+						(2 * p1.x +
+							(-p0.x + p2.x) * t +
+							(2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+							(-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
+
+					let y =
+						0.5 *
+						(2 * p1.y +
+							(-p0.y + p2.y) * t +
+							(2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+							(-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
+
+					sv.push(x, y, $._fill, $._transformIndex);
+					shapeVertCount++;
+				}
+			}
+		}
+
 		if (shapeVertCount < 3) {
 			throw new Error('A shape must have at least 3 vertices.');
 		}
 
-		// close the stroke if required
+		// Close the shape if needed
 		if (close) {
 			let firstIndex = 0;
 			let lastIndex = (shapeVertCount - 1) * 4;
@@ -350,14 +398,13 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			let lastY = sv[lastIndex + 1];
 
 			if (firstX !== lastX || firstY !== lastY) {
-				// append the first vertex to close the shape
 				sv.push(firstX, firstY, sv[firstIndex + 2], sv[firstIndex + 3]);
 				shapeVertCount++;
 			}
 		}
 
 		if ($._doFill) {
-			// triangulate the shape
+			// Triangulate the shape
 			for (let i = 1; i < shapeVertCount - 1; i++) {
 				let v0 = 0;
 				let v1 = i * 4;
@@ -371,7 +418,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doStroke) {
-			// draw lines between vertices
+			// Draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
@@ -384,9 +431,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			}
 		}
 
-		// reset for the next shape
+		// Reset for the next shape
 		shapeVertCount = 0;
 		sv = [];
+		curveVertices = [];
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {

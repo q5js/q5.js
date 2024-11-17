@@ -9,7 +9,12 @@ function Q5(scope, parent, renderer) {
 	let $ = this;
 	$._q5 = true;
 	$._parent = parent;
-	$._renderer = renderer || 'q2d';
+	if (renderer == 'webgpu-fallback') {
+		$._webgpuFallback = true;
+		$._renderer = 'q2d';
+	} else {
+		$._renderer = renderer || 'q2d';
+	}
 	$._preloadCount = 0;
 
 	let autoLoaded = scope == 'auto';
@@ -170,6 +175,11 @@ function Q5(scope, parent, renderer) {
 	if (scope == 'global') {
 		Object.assign(Q5, $);
 		delete Q5.Q5;
+	}
+
+	if ($._webgpuFallback) {
+		$.colorMode('rgb', 1);
+		$._beginRender = () => $.translate($.canvas.hw, $.canvas.hh);
 	}
 
 	for (let m of Q5.methods.init) {

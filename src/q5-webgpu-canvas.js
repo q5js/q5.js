@@ -554,10 +554,7 @@ Q5.initWebGPU = async () => {
 Q5.webgpu = async function (scope, parent) {
 	if (!scope || scope == 'global') Q5._hasGlobal = true;
 	if (!(await Q5.initWebGPU())) {
-		let q = new Q5(scope, parent);
-		q.colorMode('rgb', 1);
-		q._beginRender = () => q.translate(q.canvas.hw, q.canvas.hh);
-		return q;
+		return new Q5(scope, parent, 'webgpu-fallback');
 	}
 	return new Q5(scope, parent, 'webgpu');
 };
