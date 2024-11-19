@@ -118,7 +118,7 @@ function Q5(scope, parent, renderer) {
 	};
 	$.loop = () => {
 		$._loop = true;
-		if (looper == null) $._draw();
+		if ($._setupDone && looper == null) $._draw();
 	};
 	$.isLooping = () => $._loop;
 	$.redraw = (n = 1) => {
@@ -308,6 +308,8 @@ function createCanvas(w, h, opt) {
 		q.createCanvas(w, h, opt);
 	}
 }
+
+Q5.version = Q5.VERSION = '2.9';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -1248,7 +1250,9 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.loadImage = function (url, cb, opt) {
 		if (url.canvas) return url;
 		if (url.slice(-3).toLowerCase() == 'gif') {
-			throw new Error(`q5 doesn't support GIFs due to their impact on performance. Use a video or animation instead.`);
+			throw new Error(
+				`q5 doesn't support GIFs. Use a video or p5play animation instead. https://github.com/q5js/q5.js/issues/84`
+			);
 		}
 		q._preloadCount++;
 		let last = [...arguments].at(-1);
@@ -2403,6 +2407,7 @@ Q5.modules.math = ($, q) => {
 
 	$.angleMode = (mode) => {
 		angleMode = $._angleMode = mode == 0 || mode == 'radians' ? 0 : 1;
+		return !angleMode ? 'radians' : 'degrees';
 	};
 	let DEGTORAD = ($._DEGTORAD = Math.PI / 180);
 	let RADTODEG = ($._RADTODEG = 180 / Math.PI);
@@ -3371,7 +3376,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
 
 	$.resetMatrix = () => {
-		// Initialize the transformation matrix as 4x4 identity matrix
+		// initialize the transformation matrix as 4x4 identity matrix
 
 		// prettier-ignore
 		$._matrix = [
@@ -3395,7 +3400,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$.translate = (x, y, z) => {
 		if (!x && !y && !z) return;
-		// Update the translation values
+		// update the translation values
 		$._matrix[12] += x;
 		$._matrix[13] -= y;
 		$._matrix[14] += z || 0;
@@ -3494,25 +3499,25 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		else m = args;
 
 		if (m.length == 9) {
-			// Convert 3x3 matrix to 4x4 matrix
+			// convert 3x3 matrix to 4x4 matrix
 			m = [m[0], m[1], 0, m[2], m[3], m[4], 0, m[5], 0, 0, 1, 0, m[6], m[7], 0, m[8]];
 		} else if (m.length != 16) {
 			throw new Error('Matrix must be a 3x3 or 4x4 array.');
 		}
 
-		// Overwrite the current transformation matrix
+		// overwrite the current transformation matrix
 		$._matrix = m.slice();
 		$._matrixDirty = true;
 	};
 
-	// Function to save the current matrix state if dirty
+	// function to save the current matrix state if dirty
 	$._saveMatrix = () => {
 		transformStates.push($._matrix.slice());
 		$._transformIndex = transformStates.length - 1;
 		$._matrixDirty = false;
 	};
 
-	// Push the current matrix index onto the stack
+	// push the current matrix index onto the stack
 	$.pushMatrix = () => {
 		if ($._matrixDirty) $._saveMatrix();
 		$._transformIndexStack.push($._transformIndex);
@@ -3522,7 +3527,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!$._transformIndexStack.length) {
 			return console.warn('Matrix index stack is empty!');
 		}
-		// Pop the last matrix index and set it as the current matrix index
+		// pop the last matrix index and set it as the current matrix index
 		let idx = $._transformIndexStack.pop();
 		$._matrix = transformStates[idx].slice();
 		$._transformIndex = idx;
@@ -3585,6 +3590,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		'max' // 4
 	];
 
+	// other blend modes are not supported yet
 	const blendModes = {
 		normal: [2, 3, 0, 2, 3, 0],
 		// destination_over: [6, 1, 0, 6, 1, 0],
@@ -4048,19 +4054,22 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex,
 			ci = $._stroke,
-			sw = $._strokeWeight,
-			hsw = sw / 2;
+			sw = $._strokeWeight;
 
 		if (sw < 2) {
 			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
 			let n = getArcSegments(sw);
-			addEllipse(x, y, hsw, hsw, n, ci, ti);
+			sw /= 2;
+			addEllipse(x, y, sw, sw, n, ci, ti);
 		}
 	};
 
-	// Remove the internal transformations from the line function
+	$.stokeJoin = (x) => {
+		$.log("q5 WebGPU doesn't support changing stroke join style.");
+	};
+
 	$.line = (x1, y1, x2, y2) => {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex,
@@ -4068,12 +4077,12 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			sw = $._strokeWeight,
 			hsw = sw / 2;
 
-		// Calculate the direction vector and length
+		// calculate the direction vector and length
 		let dx = x2 - x1,
 			dy = y2 - y1,
 			length = Math.hypot(dx, dy);
 
-		// Calculate the perpendicular vector for line thickness
+		// calculate the perpendicular vector for line thickness
 		let px = -(dy / length) * hsw,
 			py = (dx / length) * hsw;
 
@@ -4109,10 +4118,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	$.endShape = (close) => {
 		if (curveVertices.length > 0) {
-			// Duplicate start and end points if necessary
+			// duplicate start and end points if necessary
 			let points = [...curveVertices];
 			if (points.length < 4) {
-				// Duplicate first and last points
+				// duplicate first and last points
 				while (points.length < 4) {
 					points.unshift(points[0]);
 					points.push(points[points.length - 1]);
@@ -4153,7 +4162,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			throw new Error('A shape must have at least 3 vertices.');
 		}
 
-		// Close the shape if needed
+		// close the shape if requested
 		if (close) {
 			let firstIndex = 0;
 			let lastIndex = (shapeVertCount - 1) * 4;
@@ -4170,7 +4179,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doFill) {
-			// Triangulate the shape
+			// triangulate the shape
 			for (let i = 1; i < shapeVertCount - 1; i++) {
 				let v0 = 0;
 				let v1 = i * 4;
@@ -4184,7 +4193,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doStroke) {
-			// Draw lines between vertices
+			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
@@ -4197,7 +4206,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			}
 		}
 
-		// Reset for the next shape
+		// reset for the next shape
 		shapeVertCount = 0;
 		sv = [];
 		curveVertices = [];
@@ -4412,7 +4421,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 
 		tIdx = (tIdx + 1) % MAX_TEXTURES;
 
-		// If the texture array is full, destroy the oldest texture
+		// if the texture array is full, destroy the oldest texture
 		if ($._textures[tIdx]) {
 			$._textures[tIdx].destroy();
 			delete $._textures[tIdx];
@@ -4679,8 +4688,9 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		getChar(charCode) {
 			return this.chars[charCode] ?? this.defaultChar;
 		}
-		// Gets the distance in pixels a line should advance for a given character code. If the upcoming
-		// character code is given any kerning between the two characters will be taken into account.
+		// Gets the distance in pixels a line should advance for a given
+		// character code. If the upcoming character code is given any
+		// kerning between the two characters will be taken into account.
 		getXAdvance(charCode, nextCharCode = -1) {
 			let char = this.getChar(charCode);
 			if (nextCharCode >= 0) {
@@ -4722,8 +4732,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		});
 		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, imgSize);
 
-		// to make q5's default font file smaller,
-		// the chars and kernings are stored as csv strings
+		// chars and kernings can be stored as csv strings, making the file
+		// size smaller, but they need to be parsed into arrays of objects
 		if (typeof atlas.chars == 'string') {
 			atlas.chars = $.CSV.parse(atlas.chars, ' ');
 			atlas.kernings = $.CSV.parse(atlas.kernings, ' ');
@@ -4849,7 +4859,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			let charCode = nextCharCode;
 			nextCharCode = i < text.length - 1 ? text.charCodeAt(i + 1) : -1;
 			switch (charCode) {
-				case 10: // Newline
+				case 10: // newline
 					lineWidths.push(offsetX);
 					line++;
 					maxWidth = Math.max(maxWidth, offsetX);
@@ -4858,11 +4868,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 					break;
 				case 13: // CR
 					break;
-				case 32: // Space
+				case 32: // space
 					// advance the offset without actually adding a character
 					offsetX += font.getXAdvance(charCode);
 					break;
-				case 9: // Tab
+				case 9: // tab
 					offsetX += font.getXAdvance(charCode) * 2;
 					break;
 				default:
@@ -4887,7 +4897,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 	$.text = (str, x, y, w, h) => {
 		if (!$._font) {
-			// check if online and loading the default font hasn't been attempted yet
+			// check if online and loading the default font
+			// hasn't been attempted yet
 			if (navigator.onLine && !initLoadDefaultFont) {
 				initLoadDefaultFont = true;
 				$.loadFont('https://q5js.org/fonts/YaHei-msdf.json');
@@ -5046,27 +5057,27 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	$._hooks.preRender.push(() => {
 		if (!$._charStack.length) return;
 
-		// Calculate total buffer size for text data
+		// calculate total buffer size for text data
 		let totalTextSize = 0;
 		for (let charsData of $._charStack) {
 			totalTextSize += charsData.length * 4;
 		}
 
-		// Create a single buffer for all char data
+		// create a single buffer for all the char data
 		let charBuffer = Q5.device.createBuffer({
 			size: totalTextSize,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
 
-		// Copy all text data into the buffer
+		// copy all the text data into the buffer
 		new Float32Array(charBuffer.getMappedRange()).set($._charStack.flat());
 		charBuffer.unmap();
 
-		// Calculate total buffer size for metadata
+		// calculate total buffer size for metadata
 		let totalMetadataSize = $._textStack.length * 6 * 4;
 
-		// Create a single buffer for all metadata
+		// create a single buffer for all metadata
 		let textBuffer = Q5.device.createBuffer({
 			label: 'textBuffer',
 			size: totalMetadataSize,
@@ -5074,11 +5085,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			mappedAtCreation: true
 		});
 
-		// Copy all metadata into the buffer
+		// copy all metadata into the buffer
 		new Float32Array(textBuffer.getMappedRange()).set($._textStack.flat());
 		textBuffer.unmap();
 
-		// Create a single bind group for the text buffer and metadata buffer
+		// create a single bind group for the text buffer and metadata buffer
 		$._textBindGroup = Q5.device.createBindGroup({
 			label: 'msdf text bind group',
 			layout: textBindGroupLayout,

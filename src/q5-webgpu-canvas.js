@@ -168,7 +168,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
 
 	$.resetMatrix = () => {
-		// Initialize the transformation matrix as 4x4 identity matrix
+		// initialize the transformation matrix as 4x4 identity matrix
 
 		// prettier-ignore
 		$._matrix = [
@@ -192,7 +192,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$.translate = (x, y, z) => {
 		if (!x && !y && !z) return;
-		// Update the translation values
+		// update the translation values
 		$._matrix[12] += x;
 		$._matrix[13] -= y;
 		$._matrix[14] += z || 0;
@@ -291,25 +291,25 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		else m = args;
 
 		if (m.length == 9) {
-			// Convert 3x3 matrix to 4x4 matrix
+			// convert 3x3 matrix to 4x4 matrix
 			m = [m[0], m[1], 0, m[2], m[3], m[4], 0, m[5], 0, 0, 1, 0, m[6], m[7], 0, m[8]];
 		} else if (m.length != 16) {
 			throw new Error('Matrix must be a 3x3 or 4x4 array.');
 		}
 
-		// Overwrite the current transformation matrix
+		// overwrite the current transformation matrix
 		$._matrix = m.slice();
 		$._matrixDirty = true;
 	};
 
-	// Function to save the current matrix state if dirty
+	// function to save the current matrix state if dirty
 	$._saveMatrix = () => {
 		transformStates.push($._matrix.slice());
 		$._transformIndex = transformStates.length - 1;
 		$._matrixDirty = false;
 	};
 
-	// Push the current matrix index onto the stack
+	// push the current matrix index onto the stack
 	$.pushMatrix = () => {
 		if ($._matrixDirty) $._saveMatrix();
 		$._transformIndexStack.push($._transformIndex);
@@ -319,7 +319,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!$._transformIndexStack.length) {
 			return console.warn('Matrix index stack is empty!');
 		}
-		// Pop the last matrix index and set it as the current matrix index
+		// pop the last matrix index and set it as the current matrix index
 		let idx = $._transformIndexStack.pop();
 		$._matrix = transformStates[idx].slice();
 		$._transformIndex = idx;
@@ -382,6 +382,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		'max' // 4
 	];
 
+	// other blend modes are not supported yet
 	const blendModes = {
 		normal: [2, 3, 0, 2, 3, 0],
 		// destination_over: [6, 1, 0, 6, 1, 0],

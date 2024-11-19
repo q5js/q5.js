@@ -38,7 +38,9 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.loadImage = function (url, cb, opt) {
 		if (url.canvas) return url;
 		if (url.slice(-3).toLowerCase() == 'gif') {
-			throw new Error(`q5 doesn't support GIFs due to their impact on performance. Use a video or animation instead.`);
+			throw new Error(
+				`q5 doesn't support GIFs. Use a video or p5play animation instead. https://github.com/q5js/q5.js/issues/84`
+			);
 		}
 		q._preloadCount++;
 		let last = [...arguments].at(-1);

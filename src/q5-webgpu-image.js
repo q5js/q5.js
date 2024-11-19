@@ -151,7 +151,7 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 
 		tIdx = (tIdx + 1) % MAX_TEXTURES;
 
-		// If the texture array is full, destroy the oldest texture
+		// if the texture array is full, destroy the oldest texture
 		if ($._textures[tIdx]) {
 			$._textures[tIdx].destroy();
 			delete $._textures[tIdx];

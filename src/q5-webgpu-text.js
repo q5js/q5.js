@@ -168,8 +168,9 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		getChar(charCode) {
 			return this.chars[charCode] ?? this.defaultChar;
 		}
-		// Gets the distance in pixels a line should advance for a given character code. If the upcoming
-		// character code is given any kerning between the two characters will be taken into account.
+		// Gets the distance in pixels a line should advance for a given
+		// character code. If the upcoming character code is given any
+		// kerning between the two characters will be taken into account.
 		getXAdvance(charCode, nextCharCode = -1) {
 			let char = this.getChar(charCode);
 			if (nextCharCode >= 0) {
@@ -211,8 +212,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		});
 		Q5.device.queue.copyExternalImageToTexture({ source: img }, { texture }, imgSize);
 
-		// to make q5's default font file smaller,
-		// the chars and kernings are stored as csv strings
+		// chars and kernings can be stored as csv strings, making the file
+		// size smaller, but they need to be parsed into arrays of objects
 		if (typeof atlas.chars == 'string') {
 			atlas.chars = $.CSV.parse(atlas.chars, ' ');
 			atlas.kernings = $.CSV.parse(atlas.kernings, ' ');
@@ -338,7 +339,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			let charCode = nextCharCode;
 			nextCharCode = i < text.length - 1 ? text.charCodeAt(i + 1) : -1;
 			switch (charCode) {
-				case 10: // Newline
+				case 10: // newline
 					lineWidths.push(offsetX);
 					line++;
 					maxWidth = Math.max(maxWidth, offsetX);
@@ -347,11 +348,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 					break;
 				case 13: // CR
 					break;
-				case 32: // Space
+				case 32: // space
 					// advance the offset without actually adding a character
 					offsetX += font.getXAdvance(charCode);
 					break;
-				case 9: // Tab
+				case 9: // tab
 					offsetX += font.getXAdvance(charCode) * 2;
 					break;
 				default:
@@ -376,7 +377,8 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 
 	$.text = (str, x, y, w, h) => {
 		if (!$._font) {
-			// check if online and loading the default font hasn't been attempted yet
+			// check if online and loading the default font
+			// hasn't been attempted yet
 			if (navigator.onLine && !initLoadDefaultFont) {
 				initLoadDefaultFont = true;
 				$.loadFont('https://q5js.org/fonts/YaHei-msdf.json');
@@ -535,27 +537,27 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	$._hooks.preRender.push(() => {
 		if (!$._charStack.length) return;
 
-		// Calculate total buffer size for text data
+		// calculate total buffer size for text data
 		let totalTextSize = 0;
 		for (let charsData of $._charStack) {
 			totalTextSize += charsData.length * 4;
 		}
 
-		// Create a single buffer for all char data
+		// create a single buffer for all the char data
 		let charBuffer = Q5.device.createBuffer({
 			size: totalTextSize,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
 
-		// Copy all text data into the buffer
+		// copy all the text data into the buffer
 		new Float32Array(charBuffer.getMappedRange()).set($._charStack.flat());
 		charBuffer.unmap();
 
-		// Calculate total buffer size for metadata
+		// calculate total buffer size for metadata
 		let totalMetadataSize = $._textStack.length * 6 * 4;
 
-		// Create a single buffer for all metadata
+		// create a single buffer for all metadata
 		let textBuffer = Q5.device.createBuffer({
 			label: 'textBuffer',
 			size: totalMetadataSize,
@@ -563,11 +565,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 			mappedAtCreation: true
 		});
 
-		// Copy all metadata into the buffer
+		// copy all metadata into the buffer
 		new Float32Array(textBuffer.getMappedRange()).set($._textStack.flat());
 		textBuffer.unmap();
 
-		// Create a single bind group for the text buffer and metadata buffer
+		// create a single bind group for the text buffer and metadata buffer
 		$._textBindGroup = Q5.device.createBindGroup({
 			label: 'msdf text bind group',
 			layout: textBindGroupLayout,

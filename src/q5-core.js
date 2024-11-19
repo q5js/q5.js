@@ -118,7 +118,7 @@ function Q5(scope, parent, renderer) {
 	};
 	$.loop = () => {
 		$._loop = true;
-		if (looper == null) $._draw();
+		if ($._setupDone && looper == null) $._draw();
 	};
 	$.isLooping = () => $._loop;
 	$.redraw = (n = 1) => {
@@ -308,6 +308,8 @@ function createCanvas(w, h, opt) {
 		q.createCanvas(w, h, opt);
 	}
 }
+
+Q5.version = Q5.VERSION = '2.9';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

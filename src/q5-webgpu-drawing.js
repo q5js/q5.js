@@ -282,19 +282,22 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex,
 			ci = $._stroke,
-			sw = $._strokeWeight,
-			hsw = sw / 2;
+			sw = $._strokeWeight;
 
 		if (sw < 2) {
 			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
 			let n = getArcSegments(sw);
-			addEllipse(x, y, hsw, hsw, n, ci, ti);
+			sw /= 2;
+			addEllipse(x, y, sw, sw, n, ci, ti);
 		}
 	};
 
-	// Remove the internal transformations from the line function
+	$.stokeJoin = (x) => {
+		$.log("q5 WebGPU doesn't support changing stroke join style.");
+	};
+
 	$.line = (x1, y1, x2, y2) => {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex,
@@ -302,12 +305,12 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			sw = $._strokeWeight,
 			hsw = sw / 2;
 
-		// Calculate the direction vector and length
+		// calculate the direction vector and length
 		let dx = x2 - x1,
 			dy = y2 - y1,
 			length = Math.hypot(dx, dy);
 
-		// Calculate the perpendicular vector for line thickness
+		// calculate the perpendicular vector for line thickness
 		let px = -(dy / length) * hsw,
 			py = (dx / length) * hsw;
 
@@ -343,10 +346,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	$.endShape = (close) => {
 		if (curveVertices.length > 0) {
-			// Duplicate start and end points if necessary
+			// duplicate start and end points if necessary
 			let points = [...curveVertices];
 			if (points.length < 4) {
-				// Duplicate first and last points
+				// duplicate first and last points
 				while (points.length < 4) {
 					points.unshift(points[0]);
 					points.push(points[points.length - 1]);
@@ -387,7 +390,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			throw new Error('A shape must have at least 3 vertices.');
 		}
 
-		// Close the shape if needed
+		// close the shape if requested
 		if (close) {
 			let firstIndex = 0;
 			let lastIndex = (shapeVertCount - 1) * 4;
@@ -404,7 +407,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doFill) {
-			// Triangulate the shape
+			// triangulate the shape
 			for (let i = 1; i < shapeVertCount - 1; i++) {
 				let v0 = 0;
 				let v1 = i * 4;
@@ -418,7 +421,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doStroke) {
-			// Draw lines between vertices
+			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
@@ -431,7 +434,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			}
 		}
 
-		// Reset for the next shape
+		// reset for the next shape
 		shapeVertCount = 0;
 		sv = [];
 		curveVertices = [];

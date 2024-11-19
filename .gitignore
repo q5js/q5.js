@@ -5,3 +5,5 @@ dev/test-p5.js
 node_modules
 package-lock.json
 jsconfig.json
+bun.lockb
+p5-tests
