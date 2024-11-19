@@ -13,7 +13,7 @@ function Q5(scope, parent, renderer) {
 		$._webgpuFallback = true;
 		$._renderer = 'q2d';
 	} else {
-		$._renderer = renderer || 'q2d';
+		$._renderer = renderer || Q5.render;
 	}
 	$._preloadCount = 0;
 
@@ -276,6 +276,8 @@ function Q5(scope, parent, renderer) {
 	if (autoLoaded) _start();
 	else setTimeout(_start, 32);
 }
+
+Q5.render = 'q2d';
 
 Q5.renderers = {};
 Q5.modules = {};

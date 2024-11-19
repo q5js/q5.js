@@ -225,8 +225,8 @@ Q5.renderers.q2d.image = ($, q) => {
 			let c = $._getImageData(x * pd, y * pd, 1, 1).data;
 			return [c[0], c[1], c[2], c[3] / 255];
 		}
-		x = (x || 0) * pd;
-		y = (y || 0) * pd;
+		x = Math.floor(x || 0) * pd;
+		y = Math.floor(y || 0) * pd;
 		let _w = (w = w || $.width);
 		let _h = (h = h || $.height);
 		w *= pd;
@@ -240,6 +240,8 @@ Q5.renderers.q2d.image = ($, q) => {
 	};
 
 	$.set = (x, y, c) => {
+		x = Math.floor(x);
+		y = Math.floor(y);
 		if (c.canvas) {
 			let old = $._tint;
 			$._tint = null;

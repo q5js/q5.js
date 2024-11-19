@@ -973,19 +973,52 @@ function setup() {
 	function trim(): Image;
 
 	/** 🌆
-	 * Enables smooth image rendering.
+	 * Enables smooth rendering of images displayed larger than
+	 * their actual size. This is the default setting, so running this
+	 * function only has an effect if `noSmooth` has been called.
+	 * @example
+createCanvas(200, 200);
+
+let icon = loadImage('/q5js_icon.png');
+
+function setup() {
+	image(icon, 0, 0, 200, 200);
+}
 	 */
 	function smooth(): void;
 
 	/** 🌆
 	 * Disables smooth image rendering for a pixelated look.
+	 * @example
+createCanvas(200, 200);
+
+let icon = loadImage('/q5js_icon.png');
+
+function setup() {
+	noSmooth();
+	image(icon, 0, 0, 200, 200);
+}
 	 */
 	function noSmooth(): void;
 
 	/** 🌆
 	 * Applies a tint (color overlay) to the drawing.
+	 * 
+	 * The alpha value of the tint color determines the 
+	 * strength of the tint. To change an image's opacity,
+	 * use the `opacity` function.
+	 * 
 	 * Tinting affects all subsequent images drawn.
 	 * @param {string | number} color - tint color
+	 * @example
+createCanvas(200, 200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function setup() {
+	tint(255, 0, 0, 128);
+	image(logo, 0, 0, 200, 200);
+}
 	 */
 	function tint(color: string | number): void;
 
@@ -1009,6 +1042,53 @@ function setup() {
 	function save(filename: string, extension: string, quality?: number): void;
 
 	/** 🌆
+	 * Retrieves a subsection of an image or canvas, as a q5 Image.
+	 * Or if width and height are both 1, returns the color of the pixel at the given coordinates in `[R, G, B, A]` array format.
+	 * @param {number} x
+	 * @param {number} y
+	 * @param {number} [w] - width of the area
+	 * @param {number} [h] - height of the area
+	 * @returns {Image | number[]}
+	 * @example
+createCanvas(200, 200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function setup() {
+	let cropped = logo.get(256, 256, 512, 512);
+	image(cropped, 0, 0, 200, 200);
+}
+	 */
+	function get(x: number, y: number, w?: number, h?: number): Image | number[];
+
+	/** 🌆
+	 * Sets a pixel's color in the image or canvas.
+	 * 
+	 * Or if a canvas or image is provided, it's drawn on top of the 
+	 * destination image or canvas, ignoring its tint setting.
+	 * 
+	 * Run `updatePixels` to apply the changes.
+	 * @param {number} x
+	 * @param {number} y
+	 * @param {any} c - color, canvas, or image
+	 * @example
+createCanvas(200, 200);
+let c = color('lime');
+
+function draw() {
+	set(random(width), random(height), c);
+	updatePixels();
+}
+	 */
+	function set(x: number, y: number, c: any): void;
+
+	/** 🌆
+	 * Returns a copy of the image.
+	 * @returns {Image}
+	 */
+	function copy(): Image;
+
+	/** 🌆
 	 * Displays a region of the image on another region of the image.
 	 * Can be used to create a detail inset, aka a magnifying glass effect.
 	 * @param {number} sx - x-coordinate of the source region
@@ -1020,45 +1100,16 @@ function setup() {
 	 * @param {number} dw - width of the destination region
 	 * @param {number} dh - height of the destination region
 	 * @example
-let logo;
-function preload() {
-  logo = loadImage('/q5js_logo.webp');
-}
+createCanvas(200, 200);
+
+let logo = loadImage('/q5js_logo.webp');
+
 function setup() {
-	logo.inset(256, 256, 512, 512, 0, 0, 200, 200);
-}
-function draw() {
-  
+	logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
+	image(logo, 0, 0, 200, 200);
 }
 	 */
 	function inset(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
-
-	/** 🌆
-	 * Returns a copy of the image.
-	 * @returns {Image}
-	 */
-	function copy(): Image;
-
-	/** 🌆
-	 * Retrieves a subsection of an image or canvas, as a q5 Image.
-	 * Or if width and height are both 1, returns the color of the pixel at the given coordinates in `[R, G, B, A]` array format.
-	 * To edit the color value of multiple pixels, it's faster to use `loadPixels` and `updatePixels`.
-	 * @param {number} x
-	 * @param {number} y
-	 * @param {number} [w] - width of the area
-	 * @param {number} [h] - height of the area
-	 * @returns {Image | number[]}
-	 */
-	function get(x: number, y: number, w?: number, h?: number): Image | number[];
-
-	/** 🌆
-	 * Sets a pixel's color in the image or canvas.
-	 * Or if a canvas or image is provided, it's drawn on top of the destination image or canvas ignoring its tint setting.
-	 * @param {number} x
-	 * @param {number} y
-	 * @param {any} c - color, canvas, or image
-	 */
-	function set(x: number, y: number, c: any): void;
 
 	/** 🌆
 	 * Array of pixels in the canvas or image. Use `loadPixels` to load the pixel data.
@@ -1066,12 +1117,32 @@ function draw() {
 	var pixels: number[];
 
 	/** 🌆
-	 * Loads pixel data into the image's `pixels` array.
+	 * Loads pixel data into the canvas' or image's `pixels` array.
+	 * @example
+createCanvas(200, 200);
+let icon = loadImage('/q5js_icon.png');
+
+function setup() {
+	icon.loadPixels();
+	for (let i=0; i < 65536; i+=16) icon.pixels[i] = 255;
+	icon.updatePixels();
+	image(icon, 0, 0, 200, 200);
+}
 	 */
 	function loadPixels(): void;
 
 	/** 🌆
-	 * Updates the image's `pixels` array to the canvas.
+	 * Applies changes in the `pixels` array to the canvas or image.
+	 * @example
+createCanvas(200, 200);
+function setup() {
+	for (let x = 0; x < 200; x += 5) {
+		for (let y = 0; y < 200; y += 5) {
+			set(x, y, color('red'));
+		}
+	}
+	updatePixels();
+}
 	 */
 	function updatePixels(): void;
 
@@ -1333,11 +1404,22 @@ function draw() {
 
 	/** 🖲️
 	 * Current X position of the mouse.
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	text(round(mouseX), 50, 120);
+}
 	 */
 	let mouseX: number;
 
 	/** 🖲️
 	 * Current Y position of the mouse.
+	 * @example
+function draw() {
+	background(200);
+	circle(100, mouseY, 100);
+}
 	 */
 	let mouseY: number;
 
@@ -1352,40 +1434,79 @@ function draw() {
 	let pmouseY: number;
 
 	/** 🖲️
+	 * The current button being pressed: 'left', 'right', 'center').
+	 * 
+	 * The default value is an empty string.
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	text(mouseButton, 20, 120);
+}
+	 */
+	let mouseButton: string;
+
+	/** 🖲️
+	 * True if the mouse is currently pressed, false otherwise.
+	 * @example
+function draw() {
+	if (mouseIsPressed) background(0);
+	else background(200);
+}
+	 */
+	let mouseIsPressed: boolean;
+
+	/** 🖲️
+	 * The name of the last key pressed.
+	 * @example
+function draw() {
+	background(200);
+	textSize(64);
+	text(key, 20, 120);
+}
+	 */
+	let key: string;
+
+	/** 🖲️
+	 * True if a key is currently pressed, false otherwise.
+	 * @example
+function draw() {
+	if (keyIsPressed) background(0);
+	else background(200);
+}
+	 */
+	let keyIsPressed: boolean;
+
+	/** 🖲️
+	 * Returns true if the user is pressing the specified key, false otherwise. Accepts case-insensitive key names.
+	 * @param {string} key - key to check
+	 * @returns {boolean} true if the key is pressed, false otherwise
+	 * @example
+function draw() {
+	background(200);
+	
+	if (keyIsDown('f') && keyIsDown('j')) {
+		rect(50, 50, 100, 100);
+	}
+}
+	 */
+	function keyIsDown(key: string): boolean;
+
+	/** 🖲️
+	 * The keyCode of the last key pressed.
+	 * @deprecated
+	 */
+	let keyCode: number;
+
+	/** 🖲️
 	 * Array of current touches, each touch being an object with x, y, id, etc.
 	 */
 	let touches: any[];
 
 	/** 🖲️
-	 * The current button being pressed ('left', 'right', 'center'), or null if no button is pressed.
-	 */
-	let mouseButton: string;
-
-	/** 🖲️
-	 * True if a key is currently pressed, false otherwise.
-	 */
-	let keyIsPressed: boolean;
-
-	/** 🖲️
-	 * True if the mouse is currently pressed, false otherwise.
-	 */
-	let mouseIsPressed: boolean;
-
-	/** 🖲️
-	 * The value of the last key pressed.
-	 */
-	let key: string;
-
-	/** 🖲️
-	 * The keyCode of the last key pressed.
-	 */
-	let keyCode: number;
-
-	/** 🖲️
-	 * Sets the cursor to a specified type or image path.
+	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) or image.
 	 * If an image is provided, optional x and y coordinates can
 	 * specify the active point of the cursor.
-	 * https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
 	 * @param {string} name - name of the cursor or the path to an image
 	 * @param {number} [x] - x-coordinate of the cursor's hot spot
 	 * @param {number} [y] - y-coordinate of the cursor's hot spot
@@ -1394,6 +1515,9 @@ function draw() {
 
 	/** 🖲️
 	 * Hides the cursor.
+	 * @example
+createCanvas(200, 200);
+noCursor();
 	 */
 	function noCursor(): void;
 
@@ -1406,13 +1530,6 @@ function draw() {
 	 * Exits pointer lock, showing the cursor again and stopping the unlimited movement.
 	 */
 	function exitPointerLock(): void;
-
-	/** 🖲️
-	 * Returns true if the user is pressing the specified key, false otherwise. Accepts case-insensitive key names.
-	 * @param {string} key - key to check
-	 * @returns {boolean} true if the key is pressed, false otherwise
-	 */
-	function keyIsDown(key: string): boolean;
 
 	// 🧮 math
 
