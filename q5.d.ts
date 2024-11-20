@@ -951,6 +951,21 @@ function draw() {
 	function imageMode(mode: string): void;
 
 	/** 🌆
+	 * Sets the default image scale, which is applied to images when
+	 * they are drawn without a specified width or height.
+	 * 
+	 * By default it is 0.5 so images appear at their actual size
+	 * when pixel density is 2. Images will be drawn at a consistent
+	 * default size relative to the canvas regardless of pixel density.
+	 * 
+	 * This function must be called before images are loaded to
+	 * have an effect.
+	 * @param {number}
+	 * @returns {number} default image scale
+	 */
+	function defaultImageScale(scale: number): number;
+
+	/** 🌆
 	 * Resizes the image.
 	 * @param {number} w - new width
 	 * @param {number} h - new height
@@ -1514,7 +1529,7 @@ function draw() {
 	function cursor(name: string, x?: number, y?: number): void;
 
 	/** 🖲️
-	 * Hides the cursor.
+	 * Hides the cursor within the bounds of the canvas.
 	 * @example
 createCanvas(200, 200);
 noCursor();

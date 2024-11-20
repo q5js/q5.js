@@ -248,7 +248,6 @@ function parseMarkdownIntoSections(markdownText) {
 		lines = markdownText.split('\n'),
 		currentSectionId = '',
 		currentSubsectionId = '',
-		idCounters = {},
 		insideCodeBlock = false;
 
 	function extractAttributes(line) {
@@ -303,14 +302,13 @@ function parseMarkdownIntoSections(markdownText) {
 			if (!isHTMLH1) {
 				id = title.slice(title.indexOf(' ') + 1).replace(/\s+/g, '-');
 			}
-			id = makeUniqueId(id, idCounters);
+			id += '-section';
 			currentSectionId = id;
 			currentSubsectionId = '';
 			sections[id] = { title: title, content: line, subsections: {}, ...attributes };
 		} else if ((isMarkdownH2 || isHTMLH2) && currentSectionId) {
 			title = title.split(' ')[1].split('(')[0];
 			id = title.replace(/\s+/g, '-');
-			id = makeUniqueId(id, idCounters, currentSectionId);
 			currentSubsectionId = id;
 			sections[currentSectionId].subsections[id] = { title: title, content: line, ...attributes };
 		} else if (currentSectionId) {
@@ -325,18 +323,8 @@ function parseMarkdownIntoSections(markdownText) {
 	return sections;
 }
 
-function makeUniqueId(baseId, idCounters, prefix = '') {
-	const fullId = prefix ? `${prefix}-${baseId}` : baseId;
-	if (idCounters[fullId] == null) {
-		idCounters[fullId] = 0;
-	} else {
-		idCounters[fullId]++;
-		return `${fullId}-${idCounters[fullId]}`;
-	}
-	return fullId;
-}
+let hasSmoothScroll = true;
 
-let hasSmootheScroll = true;
 function populateNavigation(sections) {
 	const navbar = document.getElementById('navbar');
 	navbar.innerHTML = '';
@@ -439,11 +427,11 @@ function populateNavigation(sections) {
 					if (subsectionElement) {
 						history.pushState(null, '', `#${subId}`);
 						const contentContainer = document.getElementById('content');
-						if (hasSmootheScroll) {
+						if (hasSmoothScroll) {
 							setScrollBehavior('smooth');
 						}
 						scrollToElementWithinContainer(contentContainer, subsectionElement);
-						hasSmootheScroll = true;
+						hasSmoothScroll = true;
 					}
 				} else {
 					updateMainContent(sectionId, sections, () => {
@@ -760,7 +748,7 @@ function convertMarkdownLinksToNavigationButtons(sections) {
 }
 
 function navigateToSection(targetId, sections) {
-	hasSmootheScroll = false;
+	hasSmoothScroll = false;
 	let found = false;
 	for (const [sectionId, section] of Object.entries(sections)) {
 		if (sectionId === targetId) {
@@ -887,7 +875,7 @@ function generateHeadings() {
 			button.innerText = '';
 
 			button.addEventListener('click', () => {
-				const url = `${window.location.origin}${window.location.pathname}#${id}`;
+				const url = `${location.origin}${location.pathname.slice(0, location.pathname.lastIndexOf('/') + 1)}#${id}`;
 				button.classList.add('copied');
 				navigator.clipboard.writeText(url).then(() => {
 					button.textContent = '';
