@@ -117,16 +117,35 @@ Q5.renderers.q2d.image = ($, q) => {
 		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
 
 		if ($._tint) {
-			$.ctx.shadowBlur = 0;
+			$.ctx.save();
+
 			$.ctx.shadowOffsetX = 0;
 			$.ctx.shadowOffsetY = 0;
+			$.ctx.shadowBlur = 0;
 
-			let fill = $.ctx.fillStyle;
-			$.ctx.globalCompositeOperation = 'multiply';
-			$.ctx.fillStyle = $._tint.toString();
-			$.ctx.fillRect(dx, dy, dw, dh);
-			$.ctx.globalCompositeOperation = 'source-over';
-			$.ctx.fillStyle = fill;
+			if (img.canvas.alpha) {
+				img.tintImg ??= $.createImage(dw, dh);
+				if (img.tintImg.width != dw || img.tintImg.height != dh) {
+					img.tintImg.resize(dw, dh);
+				}
+
+				let tnt = img.tintImg.ctx;
+				tnt.globalCompositeOperation = 'copy';
+				tnt.fillStyle = $._tint;
+				tnt.fillRect(0, 0, dw, dh);
+
+				tnt.globalCompositeOperation = 'destination-in';
+				tnt.drawImage(drawable, 0, 0, dw, dh);
+
+				$.ctx.globalCompositeOperation = 'multiply';
+				$.ctx.drawImage(img.tintImg.canvas, 0, 0, dw, dh, dx, dy, dw, dh);
+			} else {
+				$.ctx.globalCompositeOperation = 'multiply';
+				$.ctx.fillStyle = $._tint;
+				$.ctx.fillRect(dx, dy, dw, dh);
+			}
+
+			$.ctx.restore();
 		}
 	};
 
@@ -282,7 +301,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	if ($._scope == 'image') return;
 
 	$.tint = function (c) {
-		$._tint = c._q5Color ? c : $.color(...arguments);
+		$._tint = (c._q5Color ? c : $.color(...arguments)).toString();
 	};
 	$.noTint = () => ($._tint = null);
 };

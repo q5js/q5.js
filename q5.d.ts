@@ -401,6 +401,79 @@ function draw() {
 	function opacity(alpha: number): void;
 
 	/** ⬜️
+	 * Sets the shadow color. The default is transparent (no shadow).
+	 * 
+	 * Shadows apply to anything drawn to the canvas, including filled
+	 * shapes, strokes, text, and images.
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
+	 * @param {string | Color} color - shadow color
+	 * @example
+function draw() {
+  background(200);
+	
+	noFill();
+	shadow('black');
+	rect(64, 60, 80, 80);
+	text('q5', 100, 100);
+}
+	 * @example
+createCanvas(256, 256);
+let logo = loadImage('https://p5play.org/assets/p5play_logo.webp');
+
+function setup() {
+	background(200);
+	shadow(0);
+	image(logo, 27, 27, 200, 200);
+}
+	 */
+	function shadow(color: string | Color): void;
+
+	/** ⬜️
+	 * Disables the shadow effect.
+	 * @example
+function draw() {
+  background(200);
+	noStroke();
+	shadow('black');
+	rect(14, 14, 80, 80);
+
+	noShadow();
+	rect(104, 104, 80, 80);
+}
+	 */
+	function noShadow(): void;
+
+	/** ⬜️
+	 * Sets the shadow offset and blur radius.
+	 * 
+	 * When q5 starts, shadow offset is (10, 10) with a blur of 10.
+	 * @param {number} offsetX - horizontal offset of the shadow
+	 * @param {number} offsetY - vertical offset of the shadow, defaults to be the same as offsetX
+	 * @param {number} blur - blur radius of the shadow, defaults to 0
+	 * @example
+function draw() {
+	background(200);
+	noStroke();
+	shadow('red');
+
+	shadowBox(-20, -8, 50);
+	circle(100, 100, 80, 80);
+}
+	 * @example
+function draw() {
+	background(200);
+	noStroke();
+	shadow('aqua');
+	shadowBox(20);
+	rect(50, 50, 100, 100);
+  textSize(64);
+  text('q5', 60, 115);
+}
+	 */
+	function shadowBox(offsetX: number, offsetY: number, blur: number): void;
+
+	/** ⬜️
 	 * Translates the origin of the drawing context.
 	 * @param {number} x - translation along the x-axis
 	 * @param {number} y - translation along the y-axis

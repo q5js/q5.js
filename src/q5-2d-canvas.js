@@ -88,6 +88,32 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	$.noStroke = () => ($._doStroke = false);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
+	$._shadowOffsetX = $._shadowOffsetY = $._shadowBlur = 10;
+
+	$.shadow = function (c) {
+		if (Q5.Color) {
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
+		}
+		$.ctx.shadowColor = $._shadow = c.toString();
+
+		$.ctx.shadowOffsetX ||= $._shadowOffsetX;
+		$.ctx.shadowOffsetY ||= $._shadowOffsetY;
+		$.ctx.shadowBlur ||= $._shadowBlur;
+	};
+
+	$.shadowBox = (offsetX, offsetY, blur) => {
+		$.ctx.shadowOffsetX = $._shadowOffsetX = offsetX;
+		$.ctx.shadowOffsetY = $._shadowOffsetY = offsetY || offsetX;
+		$.ctx.shadowBlur = $._shadowBlur = blur || 0;
+	};
+
+	$.noShadow = () => {
+		$.ctx.shadowOffsetX = $.ctx.shadowOffsetY = $.ctx.shadowBlur = 0;
+	};
+
 	// DRAWING MATRIX
 
 	$.translate = (x, y) => {
