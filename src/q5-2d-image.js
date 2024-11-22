@@ -114,7 +114,9 @@ Q5.renderers.q2d.image = ($, q) => {
 		if (!sh) {
 			sh = drawable.height || drawable.videoHeight;
 		} else sh *= pd;
-		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
+		sx *= pd;
+		sy *= pd;
+		$.ctx.drawImage(drawable, sx, sy, sw, sh, dx, dy, dw, dh);
 
 		if ($._tint) {
 			$.ctx.save();
@@ -124,21 +126,21 @@ Q5.renderers.q2d.image = ($, q) => {
 			$.ctx.shadowBlur = 0;
 
 			if (img.canvas.alpha) {
-				img.tintImg ??= $.createImage(dw, dh);
-				if (img.tintImg.width != dw || img.tintImg.height != dh) {
-					img.tintImg.resize(dw, dh);
+				img.tintImg ??= $.createImage(img.w, img.h, { pixelDensity: pd });
+				if (img.tintImg.width != img.width || img.tintImg.height != img.height) {
+					img.tintImg.resize(img.w, img.h);
 				}
 
 				let tnt = img.tintImg.ctx;
 				tnt.globalCompositeOperation = 'copy';
 				tnt.fillStyle = $._tint;
-				tnt.fillRect(0, 0, dw, dh);
+				tnt.fillRect(0, 0, img.width, img.height);
 
 				tnt.globalCompositeOperation = 'destination-in';
-				tnt.drawImage(drawable, 0, 0, dw, dh);
+				tnt.drawImage(drawable, 0, 0, img.width, img.height);
 
 				$.ctx.globalCompositeOperation = 'multiply';
-				$.ctx.drawImage(img.tintImg.canvas, 0, 0, dw, dh, dx, dy, dw, dh);
+				$.ctx.drawImage(img.tintImg.canvas, sx, sy, sw, sh, dx, dy, dw, dh);
 			} else {
 				$.ctx.globalCompositeOperation = 'multiply';
 				$.ctx.fillStyle = $._tint;
