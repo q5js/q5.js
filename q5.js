@@ -1331,10 +1331,16 @@ Q5.renderers.q2d.image = ($, q) => {
 		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
 
 		if ($._tint) {
+			$.ctx.shadowBlur = 0;
+			$.ctx.shadowOffsetX = 0;
+			$.ctx.shadowOffsetY = 0;
+
+			let fill = $.ctx.fillStyle;
 			$.ctx.globalCompositeOperation = 'multiply';
 			$.ctx.fillStyle = $._tint.toString();
 			$.ctx.fillRect(dx, dy, dw, dh);
 			$.ctx.globalCompositeOperation = 'source-over';
+			$.ctx.fillStyle = fill;
 		}
 	};
 

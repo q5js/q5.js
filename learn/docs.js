@@ -221,8 +221,7 @@ function makeScripts(markdown) {
 	let codeBlockCount = 0;
 
 	return markdown.replace(/```js([\s\S]*?)```/g, (match) => {
-		const js = match.slice(5, -3);
-		js.replace(/new Q5\(\);/g, '');
+		let js = match.slice(5, -3);
 		return `
 <script id="script-${codeBlockCount++}" type="aijs">
 ${js}

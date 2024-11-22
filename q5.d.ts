@@ -13,7 +13,9 @@ declare global {
 		 *
 		 * Running `new Q5()` enables the use of q5 functions and variables
 		 * anywhere in your code. You can also start Q5 in global mode by 
-		 * running [`createCanvas`](https://q5js.org/learn/#canvas-createCanvas).
+		 * running [`createCanvas`](https://q5js.org/learn/#canvas-createCanvas). q5 uses the q2d renderer, based on the CanvasRenderingContext2D, by default.
+		 * 
+		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
 		 * @param {string | Function} [scope] -
 		 *   - "global": (default) top-level global mode, adds q5 functions
 		 * and variables to the global scope
@@ -21,9 +23,9 @@ declare global {
 		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode), not to the global scope
 		 * @param {HTMLElement} [parent] - element that the canvas will be placed inside
 		 * @example
-		 * new Q5();
-		 * createCanvas(200, 100);
-		 * circle(100, 50, 80);
+new Q5();
+createCanvas(200, 100);
+circle(100, 50, 80);
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 

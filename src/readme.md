@@ -10,11 +10,14 @@ These modules are included in the default "q5.js" bundle:
 
 ```html
 <script src="https://q5js.org/src/q5-core.js"></script>
+<script src="https://q5js.org/src/q5-canvas.js"></script>
+
 <script src="https://q5js.org/src/q5-2d-canvas.js"></script>
 <script src="https://q5js.org/src/q5-2d-drawing.js"></script>
 <script src="https://q5js.org/src/q5-2d-image.js"></script>
 <script src="https://q5js.org/src/q5-2d-soft-filters.js"></script>
 <script src="https://q5js.org/src/q5-2d-text.js"></script>
+
 <script src="https://q5js.org/src/q5-ai.js"></script>
 <script src="https://q5js.org/src/q5-color.js"></script>
 <script src="https://q5js.org/src/q5-display.js"></script>
@@ -23,6 +26,11 @@ These modules are included in the default "q5.js" bundle:
 <script src="https://q5js.org/src/q5-sound.js"></script>
 <script src="https://q5js.org/src/q5-util.js"></script>
 <script src="https://q5js.org/src/q5-vector.js"></script>
+
+<script src="https://q5js.org/src/q5-webgpu-canvas.js"></script>
+<script src="https://q5js.org/src/q5-webgpu-drawing.js"></script>
+<script src="https://q5js.org/src/q5-webgpu-image.js"></script>
+<script src="https://q5js.org/src/q5-webgpu-text.js"></script>
 ```
 
 Additional modules:
@@ -31,15 +39,6 @@ Additional modules:
 <script src="https://q5js.org/src/q5-dom.js"></script>
 <script src="https://q5js.org/src/q5-noisier.js"></script>
 <script src="https://q5js.org/src/q5-sensors.js"></script>
-```
-
-WebGPU rendering modules are in development:
-
-```html
-<script src="https://q5js.org/src/q5-webgpu-canvas.js"></script>
-<script src="https://q5js.org/src/q5-webgpu-drawing.js"></script>
-<script src="https://q5js.org/src/q5-webgpu-image.js"></script>
-<script src="https://q5js.org/src/q5-webgpu-text.js"></script>
 ```
 
 # Module Info
@@ -114,30 +113,32 @@ Image based features in this module require the q5-2d-image module.
 
 > ⚠️ Experimental features! ⚠️
 
-To use q5's WebGPU renderer, run `Q5.webgpu()` at the bottom of your sketch.
+[WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) is the successor to WebGL. It's a modern graphics API that provides cross-platform, high-performance access to the GPU.
+
+When you intend for a sketch to use WebGPU, but WebGPU is not supported on a viewer's browser, q5 will put a warning in the console, apply a compatibility layer, and display the sketch with the fallback q2d renderer. As of November 2024, WebGPU is only supported in Google Chrome and Edge.
+
+To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables.
 
 ```js
-function setup() {
-	createCanvas(200, 200);
-	noStroke();
-}
-
-function draw() {
-	clear();
-	rect(50, 50, 100, 100);
-}
+let x = 0;
+let y = 0;
 
 Q5.webgpu();
+
+function setup() {
+	createCanvas(200, 100);
+	circle(x, y, 80);
+}
 ```
 
-WebGPU has different default settings compared to q5's q2d renderer and p5's P2D and WEBGL modes.
+q5 WebGPU differences:
 
-- Explicit use of `createCanvas` is required before anything can be drawn.
-- The default color mode is RGB in 0-1 "float" format: `colorMode(RGB, 1)`.
 - The origin of the canvas (0, 0) is in the center, not the top left.
-- Mouse and touch coordinates correspond to canvas pixels (unlike in p5 WEBGL mode).
+- The default color mode is RGB in 0-1 "float" format: `colorMode(RGB, 1)`.
+- Strokes are implemented but `strokeJoin` is shimmed.
+- `Q5.webgpu` is an async function, so enabling [top level global mode](https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode) is a bit more complex.
 
-The sketches you create with the q5-webgpu renderer will still display if WebGPU is not supported on a viewer's browser. q5 will put a warning in the console and apply a compatibility layer to display sketches with the fallback q2d renderer.
+Note that unlike in p5's WebGL mode, mouse and touch coordinates align with canvas pixel values.
 
 ## webgpu-drawing
 
@@ -145,11 +146,11 @@ The sketches you create with the q5-webgpu renderer will still display if WebGPU
 
 q5's WebGPU renderer drawing functions like `rect` don't immediately draw on the canvas. Instead, they prepare vertex and color data to be sent to the GPU in bulk, which occurs after the user's `draw` function and any post-draw functions are run. This approach better utilizes the GPU, so it doesn't have to repeatedly wait for the CPU to send small chunks of data that describe each individual shape. It's the main reason why WebGPU is faster than Canvas2D.
 
-Rounded rectangles, stroke modes, and functions for drawing curves like `bezier` and `curve` are not implemented yet.
+Rounded rectangles, stroke modes, and functions for drawing curves are not implemented yet.
 
 ## webgpu-image
 
-Using `image` to drawn a subsection of an image and most blending modes are not yet implemented.
+Most filters and blending modes are not implemented yet.
 
 ## webgpu-text
 
@@ -184,6 +185,8 @@ You can choose a custom set of characters and convert fonts to MSDF format by us
 Fonts must be in MSDF format with the file ending "-msdf.json".
 
 ```js
+Q5.webgpu();
+
 function preload() {
 	loadFont('arial-msdf.json');
 }
@@ -196,8 +199,6 @@ function draw() {
 	fill(0.71, 0.92, 1);
 	text('Hello, World!', mouseX, mouseY);
 }
-
-Q5.webgpu();
 ```
 
 ### Displaying Emojis
@@ -205,6 +206,8 @@ Q5.webgpu();
 Full color emoji characters can't be rendered using the MSDF technique, so draw them using `textImage`.
 
 ```js
+Q5.webgpu();
+
 function setup() {
 	createCanvas(200, 200);
 	textSize(100);
@@ -214,8 +217,6 @@ function draw() {
 	textAlign(CENTER, CENTER);
 	textImage('🐶', 0, 0);
 }
-
-Q5.webgpu();
 ```
 
 You can also use `createTextImage` and display it with `textImage`.
@@ -244,4 +245,4 @@ Adds additional noise functions to q5.
 
 `SimplexNoise` is a simplex noise implementation in JavaScript by Tezumie. Kevin Perlin's patent on simplex noise expired in 2022. Simplex noise is slightly faster but arguably less visually appealing than perlin noise.
 
-`BlockyNoise` is similar to p5's default `noise` function, which is a bit notorious in the gen art community for not actually being perlin noise, despite its claims to be. It looks closer to value noise but is not a standard implementation of that either. When visualized in 2d it's a bit blocky at 1 octave, hence the name. This algorithm is however, very good at outputting a variety of values from less inputs, even just a single param.
+`BlockyNoise` is similar to p5's default `noise` function, which is a bit notorious in the gen art community for not actually being perlin noise, despite its claims to be. It looks closer to value noise but is not a standard implementation of that either. When visualized in 2d it's a bit blocky at 1 octave, hence the name. This algorithm is however, very good at outputting a variety of values from less than 3 inputs, even from a single parameter.

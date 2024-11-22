@@ -1234,6 +1234,10 @@ pre[class*="language-"] code {
 	#navbar.active {
 		display: block;
 	}
+
+	#homeButton {
+		margin-left: 0;
+	}
 }
 
 @media (max-width: 500px) {
