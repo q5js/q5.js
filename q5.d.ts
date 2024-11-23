@@ -1098,7 +1098,17 @@ function setup() {
 	 * strength of the tint. To change an image's opacity,
 	 * use the `opacity` function.
 	 * 
-	 * Tinting affects all subsequent images drawn.
+	 * Tinting affects all subsequent images drawn. The tint
+	 * color is applied to images using the "multiply" blend mode.
+	 * 
+	 * Since the tinting process is performance intensive, each time
+	 * an image is tinted, q5 caches the result. `image` will draw the 
+	 * cached tinted image unless the tint color has changed or the
+	 * image being tinted was edited.
+	 * 
+	 * If you need to draw an image multiple times each frame with 
+	 * different tints, consider making copies of the image and tinting
+	 * each copy separately.
 	 * @param {string | number} color - tint color
 	 * @example
 createCanvas(200, 200);

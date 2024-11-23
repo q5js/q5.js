@@ -1288,7 +1288,10 @@ Q5.renderers.q2d.image = ($, q) => {
 		}
 		q._preloadCount++;
 		let last = [...arguments].at(-1);
-		opt = typeof last == 'object' ? last : null;
+		if (typeof last == 'object') {
+			opt = last;
+			cb = null;
+		} else opt = null;
 
 		let g = $.createImage(1, 1, opt);
 		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
@@ -1358,41 +1361,36 @@ Q5.renderers.q2d.image = ($, q) => {
 		if (!sh) {
 			sh = drawable.height || drawable.videoHeight;
 		} else sh *= pd;
-		sx *= pd;
-		sy *= pd;
-		$.ctx.drawImage(drawable, sx, sy, sw, sh, dx, dy, dw, dh);
 
 		if ($._tint) {
-			$.ctx.save();
+			if (img._tint != $._tint || img._retint) {
+				img._tintImg ??= $.createImage(img.w, img.h, { pixelDensity: pd });
 
-			$.ctx.shadowOffsetX = 0;
-			$.ctx.shadowOffsetY = 0;
-			$.ctx.shadowBlur = 0;
-
-			if (img.canvas.alpha) {
-				img.tintImg ??= $.createImage(img.w, img.h, { pixelDensity: pd });
-				if (img.tintImg.width != img.width || img.tintImg.height != img.height) {
-					img.tintImg.resize(img.w, img.h);
+				if (img._tintImg.width != img.width || img._tintImg.height != img.height) {
+					img._tintImg.resize(img.w, img.h);
 				}
 
-				let tnt = img.tintImg.ctx;
+				let tnt = img._tintImg.ctx;
 				tnt.globalCompositeOperation = 'copy';
 				tnt.fillStyle = $._tint;
 				tnt.fillRect(0, 0, img.width, img.height);
 
-				tnt.globalCompositeOperation = 'destination-in';
+				if (img.canvas.alpha) {
+					tnt.globalCompositeOperation = 'destination-in';
+					tnt.drawImage(drawable, 0, 0, img.width, img.height);
+				}
+
+				tnt.globalCompositeOperation = 'multiply';
 				tnt.drawImage(drawable, 0, 0, img.width, img.height);
 
-				$.ctx.globalCompositeOperation = 'multiply';
-				$.ctx.drawImage(img.tintImg.canvas, sx, sy, sw, sh, dx, dy, dw, dh);
-			} else {
-				$.ctx.globalCompositeOperation = 'multiply';
-				$.ctx.fillStyle = $._tint;
-				$.ctx.fillRect(dx, dy, dw, dh);
+				img._tint = $._tint;
+				img._retint = false;
 			}
 
-			$.ctx.restore();
+			drawable = img._tintImg.canvas;
 		}
+
+		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
 	};
 
 	$._tint = null;
@@ -1420,6 +1418,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		$.ctx.filter = f;
 		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
 		$.ctx.filter = 'none';
+		$._retint = true;
 	};
 
 	if ($._scope == 'image') {
@@ -1436,6 +1435,8 @@ Q5.renderers.q2d.image = ($, q) => {
 
 			$.ctx.clearRect(0, 0, c.width, c.height);
 			$.ctx.drawImage(o, 0, 0, c.width, c.height);
+
+			$._retint = true;
 		};
 	}
 
@@ -1481,11 +1482,15 @@ Q5.renderers.q2d.image = ($, q) => {
 		$.ctx.drawImage(img.canvas, 0, 0);
 		$.ctx.globalCompositeOperation = old;
 		$.ctx.restore();
+
+		$._retint = true;
 	};
 
 	$.inset = (x, y, w, h, dx, dy, dw, dh) => {
 		let pd = $._pixelDensity || 1;
 		$.ctx.drawImage($.canvas, x * pd, y * pd, w * pd, h * pd, dx, dy, dw, dh);
+
+		$._retint = true;
 	};
 
 	$.copy = () => $.get();
@@ -1513,6 +1518,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.set = (x, y, c) => {
 		x = Math.floor(x);
 		y = Math.floor(y);
+		$._retint = true;
 		if (c.canvas) {
 			let old = $._tint;
 			$._tint = null;
@@ -1538,7 +1544,10 @@ Q5.renderers.q2d.image = ($, q) => {
 		q.pixels = imgData.data;
 	};
 	$.updatePixels = () => {
-		if (imgData != null) $.ctx.putImageData(imgData, 0, 0);
+		if (imgData != null) {
+			$.ctx.putImageData(imgData, 0, 0);
+			$._retint = true;
+		}
 	};
 
 	$.smooth = () => ($.ctx.imageSmoothingEnabled = true);
