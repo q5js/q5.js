@@ -612,6 +612,7 @@ Q5.modules.canvas = ($, q) => {
 	$._styleNames = [
 		'_fill',
 		'_stroke',
+		'_strokeWeight',
 		'_doStroke',
 		'_doFill',
 		'_strokeSet',
