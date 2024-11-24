@@ -152,27 +152,111 @@ Q5.renderers.q2d.image = ($, q) => {
 	$._tint = null;
 	let imgData = null;
 
-	$._softFilter = () => {
-		throw new Error('Load q5-2d-soft-filters.js to use software filters.');
+	$._softFilter = (type, value) => {
+		const tmpCanvas = document.createElement('canvas');
+		const tmpCtx = tmpCanvas.getContext('2d');
+		tmpCanvas.width = $.canvas.width;
+		tmpCanvas.height = $.canvas.height;
+
+		tmpCtx.drawImage($.canvas, 0, 0);
+
+		const imageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
+		const data = imageData.data;
+		const width = tmpCanvas.width;
+		const height = tmpCanvas.height;
+
+		switch (type) {
+			case Q5.POSTERIZE:
+				if (value < 2 || value > 255) {
+					throw new Error('Posterize value must be between 2 and 255');
+				}
+				const levels = value;
+				const levelsMinusOne = levels - 1;
+				for (let i = 0; i < data.length; i += 4) {
+					data[i] = ((data[i] * levels) >> 8) * 255 / levelsMinusOne;
+					data[i + 1] = ((data[i + 1] * levels) >> 8) * 255 / levelsMinusOne;
+					data[i + 2] = ((data[i + 2] * levels) >> 8) * 255 / levelsMinusOne;
+				}
+				break;
+
+			case Q5.OPAQUE:
+				for (let i = 0; i < data.length; i += 4) {
+					data[i + 3] = 255;
+				}
+				break;
+
+			case Q5.DILATE:
+			case Q5.ERODE:
+				applyMorphologicalFilter(data, width, height, type === Q5.DILATE);
+				break;
+
+			default:
+				throw new Error('Unsupported filter type: ' + type);
+		}
+
+		tmpCtx.putImageData(imageData, 0, 0);
+		$.ctx.drawImage(tmpCanvas, 0, 0);
 	};
 
-	$.filter = (type, x) => {
-		if (!$.ctx.filter) return $._softFilter(type, x);
+	function applyMorphologicalFilter(data, width, height, isDilate) {
+		const copyData = new Uint8ClampedArray(data);
+		const pixel = (x, y, c) => copyData[(y * width + x) * 4 + c];
+		const setPixel = (x, y, c, value) => { data[(y * width + x) * 4 + c] = value; };
 
-		if (typeof type == 'string') f = type;
-		else if (type == Q5.GRAY) f = `saturate(0%)`;
-		else if (type == Q5.INVERT) f = `invert(100%)`;
-		else if (type == Q5.BLUR) {
-			let r = Math.ceil(x * $._pixelDensity) || 1;
-			f = `blur(${r}px)`;
-		} else if (type == Q5.THRESHOLD) {
-			x ??= 0.5;
-			let b = Math.floor((0.5 / Math.max(x, 0.00001)) * 100);
-			f = `saturate(0%) brightness(${b}%) contrast(1000000%)`;
-		} else return $._softFilter(type, x);
+		for (let y = 1; y < height - 1; y++) {
+			for (let x = 1; x < width - 1; x++) {
+				for (let c = 0; c < 3; c++) {
+					let extreme = isDilate ? 0 : 255;
+					for (let ky = -1; ky <= 1; ky++) {
+						for (let kx = -1; kx <= 1; kx++) {
+							const val = pixel(x + kx, y + ky, c);
+							if (isDilate) {
+								extreme = Math.max(extreme, val);
+							} else {
+								extreme = Math.min(extreme, val);
+							}
+						}
+					}
+					setPixel(x, y, c, extreme);
+				}
+			}
+		}
+	}
+
+	$.filter = (type, value) => {
+		if (!$.ctx.filter) return $._softFilter(type, value);
+		let f = '';
+		if (typeof type === 'string') {
+			f = type;
+		} else if (type === Q5.GRAY) {
+			f = `saturate(0%)`;
+		} else if (type === Q5.INVERT) {
+			f = `invert(100%)`;
+		} else if (type === Q5.BLUR) {
+			const radius = Math.ceil(value * $._pixelDensity) || 1;
+			f = `blur(${radius}px)`;
+		} else if (type === Q5.THRESHOLD) {
+			value ??= 0.5;
+			const brightness = Math.floor((0.5 / Math.max(value, 0.00001)) * 100);
+			f = `saturate(0%) brightness(${brightness}%) contrast(1000000%)`;
+		} else if (type === Q5.SEPIA) {
+			f = `sepia(${value ?? 1})`;
+		} else if (type === Q5.BRIGHTNESS) {
+			f = `brightness(${value ?? 1})`;
+		} else if (type === Q5.SATURATION) {
+			f = `saturate(${value ?? 1})`;
+		} else if (type === Q5.CONTRAST) {
+			f = `contrast(${value ?? 1})`;
+		} else if (type === Q5.HUE_ROTATE) {
+			const unit = $._angleMode === 0 ? 'rad' : 'deg';
+			f = `hue-rotate(${value}${unit})`;
+		} else {
+			$._softFilter(type, value);
+			return;
+		}
 
 		$.ctx.filter = f;
-		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
+		$.ctx.drawImage($.canvas, 0, 0, $.canvas.width, $.canvas.height);
 		$.ctx.filter = 'none';
 		$._retint = true;
 	};
@@ -325,3 +409,8 @@ Q5.POSTERIZE = 5;
 Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
+Q5.SEPIA = 9;
+Q5.BRIGHTNESS = 10;
+Q5.SATURATION = 11;
+Q5.CONTRAST = 12;
+Q5.HUE_ROTATE = 13;
