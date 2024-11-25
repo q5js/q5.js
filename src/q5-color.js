@@ -155,8 +155,39 @@ Q5.ColorOKLCH = class extends Q5.Color {
 		this.h = h;
 		this.a = a ?? 1;
 	}
+	equals(c) {
+		return c && this.l == c.l && this.c == c.c && this.h == c.h && this.a == c.a;
+	}
+	isSameColor(c) {
+		return c && this.l == c.l && this.c == c.c && this.h == c.h;
+	}
 	toString() {
 		return `oklch(${this.l} ${this.c} ${this.h} / ${this.a})`;
+	}
+
+	get lightness() {
+		return this.l;
+	}
+	set lightness(v) {
+		this.l = v;
+	}
+	get chroma() {
+		return this.c;
+	}
+	set chroma(v) {
+		this.c = v;
+	}
+	get hue() {
+		return this.h;
+	}
+	set hue(v) {
+		this.h = v;
+	}
+	get alpha() {
+		return this.a;
+	}
+	set alpha(v) {
+		this.a = v;
 	}
 };
 
@@ -171,8 +202,38 @@ Q5.ColorRGBA = class extends Q5.Color {
 	get levels() {
 		return [this.r, this.g, this.b, this.a];
 	}
+	equals(c) {
+		return c && this.r == c.r && this.g == c.g && this.b == c.b && this.a == c.a;
+	}
+	isSameColor(c) {
+		return c && this.r == c.r && this.g == c.g && this.b == c.b;
+	}
 	toString() {
 		return `color(srgb ${this.r} ${this.g} ${this.b} / ${this.a})`;
+	}
+	get red() {
+		return this.r;
+	}
+	set red(v) {
+		this.r = v;
+	}
+	get green() {
+		return this.g;
+	}
+	set green(v) {
+		this.g = v;
+	}
+	get blue() {
+		return this.b;
+	}
+	set blue(v) {
+		this.b = v;
+	}
+	get alpha() {
+		return this.a;
+	}
+	set alpha(v) {
+		this.a = v;
 	}
 };
 

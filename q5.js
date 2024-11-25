@@ -143,15 +143,16 @@ function Q5(scope, parent, renderer) {
 	$.getTargetFrameRate = () => $._targetFrameRate || 60;
 	$.getFPS = () => $._fps;
 
+	// shims for compatibility with p5.js libraries
 	$.Element = function (a) {
 		this.elt = a;
 	};
 	$._elements = [];
+	$.describe = () => {};
 
 	$.TWO_PI = $.TAU = Math.PI * 2;
 
 	$.log = $.print = console.log;
-	$.describe = () => {};
 
 	for (let m in Q5.modules) {
 		Q5.modules[m]($, q);
@@ -1270,6 +1271,9 @@ Q5.renderers.q2d.image = ($, q) => {
 
 	Q5.Image ??= Q5Image;
 
+	$._tint = null;
+	let imgData = null;
+
 	$.createImage = (w, h, opt) => {
 		opt ??= {};
 		opt.alpha ??= true;
@@ -1364,7 +1368,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		} else sh *= pd;
 
 		if ($._tint) {
-			if (img._tint != $._tint || img._retint) {
+			if (img._retint || img._tint != $._tint) {
 				img._tintImg ??= $.createImage(img.w, img.h, { pixelDensity: pd });
 
 				if (img._tintImg.width != img.width || img._tintImg.height != img.height) {
@@ -1394,30 +1398,40 @@ Q5.renderers.q2d.image = ($, q) => {
 		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
 	};
 
-	$._tint = null;
-	let imgData = null;
-
-	$._softFilter = () => {
-		throw new Error('Load q5-2d-soft-filters.js to use software filters.');
-	};
-
-	$.filter = (type, x) => {
-		if (!$.ctx.filter) return $._softFilter(type, x);
-
-		if (typeof type == 'string') f = type;
-		else if (type == Q5.GRAY) f = `saturate(0%)`;
-		else if (type == Q5.INVERT) f = `invert(100%)`;
-		else if (type == Q5.BLUR) {
-			let r = Math.ceil(x * $._pixelDensity) || 1;
-			f = `blur(${r}px)`;
-		} else if (type == Q5.THRESHOLD) {
-			x ??= 0.5;
-			let b = Math.floor((0.5 / Math.max(x, 0.00001)) * 100);
-			f = `saturate(0%) brightness(${b}%) contrast(1000000%)`;
-		} else return $._softFilter(type, x);
+	$.filter = (type, value) => {
+		if (!$.ctx.filter) return $._softFilter(type, value);
+		let f = '';
+		if (typeof type === 'string') {
+			f = type;
+		} else if (type === Q5.GRAY) {
+			f = `saturate(0%)`;
+		} else if (type === Q5.INVERT) {
+			f = `invert(100%)`;
+		} else if (type === Q5.BLUR) {
+			const radius = Math.ceil(value * $._pixelDensity) || 1;
+			f = `blur(${radius}px)`;
+		} else if (type === Q5.THRESHOLD) {
+			value ??= 0.5;
+			const brightness = Math.floor((0.5 / Math.max(value, 0.00001)) * 100);
+			f = `saturate(0%) brightness(${brightness}%) contrast(1000000%)`;
+		} else if (type === Q5.SEPIA) {
+			f = `sepia(${value ?? 1})`;
+		} else if (type === Q5.BRIGHTNESS) {
+			f = `brightness(${value ?? 1})`;
+		} else if (type === Q5.SATURATION) {
+			f = `saturate(${value ?? 1})`;
+		} else if (type === Q5.CONTRAST) {
+			f = `contrast(${value ?? 1})`;
+		} else if (type === Q5.HUE_ROTATE) {
+			const unit = $._angleMode === 0 ? 'rad' : 'deg';
+			f = `hue-rotate(${value}${unit})`;
+		} else {
+			$._softFilter(type, value);
+			return;
+		}
 
 		$.ctx.filter = f;
-		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
+		$.ctx.drawImage($.canvas, 0, 0, $.canvas.width, $.canvas.height);
 		$.ctx.filter = 'none';
 		$._retint = true;
 	};
@@ -1570,6 +1584,156 @@ Q5.POSTERIZE = 5;
 Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
+Q5.SEPIA = 9;
+Q5.BRIGHTNESS = 10;
+Q5.SATURATION = 11;
+Q5.CONTRAST = 12;
+Q5.HUE_ROTATE = 13;
+/* software implementation of image filters */
+Q5.renderers.q2d.soft_filters = ($) => {
+	let u = null; // uint8 temporary buffer
+
+	function ensureBuf() {
+		let l = $.canvas.width * $.canvas.height * 4;
+		if (!u || u.length != l) u = new Uint8ClampedArray(l);
+	}
+
+	function initSoftFilters() {
+		$._filters = [];
+		$._filters[Q5.THRESHOLD] = (d, thresh) => {
+			if (thresh === undefined) thresh = 127.5;
+			else thresh *= 255;
+			for (let i = 0; i < d.length; i += 4) {
+				const gray = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+				d[i] = d[i + 1] = d[i + 2] = gray >= thresh ? 255 : 0;
+			}
+		};
+		$._filters[Q5.GRAY] = (d) => {
+			for (let i = 0; i < d.length; i += 4) {
+				const gray = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+				d[i] = d[i + 1] = d[i + 2] = gray;
+			}
+		};
+		$._filters[Q5.OPAQUE] = (d) => {
+			for (let i = 0; i < d.length; i += 4) {
+				d[i + 3] = 255;
+			}
+		};
+		$._filters[Q5.INVERT] = (d) => {
+			for (let i = 0; i < d.length; i += 4) {
+				d[i] = 255 - d[i];
+				d[i + 1] = 255 - d[i + 1];
+				d[i + 2] = 255 - d[i + 2];
+			}
+		};
+		$._filters[Q5.POSTERIZE] = (d, lvl = 4) => {
+			let lvl1 = lvl - 1;
+			for (let i = 0; i < d.length; i += 4) {
+				d[i] = (((d[i] * lvl) >> 8) * 255) / lvl1;
+				d[i + 1] = (((d[i + 1] * lvl) >> 8) * 255) / lvl1;
+				d[i + 2] = (((d[i + 2] * lvl) >> 8) * 255) / lvl1;
+			}
+		};
+		$._filters[Q5.DILATE] = (d, func) => {
+			func ??= Math.max;
+			ensureBuf();
+			u.set(d);
+			let [w, h] = [$.canvas.width, $.canvas.height];
+			for (let i = 0; i < h; i++) {
+				for (let j = 0; j < w; j++) {
+					let l = 4 * Math.max(j - 1, 0);
+					let r = 4 * Math.min(j + 1, w - 1);
+					let t = 4 * Math.max(i - 1, 0) * w;
+					let b = 4 * Math.min(i + 1, h - 1) * w;
+					let oi = 4 * i * w;
+					let oj = 4 * j;
+					for (let k = 0; k < 4; k++) {
+						let kt = k + t;
+						let kb = k + b;
+						let ko = k + oi;
+						d[oi + oj + k] = func(u[kt + oj], u[ko + l], u[ko + oj], u[ko + r], u[kb + oj]);
+					}
+				}
+			}
+		};
+		$._filters[Q5.ERODE] = (d) => {
+			$._filters[Q5.DILATE](d, Math.min);
+		};
+		$._filters[Q5.BLUR] = (d, r) => {
+			r = r || 1;
+			r = Math.floor(r * $._pixelDensity);
+			ensureBuf();
+			u.set(d);
+
+			let ksize = r * 2 + 1;
+
+			function gauss(ksize) {
+				let im = new Float32Array(ksize);
+				let sigma = 0.3 * r + 0.8;
+				let ss2 = sigma * sigma * 2;
+				for (let i = 0; i < ksize; i++) {
+					let x = i - ksize / 2;
+					let z = Math.exp(-(x * x) / ss2) / (2.5066282746 * sigma);
+					im[i] = z;
+				}
+				return im;
+			}
+
+			let kern = gauss(ksize);
+			let [w, h] = [$.canvas.width, $.canvas.height];
+			for (let i = 0; i < h; i++) {
+				for (let j = 0; j < w; j++) {
+					let s0 = 0,
+						s1 = 0,
+						s2 = 0,
+						s3 = 0;
+					for (let k = 0; k < ksize; k++) {
+						let jk = Math.min(Math.max(j - r + k, 0), w - 1);
+						let idx = 4 * (i * w + jk);
+						s0 += u[idx] * kern[k];
+						s1 += u[idx + 1] * kern[k];
+						s2 += u[idx + 2] * kern[k];
+						s3 += u[idx + 3] * kern[k];
+					}
+					let idx = 4 * (i * w + j);
+					d[idx] = s0;
+					d[idx + 1] = s1;
+					d[idx + 2] = s2;
+					d[idx + 3] = s3;
+				}
+			}
+			u.set(d);
+			for (let i = 0; i < h; i++) {
+				for (let j = 0; j < w; j++) {
+					let s0 = 0,
+						s1 = 0,
+						s2 = 0,
+						s3 = 0;
+					for (let k = 0; k < ksize; k++) {
+						let ik = Math.min(Math.max(i - r + k, 0), h - 1);
+						let idx = 4 * (ik * w + j);
+						s0 += u[idx] * kern[k];
+						s1 += u[idx + 1] * kern[k];
+						s2 += u[idx + 2] * kern[k];
+						s3 += u[idx + 3] * kern[k];
+					}
+					let idx = 4 * (i * w + j);
+					d[idx] = s0;
+					d[idx + 1] = s1;
+					d[idx + 2] = s2;
+					d[idx + 3] = s3;
+				}
+			}
+		};
+	}
+
+	$._softFilter = (typ, x) => {
+		if (!$._filters) initSoftFilters();
+		let imgData = $.ctx._getImageData(0, 0, $.canvas.width, $.canvas.height);
+		$._filters[typ](imgData.data, x);
+		$.ctx.putImageData(imgData, 0, 0);
+	};
+};
 Q5.renderers.q2d.text = ($, q) => {
 	$._textAlign = 'left';
 	$._textBaseline = 'alphabetic';
@@ -2054,8 +2218,39 @@ Q5.ColorOKLCH = class extends Q5.Color {
 		this.h = h;
 		this.a = a ?? 1;
 	}
+	equals(c) {
+		return c && this.l == c.l && this.c == c.c && this.h == c.h && this.a == c.a;
+	}
+	isSameColor(c) {
+		return c && this.l == c.l && this.c == c.c && this.h == c.h;
+	}
 	toString() {
 		return `oklch(${this.l} ${this.c} ${this.h} / ${this.a})`;
+	}
+
+	get lightness() {
+		return this.l;
+	}
+	set lightness(v) {
+		this.l = v;
+	}
+	get chroma() {
+		return this.c;
+	}
+	set chroma(v) {
+		this.c = v;
+	}
+	get hue() {
+		return this.h;
+	}
+	set hue(v) {
+		this.h = v;
+	}
+	get alpha() {
+		return this.a;
+	}
+	set alpha(v) {
+		this.a = v;
 	}
 };
 
@@ -2070,8 +2265,38 @@ Q5.ColorRGBA = class extends Q5.Color {
 	get levels() {
 		return [this.r, this.g, this.b, this.a];
 	}
+	equals(c) {
+		return c && this.r == c.r && this.g == c.g && this.b == c.b && this.a == c.a;
+	}
+	isSameColor(c) {
+		return c && this.r == c.r && this.g == c.g && this.b == c.b;
+	}
 	toString() {
 		return `color(srgb ${this.r} ${this.g} ${this.b} / ${this.a})`;
+	}
+	get red() {
+		return this.r;
+	}
+	set red(v) {
+		this.r = v;
+	}
+	get green() {
+		return this.g;
+	}
+	set green(v) {
+		this.g = v;
+	}
+	get blue() {
+		return this.b;
+	}
+	set blue(v) {
+		this.b = v;
+	}
+	get alpha() {
+		return this.a;
+	}
+	set alpha(v) {
+		this.a = v;
 	}
 };
 

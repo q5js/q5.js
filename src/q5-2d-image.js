@@ -25,6 +25,9 @@ Q5.renderers.q2d.image = ($, q) => {
 
 	Q5.Image ??= Q5Image;
 
+	$._tint = null;
+	let imgData = null;
+
 	$.createImage = (w, h, opt) => {
 		opt ??= {};
 		opt.alpha ??= true;
@@ -119,7 +122,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		} else sh *= pd;
 
 		if ($._tint) {
-			if (img._tint != $._tint || img._retint) {
+			if (img._retint || img._tint != $._tint) {
 				img._tintImg ??= $.createImage(img.w, img.h, { pixelDensity: pd });
 
 				if (img._tintImg.width != img.width || img._tintImg.height != img.height) {
@@ -148,80 +151,6 @@ Q5.renderers.q2d.image = ($, q) => {
 
 		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
 	};
-
-	$._tint = null;
-	let imgData = null;
-
-	$._softFilter = (type, value) => {
-		const tmpCanvas = document.createElement('canvas');
-		const tmpCtx = tmpCanvas.getContext('2d');
-		tmpCanvas.width = $.canvas.width;
-		tmpCanvas.height = $.canvas.height;
-
-		tmpCtx.drawImage($.canvas, 0, 0);
-
-		const imageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
-		const data = imageData.data;
-		const width = tmpCanvas.width;
-		const height = tmpCanvas.height;
-
-		switch (type) {
-			case Q5.POSTERIZE:
-				if (value < 2 || value > 255) {
-					throw new Error('Posterize value must be between 2 and 255');
-				}
-				const levels = value;
-				const levelsMinusOne = levels - 1;
-				for (let i = 0; i < data.length; i += 4) {
-					data[i] = ((data[i] * levels) >> 8) * 255 / levelsMinusOne;
-					data[i + 1] = ((data[i + 1] * levels) >> 8) * 255 / levelsMinusOne;
-					data[i + 2] = ((data[i + 2] * levels) >> 8) * 255 / levelsMinusOne;
-				}
-				break;
-
-			case Q5.OPAQUE:
-				for (let i = 0; i < data.length; i += 4) {
-					data[i + 3] = 255;
-				}
-				break;
-
-			case Q5.DILATE:
-			case Q5.ERODE:
-				applyMorphologicalFilter(data, width, height, type === Q5.DILATE);
-				break;
-
-			default:
-				throw new Error('Unsupported filter type: ' + type);
-		}
-
-		tmpCtx.putImageData(imageData, 0, 0);
-		$.ctx.drawImage(tmpCanvas, 0, 0);
-	};
-
-	function applyMorphologicalFilter(data, width, height, isDilate) {
-		const copyData = new Uint8ClampedArray(data);
-		const pixel = (x, y, c) => copyData[(y * width + x) * 4 + c];
-		const setPixel = (x, y, c, value) => { data[(y * width + x) * 4 + c] = value; };
-
-		for (let y = 1; y < height - 1; y++) {
-			for (let x = 1; x < width - 1; x++) {
-				for (let c = 0; c < 3; c++) {
-					let extreme = isDilate ? 0 : 255;
-					for (let ky = -1; ky <= 1; ky++) {
-						for (let kx = -1; kx <= 1; kx++) {
-							const val = pixel(x + kx, y + ky, c);
-							if (isDilate) {
-								extreme = Math.max(extreme, val);
-							} else {
-								extreme = Math.min(extreme, val);
-							}
-						}
-					}
-					setPixel(x, y, c, extreme);
-				}
-			}
-		}
-	}
 
 	$.filter = (type, value) => {
 		if (!$.ctx.filter) return $._softFilter(type, value);

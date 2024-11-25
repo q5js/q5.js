@@ -143,15 +143,16 @@ function Q5(scope, parent, renderer) {
 	$.getTargetFrameRate = () => $._targetFrameRate || 60;
 	$.getFPS = () => $._fps;
 
+	// shims for compatibility with p5.js libraries
 	$.Element = function (a) {
 		this.elt = a;
 	};
 	$._elements = [];
+	$.describe = () => {};
 
 	$.TWO_PI = $.TAU = Math.PI * 2;
 
 	$.log = $.print = console.log;
-	$.describe = () => {};
 
 	for (let m in Q5.modules) {
 		Q5.modules[m]($, q);

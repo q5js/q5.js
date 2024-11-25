@@ -1254,8 +1254,21 @@ function setup() {
 
 	/** 🌆
 	 * Applies a filter to the image.
-	 * @param {string} type - type of filter
+	 * 
+	 * See the documentation for q5's filter constants below for more info.
+	 * 
+	 * If a CSS filter string is provided, it will be applied to the image.
+	 * https://developer.mozilla.org/en-US/docs/Web/CSS/filter
+	 * @param {string} type - type of filter or a CSS filter string
 	 * @param {number} [value] - optional parameter, depending on filter type
+	 * @example
+createCanvas(200, 200);
+let logo = loadImage('/q5js_logo.webp');
+
+function setup() {
+	logo.filter(INVERT);
+	image(logo, 0, 0, 200, 200);
+}
 	 */
 	function filter(type: string, value?: number): void;
 
