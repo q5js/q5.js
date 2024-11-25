@@ -185,6 +185,9 @@ Q5.renderers.q2d.image = ($, q) => {
 		}
 
 		$.ctx.filter = f;
+		if ($.ctx.filter == 'none') {
+			throw new Error(`Invalid filter format: ${type}`);
+		}
 		$.ctx.drawImage($.canvas, 0, 0, $.canvas.width, $.canvas.height);
 		$.ctx.filter = 'none';
 		$._retint = true;

@@ -1494,24 +1494,131 @@ function setup() {
 	// 🎨 color
 
 	/** 🎨
-	 * Sets the color mode for the sketch. Changes the type of color object created by color functions.
-	 *
-	 * In WebGPU, the default color mode is 'rgb' in float format.
-	 * @param {'rgb' | 'srgb' | 'oklch'} mode - color mode
-	 * @param {1 | 255} format - color format (1 for float, 255 for integer)
-	 */
-	function colorMode(mode: 'rgb' | 'srgb' | 'oklch', format: 1 | 255): void;
-
-	/** 🎨
-	 * Creates a new `Color` object. It can parse different
-	 * color representations depending on the current `colorMode`.
-	 * @param {string | number | Color | number[]} c0 - first color component, or a string representing the color, or a `Color` object, or an array of components
+	 * Creates a new `Color` object. This function can parse different
+	 * color representations depending on the current color mode.
+	 * 
+	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
+	 * and `a`/`alpha`.
+	 * 
+	 * In rgb mode when only one numeric input is provided, it'll
+	 * be interpreted as a grayscale value. If only two numeric inputs
+	 * are provided, they will be used as grayscale and alpha values.
+	 * 
+	 * `fill`, `stroke`, and `background` functions can accept the same
+	 * wide range of inputs as this function.
+	 * @param {string | number | Color | number[]} c0 - first color component, a CSS color string, a `Color` object (to make copy), or an array of components
 	 * @param {number} [c1] - second color component
 	 * @param {number} [c2] - third color component
 	 * @param {number} [c3] - fourth color component (alpha)
 	 * @returns {Color} a new `Color` object
+	 * @example
+createCanvas(200, 200);
+
+let c = color(128);
+
+function draw() {
+	background(c);
+	c.g = (c.g + 1) % 255;
+}
 	 */
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
+
+	/** 🎨
+	 * Sets the color mode for the sketch. Changes the type of color object created by color functions.
+	 * 
+	 * In q2d, the default color mode is RGB in legacy integer format.
+	 *
+	 * In WebGPU, the default color mode is RGB in float format.
+	 * 
+	 * See the documentation for q5's color constants below for more info.
+	 * @param {'rgb' | 'srgb' | 'oklch'} mode - color mode
+	 * @param {1 | 255} format - color format (1 for float, 255 for integer)
+	 * @example
+createCanvas(200, 200);
+
+colorMode(RGB, 1);
+fill(1, 0, 0);
+rect(0, 0, 66, 200);
+fill(0, 1, 0);
+rect(66, 0, 67, 200);
+fill(0, 0, 1);
+rect(133, 0, 67, 200);
+	 * @example
+createCanvas(200, 200);
+
+colorMode(OKLCH);
+
+fill(0.25, 0.15, 0);
+rect(0, 0, 100, 200);
+fill(0.75, 0.15, 0)
+rect(100, 0, 100, 200);
+	 */
+	function colorMode(mode: 'rgb' | 'srgb' | 'oklch', format: 1 | 255): void;
+
+	/** 🎨
+	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
+	 * and `a`/`alpha`.
+	 * 
+	 * RGB is the default color mode.
+	 * 
+	 * By default when a canvas is using the `display-p3` color space,
+	 * rgb colors are mapped to the full P3 gamut, even when they use the
+	 * legacy integer format.
+	 * @example
+createCanvas(200, 200);
+
+function setup() {
+	background(255, 0, 0);
+}
+	 */
+	const RGB: 'rgb';
+
+	/** 🎨
+	 * This color mode limits the gamut of rgb colors to sRGB.
+	 * 
+	 * If your display is HDR capable, take a look at the following
+	 * example, note that full red appears less saturated, as it would
+	 * on an SDR display.
+	 * @example
+createCanvas(200, 200);
+
+colorMode(SRGB, 255);
+
+function setup() {
+	background(255, 0, 0);
+}
+	 */
+	const SRGB: 'srgb';
+
+	/** 🎨
+	 * OKLCH colors have components `l`/`lightness`, `c`/`chroma`,
+	 * `h`/`hue`, and `a`/`alpha`.
+	 * 
+	 * You may be familiar with the outdated HSL/HSV color formats,
+	 * which were created in the 1970s to be more intuitive for humans
+	 * to work with than RGB. But due to technical limitations of that
+	 * time, they are not perceptually uniform, meaning the same 
+	 * brightness values may appear lighter or darker depending on the hue.
+	 * 
+	 * The OKLCH format is similar to HSL/HSV but it is perceptually
+	 * uniform and supports a wider gamut (range of colors) than srgb. 
+	 * Every display-p3 color can be represented in OKLCH.
+	 * 
+	 * `lightness`: 0 to 1
+	 * `chroma`: 0 to 0.4
+	 * `hue`: 0 to 360
+	 * `alpha`: 0 to 1
+	 * 
+	 * Note how seamless the hue transitions are in the following example.
+	 * @example
+createCanvas(200, 200);
+colorMode(OKLCH);
+
+function draw() {
+	background(0.7, 0.16, frameCount % 360);
+}
+	 */
+	const OKLCH: 'oklch';
 
 	// 🖲️ input
 

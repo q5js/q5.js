@@ -1431,6 +1431,9 @@ Q5.renderers.q2d.image = ($, q) => {
 		}
 
 		$.ctx.filter = f;
+		if ($.ctx.filter == 'none') {
+			throw new Error(`Invalid filter format: ${type}`);
+		}
 		$.ctx.drawImage($.canvas, 0, 0, $.canvas.width, $.canvas.height);
 		$.ctx.filter = 'none';
 		$._retint = true;
@@ -2063,6 +2066,7 @@ Q5.modules.ai = ($) => {
 };
 Q5.modules.color = ($, q) => {
 	$.RGB = $.RGBA = $._colorMode = 'rgb';
+	$.SRGB = 'srgb';
 	$.OKLCH = 'oklch';
 
 	$.colorMode = (mode, format) => {
@@ -2073,7 +2077,6 @@ Q5.modules.color = ($, q) => {
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
 		} else {
-			let srgb = $.canvas.colorSpace == 'srgb';
 			if ($._colorFormat == 255) {
 				q.Color = srgb ? Q5.ColorRGBA_8 : Q5.ColorRGBA_P3_8;
 			} else {
@@ -2157,10 +2160,12 @@ Q5.modules.color = ($, q) => {
 		return new C(c0, c1, c2, c3);
 	};
 
+	// deprecated
 	$.red = (c) => c.r;
 	$.green = (c) => c.g;
 	$.blue = (c) => c.b;
 	$.alpha = (c) => c.a;
+
 	$.lightness = (c) => {
 		if (c.l) return c.l;
 		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
@@ -2217,6 +2222,9 @@ Q5.ColorOKLCH = class extends Q5.Color {
 		this.c = c;
 		this.h = h;
 		this.a = a ?? 1;
+	}
+	get levels() {
+		return [this.l, this.c, this.h, this.a];
 	}
 	equals(c) {
 		return c && this.l == c.l && this.c == c.c && this.h == c.h && this.a == c.a;
@@ -2311,6 +2319,7 @@ Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {
 		super(r, g, b, a ?? 255);
 	}
+	// deprecated set functions for backwards compatibility
 	setRed(v) {
 		this.r = v;
 	}
@@ -2322,9 +2331,6 @@ Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
 	}
 	setAlpha(v) {
 		this.a = v;
-	}
-	get levels() {
-		return [this.r, this.g, this.b, this.a];
 	}
 	toString() {
 		return `rgb(${this.r} ${this.g} ${this.b} / ${this.a / 255})`;
