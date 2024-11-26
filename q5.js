@@ -865,8 +865,8 @@ Q5.renderers.q2d.drawing = ($) => {
 	$._doFill = true;
 	$._strokeSet = false;
 	$._fillSet = false;
-	$._ellipseMode = $.CENTER;
-	$._rectMode = $.CORNER;
+	$._ellipseMode = Q5.CENTER;
+	$._rectMode = Q5.CORNER;
 	$._curveDetail = 20;
 	$._curveAlpha = 0.0;
 
@@ -2521,7 +2521,7 @@ Q5.modules.input = ($, q) => {
 	$.TEXT = 'text';
 
 	let keysHeld = {};
-	let mouseBtns = [$.LEFT, $.CENTER, $.RIGHT];
+	let mouseBtns = [Q5.LEFT, Q5.CENTER, Q5.RIGHT];
 
 	let c = $.canvas;
 
@@ -4013,10 +4013,12 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			}
 
 			if (curPipelineIndex == 0) {
+				// draw shapes
 				// v is the number of vertices
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
+				// draw images
 				if (curTextureIndex != v) {
 					// v is the texture index
 					pass.setBindGroup(2, $._textureBindGroups[v]);
@@ -4024,6 +4026,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
 			} else if (curPipelineIndex == 2) {
+				// draw text
 				let o = drawStack[i + 2];
 				pass.setBindGroup(2, $._fonts[o].bindGroup);
 				pass.setBindGroup(3, $._textBindGroup);

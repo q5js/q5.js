@@ -32,7 +32,7 @@ Q5.modules.input = ($, q) => {
 	$.TEXT = 'text';
 
 	let keysHeld = {};
-	let mouseBtns = [$.LEFT, $.CENTER, $.RIGHT];
+	let mouseBtns = [Q5.LEFT, Q5.CENTER, Q5.RIGHT];
 
 	let c = $.canvas;
 

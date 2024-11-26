@@ -3,8 +3,8 @@ Q5.renderers.q2d.drawing = ($) => {
 	$._doFill = true;
 	$._strokeSet = false;
 	$._fillSet = false;
-	$._ellipseMode = $.CENTER;
-	$._rectMode = $.CORNER;
+	$._ellipseMode = Q5.CENTER;
+	$._rectMode = Q5.CORNER;
 	$._curveDetail = 20;
 	$._curveAlpha = 0.0;
 
