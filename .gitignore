@@ -1,9 +1,10 @@
 dev/assets
 dev/tests
-dev/test.js
-dev/test-p5.js
+dev/sketch.js
+dev/sketch-p5.js
 node_modules
 package-lock.json
 jsconfig.json
 bun.lockb
+deno.lock
 p5-tests

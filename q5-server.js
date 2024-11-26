@@ -29,11 +29,11 @@ require('./q5.js');
 
 Q5._createNodeJSCanvas = function () {
 	let cairoCanvas = CairoCanvas.createCanvas(...arguments);
-	let jsdomCanvas = window.document.createElement('canvas');
+	let domCanvas = window.document.createElement('canvas');
 
 	return new Proxy(cairoCanvas, {
 		get: function (target, prop) {
-			let t = prop in target ? target : jsdomCanvas;
+			let t = prop in target ? target : domCanvas;
 			let p = t[prop];
 			if (typeof p === 'function') return p.bind(t);
 			return p;
@@ -42,7 +42,7 @@ Q5._createNodeJSCanvas = function () {
 			if (prop in target) {
 				target[prop] = value;
 			} else {
-				jsdomCanvas[prop] = value;
+				domCanvas[prop] = value;
 			}
 			return true;
 		}

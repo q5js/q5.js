@@ -1,26 +1,16 @@
 {
 	"version": "0.2.0",
-  "configurations": [
-    {
-      "type": "bun",
-      "request": "launch",
-      "name": "Debug Bun",
-      "program": "test",
-      "args": [""],
-      "cwd": "${workspaceFolder}",
-      "env": {},
-      "strictEnv": false,
-      "watchMode": false,
-      "stopOnEntry": false,
-      "noDebug": false,
-      "runtime": "bun",
-      "runtimeArgs": [],
-    },
-    {
-      "type": "bun",
-      "request": "attach",
-      "name": "Attach to Bun",
-      "url": "ws://localhost:6499/",
-    }
-  ]
+	"configurations": [
+		{
+			"request": "launch",
+			"name": "Deno Test",
+			"type": "node",
+			"program": "${workspaceFolder}/test/core.test.js",
+			"cwd": "${workspaceFolder}",
+			"env": {},
+			"runtimeExecutable": "${env:HOME}/.deno/bin/deno",
+			"runtimeArgs": ["test", "--unstable-node-globals", "--inspect-wait", "--allow-all"],
+			"attachSimplePort": 9229
+		}
+	]
 }

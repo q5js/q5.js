@@ -22,17 +22,21 @@ Q5.modules.canvas = ($, q) => {
 	}
 
 	let c = $.canvas;
-	c.width = $.width = 100;
-	c.height = $.height = 100;
+	$.width = 200;
+	$.height = 200;
 	$._pixelDensity = 1;
 
 	$.displayDensity = () => window.devicePixelRatio || 1;
 
-	if ($._scope != 'image') {
-		c.renderer = $._renderer;
-		c[$._renderer] = true;
+	if (c) {
+		c.width = 200;
+		c.height = 200;
+		if ($._scope != 'image') {
+			c.renderer = $._renderer;
+			c[$._renderer] = true;
 
-		$._pixelDensity = Math.ceil($.displayDensity());
+			$._pixelDensity = Math.ceil($.displayDensity());
+		}
 	}
 
 	$._adjustDisplay = () => {
@@ -217,8 +221,10 @@ Q5.modules.canvas = ($, q) => {
 		$._resizeCanvas(w, h);
 	};
 
-	$.canvas.resize = $.resizeCanvas;
-	$.canvas.save = $.saveCanvas = $.save;
+	if (c && !Q5._createNodeJSCanvas) {
+		c.resize = $.resizeCanvas;
+		c.save = $.saveCanvas = $.save;
+	}
 
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;

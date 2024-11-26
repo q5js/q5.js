@@ -8,7 +8,11 @@ lang
 learn
 node_modules
 tests
+p5-tests
 package-lock.json
+.vscode
 index.html
 jsconfig.json
 CODE_OF_CONDUCT.md
+bun.lockb
+deno.lock
