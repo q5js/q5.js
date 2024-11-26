@@ -332,17 +332,3 @@ Q5.renderers.q2d.image = ($, q) => {
 	};
 	$.noTint = () => ($._tint = null);
 };
-
-Q5.THRESHOLD = 1;
-Q5.GRAY = 2;
-Q5.OPAQUE = 3;
-Q5.INVERT = 4;
-Q5.POSTERIZE = 5;
-Q5.DILATE = 6;
-Q5.ERODE = 7;
-Q5.BLUR = 8;
-Q5.SEPIA = 9;
-Q5.BRIGHTNESS = 10;
-Q5.SATURATION = 11;
-Q5.CONTRAST = 12;
-Q5.HUE_ROTATE = 13;

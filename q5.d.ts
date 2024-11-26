@@ -1454,14 +1454,14 @@ function setup() {
 	const BOLDITALIC: 'italic bold';
 
 	/** ✍️
-	 * Align text to the center.
-	 */
-	const CENTER: 'center';
-
-	/** ✍️
 	 * Align text to the left.
 	 */
 	const LEFT: 'left';
+
+	/** ✍️
+	 * Align text to the center.
+	 */
+	const CENTER: 'center';
 
 	/** ✍️
 	 * Align text to the right.
@@ -1500,9 +1500,9 @@ function setup() {
 	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
 	 * and `a`/`alpha`.
 	 * 
-	 * In rgb mode when only one numeric input is provided, it'll
-	 * be interpreted as a grayscale value. If only two numeric inputs
-	 * are provided, they will be used as grayscale and alpha values.
+	 * When only one numeric input is provided, it'll be interpreted
+	 * as a grayscale value. If only two numeric inputs are provided, 
+	 * they will be used as grayscale and alpha values.
 	 * 
 	 * `fill`, `stroke`, and `background` functions can accept the same
 	 * wide range of inputs as this function.
@@ -1597,16 +1597,19 @@ function setup() {
 	 * You may be familiar with the outdated HSL/HSV color formats,
 	 * which were created in the 1970s to be more intuitive for humans
 	 * to work with than RGB. But due to technical limitations of that
-	 * time, they are not perceptually uniform, meaning the same 
+	 * time, they're not perceptually uniform, meaning colors at the same 
 	 * brightness values may appear lighter or darker depending on the hue.
 	 * 
-	 * The OKLCH format is similar to HSL/HSV but it is perceptually
-	 * uniform and supports a wider gamut (range of colors) than srgb. 
-	 * Every display-p3 color can be represented in OKLCH.
+	 * The OKLCH format is similar to HSL/HSV but its perceptually
+	 * uniform and supports HDR colors. Use this oklch color picker to 
+	 * explore the color space: https://oklch.com
 	 * 
 	 * `lightness`: 0 to 1
-	 * `chroma`: 0 to 0.4
+	 * 
+	 * `chroma`: 0 to 0.3
+	 * 
 	 * `hue`: 0 to 360
+	 * 
 	 * `alpha`: 0 to 1
 	 * 
 	 * Note how seamless the hue transitions are in the following example.

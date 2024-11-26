@@ -320,60 +320,6 @@ if (typeof document == 'object') {
 	});
 }
 Q5.modules.canvas = ($, q) => {
-	$.CENTER = 'center';
-	$.LEFT = 'left';
-	$.RIGHT = 'right';
-	$.TOP = 'top';
-	$.BOTTOM = 'bottom';
-
-	$.BASELINE = 'alphabetic';
-
-	$.NORMAL = 'normal';
-	$.ITALIC = 'italic';
-	$.BOLD = 'bold';
-	$.BOLDITALIC = 'italic bold';
-
-	$.ROUND = 'round';
-	$.SQUARE = 'butt';
-	$.PROJECT = 'square';
-	$.MITER = 'miter';
-	$.BEVEL = 'bevel';
-
-	$.CHORD_OPEN = 0;
-	$.PIE_OPEN = 1;
-	$.PIE = 2;
-	$.CHORD = 3;
-
-	$.RADIUS = 'radius';
-	$.CORNER = 'corner';
-	$.CORNERS = 'corners';
-
-	$.OPEN = 0;
-	$.CLOSE = 1;
-
-	$.LANDSCAPE = 'landscape';
-	$.PORTRAIT = 'portrait';
-
-	$.BLEND = 'source-over';
-	$.REMOVE = 'destination-out';
-	$.ADD = 'lighter';
-	$.DARKEST = 'darken';
-	$.LIGHTEST = 'lighten';
-	$.DIFFERENCE = 'difference';
-	$.SUBTRACT = 'subtract';
-	$.EXCLUSION = 'exclusion';
-	$.MULTIPLY = 'multiply';
-	$.SCREEN = 'screen';
-	$.REPLACE = 'copy';
-	$.OVERLAY = 'overlay';
-	$.HARD_LIGHT = 'hard-light';
-	$.SOFT_LIGHT = 'soft-light';
-	$.DODGE = 'color-dodge';
-	$.BURN = 'color-burn';
-
-	$.P2D = '2d';
-	$.WEBGL = 'webgl';
-
 	$._OffscreenCanvas =
 		window.OffscreenCanvas ||
 		function () {
@@ -651,6 +597,74 @@ Q5.modules.canvas = ($, q) => {
 		});
 	}
 };
+
+Q5.CENTER = 'center';
+Q5.LEFT = 'left';
+Q5.RIGHT = 'right';
+Q5.TOP = 'top';
+Q5.BOTTOM = 'bottom';
+
+Q5.BASELINE = 'alphabetic';
+
+Q5.NORMAL = 'normal';
+Q5.ITALIC = 'italic';
+Q5.BOLD = 'bold';
+Q5.BOLDITALIC = 'italic bold';
+
+Q5.ROUND = 'round';
+Q5.SQUARE = 'butt';
+Q5.PROJECT = 'square';
+Q5.MITER = 'miter';
+Q5.BEVEL = 'bevel';
+
+Q5.CHORD_OPEN = 0;
+Q5.PIE_OPEN = 1;
+Q5.PIE = 2;
+Q5.CHORD = 3;
+
+Q5.RADIUS = 'radius';
+Q5.CORNER = 'corner';
+Q5.CORNERS = 'corners';
+
+Q5.OPEN = 0;
+Q5.CLOSE = 1;
+
+Q5.LANDSCAPE = 'landscape';
+Q5.PORTRAIT = 'portrait';
+
+Q5.BLEND = 'source-over';
+Q5.REMOVE = 'destination-out';
+Q5.ADD = 'lighter';
+Q5.DARKEST = 'darken';
+Q5.LIGHTEST = 'lighten';
+Q5.DIFFERENCE = 'difference';
+Q5.SUBTRACT = 'subtract';
+Q5.EXCLUSION = 'exclusion';
+Q5.MULTIPLY = 'multiply';
+Q5.SCREEN = 'screen';
+Q5.REPLACE = 'copy';
+Q5.OVERLAY = 'overlay';
+Q5.HARD_LIGHT = 'hard-light';
+Q5.SOFT_LIGHT = 'soft-light';
+Q5.DODGE = 'color-dodge';
+Q5.BURN = 'color-burn';
+
+Q5.THRESHOLD = 1;
+Q5.GRAY = 2;
+Q5.OPAQUE = 3;
+Q5.INVERT = 4;
+Q5.POSTERIZE = 5;
+Q5.DILATE = 6;
+Q5.ERODE = 7;
+Q5.BLUR = 8;
+Q5.SEPIA = 9;
+Q5.BRIGHTNESS = 10;
+Q5.SATURATION = 11;
+Q5.CONTRAST = 12;
+Q5.HUE_ROTATE = 13;
+
+Q5.P2D = '2d';
+Q5.WEBGL = 'webgl';
 
 Q5.canvasOptions = {
 	alpha: false,
@@ -1578,20 +1592,6 @@ Q5.renderers.q2d.image = ($, q) => {
 	};
 	$.noTint = () => ($._tint = null);
 };
-
-Q5.THRESHOLD = 1;
-Q5.GRAY = 2;
-Q5.OPAQUE = 3;
-Q5.INVERT = 4;
-Q5.POSTERIZE = 5;
-Q5.DILATE = 6;
-Q5.ERODE = 7;
-Q5.BLUR = 8;
-Q5.SEPIA = 9;
-Q5.BRIGHTNESS = 10;
-Q5.SATURATION = 11;
-Q5.CONTRAST = 12;
-Q5.HUE_ROTATE = 13;
 /* software implementation of image filters */
 Q5.renderers.q2d.soft_filters = ($) => {
 	let u = null; // uint8 temporary buffer
@@ -2156,7 +2156,10 @@ Q5.modules.color = ($, q) => {
 			if (Array.isArray(c0)) [c0, c1, c2, c3] = c0;
 		}
 
-		if (c2 == undefined) return new C(c0, c0, c0, c1);
+		if (c2 == undefined) {
+			if ($._colorMode == Q5.OKLCH) return new C(c0, 0, 0, c1);
+			return new C(c0, c0, c0, c1);
+		}
 		return new C(c0, c1, c2, c3);
 	};
 

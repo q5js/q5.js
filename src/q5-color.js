@@ -90,7 +90,10 @@ Q5.modules.color = ($, q) => {
 			if (Array.isArray(c0)) [c0, c1, c2, c3] = c0;
 		}
 
-		if (c2 == undefined) return new C(c0, c0, c0, c1);
+		if (c2 == undefined) {
+			if ($._colorMode == Q5.OKLCH) return new C(c0, 0, 0, c1);
+			return new C(c0, c0, c0, c1);
+		}
 		return new C(c0, c1, c2, c3);
 	};
 
