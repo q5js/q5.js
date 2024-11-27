@@ -1,7 +1,4 @@
 import { expect } from '@std/expect';
-
-globalThis.global = globalThis;
-
 import '../q5-deno-server.js';
 
 let log = console.log;

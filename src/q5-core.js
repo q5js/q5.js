@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.10
+ * @version 2.11
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -312,7 +312,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.10';
+Q5.version = Q5.VERSION = '2.11';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

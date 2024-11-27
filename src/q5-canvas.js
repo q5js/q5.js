@@ -6,8 +6,8 @@ Q5.modules.canvas = ($, q) => {
 		};
 
 	if (Q5._nodejs) {
-		if (Q5._createNodeJSCanvas) {
-			q.canvas = Q5._createNodeJSCanvas(100, 100);
+		if (Q5._createServerCanvas) {
+			q.canvas = Q5._createServerCanvas(100, 100);
 		}
 	} else if ($._scope == 'image' || $._scope == 'graphics') {
 		q.canvas = new $._OffscreenCanvas(100, 100);
@@ -221,7 +221,7 @@ Q5.modules.canvas = ($, q) => {
 		$._resizeCanvas(w, h);
 	};
 
-	if (c && !Q5._createNodeJSCanvas) {
+	if (c && !Q5._createServerCanvas) {
 		c.resize = $.resizeCanvas;
 		c.save = $.saveCanvas = $.save;
 	}

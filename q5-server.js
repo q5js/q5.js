@@ -1,7 +1,6 @@
 /**
- * q5-server.js
- * @author quinton-ashley
- * @license LGPL-3.0
+ * @module q5-server
+ * @description Run q5 with node.js using node-canvas and jsdom
  */
 
 try {
@@ -27,7 +26,7 @@ global.window = new JSDOM('', { url: 'http://localhost' }).window;
 
 require('./q5.js');
 
-Q5._createNodeJSCanvas = function () {
+Q5._createServerCanvas = function () {
 	let cairoCanvas = CairoCanvas.createCanvas(...arguments);
 	let domCanvas = window.document.createElement('canvas');
 

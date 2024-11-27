@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.10
+ * @version 2.11
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -312,7 +312,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.10';
+Q5.version = Q5.VERSION = '2.11';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -327,8 +327,8 @@ Q5.modules.canvas = ($, q) => {
 		};
 
 	if (Q5._nodejs) {
-		if (Q5._createNodeJSCanvas) {
-			q.canvas = Q5._createNodeJSCanvas(100, 100);
+		if (Q5._createServerCanvas) {
+			q.canvas = Q5._createServerCanvas(100, 100);
 		}
 	} else if ($._scope == 'image' || $._scope == 'graphics') {
 		q.canvas = new $._OffscreenCanvas(100, 100);
@@ -542,7 +542,7 @@ Q5.modules.canvas = ($, q) => {
 		$._resizeCanvas(w, h);
 	};
 
-	if (c && !Q5._createNodeJSCanvas) {
+	if (c && !Q5._createServerCanvas) {
 		c.resize = $.resizeCanvas;
 		c.save = $.saveCanvas = $.save;
 	}
@@ -1359,7 +1359,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		if (!img) return;
 		let drawable = img?.canvas || img;
-		if (Q5._createNodeJSCanvas) {
+		if (Q5._createServerCanvas) {
 			drawable = drawable.context.canvas;
 		}
 

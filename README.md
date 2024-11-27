@@ -2,9 +2,16 @@
 
 [**q5.js**](https://q5js.org) is a spiritual successor to the [p5.js][] and [Processing Java][] graphics libraries.
 
-The q5 team aims to make creative coding even more fun and accessible for a new generation of artists, designers, educators, and beginners!
+q5 was designed to make creative coding even more fun and accessible for a new generation of artists, educators, and beginners!
 
 If you're already familiar with p5, you'll find yourself right at home with q5. It's also compatible with popular addons, including [p5.sound][] and [p5play][].
+
+```js
+function setup() {
+	createCanvas(100, 100);
+	circle(50, 50, 50);
+}
+```
 
 ## No Installation Required
 

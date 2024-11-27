@@ -1,5 +1,12 @@
-import { createCanvas } from 'jsr:@gfx/canvas@0.5.6';
-import { DOMParser } from 'jsr:@b-fuze/deno-dom';
+/**
+ * @module q5-deno-server
+ * @description Run q5 with deno using skia canvas and deno-dom
+ */
+
+import { createCanvas } from 'jsr:@gfx/canvas@0';
+import { DOMParser } from 'jsr:@b-fuze/deno-dom@0';
+
+globalThis.global = globalThis;
 
 global.window = global;
 global.document = new DOMParser().parseFromString(
@@ -15,7 +22,7 @@ global.document = new DOMParser().parseFromString(
 
 import './q5.js';
 
-Q5._createNodeJSCanvas = function () {
+Q5._createServerCanvas = function () {
 	let skiaCanvas = createCanvas(...arguments);
 	let domCanvas = document.createElement('canvas');
 

@@ -93,7 +93,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		if (!img) return;
 		let drawable = img?.canvas || img;
-		if (Q5._createNodeJSCanvas) {
+		if (Q5._createServerCanvas) {
 			drawable = drawable.context.canvas;
 		}
 
