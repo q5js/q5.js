@@ -454,11 +454,13 @@ function populateNavigation(sections) {
 }
 
 function scrollToElementWithinContainer(container, element) {
-	const containerTop = container.getBoundingClientRect().top;
-	const elementTop = element.getBoundingClientRect().top;
-	const containerScrollTop = container.scrollTop;
-	const offsetTop = elementTop - containerTop + containerScrollTop;
-	container.scrollTop = offsetTop + 2;
+	setTimeout(() => {
+		const containerTop = container.getBoundingClientRect().top
+		const elementTop = element.getBoundingClientRect().top
+		const containerScrollTop = container.scrollTop
+		const offsetTop = elementTop - containerTop + containerScrollTop
+		container.scrollTop = offsetTop + 2;
+	}, 100)
 }
 function setScrollBehavior(behavior) {
 	const content = document.getElementById('content');
@@ -479,6 +481,7 @@ function executeDataScripts(content) {
 			containerId: id,
 			scriptId: scriptContent,
 			autoRun: true,
+			scaleContainer: true,
 			title: 'Example',
 			image: 'https://aijs.io/images/newLogo.png',
 			canvasWidth: 200,
