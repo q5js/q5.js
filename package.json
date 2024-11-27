@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "2.11.0",
+	"version": "2.11.1",
 	"description": "A sequel to p5.js that's optimized for interactive art",
 	"author": "quinton-ashley",
 	"contributors": [
@@ -36,5 +36,9 @@
 		"q5xjs",
 		"q5.js",
 		"q5js"
-	]
+	],
+	"devDependencies": {
+		"jsdom": "^25.0.1",
+		"skia-canvas": "^1.0.2"
+	}
 }

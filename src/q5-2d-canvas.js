@@ -3,9 +3,15 @@ Q5.renderers.q2d = {};
 Q5.renderers.q2d.canvas = ($, q) => {
 	let c = $.canvas;
 
-	if ($.colorMode) $.colorMode('rgb', 'integer');
+	if ($.colorMode) {
+		$.colorMode(Q5.canvasOptions.colorSpace != 'srgb' ? 'rgb' : 'srgb', 255);
+	}
 
 	$._createCanvas = function (w, h, options) {
+		if (!c) {
+			console.error('q5 canvas could not be created. skia-canvas and jsdom packages not found.');
+			return;
+		}
 		q.ctx = q.drawingContext = c.getContext('2d', options);
 
 		if ($._scope != 'image') {

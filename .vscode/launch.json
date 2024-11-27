@@ -3,14 +3,42 @@
 	"configurations": [
 		{
 			"request": "launch",
-			"name": "Deno Test",
+			"name": "Run Tests (deno)",
 			"type": "node",
-			"program": "${workspaceFolder}/test/core.test.js",
-			"cwd": "${workspaceFolder}",
+			"program": "",
+			"cwd": "${workspaceFolder:q5}",
 			"env": {},
 			"runtimeExecutable": "${env:HOME}/.deno/bin/deno",
 			"runtimeArgs": ["test", "--unstable-node-globals", "--inspect-wait", "--allow-all"],
 			"attachSimplePort": 9229
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Run Tests (node)",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "test"
+		},
+		{
+			"type": "bun",
+			"request": "launch",
+			"name": "Run Tests (bun)",
+			"program": "test",
+			"args": [""],
+			"cwd": "${workspaceFolder}",
+			"env": {},
+			"strictEnv": false,
+			"watchMode": false,
+			"stopOnEntry": false,
+			"noDebug": false,
+			"runtime": "bun",
+			"runtimeArgs": []
+		},
+		{
+			"type": "bun",
+			"request": "attach",
+			"name": "Attach to Bun",
+			"url": "ws://localhost:6499/"
 		}
 	]
 }

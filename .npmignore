@@ -7,8 +7,8 @@ home
 lang
 learn
 node_modules
-tests
-p5-tests
+test
+p5-test
 package-lock.json
 .vscode
 index.html

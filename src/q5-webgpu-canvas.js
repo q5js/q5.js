@@ -95,9 +95,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		opt.format ??= navigator.gpu.getPreferredCanvasFormat();
 		opt.device ??= Q5.device;
-
-		// needed for other blend modes but couldn't get it working
-		// opt.alphaMode = 'premultiplied';
+		if (opt.alpha) opt.alphaMode = 'premultiplied';
 
 		$.ctx.configure(opt);
 
@@ -147,7 +145,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		colorIndex++;
 	};
 
-	$._fill = $._stroke = 0;
+	$._stroke = 0;
+	$._fill = 1;
 	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
@@ -439,7 +438,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 					view: mainView,
 					resolveTarget: $.ctx.getCurrentTexture().createView(),
 					loadOp: 'clear',
-					storeOp: 'store'
+					storeOp: 'store',
+					clearValue: [0, 0, 0, 0]
 				}
 			]
 		});

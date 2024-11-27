@@ -5,7 +5,7 @@ Q5.modules.canvas = ($, q) => {
 			return document.createElement('canvas');
 		};
 
-	if (Q5._nodejs) {
+	if (Q5._server) {
 		if (Q5._createServerCanvas) {
 			q.canvas = Q5._createServerCanvas(100, 100);
 		}
@@ -47,6 +47,10 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$.createCanvas = function (w, h, options) {
+		if (typeof w == 'object') {
+			options = w;
+			w = null;
+		}
 		options ??= arguments[3];
 
 		let opt = Object.assign({}, Q5.canvasOptions);

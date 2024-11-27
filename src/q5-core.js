@@ -27,7 +27,7 @@ function Q5(scope, parent, renderer) {
 	let globalScope;
 	if (scope == 'global') {
 		Q5._hasGlobal = $._isGlobal = true;
-		globalScope = !Q5._nodejs ? window : global;
+		globalScope = !Q5._server ? window : global;
 	}
 
 	let q = new Proxy($, {
@@ -283,7 +283,7 @@ Q5.render = 'q2d';
 Q5.renderers = {};
 Q5.modules = {};
 
-Q5._nodejs = typeof process == 'object';
+Q5._server = typeof process == 'object';
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
@@ -300,7 +300,7 @@ Q5.methods = {
 Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
-if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
+if (Q5._server) global.p5 ??= global.Q5 = Q5;
 
 if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
 else global.window = 0;

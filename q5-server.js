@@ -4,7 +4,7 @@
  */
 
 try {
-	global.CairoCanvas ??= require('canvas');
+	global.SkiaCanvas ??= require('skia-canvas');
 	global.JSDOM ??= require('jsdom').JSDOM;
 } catch (e) {
 	require('./q5.js');
@@ -24,13 +24,18 @@ global.window = new JSDOM('', { url: 'http://localhost' }).window;
 	global.Event = window.Event;
 }
 
+global.Image = window.Image = SkiaCanvas.Image;
+global.Window ??= SkiaCanvas.Window;
+
 require('./q5.js');
 
 Q5._createServerCanvas = function () {
-	let cairoCanvas = CairoCanvas.createCanvas(...arguments);
-	let domCanvas = window.document.createElement('canvas');
+	let skiaCanvas = new SkiaCanvas.Canvas(...arguments);
+	let domCanvas = document.createElement('canvas');
 
-	return new Proxy(cairoCanvas, {
+	skiaCanvas.save = skiaCanvas.saveAsSync;
+
+	return new Proxy(skiaCanvas, {
 		get: function (target, prop) {
 			let t = prop in target ? target : domCanvas;
 			let p = t[prop];

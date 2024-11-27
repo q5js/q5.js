@@ -56,10 +56,11 @@ Q5.renderers.q2d.image = ($, q) => {
 		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
 
 		function loaded(img) {
+			img._pixelDensity = pd;
 			g.defaultWidth = img.width * $._defaultImageScale;
 			g.defaultHeight = img.height * $._defaultImageScale;
-			g.naturalWidth = img.naturalWidth;
-			g.naturalHeight = img.naturalHeight;
+			g.naturalWidth = img.naturalWidth || img.width;
+			g.naturalHeight = img.naturalHeight || img.height;
 			g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
 
 			g.ctx.drawImage(img, 0, 0);
@@ -67,24 +68,15 @@ Q5.renderers.q2d.image = ($, q) => {
 			if (cb) cb(g);
 		}
 
-		if (Q5._nodejs && global.CairoCanvas) {
-			global.CairoCanvas.loadImage(url)
-				.then(loaded)
-				.catch((e) => {
-					q._preloadCount--;
-					throw e;
-				});
-		} else {
-			let img = new window.Image();
-			img.src = url;
-			img.crossOrigin = 'Anonymous';
-			img._pixelDensity = pd;
-			img.onload = () => loaded(img);
-			img.onerror = (e) => {
-				q._preloadCount--;
-				throw e;
-			};
-		}
+		let img = new window.Image();
+		img.crossOrigin = 'Anonymous';
+		img.onload = () => loaded(img);
+		img.onerror = (e) => {
+			q._preloadCount--;
+			throw e;
+		};
+		img.src = url;
+
 		return g;
 	};
 
@@ -92,10 +84,7 @@ Q5.renderers.q2d.image = ($, q) => {
 
 	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		if (!img) return;
-		let drawable = img?.canvas || img;
-		if (Q5._createServerCanvas) {
-			drawable = drawable.context.canvas;
-		}
+		let drawable = img.canvas || img;
 
 		dw ??= img.defaultWidth || drawable.width || img.videoWidth;
 		dh ??= img.defaultHeight || drawable.height || img.videoHeight;

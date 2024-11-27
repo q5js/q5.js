@@ -3,10 +3,12 @@
  * @description Run q5 with deno using skia canvas and deno-dom
  */
 
-import { createCanvas } from 'jsr:@gfx/canvas@0';
+import { createCanvas, Image } from 'jsr:@gfx/canvas@0';
 import { DOMParser } from 'jsr:@b-fuze/deno-dom@0';
 
 globalThis.global = globalThis;
+
+global.Image = Image;
 
 global.window = global;
 global.document = new DOMParser().parseFromString(

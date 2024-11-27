@@ -9,7 +9,7 @@ Q5.modules.display = ($) => {
 
 	$.PIXELATED = 'pixelated';
 
-	if (Q5._instanceCount == 0 && !Q5._nodejs) {
+	if (Q5._instanceCount == 0 && !Q5._server) {
 		document.head.insertAdjacentHTML(
 			'beforeend',
 			`<style>

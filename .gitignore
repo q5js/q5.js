@@ -7,4 +7,5 @@ package-lock.json
 jsconfig.json
 bun.lockb
 deno.lock
-p5-tests
+p5-test
+test/*.png

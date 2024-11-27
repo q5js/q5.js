@@ -27,7 +27,7 @@ function Q5(scope, parent, renderer) {
 	let globalScope;
 	if (scope == 'global') {
 		Q5._hasGlobal = $._isGlobal = true;
-		globalScope = !Q5._nodejs ? window : global;
+		globalScope = !Q5._server ? window : global;
 	}
 
 	let q = new Proxy($, {
@@ -283,7 +283,7 @@ Q5.render = 'q2d';
 Q5.renderers = {};
 Q5.modules = {};
 
-Q5._nodejs = typeof process == 'object';
+Q5._server = typeof process == 'object';
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
@@ -300,7 +300,7 @@ Q5.methods = {
 Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
-if (Q5._nodejs) global.p5 ??= global.Q5 = Q5;
+if (Q5._server) global.p5 ??= global.Q5 = Q5;
 
 if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
 else global.window = 0;
@@ -326,7 +326,7 @@ Q5.modules.canvas = ($, q) => {
 			return document.createElement('canvas');
 		};
 
-	if (Q5._nodejs) {
+	if (Q5._server) {
 		if (Q5._createServerCanvas) {
 			q.canvas = Q5._createServerCanvas(100, 100);
 		}
@@ -368,6 +368,10 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$.createCanvas = function (w, h, options) {
+		if (typeof w == 'object') {
+			options = w;
+			w = null;
+		}
 		options ??= arguments[3];
 
 		let opt = Object.assign({}, Q5.canvasOptions);
@@ -685,9 +689,15 @@ Q5.renderers.q2d = {};
 Q5.renderers.q2d.canvas = ($, q) => {
 	let c = $.canvas;
 
-	if ($.colorMode) $.colorMode('rgb', 'integer');
+	if ($.colorMode) {
+		$.colorMode(Q5.canvasOptions.colorSpace != 'srgb' ? 'rgb' : 'srgb', 255);
+	}
 
 	$._createCanvas = function (w, h, options) {
+		if (!c) {
+			console.error('q5 canvas could not be created. skia-canvas and jsdom packages not found.');
+			return;
+		}
 		q.ctx = q.drawingContext = c.getContext('2d', options);
 
 		if ($._scope != 'image') {
@@ -1322,10 +1332,11 @@ Q5.renderers.q2d.image = ($, q) => {
 		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
 
 		function loaded(img) {
+			img._pixelDensity = pd;
 			g.defaultWidth = img.width * $._defaultImageScale;
 			g.defaultHeight = img.height * $._defaultImageScale;
-			g.naturalWidth = img.naturalWidth;
-			g.naturalHeight = img.naturalHeight;
+			g.naturalWidth = img.naturalWidth || img.width;
+			g.naturalHeight = img.naturalHeight || img.height;
 			g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
 
 			g.ctx.drawImage(img, 0, 0);
@@ -1333,24 +1344,15 @@ Q5.renderers.q2d.image = ($, q) => {
 			if (cb) cb(g);
 		}
 
-		if (Q5._nodejs && global.CairoCanvas) {
-			global.CairoCanvas.loadImage(url)
-				.then(loaded)
-				.catch((e) => {
-					q._preloadCount--;
-					throw e;
-				});
-		} else {
-			let img = new window.Image();
-			img.src = url;
-			img.crossOrigin = 'Anonymous';
-			img._pixelDensity = pd;
-			img.onload = () => loaded(img);
-			img.onerror = (e) => {
-				q._preloadCount--;
-				throw e;
-			};
-		}
+		let img = new window.Image();
+		img.crossOrigin = 'Anonymous';
+		img.onload = () => loaded(img);
+		img.onerror = (e) => {
+			q._preloadCount--;
+			throw e;
+		};
+		img.src = url;
+
 		return g;
 	};
 
@@ -1358,10 +1360,7 @@ Q5.renderers.q2d.image = ($, q) => {
 
 	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		if (!img) return;
-		let drawable = img?.canvas || img;
-		if (Q5._createServerCanvas) {
-			drawable = drawable.context.canvas;
-		}
+		let drawable = img.canvas || img;
 
 		dw ??= img.defaultWidth || drawable.width || img.videoWidth;
 		dh ??= img.defaultHeight || drawable.height || img.videoHeight;
@@ -2403,7 +2402,7 @@ Q5.modules.display = ($) => {
 
 	$.PIXELATED = 'pixelated';
 
-	if (Q5._instanceCount == 0 && !Q5._nodejs) {
+	if (Q5._instanceCount == 0 && !Q5._server) {
 		document.head.insertAdjacentHTML(
 			'beforeend',
 			`<style>
@@ -3614,9 +3613,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		opt.format ??= navigator.gpu.getPreferredCanvasFormat();
 		opt.device ??= Q5.device;
-
-		// needed for other blend modes but couldn't get it working
-		// opt.alphaMode = 'premultiplied';
+		if (opt.alpha) opt.alphaMode = 'premultiplied';
 
 		$.ctx.configure(opt);
 
@@ -3666,7 +3663,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		colorIndex++;
 	};
 
-	$._fill = $._stroke = 0;
+	$._stroke = 0;
+	$._fill = 1;
 	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
@@ -3958,7 +3956,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 					view: mainView,
 					resolveTarget: $.ctx.getCurrentTexture().createView(),
 					loadOp: 'clear',
-					storeOp: 'store'
+					storeOp: 'store',
+					clearValue: [0, 0, 0, 0]
 				}
 			]
 		});
@@ -4255,6 +4254,41 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		drawStack.push(0, (n + 1) * 2 + 2);
 	};
 
+	const addEllipseStroke = (x, y, outerA, outerB, innerA, innerB, n, ci, ti) => {
+		y = -y;
+		let angleIncrement = $.TAU / n;
+		let t = 0;
+
+		let v = vertexStack,
+			i = vertIndex;
+
+		for (let j = 0; j <= n; j++) {
+			// Outer vertex
+			let vxOuter = x + outerA * Math.cos(t);
+			let vyOuter = y + outerB * Math.sin(t);
+
+			// Inner vertex
+			let vxInner = x + innerA * Math.cos(t);
+			let vyInner = y + innerB * Math.sin(t);
+
+			// Add vertices for triangle strip
+			v[i++] = vxOuter;
+			v[i++] = vyOuter;
+			v[i++] = ci;
+			v[i++] = ti;
+
+			v[i++] = vxInner;
+			v[i++] = vyInner;
+			v[i++] = ci;
+			v[i++] = ti;
+
+			t += angleIncrement;
+		}
+
+		vertIndex = i;
+		drawStack.push(0, (n + 1) * 2); // Use triangle strip
+	};
+
 	$.rectMode = (x) => ($._rectMode = x);
 
 	$.rect = (x, y, w, h) => {
@@ -4263,48 +4297,34 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		ti = $._transformIndex;
 
-		if ($._doStroke) {
-			ci = $._stroke;
-
-			// stroke weight adjustment
-			let sw = $._strokeWeight / 2;
-
-			if ($._doFill) {
-				// draw stroke as one big rectangle
-				let to = t + sw,
-					bo = b - sw,
-					lo = l - sw,
-					ro = r + sw;
-
-				// draw stroke rectangle
-				addRect(lo, to, ro, to, ro, bo, lo, bo, ci, ti);
-
-				// adjust inner rectangle coordinates
-				t -= sw;
-				b += sw;
-				l += sw;
-				r -= sw;
-			} else {
-				// draw stroke as four rectangles (sides)
-				let lsw = l - sw,
-					rsw = r + sw,
-					tsw = t + sw,
-					bsw = b - sw,
-					lpsw = l + sw,
-					rpsw = r - sw,
-					tpsw = t - sw,
-					bpsw = b + sw;
-
-				addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // top
-				addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // bottom
-				addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // left
-				addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // right
-			}
-		}
-
 		if ($._doFill) {
 			ci = $._fill;
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
+		}
+
+		if ($._doStroke) {
+			ci = $._stroke;
+			let sw = $._strokeWeight / 2;
+
+			// Calculate stroke positions
+			let lsw = l - sw,
+				rsw = r + sw,
+				tsw = t + sw,
+				bsw = b - sw,
+				lpsw = l + sw,
+				rpsw = r - sw,
+				tpsw = t - sw,
+				bpsw = b + sw;
+
+			addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // Top
+			addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // Bottom
+
+			// Adjust side strokes to avoid overlapping corners
+			tsw = t - sw;
+			bsw = b + sw;
+
+			addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // Left
+			addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // Right
 		}
 	};
 
@@ -4351,14 +4371,13 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._transformIndex;
 
-		if ($._doStroke) {
-			let sw = $._strokeWeight / 2;
-			addEllipse(x, y, a + sw, b + sw, n, $._stroke, ti);
-			a -= sw;
-			b -= sw;
-		}
 		if ($._doFill) {
 			addEllipse(x, y, a, b, n, $._fill, ti);
+		}
+		if ($._doStroke) {
+			let sw = $._strokeWeight / 2;
+			// Draw the stroke as a ring using triangle strips
+			addEllipseStroke(x, y, a + sw, b + sw, a - sw, b - sw, n, $._stroke, ti);
 		}
 	};
 
