@@ -367,6 +367,7 @@ header {
 .editor-container {
 	margin: 16px 32px;
 	height: 230px;
+	min-height: 230px !important;
 	overflow: hidden;
 	border-radius: 8px;
 	border: 1px solid var(--borderColor);
