@@ -294,6 +294,7 @@ Q5.TOP = 'top';
 Q5.BOTTOM = 'bottom';
 
 Q5.BASELINE = 'alphabetic';
+Q5.MIDDLE = 'middle';
 
 Q5.NORMAL = 'normal';
 Q5.ITALIC = 'italic';

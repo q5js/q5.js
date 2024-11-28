@@ -58,8 +58,9 @@ Q5.renderers.q2d.text = ($, q) => {
 	};
 
 	$.textLeading = (x) => {
+		if (x == undefined) return leading || $._textSize * 1.25;
 		leadingSet = true;
-		if (x == undefined || x == leading) return leading;
+		if (x == leading) return leading;
 		if ($._da) x *= $._da;
 		leading = x;
 		leadDiff = x - $._textSize;
@@ -73,9 +74,23 @@ Q5.renderers.q2d.text = ($, q) => {
 		}
 	};
 
-	$.textWidth = (str) => $.ctx.measureText(str).width;
-	$.textAscent = (str) => $.ctx.measureText(str).actualBoundingBoxAscent;
-	$.textDescent = (str) => $.ctx.measureText(str).actualBoundingBoxDescent;
+	const updateFont = () => {
+		$.ctx.font = `${emphasis} ${$._textSize}px ${font}`;
+		fontMod = false;
+	};
+
+	$.textWidth = (str) => {
+		if (fontMod) updateFont();
+		return $.ctx.measureText(str).width;
+	};
+	$.textAscent = (str) => {
+		if (fontMod) updateFont();
+		return $.ctx.measureText(str).actualBoundingBoxAscent;
+	};
+	$.textDescent = (str) => {
+		if (fontMod) updateFont();
+		return $.ctx.measureText(str).actualBoundingBoxDescent;
+	};
 
 	$.textFill = $.fill;
 	$.textStroke = $.stroke;
@@ -168,9 +183,8 @@ Q5.renderers.q2d.text = ($, q) => {
 				let measure = ctx.measureText(' ');
 				let ascent = measure.fontBoundingBoxAscent;
 				let descent = measure.fontBoundingBoxDescent;
-				h ??= tY + descent;
 
-				img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(h), {
+				img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(tY + descent), {
 					pixelDensity: $._pixelDensity
 				});
 
@@ -201,11 +215,13 @@ Q5.renderers.q2d.text = ($, q) => {
 			ctx.fillStyle = 'black';
 		}
 
+		let lineAmount = 0;
 		for (let line of lines) {
 			if ($._doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
 			if ($._doFill) ctx.fillText(line, tX, tY);
 			tY += leading;
-			if (tY > h) break;
+			lineAmount++;
+			if (lineAmount > h) break;
 		}
 		lines.length = 0;
 

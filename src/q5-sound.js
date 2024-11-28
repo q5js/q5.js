@@ -1,34 +1,42 @@
 Q5.modules.sound = ($, q) => {
 	$.Sound = Q5.Sound;
+
+	let sounds = [];
+
 	$.loadSound = (path, cb) => {
 		q._preloadCount++;
-		Q5.aud ??= new window.AudioContext();
-		let a = new Q5.Sound(path, cb);
-		a.crossOrigin = 'Anonymous';
-		a.addEventListener('canplaythrough', () => {
+		let s = new Q5.Sound(path, cb);
+		s.crossOrigin = 'Anonymous';
+		s.addEventListener('canplaythrough', () => {
 			q._preloadCount--;
-			a.loaded = true;
-			if (cb) cb(a);
+			s.loaded = true;
+			if (Q5.aud) s.init();
+			if (cb) cb(s);
 		});
-		return a;
+		sounds.push(s);
+		return s;
 	};
 	$.getAudioContext = () => Q5.aud;
-	$.userStartAudio = () => Q5.aud.resume();
+	$.userStartAudio = () => {
+		if (!Q5.aud) {
+			Q5.aud = new window.AudioContext();
+			for (let s of sounds) s.init();
+		}
+		return Q5.aud.resume();
+	};
 };
 
 if (window.Audio) {
-	Q5.Sound = class extends Audio {
-		constructor(path) {
-			super(path);
-			let a = this;
-			a.load();
-			a.panner = Q5.aud.createStereoPanner();
-			a.source = Q5.aud.createMediaElementSource(a);
-			a.source.connect(a.panner);
-			a.panner.connect(Q5.aud.destination);
-			Object.defineProperty(a, 'pan', {
-				get: () => a.panner.pan.value,
-				set: (v) => (a.panner.pan.value = v)
+	Q5.Sound ??= class extends Audio {
+		init() {
+			let s = this;
+			s.panner = Q5.aud.createStereoPanner();
+			s.source = Q5.aud.createMediaElementSource(s);
+			s.source.connect(s.panner);
+			s.panner.connect(Q5.aud.destination);
+			Object.defineProperty(s, 'pan', {
+				get: () => s.panner.pan.value,
+				set: (v) => (s.panner.pan.value = v)
 			});
 		}
 		setVolume(level) {

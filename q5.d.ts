@@ -1325,18 +1325,27 @@ function setup() {
 
 	/** ✍️
 	 * Renders text to the screen. Text can be positioned with the x and y
-	 * parameters and can optionally be constrained within a bounding box.
+	 * parameters and can optionally be constrained by a character limit
+	 * per line and a line limit.
 	 * @param {string} str - string of text to display
 	 * @param {number} x - x-coordinate of the text's position
 	 * @param {number} y - y-coordinate of the text's position
-	 * @param {number} [w] - width of the bounding box
-	 * @param {number} [h] - height of the bounding box
+	 * @param {number} [w] - character limit per line
+	 * @param {number} [h] - line limit
 	 * @example
 createCanvas(200, 200);
 background('silver');
 
 textSize(32);
-text('Hello, world!', 12, 100);
+text('Hello, world!', 12, 106);
+	 * @example
+createCanvas(200, 200);
+background(200);
+textSize(20);
+
+let info = "q5.js is a JavaScript library for creative coding. It's a sequel to p5.js that's optimized for interactive art.";
+
+text(info, 12, 30, 20, 5);
 	 */
 	function text(str: string, x: number, y: number, w?: number, h?: number): void;
 
@@ -1364,9 +1373,9 @@ createCanvas(200, 200);
 loadFont('/assets/Robotica.ttf');
 
 function setup() {
-	background('silver');
+	background(200);
 	textSize(48);
-	text('Hello!', 12, 100);
+	text('Hello!', 12, 114);
 }
 	 */
 	function loadFont(url: string, cb?: (fontName: string) => void): string;
@@ -1375,8 +1384,20 @@ function setup() {
 	 * Sets the current font to be used for rendering text.
 	 * 
 	 * By default, the font is set to "sans-serif" or the last font
-	 * loaded with `loadFont`.
-	 * @param {string} fontName - name of the font
+	 * loaded.
+	 * 
+	 * In q5 q2d, you can set the font to any font accepted in CSS,
+	 * such as "serif" or "monospace".
+	 * https://developer.mozilla.org/en-US/docs/Web/CSS/font-family
+	 * @param {string} fontName - name of the font or font family
+	 * @example
+createCanvas(200, 200);
+background(200);
+
+textFont('serif');
+
+textSize(32);
+text('Hello, world!', 12, 106);
 	 */
 	function textFont(fontName: string): void;
 
@@ -1384,6 +1405,13 @@ function setup() {
 	 * Sets or gets the current font size. If no argument is provided, returns the current font size.
 	 * @param {number} [size] - size of the font in pixels
 	 * @returns {number | void} current font size when no argument is provided
+	 * @example
+function draw() {
+	background(200);
+
+	textSize(abs(mouseX));
+	text('A', 10, 190);
+}
 	 */
 	function textSize(size?: number): number | void;
 
@@ -1391,12 +1419,28 @@ function setup() {
 	 * Sets or gets the current line height. If no argument is provided, returns the current line height.
 	 * @param {number} [leading] - line height in pixels
 	 * @returns {number | void} current line height when no argument is provided
+	 * @example
+function draw() {
+	background(200);
+
+	textSize(abs(mouseX));
+	text('A', 10, 190);
+	rect(10, 190, 5, -textLeading());
+}
 	 */
 	function textLeading(leading?: number): number | void;
 
 	/** ✍️
 	 * Sets the current text style.
 	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style - font style
+	 * @example
+createCanvas(200, 200);
+background(200);
+
+textStyle(ITALIC);
+
+textSize(32);
+text('Hello, world!', 12, 106);
 	 */
 	function textStyle(style: 'normal' | 'italic' | 'bold' | 'bolditalic'): void;
 
@@ -1404,6 +1448,14 @@ function setup() {
 	 * Sets the horizontal and vertical alignment of text.
 	 * @param {'left' | 'center' | 'right'} horiz - horizontal alignment
 	 * @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] - vertical alignment
+	 * @example
+createCanvas(200, 200);
+background(200);
+
+textAlign(CENTER, MIDDLE);
+
+textSize(32);
+text('Hello, world!', 100, 100);
 	 */
 	function textAlign(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
 
@@ -1411,6 +1463,14 @@ function setup() {
 	 * Calculates and returns the width of a given string of text.
 	 * @param {string} str - string to measure
 	 * @returns {number} width of the text in pixels
+	 * @example
+function draw() {
+	background(200);
+
+	textSize(abs(mouseX));
+	rect(10, 190, textWidth('A'), -textLeading());
+	text('A', 10, 190);
+}
 	 */
 	function textWidth(str: string): number;
 
@@ -1418,6 +1478,14 @@ function setup() {
 	 * Calculates and returns the ascent (the distance from the baseline to the top of the highest character) of the current font.
 	 * @param {string} str - string to measure
 	 * @returns {number} ascent of the text in pixels
+	 * @example
+function draw() {
+	background(200);
+
+	textSize(abs(mouseX));
+	rect(10, 190, textWidth('A'), -textAscent());
+	text('A', 10, 190);
+}
 	 */
 	function textAscent(str: string): number;
 
@@ -1425,6 +1493,13 @@ function setup() {
 	 * Calculates and returns the descent (the distance from the baseline to the bottom of the lowest character) of the current font.
 	 * @param {string} str - string to measure
 	 * @returns {number} descent of the text in pixels
+	 * @example
+createCanvas(200, 200);
+	background(200);
+	textSize(64);
+
+	rect(0, 100, 200, textDescent('q5'));
+	text('q5', 10, 100);
 	 */
 	function textDescent(str: string): number;
 
@@ -1435,13 +1510,13 @@ function setup() {
 	 * @param {string} str - string of text
 	 * @param {number} w - width of the bounding box
 	 * @param {number} h - height of the bounding box
-	 * @returns {Q5} an image object representing the rendered text
+	 * @returns {Q5.Image} an image object representing the rendered text
 	 */
-	function createTextImage(str: string, w: number, h: number): Q5;
+	function createTextImage(str: string, w: number, h: number): Q5.Image;
 
 	/** ✍️
 	 * Renders an image generated from text onto the canvas. The
-	 * positioning of the image can be affected by the current text
+	 * positioning of the image is affected by the current text
 	 * alignment and baseline settings.
 	 * @param {HTMLImageElement} img - image object to render, typically generated from text
 	 * @param {number} x - x-coordinate where the image should be placed
@@ -1950,55 +2025,55 @@ noCursor();
 
 	// 🔊 sound
 
-	/** 🔊
-	 * Represents a sound object, extending the native `Audio` to
-	 * add panning and for deprecated p5.sound v1 compatibility.
-	 */
 	class Sound extends Audio {
 		/** 🔊
-		 * Creates a new `Sound` object.
+		 * Creates a new `Sound` object that extends [`Audio`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement/Audio).
+		 * 
+		 * See the `loadSound` documentation for more info and example usage.
 		 * @param {string} path - path to the sound file
 		 */
 		constructor(path: string);
-
-		/** 🔊
-		 * Sets the volume of the sound.
-		 * @param {number} level - volume level, between 0.0 and 1.0
-		 * @deprecated Set the `.volume` property instead.
-		 */
-		setVolume(level: number): void;
-
-		/** 🔊
-		 * Sets whether the sound should loop.
-		 * @param {boolean} loop - a boolean indicating whether to loop the sound
-		 * @deprecated Set the `.loop` property instead.
-		 */
-		setLoop(loop: boolean): void;
-
-		/** 🔊
-		 * Sets the stereo panning of the sound.
-		 * @param {number} value - panning value, between -1 (full left) and 1 (full right)
-		 * @deprecated Set the `.pan` property instead.
-		 */
-		setPan(value: number): void;
 	}
 
 	/** 🔊
-	 * Loads a sound file and returns an enhanced Audio object with additional methods.
+	 * Creates a Q5.Sound object which extends
+	 * [`Audio`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement/Audio).
+	 * 
+	 * Set properties like `volume` and `loop` to adjust playback 
+	 * settings. Use functions like `play`, `pause`, and `stop` to 
+	 * control playback. Use getters like `loaded`, `paused`, and `ended`
+	 * to check the sound's status.
+	 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
+	 * 
+	 * Set `pan` to a value between -1 (left) and 1 (right) to adjust
+	 * the sound's stereo position.
+	 * 
+	 * For backwards compatibility with the p5.sound v1 API, the functions 
+	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
+	 * are also implemented, but their use is deprecated.
 	 * @param {string} path - path to the sound file
 	 * @param {(a: Sound) => void} [cb] - an optional callback function that is called when the sound is ready to play
-	 * @returns {Sound} an enhanced Audio object with additional methods for volume, looping, and panning
+	 * @returns {Sound} a new `Sound` object
+	 * @example
+createCanvas(200, 200);
+
+let sound = loadSound('/assets/jump.wav');
+
+function mousePressed() {
+	sound.volume = 0.3;
+	sound.play();
+}
 	 */
 	function loadSound(path: string, cb?: (a: Sound) => void): Sound;
 
 	/** 🔊
-	 * Returns the AudioContext used by the library. Creates a new one if it doesn't exist.
+	 * Returns the AudioContext in use or undefined if it doesn't exist.
 	 * @returns {AudioContext} AudioContext instance
 	 */
-	function getAudioContext(): AudioContext;
+	function getAudioContext(): AudioContext | void;
 
 	/** 🔊
-	 * Resumes the AudioContext if it has been suspended.
+	 * Creates a new AudioContext or resumes it if it was suspended.
 	 * @returns {Promise<void>} a promise that resolves when the AudioContext is resumed
 	 */
 	function userStartAudio(): Promise<void>;
