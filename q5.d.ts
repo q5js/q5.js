@@ -1331,24 +1331,51 @@ function setup() {
 	 * @param {number} y - y-coordinate of the text's position
 	 * @param {number} [w] - width of the bounding box
 	 * @param {number} [h] - height of the bounding box
+	 * @example
+createCanvas(200, 200);
+background('silver');
+
+textSize(32);
+text('Hello, world!', 12, 100);
 	 */
 	function text(str: string, x: number, y: number, w?: number, h?: number): void;
 
 	/** ✍️
-	 * Loads a font from a URL and optionally runs a callback function with the font name once it's loaded.
+	 * Loads a font from a URL and optionally runs a callback function
+	 * with the font name once it's loaded.
+	 * 
+	 * In q5 q2d, you can load fonts in any format accepted in CSS, such as
+	 * .ttf and .otf files.
+	 * 
+	 * The example below loads "Robotica.ttf" created by Courtney Novits:
+	 * https://www.dafont.com/robotica-courtney.font
 	 *
-	 * WebGPU: Fonts must be in MSDF format with the file ending
+	 * In q5 WebGPU, fonts must be in MSDF format with the file ending
 	 * "-msdf.json". If no font is loaded before `text` is run, then
-	 * the default font is loaded:
+	 * the default font, Microsoft YaHei, is loaded:
 	 * https://q5js.org/fonts/YaHei-msdf.json
+	 * https://q5js.org/fonts/YaHei.png
 	 * @param {string} url - uRL of the font to load
 	 * @param {(fontName: string) => void} [cb] - optional callback function that receives the font name as an argument once the font is loaded
 	 * @returns {string} name of the loaded font
+	 * @example
+createCanvas(200, 200);
+
+loadFont('/assets/Robotica.ttf');
+
+function setup() {
+	background('silver');
+	textSize(48);
+	text('Hello!', 12, 100);
+}
 	 */
 	function loadFont(url: string, cb?: (fontName: string) => void): string;
 
 	/** ✍️
 	 * Sets the current font to be used for rendering text.
+	 * 
+	 * By default, the font is set to "sans-serif" or the last font
+	 * loaded with `loadFont`.
 	 * @param {string} fontName - name of the font
 	 */
 	function textFont(fontName: string): void;

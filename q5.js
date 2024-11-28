@@ -1771,6 +1771,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			q._preloadCount--;
 			if (cb) cb(name);
 		});
+		$.textFont(name);
 		return name;
 	};
 
