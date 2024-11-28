@@ -1,6 +1,6 @@
 {
 	"name": "@q5/q5",
-	"version": "2.11.5",
+	"version": "2.11.6",
 	"license": "LGPL-3.0",
 	"description": "A sequel to p5.js that's optimized for interactive art",
 	"author": "quinton-ashley",

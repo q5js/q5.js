@@ -3152,11 +3152,13 @@ Q5.modules.sound = ($, q) => {
 	};
 	$.getAudioContext = () => Q5.aud;
 	$.userStartAudio = () => {
-		if (!Q5.aud) {
-			Q5.aud = new window.AudioContext();
-			for (let s of sounds) s.init();
+		if (window.AudioContext) {
+			if (!Q5.aud) {
+				Q5.aud = new window.AudioContext();
+				for (let s of sounds) s.init();
+			}
+			return Q5.aud.resume();
 		}
-		return Q5.aud.resume();
 	};
 };
 
