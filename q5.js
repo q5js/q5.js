@@ -2549,7 +2549,7 @@ Q5.modules.input = ($, q) => {
 	let c = $.canvas;
 
 	$._startAudio = () => {
-		if ($.getAudioContext && $.getAudioContext()?.state == 'suspended') $.userStartAudio();
+		if (!Q5.aud || Q5.aud?.state == 'suspended') $.userStartAudio();
 	};
 
 	$._updateMouse = (e) => {
@@ -3140,10 +3140,12 @@ Q5.modules.sound = ($, q) => {
 		let s = new Q5.Sound(path, cb);
 		s.crossOrigin = 'Anonymous';
 		s.addEventListener('canplaythrough', () => {
-			q._preloadCount--;
-			s.loaded = true;
-			if (Q5.aud) s.init();
-			if (cb) cb(s);
+			if (!s.loaded) {
+				q._preloadCount--;
+				s.loaded = true;
+				if (Q5.aud) s.init();
+				if (cb) cb(s);
+			}
 		});
 		sounds.push(s);
 		return s;
@@ -3166,10 +3168,12 @@ if (window.Audio) {
 			s.source = Q5.aud.createMediaElementSource(s);
 			s.source.connect(s.panner);
 			s.panner.connect(Q5.aud.destination);
+			let pan = s.pan;
 			Object.defineProperty(s, 'pan', {
 				get: () => s.panner.pan.value,
 				set: (v) => (s.panner.pan.value = v)
 			});
+			if (pan) s.pan = pan;
 		}
 		setVolume(level) {
 			this.volume = level;

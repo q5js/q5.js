@@ -37,7 +37,7 @@ Q5.modules.input = ($, q) => {
 	let c = $.canvas;
 
 	$._startAudio = () => {
-		if ($.getAudioContext && $.getAudioContext()?.state == 'suspended') $.userStartAudio();
+		if (!Q5.aud || Q5.aud?.state == 'suspended') $.userStartAudio();
 	};
 
 	$._updateMouse = (e) => {
