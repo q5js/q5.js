@@ -1314,8 +1314,8 @@ function setup() {
 
 	/** 🌆
 	 * Creates a new image.
-	 * @param {number} w - width
-	 * @param {number} h - height
+	 * @param {number} [w] - character limit per line
+	 * @param {number} [h] - line limit
 	 * @param {any} [opt] - optional settings for the image
 	 * @returns {Image}
 	 */
@@ -1345,7 +1345,7 @@ textSize(20);
 
 let info = "q5.js is a JavaScript library for creative coding. It's a sequel to p5.js that's optimized for interactive art.";
 
-text(info, 12, 30, 20, 5);
+text(info, 12, 30, 20, 6);
 	 */
 	function text(str: string, x: number, y: number, w?: number, h?: number): void;
 

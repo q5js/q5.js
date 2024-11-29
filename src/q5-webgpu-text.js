@@ -389,7 +389,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		if (str.length > w) {
 			let wrapped = [];
 			let i = 0;
-			while (i < str.length) {
+			while (i < str.length && wrapped.length < h) {
 				let max = i + w;
 				if (max >= str.length) {
 					wrapped.push(str.slice(i));

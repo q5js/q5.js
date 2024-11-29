@@ -221,7 +221,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			if ($._doFill) ctx.fillText(line, tX, tY);
 			tY += leading;
 			lineAmount++;
-			if (lineAmount > h) break;
+			if (lineAmount >= h) break;
 		}
 		lines.length = 0;
 

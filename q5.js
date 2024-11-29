@@ -1966,7 +1966,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			if ($._doFill) ctx.fillText(line, tX, tY);
 			tY += leading;
 			lineAmount++;
-			if (lineAmount > h) break;
+			if (lineAmount >= h) break;
 		}
 		lines.length = 0;
 
@@ -5274,7 +5274,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		if (str.length > w) {
 			let wrapped = [];
 			let i = 0;
-			while (i < str.length) {
+			while (i < str.length && wrapped.length < h) {
 				let max = i + w;
 				if (max >= str.length) {
 					wrapped.push(str.slice(i));
