@@ -7,52 +7,6 @@
 declare global {
 	// ⭐️ core
 
-	class Q5 {
-		/** ⭐️
-		 * Creates an instance of Q5.
-		 *
-		 * Running `new Q5()` enables the use of q5 functions and variables
-		 * anywhere in your code. You can also start Q5 in global mode by 
-		 * running [`createCanvas`](https://q5js.org/learn/#canvas-createCanvas). q5 uses the q2d renderer, based on the CanvasRenderingContext2D, by default.
-		 * 
-		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
-		 * @param {string | Function} [scope] -
-		 *   - "global": (default) top-level global mode, adds q5 functions
-		 * and variables to the global scope
-		 *   - "auto": if users don't create a new instance of Q5 themselves, an instance will be created automatically with this scope, which replicates p5's global mode
-		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode), not to the global scope
-		 * @param {HTMLElement} [parent] - element that the canvas will be placed inside
-		 * @example
-new Q5();
-createCanvas(200, 100);
-circle(100, 50, 80);
-		 */
-		constructor(scope?: string | Function, parent?: HTMLElement);
-
-		/** ⭐️
-		 * Q5 reformats some errors to make them more readable for beginners.
-		 * @default false
-		 */
-		static disableFriendlyErrors: boolean;
-
-		/** ⭐️
-		 * Sets the default canvas context attributes for all Q5 instances
-		 * and graphics.
-		 * @default { alpha: false, colorSpace: 'display-p3' }
-		 */
-		static canvasOptions: {};
-
-		/** ⭐️
-		 * True if the device supports HDR (the display-p3 colorspace).
-		 */
-		static supportsHDR: boolean;
-
-		/** ⭐️
-		 * Modules added to this object will be added to new Q5 instances.
-		 */
-		static modules: {};
-	}
-
 	/** ⭐️
 	 * The draw function is run 60 times per second by default.
 	 * @example
@@ -192,6 +146,10 @@ function draw() {
 	/** ⭐️
 	 * Logs a message to the JavaScript console. Alias for the standard
 	 * [`console.log`](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static) function.
+	 * 
+	 * You can open web developer tools in most browsers by using the 
+	 * keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
+	 * then click the "Console" tab.
 	 * @param {*} message - message to log
 	 */
 	function log(message: any): void;
@@ -248,19 +206,67 @@ function draw() {
 	 */
 	var deltaTime: number;
 
+	class Q5 {
+		/** ⭐️
+		 * Creates an instance of Q5.
+		 *
+		 * Running `new Q5()` enables the use of q5 functions and variables
+		 * anywhere in your code. You can also start Q5 in global mode by 
+		 * running [`createCanvas`](https://q5js.org/learn/#canvas-createCanvas).
+		 * 
+		 * By default q5 uses the CanvasRenderingContext2D based q2d renderer.
+		 * 
+		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
+		 * @param {string | Function} [scope] -
+		 *   - "global": (default) top-level global mode, adds q5 functions
+		 * and variables to the global scope
+		 *   - "auto": if users don't create a new instance of Q5 themselves, an instance will be created automatically with this scope, which replicates p5's global mode
+		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode), not to the global scope
+		 * @param {HTMLElement} [parent] - element that the canvas will be placed inside
+		 * @example
+new Q5();
+createCanvas(200, 100);
+circle(100, 50, 80);
+		 */
+		constructor(scope?: string | Function, parent?: HTMLElement);
+
+		/** ⭐️
+		 * Q5 reformats some errors to make them more readable for beginners.
+		 * @default false
+		 */
+		static disableFriendlyErrors: boolean;
+
+		/** ⭐️
+		 * Sets the default canvas context attributes for all Q5 instances
+		 * and graphics.
+		 * @default { alpha: false, colorSpace: 'display-p3' }
+		 */
+		static canvasOptions: {};
+
+		/** ⭐️
+		 * True if the device supports HDR (the display-p3 colorspace).
+		 */
+		static supportsHDR: boolean;
+
+		/** ⭐️
+		 * Modules added to this object will be added to new Q5 instances.
+		 */
+		static modules: {};
+	}
+
 	// ⬜️ canvas
 
 	/** ⬜️
-	 * Creates a canvas element. If no input parameters are provided, the
-	 * canvas will be the size of the window.
+	 * Creates a canvas element, a section of the screen your program
+	 * can draw on.
 	 * 
-	 * You can start q5 in top level global mode by running this function
-	 * before the rest of your code.
+	 * Start using q5 by running this function!
 	 *
 	 * If this function is not run by the user, a 200x200 canvas will be
-	 * created automatically.
-	 * @param {number} [w] - width of the canvas
-	 * @param {number} [h] - height of the canvas
+	 * created automatically before the draw loop starts. Although in q5 
+	 * WebGPU, this function must be run before running other q5 functions.
+	 * @param {number} [w] - width of the canvas, default is windowWidth
+	 * @param {number} [h] - height of the canvas, default is windowHeight
 	 * @param {Object} [options] - options for the canvas
 	 * @param {boolean} [options.alpha] - whether the canvas should have an alpha channel that allows it to be seen through, default is false
 	 * @param {string} [options.colorSpace] - color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
@@ -2058,9 +2064,9 @@ noCursor();
 createCanvas(200, 200);
 
 let sound = loadSound('/assets/jump.wav');
+sound.volume = 0.3;
 
 function mousePressed() {
-	sound.volume = 0.3;
 	sound.play();
 }
 	 */
