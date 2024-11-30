@@ -549,7 +549,7 @@ function updateMainContent(sectionId, sections, callback) {
 		if (typeof callback === 'function') {
 			requestAnimationFrame(callback);
 		}
-		// Prism.highlightAll();
+
 		addCopyButtons();
 		generateHeadings();
 		convertMarkdownLinksToNavigationButtons(sections);
@@ -889,27 +889,24 @@ function performSearch(searchText) {
 	Object.keys(sections).forEach((sectionId, sectionIndex) => {
 		const section = sections[sectionId];
 		const sectionTitle = stripMarkdown(stripHtmlTags(section.title.toLowerCase()));
+		const sectionEmoji = sectionTitle.split(' ')[0] + ' ';
 		const sectionContent = stripMarkdown(stripHtmlTags(section.content.toLowerCase()));
 
+		let res = {
+			title: highlightSearchText(sectionTitle, searchText),
+			id: sectionId,
+			type: 'section',
+			context: '',
+			priority: 1,
+			order: sectionIndex
+		};
+
 		if (sectionTitle.includes(searchText)) {
-			results.push({
-				title: highlightSearchText(sectionTitle, searchText),
-				id: sectionId,
-				type: 'section',
-				context: '',
-				priority: 1,
-				order: sectionIndex
-			});
+			results.push(res);
 		} else if (sectionContent.includes(searchText)) {
-			const snippet = highlightSearchText(getContextSnippet(section.content, searchText), searchText);
-			results.push({
-				title: highlightSearchText(sectionTitle, searchText),
-				id: sectionId,
-				type: 'section',
-				context: snippet,
-				priority: 3,
-				order: sectionIndex
-			});
+			res.priority = 3;
+			res.context = highlightSearchText(getContextSnippet(section.content, searchText), searchText);
+			results.push(res);
 		}
 
 		Object.keys(section.subsections).forEach((subId, subIndex) => {
@@ -917,31 +914,21 @@ function performSearch(searchText) {
 			const subsectionTitle = stripMarkdown(stripHtmlTags(subsection.title.toLowerCase()));
 			const subsectionContent = stripMarkdown(stripHtmlTags(subsection.content.toLowerCase()));
 
+			let res = {
+				title: sectionEmoji + highlightSearchText(subId, searchText),
+				id: subId,
+				type: 'subsection',
+				context: '',
+				priority: 2,
+				order: subIndex
+			};
+
 			if (subsectionTitle.includes(searchText)) {
-				results.push({
-					title: `${highlightSearchText(sectionTitle, searchText)} > ${highlightSearchText(
-						subsectionTitle,
-						searchText
-					)}`,
-					id: subId,
-					type: 'subsection',
-					context: '',
-					priority: 2,
-					order: subIndex
-				});
+				results.push(res);
 			} else if (subsectionContent.includes(searchText)) {
-				const snippet = highlightSearchText(getContextSnippet(subsection.content, searchText), searchText);
-				results.push({
-					title: `${highlightSearchText(sectionTitle, searchText)} > ${highlightSearchText(
-						subsectionTitle,
-						searchText
-					)}`,
-					id: subId,
-					type: 'subsection',
-					context: snippet,
-					priority: 3,
-					order: subIndex
-				});
+				res.priority = 3;
+				res.context = highlightSearchText(getContextSnippet(subsection.content, searchText), searchText);
+				results.push(res);
 			}
 		});
 	});
@@ -984,11 +971,11 @@ function highlightSearchText(text, searchText) {
 	}
 	const endIndex = startIndex + searchText.length;
 	const highlightedText =
-		text.substring(0, startIndex) +
+		text.substring(0, startIndex).replace(/ /g, '&nbsp;') +
 		"<span class='highlight'>" +
-		text.substring(startIndex, endIndex) +
+		text.substring(startIndex, endIndex).replace(/ /g, '&nbsp;') +
 		'</span>' +
-		text.substring(endIndex);
+		text.substring(endIndex).replace(/ /g, '&nbsp;');
 
 	return highlightedText;
 }

@@ -28,12 +28,15 @@ function setup() {
 	function setup(): void;
 
 	/** ⭐️
-	 * Use preload to load assets before the setup and draw functions are run.
+	 * Load assets in the preload function to ensure that they're
+	 * available before the setup and draw functions are run.
 	 * @example
 let logo;
+
 function preload() {
 	logo = loadImage('/q5js_logo.webp');
 }
+
 function draw() {
 	background(logo);
 }
@@ -122,6 +125,7 @@ function draw() {
 function draw() {
 	background(200);
 	textSize(64);
+
 	text(getTargetFrameRate(), 65, 120);
 }
 	 */
@@ -137,6 +141,7 @@ function draw() {
 	background(200);
 	frameRate(1);
 	textSize(64);
+
 	text(getFPS(), 8, 120);
 }
 	 */

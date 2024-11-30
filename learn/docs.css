@@ -83,6 +83,7 @@ body {
 	justify-content: center;
 	background-color: var(--backGround);
 	color: var(--textColor);
+	font-size: 18px;
 }
 
 h1 {
@@ -110,7 +111,6 @@ h6 {
 }
 
 p {
-	font-size: var(--font-large);
 	line-height: 1.5;
 	padding: 0 32px;
 	margin-bottom: 20px;
@@ -154,7 +154,7 @@ button {
 }
 
 blockquote {
-	border-left: 3px solid var(--active-color);
+	border-left: 3px solid var(--blue1);
 	padding-left: 10px;
 	color: var(--textColor);
 	margin: 20px 0;
@@ -251,12 +251,11 @@ details>summary {
 }
 
 header {
-	background-color: var(--backGround);
+	background-color: var(--blue0);
 	padding: 8px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border-bottom: 1px solid var(--borderColor);
 	position: fixed;
 	width: 100%;
 	top: 0;
@@ -267,7 +266,7 @@ header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	width: 88%;
+	height: 50px;
 	gap: 16px;
 	padding: 0 16px;
 }
@@ -292,7 +291,6 @@ header {
 	color: var(--dimText);
 	cursor: pointer;
 	border-radius: 30px;
-	font-size: var(--font-large);
 	transition: all 0.3s;
 }
 
@@ -323,12 +321,13 @@ header {
 .search-bar .dialog-input {
 	width: calc(100% - 32px);
 	border-radius: 16px;
+	font-size: 18px;
 	padding: 8px 16px;
 	border: 2px solid var(--secondary);
 }
 
 .dialog-input {
-	background-color: var(--borderColor);
+	background-color: var(--secondary);
 	color: var(--textColor);
 	border: none;
 	padding: 10px;
@@ -338,7 +337,7 @@ header {
 .magnify-glass::before {
 	font-family: "codicon";
 	content: "";
-	color: var(--blue1);
+	color: var(--blue3);
 	font-size: 20px;
 	margin-right: 12px;
 }
@@ -353,13 +352,13 @@ header {
 
 .dialog-input:focus {
 	outline: none;
-	border: 2px solid var(--active-color);
+	border: 2px solid var(--blue1);
 }
 
 .editor-container {
 	display: flex;
 	align-items: center;
-	margin: 16px 32px;
+	margin: 24px 32px;
 	background-color: var(--token-default-bg);
 }
 
@@ -369,16 +368,11 @@ header {
 	margin-left: 6px;
 }
 
-.output {
-	/* padding-right: 6px; */
-	/* border-right: 2px solid var(--borderColor); */
-}
-
 #themeToggle {
 	background-color: transparent;
 	border: none;
 	cursor: pointer;
-	color: var(--dimText);
+	color: var(--blue3);
 }
 
 #themeToggle:hover {
@@ -393,6 +387,7 @@ header {
 }
 
 .highlight {
+	font-weight: bold;
 	background-color: var(--textHighlight);
 	color: var(--textColor);
 	border-radius: 5px;
@@ -412,7 +407,7 @@ header {
 	overflow-y: auto;
 	border: 1px solid var(--borderColor);
 	border-top: none;
-	font-size: 13px;
+	font-size: 18px;
 	padding: 5px;
 	display: none;
 	scrollbar-width: thin;
@@ -440,8 +435,6 @@ header {
 }
 
 .search-result-section {
-	font-size: 13px;
-	font-weight: normal;
 	color: var(--textColor);
 }
 
@@ -455,7 +448,7 @@ header {
 
 .search-result:hover,
 .search-result:focus {
-	border: 2px solid var(--active-color);
+	border: 2px solid var(--blue1);
 }
 
 ::-webkit-scrollbar-track {
@@ -485,14 +478,14 @@ header {
 	justify-content: center;
 	width: 1000px;
 	max-width: 100%;
-	height: calc(100% - 57px);
+	height: calc(100% - 66px);
 	overflow: hidden;
 	position: fixed;
-	top: 57px;
+	top: 66px;
 }
 
 #toggleNavButton {
-	opacity: 0;
+	display: none;
 }
 
 #homeButton,
@@ -505,17 +498,28 @@ header {
 }
 
 #homeButton {
-	display: block;
+	display: flex;
+	gap: 8px;
+	align-items: center;
 	border: 1px solid transparent;
 	border-radius: 12px;
 	cursor: pointer;
 	transition: all 0.1s;
 	font-size: 24px;
-	margin-left: 82px;
 }
 
 #homeButton:hover {
 	color: var(--accent);
+}
+
+.logo {
+	border-radius: 8px;
+	width: 48px;
+}
+
+.brand {
+	border-radius: 8px;
+	width: 96px;
 }
 
 #toggleNavButton:hover {
@@ -531,7 +535,7 @@ header {
 
 #navbar {
 	width: 220px;
-	padding-top: 8px;
+	margin-top: 20px;
 	padding-bottom: 200px;
 	max-height: calc(100vh - 200px);
 	overflow-y: scroll;
@@ -575,10 +579,10 @@ header {
 }
 
 .section-link {
-	font-weight: 600;
+	font-weight: lighter;
 	color: var(--dimText);
 	border: 1px solid transparent;
-	font-size: 16px;
+	font-size: 18px;
 	border-radius: 5px 0px 0px 5px;
 	margin-top: 20px !important;
 }
@@ -590,12 +594,12 @@ header {
 }
 
 .subsection-link {
-	font-weight: 400;
 	color: var(--dimText) !important;
 	margin-bottom: 4px;
 	margin-top: 0px;
 	padding: 2px 10px;
 	font-size: 15px;
+	font-weight: lighter;
 	margin-left: 10px !important;
 	text-decoration: none !important;
 }
@@ -608,23 +612,10 @@ header {
 	margin-top: -10px !important;
 }
 
-.section-link:hover,
-.subsection-link:hover {
-	border-radius: 5px;
-	background-color: var(--secondary) !important;
-	color: var(--textColor) !important;
-	border: 1px solid transparent;
-}
-
-.active-section:hover {
-	background-color: var(--hover) !important;
-	border-right: 3px solid var(--accent);
-}
-
 .active-section {
 	margin-bottom: 15px !important;
-	background-color: var(--secondary) !important;
-	border-right: 3px solid var(--active-color);
+	background-color: var(--secondary);
+	font-weight: bold;
 }
 
 .section-link {
@@ -632,6 +623,17 @@ header {
 	margin-bottom: 10px;
 	justify-content: space-between;
 	flex-direction: row;
+	text-decoration: none;
+}
+
+.section-link:hover,
+.subsection-link:hover,
+.active-section:hover {
+	border-radius: 5px;
+	background-color: var(--background);
+	color: var(--textColor);
+	border: 1px solid transparent;
+	text-decoration: none;
 }
 
 .toggle-button {
@@ -653,10 +655,6 @@ header {
 	font-size: 16px;
 	position: relative;
 	vertical-align: bottom;
-}
-
-.toggle-button.closed::before {
-	content: "";
 }
 
 .toggle-button.open::before {
@@ -800,7 +798,7 @@ h1 {
 h1::before {
 	padding: 4px;
 	border-radius: 5px;
-	color: var(--header-color, var(--active-color));
+	color: var(--header-color, var(--blue1));
 	margin-right: 8px;
 	font-size: 27px;
 	position: relative;
@@ -905,11 +903,6 @@ h4 {
 	position: sticky;
 	top: 0;
 	z-index: 2;
-}
-
-.logo {
-	border-radius: 5px;
-	width: 32px;
 }
 
 .content-box {
@@ -1104,10 +1097,9 @@ pre[class*="language-"] code {
 	border: 1px solid var(--accent);
 }
 
-@media (max-width: 1700px) {
-	.header-container {
-		width: 968px;
-	}
+
+.header-container {
+	width: 968px;
 }
 
 @media (max-width: 999px) {
