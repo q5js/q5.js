@@ -223,7 +223,7 @@ function makeScripts(markdown) {
 	return markdown.replace(/```js([\s\S]*?)```/g, (match) => {
 		let js = match.slice(5, -3);
 		return `
-<script id="script-${codeBlockCount++}" type="aijs">
+<script id="script-${codeBlockCount++}" type="mini">
 ${js}
 </script>`;
 	});
@@ -455,12 +455,12 @@ function populateNavigation(sections) {
 
 function scrollToElementWithinContainer(container, element) {
 	setTimeout(() => {
-		const containerTop = container.getBoundingClientRect().top
-		const elementTop = element.getBoundingClientRect().top
-		const containerScrollTop = container.scrollTop
-		const offsetTop = elementTop - containerTop + containerScrollTop
+		const containerTop = container.getBoundingClientRect().top;
+		const elementTop = element.getBoundingClientRect().top;
+		const containerScrollTop = container.scrollTop;
+		const offsetTop = elementTop - containerTop + containerScrollTop;
 		container.scrollTop = offsetTop + 2;
-	}, 100)
+	}, 100);
 }
 function setScrollBehavior(behavior) {
 	const content = document.getElementById('content');
@@ -471,35 +471,12 @@ function setScrollBehavior(behavior) {
 
 let currentLoadedSectionId = '';
 function executeDataScripts(content) {
-	const scripts = content.querySelectorAll('script[type="aijs"]');
+	const scripts = content.querySelectorAll('script[type="mini"]');
 	scripts.forEach((script) => {
-		let scriptContent = script.innerHTML.slice(0, -1).replaceAll('\t', '  ');
+		let scriptContent = script.innerHTML.slice(0, -1).replaceAll('\t', '  ').trim();
 		let id = 'editor-' + script.id.slice(7);
 		script.insertAdjacentHTML('beforebegin', `<div id="${id}" class="editor-container"></div>`);
-		new MiniEditor({
-			Q5InstancedMode: true,
-			containerId: id,
-			scriptId: scriptContent,
-			autoRun: true,
-			scaleContainer: true,
-			title: 'Example',
-			image: 'https://aijs.io/images/newLogo.png',
-			canvasWidth: 200,
-			options: {
-				wordWrap: 'on',
-				wordWrapColumn: 0,
-				wrappingIndent: 'same',
-				minimap: {
-					enabled: false
-				},
-				scrollbar: {
-					verticalScrollbarSize: 0,
-					vertical: 'hidden',
-					horizontal: 'hidden',
-					handleMouseWheel: false
-				}
-			}
-		});
+		new MiniEditor(id, scriptContent);
 	});
 }
 

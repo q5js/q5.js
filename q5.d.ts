@@ -28,8 +28,7 @@ function setup() {
 	function setup(): void;
 
 	/** ⭐️
-	 * Use preload to load assets before the sketch starts and the
-	 * setup and draw functions are run.
+	 * Use preload to load assets before the setup and draw functions are run.
 	 * @example
 let logo;
 function preload() {
@@ -65,7 +64,7 @@ function draw() {
 	/** ⭐️
 	 * Redraws the canvas n times. If no input parameter is provided,
 	 * it calls the draw function once.
-	 * @param {number} [n] - number of times to redraw the canvas, default is 1
+	 * @param {number} [n] number of times to redraw the canvas, default is 1
 	 * @example
 createCanvas(200, 200);
 noLoop();
@@ -96,7 +95,7 @@ function mouseClicked() {
 
 	/** ⭐️
 	 * Sets the target frame rate or gets the sketch's current frame rate.
-	 * @param {number} [hertz] - target frame rate, default is 60
+	 * @param {number} [hertz] target frame rate, default is 60
 	 * @returns {number} current frame rate
 	 * @example
 function draw() {
@@ -150,7 +149,7 @@ function draw() {
 	 * You can open web developer tools in most browsers by using the 
 	 * keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
 	 * then click the "Console" tab.
-	 * @param {*} message - message to log
+	 * @param {*} message message to log
 	 */
 	function log(message: any): void;
 
@@ -217,12 +216,12 @@ function draw() {
 		 * By default q5 uses the CanvasRenderingContext2D based q2d renderer.
 		 * 
 		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
-		 * @param {string | Function} [scope] -
+		 * @param {string | Function} [scope]
 		 *   - "global": (default) top-level global mode, adds q5 functions
 		 * and variables to the global scope
 		 *   - "auto": if users don't create a new instance of Q5 themselves, an instance will be created automatically with this scope, which replicates p5's global mode
 		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode), not to the global scope
-		 * @param {HTMLElement} [parent] - element that the canvas will be placed inside
+		 * @param {HTMLElement} [parent] element that the canvas will be placed inside
 		 * @example
 new Q5();
 createCanvas(200, 100);
@@ -265,11 +264,11 @@ circle(100, 50, 80);
 	 * If this function is not run by the user, a 200x200 canvas will be
 	 * created automatically before the draw loop starts. Although in q5 
 	 * WebGPU, this function must be run before running other q5 functions.
-	 * @param {number} [w] - width of the canvas, default is windowWidth
-	 * @param {number} [h] - height of the canvas, default is windowHeight
-	 * @param {Object} [options] - options for the canvas
-	 * @param {boolean} [options.alpha] - whether the canvas should have an alpha channel that allows it to be seen through, default is false
-	 * @param {string} [options.colorSpace] - color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
+	 * @param {number} [w] width of the canvas, default is windowWidth
+	 * @param {number} [h] height of the canvas, default is windowHeight
+	 * @param {Object} [opt] options for the canvas
+	 * @param {boolean} [opt.alpha] whether the canvas should have an alpha channel that allows it to be seen through, default is false
+	 * @param {string} [opt.colorSpace] color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
 	 * @returns {HTMLCanvasElement} created canvas element
 	 * @example
 createCanvas(200, 100);
@@ -312,7 +311,7 @@ function draw() {
 	 * Sets the fill color for shapes. The default is white.
 	 * 
 	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
-	 * @param {string | Color} color - fill color
+	 * @param {string | Color} color fill color
 	 * @example
 function draw() {
 	background(200);
@@ -330,7 +329,7 @@ function draw() {
 	 * Sets the stroke (outline) color for shapes. The default is black.
 	 * 
 	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
-	 * @param {string | Color} color - stroke color
+	 * @param {string | Color} color stroke color
 	 * @example
 function draw() {
   background(200);
@@ -376,7 +375,7 @@ function draw() {
 
 	/** ⬜️
 	 * Sets the size of the stroke used for lines and the border around shapes.
-	 * @param {number} weight - size of the stroke in pixels
+	 * @param {number} weight size of the stroke in pixels
 	 * @example
 function setup() {
 	createCanvas(200, 200);
@@ -392,7 +391,7 @@ function setup() {
 
 	/** ⬜️
 	 * Sets the global opacity, which affects all subsequent drawing operations, except `background`. Default is 1, fully opaque.
-	 * @param {number} alpha - opacity level, ranging from 0 to 1
+	 * @param {number} alpha opacity level, ranging from 0 to 1
 	 * @example
 function draw() {
 	background(200);
@@ -413,7 +412,7 @@ function draw() {
 	 * shapes, strokes, text, and images.
 	 * 
 	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
-	 * @param {string | Color} color - shadow color
+	 * @param {string | Color} color shadow color
 	 * @example
 function draw() {
   background(200);
@@ -454,9 +453,9 @@ function draw() {
 	 * Sets the shadow offset and blur radius.
 	 * 
 	 * When q5 starts, shadow offset is (10, 10) with a blur of 10.
-	 * @param {number} offsetX - horizontal offset of the shadow
-	 * @param {number} offsetY - vertical offset of the shadow, defaults to be the same as offsetX
-	 * @param {number} blur - blur radius of the shadow, defaults to 0
+	 * @param {number} offsetX horizontal offset of the shadow
+	 * @param {number} offsetY vertical offset of the shadow, defaults to be the same as offsetX
+	 * @param {number} blur blur radius of the shadow, defaults to 0
 	 * @example
 function draw() {
 	background(200);
@@ -481,8 +480,8 @@ function draw() {
 
 	/** ⬜️
 	 * Translates the origin of the drawing context.
-	 * @param {number} x - translation along the x-axis
-	 * @param {number} y - translation along the y-axis
+	 * @param {number} x translation along the x-axis
+	 * @param {number} y translation along the y-axis
 	 * @example
 function draw() {
 	background(200);
@@ -495,7 +494,7 @@ function draw() {
 
 	/** ⬜️
 	 * Rotates the drawing context.
-	 * @param {number} angle - rotation angle in radians
+	 * @param {number} angle rotation angle in radians
 	 * @example
 function draw() {
 	background(200);
@@ -514,8 +513,8 @@ function draw() {
 	 * 
 	 * If only one input parameter is provided,
 	 * the drawing context will be scaled uniformly.
-	 * @param {number} x - scaling factor along the x-axis
-	 * @param {number} [y] - scaling factor along the y-axis
+	 * @param {number} x scaling factor along the x-axis
+	 * @param {number} [y] scaling factor along the y-axis
 	 * @example
 function draw() {
 	background(200);
@@ -528,7 +527,7 @@ function draw() {
 
 	/** ⬜️
 	 * Shears the drawing context along the x-axis.
-	 * @param {number} angle - shear angle in radians
+	 * @param {number} angle shear angle in radians
 	 * @example
 function draw() {
 	background(200);
@@ -542,7 +541,7 @@ function draw() {
 
 	/** ⬜️
 	 * Shears the drawing context along the y-axis.
-	 * @param {number} angle - shear angle in radians
+	 * @param {number} angle shear angle in radians
 	 * @example
 function draw() {
 	background(200);
@@ -558,12 +557,12 @@ function draw() {
 	 * Applies a transformation matrix.
 	 *
 	 * Accepts a 3x3 or 4x4 matrix as either an array or multiple arguments.
-	 * @param {number} a - horizontal scaling
-	 * @param {number} b - horizontal skewing
-	 * @param {number} c - vertical skewing
-	 * @param {number} d - vertical scaling
-	 * @param {number} e - horizontal moving
-	 * @param {number} f - vertical moving
+	 * @param {number} a horizontal scaling
+	 * @param {number} b horizontal skewing
+	 * @param {number} c vertical skewing
+	 * @param {number} d vertical scaling
+	 * @param {number} e horizontal moving
+	 * @param {number} f vertical moving
 	 * @example
 function draw() {
 	background(200);
@@ -657,14 +656,14 @@ square(0, 0, 50);
 
 	/** ⬜️
 	 * Resizes the canvas to the specified width and height.
-	 * @param {number} w - width of the canvas
-	 * @param {number} h - height of the canvas
+	 * @param {number} w width of the canvas
+	 * @param {number} h height of the canvas
 	 */
 	function resizeCanvas(w: number, h: number): void;
 
 	/** ⬜️
 	 * Sets the pixel density of the canvas.
-	 * @param {number} v - pixel density value
+	 * @param {number} v pixel density value
 	 * @returns {number} pixel density
 	 */
 	function pixelDensity(v: number): number;
@@ -677,7 +676,7 @@ square(0, 0, 50);
 
 	/** ⬜️
 	 * Enables or disables fullscreen mode.
-	 * @param {boolean} [v] - boolean indicating whether to enable or disable fullscreen mode
+	 * @param {boolean} [v] boolean indicating whether to enable or disable fullscreen mode
 	 * @returns {void | boolean} true if fullscreen mode is enabled, false otherwise
 	 */
 	function fullscreen(v?: boolean): void | boolean;
@@ -685,7 +684,7 @@ square(0, 0, 50);
 	/** ⬜️
 	 * Any position coordinates or dimensions you use will be scaled based
 	 * on the unit provided to this function.
-	 * @param {number} unit - unit to scale by
+	 * @param {number} unit unit to scale by
 	 * @example
 createCanvas(200, 200);
 flexibleCanvas(100);
@@ -696,9 +695,9 @@ rect(20, 20, 60, 60);
 
 	/** ⬜️
 	 * Creates a graphics buffer.
-	 * @param {number} w - width
-	 * @param {number} h - height
-	 * @param {Object} [opt] - options
+	 * @param {number} w width
+	 * @param {number} h height
+	 * @param {Object} [opt] options
 	 * @returns {Q5} a new Q5 graphics buffer
 	 */
 	function createGraphics(w: number, h: number, opt?: any): Q5;
@@ -717,15 +716,15 @@ rect(20, 20, 60, 60);
 
 	/** 💻
 	 * The `displayMode` function lets you customize how your canvas is presented.
-	 * @param {string} mode -
+	 * @param {string} mode
 	 *   - "normal": (default) no styling to canvas or its parent element
 	 *   - "centered": canvas will be centered horizontally and vertically within its parent and if it's display size is bigger than its parent it will not clip
 	 *   - "maxed": canvas will fill the parent element, same as fullscreen for a global mode canvas inside a `main` element
 	 *   - "fullscreen": canvas will fill the screen with letterboxing if necessary to preserve its aspect ratio, like css object-fit contain
-	 * @param {string} renderQuality -
+	 * @param {string} renderQuality
 	 *   - "smooth": (default) no changes to the default render quality
 	 *   - "pixelated": pixelDensity set to 1 and various css styles are applied to the canvas to make it render without image smoothing
-	 * @param {number} scale - can be given as a string (for example "x2") or a number
+	 * @param {number} scale can be given as a string (for example "x2") or a number
 	 */
 	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
 
@@ -733,49 +732,49 @@ rect(20, 20, 60, 60);
 
 	/** 🧑‍🎨
 	 * Draws over the entire canvas with a color or image.
-	 * @param {string | number} color - color or image to draw
+	 * @param {string | number} color color or image to draw
 	 */
 	function background(color: string | number): void;
 
 	/** 🧑‍🎨
 	 * Draws a rectangle.
-	 * @param {number} x - x-coordinate
-	 * @param {number} y - y-coordinate
-	 * @param {number} w - width of the rectangle
-	 * @param {number} [h] - height of the rectangle
-	 * @param {number} [tl] - top-left radius for rounded corners
-	 * @param {number} [tr] - top-right radius for rounded corners
-	 * @param {number} [br] - bottom-right radius for rounded corners
-	 * @param {number} [bl] - bottom-left radius for rounded corners
+	 * @param {number} x x-coordinate
+	 * @param {number} y y-coordinate
+	 * @param {number} w width of the rectangle
+	 * @param {number} [h] height of the rectangle
+	 * @param {number} [tl] top-left radius for rounded corners
+	 * @param {number} [tr] top-right radius for rounded corners
+	 * @param {number} [br] bottom-right radius for rounded corners
+	 * @param {number} [bl] bottom-left radius for rounded corners
 	 */
 	function rect(x: number, y: number, w: number, h?: number, tl?: number, tr?: number, br?: number, bl?: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a square.
-	 * @param {number} x - x-coordinate
-	 * @param {number} y - y-coordinate
-	 * @param {number} size - size of the sides of the square
-	 * @param {number} [tl] - top-left radius for rounded corners
-	 * @param {number} [tr] - top-right radius for rounded corners
-	 * @param {number} [br] - bottom-right radius for rounded corners
-	 * @param {number} [bl] - bottom-left radius for rounded corners
+	 * @param {number} x x-coordinate
+	 * @param {number} y y-coordinate
+	 * @param {number} size size of the sides of the square
+	 * @param {number} [tl] top-left radius for rounded corners
+	 * @param {number} [tr] top-right radius for rounded corners
+	 * @param {number} [br] bottom-right radius for rounded corners
+	 * @param {number} [bl] bottom-left radius for rounded corners
 	 */
 	function square(x: number, y: number, size: number, tl?: number, tr?: number, br?: number, bl?: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a circle.
-	 * @param {number} x - x-coordinate
-	 * @param {number} y - y-coordinate
-	 * @param {number} diameter - diameter of the circle
+	 * @param {number} x x-coordinate
+	 * @param {number} y y-coordinate
+	 * @param {number} diameter diameter of the circle
 	 */
 	function circle(x: number, y: number, diameter: number): void;
 
 	/** 🧑‍🎨
 	 * Draws an ellipse.
-	 * @param {number} x - x-coordinate
-	 * @param {number} y - y-coordinate
-	 * @param {number} width - width of the ellipse
-	 * @param {number} [height] - height of the ellipse
+	 * @param {number} x x-coordinate
+	 * @param {number} y y-coordinate
+	 * @param {number} width width of the ellipse
+	 * @param {number} [height] height of the ellipse
 	 */
 	function ellipse(x: number, y: number, width: number, height?: number): void;
 
@@ -783,13 +782,13 @@ rect(20, 20, 60, 60);
 	 * Draws an arc, which is a section of an ellipse.
 	 * 
 	 * `ellipseMode` affects how the arc is drawn.
-	 * @param {number} x - x-coordinate
-	 * @param {number} y - y-coordinate
-	 * @param {number} w - width of the ellipse
-	 * @param {number} h - height of the ellipse
-	 * @param {number} start - angle to start the arc
-	 * @param {number} stop - angle to stop the arc
-	 * @param {number} [mode] - shape and stroke style setting, default is `PIE_OPEN` for a pie shape with an unclosed stroke, can be `PIE`, `CHORD`, or `CHORD_OPEN`
+	 * @param {number} x x-coordinate
+	 * @param {number} y y-coordinate
+	 * @param {number} w width of the ellipse
+	 * @param {number} h height of the ellipse
+	 * @param {number} start angle to start the arc
+	 * @param {number} stop angle to stop the arc
+	 * @param {number} [mode] shape and stroke style setting, default is `PIE_OPEN` for a pie shape with an unclosed stroke, can be `PIE`, `CHORD`, or `CHORD_OPEN`
 	 * @example
 function draw() {
 	background(200);
@@ -804,65 +803,65 @@ function draw() {
 
 	/** 🧑‍🎨
 	 * Draws a line on the canvas.
-	 * @param {number} x1 - x-coordinate of the first point
-	 * @param {number} y1 - y-coordinate of the first point
-	 * @param {number} x2 - x-coordinate of the second point
-	 * @param {number} y2 - y-coordinate of the second point
+	 * @param {number} x1 x-coordinate of the first point
+	 * @param {number} y1 y-coordinate of the first point
+	 * @param {number} x2 x-coordinate of the second point
+	 * @param {number} y2 y-coordinate of the second point
 	 */
 	function line(x1: number, y1: number, x2: number, y2: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a point on the canvas.
-	 * @param {number} x - x-coordinate
-	 * @param {number} y - y-coordinate
+	 * @param {number} x x-coordinate
+	 * @param {number} y y-coordinate
 	 */
 	function point(x: number, y: number): void;
 
 	/** 🧑‍🎨
 	 * Sets the global composite operation for the canvas context.
-	 * @param {string} val - composite operation to set
+	 * @param {string} val composite operation to set
 	 */
 	function blendMode(val: string): void;
 
 	/** 🧑‍🎨
 	 * Sets the line cap style for the canvas context.
-	 * @param {CanvasLineCap} val - line cap style to set ('butt', 'round', 'square')
+	 * @param {CanvasLineCap} val line cap style to set ('butt', 'round', 'square')
 	 */
 	function strokeCap(val: CanvasLineCap): void;
 
 	/** 🧑‍🎨
 	 * Sets the line join style for the canvas context.
-	 * @param {CanvasLineJoin} val - line join style to set ('round', 'bevel', 'miter')
+	 * @param {CanvasLineJoin} val line join style to set ('round', 'bevel', 'miter')
 	 */
 	function strokeJoin(val: CanvasLineJoin): void;
 
 	/** 🧑‍🎨
 	 * Sets the ellipse mode.
-	 * @param {string} val - ellipse mode to set
+	 * @param {string} val ellipse mode to set
 	 */
 	function ellipseMode(val: string): void;
 
 	/** 🧑‍🎨
 	 * Sets the rectangle mode.
-	 * @param {string} val - rectangle mode to set
+	 * @param {string} val rectangle mode to set
 	 */
 	function rectMode(val: string): void;
 
 	/** 🧑‍🎨
 	 * Sets the curve detail level.
-	 * @param {number} val - curve detail level to set
+	 * @param {number} val curve detail level to set
 	 */
 	function curveDetail(val: number): void;
 
 	/** 🧑‍🎨
 	 * Sets the curve alpha value.
-	 * @param {number} val - curve alpha value to set
+	 * @param {number} val curve alpha value to set
 	 */
 	function curveAlpha(val: number): void;
 
 	/** 🧑‍🎨
 	 * Sets the curve tightness value.
-	 * @param {number} val - curve tightness value to set
+	 * @param {number} val curve tightness value to set
 	 */
 	function curveTightness(val: number): void;
 
@@ -883,72 +882,72 @@ function draw() {
 
 	/** 🧑‍🎨
 	 * Specifies a vertex in a shape.
-	 * @param {number} x - x-coordinate
-	 * @param {number} y - y-coordinate
+	 * @param {number} x x-coordinate
+	 * @param {number} y y-coordinate
 	 */
 	function vertex(x: number, y: number): void;
 
 	/** 🧑‍🎨
 	 * Specifies a Bezier vertex in a shape.
-	 * @param {number} cp1x - x-coordinate of the first control point
-	 * @param {number} cp1y - y-coordinate of the first control point
-	 * @param {number} cp2x - x-coordinate of the second control point
-	 * @param {number} cp2y - y-coordinate of the second control point
-	 * @param {number} x - x-coordinate of the anchor point
-	 * @param {number} y - y-coordinate of the anchor point
+	 * @param {number} cp1x x-coordinate of the first control point
+	 * @param {number} cp1y y-coordinate of the first control point
+	 * @param {number} cp2x x-coordinate of the second control point
+	 * @param {number} cp2y y-coordinate of the second control point
+	 * @param {number} x x-coordinate of the anchor point
+	 * @param {number} y y-coordinate of the anchor point
 	 */
 	function bezierVertex(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
 
 	/** 🧑‍🎨
 	 * Specifies a quadratic Bezier vertex in a shape.
-	 * @param {number} cp1x - x-coordinate of the control point
-	 * @param {number} cp1y - y-coordinate of the control point
-	 * @param {number} x - x-coordinate of the anchor point
-	 * @param {number} y - y-coordinate of the anchor point
+	 * @param {number} cp1x x-coordinate of the control point
+	 * @param {number} cp1y y-coordinate of the control point
+	 * @param {number} x x-coordinate of the anchor point
+	 * @param {number} y y-coordinate of the anchor point
 	 */
 	function quadraticVertex(cp1x: number, cp1y: number, x: number, y: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a Bezier curve.
-	 * @param {number} x1 - x-coordinate of the first anchor point
-	 * @param {number} y1 - y-coordinate of the first anchor point
-	 * @param {number} x2 - x-coordinate of the first control point
-	 * @param {number} y2 - y-coordinate of the first control point
-	 * @param {number} x3 - x-coordinate of the second control point
-	 * @param {number} y3 - y-coordinate of the second control point
-	 * @param {number} x4 - x-coordinate of the second anchor point
-	 * @param {number} y4 - y-coordinate of the second anchor point
+	 * @param {number} x1 x-coordinate of the first anchor point
+	 * @param {number} y1 y-coordinate of the first anchor point
+	 * @param {number} x2 x-coordinate of the first control point
+	 * @param {number} y2 y-coordinate of the first control point
+	 * @param {number} x3 x-coordinate of the second control point
+	 * @param {number} y3 y-coordinate of the second control point
+	 * @param {number} x4 x-coordinate of the second anchor point
+	 * @param {number} y4 y-coordinate of the second anchor point
 	 */
 	function bezier(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a triangle.
-	 * @param {number} x1 - x-coordinate of the first vertex
-	 * @param {number} y1 - y-coordinate of the first vertex
-	 * @param {number} x2 - x-coordinate of the second vertex
-	 * @param {number} y2 - y-coordinate of the second vertex
-	 * @param {number} x3 - x-coordinate of the third vertex
-	 * @param {number} y3 - y-coordinate of the third vertex
+	 * @param {number} x1 x-coordinate of the first vertex
+	 * @param {number} y1 y-coordinate of the first vertex
+	 * @param {number} x2 x-coordinate of the second vertex
+	 * @param {number} y2 y-coordinate of the second vertex
+	 * @param {number} x3 x-coordinate of the third vertex
+	 * @param {number} y3 y-coordinate of the third vertex
 	 */
 	function triangle(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a quadrilateral.
-	 * @param {number} x1 - x-coordinate of the first vertex
-	 * @param {number} y1 - y-coordinate of the first vertex
-	 * @param {number} x2 - x-coordinate of the second vertex
-	 * @param {number} y2 - y-coordinate of the second vertex
-	 * @param {number} x3 - x-coordinate of the third vertex
-	 * @param {number} y3 - y-coordinate of the third vertex
-	 * @param {number} x4 - x-coordinate of the fourth vertex
-	 * @param {number} y4 - y-coordinate of the fourth vertex
+	 * @param {number} x1 x-coordinate of the first vertex
+	 * @param {number} y1 y-coordinate of the first vertex
+	 * @param {number} x2 x-coordinate of the second vertex
+	 * @param {number} y2 y-coordinate of the second vertex
+	 * @param {number} x3 x-coordinate of the third vertex
+	 * @param {number} y3 y-coordinate of the third vertex
+	 * @param {number} x4 x-coordinate of the fourth vertex
+	 * @param {number} y4 y-coordinate of the fourth vertex
 	 */
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
 	/** 🧑‍🎨
 	 * Sets the canvas to erase mode, where shapes will erase what's underneath them instead of drawing over it.
-	 * @param {number} [fillAlpha] - opacity level of the fill color from 0 to 255
-	 * @param {number} [strokeAlpha] - opacity level of the stroke color from 0 to 255
+	 * @param {number} [fillAlpha] opacity level of the fill color from 0 to 255
+	 * @param {number} [strokeAlpha] opacity level of the stroke color from 0 to 255
 	 */
 	function erase(fillAlpha?: number, strokeAlpha?: number): void;
 
@@ -959,16 +958,16 @@ function draw() {
 
 	/** 🧑‍🎨
 	 * Checks if a given point is within the current path's fill area.
-	 * @param {number} x - x-coordinate of the point
-	 * @param {number} y - y-coordinate of the point
+	 * @param {number} x x-coordinate of the point
+	 * @param {number} y y-coordinate of the point
 	 * @returns {boolean} true if the point is within the fill area, false otherwise
 	 */
 	function inFill(x: number, y: number): boolean;
 
 	/** 🧑‍🎨
 	 * Checks if a given point is within the current path's stroke.
-	 * @param {number} x - x-coordinate of the point
-	 * @param {number} y - y-coordinate of the point
+	 * @param {number} x x-coordinate of the point
+	 * @param {number} y y-coordinate of the point
 	 * @returns {boolean} true if the point is within the stroke, false otherwise
 	 */
 	function inStroke(x: number, y: number): boolean;
@@ -977,9 +976,9 @@ function draw() {
 
 	/** 🌆
 	 * Loads an image from a URL and optionally runs a callback function.
-	 * @param {string} url - url of the image to load
-	 * @param {(img: any) => void} [cb] - callback function after the image is loaded
-	 * @param {any} [opt] - optional parameters for loading the image
+	 * @param {string} url url of the image to load
+	 * @param {(img: any) => void} [cb] callback function after the image is loaded
+	 * @param {any} [opt] optional parameters for loading the image
 	 * @example
 createCanvas(200, 200);
 
@@ -993,15 +992,15 @@ function draw() {
 
 	/** 🌆
 	 * Draws an image to the canvas.
-	 * @param {any} img - image to draw
-	 * @param {number} dx - x position to draw the image at
-	 * @param {number} dy - y position to draw the image at
-	 * @param {number} [dw] - width of the destination image
-	 * @param {number} [dh] - height of the destination image
-	 * @param {number} [sx] - x position in the source to start clipping a subsection from
-	 * @param {number} [sy] - y position in the source to start clipping a subsection from
-	 * @param {number} [sw] - width of the subsection of the source image
-	 * @param {number} [sh] - height of the subsection of the source image
+	 * @param {any} img image to draw
+	 * @param {number} dx x position to draw the image at
+	 * @param {number} dy y position to draw the image at
+	 * @param {number} [dw] width of the destination image
+	 * @param {number} [dh] height of the destination image
+	 * @param {number} [sx] x position in the source to start clipping a subsection from
+	 * @param {number} [sy] y position in the source to start clipping a subsection from
+	 * @param {number} [sw] width of the subsection of the source image
+	 * @param {number} [sh] height of the subsection of the source image
 	 * @example
 createCanvas(200, 200);
 
@@ -1015,9 +1014,9 @@ function draw() {
 
 	/** 🌆
 	 * Sets the image mode, which determines the position and alignment of images drawn on the canvas.
-	 * - `CORNER`: (default) images will be drawn from the top-left corner
-	 * - `CORNERS`: images will be drawn from the top-left to the bottom-right corner
-	 * - `CENTER`: images will be drawn centered at (dx, dy)
+	 * `CORNER`: (default) images will be drawn from the top-left corner
+	 * `CORNERS`: images will be drawn from the top-left to the bottom-right corner
+	 * `CENTER`: images will be drawn centered at (dx, dy)
 	 * @param {string} mode
 	 * @example
 createCanvas(200, 200);
@@ -1048,8 +1047,8 @@ function draw() {
 
 	/** 🌆
 	 * Resizes the image.
-	 * @param {number} w - new width
-	 * @param {number} h - new height
+	 * @param {number} w new width
+	 * @param {number} h new height
 	 * @example
 createCanvas(200, 200);
 
@@ -1115,7 +1114,7 @@ function setup() {
 	 * If you need to draw an image multiple times each frame with 
 	 * different tints, consider making copies of the image and tinting
 	 * each copy separately.
-	 * @param {string | number} color - tint color
+	 * @param {string | number} color tint color
 	 * @example
 createCanvas(200, 200);
 
@@ -1135,15 +1134,15 @@ function setup() {
 
 	/** 🌆
 	 * Masks the image with another image.
-	 * @param {Image} img - image to use as a mask
+	 * @param {Image} img image to use as a mask
 	 */
 	function mask(img: Image): void;
 
 	/** 🌆
 	 * Saves the image.
-	 * @param {string} filename - filename or path
-	 * @param {string} extension - file extension
-	 * @param {number} [quality] - quality of the saved image
+	 * @param {string} filename filename or path
+	 * @param {string} extension file extension
+	 * @param {number} [quality] quality of the saved image
 	 */
 	function save(filename: string, extension: string, quality?: number): void;
 
@@ -1152,8 +1151,8 @@ function setup() {
 	 * Or if width and height are both 1, returns the color of the pixel at the given coordinates in `[R, G, B, A]` array format.
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {number} [w] - width of the area
-	 * @param {number} [h] - height of the area
+	 * @param {number} [w] width of the area
+	 * @param {number} [h] height of the area
 	 * @returns {Image | number[]}
 	 * @example
 createCanvas(200, 200);
@@ -1176,7 +1175,7 @@ function setup() {
 	 * Run `updatePixels` to apply the changes.
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {any} c - color, canvas, or image
+	 * @param {any} c color, canvas, or image
 	 * @example
 createCanvas(200, 200);
 let c = color('lime');
@@ -1197,14 +1196,14 @@ function draw() {
 	/** 🌆
 	 * Displays a region of the image on another region of the image.
 	 * Can be used to create a detail inset, aka a magnifying glass effect.
-	 * @param {number} sx - x-coordinate of the source region
-	 * @param {number} sy - y-coordinate of the source region
-	 * @param {number} sw - width of the source region
-	 * @param {number} sh - height of the source region
-	 * @param {number} dx - x-coordinate of the destination region
-	 * @param {number} dy - y-coordinate of the destination region
-	 * @param {number} dw - width of the destination region
-	 * @param {number} dh - height of the destination region
+	 * @param {number} sx x-coordinate of the source region
+	 * @param {number} sy y-coordinate of the source region
+	 * @param {number} sw width of the source region
+	 * @param {number} sh height of the source region
+	 * @param {number} dx x-coordinate of the destination region
+	 * @param {number} dy y-coordinate of the destination region
+	 * @param {number} dw width of the destination region
+	 * @param {number} dh height of the destination region
 	 * @example
 createCanvas(200, 200);
 
@@ -1254,7 +1253,7 @@ function setup() {
 
 	/** 🌆
 	 * Masks the image with another image.
-	 * @param {Image} img - image to use as a mask
+	 * @param {Image} img image to use as a mask
 	 */
 	function mask(img: Image): void;
 
@@ -1265,8 +1264,8 @@ function setup() {
 	 * 
 	 * If a CSS filter string is provided, it will be applied to the image.
 	 * https://developer.mozilla.org/en-US/docs/Web/CSS/filter
-	 * @param {string} type - type of filter or a CSS filter string
-	 * @param {number} [value] - optional parameter, depending on filter type
+	 * @param {string} type type of filter or a CSS filter string
+	 * @param {number} [value] optional parameter, depending on filter type
 	 * @example
 createCanvas(200, 200);
 let logo = loadImage('/q5js_logo.webp');
@@ -1320,9 +1319,9 @@ function setup() {
 
 	/** 🌆
 	 * Creates a new image.
-	 * @param {number} [w] - character limit per line
-	 * @param {number} [h] - line limit
-	 * @param {any} [opt] - optional settings for the image
+	 * @param {number} [w] character limit per line
+	 * @param {number} [h] line limit
+	 * @param {any} [opt] optional settings for the image
 	 * @returns {Image}
 	 */
 	function createImage(w: number, h: number, opt?: any): Image;
@@ -1333,11 +1332,11 @@ function setup() {
 	 * Renders text to the screen. Text can be positioned with the x and y
 	 * parameters and can optionally be constrained by a character limit
 	 * per line and a line limit.
-	 * @param {string} str - string of text to display
-	 * @param {number} x - x-coordinate of the text's position
-	 * @param {number} y - y-coordinate of the text's position
-	 * @param {number} [w] - character limit per line
-	 * @param {number} [h] - line limit
+	 * @param {string} str string of text to display
+	 * @param {number} x x-coordinate of the text's position
+	 * @param {number} y y-coordinate of the text's position
+	 * @param {number} [w] character limit per line
+	 * @param {number} [h] line limit
 	 * @example
 createCanvas(200, 200);
 background('silver');
@@ -1370,8 +1369,8 @@ text(info, 12, 30, 20, 6);
 	 * the default font, Microsoft YaHei, is loaded:
 	 * https://q5js.org/fonts/YaHei-msdf.json
 	 * https://q5js.org/fonts/YaHei.png
-	 * @param {string} url - uRL of the font to load
-	 * @param {(fontName: string) => void} [cb] - optional callback function that receives the font name as an argument once the font is loaded
+	 * @param {string} url uRL of the font to load
+	 * @param {(fontName: string) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
 	 * @returns {string} name of the loaded font
 	 * @example
 createCanvas(200, 200);
@@ -1395,7 +1394,7 @@ function setup() {
 	 * In q5 q2d, you can set the font to any font accepted in CSS,
 	 * such as "serif" or "monospace".
 	 * https://developer.mozilla.org/en-US/docs/Web/CSS/font-family
-	 * @param {string} fontName - name of the font or font family
+	 * @param {string} fontName name of the font or font family
 	 * @example
 createCanvas(200, 200);
 background(200);
@@ -1409,7 +1408,7 @@ text('Hello, world!', 12, 106);
 
 	/** ✍️
 	 * Sets or gets the current font size. If no argument is provided, returns the current font size.
-	 * @param {number} [size] - size of the font in pixels
+	 * @param {number} [size] size of the font in pixels
 	 * @returns {number | void} current font size when no argument is provided
 	 * @example
 function draw() {
@@ -1423,7 +1422,7 @@ function draw() {
 
 	/** ✍️
 	 * Sets or gets the current line height. If no argument is provided, returns the current line height.
-	 * @param {number} [leading] - line height in pixels
+	 * @param {number} [leading] line height in pixels
 	 * @returns {number | void} current line height when no argument is provided
 	 * @example
 function draw() {
@@ -1438,7 +1437,7 @@ function draw() {
 
 	/** ✍️
 	 * Sets the current text style.
-	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style - font style
+	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style font style
 	 * @example
 createCanvas(200, 200);
 background(200);
@@ -1452,8 +1451,8 @@ text('Hello, world!', 12, 106);
 
 	/** ✍️
 	 * Sets the horizontal and vertical alignment of text.
-	 * @param {'left' | 'center' | 'right'} horiz - horizontal alignment
-	 * @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] - vertical alignment
+	 * @param {'left' | 'center' | 'right'} horiz horizontal alignment
+	 * @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] vertical alignment
 	 * @example
 createCanvas(200, 200);
 background(200);
@@ -1467,7 +1466,7 @@ text('Hello, world!', 100, 100);
 
 	/** ✍️
 	 * Calculates and returns the width of a given string of text.
-	 * @param {string} str - string to measure
+	 * @param {string} str string to measure
 	 * @returns {number} width of the text in pixels
 	 * @example
 function draw() {
@@ -1482,7 +1481,7 @@ function draw() {
 
 	/** ✍️
 	 * Calculates and returns the ascent (the distance from the baseline to the top of the highest character) of the current font.
-	 * @param {string} str - string to measure
+	 * @param {string} str string to measure
 	 * @returns {number} ascent of the text in pixels
 	 * @example
 function draw() {
@@ -1497,7 +1496,7 @@ function draw() {
 
 	/** ✍️
 	 * Calculates and returns the descent (the distance from the baseline to the bottom of the lowest character) of the current font.
-	 * @param {string} str - string to measure
+	 * @param {string} str string to measure
 	 * @returns {number} descent of the text in pixels
 	 * @example
 createCanvas(200, 200);
@@ -1513,9 +1512,9 @@ createCanvas(200, 200);
 	 * Creates an image from a string of text. Width and height
 	 * will not be the width and height of the text image, but of
 	 * the bounding box that the text will be constrained within.
-	 * @param {string} str - string of text
-	 * @param {number} w - width of the bounding box
-	 * @param {number} h - height of the bounding box
+	 * @param {string} str string of text
+	 * @param {number} w width of the bounding box
+	 * @param {number} h height of the bounding box
 	 * @returns {Q5.Image} an image object representing the rendered text
 	 */
 	function createTextImage(str: string, w: number, h: number): Q5.Image;
@@ -1524,9 +1523,9 @@ createCanvas(200, 200);
 	 * Renders an image generated from text onto the canvas. The
 	 * positioning of the image is affected by the current text
 	 * alignment and baseline settings.
-	 * @param {HTMLImageElement} img - image object to render, typically generated from text
-	 * @param {number} x - x-coordinate where the image should be placed
-	 * @param {number} y - y-coordinate where the image should be placed
+	 * @param {HTMLImageElement} img image object to render, typically generated from text
+	 * @param {number} x x-coordinate where the image should be placed
+	 * @param {number} y y-coordinate where the image should be placed
 	 */
 	function textImage(img: HTMLImageElement, x: number, y: number): void;
 
@@ -1534,9 +1533,9 @@ createCanvas(200, 200);
 	 * Number formatter, can be used to display a number as a string with
 	 * a specified number of digits before and after the decimal point,
 	 * optionally adding padding with zeros.
-	 * @param {number} n - number to format
-	 * @param {number} l - minimum number of digits to appear before the decimal point; the number is padded with zeros if necessary
-	 * @param {number} r - number of digits to appear after the decimal point
+	 * @param {number} n number to format
+	 * @param {number} l minimum number of digits to appear before the decimal point; the number is padded with zeros if necessary
+	 * @param {number} r number of digits to appear after the decimal point
 	 * @returns {string} a string representation of the number, formatted accordingly
 	 */
 	function nf(n: number, l: number, r: number): string;
@@ -1595,7 +1594,7 @@ createCanvas(200, 200);
 
 	/** ✨
 	 * Run this function before a line of code that isn't working as expected.
-	 * @param {string} [question] - question to ask the AI
+	 * @param {string} [question] question to ask the AI
 	 */
 	function askAI(question?: string): void;
 
@@ -1614,10 +1613,10 @@ createCanvas(200, 200);
 	 * 
 	 * `fill`, `stroke`, and `background` functions can accept the same
 	 * wide range of inputs as this function.
-	 * @param {string | number | Color | number[]} c0 - first color component, a CSS color string, a `Color` object (to make copy), or an array of components
-	 * @param {number} [c1] - second color component
-	 * @param {number} [c2] - third color component
-	 * @param {number} [c3] - fourth color component (alpha)
+	 * @param {string | number | Color | number[]} c0 first color component, a CSS color string, a `Color` object (to make copy), or an array of components
+	 * @param {number} [c1] second color component
+	 * @param {number} [c2] third color component
+	 * @param {number} [c3] fourth color component (alpha)
 	 * @returns {Color} a new `Color` object
 	 * @example
 createCanvas(200, 200);
@@ -1639,8 +1638,8 @@ function draw() {
 	 * In WebGPU, the default color mode is RGB in float format.
 	 * 
 	 * See the documentation for q5's color constants below for more info.
-	 * @param {'rgb' | 'srgb' | 'oklch'} mode - color mode
-	 * @param {1 | 255} format - color format (1 for float, 255 for integer)
+	 * @param {'rgb' | 'srgb' | 'oklch'} mode color mode
+	 * @param {1 | 255} format color format (1 for float, 255 for integer)
 	 * @example
 createCanvas(200, 200);
 
@@ -1810,7 +1809,7 @@ function draw() {
 
 	/** 🖲️
 	 * Returns true if the user is pressing the specified key, false otherwise. Accepts case-insensitive key names.
-	 * @param {string} key - key to check
+	 * @param {string} key key to check
 	 * @returns {boolean} true if the key is pressed, false otherwise
 	 * @example
 function draw() {
@@ -1838,9 +1837,9 @@ function draw() {
 	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) or image.
 	 * If an image is provided, optional x and y coordinates can
 	 * specify the active point of the cursor.
-	 * @param {string} name - name of the cursor or the path to an image
-	 * @param {number} [x] - x-coordinate of the cursor's hot spot
-	 * @param {number} [y] - y-coordinate of the cursor's hot spot
+	 * @param {string} name name of the cursor or the path to an image
+	 * @param {number} [x] x-coordinate of the cursor's hot spot
+	 * @param {number} [y] y-coordinate of the cursor's hot spot
 	 */
 	function cursor(name: string, x?: number, y?: number): void;
 
@@ -1866,89 +1865,89 @@ noCursor();
 
 	/** 🧮
 	 * Calculates the distance between two points.
-	 * @param {number} x1 - x-coordinate of the first point
-	 * @param {number} y1 - y-coordinate of the first point
-	 * @param {number} x2 - x-coordinate of the second point
-	 * @param {number} y2 - y-coordinate of the second point
+	 * @param {number} x1 x-coordinate of the first point
+	 * @param {number} y1 y-coordinate of the first point
+	 * @param {number} x2 x-coordinate of the second point
+	 * @param {number} y2 y-coordinate of the second point
 	 * @returns {number} distance between the points
 	 */
 	function dist(x1: number, y1: number, x2: number, y2: number): number;
 
 	/** 🧮
 	 * Maps a number from one range to another.
-	 * @param {number} value - incoming value to be converted
-	 * @param {number} start1 - lower bound of the value's current range
-	 * @param {number} stop1 - upper bound of the value's current range
-	 * @param {number} start2 - lower bound of the value's target range
-	 * @param {number} stop2 - upper bound of the value's target range
+	 * @param {number} value incoming value to be converted
+	 * @param {number} start1 lower bound of the value's current range
+	 * @param {number} stop1 upper bound of the value's current range
+	 * @param {number} start2 lower bound of the value's target range
+	 * @param {number} stop2 upper bound of the value's target range
 	 * @returns {number} mapped value
 	 */
 	function map(value: number, start1: number, stop1: number, start2: number, stop2: number): number;
 
 	/** 🧮
 	 * Sets the mode for interpreting and drawing angles. Can be either 'degrees' or 'radians'.
-	 * @param {'degrees' | 'radians'} mode - mode to set for angle interpretation
+	 * @param {'degrees' | 'radians'} mode mode to set for angle interpretation
 	 */
 	function angleMode(mode: 'degrees' | 'radians'): void;
 
 	/** 🧮
 	 * Converts degrees to radians.
-	 * @param {number} degrees - angle in degrees
+	 * @param {number} degrees angle in degrees
 	 * @returns {number} angle in radians
 	 */
 	function radians(degrees: number): number;
 
 	/** 🧮
 	 * Converts radians to degrees.
-	 * @param {number} radians - angle in radians
+	 * @param {number} radians angle in radians
 	 * @returns {number} angle in degrees
 	 */
 	function degrees(radians: number): number;
 
 	/** 🧮
 	 * Calculates a number between two numbers at a specific increment.
-	 * @param {number} start - first number
-	 * @param {number} stop - second number
-	 * @param {number} amt - amount to interpolate between the two values
+	 * @param {number} start first number
+	 * @param {number} stop second number
+	 * @param {number} amt amount to interpolate between the two values
 	 * @returns {number} interpolated number
 	 */
 	function lerp(start: number, stop: number, amt: number): number;
 
 	/** 🧮
 	 * Constrains a value between a minimum and maximum value.
-	 * @param {number} n - number to constrain
-	 * @param {number} low - lower bound
-	 * @param {number} high - upper bound
+	 * @param {number} n number to constrain
+	 * @param {number} low lower bound
+	 * @param {number} high upper bound
 	 * @returns {number} constrained value
 	 */
 	function constrain(n: number, low: number, high: number): number;
 
 	/** 🧮
 	 * Normalizes a number from another range into a value between 0 and 1.
-	 * @param {number} n - number to normalize
-	 * @param {number} start - lower bound of the range
-	 * @param {number} stop - upper bound of the range
+	 * @param {number} n number to normalize
+	 * @param {number} start lower bound of the range
+	 * @param {number} stop upper bound of the range
 	 * @returns {number} normalized number
 	 */
 	function norm(n: number, start: number, stop: number): number;
 
 	/** 🧮
 	 * Calculates the square of a number.
-	 * @param {number} n - number to square
+	 * @param {number} n number to square
 	 * @returns {number} square of the number
 	 */
 	function sq(n: number): number;
 
 	/** 🧮
 	 * Calculates the fractional part of a number.
-	 * @param {number} n - number whose fractional part is to be calculated
+	 * @param {number} n number whose fractional part is to be calculated
 	 * @returns {number} fractional part of the number
 	 */
 	function fract(n: number): number;
 
 	/** 🧮
 	 * Sets the seed for the random number generator.
-	 * @param {number} seed - seed value
+	 * @param {number} seed seed value
 	 */
 	function randomSeed(seed: number): void;
 
@@ -1957,22 +1956,22 @@ noCursor();
 	 * If one number argument is provided, returns a random number between 0 and the provided value.
 	 * If two number arguments are provided, returns a random number between the two values.
 	 * If an array is provided, returns a random element from the array.
-	 * @param {number | any[]} [a] - lower bound (inclusive) or an array
-	 * @param {number} [b] - upper bound (exclusive)
+	 * @param {number | any[]} [a] lower bound (inclusive) or an array
+	 * @param {number} [b] upper bound (exclusive)
 	 * @returns {number | any} a random number or element
 	 */
 	function random(a?: number | any[], b?: number): number | any;
 
 	/** 🧮
 	 * Sets the random number generation method.
-	 * @param {any} method - method to use for random number generation
+	 * @param {any} method method to use for random number generation
 	 */
 	function randomGenerator(method: any): void;
 
 	/** 🧮
 	 * Generates a random number following a Gaussian (normal) distribution.
-	 * @param {number} mean - mean (center) of the distribution
-	 * @param {number} std - standard deviation (spread or "width") of the distribution
+	 * @param {number} mean mean (center) of the distribution
+	 * @param {number} std standard deviation (spread or "width") of the distribution
 	 * @returns {number} a random number following a Gaussian distribution
 	 */
 	function randomGaussian(mean: number, std: number): number;
@@ -1985,29 +1984,29 @@ noCursor();
 
 	/** 🧮
 	 * Sets the noise generation mode.
-	 * @param {'perlin' | 'simplex' | 'blocky'} mode - noise generation mode
+	 * @param {'perlin' | 'simplex' | 'blocky'} mode noise generation mode
 	 */
 	function noiseMode(mode: 'perlin' | 'simplex' | 'blocky'): void;
 
 	/** 🧮
 	 * Sets the seed value for noise generation.
-	 * @param {number} seed - seed value
+	 * @param {number} seed seed value
 	 */
 	function noiseSeed(seed: number): void;
 
 	/** 🧮
 	 * Generates a noise value based on the x, y, and z inputs.
-	 * @param {number} [x] - x-coordinate input
-	 * @param {number} [y] - y-coordinate input
-	 * @param {number} [z] - z-coordinate input
+	 * @param {number} [x] x-coordinate input
+	 * @param {number} [y] y-coordinate input
+	 * @param {number} [z] z-coordinate input
 	 * @returns {number} a noise value
 	 */
 	function noise(x?: number, y?: number, z?: number): number;
 
 	/** 🧮
 	 * Sets the level of detail for noise generation.
-	 * @param {number} lod - level of detail (number of octaves)
-	 * @param {number} falloff - falloff rate for each octave
+	 * @param {number} lod level of detail (number of octaves)
+	 * @param {number} falloff falloff rate for each octave
 	 */
 	function noiseDetail(lod: number, falloff: number): void;
 
@@ -2036,7 +2035,7 @@ noCursor();
 		 * Creates a new `Sound` object that extends [`Audio`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement/Audio).
 		 * 
 		 * See the `loadSound` documentation for more info and example usage.
-		 * @param {string} path - path to the sound file
+		 * @param {string} path path to the sound file
 		 */
 		constructor(path: string);
 	}
@@ -2057,8 +2056,8 @@ noCursor();
 	 * For backwards compatibility with the p5.sound v1 API, the functions 
 	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 	 * are also implemented, but their use is deprecated.
-	 * @param {string} path - path to the sound file
-	 * @param {(a: Sound) => void} [cb] - an optional callback function that is called when the sound is ready to play
+	 * @param {string} path path to the sound file
+	 * @param {(a: Sound) => void} [cb] an optional callback function that is called when the sound is ready to play
 	 * @returns {Sound} a new `Sound` object
 	 * @example
 createCanvas(200, 200);
@@ -2088,43 +2087,43 @@ function mousePressed() {
 
 	/** 🛠️
 	 * Loads a text file from the specified path. Result is one string.
-	 * @param {string} path - path to the text file
-	 * @param {(result: string) => void} cb - a callback function that is run when the file is loaded
+	 * @param {string} path path to the text file
+	 * @param {(result: string) => void} cb a callback function that is run when the file is loaded
 	 */
 	function loadText(path: string, cb: (result: string) => void): void;
 
 	/** 🛠️
 	 * Loads a JSON file from the specified path. Result depends on the
 	 * JSON file's contents, but is typically an object or array.
-	 * @param {string} path - path to the JSON file
-	 * @param {(result: any) => void} cb - a callback function that is run when the file is loaded
+	 * @param {string} path path to the JSON file
+	 * @param {(result: any) => void} cb a callback function that is run when the file is loaded
 	 */
 	function loadJSON(path: string, cb: (result: any) => void): void;
 
 	/** 🛠️
 	 * Loads a CSV file from the specified path. Result is an array of objects.
-	 * @param {string} path - path to the CSV file
-	 * @param {(result: object[]) => void} cb - a callback function that is run when the file is loaded
+	 * @param {string} path path to the CSV file
+	 * @param {(result: object[]) => void} cb a callback function that is run when the file is loaded
 	 */
 	function loadCSV(path: string, cb: (result: object[]) => void): void;
 
 	/** 🛠️
 	 * Stores an item in localStorage.
-	 * @param {string} key - key under which to store the item
-	 * @param {string} value - value to store
+	 * @param {string} key key under which to store the item
+	 * @param {string} value value to store
 	 */
 	function storeItem(key: string, value: string): void;
 
 	/** 🛠️
 	 * Retrieves an item from localStorage.
-	 * @param {string} key - key of the item to retrieve
+	 * @param {string} key key of the item to retrieve
 	 * @returns {string} value of the retrieved item
 	 */
 	function getItem(key: string): string;
 
 	/** 🛠️
 	 * Removes an item from localStorage.
-	 * @param {string} key - key of the item to remove
+	 * @param {string} key key of the item to remove
 	 */
 	function removeItem(key: string): void;
 
@@ -2186,36 +2185,36 @@ function mousePressed() {
 
 		/** ↗️
 		 * Constructs a new Vector object.
-		 * @param {number} x - x component of the vector
-		 * @param {number} y - y component of the vector
-		 * @param {number} [z] - optional. The z component of the vector
+		 * @param {number} x x component of the vector
+		 * @param {number} y y component of the vector
+		 * @param {number} [z] optional. The z component of the vector
 		 */
 		constructor(x: number, y: number, z?: number);
 
 		/** ↗️
 		 * Adds a vector to this vector.
-		 * @param {Vector} v - vector to add
+		 * @param {Vector} v vector to add
 		 * @returns {Vector} resulting vector after addition
 		 */
 		add(v: Vector): Vector;
 
 		/** ↗️
 		 * Subtracts a vector from this vector.
-		 * @param {Vector} v - vector to subtract
+		 * @param {Vector} v vector to subtract
 		 * @returns {Vector} resulting vector after subtraction
 		 */
 		sub(v: Vector): Vector;
 
 		/** ↗️
 		 * Multiplies this vector by a scalar or element-wise by another vector.
-		 * @param {number | Vector} n - scalar to multiply by, or a vector for element-wise multiplication
+		 * @param {number | Vector} n scalar to multiply by, or a vector for element-wise multiplication
 		 * @returns {Vector} resulting vector after multiplication
 		 */
 		mult(n: number | Vector): Vector;
 
 		/** ↗️
 		 * Divides this vector by a scalar or element-wise by another vector.
-		 * @param {number | Vector} n - scalar to divide by, or a vector for element-wise division
+		 * @param {number | Vector} n scalar to divide by, or a vector for element-wise division
 		 * @returns {Vector} resulting vector after division
 		 */
 		div(n: number | Vector): Vector;
@@ -2234,28 +2233,28 @@ function mousePressed() {
 
 		/** ↗️
 		 * Sets the magnitude of the vector to the specified length.
-		 * @param {number} len - new length of the vector
+		 * @param {number} len new length of the vector
 		 * @returns {Vector} this vector after setting magnitude
 		 */
 		setMag(len: number): Vector;
 
 		/** ↗️
 		 * Calculates the dot product of this vector and another vector.
-		 * @param {Vector} v - other vector
+		 * @param {Vector} v other vector
 		 * @returns {number} dot product
 		 */
 		dot(v: Vector): number;
 
 		/** ↗️
 		 * Calculates the cross product of this vector and another vector.
-		 * @param {Vector} v - other vector
+		 * @param {Vector} v other vector
 		 * @returns {Vector} a new vector that is the cross product of this vector and the given vector
 		 */
 		cross(v: Vector): Vector;
 
 		/** ↗️
 		 * Calculates the distance between this vector and another vector.
-		 * @param {Vector} v - other vector
+		 * @param {Vector} v other vector
 		 * @returns {number} distance
 		 */
 		dist(v: Vector): number;
@@ -2268,16 +2267,16 @@ function mousePressed() {
 
 		/** ↗️
 		 * Sets the components of the vector.
-		 * @param {number} x - x component
-		 * @param {number} y - y component
-		 * @param {number} [z] - optional. The z component
+		 * @param {number} x x component
+		 * @param {number} y y component
+		 * @param {number} [z] optional. The z component
 		 * @returns {void}
 		 */
 		set(x: number, y: number, z?: number): void;
 
 		/** ↗️
 		 * Limits the magnitude of the vector to the value used for the max parameter.
-		 * @param {number} max - maximum magnitude for the vector
+		 * @param {number} max maximum magnitude for the vector
 		 * @returns {Vector} this vector after limiting
 		 */
 		limit(max: number): Vector;
@@ -2290,38 +2289,38 @@ function mousePressed() {
 
 		/** ↗️
 		 * Rotates the vector to a specific angle without changing its magnitude.
-		 * @param {number} angle - angle in radians to set the heading to
+		 * @param {number} angle angle in radians to set the heading to
 		 * @returns {Vector} this vector after setting the heading
 		 */
 		setHeading(angle: number): Vector;
 
 		/** ↗️
 		 * Rotates the vector by the given angle (only 2D vectors).
-		 * @param {number} angle - angle of rotation in radians
+		 * @param {number} angle angle of rotation in radians
 		 * @returns {Vector} this vector after rotation
 		 */
 		rotate(angle: number): Vector;
 
 		/** ↗️
 		 * Linearly interpolates between this vector and another vector.
-		 * @param {Vector} v - vector to interpolate towards
-		 * @param {number} amt - amount of interpolation; a number between 0.0 (close to the current vector) and 1.0 (close to the target vector)
+		 * @param {Vector} v vector to interpolate towards
+		 * @param {number} amt amount of interpolation; a number between 0.0 (close to the current vector) and 1.0 (close to the target vector)
 		 * @returns {Vector} this vector after interpolation
 		 */
 		lerp(v: Vector, amt: number): Vector;
 
 		/** ↗️
 		 * Linearly interpolates between this vector and another vector, including the magnitude.
-		 * @param {Vector} v - vector to interpolate towards
-		 * @param {number} amt - amount of interpolation; a number between 0.0 (close to the current vector) and 1.0 (close to the target vector)
+		 * @param {Vector} v vector to interpolate towards
+		 * @param {number} amt amount of interpolation; a number between 0.0 (close to the current vector) and 1.0 (close to the target vector)
 		 * @returns {Vector} this vector after spherical interpolation
 		 */
 		slerp(v: Vector, amt: number): Vector;
 
 		/** ↗️
 		 * Static method to create a new 2D vector from an angle.
-		 * @param {number} angle - angle in radians
-		 * @param {number} [length] - length of the vector. The default is 1
+		 * @param {number} angle angle in radians
+		 * @param {number} [length] length of the vector. The default is 1
 		 * @returns {Vector} a new 2D vector pointing in the direction of the given angle
 		 */
 		static fromAngle(angle: number, length?: number): Vector;
