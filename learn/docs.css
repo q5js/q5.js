@@ -535,14 +535,14 @@ header {
 
 #navbar {
 	width: 220px;
-	margin-top: 20px;
+	padding-top: 18px;
 	padding-bottom: 200px;
 	max-height: calc(100vh - 200px);
 	overflow-y: scroll;
 	background-color: var(--backGround);
 	scrollbar-width: thin;
 	scrollbar-color: var(--hover) var(--backGround);
-	border-right: 1px solid var(--borderColor);
+	border-right: 2px solid var(--borderColor);
 }
 
 #navbar::-webkit-scrollbar {
@@ -1125,6 +1125,21 @@ pre[class*="language-"] code {
 
 	#homeButton {
 		margin-left: 0;
+	}
+}
+
+@media (max-width: 720px) {
+	.editor-container {
+		flex-direction: column;
+	}
+
+	.mini-editor {
+		margin-left: 0;
+		margin-top: 8px;
+		padding-top: 8px;
+		border-left: none;
+		border-top: 2px solid var(--borderColor);
+		width: 100%;
 	}
 }
 
