@@ -11,7 +11,7 @@ declare global {
 	 * The draw function is run 60 times per second by default.
 	 * @example
 function draw() {
-  background('lightgray');
+  background('silver');
 	circle(frameCount % 200, 100, 80);
 }
 	 */

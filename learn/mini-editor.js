@@ -39,7 +39,7 @@ class MiniEditor {
 	async initializeEditor() {
 		return new Promise((resolve) => {
 			require.config({
-				paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' }
+				paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs' }
 			});
 
 			require(['vs/editor/editor.main'], async () => {
