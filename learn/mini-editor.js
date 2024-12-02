@@ -48,6 +48,7 @@ class MiniEditor {
 					language: 'javascript',
 					wordWrap: true,
 					folding: false,
+					renderLineHighlight: 'none',
 					theme: 'vs-dark',
 					fontSize: 14,
 					lineNumbersMinChars: 2,

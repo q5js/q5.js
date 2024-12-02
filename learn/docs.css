@@ -1108,7 +1108,7 @@ pre[class*="language-"] code {
 	}
 
 	#toggleNavButton {
-		opacity: 1;
+		display: block;
 	}
 
 	#navbar {
@@ -1143,13 +1143,45 @@ pre[class*="language-"] code {
 	}
 }
 
+@media (max-width: 650px) {
+	.params {
+		max-width: 250px;
+		white-space: nowrap;
+		text-wrap: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+@media (max-width: 600px) {
+	.params {
+		max-width: 200px;
+	}
+}
+
+@media (max-width: 550px) {
+	.params {
+		max-width: 150px;
+	}
+}
+
 @media (max-width: 500px) {
+
+	.brand,
 	.heading-container .emoji {
 		display: none;
 	}
 
+	.header-container {
+		gap: 8px;
+	}
+
 	.heading-container h2 {
 		margin-left: 8px;
+	}
+
+	.heading-container .type {
+		display: none;
 	}
 
 	.editor-container {

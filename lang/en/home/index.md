@@ -1,10 +1,10 @@
 # 1-0
 
-## A sequel to p5.js! 🎉
+## Create art with q5.js! 🎨
 
 **q5.js** is a spiritual successor to the [p5.js](https://p5js.org) and [Processing Java](https://processing.org/) graphics libraries.
 
-q5 was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners!
+It was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.
 
 If you're already familiar with p5, you'll find yourself right at home with q5. It's also compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org).
 
@@ -18,23 +18,51 @@ q5 is performance optimized for the modern web. Create interactive art that runs
 
 # 3-0
 
-## More vibrant colors! 🎨
+## Start coding! 💻
+
+No installation required! Use an online code editor with one of these q5.js template projects: [OpenProcessing](https://openprocessing.org/sketch/2471587), [Aijs](https://aijs.io/editor?user=quinton-ashley&project=logoSpin), or [CodePen](https://codepen.io/qashto/pen/jENEJNy). 🖌️
 
 # 3-1
 
-In p5, bright colors can look dull 😕
+## Join our community 🤝
+
+The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB). 🙋
 
 # 3-2
 
-q5 empowers artists with [HDR color support](https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support) 🤩
+## Local development 🛠️
+
+You can [use q5 offline](https://github.com/q5js/q5.js/wiki/Get-Started) or add this to your HTML file to always load the latest version.
+
+```html
+<script src="https://q5js.org/q5.js"></script>
+```
+
+# 3-3
+
+## Support q5 💙
+
+Support the development of q5 on [Patreon](https://www.patreon.com/c/p5play) or [GitHub Sponsors](https://github.com/sponsors/quinton-ashley).
 
 # 4-0
 
-## More help for beginners ✨
+## More vibrant colors! 🎨
+
+# 4-1
+
+In p5, bright colors can look dull 😕
+
+# 4-2
+
+q5 empowers artists with [HDR color support](https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support) 🤩
+
+# 5-0
+
+## More help for beginners! ✨
 
 Why doesn't this code work? `text('Hello!')` 🤔
 
-# 4-1
+# 5-1
 
 p5's error messages are often too vague, leaving users searching for help. 🙋
 
@@ -42,7 +70,7 @@ p5's error messages are often too vague, leaving users searching for help. 🙋
 🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
 ```
 
-# 4-2
+# 5-2
 
 Run q5's `askAI()` before code that isn't working as expected. 🤖
 
@@ -89,28 +117,6 @@ For extremely lightweight use, load only the features you need from the [q5 sour
 The `displayMode` function lets you frame your art within the browser window, no CSS skills required! 📽️
 
 Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
-
-# 11-0
-
-## No Installation Required! 💻
-
-Start coding with the [q5.js template](https://aijs.io/editor?user=quinton-ashley&project=logoSpin) for the [Aijs](https://aijs.io) online code editor. 🖌️
-
-Use q5.js in your own project by adding this line to your HTML file:
-
-```html
-<script src="https://q5js.org/q5.js"></script>
-```
-
-# 11-1
-
-## Join our community 🤝
-
-The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB). 🙋
-
-Support the development of q5 on [Patreon](https://www.patreon.com/c/p5play). 💙
-
-If you'd like to work on q5, check out our [Project Planning Board](https://github.com/orgs/q5js/projects/1/views/1). 🧑‍💻
 
 # 20-0
 

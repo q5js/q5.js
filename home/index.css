@@ -121,7 +121,11 @@ main {
 	margin-bottom: 40vh;
 }
 
-#reel3 {
+#reel3 code {
+	font-size: 14px;
+}
+
+#reel4 {
 	flex-flow: row wrap;
 }
 

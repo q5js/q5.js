@@ -75,7 +75,7 @@ noLoop();
 function draw() {
   circle(frameCount * 5, 100, 80);
 }
-function mouseClicked() {
+function mousePressed() {
   redraw();
 }
 	 */
@@ -90,7 +90,7 @@ noLoop();
 function draw() {
   circle(frameCount * 5, 100, 80);
 }
-function mouseClicked() {
+function mousePressed() {
   loop();
 }
 	 */
@@ -428,13 +428,13 @@ function draw() {
 	text('q5', 100, 100);
 }
 	 * @example
-createCanvas(256, 256);
-let logo = loadImage('https://p5play.org/assets/p5play_logo.webp');
+createCanvas(200, 200);
+let logo = loadImage('/assets/p5play_logo.webp');
 
 function setup() {
 	background(200);
 	shadow(0);
-	image(logo, 27, 27, 200, 200);
+	image(logo, 36, 36, 128, 128);
 }
 	 */
 	function shadow(color: string | Color): void;
@@ -1045,7 +1045,7 @@ function draw() {
 	 * 
 	 * This function must be called before images are loaded to
 	 * have an effect.
-	 * @param {number}
+	 * @param {number} scale
 	 * @returns {number} default image scale
 	 */
 	function defaultImageScale(scale: number): number;
@@ -1712,7 +1712,7 @@ function setup() {
 	 * time, they're not perceptually uniform, meaning colors at the same 
 	 * brightness values may appear lighter or darker depending on the hue.
 	 * 
-	 * The OKLCH format is similar to HSL/HSV but its perceptually
+	 * The OKLCH format is similar to HSL/HSV but it's perceptually
 	 * uniform and supports HDR colors. Use this oklch color picker to 
 	 * explore the color space: https://oklch.com
 	 * 
