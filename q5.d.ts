@@ -723,13 +723,13 @@ rect(20, 20, 60, 60);
 	 * The `displayMode` function lets you customize how your canvas is presented.
 	 * @param {string} mode
 	 *   - "normal": (default) no styling to canvas or its parent element
-	 *   - "centered": canvas will be centered horizontally and vertically within its parent and if it's display size is bigger than its parent it will not clip
-	 *   - "maxed": canvas will fill the parent element, same as fullscreen for a global mode canvas inside a `main` element
-	 *   - "fullscreen": canvas will fill the screen with letterboxing if necessary to preserve its aspect ratio, like css object-fit contain
+	 *   - "centered": canvas will be centered horizontally and vertically within its parent and if the window is smaller than the canvas, the canvas will be resized to avoid clipping
+	 *   - "maxed": canvas will fill the parent element, same as fullscreen for a canvas inside a `main` element
+	 *   - "fullscreen": canvas will fill the screen with letterboxing if necessary to preserve its aspect ratio
 	 * @param {string} renderQuality
-	 *   - "smooth": (default) no changes to the default render quality
-	 *   - "pixelated": pixelDensity set to 1 and various css styles are applied to the canvas to make it render without image smoothing
-	 * @param {number} scale can be given as a string (for example "x2") or a number
+	 *   - "smooth": (default) no change to the default render quality
+	 *   - "pixelated": runs `pixelDensity(1)` and `noSmooth()` then sets the canvas CSS styles `image-rendering: pixelated` and `font-smooth: never`
+	 * @param {number} scale can also be given as a string (for example "x2")
 	 */
 	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
 

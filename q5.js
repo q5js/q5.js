@@ -2690,22 +2690,21 @@ Q5.modules.input = ($, q) => {
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
 
-	if (c) {
-		c.addEventListener('mousedown', (e) => $._onmousedown(e));
-		c.addEventListener('mouseup', (e) => $._onmouseup(e));
-		c.addEventListener('wheel', (e) => $._onwheel(e));
-		c.addEventListener('click', (e) => $._onclick(e));
-		c.addEventListener('touchstart', (e) => $._ontouchstart(e));
-		c.addEventListener('touchmove', (e) => $._ontouchmove(e));
-		c.addEventListener('touchcancel', (e) => $._ontouchend(e));
-		c.addEventListener('touchend', (e) => $._ontouchend(e));
-	}
-
 	if (window) {
 		let l = window.addEventListener;
-		l('mousemove', (e) => $._onmousemove(e), false);
 		l('keydown', (e) => $._onkeydown(e), false);
 		l('keyup', (e) => $._onkeyup(e), false);
+
+		l('mousedown', (e) => $._onmousedown(e));
+		l('mousemove', (e) => $._onmousemove(e), false);
+		l('mouseup', (e) => $._onmouseup(e));
+		l('wheel', (e) => $._onwheel(e));
+		l('click', (e) => $._onclick(e));
+
+		l('touchstart', (e) => $._ontouchstart(e));
+		l('touchmove', (e) => $._ontouchmove(e));
+		l('touchend', (e) => $._ontouchend(e));
+		l('touchcancel', (e) => $._ontouchend(e));
 	}
 };
 Q5.modules.math = ($, q) => {
