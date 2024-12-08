@@ -60,7 +60,10 @@ Q5.modules.input = ($, q) => {
 		q.moveY = e.movementY;
 	};
 
+	let pressedInCanvas = 0;
+
 	$._onmousedown = (e) => {
+		pressedInCanvas++;
 		$._startAudio();
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
@@ -75,11 +78,9 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onmouseup = (e) => {
-		if ($.mouseIsPressed) {
-			$._updateMouse(e);
-			q.mouseIsPressed = false;
-			$.mouseReleased(e);
-		}
+		$._updateMouse(e);
+		q.mouseIsPressed = false;
+		$.mouseReleased(e);
 	};
 
 	$._onclick = (e) => {
@@ -193,7 +194,12 @@ Q5.modules.input = ($, q) => {
 		l('keyup', (e) => $._onkeyup(e), false);
 
 		l('mousemove', (e) => $._onmousemove(e), false);
-		l('mouseup', (e) => $._onmouseup(e));
+		l('mouseup', (e) => {
+			if (pressedInCanvas > 0) {
+				pressedInCanvas--;
+				$._onmouseup(e);
+			}
+		});
 
 		l('touchstart', (e) => $._ontouchstart(e));
 		l('touchmove', (e) => $._ontouchmove(e));
