@@ -2587,9 +2587,11 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onmouseup = (e) => {
-		$._updateMouse(e);
-		q.mouseIsPressed = false;
-		$.mouseReleased(e);
+		if ($.mouseIsPressed) {
+			$._updateMouse(e);
+			q.mouseIsPressed = false;
+			$.mouseReleased(e);
+		}
 	};
 
 	$._onclick = (e) => {
@@ -2690,16 +2692,20 @@ Q5.modules.input = ($, q) => {
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
 
+	if (c) {
+		let l = c.addEventListener.bind(c);
+		l('mousedown', (e) => $._onmousedown(e));
+		l('wheel', (e) => $._onwheel(e));
+		l('click', (e) => $._onclick(e));
+	}
+
 	if (window) {
 		let l = window.addEventListener;
 		l('keydown', (e) => $._onkeydown(e), false);
 		l('keyup', (e) => $._onkeyup(e), false);
 
-		l('mousedown', (e) => $._onmousedown(e));
 		l('mousemove', (e) => $._onmousemove(e), false);
 		l('mouseup', (e) => $._onmouseup(e));
-		l('wheel', (e) => $._onwheel(e));
-		l('click', (e) => $._onclick(e));
 
 		l('touchstart', (e) => $._ontouchstart(e));
 		l('touchmove', (e) => $._ontouchmove(e));
