@@ -2700,6 +2700,11 @@ Q5.modules.input = ($, q) => {
 		l('mousedown', (e) => $._onmousedown(e));
 		l('wheel', (e) => $._onwheel(e));
 		l('click', (e) => $._onclick(e));
+
+		l('touchstart', (e) => $._ontouchstart(e));
+		l('touchmove', (e) => $._ontouchmove(e));
+		l('touchend', (e) => $._ontouchend(e));
+		l('touchcancel', (e) => $._ontouchend(e));
 	}
 
 	if (window) {
@@ -2720,11 +2725,6 @@ Q5.modules.input = ($, q) => {
 				$._onmouseup(e);
 			}
 		});
-
-		l('touchstart', (e) => $._ontouchstart(e));
-		l('touchmove', (e) => $._ontouchmove(e));
-		l('touchend', (e) => $._ontouchend(e));
-		l('touchcancel', (e) => $._ontouchend(e));
 	}
 };
 Q5.modules.math = ($, q) => {
