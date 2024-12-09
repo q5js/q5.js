@@ -157,9 +157,9 @@ Q5.modules.input = ($, q) => {
 			q.mouseY = $.touches[0].y;
 			q.mouseIsPressed = true;
 			q.mouseButton = $.LEFT;
-			if (!$.mousePressed(e)) e.preventDefault();
+			$.mousePressed(e);
 		}
-		if (!$.touchStarted(e)) e.preventDefault();
+		$.touchStarted(e);
 	};
 
 	$._ontouchmove = (e) => {
@@ -192,6 +192,12 @@ Q5.modules.input = ($, q) => {
 		let l = window.addEventListener;
 		l('keydown', (e) => $._onkeydown(e), false);
 		l('keyup', (e) => $._onkeyup(e), false);
+
+		if (!c) {
+			l('mousedown', (e) => $._onmousedown(e));
+			l('wheel', (e) => $._onwheel(e));
+			l('click', (e) => $._onclick(e));
+		}
 
 		l('mousemove', (e) => $._onmousemove(e), false);
 		l('mouseup', (e) => {
