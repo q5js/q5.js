@@ -173,12 +173,14 @@ Q5.renderers.q2d.image = ($, q) => {
 			return;
 		}
 
+		$.ctx.save();
 		$.ctx.filter = f;
 		if ($.ctx.filter == 'none') {
 			throw new Error(`Invalid filter format: ${type}`);
 		}
+		$.ctx.globalCompositeOperation = 'source-over';
 		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
-		$.ctx.filter = 'none';
+		$.ctx.restore();
 		$._retint = true;
 	};
 
