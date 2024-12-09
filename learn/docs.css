@@ -1102,6 +1102,10 @@ pre[class*="language-"] code {
 	width: 968px;
 }
 
+.iPadShowKeyboard {
+	display: none;
+}
+
 @media (max-width: 999px) {
 	.allContent {
 		width: 800px;
@@ -1137,7 +1141,7 @@ pre[class*="language-"] code {
 		margin-left: 0;
 		margin-top: 8px;
 		padding-top: 8px;
-		border-left: none;
+		border-left: none !important;
 		border-top: 2px solid var(--borderColor);
 		width: 100%;
 	}
