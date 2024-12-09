@@ -220,7 +220,7 @@ function draw() {
 		 * 
 		 * By default q5 uses the CanvasRenderingContext2D based q2d renderer.
 		 * 
-		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
+		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
 		 * @param {string | Function} [scope]
 		 *   - "global": (default) top-level global mode, adds q5 functions
 		 * and variables to the global scope

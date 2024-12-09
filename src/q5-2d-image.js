@@ -151,12 +151,12 @@ Q5.renderers.q2d.image = ($, q) => {
 		} else if (type === Q5.INVERT) {
 			f = `invert(100%)`;
 		} else if (type === Q5.BLUR) {
-			const radius = Math.ceil(value * $._pixelDensity) || 1;
-			f = `blur(${radius}px)`;
+			let r = Math.ceil(value * $._pixelDensity) || 1;
+			f = `blur(${r}px)`;
 		} else if (type === Q5.THRESHOLD) {
 			value ??= 0.5;
-			const brightness = Math.floor((0.5 / Math.max(value, 0.00001)) * 100);
-			f = `saturate(0%) brightness(${brightness}%) contrast(1000000%)`;
+			let b = Math.floor((0.5 / Math.max(value, 0.00001)) * 100);
+			f = `saturate(0%) brightness(${b}%) contrast(1000000%)`;
 		} else if (type === Q5.SEPIA) {
 			f = `sepia(${value ?? 1})`;
 		} else if (type === Q5.BRIGHTNESS) {
@@ -166,7 +166,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		} else if (type === Q5.CONTRAST) {
 			f = `contrast(${value ?? 1})`;
 		} else if (type === Q5.HUE_ROTATE) {
-			const unit = $._angleMode === 0 ? 'rad' : 'deg';
+			let unit = $._angleMode === 0 ? 'rad' : 'deg';
 			f = `hue-rotate(${value}${unit})`;
 		} else {
 			$._softFilter(type, value);
@@ -177,7 +177,7 @@ Q5.renderers.q2d.image = ($, q) => {
 		if ($.ctx.filter == 'none') {
 			throw new Error(`Invalid filter format: ${type}`);
 		}
-		$.ctx.drawImage($.canvas, 0, 0, $.canvas.width, $.canvas.height);
+		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
 		$.ctx.filter = 'none';
 		$._retint = true;
 	};
