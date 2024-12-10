@@ -254,6 +254,7 @@ Q5.modules.canvas = ($, q) => {
 		'_strokeSet',
 		'_fillSet',
 		'_shadow',
+		'_doShadow',
 		'_shadowOffsetX',
 		'_shadowOffsetY',
 		'_shadowBlur',

@@ -76,7 +76,7 @@ function draw() {
   circle(frameCount * 5, 100, 80);
 }
 function mousePressed() {
-  redraw();
+  redraw(2);
 }
 	 */
 	function redraw(n?: number): void;
@@ -620,7 +620,8 @@ function draw() {
 	 * Saves the current drawing style settings.
 	 *
 	 * This includes the fill, stroke, stroke weight, tint, image mode, 
-	 * rect mode, ellipse mode, text size, text align, and text baseline.
+	 * rect mode, ellipse mode, text size, text align, text baseline, and
+	 * shadow settings.
 	 * @example
 function draw() {
 	background(200);
@@ -1267,10 +1268,10 @@ function setup() {
 	 * 
 	 * See the documentation for q5's filter constants below for more info.
 	 * 
-	 * If a CSS filter string is provided, it will be applied to the image.
+	 * A CSS filter string can also be used.
 	 * https://developer.mozilla.org/en-US/docs/Web/CSS/filter
-	 * @param {string} type type of filter or a CSS filter string
-	 * @param {number} [value] optional parameter, depending on filter type
+	 * @param {string} type filter type or a CSS filter string
+	 * @param {number} [value] optional value, depends on filter type
 	 * @example
 createCanvas(200, 200);
 let logo = loadImage('/q5js_logo.webp');

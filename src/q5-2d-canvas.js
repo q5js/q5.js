@@ -94,6 +94,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	$.noStroke = () => ($._doStroke = false);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
+	$._doShadow = false;
 	$._shadowOffsetX = $._shadowOffsetY = $._shadowBlur = 10;
 
 	$.shadow = function (c) {
@@ -104,6 +105,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			}
 		}
 		$.ctx.shadowColor = $._shadow = c.toString();
+		$._doShadow = true;
 
 		$.ctx.shadowOffsetX ||= $._shadowOffsetX;
 		$.ctx.shadowOffsetY ||= $._shadowOffsetY;
@@ -117,6 +119,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	};
 
 	$.noShadow = () => {
+		$._doShadow = false;
 		$.ctx.shadowOffsetX = $.ctx.shadowOffsetY = $.ctx.shadowBlur = 0;
 	};
 
@@ -158,13 +161,18 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	$.pushMatrix = () => $.ctx.save();
 	$.popMatrix = () => $.ctx.restore();
 
+	let _popStyles = $.popStyles;
+
 	$.popStyles = () => {
-		let styles = $._styles.pop();
-		for (let s of $._styleNames) $[s] = styles[s];
+		_popStyles();
 
 		$.ctx.fillStyle = $._fill;
 		$.ctx.strokeStyle = $._stroke;
 		$.ctx.lineWidth = $._strokeWeight;
+		$.ctx.shadowColor = $._shadow;
+		$.ctx.shadowOffsetX = $._doShadow ? $._shadowOffsetX : 0;
+		$.ctx.shadowOffsetY = $._doShadow ? $._shadowOffsetY : 0;
+		$.ctx.shadowBlur = $._doShadow ? $._shadowBlur : 0;
 	};
 
 	$.push = () => {
@@ -173,7 +181,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 	};
 	$.pop = () => {
 		$.ctx.restore();
-		$.popStyles();
+		_popStyles();
 	};
 
 	$.createCapture = (x) => {

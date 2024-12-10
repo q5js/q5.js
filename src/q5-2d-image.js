@@ -142,42 +142,47 @@ Q5.renderers.q2d.image = ($, q) => {
 	};
 
 	$.filter = (type, value) => {
-		if (!$.ctx.filter) return $._softFilter(type, value);
+		$.ctx.save();
+
 		let f = '';
-		if (typeof type === 'string') {
-			f = type;
-		} else if (type === Q5.GRAY) {
-			f = `saturate(0%)`;
-		} else if (type === Q5.INVERT) {
-			f = `invert(100%)`;
-		} else if (type === Q5.BLUR) {
-			let r = Math.ceil(value * $._pixelDensity) || 1;
-			f = `blur(${r}px)`;
-		} else if (type === Q5.THRESHOLD) {
-			value ??= 0.5;
-			let b = Math.floor((0.5 / Math.max(value, 0.00001)) * 100);
-			f = `saturate(0%) brightness(${b}%) contrast(1000000%)`;
-		} else if (type === Q5.SEPIA) {
-			f = `sepia(${value ?? 1})`;
-		} else if (type === Q5.BRIGHTNESS) {
-			f = `brightness(${value ?? 1})`;
-		} else if (type === Q5.SATURATION) {
-			f = `saturate(${value ?? 1})`;
-		} else if (type === Q5.CONTRAST) {
-			f = `contrast(${value ?? 1})`;
-		} else if (type === Q5.HUE_ROTATE) {
-			let unit = $._angleMode === 0 ? 'rad' : 'deg';
-			f = `hue-rotate(${value}${unit})`;
-		} else {
-			$._softFilter(type, value);
-			return;
+
+		if ($.ctx.filter) {
+			if (typeof type == 'string') {
+				f = type;
+			} else if (type == Q5.GRAY) {
+				f = `saturate(0%)`;
+			} else if (type == Q5.INVERT) {
+				f = `invert(100%)`;
+			} else if (type == Q5.BLUR) {
+				let r = Math.ceil(value * $._pixelDensity) || 1;
+				f = `blur(${r}px)`;
+			} else if (type == Q5.THRESHOLD) {
+				value ??= 0.5;
+				let b = Math.floor((0.5 / Math.max(value, 0.00001)) * 100);
+				f = `saturate(0%) brightness(${b}%) contrast(1000000%)`;
+			} else if (type == Q5.SEPIA) {
+				f = `sepia(${value ?? 1})`;
+			} else if (type == Q5.BRIGHTNESS) {
+				f = `brightness(${value ?? 1})`;
+			} else if (type == Q5.SATURATION) {
+				f = `saturate(${value ?? 1})`;
+			} else if (type == Q5.CONTRAST) {
+				f = `contrast(${value ?? 1})`;
+			} else if (type == Q5.HUE_ROTATE) {
+				let unit = $._angleMode == 0 ? 'rad' : 'deg';
+				f = `hue-rotate(${value}${unit})`;
+			}
+
+			if (f) {
+				$.ctx.filter = f;
+				if ($.ctx.filter == 'none') {
+					throw new Error(`Invalid filter format: ${type}`);
+				}
+			}
 		}
 
-		$.ctx.save();
-		$.ctx.filter = f;
-		if ($.ctx.filter == 'none') {
-			throw new Error(`Invalid filter format: ${type}`);
-		}
+		if (!f) $._softFilter(type, value);
+
 		$.ctx.globalCompositeOperation = 'source-over';
 		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
 		$.ctx.restore();
