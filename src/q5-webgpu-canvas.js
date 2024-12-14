@@ -552,7 +552,10 @@ Q5.initWebGPU = async () => {
 	}
 	if (!Q5.device) {
 		let adapter = await navigator.gpu.requestAdapter();
-		if (!adapter) throw new Error('No appropriate GPUAdapter found.');
+		if (!adapter){
+			console.warn('No appropriate GPUAdapter found, Vulkan may need to be enabled. Falling back...');
+			return false;
+		}
 		Q5.device = await adapter.requestDevice();
 	}
 	return true;
