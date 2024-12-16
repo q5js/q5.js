@@ -23,7 +23,7 @@ struct Char {
 struct Text {
 	pos: vec2f,
 	scale: f32,
-	transformIndex: f32,
+	matrixIndex: f32,
 	fillIndex: f32,
 	strokeIndex: f32
 }
@@ -55,7 +55,7 @@ fn vertexMain(input : VertexInput) -> VertexOutput {
 	let charPos = ((pos[input.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
 
 	var vert = vec4f(charPos, 0.0, 1.0);
-	vert = transforms[i32(text.transformIndex)] * vert;
+	vert = transforms[i32(text.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
@@ -279,13 +279,11 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		if (cb) cb(fontName);
 	};
 
-	// q2d graphics context to use for text image creation
-	let g = $.createGraphics(1, 1);
-	g.colorMode($.RGB, 1);
+	$._g.colorMode($.RGB, 1);
 
 	$.loadFont = (url, cb) => {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
-		if (ext != 'json') return g.loadFont(url, cb);
+		if (ext != 'json') return $._g.loadFont(url, cb);
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
 		createFont(url, fontName, cb);
 		return fontName;
@@ -470,7 +468,7 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 		text[0] = x;
 		text[1] = -y;
 		text[2] = $._textSize / 44;
-		text[3] = $._transformIndex;
+		text[3] = $._matrixIndex;
 		text[4] = $._fillSet ? $._fill : 0;
 		text[5] = $._stroke;
 
@@ -484,18 +482,18 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
 	};
 
 	$.createTextImage = (str, w, h) => {
-		g.textSize($._textSize);
+		$._g.textSize($._textSize);
 
 		if ($._doFill) {
 			let fi = $._fill * 4;
-			g.fill(colorStack.slice(fi, fi + 4));
+			$._g.fill(colorStack.slice(fi, fi + 4));
 		}
 		if ($._doStroke) {
 			let si = $._stroke * 4;
-			g.stroke(colorStack.slice(si, si + 4));
+			$._g.stroke(colorStack.slice(si, si + 4));
 		}
 
-		let img = g.createTextImage(str, w, h);
+		let img = $._g.createTextImage(str, w, h);
 
 		if (img.canvas.textureIndex == undefined) {
 			$._createTexture(img);

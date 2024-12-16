@@ -1,13 +1,21 @@
 Q5.renderers.webgpu.image = ($, q) => {
 	$._textureBindGroups = [];
-	let vertexStack = [];
+	let vertexStack = new Float32Array(1e7),
+		vertIndex = 0;
 
 	let vertexShader = Q5.device.createShaderModule({
 		label: 'imageVertexShader',
 		code: `
+struct VertexInput {
+	@location(0) pos: vec2f,
+	@location(1) texCoord: vec2f,
+	@location(2) tintIndex: f32,
+	@location(3) matrixIndex: f32
+}
 struct VertexOutput {
 	@builtin(position) position: vec4f,
-	@location(0) texCoord: vec2f
+	@location(0) texCoord: vec2f,
+	@location(1) tintIndex: f32
 }
 struct Uniforms {
 	halfWidth: f32,
@@ -18,15 +26,16 @@ struct Uniforms {
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 
 @vertex
-fn vertexMain(@location(0) pos: vec2f, @location(1) texCoord: vec2f, @location(2) transformIndex: f32) -> VertexOutput {
-	var vert = vec4f(pos, 0.0, 1.0);
-	vert = transforms[i32(transformIndex)] * vert;
+fn vertexMain(input: VertexInput) -> VertexOutput {
+	var vert = vec4f(input.pos, 0.0, 1.0);
+	vert = transforms[i32(input.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
 	var output: VertexOutput;
 	output.position = vert;
-	output.texCoord = texCoord;
+	output.texCoord = input.texCoord;
+	output.tintIndex = input.tintIndex;
 	return output;
 }
 	`
@@ -35,14 +44,20 @@ fn vertexMain(@location(0) pos: vec2f, @location(1) texCoord: vec2f, @location(2
 	let fragmentShader = Q5.device.createShaderModule({
 		label: 'imageFragmentShader',
 		code: `
-@group(2) @binding(0) var samp: sampler;
-@group(2) @binding(1) var texture: texture_2d<f32>;
-
-@fragment
-fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
-	// Sample the texture using the interpolated texture coordinate
-	return textureSample(texture, samp, texCoord);
-}
+	@group(1) @binding(0) var<storage> colors : array<vec4f>;
+	
+	@group(2) @binding(0) var samp: sampler;
+	@group(2) @binding(1) var texture: texture_2d<f32>;
+	
+	@fragment
+	fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @location(0) vec4f {
+			let texColor = textureSample(texture, samp, texCoord);
+			let tintColor = colors[i32(tintIndex)];
+			
+			// Mix original and tinted colors using tint alpha as blend factor
+			let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
+			return mix(texColor, tinted, tintColor.a);
+	}
 	`
 	});
 
@@ -63,11 +78,12 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 	});
 
 	const vertexBufferLayout = {
-		arrayStride: 20,
+		arrayStride: 24,
 		attributes: [
 			{ shaderLocation: 0, offset: 0, format: 'float32x2' },
 			{ shaderLocation: 1, offset: 8, format: 'float32x2' },
-			{ shaderLocation: 2, offset: 16, format: 'float32' } // transformIndex
+			{ shaderLocation: 2, offset: 16, format: 'float32' }, // tintIndex
+			{ shaderLocation: 3, offset: 20, format: 'float32' } // matrixIndex
 		]
 	};
 
@@ -161,58 +177,63 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 
 	$.loadImage = (src, cb) => {
 		q._preloadCount++;
-		const img = new Image();
-		img.crossOrigin = 'Anonymous';
-		img.onload = () => {
-			// calculate the default width and height that the image
-			// should be drawn at if the user doesn't specify a display size
-			img.defaultWidth = img.width * $._defaultImageScale;
-			img.defaultHeight = img.height * $._defaultImageScale;
-			img.pixelDensity = 1;
-
+		let g = $._g.loadImage(src, (img) => {
+			g.defaultWidth = img.width * $._defaultImageScale;
+			g.defaultHeight = img.height * $._defaultImageScale;
 			$._createTexture(img);
 			q._preloadCount--;
 			if (cb) cb(img);
-		};
-		img.src = src;
-		return img;
+		});
+		return g;
 	};
 
 	$.imageMode = (x) => ($._imageMode = x);
 
-	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {
+	const addVert = (x, y, u, v, ci, ti) => {
+		let s = vertexStack,
+			i = vertIndex;
+		s[i++] = x;
+		s[i++] = y;
+		s[i++] = u;
+		s[i++] = v;
+		s[i++] = ci;
+		s[i++] = ti;
+		vertIndex = i;
+	};
+
+	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
+		let g = img;
 		if (img.canvas) img = img.canvas;
 		if (img.textureIndex == undefined) return;
 
 		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._transformIndex;
 
-		let w = img.width;
-		let h = img.height;
+		let ti = $._matrixIndex,
+			w = img.width,
+			h = img.height;
 
-		dw ??= img.defaultWidth;
-		dh ??= img.defaultHeight;
+		dw ??= g.defaultWidth;
+		dh ??= g.defaultHeight;
 		sw ??= w;
 		sh ??= h;
 
-		let pd = img.pixelDensity || 1;
+		let pd = g._pixelDensity || 1;
 		dw *= pd;
 		dh *= pd;
 
 		let [l, r, t, b] = $._calcBox(dx, dy, dw, dh, $._imageMode);
 
-		let u0 = sx / w;
-		let v0 = sy / h;
-		let u1 = (sx + sw) / w;
-		let v1 = (sy + sh) / h;
+		let u0 = sx / w,
+			v0 = sy / h,
+			u1 = (sx + sw) / w,
+			v1 = (sy + sh) / h;
 
-		// prettier-ignore
-		vertexStack.push(
-			l, t, u0, v0, ti,
-			r, t, u1, v0, ti,
-			l, b, u0, v1, ti,
-			r, b, u1, v1, ti
-		);
+		let ci = $._tint;
+
+		addVert(l, t, u0, v0, ci, ti);
+		addVert(r, t, u1, v0, ci, ti);
+		addVert(l, b, u0, v1, ci, ti);
+		addVert(r, b, u1, v1, ci, ti);
 
 		$.drawStack.push(1, img.textureIndex);
 	};
@@ -223,20 +244,20 @@ fn fragmentMain(@location(0) texCoord: vec2f) -> @location(0) vec4f {
 		// Switch to image pipeline
 		$.pass.setPipeline($._pipelines[1]);
 
-		const vertexBuffer = Q5.device.createBuffer({
-			size: vertexStack.length * 4,
+		let vertexBuffer = Q5.device.createBuffer({
+			size: vertIndex * 4,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
 
-		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack);
+		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
 		$.pass.setVertexBuffer(1, vertexBuffer);
 	});
 
 	$._hooks.postRender.push(() => {
-		vertexStack.length = 0;
+		vertIndex = 0;
 	});
 };
 

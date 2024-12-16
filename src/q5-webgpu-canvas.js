@@ -11,6 +11,9 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	c.width = $.width = 500;
 	c.height = $.height = 500;
 
+	// q2d graphics context
+	$._g = $.createGraphics(1, 1);
+
 	if ($.colorMode) $.colorMode('rgb', 1);
 
 	let pass,
@@ -146,7 +149,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._stroke = 0;
-	$._fill = 1;
+	$._fill = $._tint = 1;
 	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
@@ -159,42 +162,51 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._doStroke = $._strokeSet = true;
 		$._stroke = colorIndex;
 	};
+	$.tint = (r, g, b, a) => {
+		addColor(r, g, b, a);
+		$._tint = colorIndex;
+	};
 
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
+	$.noTint = () => ($._tint = 1);
 
 	$._strokeWeight = 1;
 	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
 
-	$.resetMatrix = () => {
-		// initialize the transformation matrix as 4x4 identity matrix
-
-		// prettier-ignore
-		$._matrix = [
-			1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1
-		];
-		$._transformIndex = 0;
-	};
-	$.resetMatrix();
+	const MAX_TRANSFORMS = 1e7, // or whatever maximum you need
+		MATRIX_SIZE = 16, // 4x4 matrix
+		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE),
+		matrices = [],
+		matricesIndexStack = [];
+	let matrix;
 
 	// tracks if the matrix has been modified
 	$._matrixDirty = false;
 
-	// array to store transformation matrices for the render pass
-	let transformStates = [$._matrix.slice()];
+	// initialize with a 4x4 identity matrix
+	// prettier-ignore
+	matrices.push([
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	]);
 
-	// stack to keep track of transformation matrix indexes
-	$._transformIndexStack = [];
+	transforms.set(matrices[0]);
+
+	$.resetMatrix = () => {
+		matrix = matrices[0].slice();
+		$._matrixIndex = 0;
+	};
+	$.resetMatrix();
 
 	$.translate = (x, y, z) => {
 		if (!x && !y && !z) return;
 		// update the translation values
-		$._matrix[12] += x;
-		$._matrix[13] -= y;
-		$._matrix[14] += z || 0;
+		matrix[12] += x;
+		matrix[13] -= y;
+		matrix[14] += z || 0;
 		$._matrixDirty = true;
 	};
 
@@ -205,7 +217,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		let cosR = Math.cos(a);
 		let sinR = Math.sin(a);
 
-		let m = $._matrix;
+		let m = matrix;
 
 		let m0 = m[0],
 			m1 = m[1],
@@ -232,7 +244,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$.scale = (x = 1, y, z = 1) => {
 		y ??= x;
 
-		let m = $._matrix;
+		let m = matrix;
 
 		m[0] *= x;
 		m[1] *= x;
@@ -256,13 +268,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		let tanAng = Math.tan(ang);
 
-		let m0 = $._matrix[0],
-			m1 = $._matrix[1],
-			m4 = $._matrix[4],
-			m5 = $._matrix[5];
+		let m0 = matrix[0],
+			m1 = matrix[1],
+			m4 = matrix[4],
+			m5 = matrix[5];
 
-		$._matrix[0] = m0 + m4 * tanAng;
-		$._matrix[1] = m1 + m5 * tanAng;
+		matrix[0] = m0 + m4 * tanAng;
+		matrix[1] = m1 + m5 * tanAng;
 
 		$._matrixDirty = true;
 	};
@@ -273,13 +285,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		let tanAng = Math.tan(ang);
 
-		let m0 = $._matrix[0],
-			m1 = $._matrix[1],
-			m4 = $._matrix[4],
-			m5 = $._matrix[5];
+		let m0 = matrix[0],
+			m1 = matrix[1],
+			m4 = matrix[4],
+			m5 = matrix[5];
 
-		$._matrix[4] = m4 + m0 * tanAng;
-		$._matrix[5] = m5 + m1 * tanAng;
+		matrix[4] = m4 + m0 * tanAng;
+		matrix[5] = m5 + m1 * tanAng;
 
 		$._matrixDirty = true;
 	};
@@ -297,31 +309,32 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		}
 
 		// overwrite the current transformation matrix
-		$._matrix = m.slice();
+		matrix = m.slice();
 		$._matrixDirty = true;
 	};
 
 	// function to save the current matrix state if dirty
 	$._saveMatrix = () => {
-		transformStates.push($._matrix.slice());
-		$._transformIndex = transformStates.length - 1;
+		transforms.set(matrix, matrices.length * MATRIX_SIZE);
+		$._matrixIndex = matrices.length;
+		matrices.push(matrix.slice());
 		$._matrixDirty = false;
 	};
 
 	// push the current matrix index onto the stack
 	$.pushMatrix = () => {
 		if ($._matrixDirty) $._saveMatrix();
-		$._transformIndexStack.push($._transformIndex);
+		matricesIndexStack.push($._matrixIndex);
 	};
 
 	$.popMatrix = () => {
-		if (!$._transformIndexStack.length) {
+		if (!matricesIndexStack.length) {
 			return console.warn('Matrix index stack is empty!');
 		}
 		// pop the last matrix index and set it as the current matrix index
-		let idx = $._transformIndexStack.pop();
-		$._matrix = transformStates[idx].slice();
-		$._transformIndex = idx;
+		let idx = matricesIndexStack.pop();
+		matrix = matrices[idx].slice();
+		$._matrixIndex = idx;
 		$._matrixDirty = false;
 	};
 
@@ -446,14 +459,14 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._render = () => {
-		if (transformStates.length > 1 || !$._transformBindGroup) {
+		if (matrices.length > 1 || !$._transformBindGroup) {
 			let transformBuffer = Q5.device.createBuffer({
-				size: transformStates.length * 64, // 64 is the size of 16 floats
+				size: matrices.length * MATRIX_SIZE * 4, // 4 bytes per float
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 				mappedAtCreation: true
 			});
 
-			new Float32Array(transformBuffer.getMappedRange()).set(transformStates.flat());
+			new Float32Array(transformBuffer.getMappedRange()).set(transforms.slice(0, matrices.length * MATRIX_SIZE));
 			transformBuffer.unmap();
 
 			$._transformBindGroup = Q5.device.createBindGroup({
@@ -505,6 +518,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
+				// let vertCount = drawStack[i + 2];
 				// draw images
 				if (curTextureIndex != v) {
 					// v is the texture index
@@ -512,6 +526,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				}
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
+				// i++;
 			} else if (curPipelineIndex == 2) {
 				// draw text
 				let o = drawStack[i + 2];
@@ -540,8 +555,9 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		colorIndex = 1;
 		colorStackIndex = 8;
 		rotation = 0;
-		transformStates.length = 1;
-		$._transformIndexStack.length = 0;
+		transforms.length = MATRIX_SIZE;
+		matrices.length = 1;
+		matricesIndexStack.length = 0;
 	};
 };
 
@@ -552,8 +568,8 @@ Q5.initWebGPU = async () => {
 	}
 	if (!Q5.device) {
 		let adapter = await navigator.gpu.requestAdapter();
-		if (!adapter){
-			console.warn('No appropriate GPUAdapter found, Vulkan may need to be enabled. Falling back...');
+		if (!adapter) {
+			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, vulkan may need to be enabled.');
 			return false;
 		}
 		Q5.device = await adapter.requestDevice();

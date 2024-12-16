@@ -10,7 +10,7 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 struct VertexInput {
 	@location(0) pos: vec2f,
 	@location(1) colorIndex: f32,
-	@location(2) transformIndex: f32
+	@location(2) matrixIndex: f32
 }
 struct VertexOutput {
 	@builtin(position) position: vec4f,
@@ -29,7 +29,7 @@ struct Uniforms {
 @vertex
 fn vertexMain(input: VertexInput) -> VertexOutput {
 	var vert = vec4f(input.pos, 0.0, 1.0);
-	vert = transforms[i32(input.transformIndex)] * vert;
+	vert = transforms[i32(input.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
@@ -56,7 +56,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		attributes: [
 			{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
 			{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex
-			{ format: 'float32', offset: 12, shaderLocation: 2 } // transformIndex
+			{ format: 'float32', offset: 12, shaderLocation: 2 } // matrixIndex
 		]
 	};
 
@@ -210,7 +210,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 		let ci, ti;
 		if ($._matrixDirty) $._saveMatrix();
-		ti = $._transformIndex;
+		ti = $._matrixIndex;
 
 		if ($._doFill) {
 			ci = $._fill;
@@ -284,7 +284,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		let b = w == h ? a : Math.max(h, 1) / 2;
 
 		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._transformIndex;
+		let ti = $._matrixIndex;
 
 		if ($._doFill) {
 			addEllipse(x, y, a, b, n, $._fill, ti);
@@ -300,7 +300,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	$.point = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._transformIndex,
+		let ti = $._matrixIndex,
 			ci = $._stroke,
 			sw = $._strokeWeight;
 
@@ -320,7 +320,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	$.line = (x1, y1, x2, y2) => {
 		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._transformIndex,
+		let ti = $._matrixIndex,
 			ci = $._stroke,
 			sw = $._strokeWeight,
 			hsw = sw / 2;
@@ -355,7 +355,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 	$.vertex = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
-		sv.push(x, -y, $._fill, $._transformIndex);
+		sv.push(x, -y, $._fill, $._matrixIndex);
 		shapeVertCount++;
 	};
 
@@ -400,7 +400,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 							(2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
 							(-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
 
-					sv.push(x, y, $._fill, $._transformIndex);
+					sv.push(x, y, $._fill, $._matrixIndex);
 					shapeVertCount++;
 				}
 			}
