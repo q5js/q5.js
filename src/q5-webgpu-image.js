@@ -1,60 +1,63 @@
 Q5.renderers.webgpu.image = ($, q) => {
-	$._textureBindGroups = [];
 	let vertexStack = new Float32Array(1e7),
 		vertIndex = 0;
 
 	let imageShader = Q5.device.createShaderModule({
 		label: 'imageShader',
 		code: `
-struct VertexInput {
-	@location(0) pos: vec2f,
-	@location(1) texCoord: vec2f,
-	@location(2) tintIndex: f32,
-	@location(3) matrixIndex: f32
-}
-struct VertexOutput {
-	@builtin(position) position: vec4f,
-	@location(0) texCoord: vec2f,
-	@location(1) tintIndex: f32
-}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
 }
+struct VertexParams {
+	@location(0) pos: vec2f,
+	@location(1) texCoord: vec2f,
+	@location(2) tintIndex: f32,
+	@location(3) matrixIndex: f32,
+	@location(4) globalAlpha: f32
+}
+struct FragmentParams {
+	@builtin(position) position: vec4f,
+	@location(0) texCoord: vec2f,
+	@location(1) tintIndex: f32,
+	@location(2) globalAlpha: f32
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
 
-@group(1) @binding(0) var<storage> colors : array<vec4f>;
-
-@group(2) @binding(0) var samp: sampler;
-@group(2) @binding(1) var texture: texture_2d<f32>;
+@group(1) @binding(0) var samp: sampler;
+@group(1) @binding(1) var texture: texture_2d<f32>;
 
 @vertex
-fn vertexMain(input: VertexInput) -> VertexOutput {
-	var vert = vec4f(input.pos, 0.0, 1.0);
-	vert = transforms[i32(input.matrixIndex)] * vert;
+fn vertexMain(v: VertexParams) -> FragmentParams {
+	var vert = vec4f(v.pos, 0.0, 1.0);
+	vert = transforms[i32(v.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
-	var output: VertexOutput;
-	output.position = vert;
-	output.texCoord = input.texCoord;
-	output.tintIndex = input.tintIndex;
-	return output;
+	var f: FragmentParams;
+	f.position = vert;
+	f.texCoord = v.texCoord;
+	f.tintIndex = v.tintIndex;
+	f.globalAlpha = v.globalAlpha;
+	return f;
 }
 
 @fragment
-fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @location(0) vec4f {
-		let texColor = textureSample(texture, samp, texCoord);
-		let tintColor = colors[i32(tintIndex)];
+fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
+		let texColor = textureSample(texture, samp, f.texCoord);
+		let tintColor = colors[i32(f.tintIndex)];
 		
 		// Mix original and tinted colors using tint alpha as blend factor
-		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
+		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a * f.globalAlpha);
 		return mix(texColor, tinted, tintColor.a);
 }
 	`
 	});
+
+	$._textureBindGroups = [];
 
 	let textureLayout = Q5.device.createBindGroupLayout({
 		label: 'textureLayout',
@@ -73,12 +76,13 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 	});
 
 	const vertexBufferLayout = {
-		arrayStride: 24,
+		arrayStride: 28,
 		attributes: [
 			{ shaderLocation: 0, offset: 0, format: 'float32x2' },
 			{ shaderLocation: 1, offset: 8, format: 'float32x2' },
 			{ shaderLocation: 2, offset: 16, format: 'float32' }, // tintIndex
-			{ shaderLocation: 3, offset: 20, format: 'float32' } // matrixIndex
+			{ shaderLocation: 3, offset: 20, format: 'float32' }, // matrixIndex
+			{ shaderLocation: 4, offset: 24, format: 'float32' } // globalAlpha
 		]
 	};
 
@@ -184,7 +188,7 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 
 	$.imageMode = (x) => ($._imageMode = x);
 
-	const addVert = (x, y, u, v, ci, ti) => {
+	const addVert = (x, y, u, v, ci, ti, ga) => {
 		let s = vertexStack,
 			i = vertIndex;
 		s[i++] = x;
@@ -193,6 +197,7 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 		s[i++] = v;
 		s[i++] = ci;
 		s[i++] = ti;
+		s[i++] = ga;
 		vertIndex = i;
 	};
 
@@ -203,16 +208,15 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 
 		if ($._matrixDirty) $._saveMatrix();
 
-		let ti = $._matrixIndex,
-			w = img.width,
-			h = img.height;
+		let w = img.width,
+			h = img.height,
+			pd = g._pixelDensity || 1;
 
 		dw ??= g.defaultWidth;
 		dh ??= g.defaultHeight;
 		sw ??= w;
 		sh ??= h;
 
-		let pd = g._pixelDensity || 1;
 		dw *= pd;
 		dh *= pd;
 
@@ -221,14 +225,15 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 		let u0 = sx / w,
 			v0 = sy / h,
 			u1 = (sx + sw) / w,
-			v1 = (sy + sh) / h;
+			v1 = (sy + sh) / h,
+			ti = $._matrixIndex,
+			ci = $._tint,
+			ga = $._globalAlpha;
 
-		let ci = $._tint;
-
-		addVert(l, t, u0, v0, ci, ti);
-		addVert(r, t, u1, v0, ci, ti);
-		addVert(l, b, u0, v1, ci, ti);
-		addVert(r, b, u1, v1, ci, ti);
+		addVert(l, t, u0, v0, ci, ti, ga);
+		addVert(r, t, u1, v0, ci, ti, ga);
+		addVert(l, b, u0, v1, ci, ti, ga);
+		addVert(r, b, u1, v1, ci, ti, ga);
 
 		$.drawStack.push(1, img.textureIndex);
 	};
@@ -240,7 +245,7 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 		$.pass.setPipeline($._pipelines[1]);
 
 		let vertexBuffer = Q5.device.createBuffer({
-			size: vertIndex * 4,
+			size: vertIndex * 5,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});

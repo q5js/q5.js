@@ -18,7 +18,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	let pass,
 		mainView,
-		colorsLayout,
 		colorIndex = 1,
 		colorStackIndex = 8;
 
@@ -30,7 +29,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	let drawStack = ($.drawStack = []);
 
 	// colors used for each draw call
-
 	let colorStack = ($.colorStack = new Float32Array(1e6));
 
 	// prettier-ignore
@@ -39,43 +37,28 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		1, 1, 1, 1 // white
 	]);
 
-	$._transformLayout = Q5.device.createBindGroupLayout({
-		label: 'transformLayout',
+	let mainLayout = Q5.device.createBindGroupLayout({
+		label: 'mainLayout',
 		entries: [
 			{
 				binding: 0,
 				visibility: GPUShaderStage.VERTEX,
-				buffer: {
-					type: 'uniform',
-					hasDynamicOffset: false
-				}
+				buffer: { type: 'uniform' }
 			},
 			{
 				binding: 1,
 				visibility: GPUShaderStage.VERTEX,
-				buffer: {
-					type: 'read-only-storage',
-					hasDynamicOffset: false
-				}
-			}
-		]
-	});
-
-	colorsLayout = Q5.device.createBindGroupLayout({
-		label: 'colorsLayout',
-		entries: [
+				buffer: { type: 'read-only-storage' }
+			},
 			{
-				binding: 0,
+				binding: 2,
 				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-				buffer: {
-					type: 'read-only-storage',
-					hasDynamicOffset: false
-				}
+				buffer: { type: 'read-only-storage' }
 			}
 		]
 	});
 
-	$.bindGroupLayouts = [$._transformLayout, colorsLayout];
+	$.bindGroupLayouts = [mainLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
 		size: 8, // Size of two floats
@@ -105,7 +88,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
 
 		createMainView();
-
 		return c;
 	};
 
@@ -149,7 +131,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._stroke = 0;
-	$._fill = $._tint = 1;
+	$._fill = $._tint = $._globalAlpha = 1;
 	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
@@ -166,6 +148,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		addColor(r, g, b, a);
 		$._tint = colorIndex;
 	};
+	$.opacity = (a) => ($._globalAlpha = a);
 
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
@@ -179,6 +162,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE),
 		matrices = [],
 		matricesIndexStack = [];
+
 	let matrix;
 
 	// tracks if the matrix has been modified
@@ -214,12 +198,10 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!a) return;
 		if ($._angleMode) a *= $._DEGTORAD;
 
-		let cosR = Math.cos(a);
-		let sinR = Math.sin(a);
-
-		let m = matrix;
-
-		let m0 = m[0],
+		let cosR = Math.cos(a),
+			sinR = Math.sin(a),
+			m = matrix,
+			m0 = m[0],
 			m1 = m[1],
 			m4 = m[4],
 			m5 = m[5];
@@ -266,15 +248,15 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!ang) return;
 		if ($._angleMode) ang *= $._DEGTORAD;
 
-		let tanAng = Math.tan(ang);
+		let tanAng = Math.tan(ang),
+			m = matrix,
+			m0 = m[0],
+			m1 = m[1],
+			m4 = m[4],
+			m5 = m[5];
 
-		let m0 = matrix[0],
-			m1 = matrix[1],
-			m4 = matrix[4],
-			m5 = matrix[5];
-
-		matrix[0] = m0 + m4 * tanAng;
-		matrix[1] = m1 + m5 * tanAng;
+		m[0] = m0 + m4 * tanAng;
+		m[1] = m1 + m5 * tanAng;
 
 		$._matrixDirty = true;
 	};
@@ -283,15 +265,15 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!ang) return;
 		if ($._angleMode) ang *= $._DEGTORAD;
 
-		let tanAng = Math.tan(ang);
+		let tanAng = Math.tan(ang),
+			m = matrix,
+			m0 = m[0],
+			m1 = m[1],
+			m4 = m[4],
+			m5 = m[5];
 
-		let m0 = matrix[0],
-			m1 = matrix[1],
-			m4 = matrix[4],
-			m5 = matrix[5];
-
-		matrix[4] = m4 + m0 * tanAng;
-		matrix[5] = m5 + m1 * tanAng;
+		m[4] = m4 + m0 * tanAng;
+		m[5] = m5 + m1 * tanAng;
 
 		$._matrixDirty = true;
 	};
@@ -459,26 +441,14 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._render = () => {
-		if (matrices.length > 1 || !$._transformBindGroup) {
-			let transformBuffer = Q5.device.createBuffer({
-				size: matrices.length * MATRIX_SIZE * 4, // 4 bytes per float
-				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-				mappedAtCreation: true
-			});
+		let transformBuffer = Q5.device.createBuffer({
+			size: matrices.length * MATRIX_SIZE * 4, // 4 bytes per float
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
+		});
 
-			new Float32Array(transformBuffer.getMappedRange()).set(transforms.slice(0, matrices.length * MATRIX_SIZE));
-			transformBuffer.unmap();
-
-			$._transformBindGroup = Q5.device.createBindGroup({
-				layout: $._transformLayout,
-				entries: [
-					{ binding: 0, resource: { buffer: uniformBuffer } },
-					{ binding: 1, resource: { buffer: transformBuffer } }
-				]
-			});
-		}
-
-		pass.setBindGroup(0, $._transformBindGroup);
+		new Float32Array(transformBuffer.getMappedRange()).set(transforms.slice(0, matrices.length * MATRIX_SIZE));
+		transformBuffer.unmap();
 
 		let colorsBuffer = Q5.device.createBuffer({
 			size: colorStackIndex * 4,
@@ -489,12 +459,16 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
 
-		$._colorsBindGroup = Q5.device.createBindGroup({
-			layout: colorsLayout,
-			entries: [{ binding: 0, resource: { buffer: colorsBuffer } }]
+		mainBindGroup = Q5.device.createBindGroup({
+			layout: mainLayout,
+			entries: [
+				{ binding: 0, resource: { buffer: uniformBuffer } },
+				{ binding: 1, resource: { buffer: transformBuffer } },
+				{ binding: 2, resource: { buffer: colorsBuffer } }
+			]
 		});
 
-		pass.setBindGroup(1, $._colorsBindGroup);
+		pass.setBindGroup(0, mainBindGroup);
 
 		for (let m of $._hooks.preRender) m();
 
@@ -518,11 +492,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
-				// let vertCount = drawStack[i + 2];
+				// let instanceCount = drawStack[i + 2];
 				// draw images
 				if (curTextureIndex != v) {
 					// v is the texture index
-					pass.setBindGroup(2, $._textureBindGroups[v]);
+					pass.setBindGroup(1, $._textureBindGroups[v]);
 				}
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
@@ -530,8 +504,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			} else if (curPipelineIndex == 2) {
 				// draw text
 				let o = drawStack[i + 2];
-				pass.setBindGroup(2, $._fonts[o].bindGroup);
-				pass.setBindGroup(3, $._textBindGroup);
+				pass.setBindGroup(1, $._fonts[o].bindGroup);
+				pass.setBindGroup(2, $._textBindGroup);
 
 				// v is the number of characters in the text
 				pass.draw(4, v, 0, textCharOffset);

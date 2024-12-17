@@ -4,46 +4,40 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 		vertexStack = new Float32Array(1e7),
 		vertIndex = 0;
 
-	let vertexShader = Q5.device.createShaderModule({
-		label: 'drawingVertexShader',
+	let drawingShader = Q5.device.createShaderModule({
+		label: 'drawingShader',
 		code: `
-struct VertexInput {
-	@location(0) pos: vec2f,
-	@location(1) colorIndex: f32,
-	@location(2) matrixIndex: f32
-}
-struct VertexOutput {
-	@builtin(position) position: vec4f,
-	@location(0) color: vec4f
-}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
 }
+struct VertexParams {
+	@location(0) pos: vec2f,
+	@location(1) colorIndex: f32,
+	@location(2) matrixIndex: f32
+}
+struct FragmentParams {
+	@builtin(position) position: vec4f,
+	@location(0) color: vec4f
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
-
-@group(1) @binding(0) var<storage> colors : array<vec4f>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
 
 @vertex
-fn vertexMain(input: VertexInput) -> VertexOutput {
-	var vert = vec4f(input.pos, 0.0, 1.0);
-	vert = transforms[i32(input.matrixIndex)] * vert;
+fn vertexMain(v: VertexParams) -> FragmentParams {
+	var vert = vec4f(v.pos, 0.0, 1.0);
+	vert = transforms[i32(v.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
-	var output: VertexOutput;
-	output.position = vert;
-	output.color = colors[i32(input.colorIndex)];
-	return output;
+	var f: FragmentParams;
+	f.position = vert;
+	f.color = colors[i32(v.colorIndex)];
+	return f;
 }
-`
-	});
 
-	let fragmentShader = Q5.device.createShaderModule({
-		label: 'drawingFragmentShader',
-		code: `
 @fragment
 fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	return color;
@@ -69,19 +63,17 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		label: 'drawingPipeline',
 		layout: pipelineLayout,
 		vertex: {
-			module: vertexShader,
+			module: drawingShader,
 			entryPoint: 'vertexMain',
 			buffers: [vertexBufferLayout]
 		},
 		fragment: {
-			module: fragmentShader,
+			module: drawingShader,
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
-		multisample: {
-			count: 4
-		}
+		multisample: { count: 4 }
 	};
 
 	$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);

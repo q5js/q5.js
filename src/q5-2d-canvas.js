@@ -155,6 +155,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		if ($.ctx) {
 			$.ctx.resetTransform();
 			$.scale($._pixelDensity);
+			if ($._webgpuFallback) $.translate($.canvas.hw, $.canvas.hh);
 		}
 	};
 

@@ -2,14 +2,15 @@ Q5.renderers.webgpu.text = ($, q) => {
 	let textShader = Q5.device.createShaderModule({
 		label: 'MSDF text shader',
 		code: `
-// Positions for simple quad geometry
-const pos = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
-
-struct VertexInput {
+struct Uniforms {
+	halfWidth: f32,
+	halfHeight: f32
+}
+struct VertexParams {
 	@builtin(vertex_index) vertex : u32,
 	@builtin(instance_index) instance : u32
 }
-struct VertexOutput {
+struct FragmentParams {
 	@builtin(position) position : vec4f,
 	@location(0) texCoord : vec2f,
 	@location(1) fillColor : vec4f
@@ -27,43 +28,40 @@ struct Text {
 	fillIndex: f32,
 	strokeIndex: f32
 }
-struct Uniforms {
-	halfWidth: f32,
-	halfHeight: f32
-}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
 
-@group(1) @binding(0) var<storage> colors : array<vec4f>;
+@group(1) @binding(0) var fontTexture: texture_2d<f32>;
+@group(1) @binding(1) var fontSampler: sampler;
+@group(1) @binding(2) var<storage> fontChars: array<Char>;
 
-@group(2) @binding(0) var fontTexture: texture_2d<f32>;
-@group(2) @binding(1) var fontSampler: sampler;
-@group(2) @binding(2) var<storage> fontChars: array<Char>;
+@group(2) @binding(0) var<storage> textChars: array<vec4f>;
+@group(2) @binding(1) var<storage> textMetadata: array<Text>;
 
-@group(3) @binding(0) var<storage> textChars: array<vec4f>;
-@group(3) @binding(1) var<storage> textMetadata: array<Text>;
+const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 
 @vertex
-fn vertexMain(input : VertexInput) -> VertexOutput {
-	let char = textChars[input.instance];
+fn vertexMain(v : VertexParams) -> FragmentParams {
+	let char = textChars[v.instance];
 
 	let text = textMetadata[i32(char.w)];
 
 	let fontChar = fontChars[i32(char.z)];
 
-	let charPos = ((pos[input.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
+	let charPos = ((quad[v.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
 
 	var vert = vec4f(charPos, 0.0, 1.0);
 	vert = transforms[i32(text.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
-	var output : VertexOutput;
-	output.position = vert;
-	output.texCoord = (pos[input.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
-	output.fillColor = colors[i32(text.fillIndex)];
-	return output;
+	var f : FragmentParams;
+	f.position = vert;
+	f.texCoord = (quad[v.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
+	f.fillColor = colors[i32(text.fillIndex)];
+	return f;
 }
 
 fn sampleMsdf(texCoord: vec2f) -> f32 {
@@ -72,22 +70,22 @@ fn sampleMsdf(texCoord: vec2f) -> f32 {
 }
 
 @fragment
-fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
+fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	// pxRange (AKA distanceRange) comes from the msdfgen tool,
 	// uses the default which is 4.
 	let pxRange = 4.0;
 	let sz = vec2f(textureDimensions(fontTexture, 0));
-	let dx = sz.x*length(vec2f(dpdxFine(input.texCoord.x), dpdyFine(input.texCoord.x)));
-	let dy = sz.y*length(vec2f(dpdxFine(input.texCoord.y), dpdyFine(input.texCoord.y)));
+	let dx = sz.x*length(vec2f(dpdxFine(f.texCoord.x), dpdyFine(f.texCoord.x)));
+	let dy = sz.y*length(vec2f(dpdxFine(f.texCoord.y), dpdyFine(f.texCoord.y)));
 	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
-	let sigDist = sampleMsdf(input.texCoord) - 0.5;
+	let sigDist = sampleMsdf(f.texCoord) - 0.5;
 	let pxDist = sigDist * toPixels;
 	let edgeWidth = 0.5;
 	let alpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
 	if (alpha < 0.001) {
 		discard;
 	}
-	return vec4f(input.fillColor.rgb, input.fillColor.a * alpha);
+	return vec4f(f.fillColor.rgb, f.fillColor.a * alpha);
 }
 `
 	});

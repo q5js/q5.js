@@ -843,6 +843,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		if ($.ctx) {
 			$.ctx.resetTransform();
 			$.scale($._pixelDensity);
+			if ($._webgpuFallback) $.translate($.canvas.hw, $.canvas.hh);
 		}
 	};
 
@@ -3601,7 +3602,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	let pass,
 		mainView,
-		colorsLayout,
 		colorIndex = 1,
 		colorStackIndex = 8;
 
@@ -3613,7 +3613,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	let drawStack = ($.drawStack = []);
 
 	// colors used for each draw call
-
 	let colorStack = ($.colorStack = new Float32Array(1e6));
 
 	// prettier-ignore
@@ -3622,43 +3621,28 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		1, 1, 1, 1 // white
 	]);
 
-	$._transformLayout = Q5.device.createBindGroupLayout({
-		label: 'transformLayout',
+	let mainLayout = Q5.device.createBindGroupLayout({
+		label: 'mainLayout',
 		entries: [
 			{
 				binding: 0,
 				visibility: GPUShaderStage.VERTEX,
-				buffer: {
-					type: 'uniform',
-					hasDynamicOffset: false
-				}
+				buffer: { type: 'uniform' }
 			},
 			{
 				binding: 1,
 				visibility: GPUShaderStage.VERTEX,
-				buffer: {
-					type: 'read-only-storage',
-					hasDynamicOffset: false
-				}
-			}
-		]
-	});
-
-	colorsLayout = Q5.device.createBindGroupLayout({
-		label: 'colorsLayout',
-		entries: [
+				buffer: { type: 'read-only-storage' }
+			},
 			{
-				binding: 0,
+				binding: 2,
 				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-				buffer: {
-					type: 'read-only-storage',
-					hasDynamicOffset: false
-				}
+				buffer: { type: 'read-only-storage' }
 			}
 		]
 	});
 
-	$.bindGroupLayouts = [$._transformLayout, colorsLayout];
+	$.bindGroupLayouts = [mainLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
 		size: 8, // Size of two floats
@@ -3688,7 +3672,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
 
 		createMainView();
-
 		return c;
 	};
 
@@ -3732,7 +3715,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._stroke = 0;
-	$._fill = $._tint = 1;
+	$._fill = $._tint = $._globalAlpha = 1;
 	$._doFill = $._doStroke = true;
 
 	$.fill = (r, g, b, a) => {
@@ -3749,6 +3732,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		addColor(r, g, b, a);
 		$._tint = colorIndex;
 	};
+	$.opacity = (a) => ($._globalAlpha = a);
 
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
@@ -3762,6 +3746,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE),
 		matrices = [],
 		matricesIndexStack = [];
+
 	let matrix;
 
 	// tracks if the matrix has been modified
@@ -3797,12 +3782,10 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!a) return;
 		if ($._angleMode) a *= $._DEGTORAD;
 
-		let cosR = Math.cos(a);
-		let sinR = Math.sin(a);
-
-		let m = matrix;
-
-		let m0 = m[0],
+		let cosR = Math.cos(a),
+			sinR = Math.sin(a),
+			m = matrix,
+			m0 = m[0],
 			m1 = m[1],
 			m4 = m[4],
 			m5 = m[5];
@@ -3849,15 +3832,15 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!ang) return;
 		if ($._angleMode) ang *= $._DEGTORAD;
 
-		let tanAng = Math.tan(ang);
+		let tanAng = Math.tan(ang),
+			m = matrix,
+			m0 = m[0],
+			m1 = m[1],
+			m4 = m[4],
+			m5 = m[5];
 
-		let m0 = matrix[0],
-			m1 = matrix[1],
-			m4 = matrix[4],
-			m5 = matrix[5];
-
-		matrix[0] = m0 + m4 * tanAng;
-		matrix[1] = m1 + m5 * tanAng;
+		m[0] = m0 + m4 * tanAng;
+		m[1] = m1 + m5 * tanAng;
 
 		$._matrixDirty = true;
 	};
@@ -3866,15 +3849,15 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (!ang) return;
 		if ($._angleMode) ang *= $._DEGTORAD;
 
-		let tanAng = Math.tan(ang);
+		let tanAng = Math.tan(ang),
+			m = matrix,
+			m0 = m[0],
+			m1 = m[1],
+			m4 = m[4],
+			m5 = m[5];
 
-		let m0 = matrix[0],
-			m1 = matrix[1],
-			m4 = matrix[4],
-			m5 = matrix[5];
-
-		matrix[4] = m4 + m0 * tanAng;
-		matrix[5] = m5 + m1 * tanAng;
+		m[4] = m4 + m0 * tanAng;
+		m[5] = m5 + m1 * tanAng;
 
 		$._matrixDirty = true;
 	};
@@ -4042,26 +4025,14 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._render = () => {
-		if (matrices.length > 1 || !$._transformBindGroup) {
-			let transformBuffer = Q5.device.createBuffer({
-				size: matrices.length * MATRIX_SIZE * 4, // 4 bytes per float
-				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-				mappedAtCreation: true
-			});
+		let transformBuffer = Q5.device.createBuffer({
+			size: matrices.length * MATRIX_SIZE * 4, // 4 bytes per float
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			mappedAtCreation: true
+		});
 
-			new Float32Array(transformBuffer.getMappedRange()).set(transforms.slice(0, matrices.length * MATRIX_SIZE));
-			transformBuffer.unmap();
-
-			$._transformBindGroup = Q5.device.createBindGroup({
-				layout: $._transformLayout,
-				entries: [
-					{ binding: 0, resource: { buffer: uniformBuffer } },
-					{ binding: 1, resource: { buffer: transformBuffer } }
-				]
-			});
-		}
-
-		pass.setBindGroup(0, $._transformBindGroup);
+		new Float32Array(transformBuffer.getMappedRange()).set(transforms.slice(0, matrices.length * MATRIX_SIZE));
+		transformBuffer.unmap();
 
 		let colorsBuffer = Q5.device.createBuffer({
 			size: colorStackIndex * 4,
@@ -4072,12 +4043,16 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
 
-		$._colorsBindGroup = Q5.device.createBindGroup({
-			layout: colorsLayout,
-			entries: [{ binding: 0, resource: { buffer: colorsBuffer } }]
+		mainBindGroup = Q5.device.createBindGroup({
+			layout: mainLayout,
+			entries: [
+				{ binding: 0, resource: { buffer: uniformBuffer } },
+				{ binding: 1, resource: { buffer: transformBuffer } },
+				{ binding: 2, resource: { buffer: colorsBuffer } }
+			]
 		});
 
-		pass.setBindGroup(1, $._colorsBindGroup);
+		pass.setBindGroup(0, mainBindGroup);
 
 		for (let m of $._hooks.preRender) m();
 
@@ -4101,11 +4076,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
-				// let vertCount = drawStack[i + 2];
+				// let instanceCount = drawStack[i + 2];
 				// draw images
 				if (curTextureIndex != v) {
 					// v is the texture index
-					pass.setBindGroup(2, $._textureBindGroups[v]);
+					pass.setBindGroup(1, $._textureBindGroups[v]);
 				}
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
@@ -4113,8 +4088,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			} else if (curPipelineIndex == 2) {
 				// draw text
 				let o = drawStack[i + 2];
-				pass.setBindGroup(2, $._fonts[o].bindGroup);
-				pass.setBindGroup(3, $._textBindGroup);
+				pass.setBindGroup(1, $._fonts[o].bindGroup);
+				pass.setBindGroup(2, $._textBindGroup);
 
 				// v is the number of characters in the text
 				pass.draw(4, v, 0, textCharOffset);
@@ -4173,46 +4148,40 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 		vertexStack = new Float32Array(1e7),
 		vertIndex = 0;
 
-	let vertexShader = Q5.device.createShaderModule({
-		label: 'drawingVertexShader',
+	let drawingShader = Q5.device.createShaderModule({
+		label: 'drawingShader',
 		code: `
-struct VertexInput {
-	@location(0) pos: vec2f,
-	@location(1) colorIndex: f32,
-	@location(2) matrixIndex: f32
-}
-struct VertexOutput {
-	@builtin(position) position: vec4f,
-	@location(0) color: vec4f
-}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
 }
+struct VertexParams {
+	@location(0) pos: vec2f,
+	@location(1) colorIndex: f32,
+	@location(2) matrixIndex: f32
+}
+struct FragmentParams {
+	@builtin(position) position: vec4f,
+	@location(0) color: vec4f
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
-
-@group(1) @binding(0) var<storage> colors : array<vec4f>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
 
 @vertex
-fn vertexMain(input: VertexInput) -> VertexOutput {
-	var vert = vec4f(input.pos, 0.0, 1.0);
-	vert = transforms[i32(input.matrixIndex)] * vert;
+fn vertexMain(v: VertexParams) -> FragmentParams {
+	var vert = vec4f(v.pos, 0.0, 1.0);
+	vert = transforms[i32(v.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
-	var output: VertexOutput;
-	output.position = vert;
-	output.color = colors[i32(input.colorIndex)];
-	return output;
+	var f: FragmentParams;
+	f.position = vert;
+	f.color = colors[i32(v.colorIndex)];
+	return f;
 }
-`
-	});
 
-	let fragmentShader = Q5.device.createShaderModule({
-		label: 'drawingFragmentShader',
-		code: `
 @fragment
 fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	return color;
@@ -4238,19 +4207,17 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		label: 'drawingPipeline',
 		layout: pipelineLayout,
 		vertex: {
-			module: vertexShader,
+			module: drawingShader,
 			entryPoint: 'vertexMain',
 			buffers: [vertexBufferLayout]
 		},
 		fragment: {
-			module: fragmentShader,
+			module: drawingShader,
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
-		multisample: {
-			count: 4
-		}
+		multisample: { count: 4 }
 	};
 
 	$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
@@ -4686,62 +4653,65 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	});
 };
 Q5.renderers.webgpu.image = ($, q) => {
-	$._textureBindGroups = [];
 	let vertexStack = new Float32Array(1e7),
 		vertIndex = 0;
 
 	let imageShader = Q5.device.createShaderModule({
 		label: 'imageShader',
 		code: `
-struct VertexInput {
-	@location(0) pos: vec2f,
-	@location(1) texCoord: vec2f,
-	@location(2) tintIndex: f32,
-	@location(3) matrixIndex: f32
-}
-struct VertexOutput {
-	@builtin(position) position: vec4f,
-	@location(0) texCoord: vec2f,
-	@location(1) tintIndex: f32
-}
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
 }
+struct VertexParams {
+	@location(0) pos: vec2f,
+	@location(1) texCoord: vec2f,
+	@location(2) tintIndex: f32,
+	@location(3) matrixIndex: f32,
+	@location(4) globalAlpha: f32
+}
+struct FragmentParams {
+	@builtin(position) position: vec4f,
+	@location(0) texCoord: vec2f,
+	@location(1) tintIndex: f32,
+	@location(2) globalAlpha: f32
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
 
-@group(1) @binding(0) var<storage> colors : array<vec4f>;
-
-@group(2) @binding(0) var samp: sampler;
-@group(2) @binding(1) var texture: texture_2d<f32>;
+@group(1) @binding(0) var samp: sampler;
+@group(1) @binding(1) var texture: texture_2d<f32>;
 
 @vertex
-fn vertexMain(input: VertexInput) -> VertexOutput {
-	var vert = vec4f(input.pos, 0.0, 1.0);
-	vert = transforms[i32(input.matrixIndex)] * vert;
+fn vertexMain(v: VertexParams) -> FragmentParams {
+	var vert = vec4f(v.pos, 0.0, 1.0);
+	vert = transforms[i32(v.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
-	var output: VertexOutput;
-	output.position = vert;
-	output.texCoord = input.texCoord;
-	output.tintIndex = input.tintIndex;
-	return output;
+	var f: FragmentParams;
+	f.position = vert;
+	f.texCoord = v.texCoord;
+	f.tintIndex = v.tintIndex;
+	f.globalAlpha = v.globalAlpha;
+	return f;
 }
 
 @fragment
-fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @location(0) vec4f {
-		let texColor = textureSample(texture, samp, texCoord);
-		let tintColor = colors[i32(tintIndex)];
+fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
+		let texColor = textureSample(texture, samp, f.texCoord);
+		let tintColor = colors[i32(f.tintIndex)];
 		
 		// Mix original and tinted colors using tint alpha as blend factor
-		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
+		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a * f.globalAlpha);
 		return mix(texColor, tinted, tintColor.a);
 }
 	`
 	});
+
+	$._textureBindGroups = [];
 
 	let textureLayout = Q5.device.createBindGroupLayout({
 		label: 'textureLayout',
@@ -4760,12 +4730,13 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 	});
 
 	const vertexBufferLayout = {
-		arrayStride: 24,
+		arrayStride: 28,
 		attributes: [
 			{ shaderLocation: 0, offset: 0, format: 'float32x2' },
 			{ shaderLocation: 1, offset: 8, format: 'float32x2' },
 			{ shaderLocation: 2, offset: 16, format: 'float32' }, // tintIndex
-			{ shaderLocation: 3, offset: 20, format: 'float32' } // matrixIndex
+			{ shaderLocation: 3, offset: 20, format: 'float32' }, // matrixIndex
+			{ shaderLocation: 4, offset: 24, format: 'float32' } // globalAlpha
 		]
 	};
 
@@ -4871,7 +4842,7 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 
 	$.imageMode = (x) => ($._imageMode = x);
 
-	const addVert = (x, y, u, v, ci, ti) => {
+	const addVert = (x, y, u, v, ci, ti, ga) => {
 		let s = vertexStack,
 			i = vertIndex;
 		s[i++] = x;
@@ -4880,6 +4851,7 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 		s[i++] = v;
 		s[i++] = ci;
 		s[i++] = ti;
+		s[i++] = ga;
 		vertIndex = i;
 	};
 
@@ -4890,16 +4862,15 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 
 		if ($._matrixDirty) $._saveMatrix();
 
-		let ti = $._matrixIndex,
-			w = img.width,
-			h = img.height;
+		let w = img.width,
+			h = img.height,
+			pd = g._pixelDensity || 1;
 
 		dw ??= g.defaultWidth;
 		dh ??= g.defaultHeight;
 		sw ??= w;
 		sh ??= h;
 
-		let pd = g._pixelDensity || 1;
 		dw *= pd;
 		dh *= pd;
 
@@ -4908,14 +4879,15 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 		let u0 = sx / w,
 			v0 = sy / h,
 			u1 = (sx + sw) / w,
-			v1 = (sy + sh) / h;
+			v1 = (sy + sh) / h,
+			ti = $._matrixIndex,
+			ci = $._tint,
+			ga = $._globalAlpha;
 
-		let ci = $._tint;
-
-		addVert(l, t, u0, v0, ci, ti);
-		addVert(r, t, u1, v0, ci, ti);
-		addVert(l, b, u0, v1, ci, ti);
-		addVert(r, b, u1, v1, ci, ti);
+		addVert(l, t, u0, v0, ci, ti, ga);
+		addVert(r, t, u1, v0, ci, ti, ga);
+		addVert(l, b, u0, v1, ci, ti, ga);
+		addVert(r, b, u1, v1, ci, ti, ga);
 
 		$.drawStack.push(1, img.textureIndex);
 	};
@@ -4927,7 +4899,7 @@ fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @l
 		$.pass.setPipeline($._pipelines[1]);
 
 		let vertexBuffer = Q5.device.createBuffer({
-			size: vertIndex * 4,
+			size: vertIndex * 5,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: true
 		});
@@ -4955,14 +4927,15 @@ Q5.renderers.webgpu.text = ($, q) => {
 	let textShader = Q5.device.createShaderModule({
 		label: 'MSDF text shader',
 		code: `
-// Positions for simple quad geometry
-const pos = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
-
-struct VertexInput {
+struct Uniforms {
+	halfWidth: f32,
+	halfHeight: f32
+}
+struct VertexParams {
 	@builtin(vertex_index) vertex : u32,
 	@builtin(instance_index) instance : u32
 }
-struct VertexOutput {
+struct FragmentParams {
 	@builtin(position) position : vec4f,
 	@location(0) texCoord : vec2f,
 	@location(1) fillColor : vec4f
@@ -4980,43 +4953,40 @@ struct Text {
 	fillIndex: f32,
 	strokeIndex: f32
 }
-struct Uniforms {
-	halfWidth: f32,
-	halfHeight: f32
-}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
 
-@group(1) @binding(0) var<storage> colors : array<vec4f>;
+@group(1) @binding(0) var fontTexture: texture_2d<f32>;
+@group(1) @binding(1) var fontSampler: sampler;
+@group(1) @binding(2) var<storage> fontChars: array<Char>;
 
-@group(2) @binding(0) var fontTexture: texture_2d<f32>;
-@group(2) @binding(1) var fontSampler: sampler;
-@group(2) @binding(2) var<storage> fontChars: array<Char>;
+@group(2) @binding(0) var<storage> textChars: array<vec4f>;
+@group(2) @binding(1) var<storage> textMetadata: array<Text>;
 
-@group(3) @binding(0) var<storage> textChars: array<vec4f>;
-@group(3) @binding(1) var<storage> textMetadata: array<Text>;
+const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 
 @vertex
-fn vertexMain(input : VertexInput) -> VertexOutput {
-	let char = textChars[input.instance];
+fn vertexMain(v : VertexParams) -> FragmentParams {
+	let char = textChars[v.instance];
 
 	let text = textMetadata[i32(char.w)];
 
 	let fontChar = fontChars[i32(char.z)];
 
-	let charPos = ((pos[input.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
+	let charPos = ((quad[v.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
 
 	var vert = vec4f(charPos, 0.0, 1.0);
 	vert = transforms[i32(text.matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
 
-	var output : VertexOutput;
-	output.position = vert;
-	output.texCoord = (pos[input.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
-	output.fillColor = colors[i32(text.fillIndex)];
-	return output;
+	var f : FragmentParams;
+	f.position = vert;
+	f.texCoord = (quad[v.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
+	f.fillColor = colors[i32(text.fillIndex)];
+	return f;
 }
 
 fn sampleMsdf(texCoord: vec2f) -> f32 {
@@ -5025,22 +4995,22 @@ fn sampleMsdf(texCoord: vec2f) -> f32 {
 }
 
 @fragment
-fn fragmentMain(input : VertexOutput) -> @location(0) vec4f {
+fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	// pxRange (AKA distanceRange) comes from the msdfgen tool,
 	// uses the default which is 4.
 	let pxRange = 4.0;
 	let sz = vec2f(textureDimensions(fontTexture, 0));
-	let dx = sz.x*length(vec2f(dpdxFine(input.texCoord.x), dpdyFine(input.texCoord.x)));
-	let dy = sz.y*length(vec2f(dpdxFine(input.texCoord.y), dpdyFine(input.texCoord.y)));
+	let dx = sz.x*length(vec2f(dpdxFine(f.texCoord.x), dpdyFine(f.texCoord.x)));
+	let dy = sz.y*length(vec2f(dpdxFine(f.texCoord.y), dpdyFine(f.texCoord.y)));
 	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
-	let sigDist = sampleMsdf(input.texCoord) - 0.5;
+	let sigDist = sampleMsdf(f.texCoord) - 0.5;
 	let pxDist = sigDist * toPixels;
 	let edgeWidth = 0.5;
 	let alpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
 	if (alpha < 0.001) {
 		discard;
 	}
-	return vec4f(input.fillColor.rgb, input.fillColor.a * alpha);
+	return vec4f(f.fillColor.rgb, f.fillColor.a * alpha);
 }
 `
 	});
