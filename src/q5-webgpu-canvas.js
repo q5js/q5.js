@@ -494,7 +494,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			entries: [{ binding: 0, resource: { buffer: colorsBuffer } }]
 		});
 
-		$.pass.setBindGroup(1, $._colorsBindGroup);
+		pass.setBindGroup(1, $._colorsBindGroup);
 
 		for (let m of $._hooks.preRender) m();
 

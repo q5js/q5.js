@@ -3,8 +3,8 @@ Q5.renderers.webgpu.image = ($, q) => {
 	let vertexStack = new Float32Array(1e7),
 		vertIndex = 0;
 
-	let vertexShader = Q5.device.createShaderModule({
-		label: 'imageVertexShader',
+	let imageShader = Q5.device.createShaderModule({
+		label: 'imageShader',
 		code: `
 struct VertexInput {
 	@location(0) pos: vec2f,
@@ -25,6 +25,11 @@ struct Uniforms {
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 
+@group(1) @binding(0) var<storage> colors : array<vec4f>;
+
+@group(2) @binding(0) var samp: sampler;
+@group(2) @binding(1) var texture: texture_2d<f32>;
+
 @vertex
 fn vertexMain(input: VertexInput) -> VertexOutput {
 	var vert = vec4f(input.pos, 0.0, 1.0);
@@ -38,26 +43,16 @@ fn vertexMain(input: VertexInput) -> VertexOutput {
 	output.tintIndex = input.tintIndex;
 	return output;
 }
-	`
-	});
 
-	let fragmentShader = Q5.device.createShaderModule({
-		label: 'imageFragmentShader',
-		code: `
-	@group(1) @binding(0) var<storage> colors : array<vec4f>;
-	
-	@group(2) @binding(0) var samp: sampler;
-	@group(2) @binding(1) var texture: texture_2d<f32>;
-	
-	@fragment
-	fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @location(0) vec4f {
-			let texColor = textureSample(texture, samp, texCoord);
-			let tintColor = colors[i32(tintIndex)];
-			
-			// Mix original and tinted colors using tint alpha as blend factor
-			let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
-			return mix(texColor, tinted, tintColor.a);
-	}
+@fragment
+fn fragmentMain(@location(0) texCoord: vec2f, @location(1) tintIndex: f32) -> @location(0) vec4f {
+		let texColor = textureSample(texture, samp, texCoord);
+		let tintColor = colors[i32(tintIndex)];
+		
+		// Mix original and tinted colors using tint alpha as blend factor
+		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
+		return mix(texColor, tinted, tintColor.a);
+}
 	`
 	});
 
@@ -96,12 +91,12 @@ fn vertexMain(input: VertexInput) -> VertexOutput {
 		label: 'imagePipeline',
 		layout: pipelineLayout,
 		vertex: {
-			module: vertexShader,
+			module: imageShader,
 			entryPoint: 'vertexMain',
 			buffers: [{ arrayStride: 0, attributes: [] }, vertexBufferLayout]
 		},
 		fragment: {
-			module: fragmentShader,
+			module: imageShader,
 			entryPoint: 'fragmentMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
