@@ -118,14 +118,11 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			minFilter: filter
 		});
 	};
-	makeSampler('linear');
 
-	$.smooth = () => {
-		makeSampler('linear');
-	};
-	$.noSmooth = () => {
-		makeSampler('nearest');
-	};
+	$.smooth = () => makeSampler('linear');
+	$.noSmooth = () => makeSampler('nearest');
+
+	$.smooth();
 
 	let MAX_TEXTURES = 12000;
 

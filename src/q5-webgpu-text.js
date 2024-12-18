@@ -319,8 +319,8 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		if (vert) $._textBaseline = vert;
 	};
 
-	$._charStack = [];
-	$._textStack = [];
+	let charStack = [],
+		textStack = [];
 
 	let measureText = (font, text, charCallback) => {
 		let maxWidth = 0,
@@ -417,7 +417,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 		let ta = $._textAlign,
 			tb = $._textBaseline,
-			textIndex = $._textStack.length,
+			textIndex = textStack.length,
 			o = 0, // offset
 			measurements;
 
@@ -457,20 +457,20 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 				o += 4;
 			});
 		}
-		$._charStack.push(charsData);
+		charStack.push(charsData);
 
-		let text = [];
+		let txt = [];
 
 		if ($._matrixDirty) $._saveMatrix();
 
-		text[0] = x;
-		text[1] = -y;
-		text[2] = $._textSize / 44;
-		text[3] = $._matrixIndex;
-		text[4] = $._fillSet ? $._fill : 0;
-		text[5] = $._stroke;
+		txt[0] = x;
+		txt[1] = -y;
+		txt[2] = $._textSize / 44;
+		txt[3] = $._matrixIndex;
+		txt[4] = $._fillSet ? $._fill : 0;
+		txt[5] = $._stroke;
 
-		$._textStack.push(text);
+		textStack.push(txt);
 		$.drawStack.push(2, measurements.printedCharCount, $._font.index);
 	};
 
@@ -531,11 +531,11 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	};
 
 	$._hooks.preRender.push(() => {
-		if (!$._charStack.length) return;
+		if (!charStack.length) return;
 
 		// calculate total buffer size for text data
 		let totalTextSize = 0;
-		for (let charsData of $._charStack) {
+		for (let charsData of charStack) {
 			totalTextSize += charsData.length * 4;
 		}
 
@@ -547,11 +547,11 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		});
 
 		// copy all the text data into the buffer
-		new Float32Array(charBuffer.getMappedRange()).set($._charStack.flat());
+		new Float32Array(charBuffer.getMappedRange()).set(charStack.flat());
 		charBuffer.unmap();
 
 		// calculate total buffer size for metadata
-		let totalMetadataSize = $._textStack.length * 6 * 4;
+		let totalMetadataSize = textStack.length * 6 * 4;
 
 		// create a single buffer for all metadata
 		let textBuffer = Q5.device.createBuffer({
@@ -562,7 +562,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		});
 
 		// copy all metadata into the buffer
-		new Float32Array(textBuffer.getMappedRange()).set($._textStack.flat());
+		new Float32Array(textBuffer.getMappedRange()).set(textStack.flat());
 		textBuffer.unmap();
 
 		// create a single bind group for the text buffer and metadata buffer
@@ -577,7 +577,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
-		$._charStack.length = 0;
-		$._textStack.length = 0;
+		charStack.length = 0;
+		textStack.length = 0;
 	});
 };

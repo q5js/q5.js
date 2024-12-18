@@ -105,6 +105,7 @@ function Q5(scope, parent, renderer) {
 		for (let m of Q5.methods.post) m.call($);
 		if ($._render) $._render();
 		if ($._finishRender) $._finishRender();
+		$.postProcess();
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;
 		q.moveX = q.moveY = 0;
@@ -218,10 +219,12 @@ function Q5(scope, parent, renderer) {
 		$.preload = t.preload;
 		$.setup = t.setup;
 		$.draw = t.draw;
+		$.postProcess = t.postProcess;
 	}
 	$.preload ??= () => {};
 	$.setup ??= () => {};
 	$.draw ??= () => {};
+	$.postProcess ??= () => {};
 
 	let userFns = [
 		'mouseMoved',

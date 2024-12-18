@@ -46,7 +46,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	});
 
 	let vertexBufferLayout = {
-		arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
+		arrayStride: 16, // 4 floats * 4 bytes
 		attributes: [
 			{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
 			{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex

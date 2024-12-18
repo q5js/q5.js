@@ -105,6 +105,7 @@ function Q5(scope, parent, renderer) {
 		for (let m of Q5.methods.post) m.call($);
 		if ($._render) $._render();
 		if ($._finishRender) $._finishRender();
+		$.postProcess();
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;
 		q.moveX = q.moveY = 0;
@@ -218,10 +219,12 @@ function Q5(scope, parent, renderer) {
 		$.preload = t.preload;
 		$.setup = t.setup;
 		$.draw = t.draw;
+		$.postProcess = t.postProcess;
 	}
 	$.preload ??= () => {};
 	$.setup ??= () => {};
 	$.draw ??= () => {};
+	$.postProcess ??= () => {};
 
 	let userFns = [
 		'mouseMoved',
@@ -4059,8 +4062,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		let drawVertOffset = 0,
 			imageVertOffset = 0,
 			textCharOffset = 0,
-			curPipelineIndex = -1,
-			curTextureIndex = -1;
+			curPipelineIndex = -1;
 
 		for (let i = 0; i < drawStack.length; i += 2) {
 			let v = drawStack[i + 1];
@@ -4076,15 +4078,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
 			} else if (curPipelineIndex == 1) {
-				// let instanceCount = drawStack[i + 2];
 				// draw images
-				if (curTextureIndex != v) {
-					// v is the texture index
-					pass.setBindGroup(1, $._textureBindGroups[v]);
-				}
+				// v is the texture index
+				pass.setBindGroup(1, $._textureBindGroups[v]);
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
-				// i++;
 			} else if (curPipelineIndex == 2) {
 				// draw text
 				let o = drawStack[i + 2];
@@ -4190,7 +4188,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	});
 
 	let vertexBufferLayout = {
-		arrayStride: 16, // 2 coordinates + 1 color index + 1 transform index * 4 bytes each
+		arrayStride: 16, // 4 floats * 4 bytes
 		attributes: [
 			{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
 			{ format: 'float32', offset: 8, shaderLocation: 1 }, // colorIndex
@@ -4772,14 +4770,11 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			minFilter: filter
 		});
 	};
-	makeSampler('linear');
 
-	$.smooth = () => {
-		makeSampler('linear');
-	};
-	$.noSmooth = () => {
-		makeSampler('nearest');
-	};
+	$.smooth = () => makeSampler('linear');
+	$.noSmooth = () => makeSampler('nearest');
+
+	$.smooth();
 
 	let MAX_TEXTURES = 12000;
 
@@ -5244,8 +5239,8 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		if (vert) $._textBaseline = vert;
 	};
 
-	$._charStack = [];
-	$._textStack = [];
+	let charStack = [],
+		textStack = [];
 
 	let measureText = (font, text, charCallback) => {
 		let maxWidth = 0,
@@ -5342,7 +5337,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 		let ta = $._textAlign,
 			tb = $._textBaseline,
-			textIndex = $._textStack.length,
+			textIndex = textStack.length,
 			o = 0, // offset
 			measurements;
 
@@ -5382,20 +5377,20 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 				o += 4;
 			});
 		}
-		$._charStack.push(charsData);
+		charStack.push(charsData);
 
-		let text = [];
+		let txt = [];
 
 		if ($._matrixDirty) $._saveMatrix();
 
-		text[0] = x;
-		text[1] = -y;
-		text[2] = $._textSize / 44;
-		text[3] = $._matrixIndex;
-		text[4] = $._fillSet ? $._fill : 0;
-		text[5] = $._stroke;
+		txt[0] = x;
+		txt[1] = -y;
+		txt[2] = $._textSize / 44;
+		txt[3] = $._matrixIndex;
+		txt[4] = $._fillSet ? $._fill : 0;
+		txt[5] = $._stroke;
 
-		$._textStack.push(text);
+		textStack.push(txt);
 		$.drawStack.push(2, measurements.printedCharCount, $._font.index);
 	};
 
@@ -5456,11 +5451,11 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	};
 
 	$._hooks.preRender.push(() => {
-		if (!$._charStack.length) return;
+		if (!charStack.length) return;
 
 		// calculate total buffer size for text data
 		let totalTextSize = 0;
-		for (let charsData of $._charStack) {
+		for (let charsData of charStack) {
 			totalTextSize += charsData.length * 4;
 		}
 
@@ -5472,11 +5467,11 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		});
 
 		// copy all the text data into the buffer
-		new Float32Array(charBuffer.getMappedRange()).set($._charStack.flat());
+		new Float32Array(charBuffer.getMappedRange()).set(charStack.flat());
 		charBuffer.unmap();
 
 		// calculate total buffer size for metadata
-		let totalMetadataSize = $._textStack.length * 6 * 4;
+		let totalMetadataSize = textStack.length * 6 * 4;
 
 		// create a single buffer for all metadata
 		let textBuffer = Q5.device.createBuffer({
@@ -5487,7 +5482,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		});
 
 		// copy all metadata into the buffer
-		new Float32Array(textBuffer.getMappedRange()).set($._textStack.flat());
+		new Float32Array(textBuffer.getMappedRange()).set(textStack.flat());
 		textBuffer.unmap();
 
 		// create a single bind group for the text buffer and metadata buffer
@@ -5502,7 +5497,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
-		$._charStack.length = 0;
-		$._textStack.length = 0;
+		charStack.length = 0;
+		textStack.length = 0;
 	});
 };
