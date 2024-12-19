@@ -179,10 +179,7 @@ function Q5(scope, parent, renderer) {
 		delete Q5.Q5;
 	}
 
-	if ($._webgpuFallback) {
-		$.colorMode('rgb', 1);
-		$._beginRender = () => $.translate($.canvas.hw, $.canvas.hh);
-	}
+	if ($._webgpuFallback) $.colorMode('rgb', 1);
 
 	for (let m of Q5.methods.init) {
 		m.call($);

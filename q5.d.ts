@@ -46,9 +46,10 @@ function draw() {
 	/** ⭐️
 	 * Runs after each `draw` function call and post draw hooks.
 	 * 
-	 * Useful for adding post-processing effects when using libraries
-	 * like p5play that by default, automatically draw to the canvas
-	 * after the `draw` function.
+	 * Useful for adding post-processing effects when it's not possible
+	 * to do so at the end of the `draw` function, such as when using
+	 * libraries like p5play that draw to the canvas after the `draw`
+	 * function is run.
 	 * @example
 function draw() {
 	background(200);
