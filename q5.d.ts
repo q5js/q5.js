@@ -44,6 +44,23 @@ function draw() {
 	function preload(): void;
 
 	/** ⭐️
+	 * Runs after each `draw` function call and post draw hooks.
+	 * 
+	 * Useful for adding post-processing effects when using libraries
+	 * like p5play that by default, automatically draw to the canvas
+	 * after the `draw` function.
+	 * @example
+function draw() {
+	background(200);
+	circle(frameCount % 200, 100, 80);
+}
+function postProcess() {
+	filter(INVERT);
+}
+	 */
+	function postProcess(): void;
+
+	/** ⭐️
 	 * The number of frames that have been displayed since the program started.
 	 * @example
 function draw() {

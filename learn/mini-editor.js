@@ -90,7 +90,10 @@ class MiniEditor {
 		const q5FunctionNames = [
 			'preload',
 			'setup',
+			'update',
+			'updateCamera',
 			'draw',
+			'postProcess',
 			'doubleClicked',
 			'keyPressed',
 			'keyReleased',

@@ -315,7 +315,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.11';
+Q5.version = Q5.VERSION = '2.13';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
