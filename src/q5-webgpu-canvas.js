@@ -532,7 +532,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 Q5.initWebGPU = async () => {
 	if (!navigator.gpu) {
-		console.warn('q5 WebGPU not supported on this browser!');
+		console.warn('q5 WebGPU not supported on this browser! Use Google Chrome or Edge.');
 		return false;
 	}
 	if (!Q5.device) {

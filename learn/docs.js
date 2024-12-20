@@ -19,11 +19,8 @@ winResized();
 window.addEventListener('resize', winResized);
 
 themeToggle.addEventListener('click', () => {
-	if (document.body.classList.contains('dark')) {
-		setTheme('light');
-	} else {
-		setTheme('dark');
-	}
+	if (document.body.classList.contains('dark')) setTheme('light');
+	else setTheme('dark');
 });
 
 let darkThemeName = 'aijs_dark_modern';
@@ -72,8 +69,6 @@ function setMonacoEditorTheme(themeName) {
 			}
 		} else if (attempts < maxAttempts) {
 			setTimeout(checkEditorAvailability, interval);
-		} else {
-			// console.error('Failed to set Monaco Editor theme after 5 attempts');
 		}
 	};
 
@@ -105,9 +100,7 @@ async function modifyTokenizer(languageId, customRules) {
 }
 
 const jsCustomTokenizer = {
-	tokenizer: {
-		root: [[/[a-zA-Z_$][\w$]*(?=\()/, 'functionName']]
-	}
+	tokenizer: { root: [[/[a-zA-Z_$][\w$]*(?=\()/, 'functionName']] }
 };
 
 function stripParams(params) {
@@ -129,9 +122,7 @@ function convertToMarkdown(data) {
 		curEmoji = '';
 
 	for (let line of lines) {
-		if (!insideExample) {
-			line = line.trim();
-		}
+		if (!insideExample) line = line.trim();
 
 		if (line.startsWith('/**')) {
 			insideJSDoc = true;

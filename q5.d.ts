@@ -18,7 +18,7 @@ function draw() {
 	function draw(): void;
 
 	/** ⭐️
-	 * The setup function is called once when the program starts.
+	 * The setup function is run once, when the program starts.
 	 * @example
 function setup() {
 	createCanvas(200, 100);
@@ -42,24 +42,6 @@ function draw() {
 }
 	 */
 	function preload(): void;
-
-	/** ⭐️
-	 * Runs after each `draw` function call and post draw hooks.
-	 * 
-	 * Useful for adding post-processing effects when it's not possible
-	 * to do so at the end of the `draw` function, such as when using
-	 * libraries like p5play that draw to the canvas after the `draw`
-	 * function is run.
-	 * @example
-function draw() {
-	background(200);
-	circle(frameCount % 200, 100, 80);
-}
-function postProcess() {
-	filter(INVERT);
-}
-	 */
-	function postProcess(): void;
 
 	/** ⭐️
 	 * The number of frames that have been displayed since the program started.
@@ -94,7 +76,7 @@ function draw() {
   circle(frameCount * 5, 100, 80);
 }
 function mousePressed() {
-  redraw(2);
+  redraw(10);
 }
 	 */
 	function redraw(n?: number): void;
@@ -115,7 +97,12 @@ function mousePressed() {
 	function loop(): void;
 
 	/** ⭐️
-	 * Sets the target frame rate or gets the sketch's current frame rate.
+	 * Sets the target frame rate or gets an approximation of the
+	 * sketch's current frame rate.
+	 * 
+	 * Even when the sketch is running at a consistent frame rate,
+	 * the current frame rate value will fluctuate. Use your web browser's
+	 * developer tools for more accurate performance analysis.
 	 * @param {number} [hertz] target frame rate, default is 60
 	 * @returns {number} current frame rate
 	 * @example
@@ -151,8 +138,10 @@ function draw() {
 
 	/** ⭐️
 	 * Gets the current FPS, in terms of how many frames could be generated
-	 * in one second, which can be higher than the target frame rate. Useful
-	 * for analyzing performance.
+	 * in one second, which can be higher than the target frame rate.
+	 * 
+	 * Use your web browser's developer tools for more in-depth
+	 * performance analysis.
 	 * @returns {number} frames per second
 	 * @example
 function draw() {
@@ -175,6 +164,24 @@ function draw() {
 	 * @param {*} message message to log
 	 */
 	function log(message: any): void;
+
+	/** ⭐️
+	 * Runs after each `draw` function call and post draw hooks.
+	 * 
+	 * Useful for adding post-processing effects when it's not possible
+	 * to do so at the end of the `draw` function, such as when using
+	 * libraries like p5play that draw to the canvas after the `draw`
+	 * function is run.
+	 * @example
+function draw() {
+	background(200);
+	circle(frameCount % 200, 100, 80);
+}
+function postProcess() {
+	filter(INVERT);
+}
+	 */
+	function postProcess(): void;
 
 	/** ⭐️
 	 * The width of the window.
