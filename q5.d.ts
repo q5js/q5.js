@@ -1896,6 +1896,8 @@ noCursor();
 
 	/** 🧮
 	 * Calculates the distance between two points.
+	 * 
+	 * This function also accepts two objects with `x` and `y` properties.
 	 * @param {number} x1 x-coordinate of the first point
 	 * @param {number} y1 y-coordinate of the first point
 	 * @param {number} x2 x-coordinate of the second point
