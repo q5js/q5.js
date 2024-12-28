@@ -65,35 +65,11 @@ q5 is open source and anyone can use it for free under the terms of the LGPL (ju
 
 We need your support though! If you enjoy using q5.js, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/p5play).
 
-## Size Comparison
-
-q5 is 98% smaller than p5.
-
-p5.js is nearly 5MB in size due to lengthy JSDoc comments, [the WebGL render, and the dependencies corejs and opentype](https://github.com/processing/p5.js/issues/6776#issuecomment-1918238317).
-
-q5's JSDoc comments are stored separately in the q5.d.ts file, which includes type definitions for Visual Studio Code autocompletion. q5 also has no dependencies.
-
-npm packages:
-
-- p5 **7800kb** ⚠️
-- @types/p5 1070kb
-- q5 415kb
-
-Unminified:
-
-- p5.js **5112kb** ⚠️
-- p5.sound.js 488kb
-- q5.js 117kb
-
-Minified:
-
-- p5.min.js 1034kb ⚠️
-- p5.sound.min.js 200kb
-- q5.min.js **73kb** 🎉
-
 ## Modular Use
 
-For extremely lightweight use you can load a subset of scripts from the `src` folder. See the [src/readme.md](src/readme.md) for more info on modular use.
+q5 has no dependencies and the default bundle is just 126kb unminified.
+
+But for extremely lightweight use, you can load a subset of scripts from the `src` folder. See the [src/readme.md](src/readme.md) for more info on modular use.
 
 ## Contributing
 

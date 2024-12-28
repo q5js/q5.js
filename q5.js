@@ -20,7 +20,7 @@ function Q5(scope, parent, renderer) {
 	let autoLoaded = scope == 'auto';
 	scope ??= 'global';
 	if (scope == 'auto') {
-		if (!(window.setup || window.draw)) return;
+		if (!(window.setup || window.update || window.draw)) return;
 		scope = 'global';
 	}
 	$._scope = scope;
@@ -4044,7 +4044,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
 
-		mainBindGroup = Q5.device.createBindGroup({
+		let mainBindGroup = Q5.device.createBindGroup({
 			layout: mainLayout,
 			entries: [
 				{ binding: 0, resource: { buffer: uniformBuffer } },

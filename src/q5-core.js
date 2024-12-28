@@ -20,7 +20,7 @@ function Q5(scope, parent, renderer) {
 	let autoLoaded = scope == 'auto';
 	scope ??= 'global';
 	if (scope == 'auto') {
-		if (!(window.setup || window.draw)) return;
+		if (!(window.setup || window.update || window.draw)) return;
 		scope = 'global';
 	}
 	$._scope = scope;

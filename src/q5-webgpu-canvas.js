@@ -459,7 +459,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
 
-		mainBindGroup = Q5.device.createBindGroup({
+		let mainBindGroup = Q5.device.createBindGroup({
 			layout: mainLayout,
 			entries: [
 				{ binding: 0, resource: { buffer: uniformBuffer } },
