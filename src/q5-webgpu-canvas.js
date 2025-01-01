@@ -159,11 +159,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	const MAX_TRANSFORMS = 1e7, // or whatever maximum you need
 		MATRIX_SIZE = 16, // 4x4 matrix
-		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE),
+		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE);
+
+	let matrix,
 		matrices = [],
 		matricesIndexStack = [];
-
-	let matrix;
 
 	// tracks if the matrix has been modified
 	$._matrixDirty = false;
@@ -508,8 +508,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				i++;
 			}
 		}
-
-		for (let m of $._hooks.postRender) m();
 	};
 
 	$._finishRender = () => {
@@ -520,13 +518,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		q.pass = $.encoder = null;
 
 		// clear the stacks for the next frame
-		$.drawStack.length = 0;
+		$.drawStack = drawStack = [];
 		colorIndex = 1;
 		colorStackIndex = 8;
-		rotation = 0;
-		transforms.length = MATRIX_SIZE;
-		matrices.length = 1;
-		matricesIndexStack.length = 0;
+		matrices = [matrices[0]];
+		matricesIndexStack = [];
+
+		for (let m of $._hooks.postRender) m();
 	};
 };
 

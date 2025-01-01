@@ -27,7 +27,7 @@ function Q5(scope, parent, renderer) {
 	let globalScope;
 	if (scope == 'global') {
 		Q5._hasGlobal = $._isGlobal = true;
-		globalScope = !Q5._server ? window : global;
+		globalScope = Q5._esm ? globalThis : !Q5._server ? window : global;
 	}
 
 	let q = new Proxy($, {
@@ -284,6 +284,7 @@ Q5.renderers = {};
 Q5.modules = {};
 
 Q5._server = typeof process == 'object';
+Q5._esm = this === undefined;
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {

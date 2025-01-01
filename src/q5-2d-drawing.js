@@ -215,19 +215,19 @@ Q5.renderers.q2d.drawing = ($) => {
 	};
 
 	$.beginShape = () => {
-		curveBuff.length = 0;
+		curveBuff = [];
 		$.ctx.beginPath();
 		firstVertex = true;
 	};
 
 	$.beginContour = () => {
 		$.ctx.closePath();
-		curveBuff.length = 0;
+		curveBuff = [];
 		firstVertex = true;
 	};
 
 	$.endContour = () => {
-		curveBuff.length = 0;
+		curveBuff = [];
 		firstVertex = true;
 	};
 
@@ -236,7 +236,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff.length = 0;
+		curveBuff = [];
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
 		} else {
@@ -254,7 +254,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff.length = 0;
+		curveBuff = [];
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 
@@ -265,7 +265,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff.length = 0;
+		curveBuff = [];
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
 
@@ -294,7 +294,7 @@ Q5.renderers.q2d.drawing = ($) => {
 	};
 
 	$.endShape = (close) => {
-		curveBuff.length = 0;
+		curveBuff = [];
 		if (close) $.ctx.closePath();
 		ink();
 	};

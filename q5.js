@@ -27,7 +27,7 @@ function Q5(scope, parent, renderer) {
 	let globalScope;
 	if (scope == 'global') {
 		Q5._hasGlobal = $._isGlobal = true;
-		globalScope = !Q5._server ? window : global;
+		globalScope = Q5._esm ? globalThis : !Q5._server ? window : global;
 	}
 
 	let q = new Proxy($, {
@@ -284,6 +284,7 @@ Q5.renderers = {};
 Q5.modules = {};
 
 Q5._server = typeof process == 'object';
+Q5._esm = this === undefined;
 
 Q5._instanceCount = 0;
 Q5._friendlyError = (msg, func) => {
@@ -1104,19 +1105,19 @@ Q5.renderers.q2d.drawing = ($) => {
 	};
 
 	$.beginShape = () => {
-		curveBuff.length = 0;
+		curveBuff = [];
 		$.ctx.beginPath();
 		firstVertex = true;
 	};
 
 	$.beginContour = () => {
 		$.ctx.closePath();
-		curveBuff.length = 0;
+		curveBuff = [];
 		firstVertex = true;
 	};
 
 	$.endContour = () => {
-		curveBuff.length = 0;
+		curveBuff = [];
 		firstVertex = true;
 	};
 
@@ -1125,7 +1126,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff.length = 0;
+		curveBuff = [];
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
 		} else {
@@ -1143,7 +1144,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff.length = 0;
+		curveBuff = [];
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 
@@ -1154,7 +1155,7 @@ Q5.renderers.q2d.drawing = ($) => {
 			x *= $._da;
 			y *= $._da;
 		}
-		curveBuff.length = 0;
+		curveBuff = [];
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
 
@@ -1183,7 +1184,7 @@ Q5.renderers.q2d.drawing = ($) => {
 	};
 
 	$.endShape = (close) => {
-		curveBuff.length = 0;
+		curveBuff = [];
 		if (close) $.ctx.closePath();
 		ink();
 	};
@@ -1985,7 +1986,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			lineAmount++;
 			if (lineAmount >= h) break;
 		}
-		lines.length = 0;
+		lines = [];
 
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 
@@ -2642,8 +2643,8 @@ Q5.modules.input = ($, q) => {
 	};
 
 	if (window) {
-		$.requestPointerLock = document.body?.requestPointerLock;
-		$.exitPointerLock = document.exitPointerLock;
+		$.lockMouse = document.body?.requestPointerLock;
+		$.unlockMouse = document.exitPointerLock;
 	}
 
 	$._onkeydown = (e) => {
@@ -3744,11 +3745,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	const MAX_TRANSFORMS = 1e7, // or whatever maximum you need
 		MATRIX_SIZE = 16, // 4x4 matrix
-		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE),
+		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE);
+
+	let matrix,
 		matrices = [],
 		matricesIndexStack = [];
-
-	let matrix;
 
 	// tracks if the matrix has been modified
 	$._matrixDirty = false;
@@ -4093,8 +4094,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				i++;
 			}
 		}
-
-		for (let m of $._hooks.postRender) m();
 	};
 
 	$._finishRender = () => {
@@ -4105,13 +4104,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		q.pass = $.encoder = null;
 
 		// clear the stacks for the next frame
-		$.drawStack.length = 0;
+		$.drawStack = drawStack = [];
 		colorIndex = 1;
 		colorStackIndex = 8;
-		rotation = 0;
-		transforms.length = MATRIX_SIZE;
-		matrices.length = 1;
-		matricesIndexStack.length = 0;
+		matrices = [matrices[0]];
+		matricesIndexStack = [];
+
+		for (let m of $._hooks.postRender) m();
 	};
 };
 
@@ -4446,8 +4445,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 	};
 
-	$.stokeJoin = (x) => {
-		$.log("q5 WebGPU doesn't support changing stroke join style.");
+	$._strokeJoin = 'round';
+
+	$.strokeJoin = (x) => {
+		$._strokeJoin = x;
 	};
 
 	$.line = (x1, y1, x2, y2) => {
@@ -4468,7 +4469,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if (sw > 2) {
+		if (sw > 2 && $._strokeJoin != 'none') {
 			let n = getArcSegments(sw);
 			addEllipse(x1, y1, hsw, hsw, n, ci, ti);
 			addEllipse(x2, y2, hsw, hsw, n, ci, ti);
@@ -4610,7 +4611,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	$.background = (r, g, b, a) => {
-		$.push();
+		$.pushMatrix();
 		$.resetMatrix();
 		$._doStroke = false;
 		if (r.src) {
@@ -4625,7 +4626,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			$.rect(-c.hw, -c.hh, c.w, c.h);
 			$._rectMode = og;
 		}
-		$.pop();
+		$.popMatrix();
 		if (!$._fillSet) $._fill = 1;
 	};
 
@@ -4645,6 +4646,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
+		drawStack = $.drawStack;
 		vertIndex = 0;
 	});
 };
@@ -5291,11 +5293,16 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 	$.text = (str, x, y, w, h) => {
 		if (!$._font) {
-			// check if online and loading the default font
-			// hasn't been attempted yet
-			if (navigator.onLine && !initLoadDefaultFont) {
+			// check if loading the default font hasn't been attempted
+			if (!initLoadDefaultFont) {
 				initLoadDefaultFont = true;
-				$.loadFont('https://q5js.org/fonts/YaHei-msdf.json');
+
+				if (navigator.onLine) {
+					$.loadFont('https://q5js.org/defaultFont-msdf.json');
+				} else if (Q5._esm && import.meta?.url) {
+					let path = new URL('defaultFont-msdf.json', import.meta.url);
+					$.loadFont(path.href);
+				}
 			}
 			return;
 		}
@@ -5495,7 +5502,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
-		charStack.length = 0;
-		textStack.length = 0;
+		charStack = [];
+		textStack = [];
 	});
 };

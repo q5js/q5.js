@@ -223,7 +223,7 @@ Q5.renderers.q2d.text = ($, q) => {
 			lineAmount++;
 			if (lineAmount >= h) break;
 		}
-		lines.length = 0;
+		lines = [];
 
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 

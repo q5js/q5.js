@@ -373,11 +373,16 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 	$.text = (str, x, y, w, h) => {
 		if (!$._font) {
-			// check if online and loading the default font
-			// hasn't been attempted yet
-			if (navigator.onLine && !initLoadDefaultFont) {
+			// check if loading the default font hasn't been attempted
+			if (!initLoadDefaultFont) {
 				initLoadDefaultFont = true;
-				$.loadFont('https://q5js.org/fonts/YaHei-msdf.json');
+
+				if (navigator.onLine) {
+					$.loadFont('https://q5js.org/defaultFont-msdf.json');
+				} else if (Q5._esm && import.meta?.url) {
+					let path = new URL('defaultFont-msdf.json', import.meta.url);
+					$.loadFont(path.href);
+				}
 			}
 			return;
 		}
@@ -577,7 +582,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
-		charStack.length = 0;
-		textStack.length = 0;
+		charStack = [];
+		textStack = [];
 	});
 };

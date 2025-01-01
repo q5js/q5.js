@@ -306,8 +306,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 	};
 
-	$.stokeJoin = (x) => {
-		$.log("q5 WebGPU doesn't support changing stroke join style.");
+	$._strokeJoin = 'round';
+
+	$.strokeJoin = (x) => {
+		$._strokeJoin = x;
 	};
 
 	$.line = (x1, y1, x2, y2) => {
@@ -328,7 +330,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if (sw > 2) {
+		if (sw > 2 && $._strokeJoin != 'none') {
 			let n = getArcSegments(sw);
 			addEllipse(x1, y1, hsw, hsw, n, ci, ti);
 			addEllipse(x2, y2, hsw, hsw, n, ci, ti);
@@ -470,7 +472,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	$.background = (r, g, b, a) => {
-		$.push();
+		$.pushMatrix();
 		$.resetMatrix();
 		$._doStroke = false;
 		if (r.src) {
@@ -485,7 +487,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			$.rect(-c.hw, -c.hh, c.w, c.h);
 			$._rectMode = og;
 		}
-		$.pop();
+		$.popMatrix();
 		if (!$._fillSet) $._fill = 1;
 	};
 
@@ -505,6 +507,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
+		drawStack = $.drawStack;
 		vertIndex = 0;
 	});
 };

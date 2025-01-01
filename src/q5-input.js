@@ -113,8 +113,8 @@ Q5.modules.input = ($, q) => {
 	};
 
 	if (window) {
-		$.requestPointerLock = document.body?.requestPointerLock;
-		$.exitPointerLock = document.exitPointerLock;
+		$.lockMouse = document.body?.requestPointerLock;
+		$.unlockMouse = document.exitPointerLock;
 	}
 
 	$._onkeydown = (e) => {
