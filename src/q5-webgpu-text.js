@@ -379,10 +379,13 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 				if (navigator.onLine) {
 					$.loadFont('https://q5js.org/defaultFont-msdf.json');
-				} else if (Q5._esm && import.meta?.url) {
-					let path = new URL('defaultFont-msdf.json', import.meta.url);
-					$.loadFont(path.href);
+				} else {
+					$.loadFont('/node_modules/q5/defaultFont-msdf.json');
 				}
+				// else if (Q5._esm && import.meta.url) {
+				// 	let path = new URL('defaultFont-msdf.json', import.meta.url);
+				// 	$.loadFont(path.href);
+				// }
 			}
 			return;
 		}

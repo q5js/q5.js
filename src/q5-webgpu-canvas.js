@@ -226,6 +226,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$.scale = (x = 1, y, z = 1) => {
 		y ??= x;
 
+		$._scale = Math.max(Math.abs(x), Math.abs(y));
+
 		let m = matrix;
 
 		m[0] *= x;

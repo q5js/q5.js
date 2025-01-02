@@ -271,9 +271,9 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	$.ellipseMode = (x) => ($._ellipseMode = x);
 
 	$.ellipse = (x, y, w, h) => {
-		let n = getArcSegments(Math.max(w, h));
-		let a = Math.max(w, 1) / 2;
-		let b = w == h ? a : Math.max(h, 1) / 2;
+		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * $._scale);
+		let a = w / 2;
+		let b = w == h ? a : h / 2;
 
 		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._matrixIndex;
@@ -421,17 +421,26 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doFill) {
-			// triangulate the shape
-			for (let i = 1; i < shapeVertCount - 1; i++) {
-				let v0 = 0;
-				let v1 = i * 4;
-				let v2 = (i + 1) * 4;
+			if (shapeVertCount == 5) {
+				// for quads, draw two triangles
+				addVert(sv[0], sv[1], sv[2], sv[3]); // v0
+				addVert(sv[4], sv[5], sv[6], sv[7]); // v1
+				addVert(sv[12], sv[13], sv[14], sv[15]); // v3
+				addVert(sv[8], sv[9], sv[10], sv[11]); // v2
+				drawStack.push(0, 4);
+			} else {
+				// triangulate the shape
+				for (let i = 1; i < shapeVertCount - 1; i++) {
+					let v0 = 0;
+					let v1 = i * 4;
+					let v2 = (i + 1) * 4;
 
-				addVert(sv[v0], sv[v0 + 1], sv[v0 + 2], sv[v0 + 3]);
-				addVert(sv[v1], sv[v1 + 1], sv[v1 + 2], sv[v1 + 3]);
-				addVert(sv[v2], sv[v2 + 1], sv[v2 + 2], sv[v2 + 3]);
+					addVert(sv[v0], sv[v0 + 1], sv[v0 + 2], sv[v0 + 3]);
+					addVert(sv[v1], sv[v1 + 1], sv[v1 + 2], sv[v1 + 3]);
+					addVert(sv[v2], sv[v2 + 1], sv[v2 + 2], sv[v2 + 3]);
+				}
+				drawStack.push(0, (shapeVertCount - 2) * 3);
 			}
-			drawStack.push(0, (shapeVertCount - 2) * 3);
 		}
 
 		if ($._doStroke) {
