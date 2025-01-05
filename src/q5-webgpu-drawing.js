@@ -481,23 +481,26 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	};
 
 	$.background = (r, g, b, a) => {
-		$.pushMatrix();
-		$.resetMatrix();
+		let mi = $._matrixIndex;
+		$._matrixIndex = 0;
 		$._doStroke = false;
 		if (r.src) {
-			let og = $._imageMode;
+			let img = r;
+			let im = $._imageMode;
 			$._imageMode = 'corner';
-			$.image(r, -c.hw, -c.hh, c.w, c.h);
-			$._imageMode = og;
+			$.image(img, -c.hw, -c.hh, c.w, c.h);
+			$._imageMode = im;
 		} else {
-			let og = $._rectMode;
+			let rm = $._rectMode;
 			$._rectMode = 'corner';
+			let fill = $._fill;
 			$.fill(r, g, b, a);
 			$.rect(-c.hw, -c.hh, c.w, c.h);
-			$._rectMode = og;
+			$._rectMode = rm;
+			$._fill = fill;
 		}
-		$.popMatrix();
-		if (!$._fillSet) $._fill = 1;
+		$._doStroke = true;
+		$._matrixIndex = mi;
 	};
 
 	$._hooks.preRender.push(() => {
