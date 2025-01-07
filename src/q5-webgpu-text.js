@@ -289,11 +289,11 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 	$._loadDefaultFont = (fontName) => {
 		fonts[fontName] = null;
-		// if (navigator.onLine) {
-		// 	$.loadFont(`https://q5js.org/fonts/${fontName}-msdf.json`);
-		// } else {
-		$.loadFont(`/node_modules/q5/builtinFonts/${fontName}-msdf.json`);
-		// }
+		if (navigator.onLine) {
+			$.loadFont(`https://q5js.org/fonts/${fontName}-msdf.json`);
+		} else {
+			$.loadFont(`/node_modules/q5/builtinFonts/${fontName}-msdf.json`);
+		}
 	};
 
 	$._textSize = 18;
