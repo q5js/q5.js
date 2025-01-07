@@ -1,5 +1,5 @@
 dev/assets
-dev/tests
+dev/experiments
 dev/sketch.js
 dev/sketch-p5.js
 node_modules

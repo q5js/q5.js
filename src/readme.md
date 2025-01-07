@@ -164,14 +164,14 @@ MSDF, introduced by Chlumsky Viktor in his master's thesis ["Shape Decomposition
 
 ### Default Font
 
-For convenience, if no font is loaded before `text` is run, then q5's default MSDF font is loaded: https://q5js.org/fonts/YaHei-msdf.json
+For convenience, if no font is loaded before `text` is run, then q5's default MSDF font is loaded: https://q5js.org/fonts/sans-serif-msdf.json
 
-![YaHei msdf texture](https://q5js.org/fonts/YaHei.png)
+![YaHei msdf texture](https://q5js.org/fonts/sans-serif.png)
 
 This 512x512 msdf texture (207kb) was made with the [Microsoft YaHei](https://learn.microsoft.com/en-us/typography/font-list/microsoft-yahei) font and stores every character visible on a standard English keyboard, letters with diacritics (accents) used in European languages, and mathematical symbols.
 
 ```
-!"#$%&'()\*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^\_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¥©®°²³´·¹º¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ‘’“”π
+!"#$%&'()\*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^\_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¥©®°²³´·¹º¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ‘’“”ΑαΒβΓγΔδΕεΛλΠπΣσΩω∴∵─│┌┐└┘├┤┬┴┼▀▄█▌▐▓▒░←↑→↓↔↕↖↗↘↙«»µτΦΘ∞≡±≈∙√ⁿ
 ```
 
 > Do you think any other characters ought to be included in the default set? Let us know! https://github.com/q5js/q5.js/issues

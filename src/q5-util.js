@@ -22,9 +22,10 @@ Q5.modules.util = ($, q) => {
 
 	$.CSV = {};
 	$.CSV.parse = (csv, sep = ',', lineSep = '\n') => {
+		if (!csv.length) return [];
 		let a = [],
 			lns = csv.split(lineSep),
-			headers = lns[0].split(sep);
+			headers = lns[0].split(sep).map((h) => h.replaceAll('"', ''));
 		for (let i = 1; i < lns.length; i++) {
 			let o = {},
 				ln = lns[i].split(sep);

@@ -287,6 +287,15 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		return fontName;
 	};
 
+	$._loadDefaultFont = (fontName) => {
+		fonts[fontName] = null;
+		// if (navigator.onLine) {
+		// 	$.loadFont(`https://q5js.org/fonts/${fontName}-msdf.json`);
+		// } else {
+		$.loadFont(`/node_modules/q5/builtinFonts/${fontName}-msdf.json`);
+		// }
+	};
+
 	$._textSize = 18;
 	$._textAlign = 'left';
 	$._textBaseline = 'alphabetic';
@@ -297,6 +306,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 	$.textFont = (fontName) => {
 		$._font = fonts[fontName];
+		if ($._font === undefined) $._loadDefaultFont(fontName);
 	};
 
 	$.textSize = (size) => {
@@ -369,24 +379,10 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		};
 	};
 
-	let initLoadDefaultFont;
-
 	$.text = (str, x, y, w, h) => {
 		if (!$._font) {
-			// check if loading the default font hasn't been attempted
-			if (!initLoadDefaultFont) {
-				initLoadDefaultFont = true;
-
-				if (navigator.onLine) {
-					$.loadFont('https://q5js.org/defaultFont-msdf.json');
-				} else {
-					$.loadFont('/node_modules/q5/defaultFont-msdf.json');
-				}
-				// else if (Q5._esm && import.meta.url) {
-				// 	let path = new URL('defaultFont-msdf.json', import.meta.url);
-				// 	$.loadFont(path.href);
-				// }
-			}
+			// if the default font hasn't been loaded yet, try to load it
+			if ($._font !== null) $.textFont('sans-serif');
 			return;
 		}
 
