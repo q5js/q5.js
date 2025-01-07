@@ -390,6 +390,12 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 			return;
 		}
 
+		let type = typeof str;
+		if (type != 'string') {
+			if (type == 'object') str = str.toString();
+			else str = str + '';
+		}
+
 		if (str.length > w) {
 			let wrapped = [];
 			let i = 0;
@@ -456,7 +462,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 				if (ta == 'center') {
 					offsetX = measurements.width * -0.5 - (measurements.width - measurements.lineWidths[line]) * -0.5;
 				} else if (ta == 'right') {
-					offsetX = measurements.width - measurements.lineWidths[line];
+					offsetX = -measurements.lineWidths[line];
 				}
 				charsData[o] = textX + offsetX;
 				charsData[o + 1] = textY + offsetY;
