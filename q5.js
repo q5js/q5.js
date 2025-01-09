@@ -3814,6 +3814,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		y ??= x;
 
 		$._scale = Math.max(Math.abs(x), Math.abs(y));
+		$._scaledSW = $._strokeWeight * $._scale;
 
 		let m = matrix;
 
@@ -4438,7 +4439,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			ci = $._stroke,
 			sw = $._strokeWeight;
 
-		if (sw < 2) {
+		if ($._scaledSW < 2) {
 			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
@@ -4472,8 +4473,8 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if (sw > 2 && $._strokeJoin != 'none') {
-			let n = getArcSegments(sw);
+		if ($._scaledSW > 2 && $._strokeJoin != 'none') {
+			let n = getArcSegments($._scaledSW);
 			addEllipse(x1, y1, hsw, hsw, n, ci, ti);
 			addEllipse(x2, y2, hsw, hsw, n, ci, ti);
 		}
@@ -5240,8 +5241,9 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		leadPercent = 1.25;
 
 	$.textFont = (fontName) => {
-		$._font = fonts[fontName];
-		if ($._font === undefined) $._loadDefaultFont(fontName);
+		let font = fonts[fontName];
+		if (font) $._font = font;
+		else if (font === undefined) $._loadDefaultFont(fontName);
 	};
 
 	$.textSize = (size) => {

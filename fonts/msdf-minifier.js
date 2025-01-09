@@ -25,13 +25,21 @@ let data = JSON.parse(fs.readFileSync(inputFile, 'utf8'));
 // Convert chars array to CSV
 const parser = new Parser({ delimiter: ' ' });
 
+let chars = data.chars;
+
+for (let char of chars) {
+	delete char.index;
+	delete char.chnl;
+	delete char.page;
+}
+
 // Create modified JSON with CSV chars
-let chars = parser.parse(data.chars);
+chars = parser.parse(chars);
 
 // handle special cases when the
 // character is a double quote or backslash
-chars = chars.replace('\"\\\"', '\"\\\\\"');
-chars = chars.replace('\"\"\"\"', '\"\\\"\"');
+chars = chars.replace('"\\"', '"\\\\"');
+chars = chars.replace('""""', '"\\""');
 
 data.chars = chars;
 

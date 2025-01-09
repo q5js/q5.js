@@ -305,8 +305,9 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		leadPercent = 1.25;
 
 	$.textFont = (fontName) => {
-		$._font = fonts[fontName];
-		if ($._font === undefined) $._loadDefaultFont(fontName);
+		let font = fonts[fontName];
+		if (font) $._font = font;
+		else if (font === undefined) $._loadDefaultFont(fontName);
 	};
 
 	$.textSize = (size) => {

@@ -296,7 +296,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			ci = $._stroke,
 			sw = $._strokeWeight;
 
-		if (sw < 2) {
+		if ($._scaledSW < 2) {
 			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
@@ -330,8 +330,8 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if (sw > 2 && $._strokeJoin != 'none') {
-			let n = getArcSegments(sw);
+		if ($._scaledSW > 2 && $._strokeJoin != 'none') {
+			let n = getArcSegments($._scaledSW);
 			addEllipse(x1, y1, hsw, hsw, n, ci, ti);
 			addEllipse(x2, y2, hsw, hsw, n, ci, ti);
 		}
