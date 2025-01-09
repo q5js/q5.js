@@ -21,6 +21,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			$.ctx.lineCap = 'round';
 			$.ctx.lineJoin = 'miter';
 			$.ctx.textAlign = 'left';
+			$._strokeWeight = 1;
 		}
 		$.ctx.scale($._pixelDensity, $._pixelDensity);
 		$.ctx.save();

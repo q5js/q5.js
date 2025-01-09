@@ -260,7 +260,6 @@ function Q5(scope, parent, renderer) {
 		$._setupDone = true;
 		if ($.frameCount) return;
 		if ($.ctx === null) $.createCanvas(200, 200);
-		if ($.ctx) $.resetMatrix();
 		raf($._draw);
 	}
 
@@ -710,6 +709,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 			$.ctx.lineCap = 'round';
 			$.ctx.lineJoin = 'miter';
 			$.ctx.textAlign = 'left';
+			$._strokeWeight = 1;
 		}
 		$.ctx.scale($._pixelDensity, $._pixelDensity);
 		$.ctx.save();

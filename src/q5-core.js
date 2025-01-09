@@ -260,7 +260,6 @@ function Q5(scope, parent, renderer) {
 		$._setupDone = true;
 		if ($.frameCount) return;
 		if ($.ctx === null) $.createCanvas(200, 200);
-		if ($.ctx) $.resetMatrix();
 		raf($._draw);
 	}
 
