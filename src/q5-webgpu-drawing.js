@@ -3,6 +3,8 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 		drawStack = $.drawStack,
 		vertexStack = new Float32Array(1e7),
 		vertIndex = 0;
+	const TAU = Math.PI * 2;
+	const HALF_PI = Math.PI / 2;
 
 	let drawingShader = Q5.device.createShaderModule({
 		label: 'drawingShader',
@@ -116,10 +118,10 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		drawStack.push(0, 4);
 	};
 
-	const addEllipse = (x, y, a, b, n, ci, ti) => {
-		y = -y;
-		let t = 0,
-			angleIncrement = $.TAU / n;
+	const addArc = (x, y, a, b, startAngle, endAngle, n, ci, ti) => {
+		let angleRange = endAngle - startAngle;
+		let angleIncrement = angleRange / n;
+		let t = startAngle;
 
 		let v = vertexStack,
 			i = vertIndex;
@@ -144,27 +146,14 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			t += angleIncrement;
 		}
 
-		// close the triangle strip
-		// add center vertex
-		v[i++] = x;
-		v[i++] = y;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		// add first perimeter vertex
-		v[i++] = x + a;
-		v[i++] = y;
-		v[i++] = ci;
-		v[i++] = ti;
-
 		vertIndex = i;
-		drawStack.push(0, (n + 1) * 2 + 2);
+		drawStack.push(0, (n + 1) * 2);
 	};
 
-	const addEllipseStroke = (x, y, outerA, outerB, innerA, innerB, n, ci, ti) => {
-		y = -y;
-		let angleIncrement = $.TAU / n;
-		let t = 0;
+	const addArcStroke = (x, y, outerA, outerB, innerA, innerB, startAngle, endAngle, n, ci, ti) => {
+		let angleRange = endAngle - startAngle;
+		let angleIncrement = angleRange / n;
+		let t = startAngle;
 
 		let v = vertexStack,
 			i = vertIndex;
@@ -193,45 +182,106 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		vertIndex = i;
-		drawStack.push(0, (n + 1) * 2); // Use triangle strip
+		drawStack.push(0, (n + 1) * 2);
 	};
 
 	$.rectMode = (x) => ($._rectMode = x);
 
-	$.rect = (x, y, w, h) => {
+	$.rect = (x, y, w, h, rr = 0) => {
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 		let ci, ti;
 		if ($._matrixDirty) $._saveMatrix();
 		ti = $._matrixIndex;
 
+		if (!rr) {
+			if ($._doFill) {
+				ci = $._fill;
+				addRect(l, t, r, t, r, b, l, b, ci, ti);
+			}
+
+			if ($._doStroke) {
+				ci = $._stroke;
+				let sw = $._strokeWeight / 2;
+
+				// Calculate stroke positions
+				let lsw = l - sw,
+					rsw = r + sw,
+					tsw = t + sw,
+					bsw = b - sw,
+					lpsw = l + sw,
+					rpsw = r - sw,
+					tpsw = t - sw,
+					bpsw = b + sw;
+
+				addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // Top
+				addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // Bottom
+
+				// Adjust side strokes to avoid overlapping corners
+				tsw = t - sw;
+				bsw = b + sw;
+
+				addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // Left
+				addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // Right
+			}
+			return;
+		}
+
+		l += rr;
+		r -= rr;
+		t -= rr;
+		b += rr;
+
+		// Clamp radius
+		rr = Math.min(rr, Math.min(w, h) / 2);
+
+		let n = getArcSegments(rr * $._scale);
+
+		let trr = t + rr,
+			brr = b - rr,
+			lrr = l - rr,
+			rrr = r + rr;
+
 		if ($._doFill) {
 			ci = $._fill;
-			addRect(l, t, r, t, r, b, l, b, ci, ti);
+			// Corner arcs
+			addArc(r, b, rr, rr, -HALF_PI, 0, n, ci, ti);
+			addArc(l, b, rr, rr, -Math.PI, -HALF_PI, n, ci, ti);
+			addArc(l, t, rr, rr, Math.PI, HALF_PI, n, ci, ti);
+			addArc(r, t, rr, rr, 0, HALF_PI, n, ci, ti);
+
+			addRect(l, trr, r, trr, r, brr, l, brr, ci, ti); // center
+			addRect(l, t, lrr, t, lrr, b, l, b, ci, ti); // Left
+			addRect(rrr, t, r, t, r, b, rrr, b, ci, ti); // Right
 		}
 
 		if ($._doStroke) {
 			ci = $._stroke;
-			let sw = $._strokeWeight / 2;
+			let hsw = $._hsw;
 
-			// Calculate stroke positions
-			let lsw = l - sw,
-				rsw = r + sw,
-				tsw = t + sw,
-				bsw = b - sw,
-				lpsw = l + sw,
-				rpsw = r - sw,
-				tpsw = t - sw,
-				bpsw = b + sw;
+			let outerA = rr + hsw,
+				outerB = rr + hsw,
+				innerA = rr - hsw,
+				innerB = rr - hsw;
+			// Corner arc strokes
+			addArcStroke(r, b, outerA, outerB, innerA, innerB, -HALF_PI, 0, n, ci, ti);
+			addArcStroke(l, b, outerA, outerB, innerA, innerB, -Math.PI, -HALF_PI, n, ci, ti);
+			addArcStroke(l, t, outerA, outerB, innerA, innerB, Math.PI, HALF_PI, n, ci, ti);
+			addArcStroke(r, t, outerA, outerB, innerA, innerB, 0, HALF_PI, n, ci, ti);
 
-			addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // Top
-			addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // Bottom
+			let lrrMin = lrr - hsw,
+				lrrMax = lrr + hsw,
+				rrrMin = rrr - hsw,
+				rrrMax = rrr + hsw,
+				trrMin = trr - hsw,
+				trrMax = trr + hsw,
+				brrMin = brr - hsw,
+				brrMax = brr + hsw;
 
-			// Adjust side strokes to avoid overlapping corners
-			tsw = t - sw;
-			bsw = b + sw;
-
-			addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // Left
-			addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // Right
+			// Side strokes - positioned outside
+			addRect(lrrMin, t, lrrMax, t, lrrMax, b, lrrMin, b, ci, ti); // Left
+			addRect(rrrMin, t, rrrMax, t, rrrMax, b, rrrMin, b, ci, ti); // Right
+			addRect(l, trrMin, r, trrMin, r, trrMax, l, trrMax, ci, ti); // Top
+			addRect(l, brrMin, r, brrMin, r, brrMax, l, brrMax, ci, ti); // Bottom
 		}
 	};
 
@@ -268,6 +318,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		d < 2400 ? 90 :
 		100;
 
+	$._ellipseMode = Q5.CENTER;
 	$.ellipseMode = (x) => ($._ellipseMode = x);
 
 	$.ellipse = (x, y, w, h) => {
@@ -279,16 +330,69 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		let ti = $._matrixIndex;
 
 		if ($._doFill) {
-			addEllipse(x, y, a, b, n, $._fill, ti);
+			addArc(x, -y, a, b, 0, TAU, n, $._fill, ti);
 		}
 		if ($._doStroke) {
 			let sw = $._strokeWeight / 2;
 			// Draw the stroke as a ring using triangle strips
-			addEllipseStroke(x, y, a + sw, b + sw, a - sw, b - sw, n, $._stroke, ti);
+			addArcStroke(x, -y, a + sw, b + sw, a - sw, b - sw, 0, TAU, n, $._stroke, ti);
 		}
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
+
+	$.arc = (x, y, w, h, start, stop) => {
+		if (start === stop) return $.ellipse(x, y, w, h);
+
+		// Convert angles if needed
+		if ($._angleMode) {
+			start = $.radians(start);
+			stop = $.radians(stop);
+		}
+
+		// Normalize angles
+		start %= TAU;
+		stop %= TAU;
+		if (start < 0) start += TAU;
+		if (stop < 0) stop += TAU;
+		if (start > stop) stop += TAU;
+		if (start == stop) return $.ellipse(x, y, w, h);
+
+		// Calculate position based on ellipseMode
+		let a, b;
+		if ($._ellipseMode == $.CENTER) {
+			a = w / 2;
+			b = h / 2;
+		} else if ($._ellipseMode == $.RADIUS) {
+			a = w;
+			b = h;
+		} else if ($._ellipseMode == $.CORNER) {
+			x += w / 2;
+			y += h / 2;
+			a = w / 2;
+			b = h / 2;
+		} else if ($._ellipseMode == $.CORNERS) {
+			x = (x + w) / 2;
+			y = (y + h) / 2;
+			a = (w - x) / 2;
+			b = (h - y) / 2;
+		}
+
+		let ti = $._matrixIndex;
+		if ($._matrixDirty) $._saveMatrix();
+		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * $._scale);
+
+		// Draw fill
+		if ($._doFill) {
+			addArc(x, -y, a, b, start, stop, n, $._fill, ti);
+		}
+
+		// Draw stroke
+		if ($._doStroke) {
+			let sw = $._strokeWeight;
+			addArcStroke(x, -y, a + sw, b + sw, a - sw, b - sw, start, stop, n, $._stroke, ti);
+		}
+	};
 
 	$.point = (x, y) => {
 		if ($._matrixDirty) $._saveMatrix();
@@ -300,9 +404,9 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
-			let n = getArcSegments(sw);
+			let n = getArcSegments($._scaledSW);
 			sw /= 2;
-			addEllipse(x, y, sw, sw, n, ci, ti);
+			addArc(x, -y, sw, sw, 0, TAU, n, ci, ti);
 		}
 	};
 
@@ -317,7 +421,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		let ti = $._matrixIndex,
 			ci = $._stroke,
 			sw = $._strokeWeight,
-			hsw = sw / 2;
+			hsw = $._hsw;
 
 		// calculate the direction vector and length
 		let dx = x2 - x1,
@@ -332,8 +436,8 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 
 		if ($._scaledSW > 2 && $._strokeJoin != 'none') {
 			let n = getArcSegments($._scaledSW);
-			addEllipse(x1, y1, hsw, hsw, n, ci, ti);
-			addEllipse(x2, y2, hsw, hsw, n, ci, ti);
+			addArc(x1, -y1, hsw, hsw, 0, TAU, n, ci, ti);
+			addArc(x2, -y2, hsw, hsw, 0, TAU, n, ci, ti);
 		}
 	};
 
@@ -370,6 +474,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 				}
 			}
 
+			// calculate catmull-rom spline curve points
 			for (let i = 0; i < points.length - 3; i++) {
 				let p0 = points[i];
 				let p1 = points[i + 1];
@@ -444,17 +549,25 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		}
 
 		if ($._doStroke) {
+			let hsw = $._hsw,
+				n = getArcSegments($._scaledSW),
+				ti = $._matrixIndex,
+				ogStrokeJoin = $._strokeJoin;
+			$._strokeJoin = 'none';
 			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
 				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
+
+				addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
 			}
 			if (close) {
 				let v1 = (shapeVertCount - 1) * 4;
 				let v2 = 0;
 				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
 			}
+			$._strokeJoin = ogStrokeJoin;
 		}
 
 		// reset for the next shape

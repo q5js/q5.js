@@ -151,8 +151,6 @@ function Q5(scope, parent, renderer) {
 	$._elements = [];
 	$.describe = () => {};
 
-	$.TWO_PI = $.TAU = Math.PI * 2;
-
 	$.log = $.print = console.log;
 
 	for (let m in Q5.modules) {

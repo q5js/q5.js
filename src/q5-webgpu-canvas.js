@@ -155,7 +155,14 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$.noTint = () => ($._tint = 1);
 
 	$._strokeWeight = 1;
-	$.strokeWeight = (v) => ($._strokeWeight = Math.abs(v));
+	$._hsw = 0.5;
+	$._scaledSW = 1;
+	$.strokeWeight = (v) => {
+		v = Math.abs(v);
+		$._strokeWeight = v;
+		$._scaledSW = v * $._scale;
+		$._hsw = v / 2;
+	};
 
 	const MAX_TRANSFORMS = 1e7, // or whatever maximum you need
 		MATRIX_SIZE = 16, // 4x4 matrix
@@ -222,6 +229,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		$._matrixDirty = true;
 	};
+
+	$._scale = 1;
 
 	$.scale = (x = 1, y, z = 1) => {
 		y ??= x;

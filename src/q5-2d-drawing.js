@@ -55,17 +55,18 @@ Q5.renderers.q2d.drawing = ($) => {
 		}
 	};
 
+	const TAU = Math.PI * 2;
+
 	function arc(x, y, w, h, lo, hi, mode) {
 		if ($._angleMode) {
 			lo = $.radians(lo);
 			hi = $.radians(hi);
 		}
-		let full = $.TAU;
-		lo %= full;
-		hi %= full;
-		if (lo < 0) lo += full;
-		if (hi < 0) hi += full;
-		if (lo > hi) hi += full;
+		lo %= TAU;
+		hi %= TAU;
+		if (lo < 0) lo += TAU;
+		if (hi < 0) hi += TAU;
+		if (lo > hi) hi += TAU;
 		if (lo == hi) return $.ellipse(x, y, w, h);
 
 		w /= 2;
@@ -112,7 +113,7 @@ Q5.renderers.q2d.drawing = ($) => {
 
 	function ellipse(x, y, w, h) {
 		$.ctx.beginPath();
-		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, $.TAU);
+		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, TAU);
 		ink();
 	}
 
@@ -143,7 +144,7 @@ Q5.renderers.q2d.drawing = ($) => {
 				d *= $._da;
 			}
 			$.ctx.beginPath();
-			$.ctx.arc(x, y, d / 2, 0, $.TAU);
+			$.ctx.arc(x, y, d / 2, 0, TAU);
 			ink();
 		} else $.ellipse(x, y, d, d);
 	};

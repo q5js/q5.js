@@ -5,6 +5,7 @@ Q5.modules.math = ($, q) => {
 	$.PI = Math.PI;
 	$.HALF_PI = Math.PI / 2;
 	$.QUARTER_PI = Math.PI / 4;
+	$.TWO_PI = $.TAU = Math.PI * 2;
 
 	$.abs = Math.abs;
 	$.ceil = Math.ceil;
