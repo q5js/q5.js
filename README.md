@@ -1,4 +1,4 @@
-# <img src="q5js_logo.webp" height="64"> <img src="q5js_brand.webp" height="64">
+# <img src="https://q5js.org/q5js_logo.webp" height="64"> <img src="https://q5js.org/q5js_brand.webp" height="64">
 
 [**q5.js**](https://q5js.org) is a spiritual successor to the [p5.js][] and [Processing Java][] graphics libraries.
 
