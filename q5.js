@@ -2180,10 +2180,13 @@ Q5.modules.color = ($, q) => {
 				} else if ($._namedColors[c0]) {
 					[c0, c1, c2, c3] = $._namedColors[c0];
 				} else {
-					console.error(
-						"q5 can't parse color: " + c0 + '\nOnly numeric input, hex, and common named colors are supported.'
-					);
-					return new C(0, 0, 0);
+					// css color string not parsed
+					let c = new C(0, 0, 0);
+					c._css = c0;
+					c.toString = function () {
+						return this._css;
+					};
+					return c;
 				}
 
 				if ($._colorFormat == 1) {
