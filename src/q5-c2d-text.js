@@ -1,4 +1,4 @@
-Q5.renderers.q2d.text = ($, q) => {
+Q5.renderers.c2d.text = ($, q) => {
 	$._textAlign = 'left';
 	$._textBaseline = 'alphabetic';
 	$._textSize = 12;

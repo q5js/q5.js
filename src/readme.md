@@ -1,44 +1,44 @@
 # q5.js Source Documentation
 
-For modular use, the "q5-core.js" module must be loaded first.
+For ES6 modular use, the "q5-core.js" module must be loaded first, which adds `Q5` to the global scope.
 
-```html
-<script src="https://q5js.org/src/q5-core.js"></script>
+```js
+import "https://q5js.org/src/q5-core.js"
 ```
 
 These modules are included in the default "q5.js" bundle:
 
-```html
-<script src="https://q5js.org/src/q5-core.js"></script>
-<script src="https://q5js.org/src/q5-canvas.js"></script>
+```js
+import "https://q5js.org/src/q5-core.js"
+import "https://q5js.org/src/q5-canvas.js"
 
-<script src="https://q5js.org/src/q5-2d-canvas.js"></script>
-<script src="https://q5js.org/src/q5-2d-drawing.js"></script>
-<script src="https://q5js.org/src/q5-2d-image.js"></script>
-<script src="https://q5js.org/src/q5-2d-soft-filters.js"></script>
-<script src="https://q5js.org/src/q5-2d-text.js"></script>
+import "https://q5js.org/src/q5-2d-canvas.js"
+import "https://q5js.org/src/q5-2d-drawing.js"
+import "https://q5js.org/src/q5-2d-image.js"
+import "https://q5js.org/src/q5-2d-soft-filters.js"
+import "https://q5js.org/src/q5-2d-text.js"
 
-<script src="https://q5js.org/src/q5-ai.js"></script>
-<script src="https://q5js.org/src/q5-color.js"></script>
-<script src="https://q5js.org/src/q5-display.js"></script>
-<script src="https://q5js.org/src/q5-input.js"></script>
-<script src="https://q5js.org/src/q5-math.js"></script>
-<script src="https://q5js.org/src/q5-sound.js"></script>
-<script src="https://q5js.org/src/q5-util.js"></script>
-<script src="https://q5js.org/src/q5-vector.js"></script>
+import "https://q5js.org/src/q5-ai.js"
+import "https://q5js.org/src/q5-color.js"
+import "https://q5js.org/src/q5-display.js"
+import "https://q5js.org/src/q5-input.js"
+import "https://q5js.org/src/q5-math.js"
+import "https://q5js.org/src/q5-sound.js"
+import "https://q5js.org/src/q5-util.js"
+import "https://q5js.org/src/q5-vector.js"
 
-<script src="https://q5js.org/src/q5-webgpu-canvas.js"></script>
-<script src="https://q5js.org/src/q5-webgpu-drawing.js"></script>
-<script src="https://q5js.org/src/q5-webgpu-image.js"></script>
-<script src="https://q5js.org/src/q5-webgpu-text.js"></script>
+import "https://q5js.org/src/q5-webgpu-canvas.js"
+import "https://q5js.org/src/q5-webgpu-drawing.js"
+import "https://q5js.org/src/q5-webgpu-image.js"
+import "https://q5js.org/src/q5-webgpu-text.js"
 ```
 
 Additional modules:
 
-```html
-<script src="https://q5js.org/src/q5-dom.js"></script>
-<script src="https://q5js.org/src/q5-noisier.js"></script>
-<script src="https://q5js.org/src/q5-sensors.js"></script>
+```js
+import "https://q5js.org/src/q5-dom.js"
+import "https://q5js.org/src/q5-noisier.js"
+import "https://q5js.org/src/q5-sensors.js"
 ```
 
 # Module Info
@@ -47,11 +47,11 @@ Additional modules:
 - [Module Info](#module-info)
   - [q5-core](#q5-core)
   - [q5-canvas](#q5-canvas)
-  - [q2d-canvas](#q2d-canvas)
-  - [q5-q2d-drawing](#q5-q2d-drawing)
-  - [q5-q2d-image](#q5-q2d-image)
-  - [q5-q2d-soft-filters](#q5-q2d-soft-filters)
-  - [q5-q2d-text](#q5-q2d-text)
+  - [c2d-canvas](#c2d-canvas)
+  - [c2d-drawing](#c2d-drawing)
+  - [c2d-image](#c2d-image)
+  - [c2d-soft-filters](#c2d-soft-filters)
+  - [c2d-text](#c2d-text)
   - [webgpu-canvas](#webgpu-canvas)
   - [webgpu-drawing](#webgpu-drawing)
   - [webgpu-image](#webgpu-image)
@@ -75,35 +75,31 @@ It loads other modules by passing `$` (alias for `this`) and `q` (which in globa
 
 The canvas module provides shared functionality for all canvas renderers, such as adding the canvas to the DOM, resizing the canvas, setting pixel density.
 
-## q2d-canvas
+## c2d-canvas
 
-Adds Canvas2D rendering support to q5.
+Adds CanvasRenderingContext2D (aka Canvas2D) rendering support to q5.
 
-All other 2D modules depend on this module.
+All other c2d modules depend on this module.
 
 Though loading q5-color is recommend, it's not required since `fill` and `stroke` can be set to a CSS color string.
 
-## q5-q2d-drawing
+## c2d-drawing
 
 Adds Canvas2D drawing functions to q5.
 
-## q5-q2d-image
+## c2d-image
 
 Adds Canvas2D image support to q5.
 
-The filters in q5-image use the [CanvasRenderingContext2D.filter](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter) property to apply native hardware-accelerated filters to images.
+Image filters use the [CanvasRenderingContext2D.filter](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter) property to apply native hardware-accelerated filters to images.
 
-## q5-q2d-soft-filters
+## c2d-soft-filters
 
-Software implementation of image filters.
+Software based image filters, which are slow.
 
-This module includes additional filters not implemented in q5-image and legacy filter support for Safari which lacks `ctx.filter`.
+This module includes additional filters and legacy filter support for Safari which lacks hardware-accelerated filters. As of April 2024, Safari Technology Preview only supports `ctx.filter` under a flag.
 
-These filters are slow. Real-time use of them is not recommended.
-
-As of April 2024, Safari Technology Preview supports `ctx.filter` under a flag. Hopefully in the near future this module can be omitted from the default bundle.
-
-## q5-q2d-text
+## c2d-text
 
 Adds Canvas2D text rendering support to q5.
 
@@ -115,7 +111,7 @@ Image based features in this module require the q5-2d-image module.
 
 [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) is the successor to WebGL. It's a modern graphics API that provides cross-platform, high-performance access to the GPU.
 
-When you intend for a sketch to use WebGPU, but WebGPU is not supported on a viewer's browser, q5 will put a warning in the console, apply a compatibility layer, and display the sketch with the fallback q2d renderer. As of November 2024, WebGPU is only supported in Google Chrome and Edge.
+When you intend for a sketch to use WebGPU, but WebGPU is not supported on a viewer's browser, q5 will put a warning in the console, apply a compatibility layer, and display the sketch with the fallback c2d renderer. As of November 2024, WebGPU is only supported in Google Chrome and Edge.
 
 To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables.
 

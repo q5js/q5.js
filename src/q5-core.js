@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.14
+ * @version 2.15
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -11,7 +11,7 @@ function Q5(scope, parent, renderer) {
 	$._parent = parent;
 	if (renderer == 'webgpu-fallback') {
 		$._webgpuFallback = true;
-		$._renderer = 'q2d';
+		$._renderer = 'c2d';
 	} else {
 		$._renderer = renderer || Q5.render;
 	}
@@ -275,7 +275,7 @@ function Q5(scope, parent, renderer) {
 	else setTimeout(_start, 32);
 }
 
-Q5.render = 'q2d';
+Q5.render = 'c2d';
 
 Q5.renderers = {};
 Q5.modules = {};
@@ -310,7 +310,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.14';
+Q5.version = Q5.VERSION = '2.15';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

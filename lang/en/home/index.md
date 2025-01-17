@@ -2,19 +2,29 @@
 
 ## Create art with q5.js! 🎨
 
-**q5.js** is a spiritual successor to the [p5.js](https://p5js.org) and [Processing Java](https://processing.org/) graphics libraries.
+**q5.js** is a spiritual successor to the [p5.js](https://p5js.org) and [Processing Java](https://processing.org/) graphics libraries. ⭐️
 
-It was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.
+- performance optimized for interactive art 🚀
+- includes a brand new renderer powered by WebGPU 💪
+- up to 32x faster than p5.js 🏎️
+- HDR color support 🌈
+- compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org) 🎮
+- no dependencies, less than 100kb minified 📦
+- LGPL licensed (just like p5.js) 🆓
 
-If you're already familiar with p5, you'll find yourself right at home with q5. It's also compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org).
+q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners. 🤝
+
+# 1-1
+
+If you're already familiar with p5, you'll find yourself right at home with q5. 🏡
 
 # 2-0
 
 ## Blazing fast! 🚀
 
-q5 is performance optimized for the modern web. Create interactive art that runs in real-time on more devices than ever before. 🏎️
-
 [Draw up to 32x more](https://github.com/q5js/q5.js/wiki/Developer-Log) per frame with [q5 WebGPU](https://developer.mozilla.org/docs/Web/API/WebGPU_API), compared to the limits of p5. Or save battery by getting the same results with less power consumption. 🌱
+
+Switching from p5 to q5 is like getting a free computer upgrade. 🎉
 
 # 3-0
 
@@ -42,7 +52,9 @@ You can [use q5 offline](https://github.com/q5js/q5.js/wiki/Get-Started) or add 
 
 ## Support q5 💙
 
-Support the development of q5 on [Patreon](https://www.patreon.com/c/p5play) or [GitHub Sponsors](https://github.com/sponsors/quinton-ashley).
+q5 is open source and anyone can use it for free under the terms of the LGPL (just like p5.js). 🎉
+
+We need your support though! If you enjoy using q5.js, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/q5play).
 
 # 4-0
 
@@ -122,9 +134,9 @@ Make it "centered", "maxed", or "fullscreen" without clipping or changing the as
 
 ## Credits 🌟
 
-This project aims to be the spiritual successor to the invaluable work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/), [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org), and all contributors to these projects.
+This project aims to be the spiritual successor to the incredible work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/), [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org), and all contributors to these projects.
 
-The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended his codebase.
+The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended the unmaintained codebase.
 
 q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley) and [@Tezumie](https://github.com/Tezumie).
 

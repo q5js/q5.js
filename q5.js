@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.14
+ * @version 2.15
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -11,7 +11,7 @@ function Q5(scope, parent, renderer) {
 	$._parent = parent;
 	if (renderer == 'webgpu-fallback') {
 		$._webgpuFallback = true;
-		$._renderer = 'q2d';
+		$._renderer = 'c2d';
 	} else {
 		$._renderer = renderer || Q5.render;
 	}
@@ -275,7 +275,7 @@ function Q5(scope, parent, renderer) {
 	else setTimeout(_start, 32);
 }
 
-Q5.render = 'q2d';
+Q5.render = 'c2d';
 
 Q5.renderers = {};
 Q5.modules = {};
@@ -310,7 +310,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.14';
+Q5.version = Q5.VERSION = '2.15';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -684,9 +684,9 @@ Q5.canvasOptions = {
 if (!window.matchMedia || !matchMedia('(dynamic-range: high) and (color-gamut: p3)').matches) {
 	Q5.canvasOptions.colorSpace = 'srgb';
 } else Q5.supportsHDR = true;
-Q5.renderers.q2d = {};
+Q5.renderers.c2d = {};
 
-Q5.renderers.q2d.canvas = ($, q) => {
+Q5.renderers.c2d.canvas = ($, q) => {
 	let c = $.canvas;
 
 	if ($.colorMode) {
@@ -886,7 +886,7 @@ Q5.renderers.q2d.canvas = ($, q) => {
 		return vid;
 	};
 };
-Q5.renderers.q2d.drawing = ($) => {
+Q5.renderers.c2d.drawing = ($) => {
 	$._doStroke = true;
 	$._doFill = true;
 	$._strokeSet = false;
@@ -1285,7 +1285,7 @@ Q5.renderers.q2d.drawing = ($) => {
 		return $.ctx.isPointInStroke(x * pd, y * pd);
 	};
 };
-Q5.renderers.q2d.image = ($, q) => {
+Q5.renderers.c2d.image = ($, q) => {
 	class Q5Image {
 		constructor(w, h, opt) {
 			let $ = this;
@@ -1293,7 +1293,7 @@ Q5.renderers.q2d.image = ($, q) => {
 			$.canvas = $.ctx = $.drawingContext = null;
 			$.pixels = [];
 			Q5.modules.canvas($, $);
-			let r = Q5.renderers.q2d;
+			let r = Q5.renderers.c2d;
 			for (let m of ['canvas', 'image', 'soft_filters']) {
 				if (r[m]) r[m]($, $);
 			}
@@ -1616,7 +1616,7 @@ Q5.renderers.q2d.image = ($, q) => {
 	$.noTint = () => ($._tint = null);
 };
 /* software implementation of image filters */
-Q5.renderers.q2d.soft_filters = ($) => {
+Q5.renderers.c2d.soft_filters = ($) => {
 	let u = null; // uint8 temporary buffer
 
 	function ensureBuf() {
@@ -1760,7 +1760,7 @@ Q5.renderers.q2d.soft_filters = ($) => {
 		$.ctx.putImageData(imgData, 0, 0);
 	};
 };
-Q5.renderers.q2d.text = ($, q) => {
+Q5.renderers.c2d.text = ($, q) => {
 	$._textAlign = 'left';
 	$._textBaseline = 'alphabetic';
 	$._textSize = 12;
@@ -3601,7 +3601,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	c.width = $.width = 500;
 	c.height = $.height = 500;
 
-	// q2d graphics context
+	// c2d graphics context
 	$._g = $.createGraphics(1, 1);
 
 	if ($.colorMode) $.colorMode('rgb', 1);
@@ -3920,6 +3920,12 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		matrix = matrices[idx].slice();
 		$._matrixIndex = idx;
 		$._matrixDirty = false;
+	};
+
+	let _pushStyles = $.pushStyles;
+	$.pushStyles = () => {
+		_pushStyles();
+		$.strokeWeight($._strokeWeight);
 	};
 
 	$.push = () => {

@@ -1,10 +1,20 @@
 # <img src="https://q5js.org/q5js_logo.webp" height="64"> <img src="https://q5js.org/q5js_brand.webp" height="64">
 
-[**q5.js**](https://q5js.org) is a spiritual successor to the [p5.js][] and [Processing Java][] graphics libraries.
+## Visit [q5js.org](https://q5js.org)! 🌟
 
-q5 was designed to make creative coding even more fun and accessible for a new generation of artists, educators, and beginners!
+[q5.js](https://q5js.org) is a spiritual successor to the [p5.js][] and [Processing Java][] graphics libraries.
 
-If you're already familiar with p5, you'll find yourself right at home with q5. It's also compatible with popular addons, including [p5.sound][] and [p5play][].
+- performance optimized for interactive art 🚀
+- includes a brand new renderer powered by WebGPU 💪
+- up to 32x faster than p5.js 🏎️
+- HDR color support 🌈
+- compatible with popular addons, including [p5.sound][] and [p5play][] 🎮
+- no dependencies, less than 100kb minified 📦
+- LGPL licensed (just like p5.js) 🆓
+
+q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners. 🤝
+
+If you're already familiar with p5, you'll find yourself right at home with q5. 🏡
 
 ```js
 function setup() {
@@ -13,40 +23,11 @@ function setup() {
 }
 ```
 
-## No Installation Required
-
-Try out the [q5.js template sketch](https://aijs.io/editor?user=quinton-ashley&project=logoSpin) for the Aijs online code editor.
-
-Use q5.js in your own project by adding this line to your HTML file:
-
-```html
-<script src="https://q5js.org/q5.js"></script>
-```
-
-q5 is also available on [npm](https://www.npmjs.com/package/q5)!
-
-```bash
-npm install q5
-```
-
-## Using p5 Addon Libraries
-
-q5 is compatible with popular p5 addons and projects that use p5, such as [p5play][], because it aliases `Q5` to `p5`.
-
-To use addons, simply load them after q5.js:
-
-```html
-<script src="https://q5js.org/q5.js"></script>
-<!-- load p5 addons after q5 -->
-<script src="https://p5play.org/v3/planck.min.js"></script>
-<script src="https://p5play.org/v3/p5play.js"></script>
-```
-
 ## Documentation
 
 Browse the [q5 reference pages](https://q5js.org/learn) to learn how to use q5.js.
 
-See the [wiki](https://github.com/q5js/q5.js/wiki) for extended documentation of q5's exclusive features.
+See the [wiki](https://github.com/q5js/q5.js/wiki) for extended documentation.
 
 Use the [q5.d.ts](q5.d.ts) file in Visual Studio Code to get autocompletion and inline hover-over documentation. Simply add this `jsconfig.json` file to your project folder:
 
@@ -59,27 +40,21 @@ Use the [q5.d.ts](q5.d.ts) file in Visual Studio Code to get autocompletion and 
 }
 ```
 
-## Support this project 🤝
+## Support q5 💙
 
 q5 is open source and anyone can use it for free under the terms of the LGPL (just like p5.js). 🎉
 
 We need your support though! If you enjoy using q5.js, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/p5play).
 
-## Modular Use
-
-q5 has no dependencies and the default bundle is just 126kb unminified.
-
-But for extremely lightweight use, you can load a subset of scripts from the `src` folder. See the [src/readme.md](src/readme.md) for more info on modular use.
-
 ## Contributing
 
-Please report issues or comment on existing issues before working on a pull request.
+Are you interested in volunteering to write code for q5.js or improve the q5 ecosystem? Contributions are welcome!
 
-Check out the [q5 planning board](https://github.com/orgs/q5js/projects/1/views/1).
+Please report issues or comment on existing issues before working on a pull request. Check out the [q5 planning board](https://github.com/orgs/q5js/projects/1/views/1).
 
-If the q5 project is successful, all contributing developers will be paid for their work. The project will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative).
+All contributors must agree to the [code of conduct](CODE_OF_CONDUCT.md).
 
-Contributors must agree to the [code of conduct](CODE_OF_CONDUCT.md).
+If the q5 project becomes as successful as The Processing Foundation, all contributing developers will be fairly paid for their work. The project will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative).
 
 ## Licensing
 

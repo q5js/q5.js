@@ -1,6 +1,6 @@
-Q5.renderers.q2d = {};
+Q5.renderers.c2d = {};
 
-Q5.renderers.q2d.canvas = ($, q) => {
+Q5.renderers.c2d.canvas = ($, q) => {
 	let c = $.canvas;
 
 	if ($.colorMode) {

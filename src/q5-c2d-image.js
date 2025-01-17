@@ -1,4 +1,4 @@
-Q5.renderers.q2d.image = ($, q) => {
+Q5.renderers.c2d.image = ($, q) => {
 	class Q5Image {
 		constructor(w, h, opt) {
 			let $ = this;
@@ -6,7 +6,7 @@ Q5.renderers.q2d.image = ($, q) => {
 			$.canvas = $.ctx = $.drawingContext = null;
 			$.pixels = [];
 			Q5.modules.canvas($, $);
-			let r = Q5.renderers.q2d;
+			let r = Q5.renderers.c2d;
 			for (let m of ['canvas', 'image', 'soft_filters']) {
 				if (r[m]) r[m]($, $);
 			}

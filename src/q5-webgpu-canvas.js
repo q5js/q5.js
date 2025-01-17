@@ -11,7 +11,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	c.width = $.width = 500;
 	c.height = $.height = 500;
 
-	// q2d graphics context
+	// c2d graphics context
 	$._g = $.createGraphics(1, 1);
 
 	if ($.colorMode) $.colorMode('rgb', 1);
@@ -330,6 +330,12 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		matrix = matrices[idx].slice();
 		$._matrixIndex = idx;
 		$._matrixDirty = false;
+	};
+
+	let _pushStyles = $.pushStyles;
+	$.pushStyles = () => {
+		_pushStyles();
+		$.strokeWeight($._strokeWeight);
 	};
 
 	$.push = () => {

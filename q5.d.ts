@@ -243,7 +243,7 @@ function draw() {
 		 * anywhere in your code. You can also start Q5 in global mode by 
 		 * running [`createCanvas`](https://q5js.org/learn/#canvas-createCanvas).
 		 * 
-		 * By default q5 uses the CanvasRenderingContext2D based q2d renderer.
+		 * By default q5 uses the CanvasRenderingContext2D based c2d renderer.
 		 * 
 		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
 		 * @param {string | Function} [scope]
@@ -1389,7 +1389,7 @@ text(info, 12, 30, 20, 6);
 	 * Loads a font from a URL and optionally runs a callback function
 	 * with the font name once it's loaded.
 	 * 
-	 * In q5 q2d, you can load fonts in any format accepted in CSS, such as
+	 * In q5 c2d, you can load fonts in any format accepted in CSS, such as
 	 * .ttf and .otf files.
 	 * 
 	 * The example below loads "Robotica.ttf" created by Courtney Novits:
@@ -1422,7 +1422,7 @@ function setup() {
 	 * By default, the font is set to "sans-serif" or the last font
 	 * loaded.
 	 * 
-	 * In q5 q2d, you can set the font to any font accepted in CSS,
+	 * In q5 c2d, you can set the font to any font accepted in CSS,
 	 * such as "serif" or "monospace".
 	 * https://developer.mozilla.org/en-US/docs/Web/CSS/font-family
 	 * @param {string} fontName name of the font or font family
@@ -1664,7 +1664,7 @@ function draw() {
 	/** 🎨
 	 * Sets the color mode for the sketch. Changes the type of color object created by color functions.
 	 * 
-	 * In q2d, the default color mode is RGB in legacy integer format.
+	 * In c2d, the default color mode is RGB in legacy integer format.
 	 *
 	 * In WebGPU, the default color mode is RGB in float format.
 	 * 

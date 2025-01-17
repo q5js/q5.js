@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "2.14.6",
+	"version": "2.15.0",
 	"description": "A sequel to p5.js that's optimized for interactive art",
 	"author": "quinton-ashley",
 	"contributors": [
@@ -11,7 +11,7 @@
 	"homepage": "https://q5js.org/home",
 	"main": "q5-server.js",
 	"scripts": {
-		"bundle": "cat src/q5-core.js src/q5-canvas.js src/q5-2d-canvas.js src/q5-2d-drawing.js src/q5-2d-image.js src/q5-2d-soft-filters.js src/q5-2d-text.js src/q5-ai.js src/q5-color.js src/q5-display.js src/q5-input.js src/q5-math.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu-canvas.js src/q5-webgpu-drawing.js src/q5-webgpu-image.js src/q5-webgpu-text.js > q5.js",
+		"bundle": "cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-drawing.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-ai.js src/q5-color.js src/q5-display.js src/q5-input.js src/q5-math.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu-canvas.js src/q5-webgpu-drawing.js src/q5-webgpu-image.js src/q5-webgpu-text.js > q5.js",
 		"min": "terser q5.js --compress ecma=2024 --mangle > q5.min.js",
 		"dist": "bun bundle && bun min",
 		"dist-p5play": "bun dist && cp q5.js ../../web/p5play-web/v3/q5.js && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
