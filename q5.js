@@ -3178,13 +3178,17 @@ Q5.modules.sound = ($, q) => {
 		q._preloadCount++;
 		let s = new Q5.Sound(path, cb);
 		s.crossOrigin = 'Anonymous';
-		s.addEventListener('canplaythrough', () => {
+		s.addEventListener('loadeddata', () => {
 			if (!s.loaded) {
 				q._preloadCount--;
 				s.loaded = true;
 				if (Q5.aud) s.init();
 				if (cb) cb(s);
 			}
+		});
+		s.addEventListener('error', (e) => {
+			q._preloadCount--;
+			throw e;
 		});
 		sounds.push(s);
 		return s;
