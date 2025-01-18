@@ -3229,8 +3229,8 @@ if (window.OfflineAudioContext) {
 
 Q5.Sound = class {
 	constructor() {
-		this.loaded = false;
 		this.sources = new Set();
+		this.loaded = this.paused = false;
 	}
 
 	async load(url) {
@@ -3251,36 +3251,93 @@ Q5.Sound = class {
 		if (this._pan) this.pan = this._pan;
 	}
 
-	play(time = 0, duration) {
-		if (!this.loaded) return;
-		const source = Q5.aud.createBufferSource();
+	_newSource(offset, duration) {
+		let source = Q5.aud.createBufferSource();
 		source.buffer = this.buffer;
 		source.connect(this.gainNode);
-		source.start(0, time, duration);
+		source.loop = this._loop;
+
+		source._startedAt = Q5.aud.currentTime;
+		source._offset = offset;
+		source._duration = duration;
+
+		source.start(0, source._offset, source._duration);
+
 		this.sources.add(source);
-		source.onended = () => this.sources.delete(source);
-		return source;
+		source.onended = () => {
+			if (!this.paused) {
+				this.ended = true;
+				this.sources.delete(source);
+			}
+		};
+	}
+
+	play(time = 0, duration) {
+		if (!this.loaded) return;
+
+		if (!this.paused) {
+			this._newSource(time, duration);
+		} else {
+			let timings = [];
+			for (let source of this.sources) {
+				timings.push(source._offset, source._duration);
+				this.sources.delete(source);
+			}
+			for (let i = 0; i < timings.length; i += 2) {
+				this._newSource(timings[i], timings[i + 1]);
+			}
+		}
+
+		this.paused = this.ended = false;
+	}
+
+	pause() {
+		if (!this.isPlaying()) return;
+
+		for (let source of this.sources) {
+			source.stop();
+			let timePassed = Q5.aud.currentTime - source._startedAt;
+			source._offset += timePassed;
+			if (source._duration) source._duration -= timePassed;
+		}
+		this.paused = true;
 	}
 
 	stop() {
-		this.sources.forEach((source) => {
+		for (let source of this.sources) {
 			source.stop();
 			this.sources.delete(source);
-		});
+		}
+		this.paused = false;
+		this.ended = true;
 	}
 
+	get volume() {
+		return this._volume;
+	}
 	set volume(level) {
 		if (this.loaded) this.gainNode.gain.value = level;
-		else this._volume = level;
+		this._volume = level;
 	}
 
+	get pan() {
+		return this._pan;
+	}
 	set pan(value) {
 		if (this.loaded) this.pannerNode.pan.value = value;
-		else this._pan = value;
+		this._pan = value;
 	}
 
+	get loop() {
+		return this._loop;
+	}
 	set loop(value) {
-		this.sources.forEach((source) => (source.loop = loop));
+		this.sources.forEach((source) => (source.loop = value));
+		this._loop = value;
+	}
+
+	get playing() {
+		return !this.paused && this.sources.size > 0;
 	}
 
 	// backwards compatibility
@@ -3297,7 +3354,13 @@ Q5.Sound = class {
 		return this.loaded;
 	}
 	isPlaying() {
-		return this.sources.size > 0;
+		return this.playing;
+	}
+	isPaused() {
+		return this.paused;
+	}
+	isLooping() {
+		return this._loop;
 	}
 };
 Q5.modules.util = ($, q) => {

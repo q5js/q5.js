@@ -156,7 +156,7 @@ function draw() {
 
 	/** ⭐️
 	 * Logs a message to the JavaScript console. Alias for the standard
-	 * [`console.log`](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static) function.
+	 * [`console.log`](https://developer.mozilla.org/docs/Web/API/console/log_static) function.
 	 * 
 	 * You can open web developer tools in most browsers by using the 
 	 * keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
@@ -1294,7 +1294,7 @@ function setup() {
 	 * See the documentation for q5's filter constants below for more info.
 	 * 
 	 * A CSS filter string can also be used.
-	 * https://developer.mozilla.org/en-US/docs/Web/CSS/filter
+	 * https://developer.mozilla.org/docs/Web/CSS/filter
 	 * @param {string} type filter type or a CSS filter string
 	 * @param {number} [value] optional value, depends on filter type
 	 * @example
@@ -1424,7 +1424,7 @@ function setup() {
 	 * 
 	 * In q5 c2d, you can set the font to any font accepted in CSS,
 	 * such as "serif" or "monospace".
-	 * https://developer.mozilla.org/en-US/docs/Web/CSS/font-family
+	 * https://developer.mozilla.org/docs/Web/CSS/font-family
 	 * @param {string} fontName name of the font or font family
 	 * @example
 createCanvas(200, 200);
@@ -1865,7 +1865,7 @@ function draw() {
 	let touches: any[];
 
 	/** 🖲️
-	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) or image.
+	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/docs/Web/CSS/cursor) or image.
 	 * If an image is provided, optional x and y coordinates can
 	 * specify the active point of the cursor.
 	 * @param {string} name name of the cursor or the path to an image
@@ -2063,34 +2063,24 @@ noCursor();
 
 	// 🔊 sound
 
-	class Sound extends Audio {
-		/** 🔊
-		 * Creates a new `Sound` object that extends [`Audio`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement/Audio).
-		 * 
-		 * See the `loadSound` documentation for more info and example usage.
-		 * @param {string} path path to the sound file
-		 */
-		constructor(path: string);
-	}
-
 	/** 🔊
-	 * Creates a Q5.Sound object which extends
-	 * [`Audio`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement/Audio).
+	 * Loads audio data from a file and returns a `Q5.Sound` object that 
+	 * provides low latency sound mixing powered by WebAudio.
 	 * 
-	 * Set properties like `volume` and `loop` to adjust playback 
-	 * settings. Use functions like `play`, `pause`, and `stop` to 
-	 * control playback. Use getters like `loaded`, `paused`, and `ended`
-	 * to check the sound's status.
-	 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
+	 * Use functions like `play`, `pause`, and `stop` to 
+	 * control playback. Note that sounds can only be played after the 
+	 * first user interaction with the page!
 	 * 
+	 * Set `volume` to a value between 0 (silent) and 1 (full volume).
 	 * Set `pan` to a value between -1 (left) and 1 (right) to adjust
-	 * the sound's stereo position.
+	 * the sound's stereo position. Set `loop` to true to loop the sound.
 	 * 
-	 * For backwards compatibility with the p5.sound v1 API, the functions 
+	 * Use `loaded`, `paused`, and `ended` to check the sound's status.
+	 * 
+	 * For backwards compatibility with the p5.sound API, the functions 
 	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 	 * are also implemented, but their use is deprecated.
-	 * @param {string} path path to the sound file
-	 * @param {(a: Sound) => void} [cb] an optional callback function that is called when the sound is ready to play
+	 * @param {string} url path to the sound file
 	 * @returns {Sound} a new `Sound` object
 	 * @example
 createCanvas(200, 200);
@@ -2102,7 +2092,19 @@ function mousePressed() {
 	sound.play();
 }
 	 */
-	function loadSound(path: string, cb?: (a: Sound) => void): Sound;
+	function loadSound(url: string): Sound;
+
+	/**
+	 * Loads audio data from a file and returns an HTMLAudioElement.
+	 * https://developer.mozilla.org/docs/Web/API/HTMLMediaElement
+	 * 
+	 * Audio is considered loaded when the canplaythrough event is fired.
+	 * 
+	 * Note that audio can only be played after the first user 
+	 * interaction with the page!
+	 * @param url path to the audio file
+	 */
+	function loadAudio(url: string): Audio;
 
 	/** 🔊
 	 * Returns the AudioContext in use or undefined if it doesn't exist.
@@ -2115,6 +2117,16 @@ function mousePressed() {
 	 * @returns {Promise<void>} a promise that resolves when the AudioContext is resumed
 	 */
 	function userStartAudio(): Promise<void>;
+
+	class Sound {
+		/** 🔊
+		 * Creates a new `Q5.Sound` object.
+		 * 
+		 * See the `loadSound` documentation for more info.
+		 * @param {string} url path to the sound file
+		 */
+		constructor(url: string);
+	}
 
 	// 🛠️ utilities
 
