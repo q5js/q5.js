@@ -2,10 +2,14 @@ Q5.modules.sound = ($, q) => {
 	$.Sound = Q5.Sound;
 	let sounds = [];
 
-	$.loadSound = (url) => {
+	$.loadSound = (url, cb) => {
 		q._preloadCount++;
 		let s = new Q5.Sound();
-		s.load(url).finally(() => q._preloadCount--);
+		s.load(url)
+			.then(() => {
+				if (cb) cb(s);
+			})
+			.finally(() => q._preloadCount--);
 		sounds.push(s);
 		return s;
 	};
@@ -18,7 +22,6 @@ Q5.modules.sound = ($, q) => {
 			if (!a.loaded) {
 				q._preloadCount--;
 				a.loaded = true;
-				if (Q5.aud) a.init();
 				if (cb) cb(a);
 			}
 		});
@@ -38,7 +41,8 @@ Q5.modules.sound = ($, q) => {
 
 	$.userStartAudio = () => {
 		if (window.AudioContext) {
-			if (!Q5.aud) {
+			if (Q5._offlineAudio) {
+				Q5._offlineAudio = false;
 				Q5.aud = new window.AudioContext();
 				for (let s of sounds) s.init();
 			}
@@ -46,6 +50,11 @@ Q5.modules.sound = ($, q) => {
 		}
 	};
 };
+
+if (window.OfflineAudioContext) {
+	Q5.aud = new window.OfflineAudioContext(2, 1, 44100);
+	Q5._offlineAudio = true;
+}
 
 Q5.Sound = class {
 	constructor() {
@@ -57,10 +66,10 @@ Q5.Sound = class {
 		this.url = url;
 		let res = await fetch(url);
 		this.buffer = await res.arrayBuffer();
+		this.buffer = await Q5.aud.decodeAudioData(this.buffer);
 	}
 
-	async init() {
-		this.buffer = await Q5.aud.decodeAudioData(this.buffer);
+	init() {
 		this.gainNode = Q5.aud.createGain();
 		this.pannerNode = Q5.aud.createStereoPanner();
 		this.gainNode.connect(this.pannerNode);
