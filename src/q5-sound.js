@@ -1,28 +1,41 @@
 Q5.modules.sound = ($, q) => {
 	$.Sound = Q5.Sound;
-
 	let sounds = [];
 
-	$.loadSound = (path, cb) => {
+	$.loadSound = (url) => {
 		q._preloadCount++;
-		let s = new Q5.Sound(path, cb);
-		s.crossOrigin = 'Anonymous';
-		s.addEventListener('loadeddata', () => {
-			if (!s.loaded) {
-				q._preloadCount--;
-				s.loaded = true;
-				if (Q5.aud) s.init();
-				if (cb) cb(s);
-			}
-		});
-		s.addEventListener('error', (e) => {
-			q._preloadCount--;
-			throw e;
-		});
+		let s = new Q5.Sound();
+		s.load(url).finally(() => q._preloadCount--);
 		sounds.push(s);
 		return s;
 	};
+
+	$.loadAudio = (url, cb) => {
+		q._preloadCount++;
+		let a = new Audio(url);
+		a.crossOrigin = 'Anonymous';
+		a.addEventListener('canplaythrough', () => {
+			if (!a.loaded) {
+				q._preloadCount--;
+				a.loaded = true;
+				if (Q5.aud) a.init();
+				if (cb) cb(a);
+			}
+		});
+		let preloadSkip = () => {
+			a._preloadSkip = true;
+			q._preloadCount--;
+		};
+		a.addEventListener('suspend', preloadSkip);
+		a.addEventListener('error', (e) => {
+			preloadSkip();
+			throw e;
+		});
+		return a;
+	};
+
 	$.getAudioContext = () => Q5.aud;
+
 	$.userStartAudio = () => {
 		if (window.AudioContext) {
 			if (!Q5.aud) {
@@ -34,35 +47,76 @@ Q5.modules.sound = ($, q) => {
 	};
 };
 
-if (window.Audio) {
-	Q5.Sound ??= class extends Audio {
-		init() {
-			let s = this;
-			s.panner = Q5.aud.createStereoPanner();
-			s.source = Q5.aud.createMediaElementSource(s);
-			s.source.connect(s.panner);
-			s.panner.connect(Q5.aud.destination);
-			let pan = s.pan;
-			Object.defineProperty(s, 'pan', {
-				get: () => s.panner.pan.value,
-				set: (v) => (s.panner.pan.value = v)
-			});
-			if (pan) s.pan = pan;
-		}
-		setVolume(level) {
-			this.volume = level;
-		}
-		setLoop(loop) {
-			this.loop = loop;
-		}
-		setPan(value) {
-			this.pan = value;
-		}
-		isLoaded() {
-			return this.loaded;
-		}
-		isPlaying() {
-			return !this.paused;
-		}
-	};
-}
+Q5.Sound = class {
+	constructor() {
+		this.loaded = false;
+		this.sources = new Set();
+	}
+
+	async load(url) {
+		this.url = url;
+		let res = await fetch(url);
+		this.buffer = await res.arrayBuffer();
+	}
+
+	async init() {
+		this.buffer = await Q5.aud.decodeAudioData(this.buffer);
+		this.gainNode = Q5.aud.createGain();
+		this.pannerNode = Q5.aud.createStereoPanner();
+		this.gainNode.connect(this.pannerNode);
+		this.pannerNode.connect(Q5.aud.destination);
+
+		this.loaded = true;
+		if (this._volume) this.volume = this._volume;
+		if (this._pan) this.pan = this._pan;
+	}
+
+	play(time = 0, duration) {
+		if (!this.loaded) return;
+		const source = Q5.aud.createBufferSource();
+		source.buffer = this.buffer;
+		source.connect(this.gainNode);
+		source.start(0, time, duration);
+		this.sources.add(source);
+		source.onended = () => this.sources.delete(source);
+		return source;
+	}
+
+	stop() {
+		this.sources.forEach((source) => {
+			source.stop();
+			this.sources.delete(source);
+		});
+	}
+
+	set volume(level) {
+		if (this.loaded) this.gainNode.gain.value = level;
+		else this._volume = level;
+	}
+
+	set pan(value) {
+		if (this.loaded) this.pannerNode.pan.value = value;
+		else this._pan = value;
+	}
+
+	set loop(value) {
+		this.sources.forEach((source) => (source.loop = loop));
+	}
+
+	// backwards compatibility
+	setVolume(level) {
+		this.volume = level;
+	}
+	setPan(value) {
+		this.pan = value;
+	}
+	setLoop(loop) {
+		this.loop = loop;
+	}
+	isLoaded() {
+		return this.loaded;
+	}
+	isPlaying() {
+		return this.sources.size > 0;
+	}
+};
