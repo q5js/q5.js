@@ -55,28 +55,33 @@ Q5.renderers.c2d.image = ($, q) => {
 		let g = $.createImage(1, 1, opt);
 		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
 
-		function loaded(img) {
-			img._pixelDensity = pd;
-			g.defaultWidth = img.width * $._defaultImageScale;
-			g.defaultHeight = img.height * $._defaultImageScale;
-			g.naturalWidth = img.naturalWidth || img.width;
-			g.naturalHeight = img.naturalHeight || img.height;
-			g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
-
-			g.ctx.drawImage(img, 0, 0);
-			q._preloadCount--;
-			if (cb) cb(g);
-		}
-
 		let img = new window.Image();
 		img.crossOrigin = 'Anonymous';
-		img.onload = () => loaded(img);
-		img.onerror = (e) => {
-			q._preloadCount--;
-			throw e;
-		};
+
+		g._loader = new Promise((resolve, reject) => {
+			img.onload = () => {
+				img._pixelDensity = pd;
+				g.defaultWidth = img.width * $._defaultImageScale;
+				g.defaultHeight = img.height * $._defaultImageScale;
+				g.naturalWidth = img.naturalWidth || img.width;
+				g.naturalHeight = img.naturalHeight || img.height;
+				g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
+
+				g.ctx.drawImage(img, 0, 0);
+				q._preloadCount--;
+				if (cb) cb(g);
+				delete g._loader;
+				resolve(g);
+			};
+			img.onerror = (e) => {
+				q._preloadCount--;
+				reject(e);
+			};
+		});
+
 		img.src = url;
 
+		if ($._disablePreload) return g._loader;
 		return g;
 	};
 

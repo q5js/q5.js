@@ -150,114 +150,6 @@ function draw() {
 		</div>
 	</div>
 
-	<div id="reel4" class="reel">
-		<md id="md4-0">
-<h2 id="more-vibrant-colors-🎨">More vibrant colors! 🎨</h2>
-</md>
-		<div class="minis horiz">
-			<div>
-				<script type="mie/p5" id="SDR" hide-editor="">
-window.calcMiniWidth = () => {
-	let w = min(windowWidth, 1200) - 100;
-	return (w > 700) ? w / 2 : w;
-};
-
-let colors = ['blue', 'yellow', 'cyan', 'lime', 'magenta', 'red', 'white', 'black'];
-
-function setup() {
-	createCanvas(calcMiniWidth(), 200, {
-		colorSpace: 'srgb'
-	});
-	noiseSeed(1);
-}
-
-function draw() {
-	if (!canvas.visible) return;
-
-	darkMode = document.body.classList.contains('dark');
-	if (darkMode) background('#000');
-	else background('#eee');
-
-	let f = frameCount * 0.002;
-	let a = [];
-	for (let i = 0; i < 33; i++) {
-		a.push(noise(i * f * 0.1, f));
-	}
-
-	for (let i = 0; i < 30; i++) {
-		let d = a[i] * 80;
-		fill(colors[i % colors.length]);
-		circle(a[i + 1] * width, a[i + 2] * height, d);
-	}
-}
-
-function windowResized() {
-	resizeCanvas(calcMiniWidth(), 200);
-}
-				</script>
-				<md id="md4-1">
-<p>In p5, bright colors can look dull 😕</p>
-</md>
-			</div>
-			<div>
-				<script type="mie/q5" id="HDR" hide-editor="">
-let colors = ['blue', 'yellow', 'cyan', 'lime', 'magenta', 'red', 'white', 'black'];
-
-function setup() {
-	createCanvas(calcMiniWidth(), 200);
-	noiseSeed(1);
-}
-
-function draw() {
-	if (!canvas.visible) return;
-	
-	darkMode = document.body.classList.contains('dark');
-	if (darkMode) background('#000');
-	else background('#eee');
-
-	let f = frameCount * 0.002;
-	let a = [];
-	for (let i = 0; i < 33; i++) {
-		a.push(noise(i * f * 0.1, f));
-	}
-
-	for (let i = 0; i < 30; i++) {
-		let d = a[i] * 80;
-		fill(colors[i % colors.length]);
-		circle(a[i + 1] * width, a[i + 2] * height, d);
-	}
-}
-
-function windowResized() {
-	resizeCanvas(calcMiniWidth(), 200);
-}
-			</script>
-				<md id="md4-2">
-<p>q5 empowers artists with <a href="https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support" target="_blank">HDR color support</a> 🤩</p>
-</md>
-			</div>
-		</div>
-	</div>
-	<div id="reel5" class="reel">
-		<md id="md5-0">
-<h2 id="more-help-for-beginners-✨">More help for beginners! ✨</h2>
-<p>Why doesn't this code work? <code>text('Hello!')</code> 🤔</p>
-</md>
-		<div class="minis horiz">
-			<md id="md5-1">
-<p>p5's error messages are often too vague, leaving users searching for help. 🙋</p>
-<pre><code>🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
-</code></pre>
-</md>
-			<md id="md5-2">
-<p>Run q5's <code>askAI()</code> before code that isn't working as expected. 🤖</p>
-<pre><code>The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
-
-text('Hello!', 50, 50);
-</code></pre>
-</md>
-		</div>
-	</div>
 	<div id="reel10" class="reel">
 		<div class="minis horiz">
 			<md id="md10-0">
@@ -276,13 +168,13 @@ createCanvas(400, 400);
 			<md id="md10-2">
 <h2 id="lightweight-🪶">Lightweight 🪶</h2>
 <p>p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️</p>
-<p>q5.js is only 111kb, that's 98% smaller. 🌳</p>
-<p>For extremely lightweight use, load only the features you need from the <a href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">q5 source folder</a>. 📦</p>
+<p>q5.js is &lt;140kb, that's 98% smaller. 🌳</p>
+<p>For extremely lightweight use, load only the features you need from the <a href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">q5 source folder</a>. Load q5 using script tags or as JavaScript modules. 📦</p>
 </md>
 			<md id="md10-3">
 <h2 id="frame-your-art-🖼️">Frame your Art 🖼️</h2>
 <p>The <code>displayMode</code> function lets you frame your art within the browser window, no CSS skills required! 📽️</p>
-<p>Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾</p>
+<p>Make a canvas be centered or fill the screen without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾</p>
 </md>
 		</div>
 	</div>
@@ -291,13 +183,13 @@ createCanvas(400, 400);
 		<md id="md20-0">
 <h2 id="credits-🌟">Credits 🌟</h2>
 <p>This project aims to be the spiritual successor to the incredible work done by <a href="https://benfry.com" target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com" target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all contributors to these projects.</p>
-<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain Unlicense license. We forked and significantly extended the unmaintained codebase.</p>
+<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain Unlicense license. We forked and significantly extended the abandoned codebase.</p>
 <p>q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: <a href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.</p>
 </md>
 	</div>
 	<footer>
 		<md id="md100">
-<p>q5js.org was created by the q5 team. Copyright 2024.</p>
+<p>q5js.org was created by the q5 team. Copyright 2024-2025.</p>
 </md>
 	</footer>
 
@@ -394,6 +286,9 @@ createCanvas(400, 400);
 	</script>
 	<script src="/home/mie.js"></script>
 	<script src="main.js"></script>
+
+
+
 
 
 

@@ -112,23 +112,27 @@ class MiniEditor {
 		try {
 			let userCode = this.editor.getValue();
 
-			const q5InstanceRegex = /new\s+Q5\s*\([^)]*\);?/g;
+			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?new\s+Q5\s*\([^)]*\);?/g;
 			userCode = userCode.replace(q5InstanceRegex, '');
 
 			let q = new Q5('instance', outputElement);
 
 			for (let f of q5FunctionNames) {
-				const regex = new RegExp(`function\\s+${f}\\s*\\(`, 'g');
-				userCode = userCode.replace(regex, `q.${f} = function(`);
+				const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');
+				userCode = userCode.replace(regex, (match) => {
+					const isAsync = match.includes('async');
+					return `q.${f} = ${isAsync ? 'async ' : ''}function(`;
+				});
 			}
 
 			const func = new Function(
 				'q',
 				`
-      with (q) {
-        ${userCode}
-      }
-    `
+(async () => {
+	with (q) {
+		${userCode}
+	}
+})();`
 			);
 
 			func(q);

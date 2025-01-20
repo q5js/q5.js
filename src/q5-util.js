@@ -1,24 +1,62 @@
 Q5.modules.util = ($, q) => {
-	$._loadFile = (path, cb, type) => {
+	$._loadFile = (url, cb, type) => {
 		q._preloadCount++;
 		let ret = {};
-		fetch(path)
-			.then((r) => {
-				if (type == 'json') return r.json();
-				return r.text();
-			})
-			.then((r) => {
-				q._preloadCount--;
-				if (type == 'csv') r = $.CSV.parse(r);
-				Object.assign(ret, r);
-				if (cb) cb(r);
-			});
+		ret._loader = new Promise((resolve, reject) => {
+			fetch(url)
+				.then((res) => {
+					if (!res.ok) {
+						reject('error loading file');
+						return null;
+					}
+					if (type == 'json') return res.json();
+					return res.text();
+				})
+				.then((f) => {
+					if (type == 'csv') f = $.CSV.parse(f);
+					if (typeof f == 'string') ret.text = f;
+					else Object.assign(ret, f);
+					delete ret._loader;
+					if (cb) cb(f);
+					q._preloadCount--;
+					resolve(f);
+				});
+		});
 		return ret;
 	};
 
-	$.loadText = (path, cb) => $._loadFile(path, cb, 'text');
-	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
-	$.loadCSV = (path, cb) => $._loadFile(path, cb, 'csv');
+	$.loadText = (url, cb) => $._loadFile(url, cb, 'text');
+	$.loadJSON = (url, cb) => $._loadFile(url, cb, 'json');
+	$.loadCSV = (url, cb) => $._loadFile(url, cb, 'csv');
+
+	$.load = function (...urls) {
+		if (Array.isArray(urls[0])) urls = urls[0];
+
+		let loaders = [];
+
+		for (let url of urls) {
+			let ext = url.split('.').pop().toLowerCase();
+
+			let obj;
+			if (ext == 'json' && !url.includes('-msdf.')) {
+				obj = $.loadJSON(url);
+			} else if (ext == 'csv') {
+				obj = $.loadCSV(url);
+			} else if (/(jpe?g|png|gif|webp|avif|svg)/.test(ext)) {
+				obj = $.loadImage(url);
+			} else if (/(ttf|otf|woff2?|eot|json)/i.test(ext)) {
+				obj = $.loadFont(url);
+			} else if (/(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/.test(ext)) {
+				obj = $.loadSound(url);
+			} else {
+				obj = $.loadText(url);
+			}
+			loaders.push(obj._loader);
+		}
+
+		if (urls.length == 1) return loaders[0];
+		return Promise.all(loaders);
+	};
 
 	$.CSV = {};
 	$.CSV.parse = (csv, sep = ',', lineSep = '\n') => {

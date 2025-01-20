@@ -28,14 +28,25 @@ function setup() {
 	function setup(): void;
 
 	/** ⭐️
-	 * Load assets in the preload function to ensure that they're
-	 * available before the setup and draw functions are run.
+	 * Load assets in the preload function to ensure that they'll be
+	 * ready to use in the setup and draw functions.
+	 * 
+	 * q5's preload system can also be used without a preload function
+	 * if you create a canvas first, as shown in the second example.
 	 * @example
 let logo;
 
 function preload() {
 	logo = loadImage('/q5js_logo.webp');
 }
+
+function draw() {
+	background(logo);
+}
+	 * @example
+createCanvas(200, 100);
+
+let logo = loadImage('/q5js_logo.webp');
 
 function draw() {
 	background(logo);
@@ -177,6 +188,7 @@ function draw() {
 	background(200);
 	circle(frameCount % 200, 100, 80);
 }
+
 function postProcess() {
 	filter(INVERT);
 }
@@ -234,6 +246,34 @@ function draw() {
 }
 	 */
 	var deltaTime: number;
+
+	/** ⭐️
+	 * q5 uses the same preload system as Java Processing and p5.js v1
+	 * to load assets asynchronously, before the setup and draw
+	 * functions are run. It makes it very easy for users to
+	 * load many images, sounds, and other assets at the same time.
+	 * 
+	 * In p5.js v2, the preload system was entirely removed in
+	 * favor of having load* functions, such as `loadImage`,
+	 * return promises.
+	 * 
+	 * In q5 the `load` function can be used to load a file or
+	 * multiple files, and it returns a promise that resolves
+	 * when the file(s) are loaded.
+	 * 
+	 * Disable the preload system in q5 to make load* functions
+	 * return promises, to match p5.js v2 behavior.
+	 * @example
+new Q5();
+disablePreloadSystem();
+
+logo = await loadImage('/q5js_logo.webp');
+
+function draw() {
+	background(logo);
+}
+	 */
+	function disablePreloadSystem(): void;
 
 	class Q5 {
 		/** ⭐️
@@ -1171,7 +1211,7 @@ function setup() {
 
 	/** 🌆
 	 * Saves the image.
-	 * @param {string} filename filename or path
+	 * @param {string} filename filename or url
 	 * @param {string} extension file extension
 	 * @param {number} [quality] quality of the saved image
 	 */
@@ -1401,8 +1441,8 @@ text(info, 12, 30, 20, 6);
 	 * https://q5js.org/fonts/YaHei-msdf.json
 	 * https://q5js.org/fonts/YaHei.png
 	 * @param {string} url uRL of the font to load
-	 * @param {(fontName: string) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
-	 * @returns {string} name of the loaded font
+	 * @param {(font: FontFace) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
+	 * @returns {FontFace} font
 	 * @example
 createCanvas(200, 200);
 
@@ -1414,7 +1454,7 @@ function setup() {
 	text('Hello!', 12, 114);
 }
 	 */
-	function loadFont(url: string, cb?: (fontName: string) => void): string;
+	function loadFont(url: string, cb?: (font: FontFace) => void): string;
 
 	/** ✍️
 	 * Sets the current font to be used for rendering text.
@@ -1425,7 +1465,7 @@ function setup() {
 	 * In q5 c2d, you can set the font to any font accepted in CSS,
 	 * such as "serif" or "monospace".
 	 * https://developer.mozilla.org/docs/Web/CSS/font-family
-	 * @param {string} fontName name of the font or font family
+	 * @param {string} fontName name of the font family or a FontFace object
 	 * @example
 createCanvas(200, 200);
 background(200);
@@ -1868,7 +1908,7 @@ function draw() {
 	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/docs/Web/CSS/cursor) or image.
 	 * If an image is provided, optional x and y coordinates can
 	 * specify the active point of the cursor.
-	 * @param {string} name name of the cursor or the path to an image
+	 * @param {string} name name of the cursor or the url to an image
 	 * @param {number} [x] x-coordinate of the cursor's hot spot
 	 * @param {number} [y] y-coordinate of the cursor's hot spot
 	 */
@@ -2080,7 +2120,7 @@ noCursor();
 	 * For backwards compatibility with the p5.sound API, the functions 
 	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 	 * are also implemented, but their use is deprecated.
-	 * @param {string} url path to the sound file
+	 * @param {string} url sound file
 	 * @returns {Sound} a new `Sound` object
 	 * @example
 createCanvas(200, 200);
@@ -2095,14 +2135,23 @@ function mousePressed() {
 	function loadSound(url: string): Sound;
 
 	/**
-	 * Loads audio data from a file and returns an HTMLAudioElement.
-	 * https://developer.mozilla.org/docs/Web/API/HTMLMediaElement
+	 * Loads audio data from a file and returns an [HTMLAudioElement](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement).
 	 * 
-	 * Audio is considered loaded when the canplaythrough event is fired.
+	 * Audio is considered loaded when the [canplaythrough event](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event) is fired.
 	 * 
 	 * Note that audio can only be played after the first user 
 	 * interaction with the page!
-	 * @param url path to the audio file
+	 * @param url audio file
+	 * @returns {HTMLAudioElement} an HTMLAudioElement
+	 * @example
+createCanvas(200, 200);
+
+let audio = loadAudio('/assets/retro.flac');
+audio.volume = 0.4;
+
+function mousePressed() {
+	audio.play();
+}
 	 */
 	function loadAudio(url: string): Audio;
 
@@ -2123,34 +2172,76 @@ function mousePressed() {
 		 * Creates a new `Q5.Sound` object.
 		 * 
 		 * See the `loadSound` documentation for more info.
-		 * @param {string} url path to the sound file
 		 */
-		constructor(url: string);
+		constructor();
 	}
 
 	// 🛠️ utilities
 
 	/** 🛠️
-	 * Loads a text file from the specified path. Result is one string.
-	 * @param {string} path path to the text file
+	 * Loads a file or multiple files.
+	 * 
+	 * File type is determined by file extension. q5 supports loading
+	 * text, json, csv, font, audio, and image files.
+	 * 
+	 * To load many files, it may be easier to use load* functions,
+	 * like `loadImage`, with q5's preload system.
+	 * @param {...string} urls
+	 * @returns {Promise<any[]>} a promise that resolves with objects
+	 * @example
+let logo;
+
+async function setup() {
+	logo = await load('/q5js_logo.webp');
+}
+
+function draw() {
+	image(logo, 0, 0, 200, 200);
+}
+	 * @example
+new Q5();
+createCanvas(200, 200);
+
+// use with top level await in a module
+await load('/assets/Robotica.ttf');
+
+background(255);
+text('Hello, world!', 20, 100);
+	 * @example
+let q = new Q5();
+createCanvas(200, 200);
+
+let [jump, retro] = await load(
+		'/assets/jump.wav', '/assets/retro.flac'
+	);
+
+q.mousePressed = () => {
+	mouseButton == 'left' ? jump.play() : retro.play();
+};
+	 */
+	function load(...urls: string[]): Promise<any[]>;
+
+	/** 🛠️
+	 * Loads a text file from the specified url. Result is one string.
+	 * @param {string} url text file
 	 * @param {(result: string) => void} cb a callback function that is run when the file is loaded
 	 */
-	function loadText(path: string, cb: (result: string) => void): void;
+	function loadText(url: string, cb: (result: string) => void): void;
 
 	/** 🛠️
-	 * Loads a JSON file from the specified path. Result depends on the
+	 * Loads a JSON file from the specified url. Result depends on the
 	 * JSON file's contents, but is typically an object or array.
-	 * @param {string} path path to the JSON file
+	 * @param {string} url JSON file
 	 * @param {(result: any) => void} cb a callback function that is run when the file is loaded
 	 */
-	function loadJSON(path: string, cb: (result: any) => void): void;
+	function loadJSON(url: string, cb: (result: any) => void): void;
 
 	/** 🛠️
-	 * Loads a CSV file from the specified path. Result is an array of objects.
-	 * @param {string} path path to the CSV file
+	 * Loads a CSV file from the specified url. Result is an array of objects.
+	 * @param {string} url CSV file
 	 * @param {(result: object[]) => void} cb a callback function that is run when the file is loaded
 	 */
-	function loadCSV(path: string, cb: (result: object[]) => void): void;
+	function loadCSV(url: string, cb: (result: object[]) => void): void;
 
 	/** 🛠️
 	 * Stores an item in localStorage.

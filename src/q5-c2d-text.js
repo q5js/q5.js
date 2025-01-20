@@ -23,15 +23,26 @@ Q5.renderers.c2d.text = ($, q) => {
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
 		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
-		f.load().then(() => {
+		f._loader = (async () => {
+			let err;
+			try {
+				await f.load();
+			} catch (e) {
+				err = e;
+			}
 			q._preloadCount--;
-			if (cb) cb(name);
-		});
+			delete f._loader;
+			if (err) throw err;
+			if (cb) cb(f);
+			return f;
+		})();
 		$.textFont(name);
-		return name;
+		if ($._disablePreload) return f._loader;
+		return f;
 	};
 
 	$.textFont = (x) => {
+		if (typeof x != 'string') x = x.family;
 		if (!x || x == font) return font;
 		font = x;
 		fontMod = true;

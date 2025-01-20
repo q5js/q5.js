@@ -4,13 +4,25 @@ Q5.modules.sound = ($, q) => {
 
 	$.loadSound = (url, cb) => {
 		q._preloadCount++;
+
 		let s = new Q5.Sound();
-		s.load(url)
-			.then(() => {
-				if (cb) cb(s);
-			})
-			.finally(() => q._preloadCount--);
 		sounds.push(s);
+
+		s._loader = (async () => {
+			let err;
+			try {
+				await s.load(url);
+			} catch (e) {
+				err = e;
+			}
+			q._preloadCount--;
+			delete s._loader;
+			if (err) throw err;
+			if (cb) cb(s);
+			return s;
+		})();
+
+		if ($._disablePreload) return s._loader;
 		return s;
 	};
 

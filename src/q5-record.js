@@ -28,90 +28,90 @@ Q5.modules.record = ($, q) => {
 				'afterbegin',
 				`<style>
 .recorder-wrapper {
-		position: absolute;
-		top: ${this.options.y}px;
-		left: ${this.options.x}px;
-		z-index: 1000;
-		gap: 7px;
-		background: rgb(26, 27, 29);
-		padding: 7px;
-		border-radius: 30px;
-		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
-		border: 2px solid transparent; 
-		opacity: 0.5;
-		transition: all 0.3s;
-		display: ${this.options.display};
-		overflow: hidden;
+	position: absolute;
+	top: ${this.options.y}px;
+	left: ${this.options.x}px;
+	z-index: 1000;
+	gap: 7px;
+	background: rgb(26, 27, 29);
+	padding: 7px;
+	border-radius: 30px;
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+	border: 2px solid transparent; 
+	opacity: 0.5;
+	transition: all 0.3s;
+	display: ${this.options.display};
+	overflow: hidden;
 }
 
 .recorder-wrapper:hover {
-		opacity: 0.95;
+	opacity: 0.95;
 }
 
 .recorder-wrapper.recording {
-		border-color: #cc3e44;
+	border-color: #cc3e44;
 }
 
 .recorder-wrapper.recording .start-button {
-		color: #cc3e44; 
-		opacity: 1;
+	color: #cc3e44; 
+	opacity: 1;
 }
 
 .recorder-wrapper.recording .format-selector,
 .recorder-wrapper.recording .download-button {
-		width: 0px;
-		height: 0px;
-		opacity: 0;
-		min-width: 0px;
+	width: 0px;
+	height: 0px;
+	opacity: 0;
+	min-width: 0px;
 }
 
 .recorder-wrapper button,
 .recorder-wrapper select,
 .recorder-wrapper .recorder-timer {
-		cursor: pointer;
-		font-size: 13px;
-		padding: 5px 9px;
-		border-radius: 30px;
-		border: none;
-		outline: none;
-		background-color: rgb(35, 37, 41);
-		color: rgb(212, 218, 230);
-		font-family: 'Arial';
-		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
-		border: thin solid rgb(70, 73, 78);
-		line-height: 24px;
-		min-width: 37px;
-		max-width: 37px;
-		transition: width 0.3s, height 0.3s, opacity 0.2s;
-		overflow: hidden;
+	cursor: pointer;
+	font-size: 13px;
+	padding: 5px 9px;
+	border-radius: 30px;
+	border: none;
+	outline: none;
+	background-color: rgb(35, 37, 41);
+	color: rgb(212, 218, 230);
+	font-family: 'Arial';
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+	border: thin solid rgb(70, 73, 78);
+	line-height: 24px;
+	min-width: 37px;
+	max-width: 37px;
+	transition: width 0.3s, height 0.3s, opacity 0.2s;
+	overflow: hidden;
 }
 
 .recorder-wrapper .recorder-timer {
-		min-width: 69px;
-		max-width:100px;
+	min-width: 69px;
+	max-width:100px;
 }
 
 .recorder-wrapper select {
-		max-width:100px;
+	max-width:100px;
 }
 
 .recorder-wrapper .format-selector {
-		min-width: 100px;
+	min-width: 100px;
 }
 
 .recorder-wrapper select:hover,
 .recorder-wrapper button:hover {
-		background-color: rgb(41, 43, 48);
+	background-color: rgb(41, 43, 48);
 }
 
 .recorder-wrapper button:disabled {
-		opacity: 0.5;
-		color: rgb(150, 155, 165);
-		cursor: not-allowed;
+	opacity: 0.5;
+	color: rgb(150, 155, 165);
+	cursor: not-allowed;
 }
 
 .recorder-wrapper .download-button {
-		font-size: 18px;
+	font-size: 18px;
 }
 </style>`
 			);

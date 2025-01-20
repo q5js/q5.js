@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.15
+ * @version 2.16
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -71,6 +71,7 @@ function Q5(scope, parent, renderer) {
 
 	$._incrementPreload = () => q._preloadCount++;
 	$._decrementPreload = () => q._preloadCount--;
+	$.disablePreloadSystem = () => ($._disablePreload = true);
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
@@ -310,7 +311,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.15';
+Q5.version = Q5.VERSION = '2.16';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

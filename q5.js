@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.15
+ * @version 2.16
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -71,6 +71,7 @@ function Q5(scope, parent, renderer) {
 
 	$._incrementPreload = () => q._preloadCount++;
 	$._decrementPreload = () => q._preloadCount--;
+	$.disablePreloadSystem = () => ($._disablePreload = true);
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
@@ -310,7 +311,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.15';
+Q5.version = Q5.VERSION = '2.16';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -1342,28 +1343,33 @@ Q5.renderers.c2d.image = ($, q) => {
 		let g = $.createImage(1, 1, opt);
 		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
 
-		function loaded(img) {
-			img._pixelDensity = pd;
-			g.defaultWidth = img.width * $._defaultImageScale;
-			g.defaultHeight = img.height * $._defaultImageScale;
-			g.naturalWidth = img.naturalWidth || img.width;
-			g.naturalHeight = img.naturalHeight || img.height;
-			g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
-
-			g.ctx.drawImage(img, 0, 0);
-			q._preloadCount--;
-			if (cb) cb(g);
-		}
-
 		let img = new window.Image();
 		img.crossOrigin = 'Anonymous';
-		img.onload = () => loaded(img);
-		img.onerror = (e) => {
-			q._preloadCount--;
-			throw e;
-		};
+
+		g._loader = new Promise((resolve, reject) => {
+			img.onload = () => {
+				img._pixelDensity = pd;
+				g.defaultWidth = img.width * $._defaultImageScale;
+				g.defaultHeight = img.height * $._defaultImageScale;
+				g.naturalWidth = img.naturalWidth || img.width;
+				g.naturalHeight = img.naturalHeight || img.height;
+				g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
+
+				g.ctx.drawImage(img, 0, 0);
+				q._preloadCount--;
+				if (cb) cb(g);
+				delete g._loader;
+				resolve(g);
+			};
+			img.onerror = (e) => {
+				q._preloadCount--;
+				reject(e);
+			};
+		});
+
 		img.src = url;
 
+		if ($._disablePreload) return g._loader;
 		return g;
 	};
 
@@ -1785,15 +1791,26 @@ Q5.renderers.c2d.text = ($, q) => {
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
 		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
-		f.load().then(() => {
+		f._loader = (async () => {
+			let err;
+			try {
+				await f.load();
+			} catch (e) {
+				err = e;
+			}
 			q._preloadCount--;
-			if (cb) cb(name);
-		});
+			delete f._loader;
+			if (err) throw err;
+			if (cb) cb(f);
+			return f;
+		})();
 		$.textFont(name);
-		return name;
+		if ($._disablePreload) return f._loader;
+		return f;
 	};
 
 	$.textFont = (x) => {
+		if (typeof x != 'string') x = x.family;
 		if (!x || x == font) return font;
 		font = x;
 		fontMod = true;
@@ -3175,13 +3192,25 @@ Q5.modules.sound = ($, q) => {
 
 	$.loadSound = (url, cb) => {
 		q._preloadCount++;
+
 		let s = new Q5.Sound();
-		s.load(url)
-			.then(() => {
-				if (cb) cb(s);
-			})
-			.finally(() => q._preloadCount--);
 		sounds.push(s);
+
+		s._loader = (async () => {
+			let err;
+			try {
+				await s.load(url);
+			} catch (e) {
+				err = e;
+			}
+			q._preloadCount--;
+			delete s._loader;
+			if (err) throw err;
+			if (cb) cb(s);
+			return s;
+		})();
+
+		if ($._disablePreload) return s._loader;
 		return s;
 	};
 
@@ -3364,26 +3393,64 @@ Q5.Sound = class {
 	}
 };
 Q5.modules.util = ($, q) => {
-	$._loadFile = (path, cb, type) => {
+	$._loadFile = (url, cb, type) => {
 		q._preloadCount++;
 		let ret = {};
-		fetch(path)
-			.then((r) => {
-				if (type == 'json') return r.json();
-				return r.text();
-			})
-			.then((r) => {
-				q._preloadCount--;
-				if (type == 'csv') r = $.CSV.parse(r);
-				Object.assign(ret, r);
-				if (cb) cb(r);
-			});
+		ret._loader = new Promise((resolve, reject) => {
+			fetch(url)
+				.then((res) => {
+					if (!res.ok) {
+						reject('error loading file');
+						return null;
+					}
+					if (type == 'json') return res.json();
+					return res.text();
+				})
+				.then((f) => {
+					if (type == 'csv') f = $.CSV.parse(f);
+					if (typeof f == 'string') ret.text = f;
+					else Object.assign(ret, f);
+					delete ret._loader;
+					if (cb) cb(f);
+					q._preloadCount--;
+					resolve(f);
+				});
+		});
 		return ret;
 	};
 
-	$.loadText = (path, cb) => $._loadFile(path, cb, 'text');
-	$.loadJSON = (path, cb) => $._loadFile(path, cb, 'json');
-	$.loadCSV = (path, cb) => $._loadFile(path, cb, 'csv');
+	$.loadText = (url, cb) => $._loadFile(url, cb, 'text');
+	$.loadJSON = (url, cb) => $._loadFile(url, cb, 'json');
+	$.loadCSV = (url, cb) => $._loadFile(url, cb, 'csv');
+
+	$.load = function (...urls) {
+		if (Array.isArray(urls[0])) urls = urls[0];
+
+		let loaders = [];
+
+		for (let url of urls) {
+			let ext = url.split('.').pop().toLowerCase();
+
+			let obj;
+			if (ext == 'json' && !url.includes('-msdf.')) {
+				obj = $.loadJSON(url);
+			} else if (ext == 'csv') {
+				obj = $.loadCSV(url);
+			} else if (/(jpe?g|png|gif|webp|avif|svg)/.test(ext)) {
+				obj = $.loadImage(url);
+			} else if (/(ttf|otf|woff2?|eot|json)/i.test(ext)) {
+				obj = $.loadFont(url);
+			} else if (/(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/.test(ext)) {
+				obj = $.loadSound(url);
+			} else {
+				obj = $.loadText(url);
+			}
+			loaders.push(obj._loader);
+		}
+
+		if (urls.length == 1) return loaders[0];
+		return Promise.all(loaders);
+	};
 
 	$.CSV = {};
 	$.CSV.parse = (csv, sep = ',', lineSep = '\n') => {
@@ -5100,7 +5167,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			g.defaultHeight = img.height * $._defaultImageScale;
 			$._createTexture(img);
 			q._preloadCount--;
-			if (cb) cb(img);
+			if (cb) cb(g);
 		});
 		return g;
 	};
@@ -5473,8 +5540,13 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
 		if (ext != 'json') return $._g.loadFont(url, cb);
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
-		createFont(url, fontName, cb);
-		return fontName;
+		let f = { family: fontName };
+		f._loader = createFont(url, fontName, () => {
+			delete f._loader;
+			if (cb) cb(f);
+		});
+		if ($._disablePreload) return f._loader;
+		return f;
 	};
 
 	$._loadDefaultFont = (fontName) => {
@@ -5495,6 +5567,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		leadPercent = 1.25;
 
 	$.textFont = (fontName) => {
+		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;
 		else if (font === undefined) $._loadDefaultFont(fontName);

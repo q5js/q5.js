@@ -178,7 +178,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			g.defaultHeight = img.height * $._defaultImageScale;
 			$._createTexture(img);
 			q._preloadCount--;
-			if (cb) cb(img);
+			if (cb) cb(g);
 		});
 		return g;
 	};

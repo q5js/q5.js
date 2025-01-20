@@ -50,7 +50,7 @@ We need your support though! If you enjoy using q5.js, please donate via [GitHub
 
 Are you interested in volunteering to write code for q5.js or improve the q5 ecosystem? Contributions are welcome!
 
-Please report issues or comment on existing issues before working on a pull request. Check out the [q5 planning board](https://github.com/orgs/q5js/projects/1/views/1).
+Please report issues or comment on existing issues before working on a pull request. Check out the [q5 project planning board](https://github.com/orgs/q5js/projects/1/views/1).
 
 All contributors must agree to the [code of conduct](CODE_OF_CONDUCT.md).
 

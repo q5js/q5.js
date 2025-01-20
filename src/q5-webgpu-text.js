@@ -283,8 +283,13 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
 		if (ext != 'json') return $._g.loadFont(url, cb);
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
-		createFont(url, fontName, cb);
-		return fontName;
+		let f = { family: fontName };
+		f._loader = createFont(url, fontName, () => {
+			delete f._loader;
+			if (cb) cb(f);
+		});
+		if ($._disablePreload) return f._loader;
+		return f;
 	};
 
 	$._loadDefaultFont = (fontName) => {
@@ -305,6 +310,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		leadPercent = 1.25;
 
 	$.textFont = (fontName) => {
+		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;
 		else if (font === undefined) $._loadDefaultFont(fontName);

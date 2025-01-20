@@ -56,42 +56,6 @@ q5 is open source and anyone can use it for free under the terms of the LGPL (ju
 
 We need your support though! If you enjoy using q5.js, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/q5play).
 
-# 4-0
-
-## More vibrant colors! 🎨
-
-# 4-1
-
-In p5, bright colors can look dull 😕
-
-# 4-2
-
-q5 empowers artists with [HDR color support](https://github.com/quinton-ashley/q5.js?tab=readme-ov-file#hdr-color-support) 🤩
-
-# 5-0
-
-## More help for beginners! ✨
-
-Why doesn't this code work? `text('Hello!')` 🤔
-
-# 5-1
-
-p5's error messages are often too vague, leaving users searching for help. 🙋
-
-```
-🌸 p5.js says: [test.js, line 19] text() was expecting at least 3 arguments, but received only 1.
-```
-
-# 5-2
-
-Run q5's `askAI()` before code that isn't working as expected. 🤖
-
-```
-The `text` function requires the x and y coordinates where the text should be drawn to the canvas.
-
-text('Hello!', 50, 50);
-```
-
 # 10-0
 
 ## Dynamic 🐙
@@ -118,9 +82,9 @@ q5.js includes sound loading, playback, and basic mixing by default. 🎚️
 
 p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️
 
-q5.js is only 111kb, that's 98% smaller. 🌳
+q5.js is <140kb, that's 98% smaller. 🌳
 
-For extremely lightweight use, load only the features you need from the [q5 source folder](https://github.com/q5js/q5.js/tree/main/src). 📦
+For extremely lightweight use, load only the features you need from the [q5 source folder](https://github.com/q5js/q5.js/tree/main/src). Load q5 using script tags or as JavaScript modules. 📦
 
 # 10-3
 
@@ -128,7 +92,7 @@ For extremely lightweight use, load only the features you need from the [q5 sour
 
 The `displayMode` function lets you frame your art within the browser window, no CSS skills required! 📽️
 
-Make it "centered", "maxed", or "fullscreen" without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
+Make a canvas be centered or fill the screen without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
 
 # 20-0
 
@@ -136,10 +100,10 @@ Make it "centered", "maxed", or "fullscreen" without clipping or changing the as
 
 This project aims to be the spiritual successor to the incredible work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/), [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org), and all contributors to these projects.
 
-The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended the unmaintained codebase.
+The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended the abandoned codebase.
 
 q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley) and [@Tezumie](https://github.com/Tezumie).
 
 # 100
 
-q5js.org was created by the q5 team. Copyright 2024.
+q5js.org was created by the q5 team. Copyright 2024-2025.
