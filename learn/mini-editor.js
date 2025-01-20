@@ -4,7 +4,6 @@ class MiniEditor {
 	constructor(containerId, script) {
 		this.containerId = containerId;
 		this.initialCode = script;
-		this.init();
 	}
 
 	async init() {
@@ -63,14 +62,14 @@ class MiniEditor {
 					tabSize: 2
 				});
 
-				this.editorReady = true;
-
 				if (!typeDefs) {
 					let res = await fetch('/q5.d.ts');
 					typeDefs = await res.text();
 				}
 
 				monaco.languages.typescript.javascriptDefaults.addExtraLib(typeDefs, '/q5.d.ts');
+
+				this.editorReady = true;
 
 				resolve();
 			});

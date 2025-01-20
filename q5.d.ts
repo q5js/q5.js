@@ -248,7 +248,7 @@ function draw() {
 	var deltaTime: number;
 
 	/** ⭐️
-	 * q5 uses the same preload system as Java Processing and p5.js v1
+	 * q5 uses the same preload system as p5.js v1
 	 * to load assets asynchronously, before the setup and draw
 	 * functions are run. It makes it very easy for users to
 	 * load many images, sounds, and other assets at the same time.

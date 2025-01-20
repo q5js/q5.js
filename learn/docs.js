@@ -461,17 +461,18 @@ function setScrollBehavior(behavior) {
 }
 
 let currentLoadedSectionId = '';
-function executeDataScripts(content) {
+async function executeDataScripts(content) {
 	const scripts = content.querySelectorAll('script[type="mini"]');
-	scripts.forEach((script) => {
+	for (let script of scripts) {
 		let scriptContent = script.innerHTML.slice(0, -1).replaceAll('\t', '  ').trim();
 		let id = 'editor-' + script.id.slice(7);
 		script.insertAdjacentHTML('beforebegin', `<div id="${id}" class="editor-container"></div>`);
-		new MiniEditor(id, scriptContent);
-	});
+		let mini = new MiniEditor(id, scriptContent);
+		await mini.init();
+	}
 }
 
-function updateMainContent(sectionId, sections, callback) {
+async function updateMainContent(sectionId, sections, callback) {
 	setScrollBehavior('auto');
 	const contentArea = document.getElementById('content');
 
@@ -494,11 +495,11 @@ function updateMainContent(sectionId, sections, callback) {
 		const section = sections[sectionId];
 		let htmlContent = `<div id="${sectionId}">${marked.marked(section.content)}</div>`;
 
-		Object.keys(section.subsections).forEach((subId) => {
+		for (let subId in section.subsections) {
 			const subsection = section.subsections[subId];
 			htmlContent += `<div id="${subId}">${marked.marked(subsection.content)}</div>`;
-		});
-		contentArea.innerHTML = htmlContent;
+		}
+		contentArea.insertAdjacentHTML('beforeend', htmlContent);
 
 		const navButtonsContainer = document.createElement('div');
 		navButtonsContainer.className = 'nav-buttons-container';
@@ -537,16 +538,15 @@ function updateMainContent(sectionId, sections, callback) {
 		currentLoadedSectionId = sectionId;
 		window.location.hash = sectionId;
 
-		if (typeof callback === 'function') {
-			requestAnimationFrame(callback);
-		}
-
 		addCopyButtons();
 		generateHeadings();
 		convertMarkdownLinksToNavigationButtons(sections);
-		executeDataScripts(contentArea);
-
+		await executeDataScripts(contentArea);
 		updateStickyHeader();
+
+		if (typeof callback === 'function') {
+			requestAnimationFrame(callback);
+		}
 	}
 	const savedTheme = localStorage.getItem('theme') || 'light';
 
