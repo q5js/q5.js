@@ -4954,7 +4954,7 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 	$.background = (r, g, b, a) => {
 		$.push();
 		$.resetMatrix();
-		if (r.src) {
+		if (r.canvas) {
 			let img = r;
 			$._imageMode = 'corner';
 			$.image(img, -c.hw, -c.hh, c.w, c.h);
