@@ -111,6 +111,7 @@ function stripParams(params) {
 }
 
 function convertToMarkdown(data) {
+	data = data.replaceAll('https://q5js.org/learn', '.');
 	let lines = data.split('\n').slice(7, -4),
 		markdownCode = '',
 		insideJSDoc = false,
@@ -231,6 +232,8 @@ ${js}
 
 let markdownSections = {};
 
+let ignoreHashChange = true;
+
 fetch('../q5.d.ts')
 	.then((res) => res.text())
 	.then((data) => {
@@ -241,6 +244,11 @@ fetch('../q5.d.ts')
 		loadInitialContent(markdownSections);
 	})
 	.catch((error) => console.error('Error loading the Markdown file:', error));
+
+window.addEventListener('hashchange', () => {
+	if (ignoreHashChange) return;
+	loadInitialContent(markdownSections);
+});
 
 function parseMarkdownIntoSections(markdownText) {
 	let sections = {},
@@ -493,7 +501,7 @@ async function updateMainContent(sectionId, sections, callback) {
 	}, 0);
 	const sectionIds = Object.keys(sections);
 	const currentSectionIndex = sectionIds.indexOf(sectionId);
-	currentLoadedSectionId = sectionId;
+	// currentLoadedSectionId = sectionId;
 	updateNavigationActiveState();
 	const prevSectionId = currentSectionIndex > 0 ? sectionIds[currentSectionIndex - 1] : null;
 	const nextSectionId = currentSectionIndex < sectionIds.length - 1 ? sectionIds[currentSectionIndex + 1] : null;
@@ -544,8 +552,13 @@ async function updateMainContent(sectionId, sections, callback) {
 		const spacer = document.createElement('div');
 		spacer.style.height = '100vh';
 		contentArea.appendChild(spacer);
-		currentLoadedSectionId = sectionId;
-		window.location.hash = sectionId;
+
+		ignoreHashChange = true;
+		if (currentLoadedSectionId !== sectionId) {
+			window.location.hash = sectionId;
+			currentLoadedSectionId = sectionId;
+		}
+		ignoreHashChange = false;
 
 		addCopyButtons();
 		generateHeadings();
@@ -661,6 +674,7 @@ function updateNavigationActiveState() {
 }
 
 function loadInitialContent(sections) {
+	ignoreHashChange = true;
 	const hash = window.location.hash.replace('#', '');
 	let sectionId = null;
 	let subsectionId = null;
@@ -683,12 +697,14 @@ function loadInitialContent(sections) {
 			if (subsectionId) {
 				simulateSubsectionClick(subsectionId);
 			}
+			ignoreHashChange = false;
 		});
 	} else {
 		const firstLink = document.querySelector('.section-link, .subsection-link');
 		if (firstLink) {
 			firstLink.click();
 		}
+		ignoreHashChange = false;
 	}
 }
 

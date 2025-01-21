@@ -80,7 +80,7 @@ function draw() {
 	 * it calls the draw function once.
 	 * @param {number} [n] number of times to redraw the canvas, default is 1
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 noLoop();
 
 function draw() {
@@ -95,7 +95,7 @@ function mousePressed() {
 	/** ⭐️
 	 * Starts the draw loop again if it was stopped.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 noLoop();
 
 function draw() {
@@ -257,7 +257,7 @@ function draw() {
 	 * favor of having load* functions, such as `loadImage`,
 	 * return promises.
 	 * 
-	 * In q5 the `load` function can be used to load a file or
+	 * In q5 the [`load`](https://q5js.org/learn/#load) function can be used to load a file or
 	 * multiple files, and it returns a promise that resolves
 	 * when the file(s) are loaded.
 	 * 
@@ -281,7 +281,7 @@ function draw() {
 		 *
 		 * Running `new Q5()` enables the use of q5 functions and variables
 		 * anywhere in your code. You can also start Q5 in global mode by 
-		 * running [`createCanvas`](https://q5js.org/learn/#canvas-createCanvas).
+		 * running [`createCanvas`](https://q5js.org/learn/#createCanvas).
 		 * 
 		 * By default q5 uses the CanvasRenderingContext2D based c2d renderer.
 		 * 
@@ -332,10 +332,11 @@ circle(100, 50, 80);
 	 * Start using q5 by running this function!
 	 *
 	 * If this function is not run by the user, a 200x200 canvas will be
-	 * created automatically before the draw loop starts. Although in q5 
-	 * WebGPU, this function must be run before running other q5 functions.
-	 * @param {number} [w] width of the canvas, default is windowWidth
-	 * @param {number} [h] height of the canvas, default is windowHeight
+	 * created automatically before the draw loop starts.
+	 * 
+	 * In q5 WebGPU, this function must be run before running other q5 functions.
+	 * @param {number} [w] width or size of the canvas
+	 * @param {number} [h] height of the canvas
 	 * @param {Object} [opt] options for the canvas
 	 * @param {boolean} [opt.alpha] whether the canvas should have an alpha channel that allows it to be seen through, default is false
 	 * @param {string} [opt.colorSpace] color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
@@ -356,96 +357,88 @@ function draw() {
 	/** ⬜️
 	 * The canvas element associated with the Q5 instance.
 	 * 
-	 * @prop {Number} w
-	 * @prop {Number} width
-	 * @prop {Number} h
-	 * @prop {Number} height
-	 * @prop {Number} hw half the width
-	 * @prop {Number} hh half the height
-	 * @prop {String} renderer either "c2d" (Canvas2D) or "webgpu"
+	 * @prop {number} w
+	 * @prop {number} width
+	 * @prop {number} h
+	 * @prop {number} height
+	 * @prop {number} hw half the width
+	 * @prop {number} hh half the height
+	 * @prop {string} renderer either "c2d" (Canvas2D) or "webgpu"
 	 */
 	var canvas: HTMLCanvasElement;
 
 	/** ⬜️
-	 * The width of the canvas.
-	 */
-	var width: number;
-
-	/** ⬜️
-	 * The height of the canvas.
-	 */
-	var height: number;
-
-	/** ⬜️
 	 * Clears the canvas, making every pixel completely transparent.
 	 *
-	 * The canvas can only be seen through if it has an alpha channel though.
+	 * Note that the canvas can only be seen through if it has an alpha channel.
 	 */
 	function clear(): void;
 
 	/** ⬜️
 	 * Sets the fill color for shapes. The default is white.
 	 * 
-	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
-	 * @param {string | Color} color fill color
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
+	 * can accept colors in a wide range of formats: as a CSS color string,
+	 * a `Color` object, grayscale value, or color component values.
+	 * @param {Color} color fill color
 	 * @example
-function draw() {
-	background(200);
+createCanvas(200);
+background(200);
 
-  fill('red');
-  circle(80, 80, 80);
+fill('red');
+circle(80, 80, 80);
 
-	fill('lime');
-  square(80, 80, 80);
-}
+fill('lime');
+square(80, 80, 80);
 	 */
-	function fill(color: string | Color): void;
+	function fill(color: Color): void;
 
 	/** ⬜️
 	 * Sets the stroke (outline) color for shapes. The default is black.
 	 * 
-	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
-	 * @param {string | Color} color stroke color
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
+	 * can accept colors in a wide range of formats: as a CSS color string,
+	 * a `Color` object, grayscale value, or color component values.
+	 * @param {Color} color stroke color
 	 * @example
-function draw() {
-  background(200);
-	fill(36);
+createCanvas(200);
+background(200);
+fill(36);
 
-  stroke('red');
-  circle(80, 80, 80);
-	stroke('lime');
-  square(80, 80, 80);
-}
+stroke('red');
+circle(80, 80, 80);
+
+stroke('lime');
+square(80, 80, 80);
 	 */
-	function stroke(color: string | Color): void;
+	function stroke(color: Color): void;
 
 	/** ⬜️
 	 * After calling this function, shapes will not be filled.
 	 * @example
-function draw() {
-  background(200);
+createCanvas(200);
+background(200);
 
-	noFill();
-  stroke('red');
-  circle(80, 80, 80);
-	stroke('lime');
-  square(80, 80, 80);
-}
+noFill();
+
+stroke('red');
+circle(80, 80, 80);
+stroke('lime');
+square(80, 80, 80);
 	 */
 	function noFill(): void;
 
 	/** ⬜️
 	 * After calling this function, shapes will not have a stroke (outline).
 	 * @example
-function draw() {
-  background(200);
-  fill(36);
-  stroke('red');
-  circle(80, 80, 80);
+createCanvas(200);
+background(200);
+fill(36);
+stroke('red');
+circle(80, 80, 80);
 
-	noStroke();
-  square(80, 80, 80);
-}
+noStroke();
+square(80, 80, 80);
 	 */
 	function noStroke(): void;
 
@@ -453,15 +446,13 @@ function draw() {
 	 * Sets the size of the stroke used for lines and the border around shapes.
 	 * @param {number} weight size of the stroke in pixels
 	 * @example
-function setup() {
-	createCanvas(200, 200);
-	background(200);
-	stroke('red');
-  circle(50, 100, 80);
+createCanvas(200);
+background(200);
+stroke('red');
+circle(50, 100, 80);
 
-  strokeWeight(20);
-  circle(150, 100, 80)
-}
+strokeWeight(20);
+circle(150, 100, 80);
 	 */
 	function strokeWeight(weight: number): void;
 
@@ -469,15 +460,14 @@ function setup() {
 	 * Sets the global opacity, which affects all subsequent drawing operations, except `background`. Default is 1, fully opaque.
 	 * @param {number} alpha opacity level, ranging from 0 to 1
 	 * @example
-function draw() {
-	background(200);
-	
-	opacity(1);
-	circle(80, 80, 80);
+createCanvas(200);
+background(200);
 
-	opacity(0.2);
-	square(80, 80, 80);
-}
+opacity(1);
+circle(80, 80, 80);
+
+opacity(0.2);
+square(80, 80, 80);
 	 */
 	function opacity(alpha: number): void;
 
@@ -487,19 +477,20 @@ function draw() {
 	 * Shadows apply to anything drawn to the canvas, including filled
 	 * shapes, strokes, text, and images.
 	 * 
-	 * Like the [`color`](https://q5js.org/learn/#color) function, this function can accept colors in a wide range of formats: CSS color string, hex string, grayscale value, and color component values.
-	 * @param {string | Color} color shadow color
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
+	 * can accept colors in a wide range of formats: as a CSS color string,
+	 * a `Color` object, grayscale value, or color component values.
+	 * @param {Color} color shadow color
 	 * @example
-function draw() {
-  background(200);
-	
-	noFill();
-	shadow('black');
-	rect(64, 60, 80, 80);
-	text('q5', 100, 100);
-}
+createCanvas(200);
+background(200);
+
+noFill();
+shadow('black');
+rect(64, 60, 80, 80);
+text('q5', 100, 100);
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 let logo = loadImage('/assets/p5play_logo.webp');
 
 function setup() {
@@ -513,15 +504,14 @@ function setup() {
 	/** ⬜️
 	 * Disables the shadow effect.
 	 * @example
-function draw() {
-  background(200);
-	noStroke();
-	shadow('black');
-	rect(14, 14, 80, 80);
+createCanvas(200);
+background(200);
+noStroke();
+shadow('black');
+rect(14, 14, 80, 80);
 
-	noShadow();
-	rect(104, 104, 80, 80);
-}
+noShadow();
+rect(104, 104, 80, 80);
 	 */
 	function noShadow(): void;
 
@@ -533,26 +523,35 @@ function draw() {
 	 * @param {number} offsetY vertical offset of the shadow, defaults to be the same as offsetX
 	 * @param {number} blur blur radius of the shadow, defaults to 0
 	 * @example
-function draw() {
-	background(200);
-	noStroke();
-	shadow('red');
+createCanvas(200);
+background(200);
+noStroke();
+shadow('red');
 
-	shadowBox(-20, -8, 50);
-	circle(100, 100, 80, 80);
-}
+shadowBox(-20, -8, 50);
+circle(100, 100, 80, 80);
 	 * @example
-function draw() {
-	background(200);
-	noStroke();
-	shadow('aqua');
-	shadowBox(20);
-	rect(50, 50, 100, 100);
-  textSize(64);
-  text('q5', 60, 115);
-}
+createCanvas(200);
+background(200);
+noStroke();
+
+shadow('aqua');
+shadowBox(20);
+rect(50, 50, 100, 100);
+textSize(64);
+text('q5', 60, 115);
 	 */
 	function shadowBox(offsetX: number, offsetY: number, blur: number): void;
+
+	/** ⬜️
+	 * The width of the canvas.
+	 */
+	var width: number;
+
+	/** ⬜️
+	 * The height of the canvas.
+	 */
+	var height: number;
 
 	/** ⬜️
 	 * Translates the origin of the drawing context.
@@ -655,35 +654,42 @@ function draw() {
 	 * q5 runs this function before every time the `draw` function is run,
 	 * so that transformations don't carry over to the next frame.
 	 * @example
-function draw() {
-	background(200);
+createCanvas(200);
+background(200);
 
-	translate(100, 100);
-	circle(0, 0, 80);
+translate(100, 100);
+circle(0, 0, 80);
 
-	resetMatrix();
-	square(0, 0, 50);
-}
+resetMatrix();
+square(0, 0, 50);
 	 */
 	function resetMatrix(): void;
 
 	/** ⬜️
 	 * Saves the current transformation matrix.
 	 * @example
-function draw() {
-	background(200);
-	translate(100, 100);
-	pushMatrix();
-	rotate(QUARTER_PI);
-	ellipse(0, 0, 120, 40);
-	popMatrix();
-	ellipse(0, 0, 120, 40);
-}
+createCanvas(200);
+background(200);
+translate(100, 100);
+pushMatrix();
+rotate(QUARTER_PI);
+ellipse(0, 0, 120, 40);
+popMatrix();
+ellipse(0, 0, 120, 40);
 	 */
 	function pushMatrix(): void;
 
 	/** ⬜️
 	 * Restores the previously saved transformation matrix.
+	 * @example
+createCanvas(200);
+background(200);
+translate(100, 100);
+pushMatrix();
+rotate(QUARTER_PI);
+ellipse(0, 0, 120, 40);
+popMatrix();
+ellipse(0, 0, 120, 40);
 	 */
 	function popMatrix(): void;
 
@@ -714,7 +720,7 @@ function draw() {
 	/** ⬜️
 	 * Saves the current drawing style settings and transformations.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 push();
 fill('blue');
@@ -763,7 +769,7 @@ square(0, 0, 50);
 	 * on the unit provided to this function.
 	 * @param {number} unit unit to scale by
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 flexibleCanvas(100);
 // rect will appear in the middle of the canvas
 rect(20, 20, 60, 60);
@@ -814,7 +820,11 @@ circle(25, 12.5, 16);
 
 	/** 🧑‍🎨
 	 * Draws over the entire canvas with a color or image.
-	 * @param {string | number} color color or image to draw
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function,
+	 * this function can accept colors in a wide range of formats:
+	 * CSS color string, grayscale value, and color component values.
+	 * @param {Color | Image} filler a color or image to draw
 	 * @example
 createCanvas(200, 100);
 background('crimson');
@@ -824,7 +834,7 @@ function draw() {
 	circle(mouseX, mouseY, 20);
 }
 	 */
-	function background(color: string | number): void;
+	function background(filler: Color | Image): void;
 
 	/** 🧑‍🎨
 	 * Draws a rectangle or a rounded rectangle.
@@ -837,7 +847,7 @@ function draw() {
 	 * @param {number} [br] bottom-right radius
 	 * @param {number} [bl] bottom-left radius
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background(200);
 
 rect(30, 20, 40, 60);
@@ -856,7 +866,7 @@ rect(130, 120, 40, 60, 30, 2, 8, 20);
 	 * @param {number} [br] bottom-right radius
 	 * @param {number} [bl] bottom-left radius
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background(200);
 
 square(30, 30, 40);
@@ -900,7 +910,7 @@ ellipse(100, 50, 160, 80);
 	 * @param {number} stop angle to stop the arc
 	 * @param {number} [mode] shape and stroke style setting, default is `PIE_OPEN` for a pie shape with an unclosed stroke, can be `PIE`, `CHORD`, or `CHORD_OPEN`
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background(200);
 
 arc(40, 40, 40, 40, 0.8, -0.8);
@@ -1104,7 +1114,7 @@ point(125, 50);
 	 * @param {(img: any) => void} [cb] callback function after the image is loaded
 	 * @param {any} [opt] optional parameters for loading the image
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let logo = loadImage('/q5js_logo.webp');
 
@@ -1126,7 +1136,7 @@ function draw() {
 	 * @param {number} [sw] width of the subsection of the source image
 	 * @param {number} [sh] height of the subsection of the source image
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let logo = loadImage('/q5js_logo.webp');
 
@@ -1143,7 +1153,7 @@ function draw() {
 	 * `CENTER`: images will be drawn centered at (dx, dy)
 	 * @param {string} mode
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let logo = loadImage('/q5js_logo.webp');
 
@@ -1174,7 +1184,7 @@ function draw() {
 	 * @param {number} w new width
 	 * @param {number} h new height
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let logo = loadImage('/q5js_logo.webp');
 
@@ -1196,7 +1206,7 @@ function setup() {
 	 * their actual size. This is the default setting, so running this
 	 * function only has an effect if `noSmooth` has been called.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let icon = loadImage('/q5js_icon.png');
 
@@ -1209,7 +1219,7 @@ function setup() {
 	/** 🌆
 	 * Disables smooth image rendering for a pixelated look.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let icon = loadImage('/q5js_icon.png');
 
@@ -1240,7 +1250,7 @@ function setup() {
 	 * each copy separately.
 	 * @param {string | number} color tint color
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let logo = loadImage('/q5js_logo.webp');
 
@@ -1279,7 +1289,7 @@ function setup() {
 	 * @param {number} [h] height of the area
 	 * @returns {Image | number[]}
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let logo = loadImage('/q5js_logo.webp');
 
@@ -1301,7 +1311,7 @@ function setup() {
 	 * @param {number} y
 	 * @param {any} c color, canvas, or image
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 let c = color('lime');
 
 function draw() {
@@ -1329,7 +1339,7 @@ function draw() {
 	 * @param {number} dw width of the destination region
 	 * @param {number} dh height of the destination region
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let logo = loadImage('/q5js_logo.webp');
 
@@ -1348,7 +1358,7 @@ function setup() {
 	/** 🌆
 	 * Loads pixel data into the canvas' or image's `pixels` array.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 let icon = loadImage('/q5js_icon.png');
 
 function setup() {
@@ -1363,7 +1373,7 @@ function setup() {
 	/** 🌆
 	 * Applies changes in the `pixels` array to the canvas or image.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 function setup() {
 	for (let x = 0; x < 200; x += 5) {
 		for (let y = 0; y < 200; y += 5) {
@@ -1391,7 +1401,7 @@ function setup() {
 	 * @param {string} type filter type or a CSS filter string
 	 * @param {number} [value] optional value, depends on filter type
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 let logo = loadImage('/q5js_logo.webp');
 
 function setup() {
@@ -1461,13 +1471,13 @@ function setup() {
 	 * @param {number} [wrapWidth] maximum line width in characters
 	 * @param {number} [lineLimit] maximum number of lines
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background('silver');
 
 textSize(32);
 text('Hello, world!', 12, 106);
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background(200);
 textSize(20);
 
@@ -1497,7 +1507,7 @@ text(info, 12, 30, 20, 6);
 	 * @param {(font: FontFace) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
 	 * @returns {FontFace} font
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 loadFont('/assets/Robotica.ttf');
 
@@ -1520,7 +1530,7 @@ function setup() {
 	 * https://developer.mozilla.org/docs/Web/CSS/font-family
 	 * @param {string} fontName name of the font family or a FontFace object
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background(200);
 
 textFont('serif');
@@ -1563,7 +1573,7 @@ function draw() {
 	 * Sets the current text style.
 	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style font style
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background(200);
 
 textStyle(ITALIC);
@@ -1578,7 +1588,7 @@ text('Hello, world!', 12, 106);
 	 * @param {'left' | 'center' | 'right'} horiz horizontal alignment
 	 * @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] vertical alignment
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 background(200);
 
 textAlign(CENTER, MIDDLE);
@@ -1623,7 +1633,7 @@ function draw() {
 	 * @param {string} str string to measure
 	 * @returns {number} descent of the text in pixels
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 	background(200);
 	textSize(64);
 
@@ -1723,25 +1733,47 @@ createCanvas(200, 200);
 	// 🎨 color
 
 	/** 🎨
-	 * Creates a new `Color` object. This function can parse different
-	 * color representations depending on the current color mode.
+	 * Creates a new `Color` object, which is primarily useful for storing
+	 * a color that your sketch will reuse or modify later.
 	 * 
-	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
-	 * and `a`/`alpha`.
+	 * With the default RGB color mode, colors have these components:
 	 * 
-	 * When only one numeric input is provided, it'll be interpreted
-	 * as a grayscale value. If only two numeric inputs are provided, 
-	 * they will be used as grayscale and alpha values.
+	 * `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha`.
 	 * 
-	 * [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background) functions can accept the same
-	 * wide range of inputs as this function.
-	 * @param {string | number | Color | number[]} c0 first color component, a CSS color string, a `Color` object (to make copy), or an array of components
+	 * The default color format is integer, so set color components
+	 * to values between 0 and 255.
+	 * 
+	 * In q5 WebGPU, the default color mode is RGB in float format, so
+	 * set color components to values between 0 and 1.
+	 * 
+	 * The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background) functions
+	 * accept the same wide range of color representations as this function.
+	 * 
+	 * Here are some examples of valid use:
+	 * 
+	 * - `color(255)` (grayscale)
+	 * - `color(255, 200)` (grayscale, alpha)
+	 * - `color(255, 0, 0)` (r, g, b)
+	 * - `color(255, 0, 0, 10)` (r, g, b, a)
+	 * - `color('red')` (colorName)
+	 * - `color('#ff0000')` (hexColor)
+	 * - `color([255, 0, 0])` (colorComponents)
+	 * @param {string | number | Color | number[]} c0 color or first color component
 	 * @param {number} [c1] second color component
 	 * @param {number} [c2] third color component
 	 * @param {number} [c3] fourth color component (alpha)
 	 * @returns {Color} a new `Color` object
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
+//                (gray, alpha)
+let darkGray = color(55, 100);
+background(darkGray);
+//	                  (r, g,   b,  a)
+let blueBottle = color(0, 0, 200, 20);
+fill(blueBottle);
+circle(100, 50, 50);
+	 * @example
+createCanvas(200);
 
 let c = color('gray');
 
@@ -1763,7 +1795,7 @@ function draw() {
 	 * @param {'rgb' | 'srgb' | 'oklch'} mode color mode
 	 * @param {1 | 255} format color format (1 for float, 255 for integer)
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 colorMode(RGB, 1);
 fill(1, 0, 0);
@@ -1773,7 +1805,7 @@ rect(66, 0, 67, 200);
 fill(0, 0, 1);
 rect(133, 0, 67, 200);
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 colorMode(OKLCH);
 
@@ -1794,7 +1826,7 @@ rect(100, 0, 100, 200);
 	 * rgb colors are mapped to the full P3 gamut, even when they use the
 	 * legacy integer format.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 function setup() {
 	background(255, 0, 0);
@@ -1809,7 +1841,7 @@ function setup() {
 	 * example, note that full red appears less saturated, as it would
 	 * on an SDR display.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 colorMode(SRGB, 255);
 
@@ -1843,7 +1875,7 @@ function setup() {
 	 * 
 	 * Note how seamless the hue transitions are in the following example.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 colorMode(OKLCH);
 
 function draw() {
@@ -1963,7 +1995,7 @@ function draw() {
 	/** 🖲️
 	 * Hides the cursor within the bounds of the canvas.
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 noCursor();
 	 */
 	function noCursor(): void;
@@ -2169,7 +2201,7 @@ noCursor();
 	 * @param {string} url sound file
 	 * @returns {Sound} a new `Sound` object
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let sound = loadSound('/assets/jump.wav');
 sound.volume = 0.3;
@@ -2190,7 +2222,7 @@ function mousePressed() {
 	 * @param url audio file
 	 * @returns {HTMLAudioElement} an HTMLAudioElement
 	 * @example
-createCanvas(200, 200);
+createCanvas(200);
 
 let audio = loadAudio('/assets/retro.flac');
 audio.volume = 0.4;
@@ -2299,7 +2331,7 @@ function draw() {
 }
 	 * @example
 new Q5();
-createCanvas(200, 200);
+createCanvas(200);
 
 // use with top level await in a module
 await load('/assets/Robotica.ttf');
@@ -2308,7 +2340,7 @@ background(255);
 text('Hello, world!', 20, 100);
 	 * @example
 let q = new Q5();
-createCanvas(200, 200);
+createCanvas(200);
 
 let [jump, retro] = await load(
 		'/assets/jump.wav', '/assets/retro.flac'

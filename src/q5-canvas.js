@@ -144,8 +144,10 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$._setCanvasSize = (w, h) => {
+		if (!w) h ??= window.innerHeight;
+		else h ??= w;
 		w ??= window.innerWidth;
-		h ??= window.innerHeight;
+
 		$.defaultWidth = c.w = w = Math.ceil(w);
 		$.defaultHeight = c.h = h = Math.ceil(h);
 		c.hw = w / 2;
