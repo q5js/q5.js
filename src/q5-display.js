@@ -90,7 +90,9 @@ main {
 		}
 		if (displayMode == 'center') displayMode = 'centered';
 		Object.assign(c, { displayMode, renderQuality, displayScale });
+		if ($.ctx) $.pushStyles();
 		$._adjustDisplay();
+		if ($.ctx) $.popStyles();
 	};
 
 	$.fullscreen = (v) => {

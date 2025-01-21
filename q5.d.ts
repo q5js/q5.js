@@ -355,18 +355,24 @@ function draw() {
 
 	/** ⬜️
 	 * The canvas element associated with the Q5 instance.
+	 * 
+	 * @prop {Number} w
+	 * @prop {Number} width
+	 * @prop {Number} h
+	 * @prop {Number} height
+	 * @prop {Number} hw half the width
+	 * @prop {Number} hh half the height
+	 * @prop {String} renderer either "c2d" (Canvas2D) or "webgpu"
 	 */
 	var canvas: HTMLCanvasElement;
 
 	/** ⬜️
 	 * The width of the canvas.
-	 * Can also be accessed via `canvas.w`/`canvas.width`.
 	 */
 	var width: number;
 
 	/** ⬜️
 	 * The height of the canvas.
-	 * Can also be accessed via `canvas.h`/`canvas.height`.
 	 */
 	var height: number;
 
@@ -790,12 +796,17 @@ rect(20, 20, 60, 60);
 	 * @param {string} mode
 	 *   - "normal": (default) no styling to canvas or its parent element
 	 *   - "centered": canvas will be centered horizontally and vertically within its parent and if the window is smaller than the canvas, the canvas will be resized to avoid clipping
-	 *   - "maxed": canvas will fill the parent element, same as fullscreen for a canvas inside a `main` element
-	 *   - "fullscreen": canvas will fill the screen with letterboxing if necessary to preserve its aspect ratio
+	 *   - "maxed": canvas will fill the parent element, with letterboxing if necessary to preserve its aspect ratio
 	 * @param {string} renderQuality
 	 *   - "smooth": (default) no change to the default render quality
 	 *   - "pixelated": runs `pixelDensity(1)` and `noSmooth()` then sets the canvas CSS styles `image-rendering: pixelated` and `font-smooth: never`
 	 * @param {number} scale can also be given as a string (for example "x2")
+	 * @example
+createCanvas(50, 25);
+
+displayMode('centered', 'pixelated', 4);
+
+circle(25, 12.5, 16);
 	 */
 	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
 
@@ -804,31 +815,53 @@ rect(20, 20, 60, 60);
 	/** 🧑‍🎨
 	 * Draws over the entire canvas with a color or image.
 	 * @param {string | number} color color or image to draw
+	 * @example
+createCanvas(200, 100);
+background('crimson');
+	 * @example
+function draw() {
+	background(128, 20);
+	circle(mouseX, mouseY, 20);
+}
 	 */
 	function background(color: string | number): void;
 
 	/** 🧑‍🎨
-	 * Draws a rectangle.
+	 * Draws a rectangle or a rounded rectangle.
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} w width of the rectangle
 	 * @param {number} [h] height of the rectangle
-	 * @param {number} [tl] top-left radius for rounded corners
-	 * @param {number} [tr] top-right radius for rounded corners
-	 * @param {number} [br] bottom-right radius for rounded corners
-	 * @param {number} [bl] bottom-left radius for rounded corners
+	 * @param {number} [tl] top-left radius
+	 * @param {number} [tr] top-right radius
+	 * @param {number} [br] bottom-right radius
+	 * @param {number} [bl] bottom-left radius
+	 * @example
+createCanvas(200, 200);
+background(200);
+
+rect(30, 20, 40, 60);
+rect(80, 70, 40, 60, 10);
+rect(130, 120, 40, 60, 30, 2, 8, 20);
 	 */
 	function rect(x: number, y: number, w: number, h?: number, tl?: number, tr?: number, br?: number, bl?: number): void;
 
 	/** 🧑‍🎨
-	 * Draws a square.
+	 * Draws a square or a rounded square.
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} size size of the sides of the square
-	 * @param {number} [tl] top-left radius for rounded corners
-	 * @param {number} [tr] top-right radius for rounded corners
-	 * @param {number} [br] bottom-right radius for rounded corners
-	 * @param {number} [bl] bottom-left radius for rounded corners
+	 * @param {number} [tl] top-left radius
+	 * @param {number} [tr] top-right radius
+	 * @param {number} [br] bottom-right radius
+	 * @param {number} [bl] bottom-left radius
+	 * @example
+createCanvas(200, 200);
+background(200);
+
+square(30, 30, 40);
+square(80, 80, 40, 10);
+square(130, 130, 40, 30, 2, 8, 20);
 	 */
 	function square(x: number, y: number, size: number, tl?: number, tr?: number, br?: number, bl?: number): void;
 
@@ -837,6 +870,9 @@ rect(20, 20, 60, 60);
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} diameter diameter of the circle
+	 * @example
+createCanvas(200, 100);
+circle(100, 50, 80);
 	 */
 	function circle(x: number, y: number, diameter: number): void;
 
@@ -846,6 +882,9 @@ rect(20, 20, 60, 60);
 	 * @param {number} y y-coordinate
 	 * @param {number} width width of the ellipse
 	 * @param {number} [height] height of the ellipse
+	 * @example
+createCanvas(200, 100);
+ellipse(100, 50, 160, 80);
 	 */
 	function ellipse(x: number, y: number, width: number, height?: number): void;
 
@@ -861,14 +900,13 @@ rect(20, 20, 60, 60);
 	 * @param {number} stop angle to stop the arc
 	 * @param {number} [mode] shape and stroke style setting, default is `PIE_OPEN` for a pie shape with an unclosed stroke, can be `PIE`, `CHORD`, or `CHORD_OPEN`
 	 * @example
-function draw() {
-	background(200);
+createCanvas(200, 200);
+background(200);
 
-	arc(40, 40, 40, 40, 0.8, -0.8);
-  arc(80, 80, 40, 40, 0.8, -0.8, PIE);
-  arc(120, 120, 40, 40, 0.8, -0.8, CHORD_OPEN);
-  arc(160, 160, 40, 40, 0.8, -0.8, CHORD);
-}
+arc(40, 40, 40, 40, 0.8, -0.8);
+arc(80, 80, 40, 40, 0.8, -0.8, PIE);
+arc(120, 120, 40, 40, 0.8, -0.8, CHORD_OPEN);
+arc(160, 160, 40, 40, 0.8, -0.8, CHORD);
 	 */
 	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number): void;
 
@@ -878,6 +916,10 @@ function draw() {
 	 * @param {number} y1 y-coordinate of the first point
 	 * @param {number} x2 x-coordinate of the second point
 	 * @param {number} y2 y-coordinate of the second point
+	 * @example
+createCanvas(200, 100);
+stroke('lime');
+line(20, 20, 180, 80);
 	 */
 	function line(x1: number, y1: number, x2: number, y2: number): void;
 
@@ -885,6 +927,13 @@ function draw() {
 	 * Draws a point on the canvas.
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
+	 * @example
+createCanvas(200, 100);
+stroke('white');
+point(75, 50);
+
+strokeWeight(10);
+point(125, 50);
 	 */
 	function point(x: number, y: number): void;
 
@@ -1029,6 +1078,8 @@ function draw() {
 
 	/** 🧑‍🎨
 	 * Checks if a given point is within the current path's fill area.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {number} x x-coordinate of the point
 	 * @param {number} y y-coordinate of the point
 	 * @returns {boolean} true if the point is within the fill area, false otherwise
@@ -1037,6 +1088,8 @@ function draw() {
 
 	/** 🧑‍🎨
 	 * Checks if a given point is within the current path's stroke.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {number} x x-coordinate of the point
 	 * @param {number} y y-coordinate of the point
 	 * @returns {boolean} true if the point is within the stroke, false otherwise
@@ -1401,13 +1454,12 @@ function setup() {
 
 	/** ✍️
 	 * Renders text to the screen. Text can be positioned with the x and y
-	 * parameters and can optionally be constrained by a character limit
-	 * per line and a line limit.
+	 * parameters and can optionally be constrained.
 	 * @param {string} str string of text to display
 	 * @param {number} x x-coordinate of the text's position
 	 * @param {number} y y-coordinate of the text's position
-	 * @param {number} [w] character limit per line
-	 * @param {number} [h] line limit
+	 * @param {number} [wrapWidth] maximum line width in characters
+	 * @param {number} [lineLimit] maximum number of lines
 	 * @example
 createCanvas(200, 200);
 background('silver');
@@ -1422,8 +1474,9 @@ textSize(20);
 let info = "q5.js is a JavaScript library for creative coding. It's a sequel to p5.js that's optimized for interactive art.";
 
 text(info, 12, 30, 20, 6);
+//
 	 */
-	function text(str: string, x: number, y: number, w?: number, h?: number): void;
+	function text(str: string, x: number, y: number, wrapWidth?: number, lineLimit?: number): void;
 
 	/** ✍️
 	 * Loads a font from a URL and optionally runs a callback function
@@ -1580,15 +1633,13 @@ createCanvas(200, 200);
 	function textDescent(str: string): number;
 
 	/** ✍️
-	 * Creates an image from a string of text. Width and height
-	 * will not be the width and height of the text image, but of
-	 * the bounding box that the text will be constrained within.
+	 * Creates an image from a string of text.
 	 * @param {string} str string of text
-	 * @param {number} w width of the bounding box
-	 * @param {number} h height of the bounding box
+	 * @param {number} [wrapWidth] maximum line width in characters
+	 * @param {number} [lineLimit] maximum number of lines
 	 * @returns {Q5.Image} an image object representing the rendered text
 	 */
-	function createTextImage(str: string, w: number, h: number): Q5.Image;
+	function createTextImage(str: string, wrapWidth: number, lineLimit: number): Q5.Image;
 
 	/** ✍️
 	 * Renders an image generated from text onto the canvas. The
@@ -1682,7 +1733,7 @@ createCanvas(200, 200);
 	 * as a grayscale value. If only two numeric inputs are provided, 
 	 * they will be used as grayscale and alpha values.
 	 * 
-	 * `fill`, `stroke`, and `background` functions can accept the same
+	 * [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background) functions can accept the same
 	 * wide range of inputs as this function.
 	 * @param {string | number | Color | number[]} c0 first color component, a CSS color string, a `Color` object (to make copy), or an array of components
 	 * @param {number} [c1] second color component
@@ -1692,7 +1743,7 @@ createCanvas(200, 200);
 	 * @example
 createCanvas(200, 200);
 
-let c = color(128);
+let c = color('gray');
 
 function draw() {
 	background(c);
@@ -1851,7 +1902,7 @@ function draw() {
 	 * True if the mouse is currently pressed, false otherwise.
 	 * @example
 function draw() {
-	if (mouseIsPressed) background(0);
+	if (mouseIsPressed) background(100);
 	else background(200);
 }
 	 */
@@ -1872,7 +1923,7 @@ function draw() {
 	 * True if a key is currently pressed, false otherwise.
 	 * @example
 function draw() {
-	if (keyIsPressed) background(0);
+	if (keyIsPressed) background(100);
 	else background(200);
 }
 	 */
@@ -1894,13 +1945,8 @@ function draw() {
 	function keyIsDown(key: string): boolean;
 
 	/** 🖲️
-	 * The keyCode of the last key pressed.
-	 * @deprecated
-	 */
-	let keyCode: number;
-
-	/** 🖲️
-	 * Array of current touches, each touch being an object with x, y, id, etc.
+	 * Array of current touches, each touch being an object with
+	 * id, x, and y properties.
 	 */
 	let touches: any[];
 
@@ -2170,10 +2216,63 @@ function mousePressed() {
 	class Sound {
 		/** 🔊
 		 * Creates a new `Q5.Sound` object.
-		 * 
-		 * See the `loadSound` documentation for more info.
 		 */
 		constructor();
+
+		/** 🔊
+		 * Set the sound's volume to a value between
+		 * 0 (silent) and 1 (full volume).
+		 */
+		volume: number;
+
+		/** 🔊
+		 * Set the sound's stereo position between -1 (left) and 1 (right).
+		 */
+		pan: number;
+
+		/** 🔊
+		 * Set to true to make the sound loop continuously.
+		 */
+		loop: boolean;
+
+		/** 🔊
+		 * True if the sound data has finished loading.
+		 */
+		loaded: boolean;
+
+		/** 🔊
+		 * True if the sound is currently paused.
+		 */
+		paused: boolean;
+
+		/** 🔊
+		 * True if the sound has finished playing.
+		 */
+		ended: boolean;
+
+		/** 🔊
+		 * Plays the sound.
+		 * 
+		 * If this function is run when the sound is already playing,
+		 * a new playback will start, causing a layering effect.
+		 * 
+		 * If this function is run when the sound is paused,
+		 * all playback instances will be resumed.
+		 */
+		play(): void;
+
+		/** 🔊
+		 * Pauses the sound, allowing it to be resumed.
+		 */
+		pause(): void;
+
+		/** 🔊
+		 * Stops the sound, resetting its playback position
+		 * to the beginning.
+		 * 
+		 * Removes all playback instances.
+		 */
+		stop(): void;
 	}
 
 	// 🛠️ utilities

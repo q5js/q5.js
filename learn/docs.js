@@ -115,6 +115,7 @@ function convertToMarkdown(data) {
 		markdownCode = '',
 		insideJSDoc = false,
 		insideParams = false,
+		insideProps = false,
 		insideExample = false,
 		jsDocBuffer = '',
 		inClassDef = false,
@@ -133,24 +134,32 @@ function convertToMarkdown(data) {
 					line = jsDocBuffer += '```';
 					insideExample = false;
 				}
-				insideJSDoc = insideParams = false;
+				insideJSDoc = insideParams = insideProps = false;
 			} else {
 				line = line.replace(/^\s*\* {0,1}/, '');
-				if (line.startsWith('@param')) {
+				let isParam = line.startsWith('@param');
+				if (isParam) {
 					if (!insideParams) jsDocBuffer += '### Params\n\n';
 					insideParams = true;
-					const paramMatch = line.match(/@param \{([^\}]+)\} (\S+) *-* *(.*)/);
-					if (paramMatch) {
-						let [_, paramType, paramName, paramDesc] = paramMatch;
+				}
+				let isProp = line.startsWith('@prop');
+				if (isProp) {
+					if (!insideProps) jsDocBuffer += '### Properties\n\n';
+					insideProps = true;
+				}
+				if (isParam || isProp) {
+					const pMatch = line.match(/@(param|prop|property) \{([^\}]+)\} (\S+) *-* *(.*)/);
+					if (pMatch) {
+						let [_0, _1, pType, pName, pDesc] = pMatch;
 						let optional = '';
-						if (paramName[0] === '[') {
-							paramName = paramName.slice(1, -1);
+						if (pName[0] === '[') {
+							pName = pName.slice(1, -1);
 							optional = '(optional)';
 						}
-						if (paramName.includes('.')) line = '  ';
+						if (pName.includes('.')) line = '  ';
 						else line = '';
-						line += `- \`${paramName}\` \`<${paramType}>\` ${optional}`;
-						if (paramDesc) line += ` - ${paramDesc}`;
+						line += `- \`${pName}\` \`<${pType}>\` ${optional}`;
+						if (pDesc) line += ` - ${pDesc}`;
 					}
 				} else if (line.startsWith('@returns')) {
 					const returnMatch = line.match(/@returns \{([^\}]+)\} *-* *(.*)/);
