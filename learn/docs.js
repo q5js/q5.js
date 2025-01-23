@@ -330,8 +330,6 @@ function parseMarkdownIntoSections(markdownText) {
 	return sections;
 }
 
-let hasSmoothScroll = true;
-
 function populateNavigation(sections) {
 	const navbar = document.getElementById('navbar');
 	navbar.innerHTML = '';
@@ -434,11 +432,8 @@ function populateNavigation(sections) {
 					if (subsectionElement) {
 						history.pushState(null, '', `#${subId}`);
 						const contentContainer = document.getElementById('content');
-						if (hasSmoothScroll) {
-							setScrollBehavior('smooth');
-						}
+						scrollBehavior = 'smooth';
 						scrollToElementWithinContainer(contentContainer, subsectionElement);
-						hasSmoothScroll = true;
 					}
 				} else {
 					updateMainContent(sectionId, sections, () => {
@@ -461,114 +456,109 @@ function populateNavigation(sections) {
 	});
 }
 
+let scrollBehavior = 'smooth';
 function scrollToElementWithinContainer(container, element) {
-	setTimeout(() => {
-		const containerTop = container.getBoundingClientRect().top;
-		const elementTop = element.getBoundingClientRect().top;
-		const containerScrollTop = container.scrollTop;
-		const offsetTop = elementTop - containerTop + containerScrollTop;
-		container.scrollTop = offsetTop + 2;
-	}, 100);
-}
-function setScrollBehavior(behavior) {
-	const content = document.getElementById('content');
-	if (content.style.scrollBehavior !== behavior) {
-		content.style.scrollBehavior = behavior;
-	}
+	const offsetTop = element.offsetTop;
+	window.scrollTo({
+		top: offsetTop,
+		behavior: scrollBehavior
+	});
 }
 
+let currentSectionId = '';
 let currentLoadedSectionId = '';
 async function executeDataScripts(content) {
 	const scripts = content.querySelectorAll('script[type="mini"]');
 	for (let script of scripts) {
 		let scriptContent = script.innerHTML.slice(0, -1).replaceAll('\t', '  ').trim();
 		let id = 'editor-' + script.id.slice(7);
-		script.insertAdjacentHTML('beforebegin', `<div id="${id}" class="editor-container"></div>`);
-		let mini = new MiniEditor(id, scriptContent);
+		let container = document.createElement('div');
+		container.id = id;
+		container.className = 'editor-container';
+		script.insertAdjacentElement('beforebegin', container);
+		let mini = new MiniEditor(container, scriptContent);
 		await mini.init();
 	}
 }
 
 async function updateMainContent(sectionId, sections, callback) {
-	setScrollBehavior('auto');
+	scrollBehavior = 'instant';
 	const contentArea = document.getElementById('content');
 
 	contentArea.classList.remove('fade-in');
 	contentArea.classList.add('fade-out');
-	setTimeout(() => {
-		contentArea.classList.remove('fade-out');
-		contentArea.classList.add('fade-in');
-	}, 0);
 	const sectionIds = Object.keys(sections);
 	const currentSectionIndex = sectionIds.indexOf(sectionId);
-	// currentLoadedSectionId = sectionId;
+	currentSectionId = sectionId;
 	updateNavigationActiveState();
 	const prevSectionId = currentSectionIndex > 0 ? sectionIds[currentSectionIndex - 1] : null;
 	const nextSectionId = currentSectionIndex < sectionIds.length - 1 ? sectionIds[currentSectionIndex + 1] : null;
 
-	if ((marked && currentLoadedSectionId !== sectionId) || (marked && currentLoadedSectionId === sectionId)) {
-		contentArea.innerHTML = '';
+	contentArea.innerHTML = '';
 
-		const section = sections[sectionId];
-		let htmlContent = `<div id="${sectionId}">${marked.marked(section.content)}</div>`;
+	const section = sections[sectionId];
+	let htmlContent = `<div id="${sectionId}">${marked.marked(section.content)}</div>`;
 
-		for (let subId in section.subsections) {
-			const subsection = section.subsections[subId];
-			htmlContent += `<div id="${subId}">${marked.marked(subsection.content)}</div>`;
-		}
-		contentArea.insertAdjacentHTML('beforeend', htmlContent);
+	for (let subId in section.subsections) {
+		const subsection = section.subsections[subId];
+		htmlContent += `<div id="${subId}">${marked.marked(subsection.content)}</div>`;
+	}
+	contentArea.insertAdjacentHTML('beforeend', htmlContent);
 
-		const navButtonsContainer = document.createElement('div');
-		navButtonsContainer.className = 'nav-buttons-container';
+	const navButtonsContainer = document.createElement('div');
+	navButtonsContainer.className = 'nav-buttons-container';
 
-		if (prevSectionId) {
-			const prevButton = document.createElement('button');
-			prevButton.className = 'nav-button prev-section';
-			const prevLabel = document.createElement('div');
-			prevLabel.textContent = 'Previous Section';
-			prevButton.appendChild(prevLabel);
-			const prevTitle = document.createElement('div');
-			prevTitle.textContent = sections[prevSectionId].title;
-			prevButton.appendChild(prevTitle);
+	if (prevSectionId) {
+		const prevButton = document.createElement('button');
+		prevButton.className = 'nav-button prev-section';
+		const prevLabel = document.createElement('div');
+		prevLabel.textContent = 'Previous Section';
+		prevButton.appendChild(prevLabel);
+		const prevTitle = document.createElement('div');
+		prevTitle.textContent = sections[prevSectionId].title;
+		prevButton.appendChild(prevTitle);
 
-			prevButton.addEventListener('click', () => updateMainContent(prevSectionId, sections));
-			navButtonsContainer.appendChild(prevButton);
-		}
+		prevButton.addEventListener('click', () => updateMainContent(prevSectionId, sections));
+		navButtonsContainer.appendChild(prevButton);
+	}
 
-		if (nextSectionId) {
-			const nextButton = document.createElement('button');
-			nextButton.className = 'nav-button next-section';
-			const nextLabel = document.createElement('div');
-			nextLabel.textContent = 'Next Section';
-			nextButton.appendChild(nextLabel);
-			const nextTitle = document.createElement('div');
-			nextTitle.textContent = sections[nextSectionId].title;
-			nextButton.appendChild(nextTitle);
+	if (nextSectionId) {
+		const nextButton = document.createElement('button');
+		nextButton.className = 'nav-button next-section';
+		const nextLabel = document.createElement('div');
+		nextLabel.textContent = 'Next Section';
+		nextButton.appendChild(nextLabel);
+		const nextTitle = document.createElement('div');
+		nextTitle.textContent = sections[nextSectionId].title;
+		nextButton.appendChild(nextTitle);
 
-			nextButton.addEventListener('click', () => updateMainContent(nextSectionId, sections));
-			navButtonsContainer.appendChild(nextButton);
-		}
-		contentArea.appendChild(navButtonsContainer);
-		const spacer = document.createElement('div');
-		spacer.style.height = '100vh';
-		contentArea.appendChild(spacer);
+		nextButton.addEventListener('click', () => updateMainContent(nextSectionId, sections));
+		navButtonsContainer.appendChild(nextButton);
+	}
+	contentArea.appendChild(navButtonsContainer);
+	const spacer = document.createElement('div');
+	spacer.style.height = '100vh';
+	contentArea.appendChild(spacer);
 
-		ignoreHashChange = true;
-		if (currentLoadedSectionId !== sectionId) {
-			window.location.hash = sectionId;
-			currentLoadedSectionId = sectionId;
-		}
-		ignoreHashChange = false;
+	// ignoreHashChange = true;
+	// if (currentLoadedSectionId && currentLoadedSectionId !== sectionId) {
+	// 	window.location.hash = sectionId;
+	// 	currentLoadedSectionId = sectionId;
+	// }
+	// ignoreHashChange = false;
 
-		addCopyButtons();
-		generateHeadings();
-		convertMarkdownLinksToNavigationButtons(sections);
-		await executeDataScripts(contentArea);
-		updateStickyHeader();
+	currentLoadedSectionId = sectionId;
 
-		if (typeof callback === 'function') {
-			requestAnimationFrame(callback);
-		}
+	addCopyButtons();
+	generateHeadings();
+	convertMarkdownLinksToNavigationButtons(sections);
+	await executeDataScripts(contentArea);
+	updateStickyHeader();
+	contentArea.classList.remove('fade-out');
+	contentArea.classList.add('fade-in');
+
+	if (typeof callback === 'function') {
+		requestAnimationFrame(callback);
 	}
 	const savedTheme = localStorage.getItem('theme') || 'light';
 
@@ -655,7 +645,7 @@ contentDiv.addEventListener('scroll', updateStickyHeader);
 function updateNavigationActiveState() {
 	const links = document.querySelectorAll('.section-link, .subsection-link');
 	links.forEach((link) => {
-		if (link.getAttribute('href') === `#${currentLoadedSectionId}`) {
+		if (link.getAttribute('href') === `#${currentSectionId}`) {
 			link.classList.add('active-section');
 			const parentSectionContainer = link.closest('.section-container');
 			if (parentSectionContainer) {
@@ -675,10 +665,9 @@ function updateNavigationActiveState() {
 
 function loadInitialContent(sections) {
 	ignoreHashChange = true;
-	const hash = window.location.hash.replace('#', '');
+	const hash = location.hash.replace('#', '');
 	let sectionId = null;
 	let subsectionId = null;
-	setScrollBehavior('auto');
 
 	if (sections[hash]) {
 		sectionId = hash;
@@ -743,7 +732,6 @@ function convertMarkdownLinksToNavigationButtons(sections) {
 }
 
 function navigateToSection(targetId, sections) {
-	hasSmoothScroll = false;
 	let found = false;
 	for (const [sectionId, section] of Object.entries(sections)) {
 		if (sectionId === targetId) {
@@ -769,7 +757,7 @@ function loadContentForSection(sectionId, sections, callback) {
 		if (subsectionElement) {
 			history.pushState(null, '', `#${sectionId}`);
 			const contentContainer = document.getElementById('content');
-			setScrollBehavior('smooth');
+			scrollBehavior = 'smooth';
 			scrollToElementWithinContainer(contentContainer, subsectionElement);
 		}
 	} else {

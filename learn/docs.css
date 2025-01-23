@@ -628,8 +628,8 @@ header {
 .subsection-link:hover,
 .active-section:hover {
 	border-radius: 5px;
-	background-color: var(--background);
-	color: var(--textColor);
+	background-color: var(--background) !important;
+	color: var(--textColor) !important;
 	border: 1px solid transparent;
 	text-decoration: none;
 }

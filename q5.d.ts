@@ -1326,6 +1326,7 @@ function draw() {
 	 * @example
 createCanvas(200, 100);
 
+// example coming soon
 // let vid = createVideo('/assets/q5js_video.mp4');
 // vid.controls = true;
 // vid.loop = true;

@@ -1,26 +1,25 @@
 let typeDefs = '';
 
 class MiniEditor {
-	constructor(containerId, script) {
-		this.containerId = containerId;
+	constructor(container, script) {
+		this.container = container;
 		this.initialCode = script;
 	}
 
 	async init() {
-		const container = document.getElementById(this.containerId);
-
-		const editorEl = document.createElement('div');
-		editorEl.id = `${this.containerId}-mini-editor`;
+		let editorEl = document.createElement('div');
+		editorEl.id = `${this.container.id}-mini-editor`;
 		editorEl.className = 'mini-editor';
 
+		let outputEl = document.createElement('div');
+		outputEl.id = `${this.container.id}-output`;
+		outputEl.className = 'output';
+
+		this.container.append(outputEl);
+		this.container.append(editorEl);
+
+		this.outputEl = outputEl;
 		this.editorEl = editorEl;
-
-		const output = document.createElement('div');
-		output.id = `${this.containerId}-output`;
-		output.className = 'output';
-
-		container.appendChild(output);
-		container.appendChild(editorEl);
 
 		await this.initializeEditor();
 
@@ -83,8 +82,7 @@ class MiniEditor {
 		}
 		this.isRunning = true;
 
-		const outputElement = document.getElementById(`${this.containerId}-output`);
-		outputElement.innerHTML = '';
+		this.outputEl.innerHTML = '';
 
 		const q5FunctionNames = [
 			'preload',
@@ -114,7 +112,7 @@ class MiniEditor {
 			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?new\s+Q5\s*\([^)]*\);?/g;
 			userCode = userCode.replace(q5InstanceRegex, '');
 
-			let q = new Q5('instance', outputElement);
+			let q = new Q5('instance', this.outputEl);
 
 			for (let f of q5FunctionNames) {
 				const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');
