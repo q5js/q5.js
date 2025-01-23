@@ -75,7 +75,6 @@ body {
 	font-family: sans-serif;
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
 }
 
 body {
@@ -110,21 +109,21 @@ h6 {
 	font-size: 0.85em;
 }
 
-p {
+:not(.output)>p {
 	line-height: 1.5;
 	padding: 0 32px;
 	margin-bottom: 20px;
 }
 
-a:not(.section-link) {
+:not(.output)>a:not(.section-link) {
 	color: var(--blue1);
 }
 
-a {
+:not(.output)>a {
 	text-decoration: none;
 }
 
-a:hover {
+:not(.output)>a:hover {
 	text-decoration: underline;
 }
 
@@ -148,7 +147,7 @@ li {
 	margin-bottom: 8px;
 }
 
-button {
+:not(.output)>button {
 	font-family: codicon;
 	padding: 0;
 }
@@ -478,9 +477,7 @@ header {
 	justify-content: center;
 	width: 1000px;
 	max-width: 100%;
-	height: calc(100% - 66px);
-	overflow: hidden;
-	position: fixed;
+	position: absolute;
 	top: 66px;
 }
 
@@ -534,7 +531,9 @@ header {
 }
 
 #navbar {
+	position: sticky;
 	width: 220px;
+	top: 66px;
 	padding-top: 18px;
 	padding-bottom: 200px;
 	max-height: calc(100vh - 200px);
@@ -550,10 +549,9 @@ header {
 }
 
 #content {
-	overflow-y: auto;
 	background-color: var(--backGround);
 	width: 100%;
-	max-height: calc(100vh - 55px);
+	max-width: 780px;
 }
 
 #content.fade-out {
@@ -1192,7 +1190,7 @@ pre[class*="language-"] code {
 		margin: 16px 8px;
 	}
 
-	p {
+	#content>div>p {
 		padding: 0 16px;
 	}
 

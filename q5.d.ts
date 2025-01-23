@@ -1106,6 +1106,232 @@ point(125, 50);
 	 */
 	function inStroke(x: number, y: number): boolean;
 
+	// 📑 dom
+
+	/** 📑
+	 * Creates a new HTML element.
+	 * 
+	 * q5 adds functions like `position` and `size` to the element
+	 * that make it easy to position elements above the canvas.
+	 * 
+	 * Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
+	 * 
+	 * `createEl` is an alias for this function.
+	 * @param {string} tag tag name of the element
+	 * @param {string} [content] content of the element
+	 * @returns {HTMLElement} created DOM element
+	 * @example
+createCanvas(200);
+
+let el = createEl('div', '*');
+el.position(0, 0);
+el.size(100, 100);
+el.style.fontSize = '136px';
+el.style.textAlign = 'center';
+el.style.backgroundColor = 'blue';
+el.style.color = 'white';
+	 */
+	function createElement(tag: string, content?: string): HTMLElement;
+
+	/** 📑
+	 * Creates a link element.
+	 * @param {string} href url
+	 * @param {string} [text] text content
+	 * @param {boolean} [newTab] whether to open the link in a new tab
+	 * @example
+createCanvas(200, 100);
+
+let link = createA('https://q5js.org', 'q5.js');
+link.position(0, 0);
+link.style.fontSize = '80px';
+	 */
+	function createA(href: string, text?: string): HTMLAnchorElement;
+
+	/** 📑
+	 * Creates a button element.
+	 * 
+	 * Use [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener) to respond to button click events.
+	 * @param {string} [content] text content
+	 * @example
+createCanvas(200, 100);
+
+let btn = createButton('Click me!');
+
+btn.addEventListener('click', () => {
+	background(random(100, 255));
+});
+	 */
+	function createButton(content?: string): HTMLButtonElement;
+
+	/** 📑
+	 * Creates a checkbox element.
+	 * 
+	 * Use the `checked` property to get or set the checkbox's state.
+	 * 
+	 * The `label` property is the text label element next to the checkbox.
+	 * @param {string} [label] text label placed next to the checkbox
+	 * @param {boolean} [checked] initial state
+	 * @example
+createCanvas(200, 100);
+
+let box = createCheckbox('Check me!');
+box.label.style.color = 'lime';
+
+box.addEventListener('change', () => {
+	if (box.checked) background('lime');
+	else background('black');
+});
+	 */
+	function createCheckbox(label?: string, checked?: boolean): HTMLInputElement;
+
+	/** 📑
+	 * Creates a color input element.
+	 * 
+	 * Use the `value` property to get or set the color value.
+	 * @param {string} [value] initial color value
+	 * @example
+createCanvas(200, 100);
+
+let picker = createColorPicker();
+picker.value = '#fd7575';
+
+function draw() {
+	background(picker.value);
+}
+	 */
+	function createColorPicker(value?: string): HTMLInputElement;
+
+	/** 📑
+	 * Creates an img element.
+	 * @param {string} src url of the image
+	 * @example
+createCanvas(200, 100);
+
+let img = createImg('/assets/p5play_logo.webp')
+	.position(0, 0)
+	.size(100, 100);
+	 */
+	function createImg(src: string): HTMLImageElement;
+
+	/** 📑
+	 * Creates an input element.
+	 * 
+	 * Use the `value` property to get or set the input's value.
+	 * 
+	 * See MDN's [input documentation](https://developer.mozilla.org/docs/Web/HTML/Element/input#input_types) for the full list of input types.
+	 * @param {string} [value] initial value
+	 * @param {string} [type] text input type, can be 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
+	 * @example
+createCanvas(200, 100);
+textSize(64);
+
+let input = createInput();
+input.placeholder = 'Type here!';
+input.size(200, 32);
+
+input.addEventListener('input', () => {
+	background('orange');
+	text(input.value, 10, 70);
+});
+	 */
+	function createInput(value?: string, type?: string): HTMLInputElement;
+
+	/** 📑
+	 * Creates a paragraph element.
+	 * @param {string} [content] text content
+	 * @example
+createCanvas(200, 50);
+background('coral');
+
+let p = createP('Hello, world!');
+p.style.color = 'pink';
+	 */
+	function createP(content?: string): HTMLParagraphElement;
+
+	/** 📑
+	 * Creates a radio button group.
+	 * 
+	 * Use the `option(label, value)` function to add new radio buttons
+	 * to the group.
+	 * 
+	 * Use the `value` property to get or set the value of the selected radio button.
+	 * @param {string} [groupName]
+	 * @example
+createCanvas(200, 100);
+
+let radio = createRadio()
+	.option('square', '1')
+	.option('circle', '2');
+radio.style.color = 'aqua';
+
+function draw() {
+	background(200);
+	if (radio.value == '1') square(75, 25, 50);
+	if (radio.value == '2') circle(100, 50, 50);
+}
+	 */
+	function createRadio(groupName): HTMLDivElement;
+
+	/** 📑
+	 * Creates a select element.
+	 * 
+	 * Use the `option(label, value)` function to add new options to
+	 * the select element.
+	 * 
+	 * Set `multiple` to `true` to allow multiple options to be selected.
+	 * 
+	 * Use the `value` property to get or set the selected option.
+	 * 
+	 * Use the `selected` property to get the selected option or options.
+	 * @param {boolean} [placeholder] optional placeholder text that appears when no option is selected
+	 * @example
+createCanvas(200, 100);
+
+let sel = createSelect('Select a color')
+	.option('Red', '#f55')
+	.option('Green', '#5f5');
+
+sel.addEventListener('change', () => {
+	background(sel.value);
+});
+	 */
+	function createSelect(placeholder): HTMLSelectElement;
+
+	/** 📑
+	 * Creates a slider element.
+	 * 
+	 * Use the `value` property to get or set the slider's value.
+	 * 
+	 * Use the `val` function to get the slider's value as a number.
+	 * @param {number} min minimum value
+	 * @param {number} max maximum value
+	 * @param {number} [value] initial value
+	 * @param {number} [step] step size
+	 * @example
+createCanvas(200);
+
+let slider = createSlider(0, 255)
+	.position(10, 10)
+	.size(180);
+
+function draw() {
+	background(slider.val());
+}
+	 */
+	function createSlider(min: number, max: number, value?: number, step?: number): HTMLInputElement;
+
+	/** 📑
+	 * Creates a video element.
+	 * @param {string} src url of the video
+	 * @example
+createCanvas(200, 100);
+
+// let vid = createVideo('/assets/q5js_video.mp4');
+// vid.controls = true;
+// vid.loop = true;
+	 */
+	function createVideo(src: string): HTMLVideoElement;
+
 	// 🌆 image
 
 	/** 🌆

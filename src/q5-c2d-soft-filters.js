@@ -138,7 +138,7 @@ Q5.renderers.c2d.soft_filters = ($) => {
 
 	$._softFilter = (typ, x) => {
 		if (!$._filters) initSoftFilters();
-		let imgData = $.ctx._getImageData(0, 0, $.canvas.width, $.canvas.height);
+		let imgData = $._getImageData(0, 0, $.canvas.width, $.canvas.height);
 		$._filters[typ](imgData.data, x);
 		$.ctx.putImageData(imgData, 0, 0);
 	};
