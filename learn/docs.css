@@ -626,12 +626,17 @@ header {
 
 .section-link:hover,
 .subsection-link:hover,
+.subsection-link.active,
 .active-section:hover {
 	border-radius: 5px;
-	background-color: var(--background) !important;
+	background-color: var(--secondary) !important;
 	color: var(--textColor) !important;
 	border: 1px solid transparent;
 	text-decoration: none;
+}
+
+.subsection-link.active {
+	font-weight: normal;
 }
 
 .toggle-button {
@@ -899,7 +904,7 @@ h4 {
 	opacity: 0.95;
 	transition: opacity 0.5s ease-in-out;
 	position: sticky;
-	top: 0;
+	top: 66px;
 	z-index: 2;
 }
 

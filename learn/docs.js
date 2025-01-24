@@ -431,9 +431,8 @@ function populateNavigation(sections) {
 					const subsectionElement = document.getElementById(subId);
 					if (subsectionElement) {
 						history.pushState(null, '', `#${subId}`);
-						const contentContainer = document.getElementById('content');
 						scrollBehavior = 'smooth';
-						scrollToElementWithinContainer(contentContainer, subsectionElement);
+						scrollToElement(subsectionElement);
 					}
 				} else {
 					updateMainContent(sectionId, sections, () => {
@@ -441,8 +440,7 @@ function populateNavigation(sections) {
 							const subsectionElement = document.getElementById(subId);
 							if (subsectionElement) {
 								history.pushState(null, '', `#${subId}`);
-								const contentContainer = document.getElementById('content');
-								scrollToElementWithinContainer(contentContainer, subsectionElement);
+								scrollToElement(subsectionElement);
 							}
 						}, 0);
 					});
@@ -457,10 +455,9 @@ function populateNavigation(sections) {
 }
 
 let scrollBehavior = 'smooth';
-function scrollToElementWithinContainer(container, element) {
-	const offsetTop = element.offsetTop;
+function scrollToElement(element) {
 	window.scrollTo({
-		top: offsetTop,
+		top: element.offsetTop,
 		behavior: scrollBehavior
 	});
 }
@@ -540,12 +537,11 @@ async function updateMainContent(sectionId, sections, callback) {
 	spacer.style.height = '100vh';
 	contentArea.appendChild(spacer);
 
-	// ignoreHashChange = true;
-	// if (currentLoadedSectionId && currentLoadedSectionId !== sectionId) {
-	// 	window.location.hash = sectionId;
-	// 	currentLoadedSectionId = sectionId;
-	// }
-	// ignoreHashChange = false;
+	ignoreHashChange = true;
+	if (currentLoadedSectionId && currentLoadedSectionId !== sectionId) {
+		window.location.hash = sectionId;
+	}
+	ignoreHashChange = false;
 
 	currentLoadedSectionId = sectionId;
 
@@ -554,93 +550,57 @@ async function updateMainContent(sectionId, sections, callback) {
 	convertMarkdownLinksToNavigationButtons(sections);
 	await executeDataScripts(contentArea);
 	updateStickyHeader();
-	contentArea.classList.remove('fade-out');
-	contentArea.classList.add('fade-in');
 
-	if (typeof callback === 'function') {
-		requestAnimationFrame(callback);
-	}
-	const savedTheme = localStorage.getItem('theme') || 'light';
-
-	setTimeout(() => {
-		setTheme(savedTheme);
-	}, 0);
-
-	document.querySelectorAll('.grid-button').forEach((button) => {
-		const icon = button.getAttribute('data-icon');
-		const color = button.getAttribute('data-color');
-		if (icon) {
-			button.style.setProperty('--button-icon', `"${icon}"`);
-		}
-		if (color) {
-			button.style.setProperty('--icon-color', color);
-		}
-		button.addEventListener('click', () => {
-			const dataUrl = button.getAttribute('data-url');
-			navigateToSection(dataUrl, markdownSections);
-		});
-	});
-	document.querySelectorAll('h1[data-icon], h2[data-icon]').forEach((header) => {
-		const icon = header.getAttribute('data-icon');
-		const color = header.getAttribute('data-color');
-		if (icon) {
-			header.style.setProperty('--header-icon', `"${icon}"`);
-		}
-		if (color) {
-			header.style.setProperty('--header-color', color);
-		}
-	});
 	document.querySelectorAll('code').forEach((code) => {
 		if (code.innerText[0] == '<') {
 			code.classList.add('type');
 		}
 	});
-}
-function updateStickyHeader() {
-	const h2Wrappers = document.querySelectorAll('.h2-wrapper');
-	let closestWrapper = null;
-	let closestDistance = Infinity;
 
-	h2Wrappers.forEach((wrapper) => {
-		const rect = wrapper.getBoundingClientRect();
-		const distance = Math.abs(rect.top); // Use absolute value to get closest to top
+	contentArea.classList.remove('fade-out');
+	contentArea.classList.add('fade-in');
 
-		if (distance < closestDistance) {
-			closestDistance = distance;
-			closestWrapper = wrapper;
-		}
+	requestAnimationFrame(() => {
+		setTheme(localStorage.getItem('theme') || 'light');
 	});
 
-	h2Wrappers.forEach((wrapper) => {
-		wrapper.classList.remove('sticky');
-	});
-
-	if (closestWrapper) {
-		closestWrapper.classList.add('sticky');
-
-		const h2Element = closestWrapper.querySelector('h2');
-		const subsectionId = h2Element ? h2Element.getAttribute('id') : null;
-
-		if (subsectionId) {
-			const navLinks = document.querySelectorAll('.subsection-link');
-			let isActiveSet = false;
-
-			navLinks.forEach((link) => {
-				const href = link.getAttribute('href');
-
-				if (href.includes(subsectionId) && !isActiveSet) {
-					link.classList.add('active');
-					isActiveSet = true; // Ensure only one link is active
-				} else {
-					link.classList.remove('active');
-				}
-			});
-		}
+	if (typeof callback === 'function') {
+		requestAnimationFrame(callback);
 	}
 }
 
-const contentDiv = document.getElementById('content');
-contentDiv.addEventListener('scroll', updateStickyHeader);
+let prevStickyWrapper = null;
+
+function updateStickyHeader() {
+	const h2Wrappers = document.querySelectorAll('.h2-wrapper');
+	let closestWrapper = null;
+	let minDistance = Infinity;
+
+	for (const wrapper of h2Wrappers) {
+		const distance = Math.abs(wrapper.getBoundingClientRect().top - 66);
+		if (distance < minDistance) {
+			minDistance = distance;
+			closestWrapper = wrapper;
+		}
+	}
+
+	if (closestWrapper === prevStickyWrapper) return;
+
+	if (prevStickyWrapper) {
+		prevStickyWrapper.classList.remove('sticky');
+	}
+
+	closestWrapper.classList.add('sticky');
+	prevStickyWrapper = closestWrapper;
+
+	const subsectionId = closestWrapper.parentElement.id;
+
+	for (const link of document.querySelectorAll('.subsection-link')) {
+		link.classList.toggle('active', link.getAttribute('href').slice(1) === subsectionId);
+	}
+}
+
+document.body.addEventListener('wheel', updateStickyHeader);
 
 function updateNavigationActiveState() {
 	const links = document.querySelectorAll('.section-link, .subsection-link');
@@ -756,9 +716,8 @@ function loadContentForSection(sectionId, sections, callback) {
 		const subsectionElement = document.getElementById(sectionId);
 		if (subsectionElement) {
 			history.pushState(null, '', `#${sectionId}`);
-			const contentContainer = document.getElementById('content');
 			scrollBehavior = 'smooth';
-			scrollToElementWithinContainer(contentContainer, subsectionElement);
+			scrollToElement(subsectionElement);
 		}
 	} else {
 		updateMainContent(sectionId, sections, () => {
@@ -766,8 +725,7 @@ function loadContentForSection(sectionId, sections, callback) {
 				const subsectionElement = document.getElementById(sectionId);
 				if (subsectionElement) {
 					history.pushState(null, '', `#${sectionId}`);
-					const contentContainer = document.getElementById('content');
-					scrollToElementWithinContainer(contentContainer, subsectionElement);
+					scrollToElement(subsectionElement);
 				}
 				if (typeof callback === 'function') {
 					callback();

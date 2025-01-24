@@ -1280,10 +1280,10 @@ function draw() {
 	 * 
 	 * Set `multiple` to `true` to allow multiple options to be selected.
 	 * 
-	 * Use the `value` property to get or set the selected option.
+	 * Use the `value` property to get or set the selected option value.
 	 * 
 	 * Use the `selected` property to get the selected option or options.
-	 * @param {boolean} [placeholder] optional placeholder text that appears when no option is selected
+	 * @param {string} [placeholder] optional placeholder text that appears before an option is selected
 	 * @example
 createCanvas(200, 100);
 
