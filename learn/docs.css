@@ -555,7 +555,7 @@ header {
 }
 
 #content.fade-out {
-	opacity: 0;
+	opacity: 0.0001;
 	transition: opacity 0s ease;
 }
 
@@ -662,6 +662,10 @@ header {
 
 .toggle-button.open::before {
 	content: "";
+}
+
+.toggle-button.close::before {
+	content: "";
 }
 
 .nav-buttons-container {
