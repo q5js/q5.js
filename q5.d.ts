@@ -798,7 +798,7 @@ rect(20, 20, 60, 60);
 	// 💻 display
 
 	/** 💻
-	 * The `displayMode` function lets you customize how your canvas is presented.
+	 * Customize how your canvas is presented.
 	 * @param {string} mode
 	 *   - "normal": (default) no styling to canvas or its parent element
 	 *   - "centered": canvas will be centered horizontally and vertically within its parent and if the window is smaller than the canvas, the canvas will be resized to avoid clipping
@@ -1711,6 +1711,7 @@ textSize(20);
 let info = "q5.js is a JavaScript library for creative coding. It's a sequel to p5.js that's optimized for interactive art.";
 
 text(info, 12, 30, 20, 6);
+//
 //
 	 */
 	function text(str: string, x: number, y: number, wrapWidth?: number, lineLimit?: number): void;

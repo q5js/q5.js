@@ -534,7 +534,7 @@ header {
 	position: sticky;
 	width: 220px;
 	top: 66px;
-	padding-top: 18px;
+	padding-top: 16px;
 	padding-bottom: 200px;
 	max-height: calc(100vh - 200px);
 	overflow-y: scroll;
@@ -567,7 +567,7 @@ header {
 .section-link,
 .subsection-link {
 	display: block;
-	padding: 3px 11px;
+	padding: 5.25px 11px;
 	border-radius: 5px;
 	text-decoration: none;
 	color: var(--dimText);
@@ -581,7 +581,7 @@ header {
 	color: var(--dimText);
 	border: 1px solid transparent;
 	font-size: 18px;
-	border-radius: 5px 0px 0px 5px;
+	border-radius: 8px 0px 0px 8px;
 	margin-top: 20px !important;
 }
 
@@ -610,9 +610,12 @@ header {
 	margin-top: -10px !important;
 }
 
+.subsections-container {
+	padding-top: 6px;
+}
+
 .active-section {
-	margin-bottom: 15px !important;
-	background-color: var(--secondary);
+	background-color: var(--borderColor);
 	font-weight: bold;
 }
 
@@ -628,8 +631,8 @@ header {
 .subsection-link:hover,
 .subsection-link.active,
 .active-section:hover {
-	border-radius: 5px;
-	background-color: var(--secondary) !important;
+	border-radius: 4px 0 0 4px;
+	background-color: var(--borderColor) !important;
 	color: var(--textColor) !important;
 	border: 1px solid transparent;
 	text-decoration: none;
@@ -902,6 +905,7 @@ h4 {
 	transition: opacity 0.2s ease-in-out;
 	position: relative;
 	text-overflow: ellipsis;
+	border-radius: 0 8px 8px 0;
 }
 
 .h2-wrapper.sticky {

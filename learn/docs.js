@@ -248,7 +248,7 @@ ${js}
 			if (!isHTMLH1) {
 				id = title.slice(title.indexOf(' ') + 1).replace(/\s+/g, '-');
 			}
-			id += '-section';
+			id += 'Section';
 			currentSectionId = id;
 			currentSubsectionId = '';
 			sections[id] = { title: title, content: line, subsections: {} };
