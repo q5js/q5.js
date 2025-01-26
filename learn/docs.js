@@ -99,9 +99,7 @@ function convertTSDefToMarkdown(data) {
 	for (let line of lines) {
 		if (!insideExample) line = line.trim();
 
-		if (!line) {
-			markdownCode += '\n';
-		} else if (line.startsWith('/**')) {
+		if (line.startsWith('/**')) {
 			insideJSDoc = true;
 			jsDocBuffer = '';
 		} else if (insideJSDoc) {
@@ -153,6 +151,8 @@ function convertTSDefToMarkdown(data) {
 				}
 				jsDocBuffer += line + '\n';
 			}
+		} else if (!line) {
+			markdownCode += '\n';
 		} else if (line.startsWith('//')) {
 			let sectionTitle = line.slice(3);
 			curEmoji = sectionTitle.slice(0, sectionTitle.indexOf(' '));
