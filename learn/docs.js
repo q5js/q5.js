@@ -99,7 +99,9 @@ function convertTSDefToMarkdown(data) {
 	for (let line of lines) {
 		if (!insideExample) line = line.trim();
 
-		if (line.startsWith('/**')) {
+		if (!line) {
+			markdownCode += '\n';
+		} else if (line.startsWith('/**')) {
 			insideJSDoc = true;
 			jsDocBuffer = '';
 		} else if (insideJSDoc) {
@@ -159,24 +161,27 @@ function convertTSDefToMarkdown(data) {
 			let classMatch = line.match(/class\s+(\w+)/);
 			currentClassName = classMatch[1];
 			inClassDef = true;
-		} else if (inClassDef && line.startsWith('letructor')) {
+		} else if (inClassDef && line.startsWith('constructor')) {
 			let params = stripParams(line.slice(11));
 			markdownCode += `## ${curEmoji} ${currentClassName}${params} &lt;class&gt;\n\n`;
 			markdownCode += jsDocBuffer + '\n\n';
 			jsDocBuffer = '';
 		} else if (inClassDef && line.startsWith('static')) {
 			continue;
-		} else if (line.startsWith('function')) {
+		} else if (line.includes('(')) {
 			let funcMatch = line.match(/(\w+)\s*\((.*)\)\s*:\s*(\w+)/);
 			if (funcMatch) {
 				let [_, funcName, funcParams, funcType] = funcMatch;
+				if (!line.startsWith('function ')) {
+					funcName = currentClassName.toLowerCase() + '.' + funcName;
+				}
 				funcParams = stripParams(funcParams);
 				let funcHeader = `## ${curEmoji} ${funcName}(${funcParams}) &lt;${funcType}&gt;\n\n`;
 				markdownCode += funcHeader + jsDocBuffer + '\n\n';
 				jsDocBuffer = '';
 			}
-		} else if (line.startsWith('var ') || line.startsWith('let ') || line.startsWith('let ')) {
-			let varMatch = line.match(/(var|let|let)\s+(\w+)/);
+		} else if (line.startsWith('var ') || line.startsWith('let ') || line.startsWith('const ')) {
+			let varMatch = line.match(/(var|let|const)\s+(\w+)/);
 			if (varMatch) {
 				let varName = varMatch[2].trim();
 				let type = line.split(':')[1].slice(1, -1);
@@ -184,7 +189,7 @@ function convertTSDefToMarkdown(data) {
 				markdownCode += varHeader + jsDocBuffer + '\n\n';
 				jsDocBuffer = '';
 			}
-		} else if (line !== '}') {
+		} else if (line !== '}' && !line.includes(':')) {
 			markdownCode += line + '\n';
 		}
 	}

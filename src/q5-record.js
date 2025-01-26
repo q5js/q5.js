@@ -1,17 +1,14 @@
 Q5.modules.record = ($, q) => {
 	class Q5Recorder {
-		constructor(options = {}) {
+		constructor(opt = {}) {
+			this.x ??= 10;
+			this.y ??= 10;
+
 			this.mediaRecorder = null;
 			this.chunks = [];
 			this.isRecording = false;
 			this.isPaused = false;
 			this.stream = $.canvas.captureStream($.getTargetFrameRate());
-			this.options = {
-				x: options.x,
-				y: options.y,
-				display: options.x !== undefined || options.y !== undefined ? 'flex' : 'none',
-				...options
-			};
 			this.startTime = null;
 			this.timerInterval = null;
 			this.elapsedTime = 0;
@@ -23,9 +20,8 @@ Q5.modules.record = ($, q) => {
 				'afterbegin',
 				`<style>
 .recorder {
+	display: none;
 	position: absolute;
-	top: ${this.options.y}px;
-	left: ${this.options.x}px;
 	z-index: 1000;
 	gap: 7px;
 	background: rgb(26, 27, 29);
@@ -35,7 +31,6 @@ Q5.modules.record = ($, q) => {
 	border: 2px solid transparent; 
 	opacity: 0.5;
 	transition: all 0.3s;
-	display: ${this.options.display};
 	overflow: hidden;
 }
 
@@ -319,7 +314,7 @@ Q5.modules.record = ($, q) => {
 
 	$.record = (videoSettings) => {
 		if (!_rec) {
-			_rec = new Q5Recorder({ x: undefined, y: undefined });
+			_rec = new Q5Recorder();
 		}
 		if (!$.isRecording) {
 			_rec.start(videoSettings);
@@ -330,32 +325,27 @@ Q5.modules.record = ($, q) => {
 	};
 
 	$.pauseRecording = () => {
-		if (_rec && $.isRecording && !_rec.isPaused) {
+		if ($.isRecording && !_rec.isPaused) {
 			_rec.pauseRecording();
 		}
 	};
 
 	$.deleteRecording = () => {
-		if (_rec) {
-			_rec.deleteRecording();
-			$.isRecording = false;
-		}
+		_rec.deleteRecording();
+		$.isRecording = false;
 	};
 
 	$.saveRecording = (fileName) => {
-		if (_rec) {
-			_rec.saveRecording(fileName);
-			$.isRecording = false;
-		}
+		_rec.saveRecording(fileName);
+		$.isRecording = false;
 	};
 
 	$.createRecorder = (x = 10, y = 10) => {
 		if (!_rec) {
 			_rec = new Q5Recorder({ x, y });
-		} else {
-			_rec.wrapper.style.top = `${y}px`;
-			_rec.wrapper.style.left = `${x}px`;
-			_rec.wrapper.style.display = 'flex';
 		}
+		_rec.wrapper.style.top = `${y}px`;
+		_rec.wrapper.style.left = `${x}px`;
+		_rec.wrapper.style.display = 'flex';
 	};
 };

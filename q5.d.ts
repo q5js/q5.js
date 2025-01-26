@@ -524,12 +524,14 @@ rect(104, 104, 80, 80);
 	 * @param {number} blur blur radius of the shadow, defaults to 0
 	 * @example
 createCanvas(200);
-background(200);
 noStroke();
-shadow('red');
+shadow(50);
 
-shadowBox(-20, -8, 50);
-circle(100, 100, 80, 80);
+function draw() {
+  background(200);
+	shadowBox(-20, mouseY, 10);
+	circle(100, 100, 80, 80);
+}
 	 * @example
 createCanvas(200);
 background(200);
@@ -767,6 +769,8 @@ square(0, 0, 50);
 	/** ⬜️
 	 * Any position coordinates or dimensions you use will be scaled based
 	 * on the unit provided to this function.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {number} unit unit to scale by
 	 * @example
 createCanvas(200);
@@ -778,6 +782,8 @@ rect(20, 20, 60, 60);
 
 	/** ⬜️
 	 * Creates a graphics buffer.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {number} w width
 	 * @param {number} h height
 	 * @param {Object} [opt] options
@@ -786,7 +792,8 @@ rect(20, 20, 60, 60);
 	function createGraphics(w: number, h: number, opt?: any): Q5;
 
 	/** ⬜️
-	 * The 2D rendering context for the canvas.
+	 * The 2D rendering context for the canvas, if using the Canvas2D
+	 * renderer.
 	 */
 	var ctx: CanvasRenderingContext2D;
 
@@ -2021,20 +2028,22 @@ createCanvas(200);
 	 * @returns {Color} a new `Color` object
 	 * @example
 createCanvas(200);
-//                (gray, alpha)
-let darkGray = color(55, 100);
-background(darkGray);
-//	                  (r, g,   b,  a)
-let blueBottle = color(0, 0, 200, 20);
-fill(blueBottle);
-circle(100, 50, 50);
+rect(0, 0, 100, 200);
+
+//                ( r,   g,   b,   a)
+let bottle = color(90, 100, 255, 100);
+fill(bottle);
+stroke(bottle);
+strokeWeight(30);
+circle(100, 100, 155);
 	 * @example
 createCanvas(200);
-
-let c = color('gray');
+//          (gray, alpha)
+let c = color(200, 50);
 
 function draw() {
 	background(c);
+	circle(mouseX, mouseY, 50);
 	c.g = (c.g + 1) % 255;
 }
 	 */
@@ -2067,6 +2076,7 @@ colorMode(OKLCH);
 
 fill(0.25, 0.15, 0);
 rect(0, 0, 100, 200);
+
 fill(0.75, 0.15, 0)
 rect(100, 0, 100, 200);
 	 */

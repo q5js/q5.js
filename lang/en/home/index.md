@@ -9,7 +9,7 @@
 - up to 32x faster than p5.js 🏎️
 - HDR color support 🌈
 - compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org) 🎮
-- no dependencies, less than 100kb minified 📦
+- no dependencies, ~100kb minified 📦
 - LGPL licensed (just like p5.js) 🆓
 
 q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners. 🤝

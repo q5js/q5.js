@@ -2716,12 +2716,13 @@ Q5.modules.dom = ($) => {
 			btn.type = 'radio';
 			btn.name = el.name;
 			btn.value = value || label;
-			btn.addEventListener('change', () => (el.selected = btn));
+			btn.addEventListener('input', () => (el.selected = btn));
 
 			let lbl = $.createEl('label', label);
 			lbl.addEventListener('click', () => {
 				btn.checked = true;
 				el.selected = btn;
+				btn.dispatchEvent(new Event('input', { bubbles: true }));
 				btn.dispatchEvent(new Event('change', { bubbles: true }));
 			});
 
