@@ -1109,22 +1109,34 @@ point(125, 50);
 	// 📑 dom
 
 	/** 📑
-	 * Creates a new HTML element.
+	 * Creates a new HTML element and adds it to the page. `createEl` is
+	 * an alias.
 	 * 
-	 * q5 adds functions like `position` and `size` to the element
-	 * that make it easy to position elements above the canvas.
+	 * The element is part of the DOM (Document Object Model), an interface for
+	 * creating and editing web pages with JavaScript.
 	 * 
 	 * Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
 	 * 
-	 * `createEl` is an alias for this function.
+	 * Use [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener) to respond to events such as:
+	 * - "click": when the element is clicked
+	 * - "mouseover": when the mouse hovers over the element
+	 * - "mouseout": when the mouse stops hovering over the element
+	 * - "input": when a form element's value changes
+	 * 
+	 * q5 adds some extra functionality to the elements it creates:
+	 * 
+	 * - the `position` function makes it easy to place the element
+	 * relative to the canvas
+	 * - the `size` function sets the width and height of the element
+	 * - alternatively, use the element's `x`, `y`, `width`, and `height` properties
 	 * @param {string} tag tag name of the element
 	 * @param {string} [content] content of the element
-	 * @returns {HTMLElement} created DOM element
+	 * @returns {HTMLElement} element
 	 * @example
 createCanvas(200);
 
 let el = createEl('div', '*');
-el.position(0, 0);
+el.position(50, 50);
 el.size(100, 100);
 el.style.fontSize = '136px';
 el.style.textAlign = 'center';
@@ -1139,18 +1151,20 @@ el.style.color = 'white';
 	 * @param {string} [text] text content
 	 * @param {boolean} [newTab] whether to open the link in a new tab
 	 * @example
-createCanvas(200, 100);
+createCanvas(200);
 
 let link = createA('https://q5js.org', 'q5.js');
-link.position(0, 0);
+link.position(16, 42);
 link.style.fontSize = '80px';
+
+link.addEventListener('mouseover', () => {
+	background('blue');
+});
 	 */
 	function createA(href: string, text?: string): HTMLAnchorElement;
 
 	/** 📑
 	 * Creates a button element.
-	 * 
-	 * Use [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener) to respond to button click events.
 	 * @param {string} [content] text content
 	 * @example
 createCanvas(200, 100);
@@ -1177,7 +1191,7 @@ createCanvas(200, 100);
 let box = createCheckbox('Check me!');
 box.label.style.color = 'lime';
 
-box.addEventListener('change', () => {
+box.addEventListener('input', () => {
 	if (box.checked) background('lime');
 	else background('black');
 });
@@ -1202,7 +1216,7 @@ function draw() {
 	function createColorPicker(value?: string): HTMLInputElement;
 
 	/** 📑
-	 * Creates an img element.
+	 * Creates an image element.
 	 * @param {string} src url of the image
 	 * @example
 createCanvas(200, 100);
@@ -1332,6 +1346,20 @@ createCanvas(200, 100);
 // vid.loop = true;
 	 */
 	function createVideo(src: string): HTMLVideoElement;
+
+	/** 📑
+	 * Finds an element in the DOM using a CSS selector.
+	 * @param {string} selector CSS selector
+	 * @returns {HTMLElement} element
+	 */
+	function findElement(selector: string): HTMLElement;
+
+	/** 📑
+	 * Finds multiple elements in the DOM using a CSS selector.
+	 * @param {string} selector CSS selector
+	 * @returns {HTMLElement[]} elements
+	 */
+	function findElements(selector: string): HTMLElement[];
 
 	// 🌆 image
 
@@ -1680,8 +1708,8 @@ function setup() {
 
 	/** 🌆
 	 * Creates a new image.
-	 * @param {number} [w] character limit per line
-	 * @param {number} [h] line limit
+	 * @param {number} w width
+	 * @param {number} h height
 	 * @param {any} [opt] optional settings for the image
 	 * @returns {Image}
 	 */

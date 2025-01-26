@@ -109,6 +109,7 @@ Q5.modules.dom = ($) => {
 		let lbl = $.createEl('label', label);
 		lbl.addEventListener('click', () => {
 			el.checked = !el.checked;
+			el.dispatchEvent(new Event('input', { bubbles: true }));
 			el.dispatchEvent(new Event('change', { bubbles: true }));
 		});
 		el.insertAdjacentElement('afterend', lbl);

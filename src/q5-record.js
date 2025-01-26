@@ -1,16 +1,11 @@
 Q5.modules.record = ($, q) => {
 	class Q5Recorder {
-		constructor(canvas, options = {}) {
-			this.canvas = canvas || document.querySelector('canvas');
-			if (!this.canvas) {
-				throw new Error('Canvas not found');
-			}
-
+		constructor(options = {}) {
 			this.mediaRecorder = null;
 			this.chunks = [];
 			this.isRecording = false;
 			this.isPaused = false;
-			this.stream = this.canvas.captureStream($.getTargetFrameRate());
+			this.stream = $.canvas.captureStream($.getTargetFrameRate());
 			this.options = {
 				x: options.x,
 				y: options.y,
@@ -27,7 +22,7 @@ Q5.modules.record = ($, q) => {
 			document.head.insertAdjacentHTML(
 				'afterbegin',
 				`<style>
-.recorder-wrapper {
+.recorder {
 	position: absolute;
 	top: ${this.options.y}px;
 	left: ${this.options.x}px;
@@ -44,30 +39,30 @@ Q5.modules.record = ($, q) => {
 	overflow: hidden;
 }
 
-.recorder-wrapper:hover {
+.recorder:hover {
 	opacity: 0.95;
 }
 
-.recorder-wrapper.recording {
+.recorder.recording {
 	border-color: #cc3e44;
 }
 
-.recorder-wrapper.recording .start-button {
+.recorder.recording .start-button {
 	color: #cc3e44; 
 	opacity: 1;
 }
 
-.recorder-wrapper.recording .format-selector,
-.recorder-wrapper.recording .download-button {
+.recorder.recording .format-selector,
+.recorder.recording .download-button {
 	width: 0px;
 	height: 0px;
 	opacity: 0;
 	min-width: 0px;
 }
 
-.recorder-wrapper button,
-.recorder-wrapper select,
-.recorder-wrapper .recorder-timer {
+.recorder button,
+.recorder select,
+.recorder .recorder-timer {
 	cursor: pointer;
 	font-size: 13px;
 	padding: 5px 9px;
@@ -86,31 +81,31 @@ Q5.modules.record = ($, q) => {
 	overflow: hidden;
 }
 
-.recorder-wrapper .recorder-timer {
+.recorder .recorder-timer {
 	min-width: 69px;
 	max-width:100px;
 }
 
-.recorder-wrapper select {
+.recorder select {
 	max-width:100px;
 }
 
-.recorder-wrapper .format-selector {
+.recorder .format-selector {
 	min-width: 100px;
 }
 
-.recorder-wrapper select:hover,
-.recorder-wrapper button:hover {
+.recorder select:hover,
+.recorder button:hover {
 	background-color: rgb(41, 43, 48);
 }
 
-.recorder-wrapper button:disabled {
+.recorder button:disabled {
 	opacity: 0.5;
 	color: rgb(150, 155, 165);
 	cursor: not-allowed;
 }
 
-.recorder-wrapper .download-button {
+.recorder .download-button {
 	font-size: 18px;
 }
 </style>`
@@ -121,9 +116,9 @@ Q5.modules.record = ($, q) => {
 				{ label: 'VP9', mimeType: 'video/mp4; codecs=vp9' }
 			].filter((format) => MediaRecorder.isTypeSupported(format.mimeType));
 
-			let wrapper = document.createElement('div');
-			wrapper.className = 'recorder-wrapper';
-			wrapper.innerHTML = `
+			let ui = document.createElement('div');
+			ui.className = 'recorder';
+			ui.innerHTML = `
 <button></button><button></button><span class="recorder-timer"></span>`;
 
 			let formatSelector = document.createElement('select');
@@ -131,16 +126,16 @@ Q5.modules.record = ($, q) => {
 				let option = document.createElement('option');
 				option.value = format.mimeType;
 				option.textContent = format.label;
-				formatSelector.appendChild(option);
+				formatSelector.append(option);
 			}
-			wrapper.appendChild(formatSelector);
+			ui.append(formatSelector);
 
-			document.body.appendChild(wrapper);
+			document.body.append(ui);
 
-			this.wrapper = wrapper;
-			let recordPauseButton = (this.recordPauseButton = wrapper.children[0]);
-			let deleteSaveButton = (this.deleteSaveButton = wrapper.children[1]);
-			this.timerDisplay = wrapper.children[2];
+			this.ui = ui;
+			let recordPauseButton = (this.recordPauseButton = ui.children[0]);
+			let deleteSaveButton = (this.deleteSaveButton = ui.children[1]);
+			this.timerDisplay = ui.children[2];
 			this.formatSelector = formatSelector;
 
 			this.encoderSettings = {
@@ -200,7 +195,7 @@ Q5.modules.record = ($, q) => {
 			this.deleteSaveButton.title = 'Delete Recording';
 
 			this.deleteSaveButton.disabled = false;
-			this.wrapper.classList.add('recording');
+			this.ui.classList.add('recording');
 
 			this.startTime = Date.now();
 			this.timerInterval = setInterval(() => {
@@ -247,7 +242,7 @@ Q5.modules.record = ($, q) => {
 			this.isRecording = false;
 			this.isPaused = false;
 
-			this.wrapper.classList.remove('recording');
+			this.ui.classList.remove('recording');
 
 			this.elapsedTime += Date.now() - this.startTime;
 			clearInterval(this.timerInterval);
@@ -324,7 +319,7 @@ Q5.modules.record = ($, q) => {
 
 	$.record = (videoSettings) => {
 		if (!_rec) {
-			_rec = new Q5Recorder($.canvas, { x: undefined, y: undefined });
+			_rec = new Q5Recorder({ x: undefined, y: undefined });
 		}
 		if (!$.isRecording) {
 			_rec.start(videoSettings);
@@ -356,7 +351,7 @@ Q5.modules.record = ($, q) => {
 
 	$.createRecorder = (x = 10, y = 10) => {
 		if (!_rec) {
-			_rec = new Q5Recorder($.canvas, { x, y });
+			_rec = new Q5Recorder({ x, y });
 		} else {
 			_rec.wrapper.style.top = `${y}px`;
 			_rec.wrapper.style.left = `${x}px`;
