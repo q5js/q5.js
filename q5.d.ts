@@ -8,6 +8,20 @@ declare global {
 	// ⭐️ core
 
 	/** ⭐️
+	 * Welcome to q5's documentation! ☺️
+	 * 
+	 * First time coding? Check out the [q5 Beginner's Guide to JavaScript](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Guide-to-JavaScript).
+	 * 
+	 * On these Learn pages you'll find concise descriptions for
+	 * q5's functions and variables. Scroll through entire topics without
+	 * needing to click between separate pages.
+	 * 
+	 * Experiment with editing the code in the interactive mini examples,
+	 * which are often only 8 lines of code or less. They automatically
+	 * update as you type, so you can see results right away.
+	 */
+
+	/** ⭐️
 	 * The draw function is run 60 times per second by default.
 	 * @example
 function draw() {
@@ -480,6 +494,8 @@ square(80, 80, 80);
 	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
 	 * can accept colors in a wide range of formats: as a CSS color string,
 	 * a `Color` object, grayscale value, or color component values.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {Color} color shadow color
 	 * @example
 createCanvas(200);
@@ -837,7 +853,7 @@ createCanvas(200, 100);
 background('crimson');
 	 * @example
 function draw() {
-	background(128, 20);
+	background(128, 100);
 	circle(mouseX, mouseY, 20);
 }
 	 */
@@ -1355,15 +1371,15 @@ createCanvas(200, 100);
 	function createVideo(src: string): HTMLVideoElement;
 
 	/** 📑
-	 * Finds an element in the DOM using a CSS selector.
-	 * @param {string} selector CSS selector
+	 * Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * @param {string} selector
 	 * @returns {HTMLElement} element
 	 */
 	function findElement(selector: string): HTMLElement;
 
 	/** 📑
-	 * Finds multiple elements in the DOM using a CSS selector.
-	 * @param {string} selector CSS selector
+	 * Finds all elements in the DOM that match the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * @param {string} selector
 	 * @returns {HTMLElement[]} elements
 	 */
 	function findElements(selector: string): HTMLElement[];

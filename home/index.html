@@ -11,6 +11,17 @@
 	<meta property="og:url" content="https://q5js.org">
 	<meta property="og:image" content="q5js_logo.webp">
 	<meta property="og:description" content="q5.js is a sequel to p5.js that's smaller and faster!">
+	<!-- load Adobe Heiti font -->
+	<script>
+		(function (d) {
+			var config = {
+				kitId: 'oqc5ofj',
+				scriptTimeout: 3000,
+				async: true
+			},
+				h = d.documentElement, t = setTimeout(function () { h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive"; }, config.scriptTimeout), tk = d.createElement("script"), f = false, s = d.getElementsByTagName("script")[0], a; h.className += " wf-loading"; tk.src = 'https://use.typekit.net/' + config.kitId + '.js'; tk.async = true; tk.onload = tk.onreadystatechange = function () { a = this.readyState; if (f || a && a != "complete" && a != "loaded") return; f = true; clearTimeout(t); try { Typekit.load(config) } catch (e) { } }; s.parentNode.insertBefore(tk, s)
+		})(document);
+	</script>
 </head>
 
 <body class="dark">
@@ -40,17 +51,16 @@
 	<div id="reel1" class="reel">
 		<md id="md1-0">
 <h2 id="create-art-with-q5js-🎨">Create art with q5.js! 🎨</h2>
-<p><strong>q5.js</strong> is a spiritual successor to the <a href="https://p5js.org" target="_blank">p5.js</a> and <a href="https://processing.org/" target="_blank">Processing Java</a> graphics libraries. ⭐️</p>
+<p><strong>q5.js</strong> is a sequel to the <a href="https://p5js.org" target="_blank">p5.js</a> and <a href="https://processing.org/" target="_blank">Processing Java</a> graphics libraries. ⭐️</p>
 <ul>
 <li>performance optimized for interactive art 🚀</li>
 <li>includes a brand new renderer powered by WebGPU 💪</li>
 <li>up to 32x faster than p5.js 🏎️</li>
-<li>HDR color support 🌈</li>
+<li>beginner friendly API and documentation 📚</li>
 <li>compatible with popular addons, including <a href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> and <a href="https://p5play.org" target="_blank">p5play</a> 🎮</li>
-<li>no dependencies, less than 100kb minified 📦</li>
-<li>LGPL licensed (just like p5.js) 🆓</li>
+<li>no dependencies, ~100kb minified 📦</li>
+<li>100% free to use under the LGPL (just like p5.js) 🆓</li>
 </ul>
-<p>q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners. 🤝</p>
 </md>
 		<md id="md1-1">
 <p>If you're already familiar with p5, you'll find yourself right at home with q5. 🏡</p>
@@ -168,7 +178,7 @@ createCanvas(400, 400);
 			<md id="md10-2">
 <h2 id="lightweight-🪶">Lightweight 🪶</h2>
 <p>p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️</p>
-<p>q5.js is &lt;140kb, that's 98% smaller. 🌳</p>
+<p>q5.js is ~140kb, that's 98% smaller. 🌳</p>
 <p>For extremely lightweight use, load only the features you need from the <a href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">q5 source folder</a>. Load q5 using script tags or as JavaScript modules. 📦</p>
 </md>
 			<md id="md10-3">
@@ -182,7 +192,7 @@ createCanvas(400, 400);
 	<div id="reel20" class="reel">
 		<md id="md20-0">
 <h2 id="credits-🌟">Credits 🌟</h2>
-<p>This project aims to be the spiritual successor to the incredible work done by <a href="https://benfry.com" target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com" target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all contributors to these projects.</p>
+<p>This project aims to continue the legacy of the incredible work done by <a href="https://benfry.com" target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com" target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all contributors to these projects.</p>
 <p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain Unlicense license. We forked and significantly extended the abandoned codebase.</p>
 <p>q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: <a href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.</p>
 </md>
@@ -286,9 +296,6 @@ createCanvas(400, 400);
 	</script>
 	<script src="/home/mie.js"></script>
 	<script src="main.js"></script>
-
-
-
 
 
 

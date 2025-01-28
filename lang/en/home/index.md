@@ -2,17 +2,15 @@
 
 ## Create art with q5.js! 🎨
 
-**q5.js** is a spiritual successor to the [p5.js](https://p5js.org) and [Processing Java](https://processing.org/) graphics libraries. ⭐️
+**q5.js** is a sequel to the [p5.js](https://p5js.org) and [Processing Java](https://processing.org/) graphics libraries. ⭐️
 
 - performance optimized for interactive art 🚀
 - includes a brand new renderer powered by WebGPU 💪
 - up to 32x faster than p5.js 🏎️
-- HDR color support 🌈
+- beginner friendly API and documentation 📚
 - compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org) 🎮
 - no dependencies, ~100kb minified 📦
-- LGPL licensed (just like p5.js) 🆓
-
-q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners. 🤝
+- 100% free to use under the LGPL (just like p5.js) 🆓
 
 # 1-1
 
@@ -82,7 +80,7 @@ q5.js includes sound loading, playback, and basic mixing by default. 🎚️
 
 p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️
 
-q5.js is <140kb, that's 98% smaller. 🌳
+q5.js is ~140kb, that's 98% smaller. 🌳
 
 For extremely lightweight use, load only the features you need from the [q5 source folder](https://github.com/q5js/q5.js/tree/main/src). Load q5 using script tags or as JavaScript modules. 📦
 
@@ -98,7 +96,7 @@ Make a canvas be centered or fill the screen without clipping or changing the as
 
 ## Credits 🌟
 
-This project aims to be the spiritual successor to the incredible work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/), [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org), and all contributors to these projects.
+This project aims to continue the legacy of the incredible work done by [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/), [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org), and all contributors to these projects.
 
 The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended the abandoned codebase.
 

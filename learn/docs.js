@@ -85,8 +85,9 @@ function stripParams(params) {
 function convertTSDefToMarkdown(data) {
 	data = data.replaceAll('https://q5js.org/learn', '.');
 
+	let markdownCode = '';
+
 	let lines = data.split('\n').slice(7, -4),
-		markdownCode = '',
 		insideJSDoc = false,
 		insideParams = false,
 		insideProps = false,
@@ -152,6 +153,7 @@ function convertTSDefToMarkdown(data) {
 				jsDocBuffer += line + '\n';
 			}
 		} else if (!line) {
+			if (jsDocBuffer.length > 0) markdownCode += jsDocBuffer;
 			markdownCode += '\n';
 		} else if (line.startsWith('//')) {
 			let sectionTitle = line.slice(3);
@@ -167,6 +169,7 @@ function convertTSDefToMarkdown(data) {
 			markdownCode += jsDocBuffer + '\n\n';
 			jsDocBuffer = '';
 		} else if (inClassDef && line.startsWith('static')) {
+			jsDocBuffer = '';
 			continue;
 		} else if (line.includes('(')) {
 			let funcMatch = line.match(/(\w+)\s*\((.*)\)\s*:\s*(\w+)/);
@@ -733,7 +736,8 @@ function performSearch(searchText) {
 
 			resultElement.addEventListener('click', () => {
 				searchResultsContainer.innerHTML = '';
-				navigateTo(result.id);
+				let { sectionId, subsectionId } = findSectionAndSubsection(result.id);
+				navigateTo(sectionId, subsectionId);
 				searchInput.value = '';
 				searchResultsContainer.innerHTML = '';
 				displayPromptMessage('Start typing to search the documentation');
