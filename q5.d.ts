@@ -2466,33 +2466,24 @@ noCursor();
 	// 🎞️ record
 
 	/** 🎞️
-	 * Creates a recorder UI, which is a q5 DOM element, and positions
-	 * it above the canvas.
-	 * 
-	 * Press the record button to start recording the canvas, press
-	 * it again to pause the recording. When recording is paused, press 
-	 * the save button to download the recording as a video file. While 
-	 * recording, press the delete button to discard the recording.
-	 * 
-	 * `format` is set to 'H.264' by default or 'VP9' if the height of
-	 * the canvas is greater than or equal to 1440 pixels.
-	 * 
-	 * `quality` is set automatically based on the height of the canvas.
-	 * 
-	 * - "SD" (640x480)
-	 * - "HD" (1280x720)
-	 * - "FHD" (1920x1080)
-	 * - "QHD" (2560x1440)
-	 * - "4K" (3840x2160)
-	 * - "8K" (7680x4320)
+	 * Creates a recorder. Simply hit record to start recording!
 	 * 
 	 * Recording large canvases is an intensive process, so your
-	 * computer may not be able to do it in real time. In cases where
-	 * real time interaction is more important than recording quality,
-	 * you can set the quality to a lower preset or reduce the canvas
-	 * size.
+	 * computer may not be able to do it in real time. That's okay,
+	 * the resulting video will playback at your sketch's target 
+	 * frame rate.
 	 * 
-	 * @returns {HTMLElement} a recorder element
+	 * In cases where real time interaction is a priority, consider 
+	 * reducing the canvas' size, frame rate, and/or recording
+	 * quality.
+	 * 
+	 * `format` and `quality` properties are set 
+	 * automatically based on the height of the canvas. They can be
+	 * changed via the UI or programmatically.
+	 * 
+	 * The recorder uses the [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder) API, which 
+	 * unfortunately can't encode HDR video.
+	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
 createCanvas(200);
 
@@ -2504,7 +2495,42 @@ function draw() {
 	 */
 	function createRecorder(): HTMLElement;
 
+	/** 🎞️
+	 * Starts recording the canvas or resumes recording if it was paused.
+	 * 
+	 * If no recorder exists, one is created but not displayed.
+	 */
+	function record(): void;
 
+	/** 🎞️
+	 * Pauses the canvas recording, if one is in progress.
+	 */
+	function pauseRecording(): void;
+
+	/** 🎞️
+	 * Discards the current recording.
+	 */
+	function deleteRecording(): void;
+
+	/** 🎞️
+	 * Saves the current recording as a video file.
+	 * @param {string} fileName
+	 * @example
+function draw() {
+	square(mouseX, random(canvas.h), 10);
+}
+
+function mousePressed() {
+	if (!recording) record();
+	else saveRecording('squares');
+}
+	 */
+	function saveRecording(fileName): void;
+
+	/** 🎞️
+	 * True if the canvas is currently being recorded.
+	 */
+	var recording: boolean;
 
 	// 🔊 sound
 
