@@ -72,7 +72,7 @@ Q5.modules.dom = ($) => {
 		};
 
 		el.show = () => {
-			el.style.display = 'block';
+			el.style.display = '';
 			return el;
 		};
 
@@ -193,14 +193,19 @@ Q5.modules.dom = ($) => {
 		}
 		Object.defineProperty(el, 'selected', {
 			get: () => {
-				if (el.multiple) return Array.from(el.selectedOptions);
-				return el.selectedOptions[0];
+				if (el.multiple) {
+					return Array.from(el.selectedOptions).map((opt) => opt.textContent);
+				}
+				return el.selectedOptions[0]?.textContent;
 			},
 			set: (v) => {
 				if (el.multiple) {
-					el.options.forEach((o) => (o.selected = v.includes(o)));
+					Array.from(el.options).forEach((opt) => {
+						opt.selected = v.includes(opt.textContent);
+					});
 				} else {
-					v.selected = true;
+					const option = Array.from(el.options).find((opt) => opt.textContent === v);
+					if (option) option.selected = true;
 				}
 			}
 		});

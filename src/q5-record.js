@@ -1,322 +1,344 @@
-Q5.modules.record = ($, q) => {
-	class Q5Recorder {
-		constructor(opt = {}) {
-			this.x ??= 10;
-			this.y ??= 10;
+Q5.modules.record = ($) => {
+	let rec, btn0, btn1, timer, formatSelect, qualitySelect;
 
-			this.mediaRecorder = null;
-			this.chunks = [];
-			this.isRecording = false;
-			this.isPaused = false;
-			this.stream = $.canvas.captureStream($.getTargetFrameRate());
-			this.elapsedTime = 0;
-			this.createUI();
-		}
-
-		createUI() {
-			document.head.insertAdjacentHTML(
-				'afterbegin',
-				`<style>
-.recorder {
-	display: none;
-	position: absolute;
+	function initRecorder(opt = {}) {
+		document.head.insertAdjacentHTML(
+			'beforeend',
+			`<style>
+.rec {
+	display: flex;
 	z-index: 1000;
-	font-family: sans-serif;
 	gap: 6px;
 	background: #1a1b1d;
 	padding: 6px 8px;
 	border-radius: 21px;
 	box-shadow: #0000001a 0px 4px 12px;
 	border: 2px solid transparent; 
-	opacity: 0.5;
+	opacity: 0.6;
 	transition: all 0.3s;
+	width: 134px;
 	overflow: hidden;
 }
 
-.recorder:hover {
-	opacity: 0.95;
+.rec:hover {
+	width: unset;
+	opacity: 0.96;
 }
 
-.recorder.recording {
-	border-color: #cc3e44;
-}
+.rec.recording { border-color: #cc3e44; }
 
-.recorder button,
-.recorder select {
-	cursor: pointer;
-}
+.rec button,
+.rec select { cursor: pointer; }
 
-.recorder button,
-.recorder select,
-.recorder .record-timer {
+.rec button,
+.rec select,
+.rec .record-timer {
+	font-family: sans-serif;
 	font-size: 14px;
-	padding: 0px 10px;
+	padding: 2px 10px;
 	border-radius: 18px;
-	border: none;
 	outline: none;
 	background-color: #232529;
 	color: #d4dae6;
 	box-shadow: #0000001a 0px 4px 12px;
-	border: thin solid #46494e;
-	line-height: 24px;
-	min-width: 36px;
+	border: 1px solid #46494e;
+	vertical-align: middle;
+	line-height: 18px;
 	transition: all 0.3s;
 }
 
-.recorder .record-button {
+.rec .record-button { 
 	color: #cc3e44;
 	font-size: 18px;
 }
 
-.recorder select:hover,
-.recorder button:hover {
-	background-color: #292b30;
-}
+.rec select:hover,
+.rec button:hover { background-color: #292b30; }
 
-.recorder button:disabled {
+.rec button:disabled {
 	opacity: 0.5;
 	color: #969ba5;
 	cursor: not-allowed;
 }
 </style>`
-			);
+		);
 
-			let supportedFormats = [
-				{ label: 'H.264', mimeType: 'video/mp4; codecs="avc1.42E01E"' },
-				{ label: 'VP9', mimeType: 'video/mp4; codecs=vp9' }
-			].filter((format) => MediaRecorder.isTypeSupported(format.mimeType));
+		rec = $.createEl('div');
+		rec.className = 'rec';
+		rec.innerHTML = `
+<button class="record-button"></button>
+<span class="record-timer"></span>
+<button></button>
+`;
 
-			let ui = document.createElement('div');
-			ui.className = 'recorder';
-			ui.innerHTML = `
-<button></button><button></button><span class="record-timer"></span>`;
+		[btn0, timer, btn1] = rec.children;
 
-			let formatSelector = document.createElement('select');
-			for (let format of supportedFormats) {
-				let option = document.createElement('option');
-				option.value = format.mimeType;
-				option.textContent = format.label;
-				formatSelector.append(option);
+		rec.x = rec.y = 8;
+
+		rec.chunks = [];
+		rec.time = { hours: 0, minutes: 0, seconds: 0, frames: 0 };
+		rec.stream = $.canvas.captureStream($.getTargetFrameRate());
+
+		rec.formats = opt.formats || {
+			'H.264': 'video/mp4; codecs="avc1.42E01E", mp4a.40.2',
+			VP9: 'video/mp4; codecs=vp9, opus'
+		};
+
+		// remove unsupported formats
+		for (let format in rec.formats) {
+			if (!MediaRecorder.isTypeSupported(rec.formats[format])) {
+				delete rec.Blobformats[format];
 			}
-			ui.append(formatSelector);
+		}
 
-			document.body.append(ui);
+		formatSelect = $.createSelect();
+		for (const name in rec.formats) {
+			formatSelect.option(name, rec.formats[name]);
+		}
+		rec.append(formatSelect);
 
-			this.ui = ui;
-			let recordPauseButton = (this.recordPauseButton = ui.children[0]);
-			recordPauseButton.classList.add('record-button');
-			let deleteSaveButton = (this.deleteSaveButton = ui.children[1]);
-			this.timerDisplay = ui.children[2];
-			this.formatSelector = formatSelector;
+		// prettier-ignore
+		rec.qualityPresets = {
+			SD:    10000000, // 10 Mbps
+			HD:    16000000, // 16 Mbps
+			FHD:   22000000, // 22 Mbps
+			QHD:   28000000, // 28 Mbps
+			'4K':   48000000, // 48 Mbps
+			'8K': 75000000  // 75 Mbps
+		};
 
-			this.encoderSettings = {
-				mimeType: formatSelector.value,
-				videoBitsPerSecond: 10000000
-			};
+		qualitySelect = $.createSelect();
+		for (let name in rec.qualityPresets) {
+			qualitySelect.option(name);
+		}
+		rec.append(qualitySelect);
 
-			formatSelector.addEventListener('change', () => {
-				this.encoderSettings.mimeType = formatSelector.value;
-			});
+		let ql; // default quality level
+		let h = $.canvas.height;
+		if (h >= 4320) ql = '8K';
+		else if (h >= 2160) ql = '4K';
+		else if (h >= 1440) ql = 'QHD';
+		else if (h >= 1080) ql = 'FHD';
+		else if (h >= 720) ql = 'HD';
+		else ql = 'SD';
 
-			recordPauseButton.addEventListener('click', () => {
-				if (!this.isRecording) this.start();
-				else if (!this.isPaused) this.pauseRecording();
-				else this.resumeRecording();
-			});
+		rec.encoderSettings = {
+			mimeType: formatSelect.value,
+			videoBitsPerSecond: rec.qualityPresets[ql]
+		};
+		qualitySelect.selected = ql;
 
-			deleteSaveButton.addEventListener('click', () => {
-				if (this.isPaused) this.saveRecording();
-				else {
-					this.stop();
-					this.chunks = [];
-					this.resetUI();
+		function changeFormat() {
+			rec.encoderSettings.mimeType = formatSelect.value;
+		}
+
+		function changeQuality() {
+			rec.encoderSettings.videoBitsPerSecond = rec.qualityPresets[qualitySelect.value];
+		}
+
+		Object.defineProperty(rec, 'quality', {
+			get: () => qualitySelect.selected,
+			set: (v) => {
+				if (rec.qualityPresets[v]) {
+					qualitySelect.selected = v;
+					changeQuality();
 				}
-			});
-
-			this.resetUI();
-
-			$.registerMethod('post', () => {
-				this.updateTimer();
-			});
-		}
-
-		start(videoSettings = {}) {
-			if (this.isRecording) return;
-
-			if (videoSettings.mimeType) this.encoderSettings.mimeType = videoSettings.mimeType;
-			if (videoSettings.videoBitsPerSecond) this.encoderSettings.videoBitsPerSecond = videoSettings.videoBitsPerSecond;
-
-			try {
-				this.mediaRecorder = new MediaRecorder(this.stream, this.encoderSettings);
-			} catch (e) {
-				console.error('Failed to initialize MediaRecorder:', e);
-				return;
 			}
+		});
 
-			this.chunks = [];
-			this.mediaRecorder.ondataavailable = (event) => {
-				if (event.data.size > 0) {
-					this.chunks.push(event.data);
-				}
-			};
-
-			this.mediaRecorder.start();
-			this.isRecording = true;
-			this.isPaused = false;
-
-			this.recordPauseButton.innerHTML = '⏸';
-			this.recordPauseButton.title = 'Pause Recording';
-			this.deleteSaveButton.innerHTML = '🗑️';
-			this.deleteSaveButton.title = 'Delete Recording';
-
-			this.deleteSaveButton.disabled = false;
-			this.ui.classList.add('recording');
-
-			this.startTime = $.frameCount;
-		}
-
-		pauseRecording() {
-			if (!this.isRecording || this.isPaused) return;
-
-			this.mediaRecorder.pause();
-			this.isPaused = true;
-
-			this.recordPauseButton.innerHTML = '⏺';
-			this.recordPauseButton.title = 'Resume Recording';
-			this.deleteSaveButton.innerHTML = '💾';
-			this.deleteSaveButton.title = 'Save Recording';
-
-			this.elapsedTime += $.frameCount - this.startTime;
-		}
-
-		resumeRecording() {
-			if (!this.isRecording || !this.isPaused) return;
-
-			this.mediaRecorder.resume();
-			this.isPaused = false;
-
-			this.recordPauseButton.innerHTML = '⏸';
-			this.recordPauseButton.title = 'Pause Recording';
-			this.deleteSaveButton.innerHTML = '🗑️';
-			this.deleteSaveButton.title = 'Delete Recording';
-
-			this.startTime = $.frameCount;
-		}
-
-		stop() {
-			if (!this.isRecording) return;
-
-			this.mediaRecorder.stop();
-			this.isRecording = false;
-			this.isPaused = false;
-
-			this.ui.classList.remove('recording');
-
-			this.elapsedTime += $.frameCount - this.startTime;
-		}
-
-		saveRecording(fileName = 'recording') {
-			if (this.isRecording) {
-				this.stop();
-				this.mediaRecorder.onstop = () => {
-					this.exportRecording(fileName);
-				};
-			} else {
-				this.exportRecording(fileName);
+		Object.defineProperty(rec, 'format', {
+			get: () => formatSelect.selected,
+			set: (v) => {
+				formatSelect.selected = v;
+				changeFormat();
 			}
-		}
+		});
 
-		exportRecording(fileName) {
-			if (this.chunks.length === 0) return;
+		if (h >= 1440 && rec.formats.VP9) rec.format = 'VP9';
 
-			let type = this.encoderSettings.mimeType;
-			let extension = type.slice(5, type.indexOf(';') - 5);
-			let fullFileName = `${fileName}.${extension}`;
-			let blob = new Blob(this.chunks, { type });
-			let dataUrl = URL.createObjectURL(blob);
+		formatSelect.addEventListener('change', changeFormat);
+		qualitySelect.addEventListener('change', changeQuality);
 
-			let a = document.createElement('a');
-			a.href = dataUrl;
-			a.download = fullFileName;
-			a.click();
+		btn0.addEventListener('click', () => {
+			if (!rec.recording) start();
+			else if (!rec.paused) $.pauseRecording();
+			else resumeRecording();
+		});
 
-			URL.revokeObjectURL(dataUrl);
-			this.chunks = [];
-			this.resetUI();
-		}
+		btn1.addEventListener('click', () => {
+			if (rec.paused) $.saveRecording();
+			else $.deleteRecording();
+		});
 
-		resetUI() {
-			this.recordPauseButton.innerHTML = '⏺';
-			this.recordPauseButton.title = 'Start Recording';
-
-			this.deleteSaveButton.innerHTML = '💾';
-			this.deleteSaveButton.title = 'Save Recording';
-
-			this.deleteSaveButton.disabled = true;
-			this.timerDisplay.textContent = '00:00:00:00';
-			this.elapsedTime = 0;
-		}
-
-		updateTimer() {
-			let totalElapsed = this.elapsedTime;
-			if (this.isRecording && !this.isPaused) {
-				totalElapsed += $.frameCount - this.startTime;
-			}
-			let formattedTime = this.formatTime(totalElapsed || 0);
-			this.timerDisplay.textContent = formattedTime;
-		}
-
-		formatTime(frames) {
-			let fr = $.getTargetFrameRate();
-			let ms = Math.floor((frames * 1000) / fr);
-			let totalSeconds = Math.floor(ms / 1000);
-			let hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-			totalSeconds %= 3600;
-			let minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-			let seconds = String(totalSeconds % 60).padStart(2, '0');
-			frames = String(frames % fr).padStart(2, '0');
-			return `${hours}:${minutes}:${seconds}:${frames}`;
-		}
+		resetUI();
+		$.registerMethod('post', updateTimer);
 	}
 
-	$.isRecording = false;
+	function start() {
+		if (rec.recording) return;
 
-	let _rec;
-
-	$.record = (videoSettings) => {
-		if (!_rec) {
-			_rec = new Q5Recorder();
+		try {
+			rec.mediaRecorder = new MediaRecorder(rec.stream, rec.encoderSettings);
+		} catch (e) {
+			console.error('Failed to initialize MediaRecorder: ', e);
+			return;
 		}
-		if (!$.isRecording) {
-			_rec.start(videoSettings);
-			$.isRecording = true;
-		} else if (_rec.isPaused) {
-			_rec.resumeRecording();
+
+		rec.chunks = [];
+		rec.mediaRecorder.ondataavailable = (e) => {
+			if (e.data.size > 0) rec.chunks.push(e.data);
+		};
+
+		rec.mediaRecorder.start();
+		rec.recording = true;
+		rec.paused = false;
+
+		btn0.textContent = '⏸';
+		btn0.title = 'Pause Recording';
+		btn1.textContent = '🗑️';
+		btn1.title = 'Delete Recording';
+		btn1.disabled = false;
+		rec.classList.add('recording');
+
+		rec.time = { hours: 0, minutes: 0, seconds: 0, frames: 0 };
+	}
+
+	function resumeRecording() {
+		if (!rec.recording || !rec.paused) return;
+
+		rec.mediaRecorder.resume();
+		rec.paused = false;
+
+		btn0.textContent = '⏸';
+		btn0.title = 'Pause Recording';
+		btn1.textContent = '🗑️';
+		btn1.title = 'Delete Recording';
+	}
+
+	function stop() {
+		if (!rec.recording) return;
+
+		rec.time = { hours: 0, minutes: 0, seconds: 0, frames: 0 };
+		rec.mediaRecorder.stop();
+		rec.recording = false;
+		rec.paused = false;
+		rec.classList.remove('recording');
+	}
+
+	function resetUI() {
+		btn0.textContent = '⏺';
+		btn0.title = 'Start Recording';
+		btn1.textContent = '💾';
+		btn1.title = 'Save Recording';
+		btn1.disabled = true;
+	}
+
+	function updateTimer() {
+		if (rec.recording && !rec.paused) {
+			rec.time.frames++;
+			let fr = $.getTargetFrameRate();
+
+			if (rec.time.frames >= fr) {
+				rec.time.seconds += Math.floor(rec.time.frames / fr);
+				rec.time.frames %= fr;
+
+				if (rec.time.seconds >= 60) {
+					rec.time.minutes += Math.floor(rec.time.seconds / 60);
+					rec.time.seconds %= 60;
+
+					if (rec.time.minutes >= 60) {
+						rec.time.hours += Math.floor(rec.time.minutes / 60);
+						rec.time.minutes %= 60;
+					}
+				}
+			}
+		}
+		timer.textContent = formatTime();
+	}
+
+	function formatTime() {
+		let { hours, minutes, seconds, frames } = rec.time;
+		return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(
+			2,
+			'0'
+		)}:${String(frames).padStart(2, '0')}`;
+	}
+
+	$.recording = false;
+
+	$.record = (opt) => {
+		if (!rec) {
+			initRecorder(opt);
+			rec.hide();
+		}
+		if (!$.recording) {
+			start();
+			$.recording = true;
+		} else if (rec.paused) {
+			resumeRecording();
 		}
 	};
 
 	$.pauseRecording = () => {
-		if ($.isRecording && !_rec.isPaused) {
-			_rec.pauseRecording();
-		}
+		if (!rec.recording || rec.paused) return;
+
+		rec.mediaRecorder.pause();
+		rec.paused = true;
+
+		btn0.textContent = '⏺';
+		btn0.title = 'Resume Recording';
+		btn1.textContent = '💾';
+		btn1.title = 'Save Recording';
 	};
 
 	$.deleteRecording = () => {
-		_rec.deleteRecording();
-		$.isRecording = false;
+		stop();
+		rec.chunks = [];
+		resetUI();
+		$.recording = false;
 	};
 
-	$.saveRecording = (fileName) => {
-		_rec.saveRecording(fileName);
-		$.isRecording = false;
-	};
-
-	$.createRecorder = (x = 10, y = 10) => {
-		if (!_rec) {
-			_rec = new Q5Recorder({ x, y });
+	$.saveRecording = async (fileName = 'recording') => {
+		if (rec.recording) {
+			await new Promise((resolve) => {
+				rec.mediaRecorder.onstop = resolve;
+				stop();
+			});
 		}
-		_rec.ui.style.top = `${y}px`;
-		_rec.ui.style.left = `${x}px`;
-		_rec.ui.style.display = 'flex';
+
+		if (rec.chunks.length == 0) return;
+
+		let type = rec.encoderSettings.mimeType,
+			extension = type.slice(6, type.indexOf(';')),
+			blob = new Blob(rec.chunks, { type }),
+			dataUrl = URL.createObjectURL(blob),
+			iframe = document.createElement('iframe'),
+			a = document.createElement('a');
+
+		// Create an invisible iframe to detect load completion
+		iframe.style.display = 'none';
+		document.body.append(iframe);
+		a.href = dataUrl;
+		a.download = `${fileName}.${extension}`;
+
+		await new Promise((resolve) => {
+			iframe.onload = () => {
+				document.body.removeChild(iframe);
+				resolve();
+			};
+			iframe.name = 'download_' + Date.now();
+			a.target = iframe.name;
+			a.click();
+		});
+
+		setTimeout(() => URL.revokeObjectURL(dataUrl), 1000);
+		rec.chunks = [];
+		resetUI();
+		$.recording = false;
+	};
+
+	$.createRecorder = (opt) => {
+		if (!rec) initRecorder(opt);
+		return rec;
 	};
 };

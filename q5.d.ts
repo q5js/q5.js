@@ -1319,7 +1319,9 @@ function draw() {
 	 * 
 	 * Use the `value` property to get or set the selected option value.
 	 * 
-	 * Use the `selected` property to get the selected option or options.
+	 * Use the `selected` property get the labels of the selected 
+	 * options or set the selected options by label. Can be a single 
+	 * string or an array of strings.
 	 * @param {string} [placeholder] optional placeholder text that appears before an option is selected
 	 * @example
 createCanvas(200, 100);
@@ -2460,6 +2462,49 @@ noCursor();
 	 * Approximately 6.28319.
 	 */
 	const TAU: number;
+
+	// 🎞️ record
+
+	/** 🎞️
+	 * Creates a recorder UI, which is a q5 DOM element, and positions
+	 * it above the canvas.
+	 * 
+	 * Press the record button to start recording the canvas, press
+	 * it again to pause the recording. When recording is paused, press 
+	 * the save button to download the recording as a video file. While 
+	 * recording, press the delete button to discard the recording.
+	 * 
+	 * `format` is set to 'H.264' by default or 'VP9' if the height of
+	 * the canvas is greater than or equal to 1440 pixels.
+	 * 
+	 * `quality` is set automatically based on the height of the canvas.
+	 * 
+	 * - "SD" (640x480)
+	 * - "HD" (1280x720)
+	 * - "FHD" (1920x1080)
+	 * - "QHD" (2560x1440)
+	 * - "4K" (3840x2160)
+	 * - "8K" (7680x4320)
+	 * 
+	 * Recording large canvases is an intensive process, so your
+	 * computer may not be able to do it in real time. In cases where
+	 * real time interaction is more important than recording quality,
+	 * you can set the quality to a lower preset or reduce the canvas
+	 * size.
+	 * 
+	 * @returns {HTMLElement} a recorder element
+	 * @example
+createCanvas(200);
+
+createRecorder();
+
+function draw() {
+	circle(mouseX, random(canvas.h), 10);
+}
+	 */
+	function createRecorder(): HTMLElement;
+
+
 
 	// 🔊 sound
 
