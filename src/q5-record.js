@@ -92,26 +92,27 @@ Q5.modules.record = ($) => {
 			}
 		}
 
-		formatSelect = $.createSelect();
+		formatSelect = $.createSelect('format');
 		for (const name in rec.formats) {
 			formatSelect.option(name, rec.formats[name]);
 		}
+		formatSelect.title = 'Video Format';
 		rec.append(formatSelect);
 
-		// prettier-ignore
-		rec.qualityPresets = {
-			SD:   10000000, // 10 Mbps
-			HD:   16000000, // 16 Mbps
-			FHD:  22000000, // 22 Mbps
-			QHD:  28000000, // 28 Mbps
-			'4K': 48000000, // 48 Mbps
-			'8K': 75000000  // 75 Mbps
+		let qMult = {
+			min: 0.1,
+			low: 0.25,
+			mid: 0.5,
+			high: 0.75,
+			ultra: 0.9,
+			max: 1
 		};
 
-		qualitySelect = $.createSelect();
-		for (let name in rec.qualityPresets) {
-			qualitySelect.option(name);
+		qualitySelect = $.createSelect('quality');
+		for (let name in qMult) {
+			qualitySelect.option(name, qMult[name]);
 		}
+		qualitySelect.title = 'Video Quality';
 		rec.append(qualitySelect);
 
 		rec.encoderSettings = {};
@@ -121,7 +122,7 @@ Q5.modules.record = ($) => {
 		}
 
 		function changeQuality() {
-			rec.encoderSettings.videoBitsPerSecond = rec.qualityPresets[qualitySelect.value];
+			rec.encoderSettings.videoBitsPerSecond = maxVideoBitRate * qualitySelect.value;
 		}
 
 		formatSelect.addEventListener('change', changeFormat);
@@ -130,8 +131,8 @@ Q5.modules.record = ($) => {
 		Object.defineProperty(rec, 'quality', {
 			get: () => qualitySelect.selected,
 			set: (v) => {
-				v = v.toUpperCase();
-				if (rec.qualityPresets[v]) {
+				v = v.toLowerCase();
+				if (qMult[v]) {
 					qualitySelect.selected = v;
 					changeQuality();
 				}
@@ -150,10 +151,14 @@ Q5.modules.record = ($) => {
 		});
 
 		let h = $.canvas.height;
-		rec.quality = h >= 4320 ? '8K' : h >= 2160 ? '4K' : h >= 1440 ? 'QHD' : h >= 1080 ? 'FHD' : h >= 720 ? 'HD' : 'SD';
 
 		if (h >= 1440 && rec.formats.VP9) rec.format = 'VP9';
 		else rec.format = 'H.264';
+
+		let maxVideoBitRate =
+			(h >= 4320 ? 128 : h >= 2160 ? 75 : h >= 1440 ? 36 : h >= 1080 ? 28 : h >= 720 ? 22 : 16) * 1000000;
+
+		rec.quality = 'high';
 
 		btn0.addEventListener('click', () => {
 			if (!$.recording) start();

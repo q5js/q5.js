@@ -1255,6 +1255,9 @@ let img = createImg('/assets/p5play_logo.webp')
 	 * 
 	 * Use the `value` property to get or set the input's value.
 	 * 
+	 * Use the `placeholder` property to set label text that appears
+	 * inside the input when it's empty.
+	 * 
 	 * See MDN's [input documentation](https://developer.mozilla.org/docs/Web/HTML/Element/input#input_types) for the full list of input types.
 	 * @param {string} [value] initial value
 	 * @param {string} [type] text input type, can be 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
