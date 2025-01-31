@@ -1600,7 +1600,7 @@ createCanvas(200);
 let c = color('lime');
 
 function draw() {
-	set(random(width), random(height), c);
+	set(randomX(), randomY(), c);
 	updatePixels();
 }
 	 */
@@ -2556,7 +2556,7 @@ createCanvas(200);
 createRecorder();
 
 function draw() {
-	circle(mouseX, random(height), 10);
+	circle(mouseX, randomY(), 10);
 }
 	 */
 	function createRecorder(): HTMLElement;
@@ -2583,7 +2583,7 @@ function draw() {
 	 * @param {string} fileName
 	 * @example
 function draw() {
-	square(mouseX, random(height), 10);
+	square(mouseX, randomY(), 10);
 }
 
 function mousePressed() {
