@@ -1,4 +1,4 @@
-Q5.modules.record = ($) => {
+Q5.modules.record = ($, q) => {
 	let rec, btn0, btn1, timer, formatSelect, qualitySelect;
 
 	$.recording = false;
@@ -200,7 +200,7 @@ Q5.modules.record = ($) => {
 		});
 
 		rec.mediaRecorder.start();
-		$.recording = true;
+		q.recording = true;
 		rec.paused = false;
 		rec.classList.add('recording');
 
@@ -221,7 +221,7 @@ Q5.modules.record = ($) => {
 
 		rec.resetTimer();
 		rec.mediaRecorder.stop();
-		$.recording = false;
+		q.recording = false;
 		rec.paused = false;
 		rec.classList.remove('recording');
 	}
@@ -293,7 +293,7 @@ Q5.modules.record = ($) => {
 	$.deleteRecording = () => {
 		stop();
 		resetUI();
-		$.recording = false;
+		q.recording = false;
 	};
 
 	$.saveRecording = async (fileName) => {
@@ -318,7 +318,8 @@ Q5.modules.record = ($) => {
 		a.target = iframe.name;
 		a.href = dataUrl;
 		fileName ??=
-			'recording ' +
+			document.title +
+			' ' +
 			new Date()
 				.toLocaleString(undefined, { hour12: false })
 				.replace(',', ' at')
@@ -336,6 +337,6 @@ Q5.modules.record = ($) => {
 
 		setTimeout(() => URL.revokeObjectURL(dataUrl), 1000);
 		resetUI();
-		$.recording = false;
+		q.recording = false;
 	};
 };

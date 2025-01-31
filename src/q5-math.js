@@ -134,6 +134,14 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
+	if ($._renderer == 'c2d' && !$._webgpuFallback) {
+		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
+		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
+	} else {
+		$.randomX = (v = 0) => $.random(-$.canvas.hw - v, $.canvas.hw + v);
+		$.randomY = (v = 0) => $.random(-$.canvas.hh - v, $.canvas.hh + v);
+	}
+
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();
 		else if (method == $.SHR3) rng1 = shr3();

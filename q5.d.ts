@@ -823,12 +823,12 @@ rect(20, 20, 60, 60);
 	/** 💻
 	 * Customize how your canvas is presented.
 	 * @param {string} mode
-	 *   - "normal": (default) no styling to canvas or its parent element
-	 *   - "centered": canvas will be centered horizontally and vertically within its parent and if the window is smaller than the canvas, the canvas will be resized to avoid clipping
-	 *   - "maxed": canvas will fill the parent element, with letterboxing if necessary to preserve its aspect ratio
+	 *   - "normal": (default) canvas is not repositioned
+	 *   - "centered": canvas is moved to the center of its parent
+	 *   - "maxed": canvas will be scaled to fill the parent element, with letterboxing if necessary to preserve its aspect ratio
 	 * @param {string} renderQuality
-	 *   - "smooth": (default) no change to the default render quality
-	 *   - "pixelated": runs `pixelDensity(1)` and `noSmooth()` then sets the canvas CSS styles `image-rendering: pixelated` and `font-smooth: never`
+	 *   - "smooth": (default) smooth upscaling if the canvas is scaled
+	 *   - "pixelated": pixels rendered as sharp squares
 	 * @param {number} scale can also be given as a string (for example "x2")
 	 * @example
 createCanvas(50, 25);
@@ -1132,11 +1132,13 @@ point(125, 50);
 	// 📑 dom
 
 	/** 📑
+	 * The Document Object Model (DOM) is an interface for
+	 * creating and editing web pages with JavaScript.
+	 */
+
+	/** 📑
 	 * Creates a new HTML element and adds it to the page. `createEl` is
 	 * an alias.
-	 * 
-	 * The element is part of the DOM (Document Object Model), an interface for
-	 * creating and editing web pages with JavaScript.
 	 * 
 	 * Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
 	 * 
@@ -1784,9 +1786,9 @@ text(info, 12, 30, 20, 6);
 	 *
 	 * In q5 WebGPU, fonts must be in MSDF format with the file ending
 	 * "-msdf.json". If no font is loaded before `text` is run, then
-	 * the default font, Microsoft YaHei, is loaded:
-	 * https://q5js.org/fonts/YaHei-msdf.json
-	 * https://q5js.org/fonts/YaHei.png
+	 * the default sans serif font, Microsoft YaHei, is loaded:
+	 * https://q5js.org/fonts/sans-serif-msdf.json
+	 * https://q5js.org/fonts/sans-serif.png
 	 * @param {string} url uRL of the font to load
 	 * @param {(font: FontFace) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
 	 * @returns {FontFace} font
@@ -2299,6 +2301,53 @@ noCursor();
 
 	// 🧮 math
 
+		/** 🧮
+	 * Generates random numbers. If no arguments are provided, returns a random number between 0 and 1.
+	 * If one number argument is provided, returns a random number between 0 and the provided value.
+	 * If two number arguments are provided, returns a random number between the two values.
+	 * If an array is provided, returns a random element from the array.
+	 * @param {number | any[]} [low] lower bound (inclusive) or an array
+	 * @param {number} [high] upper bound (exclusive)
+	 * @returns {number | any} a random number or element
+	 * @example
+createCanvas(200);
+background(200);
+frameRate(5);
+
+function draw() {
+	circle(100, 100, random(200));
+}
+	 */
+	function random(low?: number | any[], high?: number): number | any;
+
+	/** 🧮
+	 * Generates a random number within the range of the canvas width.
+	 * @param {number} [margin] distance to extend (positive) or contract (negative) the range from canvas edges
+	 * @returns {number} random x value
+	 * @example
+createCanvas(200);
+background(200);
+
+function draw() {
+	circle(randomX(), 100, random(50));
+}
+	 */
+	function randomX(margin?: number): number;
+
+	/** 🧮
+	 * Generates a random number within the range of the canvas height.
+	 * @param {number} [margin] distance to extend (positive) or contract (negative) the range from canvas edges
+	 * @returns {number} random y value
+	 * @example
+createCanvas(200);
+background(200);
+
+function draw() {
+	circle(100, randomY(), random(50));
+}
+	 */
+	function randomY(margin?: number): number;
+
 	/** 🧮
 	 * Calculates the distance between two points.
 	 * 
@@ -2390,17 +2439,6 @@ noCursor();
 	function randomSeed(seed: number): void;
 
 	/** 🧮
-	 * Generates random numbers. If no arguments are provided, returns a random number between 0 and 1.
-	 * If one number argument is provided, returns a random number between 0 and the provided value.
-	 * If two number arguments are provided, returns a random number between the two values.
-	 * If an array is provided, returns a random element from the array.
-	 * @param {number | any[]} [a] lower bound (inclusive) or an array
-	 * @param {number} [b] upper bound (exclusive)
-	 * @returns {number | any} a random number or element
-	 */
-	function random(a?: number | any[], b?: number): number | any;
-
-	/** 🧮
 	 * Sets the random number generation method.
 	 * @param {any} method method to use for random number generation
 	 */
@@ -2422,15 +2460,12 @@ noCursor();
 
 	/** 🧮
 	 * Sets the noise generation mode.
+	 * 
+	 * Only the default mode, "perlin", is included in q5.js. Use of the 
+	 * other modes requires the q5-noiser module.
 	 * @param {'perlin' | 'simplex' | 'blocky'} mode noise generation mode
 	 */
 	function noiseMode(mode: 'perlin' | 'simplex' | 'blocky'): void;
-
-	/** 🧮
-	 * Sets the seed value for noise generation.
-	 * @param {number} seed seed value
-	 */
-	function noiseSeed(seed: number): void;
 
 	/** 🧮
 	 * Generates a noise value based on the x, y, and z inputs.
@@ -2440,6 +2475,12 @@ noCursor();
 	 * @returns {number} a noise value
 	 */
 	function noise(x?: number, y?: number, z?: number): number;
+
+	/** 🧮
+	 * Sets the seed value for noise generation.
+	 * @param {number} seed seed value
+	 */
+	function noiseSeed(seed: number): void;
 
 	/** 🧮
 	 * Sets the level of detail for noise generation.
@@ -2469,23 +2510,30 @@ noCursor();
 	// 🎞️ record
 
 	/** 🎞️
-	 * Creates a recorder. Simply hit record to start recording!
+	 * q5.js has a built-in canvas recorder powered by
+	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder). It's 5-10x faster than p5.capture.
 	 * 
 	 * Recording large canvases is an intensive process, so your
 	 * computer may not be able to do it in real time. That's okay,
 	 * the resulting video will playback at your sketch's target 
 	 * frame rate.
 	 * 
-	 * In cases where real time interaction is a priority, consider 
-	 * reducing the canvas' size, frame rate, and/or recording
-	 * quality.
+	 * If real time interaction while recording is a priority, 
+	 * consider reducing the canvas' size, frame rate, and/or 
+	 * recording quality.
+	 * 
+	 * HDR video encoding is not yet supported by any web browser.
+	 * For that and other advanced recording features, consider using
+	 * a screen capture tool like [OBS Studio](https://obsproject.com).
+	 */
+
+	/** 🎞️
+	 * Creates a recorder. Simply hit record to start recording!
 	 * 
 	 * `format` and `quality` properties are set 
 	 * automatically based on the height of the canvas. They can be
 	 * changed via the UI or programmatically.
 	 * 
-	 * The recorder uses the [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder) API, which 
-	 * unfortunately can't encode HDR video.
 	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
 createCanvas(200);
@@ -2493,7 +2541,7 @@ createCanvas(200);
 createRecorder();
 
 function draw() {
-	circle(mouseX, random(canvas.h), 10);
+	circle(mouseX, random(height), 10);
 }
 	 */
 	function createRecorder(): HTMLElement;
@@ -2520,7 +2568,7 @@ function draw() {
 	 * @param {string} fileName
 	 * @example
 function draw() {
-	square(mouseX, random(canvas.h), 10);
+	square(mouseX, random(height), 10);
 }
 
 function mousePressed() {
@@ -2538,8 +2586,15 @@ function mousePressed() {
 	// 🔊 sound
 
 	/** 🔊
-	 * Loads audio data from a file and returns a `Q5.Sound` object that 
-	 * provides low latency sound mixing powered by WebAudio.
+	 * q5.js includes low latency sound playback and basic mixing powered
+	 * by WebAudio.
+	 * 
+	 * For audio filtering, synthesis, and analysis, consider using
+	 * [p5.sound](https://p5js.org/reference/p5.sound/).
+	 */
+
+	/** 🔊
+	 * Loads audio data from a file and returns a `Q5.Sound` object.
 	 * 
 	 * Use functions like `play`, `pause`, and `stop` to 
 	 * control playback. Note that sounds can only be played after the 

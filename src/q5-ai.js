@@ -22,8 +22,8 @@ Q5.modules.ai = ($) => {
 		let parts = errFile.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		if (askAI) lineNum++;
-		parts[3] = parts[3].split(')')[0];
-		let fileUrl = parts.slice(0, 2).join(':');
+		parts[parts.length - 1] = parts.at(-1).split(')')[0];
+		let fileUrl = parts.slice(0, -2).join(':');
 		let fileBase = fileUrl.split('/').at(-1);
 
 		try {
@@ -47,7 +47,7 @@ Q5.modules.ai = ($) => {
 				askAI && e.message.length > 10 ? e.message.slice(10) : 'Whats+wrong+with+this+line%3F+short+answer';
 
 			let url =
-				'https://chatgpt.com/?q=q5.js+' +
+				'https://chatgpt.com/?q=using+q5.js+not+p5.js+' +
 				question +
 				(askAI ? '' : '%0A%0A' + encodeURIComponent(e.name + ': ' + e.message)) +
 				'%0A%0ALine%3A+' +

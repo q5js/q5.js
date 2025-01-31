@@ -223,6 +223,8 @@ function Q5(scope, parent, renderer) {
 	$.postProcess ??= () => {};
 
 	let userFns = [
+		'setup',
+		'postProcess',
 		'mouseMoved',
 		'mousePressed',
 		'mouseReleased',

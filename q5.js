@@ -223,6 +223,8 @@ function Q5(scope, parent, renderer) {
 	$.postProcess ??= () => {};
 
 	let userFns = [
+		'setup',
+		'postProcess',
 		'mouseMoved',
 		'mousePressed',
 		'mouseReleased',
@@ -2082,8 +2084,8 @@ Q5.modules.ai = ($) => {
 		let parts = errFile.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		if (askAI) lineNum++;
-		parts[3] = parts[3].split(')')[0];
-		let fileUrl = parts.slice(0, 2).join(':');
+		parts[parts.length - 1] = parts.at(-1).split(')')[0];
+		let fileUrl = parts.slice(0, -2).join(':');
 		let fileBase = fileUrl.split('/').at(-1);
 
 		try {
@@ -2107,7 +2109,7 @@ Q5.modules.ai = ($) => {
 				askAI && e.message.length > 10 ? e.message.slice(10) : 'Whats+wrong+with+this+line%3F+short+answer';
 
 			let url =
-				'https://chatgpt.com/?q=q5.js+' +
+				'https://chatgpt.com/?q=using+q5.js+not+p5.js+' +
 				question +
 				(askAI ? '' : '%0A%0A' + encodeURIComponent(e.name + ': ' + e.message)) +
 				'%0A%0ALine%3A+' +
@@ -3167,6 +3169,14 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
+	if ($._renderer == 'c2d' && !$._webgpuFallback) {
+		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
+		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
+	} else {
+		$.randomX = (v = 0) => $.random(-$.canvas.hw - v, $.canvas.hw + v);
+		$.randomY = (v = 0) => $.random(-$.canvas.hh - v, $.canvas.hh + v);
+	}
+
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();
 		else if (method == $.SHR3) rng1 = shr3();
@@ -3455,7 +3465,7 @@ Q5.PerlinNoise = class extends Q5.Noise {
 		return (total / maxAmp + 1) / 2;
 	}
 };
-Q5.modules.record = ($) => {
+Q5.modules.record = ($, q) => {
 	let rec, btn0, btn1, timer, formatSelect, qualitySelect;
 
 	$.recording = false;
@@ -3657,7 +3667,7 @@ Q5.modules.record = ($) => {
 		});
 
 		rec.mediaRecorder.start();
-		$.recording = true;
+		q.recording = true;
 		rec.paused = false;
 		rec.classList.add('recording');
 
@@ -3678,7 +3688,7 @@ Q5.modules.record = ($) => {
 
 		rec.resetTimer();
 		rec.mediaRecorder.stop();
-		$.recording = false;
+		q.recording = false;
 		rec.paused = false;
 		rec.classList.remove('recording');
 	}
@@ -3750,7 +3760,7 @@ Q5.modules.record = ($) => {
 	$.deleteRecording = () => {
 		stop();
 		resetUI();
-		$.recording = false;
+		q.recording = false;
 	};
 
 	$.saveRecording = async (fileName) => {
@@ -3775,7 +3785,8 @@ Q5.modules.record = ($) => {
 		a.target = iframe.name;
 		a.href = dataUrl;
 		fileName ??=
-			'recording ' +
+			document.title +
+			' ' +
 			new Date()
 				.toLocaleString(undefined, { hour12: false })
 				.replace(',', ' at')
@@ -3793,7 +3804,7 @@ Q5.modules.record = ($) => {
 
 		setTimeout(() => URL.revokeObjectURL(dataUrl), 1000);
 		resetUI();
-		$.recording = false;
+		q.recording = false;
 	};
 };
 Q5.modules.sound = ($, q) => {
