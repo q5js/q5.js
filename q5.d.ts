@@ -2345,6 +2345,13 @@ background(200);
 function draw() {
 	circle(100, randomY(), random(50));
 }
+	 * @example
+createCanvas(200);
+background(200);
+
+function draw() {
+	circle(randomX(-20), randomY(-60), 10);
+}
 	 */
 	function randomY(margin?: number): number;
 
@@ -2357,6 +2364,15 @@ function draw() {
 	 * @param {number} x2 x-coordinate of the second point
 	 * @param {number} y2 y-coordinate of the second point
 	 * @returns {number} distance between the points
+	 * @example
+function draw() {
+	background(200);
+	circle(100, 100, 20);
+	circle(mouseX, mouseY, 20);
+
+	let d = dist(100, 100, mouseX, mouseY);
+	text(round(d), 20, 20);
+}
 	 */
 	function dist(x1: number, y1: number, x2: number, y2: number): number;
 
@@ -2511,28 +2527,27 @@ function draw() {
 
 	/** 🎞️
 	 * q5.js has a built-in canvas recorder powered by
-	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder). It's 5-10x faster than p5.capture.
+	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder). It provides a good balance between 
+	 * video encoding speed, quality, and file size.
 	 * 
 	 * Recording large canvases is an intensive process, so your
 	 * computer may not be able to do it in real time. That's okay,
 	 * the resulting video will playback at your sketch's target 
-	 * frame rate.
-	 * 
-	 * If real time interaction while recording is a priority, 
-	 * consider reducing the canvas' size, frame rate, and/or 
+	 * frame rate. But if real time interaction while recording is a 
+	 * priority, consider reducing the canvas' size, frame rate, and/or 
 	 * recording quality.
 	 * 
 	 * HDR video encoding is not yet supported by any web browser.
-	 * For that and other advanced recording features, consider using
+	 * For that and other advanced features, consider using
 	 * a screen capture tool like [OBS Studio](https://obsproject.com).
 	 */
 
 	/** 🎞️
 	 * Creates a recorder. Simply hit record to start recording!
 	 * 
-	 * `format` and `quality` properties are set 
-	 * automatically based on the height of the canvas. They can be
-	 * changed via the UI or programmatically.
+	 * `quality` is set to "high" by default.
+	 * 
+	 * `format` is set automatically based on the height of the canvas.
 	 * 
 	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
