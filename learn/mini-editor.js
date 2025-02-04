@@ -160,6 +160,7 @@ class MiniEditor {
 	}
 
 	resizeEditor() {
+		this.editorEl.style.width = '100%';
 		this.editorEl.style.height = this.initialCode.split('\n').length * 22 + 'px';
 		this.editor.layout();
 	}

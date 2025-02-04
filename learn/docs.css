@@ -1145,6 +1145,7 @@ pre[class*="language-"] code {
 @media (max-width: 720px) {
 	.mie-container {
 		flex-direction: column;
+		gap: 8px;
 	}
 
 	.mini-editor {
