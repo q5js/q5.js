@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.18
+ * @version 2.19
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -104,9 +104,9 @@ function Q5(scope, parent, renderer) {
 			throw e;
 		}
 		for (let m of Q5.methods.post) m.call($);
+		$.postProcess();
 		if ($._render) $._render();
 		if ($._finishRender) $._finishRender();
-		$.postProcess();
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;
 		q.moveX = q.moveY = 0;
@@ -313,7 +313,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.18';
+Q5.version = Q5.VERSION = '2.19';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

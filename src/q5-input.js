@@ -93,7 +93,7 @@ Q5.modules.input = ($, q) => {
 	$._onwheel = (e) => {
 		$._updateMouse(e);
 		e.delta = e.deltaY;
-		if ($.mouseWheel(e) == false) e.preventDefault();
+		if ($.mouseWheel(e) == false || $._noScroll) e.preventDefault();
 	};
 
 	$.cursor = (name, x, y) => {
@@ -108,9 +108,8 @@ Q5.modules.input = ($, q) => {
 		$.canvas.style.cursor = name + pfx;
 	};
 
-	$.noCursor = () => {
-		$.canvas.style.cursor = 'none';
-	};
+	$.noCursor = () => ($.canvas.style.cursor = 'none');
+	$.noScroll = () => ($._noScroll = true);
 
 	if (window) {
 		$.lockMouse = document.body?.requestPointerLock;

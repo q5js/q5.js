@@ -32,10 +32,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		opt ??= {};
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace || Q5.canvasOptions.colorSpace;
-		let img = new Q5.Image(w, h, opt);
-		img.defaultWidth = w * $._defaultImageScale;
-		img.defaultHeight = h * $._defaultImageScale;
-		return img;
+		return new Q5.Image(w, h, opt);
 	};
 
 	$.loadImage = function (url, cb, opt) {
@@ -191,7 +188,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		$.ctx.globalCompositeOperation = 'source-over';
 		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
 		$.ctx.restore();
-		$._retint = true;
+		$.modified = $._retint = true;
 	};
 
 	if ($._scope == 'image') {
@@ -209,7 +206,7 @@ Q5.renderers.c2d.image = ($, q) => {
 			$.ctx.clearRect(0, 0, c.width, c.height);
 			$.ctx.drawImage(o, 0, 0, c.width, c.height);
 
-			$._retint = true;
+			$.modified = $._retint = true;
 		};
 	}
 
@@ -256,17 +253,25 @@ Q5.renderers.c2d.image = ($, q) => {
 		$.ctx.globalCompositeOperation = old;
 		$.ctx.restore();
 
-		$._retint = true;
+		$.modified = $._retint = true;
 	};
 
 	$.inset = (x, y, w, h, dx, dy, dw, dh) => {
 		let pd = $._pixelDensity || 1;
 		$.ctx.drawImage($.canvas, x * pd, y * pd, w * pd, h * pd, dx, dy, dw, dh);
 
-		$._retint = true;
+		$.modified = $._retint = true;
 	};
 
-	$.copy = () => $.get();
+	$.copy = () => {
+		let img = $.get();
+		for (let prop in $) {
+			if (typeof $[prop] != 'function' && !/(canvas|ctx|texture|textureIndex)/.test(prop)) {
+				img[prop] = $[prop];
+			}
+		}
+		return img;
+	};
 
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
@@ -276,22 +281,19 @@ Q5.renderers.c2d.image = ($, q) => {
 		}
 		x = Math.floor(x || 0) * pd;
 		y = Math.floor(y || 0) * pd;
-		let _w = (w = w || $.width);
-		let _h = (h = h || $.height);
-		w *= pd;
-		h *= pd;
-		let img = $.createImage(w, h);
-		img.ctx.drawImage($.canvas, x, y, w, h, 0, 0, w, h);
-		img._pixelDensity = pd;
-		img.width = _w;
-		img.height = _h;
+		w ??= $.width;
+		h ??= $.height;
+		let img = $.createImage(w, h, { pixelDensity: pd });
+		img.ctx.drawImage($.canvas, x, y, w * pd, h * pd, 0, 0, w, h);
+		img.width = w;
+		img.height = h;
 		return img;
 	};
 
 	$.set = (x, y, c) => {
 		x = Math.floor(x);
 		y = Math.floor(y);
-		$._retint = true;
+		$.modified = $._retint = true;
 		if (c.canvas) {
 			let old = $._tint;
 			$._tint = null;
@@ -319,7 +321,7 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.updatePixels = () => {
 		if (imgData != null) {
 			$.ctx.putImageData(imgData, 0, 0);
-			$._retint = true;
+			$.modified = $._retint = true;
 		}
 	};
 
@@ -327,6 +329,20 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
 
 	if ($._scope == 'image') return;
+
+	$._saveCanvas = async (data, ext) => {
+		data = data.canvas || data;
+		if (data instanceof OffscreenCanvas) {
+			const blob = await data.convertToBlob({ type: 'image/' + ext });
+
+			return await new Promise((resolve) => {
+				const reader = new FileReader();
+				reader.onloadend = () => resolve(reader.result);
+				reader.readAsDataURL(blob);
+			});
+		}
+		return data.toDataURL('image/' + ext);
+	};
 
 	$.tint = function (c) {
 		$._tint = (c._q5Color ? c : $.color(...arguments)).toString();

@@ -509,20 +509,14 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		}
 
 		let img = $._g.createTextImage(str, w, h);
-
-		if (img.canvas.textureIndex == undefined) {
+		if (img.textureIndex == undefined) {
 			$._createTexture(img);
-		} else if (img.modified) {
-			let cnv = img.canvas;
-			let textureSize = [cnv.width, cnv.height, 1];
-			let texture = $._textures[cnv.textureIndex];
-
-			Q5.device.queue.copyExternalImageToTexture(
-				{ source: cnv },
-				{ texture, colorSpace: $.canvas.colorSpace },
-				textureSize
-			);
-			img.modified = false;
+			let _copy = img.copy;
+			img.copy = function () {
+				let copy = _copy();
+				$._createTexture(copy);
+				return copy;
+			};
 		}
 		return img;
 	};

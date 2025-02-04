@@ -1,19 +1,32 @@
 let typeDefs = '';
 
 class MiniEditor {
-	constructor(container, script) {
+	constructor(scriptEl) {
+		let scriptContent = scriptEl.innerHTML.slice(0, -1).replaceAll('\t', '  ').trim();
+		let container = document.createElement('div');
+		container.id = 'mie-' + scriptEl.id;
+		container.className = 'mie-container';
+		scriptEl.insertAdjacentElement('beforebegin', container);
 		this.container = container;
-		this.initialCode = script;
+		this.initialCode = scriptContent;
+
+		let attrs = scriptEl.getAttributeNames();
+		for (let attr of attrs) {
+			this[attr] = scriptEl.getAttribute(attr) || true;
+		}
 	}
 
 	async init() {
 		let editorEl = document.createElement('div');
-		editorEl.id = `${this.container.id}-mini-editor`;
-		editorEl.className = 'mini-editor';
+		editorEl.id = `mie-${this.container.id}`;
+		editorEl.className = 'mie-code';
+		if (this['hide-editor']) {
+			editorEl.style.display = 'none';
+		}
 
 		let outputEl = document.createElement('div');
 		outputEl.id = `${this.container.id}-output`;
-		outputEl.className = 'output';
+		outputEl.className = 'mie-output';
 
 		this.container.append(outputEl);
 		this.container.append(editorEl);
@@ -75,7 +88,7 @@ class MiniEditor {
 		});
 	}
 
-	runCode() {
+	async runCode() {
 		if (!this.editorReady) {
 			console.error('Editor is not ready yet');
 			return;
@@ -100,6 +113,7 @@ class MiniEditor {
 			'mousePressed',
 			'mouseReleased',
 			'mouseClicked',
+			'mouseWheel',
 			'touchStarted',
 			'touchMoved',
 			'touchEnded',
@@ -112,7 +126,12 @@ class MiniEditor {
 			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?new\s+Q5\s*\([^)]*\);?/g;
 			userCode = userCode.replace(q5InstanceRegex, '');
 
-			let q = new Q5('instance', this.outputEl);
+			let q;
+			if (this.renderer == 'webgpu') {
+				q = await Q5.webgpu('instance', this.outputEl);
+			} else {
+				q = new Q5('instance', this.outputEl);
+			}
 
 			for (let f of q5FunctionNames) {
 				const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');

@@ -1,8 +1,3 @@
-/**
- * q5-webgpu
- *
- * EXPERIMENTAL, for developer testing only!
- */
 Q5.renderers.webgpu = {};
 
 Q5.renderers.webgpu.canvas = ($, q) => {
@@ -18,6 +13,11 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	let pass,
 		mainView,
+		frameTextureA,
+		frameTextureB,
+		frameSampler,
+		framePipeline,
+		frameBindGroup,
 		colorIndex = 1,
 		colorStackIndex = 8;
 
@@ -66,14 +66,60 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	});
 
 	let createMainView = () => {
+		let w = $.canvas.width,
+			h = $.canvas.height,
+			size = [w, h],
+			format = 'bgra8unorm';
+
 		mainView = Q5.device
 			.createTexture({
-				size: [$.canvas.width, $.canvas.height],
+				size,
 				sampleCount: 4,
-				format: 'bgra8unorm',
+				format,
 				usage: GPUTextureUsage.RENDER_ATTACHMENT
 			})
 			.createView();
+
+		let usage =
+			GPUTextureUsage.COPY_SRC |
+			GPUTextureUsage.COPY_DST |
+			GPUTextureUsage.TEXTURE_BINDING |
+			GPUTextureUsage.RENDER_ATTACHMENT;
+
+		frameTextureA = Q5.device.createTexture({ size, format, usage });
+		frameTextureB = Q5.device.createTexture({ size, format, usage });
+
+		let finalShader = Q5.device.createShaderModule({
+			code: `
+@vertex fn v(@builtin(vertex_index)i:u32)->@builtin(position)vec4<f32>{
+	const pos=array(vec2(-1f,-1f),vec2(1f,-1f),vec2(-1f,1f),vec2(1f,1f));
+	return vec4(pos[i],0f,1f);
+}
+@group(0) @binding(0) var s: sampler;
+@group(0) @binding(1) var t: texture_2d<f32>;
+@fragment fn f(@builtin(position)c:vec4<f32>)->@location(0)vec4<f32>{
+	let uv=c.xy/vec2(${w}, ${h});
+	return textureSample(t,s,uv);
+}`
+		});
+
+		frameSampler = Q5.device.createSampler({
+			magFilter: 'linear',
+			minFilter: 'linear'
+		});
+
+		// Create a pipeline for rendering
+		framePipeline = Q5.device.createRenderPipeline({
+			layout: 'auto',
+			vertex: { module: finalShader, entryPoint: 'v' },
+			fragment: {
+				module: finalShader,
+				entryPoint: 'f',
+				targets: [{ format, writeMask: GPUColorWrite.ALL }]
+			},
+			primitive: { topology: 'triangle-strip' },
+			multisample: { count: 4 }
+		});
 	};
 
 	$._createCanvas = (w, h, opt) => {
@@ -439,23 +485,52 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		}
 	};
 
-	$.clear = () => {};
+	let shouldClear = false;
+	$.clear = () => {
+		shouldClear = true;
+	};
+
+	const _drawFrame = () => {
+		pass.setPipeline(framePipeline);
+		pass.setBindGroup(0, frameBindGroup);
+		pass.draw(4);
+	};
 
 	$._beginRender = () => {
+		// swap the frame textures
+		const temp = frameTextureA;
+		frameTextureA = frameTextureB;
+		frameTextureB = temp;
+		$.canvas.texture = frameTextureA;
+
 		$.encoder = Q5.device.createCommandEncoder();
+
+		let target = shouldClear ? $.ctx.getCurrentTexture().createView() : frameTextureA.createView();
 
 		pass = q.pass = $.encoder.beginRenderPass({
 			label: 'q5-webgpu',
 			colorAttachments: [
 				{
 					view: mainView,
-					resolveTarget: $.ctx.getCurrentTexture().createView(),
+					resolveTarget: target,
 					loadOp: 'clear',
 					storeOp: 'store',
 					clearValue: [0, 0, 0, 0]
 				}
 			]
 		});
+
+		if (!shouldClear) {
+			frameBindGroup = Q5.device.createBindGroup({
+				layout: framePipeline.getBindGroupLayout(0),
+				entries: [
+					{ binding: 0, resource: frameSampler },
+					{ binding: 1, resource: frameTextureB.createView() }
+				]
+			});
+
+			_drawFrame();
+		}
 	};
 
 	$._render = () => {
@@ -530,8 +605,33 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$._finishRender = () => {
 		pass.end();
-		let commandBuffer = $.encoder.finish();
-		Q5.device.queue.submit([commandBuffer]);
+
+		if (!shouldClear) {
+			pass = $.encoder.beginRenderPass({
+				colorAttachments: [
+					{
+						view: mainView,
+						resolveTarget: $.ctx.getCurrentTexture().createView(),
+						loadOp: 'clear',
+						storeOp: 'store',
+						clearValue: [0, 0, 0, 0]
+					}
+				]
+			});
+
+			frameBindGroup = Q5.device.createBindGroup({
+				layout: framePipeline.getBindGroupLayout(0),
+				entries: [
+					{ binding: 0, resource: frameSampler },
+					{ binding: 1, resource: frameTextureA.createView() }
+				]
+			});
+			_drawFrame();
+			pass.end();
+			shouldClear = false;
+		}
+
+		Q5.device.queue.submit([$.encoder.finish()]);
 
 		q.pass = $.encoder = null;
 

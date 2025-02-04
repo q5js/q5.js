@@ -385,6 +385,21 @@ footer {
 	z-index: 1;
 }
 
+.mie-container {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.mie-code {
+	width: 300px;
+}
+
+.mie-output {
+	display: flex;
+	align-items: center;
+}
+
 @media screen and (max-width: 800px) {
 	.reel {
 		padding-left: 0;

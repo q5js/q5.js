@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>q5</title>
@@ -42,7 +45,8 @@
 			<div class="btn">
 				<div id="darkModeIcon"></div>
 			</div>
-			<textarea id="scriptLink" rows="1" readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
+			<textarea id="scriptLink" rows="1"
+				readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
 			<div class="btn">
 				<div id="fullscreenIcon"></div>
 			</div>
@@ -50,29 +54,33 @@
 	</div>
 	<div id="reel1" class="reel">
 		<md id="md1-0">
-<h2 id="create-art-with-q5js-🎨">Create art with q5.js! 🎨</h2>
-<p><strong>q5.js</strong> is a sequel to the <a href="https://p5js.org" target="_blank">p5.js</a> and <a href="https://processing.org/" target="_blank">Processing Java</a> graphics libraries. ⭐️</p>
-<ul>
-<li>performance optimized for interactive art 🚀</li>
-<li>includes a brand new renderer powered by WebGPU 💪</li>
-<li>up to 32x faster than p5.js 🏎️</li>
-<li>beginner friendly API and documentation 📚</li>
-<li>compatible with popular addons, including <a href="https://p5js.org/reference/#/libraries/p5.sound" target="_blank">p5.sound</a> and <a href="https://p5play.org" target="_blank">p5play</a> 🎮</li>
-<li>no dependencies, ~100kb minified 📦</li>
-<li>100% free to use under the LGPL (just like p5.js) 🆓</li>
-</ul>
-</md>
+			<h2 id="create-art-with-q5js-🎨">Create art with q5.js! 🎨</h2>
+			<p><strong>q5.js</strong> is a sequel to the <a href="https://p5js.org" target="_blank">p5.js</a> and <a
+					href="https://processing.org/" target="_blank">Processing Java</a> graphics libraries. ⭐️</p>
+			<ul>
+				<li>performance optimized for interactive art 🚀</li>
+				<li>includes a brand new renderer powered by WebGPU 💪</li>
+				<li>up to 32x faster than p5.js 🏎️</li>
+				<li>beginner friendly API and documentation 📚</li>
+				<li>compatible with popular addons, including <a href="https://p5js.org/reference/#/libraries/p5.sound"
+						target="_blank">p5.sound</a> and <a href="https://p5play.org" target="_blank">p5play</a> 🎮</li>
+				<li>no dependencies, ~100kb minified 📦</li>
+				<li>100% free to use under the LGPL (just like p5.js) 🆓</li>
+			</ul>
+		</md>
 		<md id="md1-1">
-<p>If you're already familiar with p5, you'll find yourself right at home with q5. 🏡</p>
-</md>
+			<p>If you're already familiar with p5, you'll find yourself right at home with q5. 🏡</p>
+		</md>
 		<div class="minis horiz">
-			<script type="mie/p5" id="p5.js" horiz="" width="350px">
+			<script type="mini" id="p5.js" horiz="" width="350px">
+// p5.js
 function setup() {
 	createCanvas(100, 100);
 	circle(50, 50, 50);
 }
 			</script>
-			<script type="mie/q5" id="q5.js" horiz="" width="350px">
+			<script type="mini" id="q5.js" horiz="" width="350px">
+// q5.js
 function setup() {
 	createCanvas(100, 100);
 	circle(50, 50, 50);
@@ -101,11 +109,13 @@ function setup() {
 	</div> -->
 	<div id="reel2" class="reel">
 		<md id="md2-0">
-<h2 id="blazing-fast-🚀">Blazing fast! 🚀</h2>
-<p><a href="https://github.com/q5js/q5.js/wiki/Developer-Log" target="_blank">Draw up to 32x more</a> per frame with <a href="https://developer.mozilla.org/docs/Web/API/WebGPU_API" target="_blank">q5 WebGPU</a>, compared to the limits of p5. Or save battery by getting the same results with less power consumption. 🌱</p>
-<p>Switching from p5 to q5 is like getting a free computer upgrade. 🎉</p>
-</md>
-		<script type="mie/q5" id="rainbowLoops" renderer="webgpu" hide-editor="">
+			<h2 id="blazing-fast-🚀">Blazing fast! 🚀</h2>
+			<p><a href="https://github.com/q5js/q5.js/wiki/Developer-Log" target="_blank">Draw up to 32x more</a> per frame
+				with <a href="https://developer.mozilla.org/docs/Web/API/WebGPU_API" target="_blank">q5 WebGPU</a>, compared to
+				the limits of p5. Or save battery by getting the same results with less power consumption. 🌱</p>
+			<p>Switching from p5 to q5 is like getting a free computer upgrade. 🎉</p>
+		</md>
+		<script type="mini" id="rainbowLoops" renderer="webgpu" hide-editor="">
 let size;
 
 function setup() {
@@ -117,7 +127,7 @@ function setup() {
 }
 
 function draw() {
-	background(0);
+	background(0, 0.1);
 
 	for (let i = 0; i < 720; i++) {
 		let r = cos(frameCount + i * 2) * 0.5 + 0.5;
@@ -125,82 +135,104 @@ function draw() {
 		let b = cos(frameCount + i) * 0.5 + 0.5;
 		fill(r, g, b);
 
-		let x = cos(frameCount + i/2 + mouseX/10) * size * sin(frameCount + i);
+		let x = cos(frameCount + i/2 + mouseX) * size * sin(frameCount + i);
 		x *= sin(frameCount + i);
-		let y = sin(frameCount + i/2 + mouseY/10) * size * cos(frameCount + i);
+		let y = sin(frameCount + i/2 + mouseY) * size * cos(frameCount + i);
 		for (let j = -5; j <= 5; j++) {
 			rect(x + j * 20, y, 10, 10);
 		}
 	}
 }
-</script>
+		</script>
 	</div>
 
 	<div id="reel3" class="reel">
 		<div class="minis horiz">
 			<md id="md3-0">
-<h2 id="start-coding-💻">Start coding! 💻</h2>
-<p>No installation required! Use an online code editor with one of these q5.js template projects: <a href="https://openprocessing.org/sketch/2471587" target="_blank">OpenProcessing</a>, <a href="https://aijs.io/editor?user=quinton-ashley&amp;project=logoSpin" target="_blank">Aijs</a>, or <a href="https://codepen.io/qashto/pen/jENEJNy" target="_blank">CodePen</a>. 🖌️</p>
-</md>
+				<h2 id="start-coding-💻">Start coding! 💻</h2>
+				<p>No installation required! Use an online code editor with one of these q5.js template projects: <a
+						href="https://openprocessing.org/sketch/2471587" target="_blank">OpenProcessing</a>, <a
+						href="https://aijs.io/editor?user=quinton-ashley&amp;project=logoSpin" target="_blank">Aijs</a>, or <a
+						href="https://codepen.io/qashto/pen/jENEJNy" target="_blank">CodePen</a>. 🖌️</p>
+			</md>
 			<md id="md3-1">
-<h2 id="join-our-community-🤝">Join our community 🤝</h2>
-<p>The future of creative coding is here! Join us on the <a href="https://discord.gg/QuxQYwGWuB" target="_blank">q5 community Discord</a>. 🙋</p>
-</md>
+				<h2 id="join-our-community-🤝">Join our community 🤝</h2>
+				<p>The future of creative coding is here! Join us on the <a href="https://discord.gg/QuxQYwGWuB"
+						target="_blank">q5 community Discord</a>. 🙋</p>
+			</md>
 			<md id="md3-2">
-<h2 id="local-development-🛠️">Local development 🛠️</h2>
-<p>You can <a href="https://github.com/q5js/q5.js/wiki/Get-Started" target="_blank">use q5 offline</a> or add this to your HTML file to always load the latest version.</p>
-<pre><code class="language-html">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;
+				<h2 id="local-development-🛠️">Local development 🛠️</h2>
+				<p>You can <a href="https://github.com/q5js/q5.js/wiki/Get-Started" target="_blank">use q5 offline</a> or add
+					this to your HTML file to always load the latest version.</p>
+				<pre><code class="language-html">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;
 </code></pre>
-</md>
+			</md>
 			<md id="md3-3">
-<h2 id="support-q5-💙">Support q5 💙</h2>
-<p>q5 is open source and anyone can use it for free under the terms of the LGPL (just like p5.js). 🎉</p>
-<p>We need your support though! If you enjoy using q5.js, please donate via <a href="https://github.com/sponsors/quinton-ashley" target="_blank">GitHub Sponsors</a> or <a href="https://www.patreon.com/q5play" target="_blank">Patreon</a>.</p>
-</md>
+				<h2 id="support-q5-💙">Support q5 💙</h2>
+				<p>q5 is open source and anyone can use it for free under the terms of the LGPL (just like p5.js). 🎉</p>
+				<p>We need your support though! If you enjoy using q5.js, please donate via <a
+						href="https://github.com/sponsors/quinton-ashley" target="_blank">GitHub Sponsors</a> or <a
+						href="https://www.patreon.com/q5play" target="_blank">Patreon</a>.</p>
+			</md>
 		</div>
 	</div>
 
 	<div id="reel10" class="reel">
 		<div class="minis horiz">
 			<md id="md10-0">
-<h2 id="dynamic-🐙">Dynamic 🐙</h2>
-<p>Q5 instances can be created manually, which makes the <code>setup</code> function optional. Use q5 functions anywhere with <a href="https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode" target="_blank">top-level global mode</a>! 👀</p>
-<pre><code class="language-js">new Q5();
+				<h2 id="dynamic-🐙">Dynamic 🐙</h2>
+				<p>Q5 instances can be created manually, which makes the <code>setup</code> function optional. Use q5 functions
+					anywhere with <a href="https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode"
+						target="_blank">top-level global mode</a>! 👀</p>
+				<pre><code class="language-js">new Q5();
 
 createCanvas(400, 400);
 </code></pre>
-</md>
+			</md>
 			<md id="md10-1">
-<h2 id="sound-on-🔊">Sound On 🔊</h2>
-<p>p5.sound is a great library, but typical use doesn't require its extensive sound generation and filtering features. 🎛️</p>
-<p>q5.js includes sound loading, playback, and basic mixing by default. 🎚️</p>
-</md>
+				<h2 id="sound-on-🔊">Sound On 🔊</h2>
+				<p>p5.sound is a great library, but typical use doesn't require its extensive sound generation and filtering
+					features. 🎛️</p>
+				<p>q5.js includes sound loading, playback, and basic mixing by default. 🎚️</p>
+			</md>
 			<md id="md10-2">
-<h2 id="lightweight-🪶">Lightweight 🪶</h2>
-<p>p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️</p>
-<p>q5.js is ~140kb, that's 98% smaller. 🌳</p>
-<p>For extremely lightweight use, load only the features you need from the <a href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">q5 source folder</a>. Load q5 using script tags or as JavaScript modules. 📦</p>
-</md>
+				<h2 id="lightweight-🪶">Lightweight 🪶</h2>
+				<p>p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️</p>
+				<p>q5.js is ~140kb, that's 98% smaller. 🌳</p>
+				<p>For extremely lightweight use, load only the features you need from the <a
+						href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">q5 source folder</a>. Load q5 using
+					script tags or as JavaScript modules. 📦</p>
+			</md>
 			<md id="md10-3">
-<h2 id="frame-your-art-🖼️">Frame your Art 🖼️</h2>
-<p>The <code>displayMode</code> function lets you frame your art within the browser window, no CSS skills required! 📽️</p>
-<p>Make a canvas be centered or fill the screen without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾</p>
-</md>
+				<h2 id="frame-your-art-🖼️">Frame your Art 🖼️</h2>
+				<p>The <code>displayMode</code> function lets you frame your art within the browser window, no CSS skills
+					required! 📽️</p>
+				<p>Make a canvas be centered or fill the screen without clipping or changing the aspect ratio. Use the
+					"pixelated" rendering preset to make pixel art. 👾</p>
+			</md>
 		</div>
 	</div>
 
 	<div id="reel20" class="reel">
 		<md id="md20-0">
-<h2 id="credits-🌟">Credits 🌟</h2>
-<p>This project aims to continue the legacy of the incredible work done by <a href="https://benfry.com" target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com" target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all contributors to these projects.</p>
-<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain Unlicense license. We forked and significantly extended the abandoned codebase.</p>
-<p>q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: <a href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.</p>
-</md>
+			<h2 id="credits-🌟">Credits 🌟</h2>
+			<p>This project aims to continue the legacy of the incredible work done by <a href="https://benfry.com"
+					target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a
+					href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com"
+					target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all
+				contributors to these projects.</p>
+			<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a
+					href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain
+				Unlicense license. We forked and significantly extended the abandoned codebase.</p>
+			<p>q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: <a
+					href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a> and <a
+					href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.</p>
+		</md>
 	</div>
 	<footer>
 		<md id="md100">
-<p>q5js.org was created by the q5 team. Copyright 2024-2025.</p>
-</md>
+			<p>q5js.org was created by the q5 team. Copyright 2024-2025.</p>
+		</md>
 	</footer>
 
 	<script src="../q5.js"></script>
@@ -286,17 +318,40 @@ createCanvas(400, 400);
 		Q5.canvasOptions.alpha = true;
 	</script>
 
-	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ace.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ext-language_tools.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min-noconflict/ext-beautify.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs/loader.min.js"></script>
+	<script src="/learn/mini-editor.js"></script>
+	<script src="/home/theme.js"></script>
 	<script>
-		window.mie = {
-			autoLoad: false
-		};
+		document.getElementById('fullscreenIcon').addEventListener('click', () => {
+			if (document.fullscreenElement) document.exitFullscreen();
+			else document.documentElement.requestFullscreen();
+		});
+
+		document.getElementById('darkModeIcon').addEventListener('click', () => {
+			setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
+		});
+
+		window.addEventListener('scroll', function () {
+			if (window.scrollY > 50) {
+				// Adjust the scroll position as needed
+				document.body.classList.add('nav-fixed');
+			} else {
+				document.body.classList.remove('nav-fixed');
+			}
+		});
+
+		(async () => {
+			await Q5.initWebGPU();
+
+			let scripts = document.body.querySelectorAll('script[type="mini"]');
+			for (let script of scripts) {
+				let mie = new MiniEditor(script);
+				await mie.init();
+			}
+		})();
 	</script>
-	<script src="/home/mie.js"></script>
-	<script src="main.js"></script>
 
 
+</body>
 
-</body></html>
+</html>

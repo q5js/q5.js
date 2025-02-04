@@ -100,49 +100,6 @@ Q5.modules.canvas = ($, q) => {
 		return g;
 	};
 
-	async function saveFile(data, name, ext) {
-		name = name || 'untitled';
-		ext = ext || 'png';
-		if (ext == 'jpg' || ext == 'png' || ext == 'webp') {
-			if (data instanceof OffscreenCanvas) {
-				const blob = await data.convertToBlob({ type: 'image/' + ext });
-				data = await new Promise((resolve) => {
-					const reader = new FileReader();
-					reader.onloadend = () => resolve(reader.result);
-					reader.readAsDataURL(blob);
-				});
-			} else {
-				data = data.toDataURL('image/' + ext);
-			}
-		} else {
-			let type = 'text/plain';
-			if (ext == 'json') {
-				if (typeof data != 'string') data = JSON.stringify(data);
-				type = 'text/json';
-			}
-			data = new Blob([data], { type });
-			data = URL.createObjectURL(data);
-		}
-		let a = document.createElement('a');
-		a.href = data;
-		a.download = name + '.' + ext;
-		a.click();
-		URL.revokeObjectURL(a.href);
-	}
-
-	$.save = (a, b, c) => {
-		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
-			c = b;
-			b = a;
-			a = $.canvas;
-		}
-		if (c) return saveFile(a, b, c);
-		if (b) {
-			b = b.split('.');
-			saveFile(a, b[0], b.at(-1));
-		} else saveFile(a);
-	};
-
 	$._setCanvasSize = (w, h) => {
 		if (!w) h ??= window.innerHeight;
 		else h ??= w;

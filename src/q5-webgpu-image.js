@@ -124,12 +124,10 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 
 	$.smooth();
 
-	let MAX_TEXTURES = 12000;
-
-	$._textures = [];
 	let tIdx = 0;
 
 	$._createTexture = (img) => {
+		let g = img;
 		if (img.canvas) img = img.canvas;
 
 		let textureSize = [img.width, img.height, 1];
@@ -149,26 +147,18 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			textureSize
 		);
 
-		$._textures[tIdx] = texture;
-		img.textureIndex = tIdx;
+		g.texture = texture;
+		g.textureIndex = tIdx;
 
-		const textureBindGroup = Q5.device.createBindGroup({
+		$._textureBindGroups[tIdx] = Q5.device.createBindGroup({
 			layout: textureLayout,
 			entries: [
 				{ binding: 0, resource: sampler },
 				{ binding: 1, resource: texture.createView() }
 			]
 		});
-		$._textureBindGroups[tIdx] = textureBindGroup;
 
-		tIdx = (tIdx + 1) % MAX_TEXTURES;
-
-		// if the texture array is full, destroy the oldest texture
-		if ($._textures[tIdx]) {
-			$._textures[tIdx].destroy();
-			delete $._textures[tIdx];
-			delete $._textureBindGroups[tIdx];
-		}
+		tIdx++;
 	};
 
 	$.loadImage = (src, cb) => {
@@ -199,23 +189,31 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 	};
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
-		let g = img;
-		if (img.canvas) img = img.canvas;
 		if (img.textureIndex == undefined) return;
+
+		let cnv = img.canvas || img;
 
 		if ($._matrixDirty) $._saveMatrix();
 
-		let w = img.width,
-			h = img.height,
-			pd = g._pixelDensity || 1;
+		let w = cnv.width,
+			h = cnv.height,
+			pd = img._pixelDensity || 1;
 
-		dw ??= g.defaultWidth;
-		dh ??= g.defaultHeight;
+		if (img.modified) {
+			Q5.device.queue.copyExternalImageToTexture(
+				{ source: cnv },
+				{ texture: img.texture, colorSpace: $.canvas.colorSpace },
+				[w, h, 1]
+			);
+			img.modified = false;
+		}
+
+		dw ??= img.defaultWidth;
+		dh ??= img.defaultHeight;
 		sw ??= w;
 		sh ??= h;
-
-		dw *= pd;
-		dh *= pd;
+		sx *= pd;
+		sy *= pd;
 
 		let [l, r, t, b] = $._calcBox(dx, dy, dw, dh, $._imageMode);
 
@@ -235,8 +233,55 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		$.drawStack.push(1, img.textureIndex);
 	};
 
+	$._saveCanvas = async (data, ext) => {
+		let texture = data.texture,
+			w = texture.width,
+			h = texture.height,
+			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
+
+		let buffer = Q5.device.createBuffer({
+			size: bytesPerRow * h,
+			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+		});
+
+		let en = Q5.device.createCommandEncoder();
+
+		en.copyTextureToBuffer({ texture }, { buffer, bytesPerRow, rowsPerImage: h }, { width: w, height: h });
+
+		Q5.device.queue.submit([en.finish()]);
+
+		await buffer.mapAsync(GPUMapMode.READ);
+
+		let pad = new Uint8Array(buffer.getMappedRange());
+		data = new Uint8Array(w * h * 4); // unpadded data
+
+		// Remove padding from each row
+		for (let y = 0; y < h; y++) {
+			const p = y * bytesPerRow; // padded row offset
+			const u = y * w * 4; // unpadded row offset
+			data.set(pad.subarray(p, p + w * 4), u);
+		}
+
+		buffer.unmap();
+
+		let colorSpace = $.canvas.colorSpace;
+		data = new Uint8ClampedArray(data.buffer);
+		data = new ImageData(data, w, h, { colorSpace });
+		let cnv = new OffscreenCanvas(w, h);
+		let ctx = cnv.getContext('2d', { colorSpace });
+		ctx.putImageData(data, 0, 0);
+
+		// Convert to blob then data URL
+		let blob = await cnv.convertToBlob({ type: 'image/' + ext });
+		return await new Promise((resolve) => {
+			let r = new FileReader();
+			r.onloadend = () => resolve(r.result);
+			r.readAsDataURL(blob);
+		});
+	};
+
 	$._hooks.preRender.push(() => {
-		if (!$._textureBindGroups.length) return;
+		if (!vertIndex) return;
 
 		// Switch to image pipeline
 		$.pass.setPipeline($._pipelines[1]);

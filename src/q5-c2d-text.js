@@ -191,9 +191,14 @@ Q5.renderers.c2d.text = ($, q) => {
 			tY = leading * lines.length;
 
 			if (!img) {
+				let ogBaseline = $.ctx.textBaseline;
+				$.ctx.textBaseline = 'alphabetic';
+
 				let measure = ctx.measureText(' ');
 				let ascent = measure.fontBoundingBoxAscent;
 				let descent = measure.fontBoundingBoxDescent;
+
+				$.ctx.textBaseline = ogBaseline;
 
 				img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(tY + descent), {
 					pixelDensity: $._pixelDensity
@@ -205,12 +210,13 @@ Q5.renderers.c2d.text = ($, q) => {
 				img._middle = img._top + ascent * 0.5;
 				img._bottom = img._top + ascent;
 				img._leading = leading;
+			} else {
+				img.modified = true;
 			}
 
 			img._fill = $._fill;
 			img._stroke = $._stroke;
 			img._strokeWeight = $._strokeWeight;
-			img.modified = true;
 
 			ctx = img.ctx;
 

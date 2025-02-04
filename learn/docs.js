@@ -14,66 +14,8 @@ winResized();
 window.addEventListener('resize', winResized);
 
 themeToggle.addEventListener('click', () => {
-	if (document.body.classList.contains('dark')) setTheme('light');
-	else setTheme('dark');
+	setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
 });
-
-let themeCache = {};
-
-async function setMonacoEditorTheme(themeName) {
-	if (typeof monaco == 'undefined') return;
-
-	let themeData = themeCache[themeName];
-
-	if (!themeData) {
-		themeData = await fetch(`./themes/${themeName}.json`).then((res) => res.json());
-		themeCache[themeName] = themeData;
-	}
-
-	monaco.editor.defineTheme('custom-theme', themeData);
-	monaco.editor.setTheme('custom-theme');
-	modifyTokenizer('javascript', jsCustomTokenizer);
-}
-
-function setTheme(theme) {
-	if (theme === 'dark') {
-		document.body.classList.remove('light');
-		document.body.classList.add('dark');
-		setMonacoEditorTheme('aijs_dark_modern');
-	} else {
-		document.body.classList.remove('dark');
-		document.body.classList.add('light');
-		setMonacoEditorTheme('aijs_light');
-	}
-	localStorage.setItem('theme', theme);
-}
-
-setTheme(localStorage.getItem('theme') || 'light');
-
-let jsCustomTokenizer = {
-	tokenizer: { root: [[/[a-zA-Z_$][\w$]*(?=\()/, 'functionName']] }
-};
-
-async function modifyTokenizer(languageId, customRules) {
-	let allLangs = monaco.languages.getLanguages();
-	let { language } = await allLangs.find(({ id }) => id === languageId).loader();
-
-	for (let key in customRules) {
-		let value = customRules[key];
-		if (key === 'tokenizer') {
-			for (let category in value) {
-				let tokenDefs = value[category];
-				if (!language.tokenizer.hasOwnProperty(category)) {
-					language.tokenizer[category] = [];
-				}
-				if (Array.isArray(tokenDefs)) {
-					language.tokenizer[category].unshift(...tokenDefs);
-				}
-			}
-		}
-	}
-	monaco.languages.setMonarchTokensProvider(languageId, language);
-}
 
 function stripParams(params) {
 	return params
@@ -207,7 +149,7 @@ function parseMarkdownIntoSections(markdownText) {
 	markdownText = markdownText.replace(/```js([\s\S]*?)```/g, (match) => {
 		let js = match.slice(5, -3);
 		return `
-<script id="script-${codeBlockCount++}" type="mini">
+<script id="ex${codeBlockCount++}" type="mini">
 ${js}
 </script>`;
 	});
@@ -454,14 +396,8 @@ function generateHeadings() {
 async function executeDataScripts() {
 	let scripts = contentArea.querySelectorAll('script[type="mini"]');
 	for (let script of scripts) {
-		let scriptContent = script.innerHTML.slice(0, -1).replaceAll('\t', '  ').trim();
-		let id = 'editor-' + script.id.slice(7);
-		let container = document.createElement('div');
-		container.id = id;
-		container.className = 'editor-container';
-		script.insertAdjacentElement('beforebegin', container);
-		let mini = new MiniEditor(container, scriptContent);
-		await mini.init();
+		let mie = new MiniEditor(script);
+		await mie.init();
 	}
 }
 
@@ -509,7 +445,7 @@ function populateContentArea() {
 		title.textContent = sections[nav.id].title;
 		button.append(title);
 
-		button.addEventListener('click', () => updateMainContent(nav.id));
+		button.addEventListener('click', () => navigateTo(nav.id));
 		navButtonsContainer.append(button);
 	}
 

@@ -293,18 +293,19 @@ function draw() {
 		/** ⭐️
 		 * Creates an instance of Q5.
 		 *
-		 * Running `new Q5()` enables the use of q5 functions and variables
-		 * anywhere in your code. You can also start Q5 in global mode by 
-		 * running [`createCanvas`](https://q5js.org/learn/#createCanvas).
+		 * Running `new Q5()` enables use of q5 functions and variables
+		 * anywhere in your sketch. You can also start Q5 in global 
+		 * mode by running [`createCanvas`](https://q5js.org/learn/#createCanvas).
 		 * 
-		 * By default q5 uses the CanvasRenderingContext2D based c2d renderer.
+		 * By default q5 uses the CanvasRenderingContext2D (aka Canvas2D)
+		 * based c2d renderer.
 		 * 
-		 * To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of file level variables. For more information read the [q5-webgpu modules documentation](https://github.com/q5js/q5.js/blob/main/src/readme.md#webgpu-canvas).
+		 * To use the [q5 WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer), run `Q5.webgpu()` after the creation of file level variables.
 		 * @param {string | Function} [scope]
 		 *   - "global": (default) top-level global mode, adds q5 functions
 		 * and variables to the global scope
 		 *   - "auto": if users don't create a new instance of Q5 themselves, an instance will be created automatically with this scope, which replicates p5's global mode
-		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode), not to the global scope
+		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode)
 		 * @param {HTMLElement} [parent] element that the canvas will be placed inside
 		 * @example
 new Q5();
@@ -1019,17 +1020,22 @@ point(125, 50);
 	function curveTightness(val: number): void;
 
 	/** 🧑‍🎨
-	 * Starts recording vertices for a shape.
+	 * Starts storing vertices for a convex shape.
 	 */
 	function beginShape(): void;
 
 	/** 🧑‍🎨
-	 * Starts recording vertices for a shape to be used as a contour.
+	 * Ends storing vertices for a convex shape.
+	 */
+	function endShape(): void;
+
+	/** 🧑‍🎨
+	 * Starts storing vertices for a contour.
 	 */
 	function beginContour(): void;
 
 	/** 🧑‍🎨
-	 * Ends recording vertices for a shape.
+	 * Ends storing vertices for a contour.
 	 */
 	function endContour(): void;
 
@@ -1558,14 +1564,6 @@ function setup() {
 	function mask(img: Image): void;
 
 	/** 🌆
-	 * Saves the image.
-	 * @param {string} filename filename or url
-	 * @param {string} extension file extension
-	 * @param {number} [quality] quality of the saved image
-	 */
-	function save(filename: string, extension: string, quality?: number): void;
-
-	/** 🌆
 	 * Retrieves a subsection of an image or canvas, as a q5 Image.
 	 * Or if width and height are both 1, returns the color of the pixel at the given coordinates in `[R, G, B, A]` array format.
 	 * @param {number} x
@@ -1934,16 +1932,40 @@ createCanvas(200);
 	 * @param {number} [wrapWidth] maximum line width in characters
 	 * @param {number} [lineLimit] maximum number of lines
 	 * @returns {Q5.Image} an image object representing the rendered text
+	 * @example
+createCanvas(200, 200);
+textSize(80);
+let img = createTextImage('🐶');
+img.filter(INVERT);
+
+function draw() {
+	background(200);
+	text('🐶', 10, 75);
+	image(img, 110, 75);
+}
 	 */
 	function createTextImage(str: string, wrapWidth: number, lineLimit: number): Q5.Image;
 
 	/** ✍️
-	 * Renders an image generated from text onto the canvas. The
-	 * positioning of the image is affected by the current text
+	 * Renders an image generated from text onto the canvas.
+	 * 
+	 * The positioning of the image is affected by the current text
 	 * alignment and baseline settings.
-	 * @param {HTMLImageElement} img image object to render, typically generated from text
+	 * 
+	 * If the first parameter is a string, an image of the text is
+	 * created automatically, then drawn.
+	 * @param {Q5.Image} img image object or text
 	 * @param {number} x x-coordinate where the image should be placed
 	 * @param {number} y y-coordinate where the image should be placed
+	 * @example
+createCanvas(200, 200);
+textSize(80);
+textAlign(CENTER, CENTER);
+
+function draw() {
+	background(200);
+	textImage('🐶', 100, 100);
+}
 	 */
 	function textImage(img: HTMLImageElement, x: number, y: number): void;
 
@@ -1955,6 +1977,12 @@ createCanvas(200);
 	 * @param {number} l minimum number of digits to appear before the decimal point; the number is padded with zeros if necessary
 	 * @param {number} r number of digits to appear after the decimal point
 	 * @returns {string} a string representation of the number, formatted accordingly
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+textSize(32);
+text(nf(PI, 4, 2), 10, 60);
 	 */
 	function nf(n: number, l: number, r: number): string;
 
@@ -2109,17 +2137,15 @@ rect(100, 0, 100, 200);
 	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
 	 * and `a`/`alpha`.
 	 * 
-	 * RGB is the default color mode.
-	 * 
-	 * By default when a canvas is using the `display-p3` color space,
+	 * By default when a canvas is using the HDR `display-p3` color space,
 	 * rgb colors are mapped to the full P3 gamut, even when they use the
-	 * legacy integer format.
+	 * legacy integer 0-255 format.
 	 * @example
-createCanvas(200);
+createCanvas(200, 100);
 
-function setup() {
-	background(255, 0, 0);
-}
+colorMode(RGB, 255);
+
+background(255, 0, 0);
 	 */
 	const RGB: 'rgb';
 
@@ -2130,13 +2156,11 @@ function setup() {
 	 * example, note that full red appears less saturated, as it would
 	 * on an SDR display.
 	 * @example
-createCanvas(200);
+createCanvas(200, 100);
 
 colorMode(SRGB, 255);
 
-function setup() {
-	background(255, 0, 0);
-}
+background(255, 0, 0);
 	 */
 	const SRGB: 'srgb';
 
@@ -2230,6 +2254,24 @@ function draw() {
 	let mouseIsPressed: boolean;
 
 	/** 🖲️
+	 * Define this function to respond to mouse events immediately.
+	 * 
+	 * There can be a delay of up to one frame between a mouse event
+	 * and the next time the `draw` function is run.
+	 * 
+	 * Useful for playing sounds.
+	 * @example
+createCanvas(200, 100);
+
+let gray = 100;
+function mousePressed() {
+	background(gray);
+	gray += 10;
+}
+	 */
+	function mousePressed(): void;
+
+	/** 🖲️
 	 * The name of the last key pressed.
 	 * @example
 function draw() {
@@ -2266,6 +2308,24 @@ function draw() {
 	function keyIsDown(key: string): boolean;
 
 	/** 🖲️
+	 * Define this function to respond to key press events immediately.
+	 * 
+	 * There can be a delay of up to one frame between a key press event
+	 * and the next time the `draw` function is run.
+	 * 
+	 * Useful for playing sounds.
+	 * @example
+createCanvas(200, 100);
+
+let gray = 100;
+function keyPressed() {
+	background(gray);
+	gray += 10;
+}
+	 */
+	function keyPressed(): void;
+
+	/** 🖲️
 	 * Array of current touches, each touch being an object with
 	 * id, x, and y properties.
 	 */
@@ -2276,18 +2336,52 @@ function draw() {
 	 * If an image is provided, optional x and y coordinates can
 	 * specify the active point of the cursor.
 	 * @param {string} name name of the cursor or the url to an image
-	 * @param {number} [x] x-coordinate of the cursor's hot spot
-	 * @param {number} [y] y-coordinate of the cursor's hot spot
+	 * @param {number} [x] x-coordinate of the cursor's point
+	 * @param {number} [y] y-coordinate of the cursor's point
+	 * @example
+createCanvas(200, 100);
+cursor('pointer');
 	 */
 	function cursor(name: string, x?: number, y?: number): void;
 
 	/** 🖲️
 	 * Hides the cursor within the bounds of the canvas.
 	 * @example
-createCanvas(200);
+createCanvas(200, 100);
 noCursor();
 	 */
 	function noCursor(): void;
+
+	/** 🖲️
+	 * Prevents mouse wheel events from propagating and causing
+	 * the page to scroll when the mouse is inside the canvas.
+	 * 
+	 * Useful for games and interactive art that fill the screen.
+	 * @example
+createCanvas(200, 100);
+noScroll();
+	 */
+	function noScroll(): void;
+
+	/** 🖲️
+	 * Define this function to respond to mouse wheel events.
+	 * 
+	 * `event.deltaX` and `event.deltaY` are the horizontal and vertical
+	 * scroll amounts, respectively.
+	 * 
+	 * Return false to prevent the default behavior of scrolling the page.
+	 * @example
+let x = y = 100;
+function draw() {
+	circle(x, y, 10);
+}
+function mouseWheel(e) {
+	x += e.deltaX;
+	y += e.deltaY;
+	return false;
+}
+	 */
+	function mouseWheel(event: any): void;
 
 	/** 🖲️
 	 * Requests that the pointer be locked to the document body, hiding the cursor and allowing for unlimited movement.
@@ -2325,11 +2419,11 @@ function draw() {
 	 * @param {number} [margin] distance to extend (positive) or contract (negative) the range from canvas edges
 	 * @returns {number} random x value
 	 * @example
-createCanvas(200);
+createCanvas(200, 100);
 background(200);
 
 function draw() {
-	circle(randomX(), 100, random(50));
+	circle(randomX(), 50, random(50));
 }
 	 */
 	function randomX(margin?: number): number;
@@ -2350,7 +2444,7 @@ createCanvas(200);
 background(200);
 
 function draw() {
-	circle(randomX(-20), randomY(-60), 10);
+	circle(randomX(), randomY(-60), 10);
 }
 	 */
 	function randomY(margin?: number): number;
@@ -2489,6 +2583,12 @@ function draw() {
 	 * @param {number} [y] y-coordinate input
 	 * @param {number} [z] z-coordinate input
 	 * @returns {number} a noise value
+	 * @example
+function draw() {
+	background(200);
+	let n = noise(frameCount * 0.01);
+	square(n * 200, n * 200, 10);
+}
 	 */
 	function noise(x?: number, y?: number, z?: number): number;
 
@@ -2777,6 +2877,37 @@ q.mousePressed = () => {
 };
 	 */
 	function load(...urls: string[]): Promise<any[]>;
+
+	/** 🛠️
+	 * Saves data to a file.
+	 * 
+	 * If data is not specified, the canvas will be saved.
+	 * 
+	 * If no arguments are provided, the canvas will be saved as
+	 * an image file named "untitled.png".
+	 * @param {object} [data] canvas, image, or JS object
+	 * @param {string} [filename] filename or url
+	 * @param {string} [extension] file extension
+	 * @example
+createCanvas(200);
+background(200);
+circle(100, 100, 50);
+
+function mousePressed() {
+	save('circle.png');
+}
+	 * @example
+createCanvas(200);
+
+textSize(180);
+let bolt = createTextImage('⚡️');
+image(bolt, 16, -56);
+
+function mousePressed() {
+	save(bolt, 'bolt.png');
+}
+	 */
+	function save(data: object, filename?: string, extension?: string): void;
 
 	/** 🛠️
 	 * Loads a text file from the specified url. Result is one string.

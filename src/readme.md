@@ -1,50 +1,52 @@
-# q5.js Source Documentation
+# q5.js Modular Use
 
 For ES6 modular use, the "q5-core.js" module must be loaded first, which adds `Q5` to the global scope.
 
 ```js
-import "https://q5js.org/src/q5-core.js"
+import 'https://q5js.org/src/q5-core.js';
 ```
 
 These modules are included in the default "q5.js" bundle:
 
 ```js
-import "https://q5js.org/src/q5-core.js"
-import "https://q5js.org/src/q5-canvas.js"
+import 'https://q5js.org/src/q5-core.js';
+import 'https://q5js.org/src/q5-canvas.js';
 
-import "https://q5js.org/src/q5-2d-canvas.js"
-import "https://q5js.org/src/q5-2d-drawing.js"
-import "https://q5js.org/src/q5-2d-image.js"
-import "https://q5js.org/src/q5-2d-soft-filters.js"
-import "https://q5js.org/src/q5-2d-text.js"
+import 'https://q5js.org/src/q5-2d-canvas.js';
+import 'https://q5js.org/src/q5-2d-drawing.js';
+import 'https://q5js.org/src/q5-2d-image.js';
+import 'https://q5js.org/src/q5-2d-soft-filters.js';
+import 'https://q5js.org/src/q5-2d-text.js';
 
-import "https://q5js.org/src/q5-ai.js"
-import "https://q5js.org/src/q5-color.js"
-import "https://q5js.org/src/q5-display.js"
-import "https://q5js.org/src/q5-input.js"
-import "https://q5js.org/src/q5-math.js"
-import "https://q5js.org/src/q5-sound.js"
-import "https://q5js.org/src/q5-util.js"
-import "https://q5js.org/src/q5-vector.js"
+import 'https://q5js.org/src/q5-ai.js';
+import 'https://q5js.org/src/q5-color.js';
+import 'https://q5js.org/src/q5-display.js';
+import 'https://q5js.org/src/q5-input.js';
+import 'https://q5js.org/src/q5-math.js';
+import 'https://q5js.org/src/q5-sound.js';
+import 'https://q5js.org/src/q5-util.js';
+import 'https://q5js.org/src/q5-vector.js';
 
-import "https://q5js.org/src/q5-webgpu-canvas.js"
-import "https://q5js.org/src/q5-webgpu-drawing.js"
-import "https://q5js.org/src/q5-webgpu-image.js"
-import "https://q5js.org/src/q5-webgpu-text.js"
+import 'https://q5js.org/src/q5-webgpu-canvas.js';
+import 'https://q5js.org/src/q5-webgpu-drawing.js';
+import 'https://q5js.org/src/q5-webgpu-image.js';
+import 'https://q5js.org/src/q5-webgpu-text.js';
 ```
 
 Additional modules:
 
 ```js
-import "https://q5js.org/src/q5-dom.js"
-import "https://q5js.org/src/q5-noisier.js"
-import "https://q5js.org/src/q5-sensors.js"
+import 'https://q5js.org/src/q5-dom.js';
+import 'https://q5js.org/src/q5-noisier.js';
+import 'https://q5js.org/src/q5-sensors.js';
 ```
 
-# Module Info
+# q5.js Source Code
 
-- [q5.js Source Documentation](#q5js-source-documentation)
-- [Module Info](#module-info)
+This section contains information about q5's source code for developers who want to contribute to q5.js.
+
+- [q5.js Modular Use](#q5js-modular-use)
+- [q5.js Source Code](#q5js-source-code)
   - [q5-core](#q5-core)
   - [q5-canvas](#q5-canvas)
   - [c2d-canvas](#c2d-canvas)
@@ -56,12 +58,6 @@ import "https://q5js.org/src/q5-sensors.js"
   - [webgpu-drawing](#webgpu-drawing)
   - [webgpu-image](#webgpu-image)
   - [webgpu-text](#webgpu-text)
-    - [Default Font](#default-font)
-    - [Create a MSDF Font](#create-a-msdf-font)
-    - [Load a MSDF font](#load-a-msdf-font)
-    - [Displaying Emojis](#displaying-emojis)
-    - [Lightweight Use](#lightweight-use)
-    - [Limitations](#limitations)
   - [math](#math)
   - [noisier](#noisier)
 
@@ -97,137 +93,37 @@ Image filters use the [CanvasRenderingContext2D.filter](https://developer.mozill
 
 Software based image filters, which are slow.
 
-This module includes additional filters and legacy filter support for Safari which lacks hardware-accelerated filters. As of April 2024, Safari Technology Preview only supports `ctx.filter` under a flag.
+This module includes additional filters and legacy filter support for Safari which lacks hardware-accelerated filters. As of Feb 2025, Safari Technology Preview only supports `ctx.filter` under a flag.
 
 ## c2d-text
 
 Adds Canvas2D text rendering support to q5.
 
-Image based features in this module require the q5-2d-image module.
+Image based features in this module require the q5-c2d-image module.
 
 ## webgpu-canvas
 
-> ⚠️ Experimental features! ⚠️
+Adds WebGPU rendering support to q5.
 
-[WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) is the successor to WebGL. It's a modern graphics API that provides cross-platform, high-performance access to the GPU.
+Just like with the Canvas2D renderer, anything drawn to the q5 WebGPU canvas is permanent, unless cleared or overwritten. Achieving this effect in WebGPU is complicated because the canvas texture can not be read back to the CPU. Two textures are used that can be read and copied. One is for rendering and one stores the previous frame. Each frame cycle, the previous frame is drawn onto the current frame, which is how the drawing permanence effect is achieved.
 
-When you intend for a sketch to use WebGPU, but WebGPU is not supported on a viewer's browser, q5 will put a warning in the console, apply a compatibility layer, and display the sketch with the fallback c2d renderer. As of November 2024, WebGPU is only supported in Google Chrome and Edge.
-
-To use the q5 WebGPU renderer, run `Q5.webgpu()` after the creation of any file level variables.
-
-```js
-let x = 0;
-let y = 0;
-
-Q5.webgpu();
-
-function setup() {
-	createCanvas(200, 100);
-	circle(x, y, 80);
-}
-```
-
-q5 WebGPU differences:
-
-- The origin of the canvas (0, 0) is in the center, not the top left.
-- The default color mode is RGB in 0-1 "float" format: `colorMode(RGB, 1)`.
-- Strokes are implemented but `strokeJoin` is shimmed.
-- `Q5.webgpu` is an async function, so enabling [top level global mode](https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode) is a bit more complex.
-
-Note that unlike in p5's WebGL mode, mouse and touch coordinates align with canvas pixel values.
+Note that `colorStack` and `transforms` are Float32Arrays which enable faster mapping to GPU buffers at the cost of being harder to work with than JS arrays. These arrays are directly modified for best performance, over using `set`.
 
 ## webgpu-drawing
 
-> Uses `colorMode(RGB, 1)` by default. Changing it to 'oklch' is not supported yet for the webgpu renderer.
+Uses "triangle-strip" primitive topology to render shapes and strokes.
 
-q5's WebGPU renderer drawing functions like `rect` don't immediately draw on the canvas. Instead, they prepare vertex and color data to be sent to the GPU in bulk, which occurs after the user's `draw` function and any post-draw functions are run. This approach better utilizes the GPU, so it doesn't have to repeatedly wait for the CPU to send small chunks of data that describe each individual shape. It's the main reason why WebGPU is faster than Canvas2D.
+Each vertex of a custom polygon can have its own color, which is interpolated between vertices. This is a simple way to achieve gradients.
 
-Rounded rectangles, stroke modes, and functions for drawing curves are not implemented yet.
+Performance is the primary goal of q5 WebGPU, not replicating all the advanced drawing features of Canvas2D or SVG. Achieving similar effects may require using images or image based animations. There are no plans to add support for stroke patterns or different line caps. Also concave shapes can't be drawn as a single custom polygon, instead, they must be broken down into multiple convex polygons.
 
 ## webgpu-image
 
-Most filters and blending modes are not implemented yet.
+Loads images as a `Q5.Image` object backed by an `OffscreenCanvas` that use the Canvas2D renderer. When loaded or modified, the image is converted into a GPU texture that can be drawn on the WebGPU canvas. This is a slow process and should be avoided if possible. It would probably be better to use WebGPU shaders to filter images.
 
 ## webgpu-text
 
-The q5 WebGPU text renderer uses multi-channel signed distance fields (MSDF) for high performance and high quality real-time text rendering. Text can be rapidly recolored, rotated, and scaled without any loss in quality or performance.
-
-MSDF, introduced by Chlumsky Viktor in his master's thesis ["Shape Decomposition for Multi-channel Distance Fields" (2015)](https://dspace.cvut.cz/bitstream/handle/10467/62770/F8-DP-2015-Chlumsky-Viktor-thesis.pdf), improves upon the signed distance field (SDF) technique, popularized by Chris Green and [Valve Software](https://www.valvesoftware.com/en/) in ["Improved Alpha-Tested Magnification for Vector Textures and Special Effects" (2007)](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf).
-
-| SDF                                                                                                                  | MSDF                                                                                                                  |
-| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| ![demo-sdf16](https://user-images.githubusercontent.com/18639794/106391905-e679af00-63ef-11eb-96c3-993176330911.png) | ![demo-msdf16](https://user-images.githubusercontent.com/18639794/106391899-e37ebe80-63ef-11eb-988b-4764004bb196.png) |
-
-### Default Font
-
-For convenience, if no font is loaded before `text` is run, then q5's default MSDF font is loaded: https://q5js.org/fonts/sans-serif-msdf.json
-
-![YaHei msdf texture](https://q5js.org/fonts/sans-serif.png)
-
-This 512x512 msdf texture (207kb) was made with the [Microsoft YaHei](https://learn.microsoft.com/en-us/typography/font-list/microsoft-yahei) font and stores every character visible on a standard English keyboard, letters with diacritics (accents) used in European languages, and mathematical symbols.
-
-```
-!"#$%&'()\*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^\_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¥©®°²³´·¹º¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ‘’“”ΑαΒβΓγΔδΕεΛλΠπΣσΩω∴∵─│┌┐└┘├┤┬┴┼▀▄█▌▐▓▒░←↑→↓↔↕↖↗↘↙«»µτΦΘ∞≡±≈∙√ⁿ
-```
-
-> Do you think any other characters ought to be included in the default set? Let us know! https://github.com/q5js/q5.js/issues
-
-### Create a MSDF Font
-
-You can choose a custom set of characters and convert fonts to MSDF format by using the [msdf-bmfont-xml](https://msdf-bmfont.donmccurdy.com/) website, created by Don McCurdy.
-
-### Load a MSDF font
-
-Fonts must be in MSDF format with the file ending "-msdf.json".
-
-```js
-Q5.webgpu();
-
-function preload() {
-	loadFont('arial-msdf.json');
-}
-
-function setup() {
-	createCanvas(200, 200);
-}
-
-function draw() {
-	fill(0.71, 0.92, 1);
-	text('Hello, World!', mouseX, mouseY);
-}
-```
-
-### Displaying Emojis
-
-Full color emoji characters can't be rendered using the MSDF technique, so draw them using `textImage`.
-
-```js
-Q5.webgpu();
-
-function setup() {
-	createCanvas(200, 200);
-	textSize(100);
-}
-
-function draw() {
-	textAlign(CENTER, CENTER);
-	textImage('🐶', 0, 0);
-}
-```
-
-You can also use `createTextImage` and display it with `textImage`.
-
-### Lightweight Use
-
-For super lightweight use load <https://q5js.org/fonts/YaHei-256-msdf.json>, which has a limited character set of english letters and some common punctuation symbols that completely fill in a 256x256 texture (73kb).
-
-```
-!@'",-.0123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
-```
-
-### Limitations
-
-Text strokes are not supported yet, except with `textImage`.
+Uses the state of the art MSDF text rendering technique.
 
 ## math
 
@@ -241,4 +137,4 @@ Adds additional noise functions to q5.
 
 `SimplexNoise` is a simplex noise implementation in JavaScript by Tezumie. Kevin Perlin's patent on simplex noise expired in 2022. Simplex noise is slightly faster but arguably less visually appealing than perlin noise.
 
-`BlockyNoise` is similar to p5's default `noise` function, which is a bit notorious in the gen art community for not actually being perlin noise, despite its claims to be. It looks closer to value noise but is not a standard implementation of that either. When visualized in 2d it's a bit blocky at 1 octave, hence the name. This algorithm is however, very good at outputting a variety of values from less than 3 inputs, even from a single parameter.
+`BlockyNoise` is similar to p5's default `noise` function, which is not actually perlin noise, despite its claims to be. It looks closer to value noise but is not a standard implementation of that either. When visualized in 2d it's a bit blocky at 1 octave, hence its name in q5. When over 4 octaves are used, it's good at outputting noise from less than 3 inputs, even from a single parameter.

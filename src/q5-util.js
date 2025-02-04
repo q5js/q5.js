@@ -29,6 +29,10 @@ Q5.modules.util = ($, q) => {
 	$.loadJSON = (url, cb) => $._loadFile(url, cb, 'json');
 	$.loadCSV = (url, cb) => $._loadFile(url, cb, 'csv');
 
+	const imgRegex = /(jpe?g|png|gif|webp|avif|svg)/,
+		fontRegex = /(ttf|otf|woff2?|eot|json)/,
+		audioRegex = /(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/;
+
 	$.load = function (...urls) {
 		if (Array.isArray(urls[0])) urls = urls[0];
 
@@ -42,11 +46,11 @@ Q5.modules.util = ($, q) => {
 				obj = $.loadJSON(url);
 			} else if (ext == 'csv') {
 				obj = $.loadCSV(url);
-			} else if (/(jpe?g|png|gif|webp|avif|svg)/.test(ext)) {
+			} else if (imgRegex.test(ext)) {
 				obj = $.loadImage(url);
-			} else if (/(ttf|otf|woff2?|eot|json)/i.test(ext)) {
+			} else if (fontRegex.test(ext)) {
 				obj = $.loadFont(url);
-			} else if (/(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/.test(ext)) {
+			} else if (audioRegex.test(ext)) {
 				obj = $.loadSound(url);
 			} else {
 				obj = $.loadText(url);
@@ -56,6 +60,40 @@ Q5.modules.util = ($, q) => {
 
 		if (urls.length == 1) return loaders[0];
 		return Promise.all(loaders);
+	};
+
+	async function saveFile(data, name, ext) {
+		name = name || 'untitled';
+		ext = ext || 'png';
+		if (imgRegex.test(ext)) {
+			data = await $._saveCanvas(data, ext);
+		} else {
+			let type = 'text/plain';
+			if (ext == 'json') {
+				if (typeof data != 'string') data = JSON.stringify(data);
+				type = 'text/json';
+			}
+			data = new Blob([data], { type });
+			data = URL.createObjectURL(data);
+		}
+		let a = document.createElement('a');
+		a.href = data;
+		a.download = name + '.' + ext;
+		a.click();
+		setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+	}
+
+	$.save = (a, b, c) => {
+		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
+			c = b;
+			b = a;
+			a = $.canvas;
+		}
+		if (c) saveFile(a, b, c);
+		else if (b) {
+			let lastDot = b.lastIndexOf('.');
+			saveFile(a, b.slice(0, lastDot), b.slice(lastDot + 1));
+		} else saveFile(a);
 	};
 
 	$.CSV = {};
