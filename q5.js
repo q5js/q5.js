@@ -506,10 +506,7 @@ Q5.modules.canvas = ($, q) => {
 		$._resizeCanvas(w, h);
 	};
 
-	if (c && !Q5._createServerCanvas) {
-		c.resize = $.resizeCanvas;
-		c.save = $.saveCanvas = $.save;
-	}
+	if (c && !Q5._createServerCanvas) c.resize = $.resizeCanvas;
 
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
@@ -4103,6 +4100,10 @@ Q5.modules.util = ($, q) => {
 		}
 		return a;
 	};
+
+	if ($.canvas && !Q5._createServerCanvas) {
+		$.canvas.save = $.saveCanvas = $.save;
+	}
 
 	if (typeof localStorage == 'object') {
 		$.storeItem = localStorage.setItem;

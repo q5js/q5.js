@@ -2886,8 +2886,7 @@ q.mousePressed = () => {
 	 * If no arguments are provided, the canvas will be saved as
 	 * an image file named "untitled.png".
 	 * @param {object} [data] canvas, image, or JS object
-	 * @param {string} [filename] filename or url
-	 * @param {string} [extension] file extension
+	 * @param {string} [fileName] filename to save as
 	 * @example
 createCanvas(200);
 background(200);
@@ -2907,7 +2906,7 @@ function mousePressed() {
 	save(bolt, 'bolt.png');
 }
 	 */
-	function save(data: object, filename?: string, extension?: string): void;
+	function save(data?: object, fileName?: string): void;
 
 	/** 🛠️
 	 * Loads a text file from the specified url. Result is one string.

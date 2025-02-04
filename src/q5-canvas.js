@@ -184,10 +184,7 @@ Q5.modules.canvas = ($, q) => {
 		$._resizeCanvas(w, h);
 	};
 
-	if (c && !Q5._createServerCanvas) {
-		c.resize = $.resizeCanvas;
-		c.save = $.saveCanvas = $.save;
-	}
+	if (c && !Q5._createServerCanvas) c.resize = $.resizeCanvas;
 
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;

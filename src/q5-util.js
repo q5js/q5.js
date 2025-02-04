@@ -111,6 +111,10 @@ Q5.modules.util = ($, q) => {
 		return a;
 	};
 
+	if ($.canvas && !Q5._createServerCanvas) {
+		$.canvas.save = $.saveCanvas = $.save;
+	}
+
 	if (typeof localStorage == 'object') {
 		$.storeItem = localStorage.setItem;
 		$.getItem = localStorage.getItem;
