@@ -3441,7 +3441,7 @@ Q5.PerlinNoise = class extends Q5.Noise {
 	}
 };
 Q5.modules.record = ($, q) => {
-	let rec, btn0, btn1, timer, formatSelect, qualitySelect;
+	let rec, btn0, btn1, timer, formatSelect, bitrateInput;
 
 	$.recording = false;
 
@@ -3476,6 +3476,7 @@ Q5.modules.record = ($, q) => {
 
 .rec button,
 .rec select,
+.rec input,
 .rec .record-timer {
 	font-family: sans-serif;
 	font-size: 14px;
@@ -3541,21 +3542,10 @@ Q5.modules.record = ($, q) => {
 		formatSelect.title = 'Video Format';
 		rec.append(formatSelect);
 
-		let qMult = {
-			min: 0.1,
-			low: 0.25,
-			mid: 0.5,
-			high: 0.75,
-			ultra: 0.9,
-			max: 1
-		};
-
-		qualitySelect = $.createSelect('quality');
-		for (let name in qMult) {
-			qualitySelect.option(name, qMult[name]);
-		}
-		qualitySelect.title = 'Video Quality';
-		rec.append(qualitySelect);
+		bitrateInput = $.createInput();
+		bitrateInput.title = 'Video Bitrate';
+		bitrateInput.style.width = '48px';
+		rec.append(bitrateInput);
 
 		rec.encoderSettings = {};
 
@@ -3563,21 +3553,18 @@ Q5.modules.record = ($, q) => {
 			rec.encoderSettings.mimeType = formatSelect.value;
 		}
 
-		function changeQuality() {
-			rec.encoderSettings.videoBitsPerSecond = maxVideoBitRate * qualitySelect.value;
+		function changeBitrate() {
+			rec.encoderSettings.videoBitsPerSecond = 1000000 * bitrateInput.value;
 		}
 
 		formatSelect.addEventListener('change', changeFormat);
-		qualitySelect.addEventListener('change', changeQuality);
+		bitrateInput.addEventListener('change', changeBitrate);
 
-		Object.defineProperty(rec, 'quality', {
-			get: () => qualitySelect.selected,
+		Object.defineProperty(rec, 'bitrate', {
+			get: () => bitrateInput.value,
 			set: (v) => {
-				v = v.toLowerCase();
-				if (qMult[v]) {
-					qualitySelect.selected = v;
-					changeQuality();
-				}
+				bitrateInput.value = v;
+				changeBitrate();
 			}
 		});
 
@@ -3592,15 +3579,10 @@ Q5.modules.record = ($, q) => {
 			}
 		});
 
+		rec.format = 'H.264';
+
 		let h = $.canvas.height;
-
-		if (h >= 1440 && rec.formats.VP9) rec.format = 'VP9';
-		else rec.format = 'H.264';
-
-		let maxVideoBitRate =
-			(h >= 4320 ? 128 : h >= 2160 ? 75 : h >= 1440 ? 36 : h >= 1080 ? 28 : h >= 720 ? 22 : 16) * 1000000;
-
-		rec.quality = 'high';
+		rec.bitrate = h >= 4320 ? 128 : h >= 2160 ? 75 : h >= 1440 ? 50 : h >= 1080 ? 32 : h >= 720 ? 26 : 16;
 
 		btn0.addEventListener('click', () => {
 			if (!$.recording) start();
