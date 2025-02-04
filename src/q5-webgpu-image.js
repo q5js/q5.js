@@ -255,11 +255,18 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		let pad = new Uint8Array(buffer.getMappedRange());
 		data = new Uint8Array(w * h * 4); // unpadded data
 
-		// Remove padding from each row
+		// Remove padding from each row and swap BGR to RGB
 		for (let y = 0; y < h; y++) {
 			const p = y * bytesPerRow; // padded row offset
 			const u = y * w * 4; // unpadded row offset
-			data.set(pad.subarray(p, p + w * 4), u);
+			for (let x = 0; x < w; x++) {
+				const pp = p + x * 4; // padded pixel offset
+				const up = u + x * 4; // unpadded pixel offset
+				data[up + 0] = pad[pp + 2]; // R <- B
+				data[up + 1] = pad[pp + 1]; // G <- G
+				data[up + 2] = pad[pp + 0]; // B <- R
+				data[up + 3] = pad[pp + 3]; // A <- A
+			}
 		}
 
 		buffer.unmap();
