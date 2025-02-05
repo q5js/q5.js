@@ -138,7 +138,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
 	});
 
-	$._pipelineConfigs[2] = {
+	$._pipelineConfigs[3] = {
 		label: 'msdf font pipeline',
 		layout: fontPipelineLayout,
 		vertex: { module: textShader, entryPoint: 'vertexMain' },
@@ -151,7 +151,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
+	$._pipelines[3] = Q5.device.createRenderPipeline($._pipelineConfigs[3]);
 
 	class MsdfFont {
 		constructor(bindGroup, lineHeight, chars, kernings) {
@@ -488,7 +488,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		txt[5] = $._stroke;
 
 		textStack.push(txt);
-		$.drawStack.push(2, measurements.printedCharCount, $._font.index);
+		$.drawStack.push(3, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {

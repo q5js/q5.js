@@ -140,7 +140,14 @@ Q5.renderers.c2d.image = ($, q) => {
 			drawable = img._tintImg.canvas;
 		}
 
+		if (img.flipped) {
+			$.ctx.save();
+			$.ctx.translate(dx + dw, 0);
+			$.ctx.scale(-1, 1);
+			dx = 0;
+		}
 		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
+		if (img.flipped) $.ctx.restore();
 	};
 
 	$.filter = (type, value) => {

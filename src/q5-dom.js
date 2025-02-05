@@ -1,4 +1,4 @@
-Q5.modules.dom = ($) => {
+Q5.modules.dom = ($, q) => {
 	$.elementMode = (mode) => ($._elementMode = mode);
 
 	$.createElement = (tag, content) => {
@@ -37,12 +37,12 @@ Q5.modules.dom = ($) => {
 		});
 
 		Object.defineProperty(el, 'width', {
-			get: () => el.style.width,
+			get: () => parseInt(el.style.width || 0),
 			set: (v) => (el.style.width = v + 'px')
 		});
 
 		Object.defineProperty(el, 'height', {
-			get: () => el.style.height,
+			get: () => parseInt(el.style.height || 0),
 			set: (v) => (el.style.height = v + 'px')
 		});
 
@@ -87,7 +87,8 @@ Q5.modules.dom = ($) => {
 		};
 
 		$._elements.push(el);
-		$.canvas.parentElement.append(el);
+		if ($.canvas) $.canvas.parentElement.append(el);
+		else document.body.append(el);
 
 		return el;
 	};
@@ -256,8 +257,56 @@ Q5.modules.dom = ($) => {
 	$.createVideo = (src) => {
 		let el = $.createEl('video');
 		el.crossOrigin = 'anonymous';
-		el.src = src;
+		if (src) el.src = src;
 		return el;
+	};
+
+	$.createCapture = function (type, flipped = true, cb) {
+		q._preloadCount++;
+
+		let constraints = typeof type == 'string' ? { [type]: true } : type || { video: true, audio: true };
+
+		if (constraints.video) {
+			// basically request the highest resolution possible
+			constraints.video = { width: 3840, height: 2160 };
+		}
+
+		let vid = $.createVideo();
+		vid.playsinline = true;
+		vid.autoplay = true;
+		if (flipped) {
+			vid.flipped = true;
+			vid.style.transform = 'scale(-1, 1)';
+		}
+
+		vid._loader = (async () => {
+			let stream;
+			try {
+				stream = await navigator.mediaDevices.getUserMedia(constraints);
+			} catch (e) {
+				q._preloadCount--;
+				throw e;
+			}
+
+			vid.srcObject = stream;
+			await new Promise((resolve) => vid.addEventListener('loadedmetadata', resolve));
+
+			vid.width ||= vid.videoWidth;
+			vid.height ||= vid.videoHeight;
+			vid.loadPixels = () => {
+				let g = $.createGraphics(vid.videoWidth, vid.videoHeight);
+				g.image(vid, 0, 0);
+				g.loadPixels();
+				vid.pixels = g.pixels;
+				g.remove();
+			};
+			if (cb) cb(vid);
+			q._preloadCount--;
+			return vid;
+		})();
+
+		if ($._disablePreload) return vid._loader;
+		return vid;
 	};
 
 	$.findElement = (selector) => document.querySelector(selector);

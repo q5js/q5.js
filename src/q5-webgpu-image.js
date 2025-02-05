@@ -2,9 +2,7 @@ Q5.renderers.webgpu.image = ($, q) => {
 	let vertexStack = new Float32Array(1e7),
 		vertIndex = 0;
 
-	let imageShader = Q5.device.createShaderModule({
-		label: 'imageShader',
-		code: `
+	let imageShaderCode = `
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
@@ -54,10 +52,32 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a * f.globalAlpha);
 		return mix(texColor, tinted, tintColor.a);
 }
-	`
+`;
+
+	let imageShader = Q5.device.createShaderModule({
+		label: 'imageShader',
+		code: imageShaderCode
 	});
 
-	$._textureBindGroups = [];
+	let videoShaderCode = imageShaderCode
+		.replace('texture_2d<f32>', 'texture_external')
+		.replace('textureSample', 'textureSampleBaseClampToEdge');
+
+	let videoShader = Q5.device.createShaderModule({
+		label: 'videoShader',
+		code: videoShaderCode
+	});
+
+	let vertexBufferLayout = {
+		arrayStride: 28,
+		attributes: [
+			{ shaderLocation: 0, offset: 0, format: 'float32x2' },
+			{ shaderLocation: 1, offset: 8, format: 'float32x2' },
+			{ shaderLocation: 2, offset: 16, format: 'float32' }, // tintIndex
+			{ shaderLocation: 3, offset: 20, format: 'float32' }, // matrixIndex
+			{ shaderLocation: 4, offset: 24, format: 'float32' } // globalAlpha
+		]
+	};
 
 	let textureLayout = Q5.device.createBindGroupLayout({
 		label: 'textureLayout',
@@ -75,25 +95,35 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		]
 	});
 
-	const vertexBufferLayout = {
-		arrayStride: 28,
-		attributes: [
-			{ shaderLocation: 0, offset: 0, format: 'float32x2' },
-			{ shaderLocation: 1, offset: 8, format: 'float32x2' },
-			{ shaderLocation: 2, offset: 16, format: 'float32' }, // tintIndex
-			{ shaderLocation: 3, offset: 20, format: 'float32' }, // matrixIndex
-			{ shaderLocation: 4, offset: 24, format: 'float32' } // globalAlpha
+	let videoTextureLayout = Q5.device.createBindGroupLayout({
+		label: 'videoTextureLayout',
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.FRAGMENT,
+				sampler: { type: 'filtering' }
+			},
+			{
+				binding: 1,
+				visibility: GPUShaderStage.FRAGMENT,
+				externalTexture: {}
+			}
 		]
-	};
+	});
 
-	const pipelineLayout = Q5.device.createPipelineLayout({
+	let imagePipelineLayout = Q5.device.createPipelineLayout({
 		label: 'imagePipelineLayout',
 		bindGroupLayouts: [...$.bindGroupLayouts, textureLayout]
 	});
 
+	let videoPipelineLayout = Q5.device.createPipelineLayout({
+		label: 'videoPipelineLayout',
+		bindGroupLayouts: [...$.bindGroupLayouts, videoTextureLayout]
+	});
+
 	$._pipelineConfigs[1] = {
 		label: 'imagePipeline',
-		layout: pipelineLayout,
+		layout: imagePipelineLayout,
 		vertex: {
 			module: imageShader,
 			entryPoint: 'vertexMain',
@@ -110,10 +140,29 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 
 	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
 
-	let sampler;
+	$._pipelineConfigs[2] = {
+		label: 'videoPipeline',
+		layout: videoPipelineLayout,
+		vertex: {
+			module: videoShader,
+			entryPoint: 'vertexMain',
+			buffers: [{ arrayStride: 0, attributes: [] }, vertexBufferLayout]
+		},
+		fragment: {
+			module: videoShader,
+			entryPoint: 'fragmentMain',
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+		},
+		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
+		multisample: { count: 4 }
+	};
+
+	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
+
+	$._textureBindGroups = [];
 
 	let makeSampler = (filter) => {
-		sampler = Q5.device.createSampler({
+		$._imageSampler = Q5.device.createSampler({
 			magFilter: filter,
 			minFilter: filter
 		});
@@ -124,7 +173,8 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 
 	$.smooth();
 
-	let tIdx = 0;
+	let tIdx = 0,
+		vidFrames = 0;
 
 	$._createTexture = (img) => {
 		let g = img;
@@ -148,12 +198,12 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		);
 
 		g.texture = texture;
-		g.textureIndex = tIdx;
+		g.textureIndex = tIdx + vidFrames;
 
-		$._textureBindGroups[tIdx] = Q5.device.createBindGroup({
+		$._textureBindGroups[tIdx + vidFrames] = Q5.device.createBindGroup({
 			layout: textureLayout,
 			entries: [
-				{ binding: 0, resource: sampler },
+				{ binding: 0, resource: $._imageSampler },
 				{ binding: 1, resource: texture.createView() }
 			]
 		});
@@ -189,7 +239,12 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 	};
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
-		if (img.textureIndex == undefined) return;
+		let isVideo;
+		if (img.textureIndex == undefined) {
+			isVideo = img.tagName == 'VIDEO';
+			if (!isVideo || !img.width) return;
+			if (img.flipped) $.scale(-1, 1);
+		}
 
 		let cnv = img.canvas || img;
 
@@ -208,8 +263,8 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			img.modified = false;
 		}
 
-		dw ??= img.defaultWidth;
-		dh ??= img.defaultHeight;
+		dw ??= img.defaultWidth || img.videoWidth;
+		dh ??= img.defaultHeight || img.videoHeight;
 		sw ??= w;
 		sh ??= h;
 		sx *= pd;
@@ -230,7 +285,27 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		addVert(l, b, u0, v1, ci, ti, ga);
 		addVert(r, b, u1, v1, ci, ti, ga);
 
-		$.drawStack.push(1, img.textureIndex);
+		if (!isVideo) {
+			$.drawStack.push(1, img.textureIndex);
+		} else {
+			// draw video
+			let externalTexture = Q5.device.importExternalTexture({ source: img });
+
+			// Create bind group for video texture that will only exist for this frame
+			$._textureBindGroups.push(
+				Q5.device.createBindGroup({
+					layout: videoTextureLayout,
+					entries: [
+						{ binding: 0, resource: $._imageSampler },
+						{ binding: 1, resource: externalTexture }
+					]
+				})
+			);
+
+			$.drawStack.push(2, $._textureBindGroups.length - 1);
+
+			if (img.flipped) $.scale(-1, 1);
+		}
 	};
 
 	$._saveCanvas = async (data, ext) => {
@@ -303,10 +378,18 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		vertexBuffer.unmap();
 
 		$.pass.setVertexBuffer(1, vertexBuffer);
+
+		if (vidFrames) {
+			// Switch to video pipeline
+			$.pass.setPipeline($._pipelines[3]);
+			$.pass.setVertexBuffer(1, vertexBuffer);
+		}
 	});
 
 	$._hooks.postRender.push(() => {
 		vertIndex = 0;
+		$._textureBindGroups.splice(tIdx, vidFrames);
+		vidFrames = 0;
 	});
 };
 

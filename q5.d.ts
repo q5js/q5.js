@@ -1384,6 +1384,36 @@ createCanvas(200, 100);
 	function createVideo(src: string): HTMLVideoElement;
 
 	/** 📑
+	 * Creates a capture from a connected camera, such as a webcam.
+	 * 
+	 * The capture can be displayed using the `image` function.
+	 * 
+	 * Preload to ensure the capture is ready to use when your 
+	 * sketch starts.
+	 * 
+	 * Requests the highest resolution available by default. The
+	 * first parameter to this function can be used to specify
+	 * the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia) for more info.
+	 * @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
+	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
+	 * @param {(vid: HTMLVideoElement) => void} [cb] callback function after the capture is created
+	 * @example
+createCanvas(200, 0);
+let cap = createCapture(VIDEO);
+cap.size(200, 150);
+	 * @example
+createCanvas(200);
+let cap = createCapture(VIDEO);
+cap.hide();
+
+function draw() {
+	image(cap, 0, 0, 200, 200);
+	filter(INVERT);
+}
+	 */
+	function createCapture(type?: string, flipped?: boolean, cb?: (vid: HTMLVideoElement) => void): HTMLVideoElement;
+
+	/** 📑
 	 * Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
 	 * @param {string} selector
 	 * @returns {HTMLElement} element

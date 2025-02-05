@@ -276,6 +276,9 @@ Q5.CORNERS = 'corners';
 Q5.OPEN = 0;
 Q5.CLOSE = 1;
 
+Q5.VIDEO = 'video';
+Q5.AUDIO = 'audio';
+
 Q5.LANDSCAPE = 'landscape';
 Q5.PORTRAIT = 'portrait';
 
@@ -310,7 +313,7 @@ Q5.SATURATION = 11;
 Q5.CONTRAST = 12;
 Q5.HUE_ROTATE = 13;
 
-Q5.P2D = '2d';
+Q5.C2D = Q5.P2D = Q5.P2DHDR = 'c2d';
 Q5.WEBGL = 'webgl';
 
 Q5.canvasOptions = {

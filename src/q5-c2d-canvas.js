@@ -185,18 +185,4 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.restore();
 		_popStyles();
 	};
-
-	$.createCapture = (x) => {
-		var vid = document.createElement('video');
-		vid.playsinline = 'playsinline';
-		vid.autoplay = 'autoplay';
-		navigator.mediaDevices.getUserMedia(x).then((stream) => {
-			vid.srcObject = stream;
-		});
-		vid.style.position = 'absolute';
-		vid.style.opacity = 0.00001;
-		vid.style.zIndex = -1000;
-		document.body.append(vid);
-		return vid;
-	};
 };
