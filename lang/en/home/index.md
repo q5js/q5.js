@@ -10,9 +10,11 @@
 - no dependencies, ~100kb minified 📦
 - free to use under the LGPL (just like p5.js) 🆓
 
-# 2-0
+# 1-1
 
-If you're already familiar with p5, you'll find yourself right at home with q5. 🏡
+Familiar with p5? You'll be right at home with q5. 🏡
+
+It's like getting a free computer upgrade! 🖥️
 
 # 3-0
 

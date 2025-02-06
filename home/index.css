@@ -38,12 +38,12 @@ body {
 	background-color: var(--brand-secondary);
 	color: var(--primary);
 	font-size: 20px;
-	text-shadow: 0 0 16px rgb(255 255 255 / 25%);
+	/* text-shadow: 0 0 16px rgb(255 255 255 / 25%); */
 }
 
 h2 {
 	color: var(--brand-primary);
-	text-shadow: 2px 2px 20px var(--blue);
+	text-shadow: 0 0 32px #b7ebff80;
 	font-size: 32px;
 	margin-top: 8px;
 	margin-bottom: 0px;
@@ -66,8 +66,6 @@ pre {
 	white-space: pre-wrap;
 	word-wrap: break-word;
 }
-
-
 
 a {
 	color: var(--blue1);
@@ -120,8 +118,16 @@ main {
 	width: 100%;
 	background-color: var(--background);
 	padding: 16px;
-	gap: 24px;
+	gap: 32px;
 	margin-bottom: 12vh;
+}
+
+.minis {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 32px;
 }
 
 #reel0 {
@@ -129,6 +135,11 @@ main {
 	background-color: unset;
 	height: 100vh;
 	margin-bottom: 0;
+}
+
+#reel1 {
+	flex-direction: row;
+	gap: 32px;
 }
 
 #reel3 code {
@@ -252,7 +263,7 @@ a {
 }
 
 #partners img {
-	width: 256px;
+	width: 230px;
 	border-radius: 16px;
 	border: 3px solid var(--blue);
 	transition: all 0.1s ease-in-out;
@@ -302,10 +313,6 @@ a {
 
 .mie .ace_cursor {
 	border-color: var(--primary) !important;
-}
-
-#reel1 .mie {
-	min-width: 0;
 }
 
 #reel3 .minis>div {
@@ -395,7 +402,7 @@ footer {
 }
 
 .mie-code {
-	width: 300px;
+	width: 256px;
 }
 
 .mie-output {
@@ -403,10 +410,14 @@ footer {
 	align-items: center;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.reel {
 		padding-left: 0;
 		padding-right: 0;
+	}
+
+	#reel1 {
+		flex-direction: column;
 	}
 
 	.minis md {

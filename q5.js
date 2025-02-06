@@ -1235,7 +1235,7 @@ Q5.renderers.c2d.drawing = ($) => {
 };
 Q5.renderers.c2d.image = ($, q) => {
 	class Q5Image {
-		constructor(w, h, opt) {
+		constructor(w, h, opt = {}) {
 			let $ = this;
 			$._scope = 'image';
 			$.canvas = $.ctx = $.drawingContext = null;

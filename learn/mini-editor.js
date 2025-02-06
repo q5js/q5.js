@@ -18,7 +18,7 @@ class MiniEditor {
 
 	async init() {
 		let editorEl = document.createElement('div');
-		editorEl.id = `mie-${this.container.id}`;
+		editorEl.id = `${this.container.id}-code`;
 		editorEl.className = 'mie-code';
 		if (this['hide-editor']) {
 			editorEl.style.display = 'none';
@@ -27,6 +27,9 @@ class MiniEditor {
 		let outputEl = document.createElement('div');
 		outputEl.id = `${this.container.id}-output`;
 		outputEl.className = 'mie-output';
+		if (this['hide-output']) {
+			outputEl.style.display = 'none';
+		}
 
 		this.container.append(outputEl);
 		this.container.append(editorEl);
@@ -160,7 +163,6 @@ class MiniEditor {
 	}
 
 	resizeEditor() {
-		this.editorEl.style.width = '100%';
 		this.editorEl.style.height = this.initialCode.split('\n').length * 22 + 'px';
 		this.editor.layout();
 	}

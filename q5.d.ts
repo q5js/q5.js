@@ -572,6 +572,16 @@ text('q5', 60, 115);
 	 */
 	var height: number;
 
+	/**	⬜️
+	 * Half the width of the canvas.
+	 */
+	var halfWidth: number;
+
+	/** ⬜️
+	 * Half the height of the canvas.
+	 */
+	var halfHeight: number;
+
 	/** ⬜️
 	 * Translates the origin of the drawing context.
 	 * @param {number} x translation along the x-axis
