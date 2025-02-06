@@ -105,10 +105,10 @@ Q5.modules.canvas = ($, q) => {
 		else h ??= w;
 		w ??= window.innerWidth;
 
-		$.defaultWidth = c.w = w = Math.ceil(w);
-		$.defaultHeight = c.h = h = Math.ceil(h);
-		c.hw = w / 2;
-		c.hh = h / 2;
+		q.defaultWidth = c.w = w = Math.ceil(w);
+		q.defaultHeight = c.h = h = Math.ceil(h);
+		q.halfWidth = c.hw = w / 2;
+		q.halfHeight = c.hh = h / 2;
 
 		// changes the actual size of the canvas
 		c.width = Math.ceil(w * $._pixelDensity);
@@ -126,8 +126,8 @@ Q5.modules.canvas = ($, q) => {
 	$._setImageSize = (w, h) => {
 		q.width = c.w = w;
 		q.height = c.h = h;
-		c.hw = w / 2;
-		c.hh = h / 2;
+		q.halfWidth = c.hw = w / 2;
+		q.halfHeight = c.hh = h / 2;
 
 		// changes the actual size of the canvas
 		c.width = Math.ceil(w * $._pixelDensity);

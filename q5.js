@@ -427,10 +427,10 @@ Q5.modules.canvas = ($, q) => {
 		else h ??= w;
 		w ??= window.innerWidth;
 
-		$.defaultWidth = c.w = w = Math.ceil(w);
-		$.defaultHeight = c.h = h = Math.ceil(h);
-		c.hw = w / 2;
-		c.hh = h / 2;
+		q.defaultWidth = c.w = w = Math.ceil(w);
+		q.defaultHeight = c.h = h = Math.ceil(h);
+		q.halfWidth = c.hw = w / 2;
+		q.halfHeight = c.hh = h / 2;
 
 		// changes the actual size of the canvas
 		c.width = Math.ceil(w * $._pixelDensity);
@@ -448,8 +448,8 @@ Q5.modules.canvas = ($, q) => {
 	$._setImageSize = (w, h) => {
 		q.width = c.w = w;
 		q.height = c.h = h;
-		c.hw = w / 2;
-		c.hh = h / 2;
+		q.halfWidth = c.hw = w / 2;
+		q.halfHeight = c.hh = h / 2;
 
 		// changes the actual size of the canvas
 		c.width = Math.ceil(w * $._pixelDensity);
@@ -2020,16 +2020,6 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		$.image(img, x, y);
 		$._imageMode = og;
-	};
-
-	$.nf = (n, l, r) => {
-		let neg = n < 0;
-		n = Math.abs(n);
-		let parts = n.toFixed(r).split('.');
-		parts[0] = parts[0].padStart(l, '0');
-		let s = parts.join('.');
-		if (neg) s = '-' + s;
-		return s;
 	};
 };
 Q5.modules.ai = ($) => {
@@ -4144,9 +4134,20 @@ Q5.modules.util = ($, q) => {
 	$.hour = () => new Date().getHours();
 	$.minute = () => new Date().getMinutes();
 	$.second = () => new Date().getSeconds();
+
+	$.nf = (n, l, r) => {
+		let neg = n < 0;
+		n = Math.abs(n);
+		let parts = n.toFixed(r).split('.');
+		parts[0] = parts[0].padStart(l, '0');
+		let s = parts.join('.');
+		if (neg) s = '-' + s;
+		return s;
+	};
 };
 Q5.modules.vector = ($) => {
-	$.createVector = (x, y, z) => new Q5.Vector(x, y, z, $);
+	$.Vector = Q5.Vector;
+	$.createVector = (x, y, z) => new $.Vector(x, y, z, $);
 };
 
 Q5.Vector = class {

@@ -1,44 +1,38 @@
 # 1-0
 
-## Create art with q5.js! 🎨
+## Create art with q5! 🎨
 
-**q5.js** is a sequel to the [p5.js](https://p5js.org) and [Processing Java](https://processing.org/) graphics libraries. ⭐️
-
+- a sequel to [p5.js](https://p5js.org) and [Processing](https://processing.org/) ⭐️
 - performance optimized for interactive art 🚀
-- includes a brand new renderer powered by WebGPU 💪
-- up to 32x faster than p5.js 🏎️
-- beginner friendly API and documentation 📚
-- compatible with popular addons, including [p5.sound](https://p5js.org/reference/#/libraries/p5.sound) and [p5play](https://p5play.org) 🎮
+- lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
+- beginner friendly [documentation](/learn) 📚
+- compatible with popular p5 addons 🧩
 - no dependencies, ~100kb minified 📦
-- 100% free to use under the LGPL (just like p5.js) 🆓
-
-# 1-1
-
-If you're already familiar with p5, you'll find yourself right at home with q5. 🏡
+- free to use under the LGPL (just like p5.js) 🆓
 
 # 2-0
 
-## Blazing fast! 🚀
-
-[Draw up to 32x more](https://github.com/q5js/q5.js/wiki/Developer-Log) per frame with [q5 WebGPU](https://developer.mozilla.org/docs/Web/API/WebGPU_API), compared to the limits of p5. Or save battery by getting the same results with less power consumption. 🌱
-
-Switching from p5 to q5 is like getting a free computer upgrade. 🎉
+If you're already familiar with p5, you'll find yourself right at home with q5. 🏡
 
 # 3-0
 
+## Works with
+
+# 4-0
+
 ## Start coding! 💻
 
-No installation required! Use an online code editor with one of these q5.js template projects: [OpenProcessing](https://openprocessing.org/sketch/2471587), [Aijs](https://aijs.io/editor?user=quinton-ashley&project=logoSpin), or [CodePen](https://codepen.io/qashto/pen/jENEJNy). 🖌️
+No installation required! Use an online code editor: [OpenProcessing](https://openprocessing.org/sketch/2471587), [Aijs](https://aijs.io/editor?user=quinton-ashley&project=logoSpin), or [CodePen](https://codepen.io/qashto/pen/jENEJNy). 🖌️
 
-# 3-1
+# 4-1
 
-## Join our community 🤝
+## Join us 🤝
 
 The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB). 🙋
 
-# 3-2
+# 4-2
 
-## Local development 🛠️
+## Local dev 🛠️
 
 You can [use q5 offline](https://github.com/q5js/q5.js/wiki/Get-Started) or add this to your HTML file to always load the latest version.
 
@@ -46,7 +40,7 @@ You can [use q5 offline](https://github.com/q5js/q5.js/wiki/Get-Started) or add 
 <script src="https://q5js.org/q5.js"></script>
 ```
 
-# 3-3
+# 4-3
 
 ## Support q5 💙
 
@@ -56,41 +50,15 @@ We need your support though! If you enjoy using q5.js, please donate via [GitHub
 
 # 10-0
 
-## Dynamic 🐙
+## Exclusive Features 💫
 
-Q5 instances can be created manually, which makes the `setup` function optional. Use q5 functions anywhere with [top-level global mode](https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode)! 👀
-
-```js
-new Q5();
-
-createCanvas(400, 400);
-```
-
-# 10-1
-
-## Sound On 🔊
-
-p5.sound is a great library, but typical use doesn't require its extensive sound generation and filtering features. 🎛️
-
-q5.js includes sound loading, playback, and basic mixing by default. 🎚️
-
-# 10-2
-
-## Lightweight 🪶
-
-p5.js and p5.sound.js have a combined size of 5.6MB! ⚠️
-
-q5.js is ~140kb, that's 98% smaller. 🌳
-
-For extremely lightweight use, load only the features you need from the [q5 source folder](https://github.com/q5js/q5.js/tree/main/src). Load q5 using script tags or as JavaScript modules. 📦
-
-# 10-3
-
-## Frame your Art 🖼️
-
-The `displayMode` function lets you frame your art within the browser window, no CSS skills required! 📽️
-
-Make a canvas be centered or fill the screen without clipping or changing the aspect ratio. Use the "pixelated" rendering preset to make pixel art. 👾
+- WebGPU rendering support ⚡️
+- frame your canvas with [`displayMode`](/learn/#displayMode) 🖼️
+- [top-level global mode](https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode) ⚙️
+- modular use from [source](https://github.com/q5js/q5.js/tree/main/src) 📦
+- 98% smaller than p5 + p5.sound + p5.capture 🌳
+- includes [sound](/learn/#soundSection) playback and mixing 🔊
+- includes canvas [recorder](/learn/#recordSection) 🎞️
 
 # 20-0
 

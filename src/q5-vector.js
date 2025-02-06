@@ -1,5 +1,6 @@
 Q5.modules.vector = ($) => {
-	$.createVector = (x, y, z) => new Q5.Vector(x, y, z, $);
+	$.Vector = Q5.Vector;
+	$.createVector = (x, y, z) => new $.Vector(x, y, z, $);
 };
 
 Q5.Vector = class {

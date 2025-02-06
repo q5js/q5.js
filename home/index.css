@@ -38,15 +38,16 @@ body {
 	background-color: var(--brand-secondary);
 	color: var(--primary);
 	font-size: 20px;
-	font-family: 'adobe-heiti-std', monospace;
+	text-shadow: 0 0 16px rgb(255 255 255 / 25%);
 }
 
 h2 {
 	color: var(--brand-primary);
-	text-shadow: 2px 2px 0 var(--brand-secondary);
+	text-shadow: 2px 2px 20px var(--blue);
 	font-size: 32px;
 	margin-top: 8px;
 	margin-bottom: 0px;
+	font-family: 'adobe-heiti-std', monospace;
 }
 
 p {
@@ -57,13 +58,16 @@ p {
 pre {
 	background-color: var(--background);
 	padding: 8px;
+	font-size: 14px;
 }
 
-code {
+:not(pre)>code {
 	font-size: 18px;
 	white-space: pre-wrap;
 	word-wrap: break-word;
 }
+
+
 
 a {
 	color: var(--blue1);
@@ -77,6 +81,17 @@ md {
 	background-color: var(--secondary);
 	padding-left: 20px;
 	padding-right: 20px;
+}
+
+md,
+nav div,
+.mie-container>div,
+#partners img {
+	box-shadow: var(--blue) 0px 0px 50px;
+}
+
+ul {
+	padding-inline-start: 20px;
 }
 
 main {
@@ -106,7 +121,7 @@ main {
 	background-color: var(--background);
 	padding: 16px;
 	gap: 24px;
-	margin-bottom: 40vh;
+	margin-bottom: 12vh;
 }
 
 #reel0 {
@@ -114,14 +129,6 @@ main {
 	background-color: unset;
 	height: 100vh;
 	margin-bottom: 0;
-}
-
-#reel1 {
-	margin-bottom: 50vh;
-}
-
-#reel2 {
-	margin-bottom: 40vh;
 }
 
 #reel3 code {
@@ -238,25 +245,21 @@ a {
 #partners {
 	display: flex;
 	flex-flow: row wrap;
-	justify-content: space-between;
-	z-index: 1;
-	gap: 8px;
-}
-
-#partners a {
-	box-sizing: border-box;
-	display: flex;
-	justify-content: center;
+	justify-content: space-around;
 	align-items: center;
-	background-color: var(--secondary);
-	border: 3px solid var(--brand-primary);
-	border-radius: 16px;
-	width: 126px;
-	height: 90px;
+	z-index: 1;
+	gap: 16px;
 }
 
 #partners img {
-	width: 96px;
+	width: 256px;
+	border-radius: 16px;
+	border: 3px solid var(--blue);
+	transition: all 0.1s ease-in-out;
+}
+
+#partners img:hover {
+	scale: 1.05;
 }
 
 #partners #p5play_logo {
@@ -456,7 +459,7 @@ footer {
 	}
 
 	#partners img {
-		width: 80%;
+		width: 100%;
 	}
 }
 

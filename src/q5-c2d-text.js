@@ -283,14 +283,4 @@ Q5.renderers.c2d.text = ($, q) => {
 		$.image(img, x, y);
 		$._imageMode = og;
 	};
-
-	$.nf = (n, l, r) => {
-		let neg = n < 0;
-		n = Math.abs(n);
-		let parts = n.toFixed(r).split('.');
-		parts[0] = parts[0].padStart(l, '0');
-		let s = parts.join('.');
-		if (neg) s = '-' + s;
-		return s;
-	};
 };
