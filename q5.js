@@ -2787,6 +2787,7 @@ Q5.modules.dom = ($, q) => {
 			// basically request the highest resolution possible
 			constraints.video = { width: 3840, height: 2160 };
 		}
+		constraints.video.facingMode ??= 'user';
 
 		let vid = $.createVideo();
 		vid.playsinline = true;
@@ -2810,6 +2811,8 @@ Q5.modules.dom = ($, q) => {
 
 			vid.width ||= vid.videoWidth;
 			vid.height ||= vid.videoHeight;
+			vid.defaultWidth = vid.width * $._defaultImageScale;
+			vid.defaultHeight = vid.height * $._defaultImageScale;
 			vid.loadPixels = () => {
 				let g = $.createGraphics(vid.videoWidth, vid.videoHeight);
 				g.image(vid, 0, 0);

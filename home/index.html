@@ -211,11 +211,12 @@ circle(50, 50, 50);
 			let l = new Lava(random(width), random(height), random(10, 100));
 			lavas.push(l);
 		}
+		let blue = color(183, 235, 255, 64);
+		let black = color(0, 64);
 
 		function draw() {
 			darkMode = document.body.classList.contains('dark');
-			if (darkMode) background('#00000040');
-			else background('#b7ebff40');
+			background(darkMode ? black : blue);
 
 			for (let l of lavas) {
 				l.move();
@@ -268,6 +269,9 @@ circle(50, 50, 50);
 			}
 		})();
 	</script>
+
+
+
 
 
 

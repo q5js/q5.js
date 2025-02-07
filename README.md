@@ -2,25 +2,22 @@
 
 ## Visit [q5js.org](https://q5js.org)! 🌟
 
-[q5.js](https://q5js.org) is a sequel to the [p5.js][] and [Processing Java][] graphics libraries.
+[q5.js](https://q5js.org) is a sequel to [p5.js][] and [Processing Java][].
 
 - performance optimized for interactive art 🚀
-- includes a brand new renderer powered by WebGPU 💪
-- up to 32x faster than p5.js 🏎️
-- beginner friendly API and documentation 📚
+- lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
+- beginner friendly [documentation](https://q5js.org/learn) 📚
 - compatible with popular addons, including [p5.sound][] and [p5play][] 🎮
 - no dependencies, ~100kb minified 📦
-- LGPL licensed (just like p5.js) 🆓
+- free to use under the LGPL (just like p5.js) 🆓
 
 q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners. 🤝
 
-If you're already familiar with p5, you'll find yourself right at home with q5. 🏡
+Familiar with p5? You'll be right at home with q5. It's like getting a free computer upgrade! 🖥️
 
 ```js
-function setup() {
-	createCanvas(100, 100);
-	circle(50, 50, 50);
-}
+createCanvas(100, 100);
+circle(50, 50, 50);
 ```
 
 ## Documentation

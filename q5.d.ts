@@ -293,24 +293,32 @@ function draw() {
 		/** ⭐️
 		 * Creates an instance of Q5.
 		 *
-		 * Running `new Q5()` enables use of q5 functions and variables
-		 * anywhere in your sketch. You can also start Q5 in global 
-		 * mode by running [`createCanvas`](https://q5js.org/learn/#createCanvas).
+		 * Running `new Q5()` starts q5 in top-level global mode,
+		 * enabling use of q5 functions and variables on the file level, 
+		 * outside of `setup` and `draw`. You can also start Q5 in this mode
+		 * by running [`createCanvas`](https://q5js.org/learn/#createCanvas) 
+		 * on the file level.
 		 * 
-		 * By default q5 uses the CanvasRenderingContext2D (aka Canvas2D)
-		 * based c2d renderer.
+		 * If users don't create a new instance of Q5 themselves, an 
+		 * instance will be created automatically, replicating
+		 * p5's limited global mode. p5's instance mode is supported by 
+		 * this constructor as well but its use is deprecated, use
+		 * [q5's namespaced instance mode](https://github.com/q5js/q5.js/wiki/Instance-Mode) instead.
 		 * 
-		 * To use the [q5 WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer), run `Q5.webgpu()` after the creation of file level variables.
+		 * Run [`Q5.webgpu()`](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) instead of this constructor to use
+		 * q5's WebGPU renderer.
 		 * @param {string | Function} [scope]
-		 *   - "global": (default) top-level global mode, adds q5 functions
-		 * and variables to the global scope
-		 *   - "auto": if users don't create a new instance of Q5 themselves, an instance will be created automatically with this scope, which replicates p5's global mode
-		 *   - "instance": enables users to [assign a Q5 instance to a variable](https://github.com/q5js/q5.js/wiki/Instance-Mode)
+		 *   - "global": (default) adds q5 functions and variables to the global scope
+		 *   - "instance": does not add q5 functions or variables to the global scope
 		 * @param {HTMLElement} [parent] element that the canvas will be placed inside
 		 * @example
 new Q5();
 createCanvas(200, 100);
 circle(100, 50, 80);
+		 * @example
+let q = new Q5('instance');
+q.createCanvas(200, 100);
+q.circle(100, 50, 20);
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
@@ -336,6 +344,17 @@ circle(100, 50, 80);
 		 * Modules added to this object will be added to new Q5 instances.
 		 */
 		static modules: {};
+
+		static Image: {
+			new(w: number, h: number, opt?: any): Q5.Image;
+		}
+	}
+
+	namespace Q5 {
+		interface Image {
+			width: number;
+			height: number;
+		}
 	}
 
 	// ⬜️ canvas
@@ -344,12 +363,12 @@ circle(100, 50, 80);
 	 * Creates a canvas element, a section of the screen your program
 	 * can draw on.
 	 * 
-	 * Start using q5 by running this function!
-	 *
-	 * If this function is not run by the user, a 200x200 canvas will be
-	 * created automatically before the draw loop starts.
+	 * Run this function to start using q5. If this function is not run
+	 * by the user, a 200x200 canvas will be created automatically before
+	 * the draw loop starts.
 	 * 
-	 * In q5 WebGPU, this function must be run before running other q5 functions.
+	 * In q5 WebGPU, this function must be run before running other
+	 * q5 functions.
 	 * @param {number} [w] width or size of the canvas
 	 * @param {number} [h] height of the canvas
 	 * @param {Object} [opt] options for the canvas
@@ -858,7 +877,7 @@ circle(25, 12.5, 16);
 	 * Like the [`color`](https://q5js.org/learn/#color) function,
 	 * this function can accept colors in a wide range of formats:
 	 * CSS color string, grayscale value, and color component values.
-	 * @param {Color | Image} filler a color or image to draw
+	 * @param {Color | Q5.Image} filler a color or image to draw
 	 * @example
 createCanvas(200, 100);
 background('crimson');
@@ -868,7 +887,7 @@ function draw() {
 	circle(mouseX, mouseY, 20);
 }
 	 */
-	function background(filler: Color | Image): void;
+	function background(filler: Color | Q5.Image): void;
 
 	/** 🧑‍🎨
 	 * Draws a rectangle or a rounded rectangle.
@@ -1444,6 +1463,7 @@ function draw() {
 	 * @param {string} url url of the image to load
 	 * @param {(img: any) => void} [cb] callback function after the image is loaded
 	 * @param {any} [opt] optional parameters for loading the image
+	 * @returns {Q5.Image} image
 	 * @example
 createCanvas(200);
 
@@ -1453,7 +1473,7 @@ function draw() {
 	image(logo, 0, 0, 200, 200);
 }
 	 */
-	function loadImage(url: string, cb?: (img: any) => void, opt?: any): void;
+	function loadImage(url: string, cb?: (img: any) => void, opt?: any): Q5.Image;
 
 	/** 🌆
 	 * Draws an image to the canvas.
@@ -1530,7 +1550,7 @@ function setup() {
 	 * Returns a trimmed image, cropping out transparent pixels from the edges.
 	 * @returns {Image}
 	 */
-	function trim(): Image;
+	function trim(): Q5.Image;
 
 	/** 🌆
 	 * Enables smooth rendering of images displayed larger than
@@ -1599,9 +1619,9 @@ function setup() {
 
 	/** 🌆
 	 * Masks the image with another image.
-	 * @param {Image} img image to use as a mask
+	 * @param {Q5.Image} img image to use as a mask
 	 */
-	function mask(img: Image): void;
+	function mask(img: Q5.Image): void;
 
 	/** 🌆
 	 * Retrieves a subsection of an image or canvas, as a q5 Image.
@@ -1621,7 +1641,7 @@ function setup() {
 	image(cropped, 0, 0, 200, 200);
 }
 	 */
-	function get(x: number, y: number, w?: number, h?: number): Image | number[];
+	function get(x: number, y: number, w?: number, h?: number): Q5.Image | number[];
 
 	/** 🌆
 	 * Sets a pixel's color in the image or canvas.
@@ -1646,9 +1666,9 @@ function draw() {
 
 	/** 🌆
 	 * Returns a copy of the image.
-	 * @returns {Image}
+	 * @returns {Q5.Image}
 	 */
-	function copy(): Image;
+	function copy(): Q5.Image;
 
 	/** 🌆
 	 * Displays a region of the image on another region of the image.
@@ -1707,12 +1727,6 @@ function setup() {
 }
 	 */
 	function updatePixels(): void;
-
-	/** 🌆
-	 * Masks the image with another image.
-	 * @param {Image} img image to use as a mask
-	 */
-	function mask(img: Image): void;
 
 	/** 🌆
 	 * Applies a filter to the image.
@@ -1779,9 +1793,9 @@ function setup() {
 	 * @param {number} w width
 	 * @param {number} h height
 	 * @param {any} [opt] optional settings for the image
-	 * @returns {Image}
+	 * @returns {Q5.Image}
 	 */
-	function createImage(w: number, h: number, opt?: any): Image;
+	function createImage(w: number, h: number, opt?: any): Q5.Image;
 
 	// ✍️ text
 
@@ -2236,6 +2250,20 @@ function draw() {
 }
 	 */
 	const OKLCH: 'oklch';
+
+	class Color {
+		/** 🎨
+		 * Use the `color` function for greater flexibility, it runs
+		 * this constructor internally.
+		 * 
+		 * This constructor only accepts 4 numbers, which are the color 
+		 * components.
+		 * 
+		 * `Color` is not actually a class itself, it's a reference to a
+		 * Q5 color class based on the color mode and format.
+		 */
+		constructor(c0: number, c1: number, c2: number, c3: number);
+	}
 
 	// 🖲️ input
 
@@ -2802,7 +2830,7 @@ function mousePressed() {
 	audio.play();
 }
 	 */
-	function loadAudio(url: string): Audio;
+	function loadAudio(url: string): HTMLAudioElement;
 
 	/** 🔊
 	 * Returns the AudioContext in use or undefined if it doesn't exist.

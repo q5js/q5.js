@@ -113,6 +113,8 @@ function convertTSDefToMarkdown(data) {
 		} else if (inClassDef && line.startsWith('static')) {
 			jsDocBuffer = '';
 			continue;
+		} else if (line.startsWith('new')) {
+			continue;
 		} else if (line.includes('(')) {
 			let funcMatch = line.match(/(\w+)\s*\((.*)\)\s*:\s*(\w+)/);
 			if (funcMatch) {
@@ -134,6 +136,8 @@ function convertTSDefToMarkdown(data) {
 				markdownCode += varHeader + jsDocBuffer + '\n\n';
 				jsDocBuffer = '';
 			}
+		} else if (line.startsWith('namespace') || line.startsWith('interface')) {
+			continue;
 		} else if (line !== '}' && !line.includes(':')) {
 			markdownCode += line + '\n';
 		}
