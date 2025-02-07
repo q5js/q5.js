@@ -423,7 +423,7 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$._setCanvasSize = (w, h) => {
-		if (!w) h ??= window.innerHeight;
+		if (w == undefined) h ??= window.innerHeight;
 		else h ??= w;
 		w ??= window.innerWidth;
 
@@ -2554,12 +2554,12 @@ Q5.modules.dom = ($, q) => {
 		});
 
 		Object.defineProperty(el, 'width', {
-			get: () => parseInt(el.style.width || 0),
+			get: () => parseFloat(el.style.width || 0),
 			set: (v) => (el.style.width = v + 'px')
 		});
 
 		Object.defineProperty(el, 'height', {
-			get: () => parseInt(el.style.height || 0),
+			get: () => parseFloat(el.style.height || 0),
 			set: (v) => (el.style.height = v + 'px')
 		});
 
@@ -2570,7 +2570,7 @@ Q5.modules.dom = ($, q) => {
 			return el;
 		};
 
-		// overwrite size
+		// the existing size property of input elements must be overwritten
 		Object.defineProperty(el, 'size', {
 			writable: true
 		});
@@ -2783,7 +2783,7 @@ Q5.modules.dom = ($, q) => {
 
 		let constraints = typeof type == 'string' ? { [type]: true } : type || { video: true, audio: true };
 
-		if (constraints.video) {
+		if (constraints.video === true) {
 			// basically request the highest resolution possible
 			constraints.video = { width: 3840, height: 2160 };
 		}

@@ -17,7 +17,7 @@ declare global {
 	 * needing to click between separate pages.
 	 * 
 	 * Experiment with editing the code in the interactive mini examples,
-	 * which are often only 8 lines of code or less. They automatically
+	 * which are often only 8 lines or less. They automatically
 	 * update as you type, so you can see results right away.
 	 */
 
@@ -1401,6 +1401,9 @@ function draw() {
 
 	/** 📑
 	 * Creates a video element.
+	 * 
+	 * The video element can be hidden and its content can be
+	 * displayed on the canvas using the `image` function.
 	 * @param {string} src url of the video
 	 * @example
 createCanvas(200, 100);
@@ -1415,21 +1418,23 @@ createCanvas(200, 100);
 	/** 📑
 	 * Creates a capture from a connected camera, such as a webcam.
 	 * 
-	 * The capture can be displayed using the `image` function.
+	 * The capture video element can be hidden and its content can be
+	 * displayed on the canvas using the `image` function.
 	 * 
-	 * Preload to ensure the capture is ready to use when your 
+	 * Can preload to ensure the capture is ready to use when your 
 	 * sketch starts.
 	 * 
-	 * Requests the highest resolution available by default. The
-	 * first parameter to this function can be used to specify
-	 * the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia) for more info.
+	 * Requests the highest video resolution from the user facing camera 	
+	 * by default. The first parameter to this function can be used to 
+	 * specify the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia)
+	 * for more info.
 	 * @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
 	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
 	 * @param {(vid: HTMLVideoElement) => void} [cb] callback function after the capture is created
 	 * @example
-createCanvas(200, 0);
+createCanvas(0);
 let cap = createCapture(VIDEO);
-cap.size(200, 150);
+cap.size(200, 112.5);
 	 * @example
 createCanvas(200);
 let cap = createCapture(VIDEO);
@@ -1439,6 +1444,14 @@ function draw() {
 	image(cap, 0, 0, 200, 200);
 	filter(INVERT);
 }
+	* @example
+createCanvas(0);
+
+// standard definition (SD) video
+let cap = createCapture({
+	video: { width: 640, height: 480 }
+});
+cap.size(200, 150);
 	 */
 	function createCapture(type?: string, flipped?: boolean, cb?: (vid: HTMLVideoElement) => void): HTMLVideoElement;
 

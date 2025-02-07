@@ -24,13 +24,13 @@ It's like getting a free computer upgrade! 🖥️
 
 ## Start coding! 💻
 
-No installation required! Use an online code editor: [OpenProcessing](https://openprocessing.org/sketch/2471587), [Aijs](https://aijs.io/editor?user=quinton-ashley&project=logoSpin), or [CodePen](https://codepen.io/qashto/pen/jENEJNy). 🖌️
+No installation required! Use an online code editor: [OpenProcessing](https://openprocessing.org/sketch/2471587), [Aijs](https://aijs.io/editor?user=quinton-ashley&project=logoSpin), or [CodePen](https://codepen.io/qashto/pen/jENEJNy).
 
 # 4-1
 
 ## Join us 🤝
 
-The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB). 🙋
+The future of creative coding is here! Join us on the [q5 community Discord](https://discord.gg/QuxQYwGWuB).
 
 # 4-2
 
@@ -46,7 +46,7 @@ You can [use q5 offline](https://github.com/q5js/q5.js/wiki/Get-Started) or add 
 
 ## Support q5 💙
 
-q5 is open source and anyone can use it for free under the terms of the LGPL (just like p5.js). 🎉
+q5 is open source and anyone can use it for free under the terms of the LGPL (just like p5.js).
 
 We need your support though! If you enjoy using q5.js, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/q5play).
 
