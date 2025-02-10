@@ -490,6 +490,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		shouldClear = true;
 	};
 
+	$.createGraphics = (w, h, opt) => $._g.createGraphics(w, h, opt);
+
 	const _drawFrame = () => {
 		pass.setPipeline(framePipeline);
 		pass.setBindGroup(0, frameBindGroup);

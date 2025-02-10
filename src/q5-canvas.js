@@ -95,8 +95,9 @@ Q5.modules.canvas = ($, q) => {
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
 		g.createCanvas.call($, w, h, opt);
-		g.defaultWidth = w;
-		g.defaultHeight = h;
+		let scale = g._pixelDensity * $._defaultImageScale;
+		g.defaultWidth = w * scale;
+		g.defaultHeight = h * scale;
 		return g;
 	};
 
@@ -105,8 +106,8 @@ Q5.modules.canvas = ($, q) => {
 		else h ??= w;
 		w ??= window.innerWidth;
 
-		q.defaultWidth = c.w = w = Math.ceil(w);
-		q.defaultHeight = c.h = h = Math.ceil(h);
+		c.w = w = Math.ceil(w);
+		c.h = h = Math.ceil(h);
 		q.halfWidth = c.hw = w / 2;
 		q.halfHeight = c.hh = h / 2;
 

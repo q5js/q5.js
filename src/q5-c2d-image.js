@@ -12,6 +12,9 @@ Q5.renderers.c2d.image = ($, q) => {
 			}
 			$._pixelDensity = opt.pixelDensity || 1;
 			$.createCanvas(w, h, opt);
+			let scale = $._pixelDensity * q._defaultImageScale;
+			$.defaultWidth = w * scale;
+			$.defaultHeight = h * scale;
 			delete $.createCanvas;
 			$._loop = false;
 		}
@@ -50,7 +53,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		} else opt = null;
 
 		let g = $.createImage(1, 1, opt);
-		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
+		let pd = g._pixelDensity;
 
 		let img = new window.Image();
 		img.crossOrigin = 'Anonymous';

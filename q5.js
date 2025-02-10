@@ -171,7 +171,10 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	if (scope == 'graphics') return;
+	if (scope == 'graphics') {
+		$._graphics = true;
+		return;
+	}
 
 	if (scope == 'global') {
 		Object.assign(Q5, $);
@@ -417,8 +420,9 @@ Q5.modules.canvas = ($, q) => {
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
 		g.createCanvas.call($, w, h, opt);
-		g.defaultWidth = w;
-		g.defaultHeight = h;
+		let scale = g._pixelDensity * $._defaultImageScale;
+		g.defaultWidth = w * scale;
+		g.defaultHeight = h * scale;
 		return g;
 	};
 
@@ -427,8 +431,8 @@ Q5.modules.canvas = ($, q) => {
 		else h ??= w;
 		w ??= window.innerWidth;
 
-		q.defaultWidth = c.w = w = Math.ceil(w);
-		q.defaultHeight = c.h = h = Math.ceil(h);
+		c.w = w = Math.ceil(w);
+		c.h = h = Math.ceil(h);
 		q.halfWidth = c.hw = w / 2;
 		q.halfHeight = c.hh = h / 2;
 
@@ -1247,6 +1251,9 @@ Q5.renderers.c2d.image = ($, q) => {
 			}
 			$._pixelDensity = opt.pixelDensity || 1;
 			$.createCanvas(w, h, opt);
+			let scale = $._pixelDensity * q._defaultImageScale;
+			$.defaultWidth = w * scale;
+			$.defaultHeight = h * scale;
 			delete $.createCanvas;
 			$._loop = false;
 		}
@@ -1285,7 +1292,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		} else opt = null;
 
 		let g = $.createImage(1, 1, opt);
-		let pd = (g._pixelDensity = opt?.pixelDensity || 1);
+		let pd = g._pixelDensity;
 
 		let img = new window.Image();
 		img.crossOrigin = 'Anonymous';
@@ -4946,6 +4953,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		shouldClear = true;
 	};
 
+	$.createGraphics = (w, h, opt) => $._g.createGraphics(w, h, opt);
+
 	const _drawFrame = () => {
 		pass.setPipeline(framePipeline);
 		pass.setBindGroup(0, frameBindGroup);
@@ -5997,10 +6006,10 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 	};
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
-		let isVideo;
+		let useExternal;
 		if (img.textureIndex == undefined) {
-			isVideo = img.tagName == 'VIDEO';
-			if (!isVideo || !img.width) return;
+			useExternal = img._graphics || img.tagName == 'VIDEO';
+			if (!useExternal || !img.width) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 
@@ -6012,7 +6021,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			h = cnv.height,
 			pd = img._pixelDensity || 1;
 
-		if (img.modified) {
+		if (!useExternal && img.modified) {
 			Q5.device.queue.copyExternalImageToTexture(
 				{ source: cnv },
 				{ texture: img.texture, colorSpace: $.canvas.colorSpace },
@@ -6043,13 +6052,14 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		addVert(l, b, u0, v1, ci, ti, ga);
 		addVert(r, b, u1, v1, ci, ti, ga);
 
-		if (!isVideo) {
+		if (!useExternal) {
 			$.drawStack.push(1, img.textureIndex);
 		} else {
-			// draw video
+			// render using an external texture
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
 
-			// Create bind group for video texture that will only exist for this frame
+			// Create bind group for the external texture that will
+			// only exist for this frame
 			$._textureBindGroups.push(
 				Q5.device.createBindGroup({
 					layout: videoTextureLayout,

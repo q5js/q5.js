@@ -171,7 +171,10 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	if (scope == 'graphics') return;
+	if (scope == 'graphics') {
+		$._graphics = true;
+		return;
+	}
 
 	if (scope == 'global') {
 		Object.assign(Q5, $);

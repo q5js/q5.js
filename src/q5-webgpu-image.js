@@ -239,10 +239,10 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 	};
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
-		let isVideo;
+		let useExternal;
 		if (img.textureIndex == undefined) {
-			isVideo = img.tagName == 'VIDEO';
-			if (!isVideo || !img.width) return;
+			useExternal = img._graphics || img.tagName == 'VIDEO';
+			if (!useExternal || !img.width) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 
@@ -254,7 +254,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			h = cnv.height,
 			pd = img._pixelDensity || 1;
 
-		if (img.modified) {
+		if (!useExternal && img.modified) {
 			Q5.device.queue.copyExternalImageToTexture(
 				{ source: cnv },
 				{ texture: img.texture, colorSpace: $.canvas.colorSpace },
@@ -285,13 +285,14 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		addVert(l, b, u0, v1, ci, ti, ga);
 		addVert(r, b, u1, v1, ci, ti, ga);
 
-		if (!isVideo) {
+		if (!useExternal) {
 			$.drawStack.push(1, img.textureIndex);
 		} else {
-			// draw video
+			// render using an external texture
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
 
-			// Create bind group for video texture that will only exist for this frame
+			// Create bind group for the external texture that will
+			// only exist for this frame
 			$._textureBindGroups.push(
 				Q5.device.createBindGroup({
 					layout: videoTextureLayout,
