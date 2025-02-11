@@ -576,6 +576,8 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		new Float32Array(textBuffer.getMappedRange()).set(textStack.flat());
 		textBuffer.unmap();
 
+		$._buffers.push(charBuffer, textBuffer);
+
 		// create a single bind group for the text buffer and metadata buffer
 		$._textBindGroup = Q5.device.createBindGroup({
 			label: 'msdf text bind group',

@@ -829,7 +829,7 @@ rect(20, 20, 60, 60);
 	/** ⬜️
 	 * Creates a graphics buffer.
 	 * 
-	 * Not available in q5 WebGPU.
+	 * Not recommended for use in q5 WebGPU.
 	 * @param {number} w width
 	 * @param {number} h height
 	 * @param {Object} [opt] options

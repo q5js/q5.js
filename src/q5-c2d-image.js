@@ -204,7 +204,7 @@ Q5.renderers.c2d.image = ($, q) => {
 	if ($._scope == 'image') {
 		$.resize = (w, h) => {
 			let c = $.canvas;
-			let o = new $._OffscreenCanvas(c.width, c.height);
+			let o = new $._Canvas(c.width, c.height);
 			let tmpCtx = o.getContext('2d', {
 				colorSpace: c.colorSpace
 			});
@@ -342,7 +342,7 @@ Q5.renderers.c2d.image = ($, q) => {
 
 	$._saveCanvas = async (data, ext) => {
 		data = data.canvas || data;
-		if (data instanceof OffscreenCanvas) {
+		if (data instanceof HTMLCanvasElement || data instanceof OffscreenCanvas) {
 			const blob = await data.convertToBlob({ type: 'image/' + ext });
 
 			return await new Promise((resolve) => {

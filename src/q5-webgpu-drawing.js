@@ -1,7 +1,7 @@
 Q5.renderers.webgpu.drawing = ($, q) => {
 	let c = $.canvas,
 		drawStack = $.drawStack,
-		vertexStack = new Float32Array(1e7),
+		vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
 		vertIndex = 0;
 	const TAU = Math.PI * 2;
 	const HALF_PI = Math.PI / 2;
@@ -622,6 +622,8 @@ fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
 		vertexBuffer.unmap();
 
 		$.pass.setVertexBuffer(0, vertexBuffer);
+
+		$._buffers.push(vertexBuffer);
 	});
 
 	$._hooks.postRender.push(() => {

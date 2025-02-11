@@ -119,7 +119,7 @@ Performance is the primary goal of q5 WebGPU, not replicating all the advanced d
 
 ## webgpu-image
 
-Loads images as a `Q5.Image` object backed by an `OffscreenCanvas` that use the Canvas2D renderer. When loaded or modified, the image is converted into a GPU texture that can be drawn on the WebGPU canvas. This is a slow process and should be avoided if possible. It would probably be better to use WebGPU shaders to filter images.
+Loads images as a `Q5.Image` object backed by an `HTMLCanvasElement` that use the Canvas2D renderer. When loaded or modified, the image is converted into a GPU texture that can be drawn on the WebGPU canvas. This is a slow process and should be avoided if possible. It would probably be better to use WebGPU shaders to filter images.
 
 ## webgpu-text
 

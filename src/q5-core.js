@@ -29,6 +29,7 @@ function Q5(scope, parent, renderer) {
 		Q5._hasGlobal = $._isGlobal = true;
 		globalScope = Q5._esm ? globalThis : !Q5._server ? window : global;
 	}
+	if (scope == 'graphics') $._graphics = true;
 
 	let q = new Proxy($, {
 		set: (t, p, v) => {
@@ -171,17 +172,14 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	if (scope == 'graphics') {
-		$._graphics = true;
-		return;
-	}
+	if ($._webgpuFallback) $.colorMode('rgb', 1);
+
+	if ($._graphics) return;
 
 	if (scope == 'global') {
 		Object.assign(Q5, $);
 		delete Q5.Q5;
 	}
-
-	if ($._webgpuFallback) $.colorMode('rgb', 1);
 
 	for (let m of Q5.methods.init) {
 		m.call($);

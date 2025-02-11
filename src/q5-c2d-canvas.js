@@ -46,7 +46,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 		let o;
 		if ($.frameCount > 1) {
-			o = new $._OffscreenCanvas(c.width, c.height);
+			o = new $._Canvas(c.width, c.height);
 			o.w = c.w;
 			o.h = c.h;
 			let oCtx = o.getContext('2d');

@@ -1,5 +1,5 @@
 Q5.modules.canvas = ($, q) => {
-	$._OffscreenCanvas =
+	$._Canvas =
 		window.OffscreenCanvas ||
 		function () {
 			return document.createElement('canvas');
@@ -10,7 +10,7 @@ Q5.modules.canvas = ($, q) => {
 			q.canvas = Q5._createServerCanvas(100, 100);
 		}
 	} else if ($._scope == 'image' || $._scope == 'graphics') {
-		q.canvas = new $._OffscreenCanvas(100, 100);
+		q.canvas = new $._Canvas(100, 100);
 	}
 
 	if (!$.canvas) {
@@ -89,9 +89,8 @@ Q5.modules.canvas = ($, q) => {
 		return rend;
 	};
 
-	$.createGraphics = function (w, h, opt) {
-		let g = new Q5('graphics');
-		opt ??= {};
+	$.createGraphics = function (w, h, opt = {}) {
+		let g = new Q5('graphics', undefined, opt.renderer || ($._webgpuFallback ? 'webgpu-fallback' : $._renderer));
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
 		g.createCanvas.call($, w, h, opt);

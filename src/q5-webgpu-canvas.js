@@ -6,15 +6,14 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	c.width = $.width = 500;
 	c.height = $.height = 500;
 
-	// c2d graphics context
-	$._g = $.createGraphics(1, 1);
+	$._g = $.createGraphics(1, 1, { renderer: 'c2d' });
 
 	if ($.colorMode) $.colorMode('rgb', 1);
 
 	let pass,
 		mainView,
-		frameTextureA,
-		frameTextureB,
+		frameA,
+		frameB,
 		frameSampler,
 		framePipeline,
 		frameBindGroup,
@@ -23,6 +22,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$._pipelineConfigs = [];
 	$._pipelines = [];
+	$._buffers = [];
 
 	// local variables used for slightly better performance
 	// stores pipeline shifts and vertex counts/image indices
@@ -86,8 +86,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			GPUTextureUsage.TEXTURE_BINDING |
 			GPUTextureUsage.RENDER_ATTACHMENT;
 
-		frameTextureA = Q5.device.createTexture({ size, format, usage });
-		frameTextureB = Q5.device.createTexture({ size, format, usage });
+		$._frameA = frameA = Q5.device.createTexture({ size, format, usage });
+		$._frameB = frameB = Q5.device.createTexture({ size, format, usage });
 
 		let finalShader = Q5.device.createShaderModule({
 			code: `
@@ -210,7 +210,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		$._hsw = v / 2;
 	};
 
-	const MAX_TRANSFORMS = 1e7, // or whatever maximum you need
+	const MAX_TRANSFORMS = $._graphics ? 1000 : 1e7,
 		MATRIX_SIZE = 16, // 4x4 matrix
 		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE);
 
@@ -490,8 +490,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		shouldClear = true;
 	};
 
-	$.createGraphics = (w, h, opt) => $._g.createGraphics(w, h, opt);
-
 	const _drawFrame = () => {
 		pass.setPipeline(framePipeline);
 		pass.setBindGroup(0, frameBindGroup);
@@ -500,14 +498,13 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	$._beginRender = () => {
 		// swap the frame textures
-		const temp = frameTextureA;
-		frameTextureA = frameTextureB;
-		frameTextureB = temp;
-		$.canvas.texture = frameTextureA;
+		const temp = frameA;
+		frameA = frameB;
+		frameB = temp;
 
 		$.encoder = Q5.device.createCommandEncoder();
 
-		let target = shouldClear ? $.ctx.getCurrentTexture().createView() : frameTextureA.createView();
+		let target = shouldClear ? $.ctx.getCurrentTexture().createView() : frameA.createView();
 
 		pass = q.pass = $.encoder.beginRenderPass({
 			label: 'q5-webgpu',
@@ -527,7 +524,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				layout: framePipeline.getBindGroupLayout(0),
 				entries: [
 					{ binding: 0, resource: frameSampler },
-					{ binding: 1, resource: frameTextureB.createView() }
+					{ binding: 1, resource: frameB.createView() }
 				]
 			});
 
@@ -585,7 +582,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				// v is the number of vertices
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
-			} else if (curPipelineIndex == 1 || curPipelineIndex == 2) {
+			} else if (curPipelineIndex <= 2) {
 				// draw an image or video frame
 				// v is the texture index
 				pass.setBindGroup(1, $._textureBindGroups[v]);
@@ -625,7 +622,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				layout: framePipeline.getBindGroupLayout(0),
 				entries: [
 					{ binding: 0, resource: frameSampler },
-					{ binding: 1, resource: frameTextureA.createView() }
+					{ binding: 1, resource: frameA.createView() }
 				]
 			});
 			_drawFrame();
@@ -634,6 +631,12 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		}
 
 		Q5.device.queue.submit([$.encoder.finish()]);
+
+		// destroy buffers
+		Q5.device.queue.onSubmittedWorkDone().then(() => {
+			for (let b of $._buffers) b.destroy();
+			$._buffers = [];
+		});
 
 		q.pass = $.encoder = null;
 
@@ -660,6 +663,11 @@ Q5.initWebGPU = async () => {
 			return false;
 		}
 		Q5.device = await adapter.requestDevice();
+
+		Q5.device.lost.then((e) => {
+			console.error('WebGPU crashed!');
+			console.error(e);
+		});
 	}
 	return true;
 };
