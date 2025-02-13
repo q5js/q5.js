@@ -409,7 +409,7 @@ Q5.modules.canvas = ($, q) => {
 		}
 		if ($._beginRender) $._beginRender();
 
-		c.mousePressed = (cb) => c.addEventListener('mousedown', cb);
+		if ($._addEventMethods) $._addEventMethods(c);
 
 		return rend;
 	};
@@ -2609,7 +2609,7 @@ Q5.modules.dom = ($, q) => {
 			return el;
 		};
 
-		el.mousePressed = (cb) => el.addEventListener('mousedown', cb);
+		$._addLegacyEventMethods(el);
 
 		$._elements.push(el);
 		if ($.canvas) $.canvas.parentElement.append(el);
@@ -2618,6 +2618,15 @@ Q5.modules.dom = ($, q) => {
 		return el;
 	};
 	$.createEl = $.createElement;
+
+	$._addEventMethods = (el) => {
+		let l = el.addEventListener;
+		el.mousePressed = (cb) => l('mousedown', cb);
+		el.mouseReleased = (cb) => l('mouseup', cb);
+		el.mouseClicked = (cb) => l('click', cb);
+		el.mouseMoved = (cb) => l('mousemove', cb);
+		el.mouseWheel = (cb) => l('wheel', cb);
+	};
 
 	$.createA = (href, content, newTab) => {
 		let el = $.createEl('a', content);
@@ -3071,12 +3080,16 @@ Q5.modules.math = ($, q) => {
 	$.mag = Math.hypot;
 	$.max = Math.max;
 	$.min = Math.min;
-	$.round = Math.round;
 	$.pow = Math.pow;
 	$.sqrt = Math.sqrt;
 
 	$.SHR3 = 1;
 	$.LCG = 2;
+
+	$.round = (x, d = 0) => {
+		let p = 10 ** d;
+		return Math.round(x * p) / p;
+	};
 
 	let angleMode = ($._angleMode = 0);
 
@@ -3346,33 +3359,33 @@ Q5.modules.math = ($, q) => {
 	$.SIMPLEX = 'simplex';
 	$.BLOCKY = 'blocky';
 
-	$.Noise = Q5.PerlinNoise;
+	$.NoiseGenerator = Q5.PerlinNoise;
 	let _noise;
 
 	$.noiseMode = (mode) => {
-		q.Noise = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
+		q.NoiseGenerator = Q5[mode[0].toUpperCase() + mode.slice(1) + 'Noise'];
 		_noise = null;
 	};
 
 	$.noiseSeed = (seed) => {
-		_noise = new $.Noise(seed);
+		_noise = new $.NoiseGenerator(seed);
 	};
 
 	$.noise = (x = 0, y = 0, z = 0) => {
-		_noise ??= new $.Noise();
+		_noise ??= new $.NoiseGenerator();
 		return _noise.noise(x, y, z);
 	};
 
 	$.noiseDetail = (lod, falloff) => {
-		_noise ??= new $.Noise();
+		_noise ??= new $.NoiseGenerator();
 		if (lod > 0) _noise.octaves = lod;
 		if (falloff > 0) _noise.falloff = falloff;
 	};
 };
 
-Q5.Noise = class {};
+Q5.NoiseGenerator = class {};
 
-Q5.PerlinNoise = class extends Q5.Noise {
+Q5.PerlinNoise = class extends Q5.NoiseGenerator {
 	constructor(seed) {
 		super();
 		this.grad3 = [

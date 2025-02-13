@@ -86,7 +86,7 @@ Q5.modules.dom = ($, q) => {
 			return el;
 		};
 
-		el.mousePressed = (cb) => el.addEventListener('mousedown', cb);
+		$._addLegacyEventMethods(el);
 
 		$._elements.push(el);
 		if ($.canvas) $.canvas.parentElement.append(el);
@@ -95,6 +95,15 @@ Q5.modules.dom = ($, q) => {
 		return el;
 	};
 	$.createEl = $.createElement;
+
+	$._addEventMethods = (el) => {
+		let l = el.addEventListener;
+		el.mousePressed = (cb) => l('mousedown', cb);
+		el.mouseReleased = (cb) => l('mouseup', cb);
+		el.mouseClicked = (cb) => l('click', cb);
+		el.mouseMoved = (cb) => l('mousemove', cb);
+		el.mouseWheel = (cb) => l('wheel', cb);
+	};
 
 	$.createA = (href, content, newTab) => {
 		let el = $.createEl('a', content);

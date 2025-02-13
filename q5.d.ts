@@ -10,7 +10,7 @@ declare global {
 	/** ⭐️
 	 * Welcome to q5's documentation! ☺️
 	 * 
-	 * First time coding? Check out the [q5 Beginner's Guide to JavaScript](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Guide-to-JavaScript).
+	 * First time coding? Check out the [q5 Beginner's Brief](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief).
 	 * 
 	 * On these Learn pages you'll find concise descriptions for
 	 * q5's functions and variables. Scroll through entire topics without

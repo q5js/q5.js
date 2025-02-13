@@ -1,5 +1,5 @@
 /* additional noise algorithms */
-Q5.SimplexNoise = class extends Q5.Noise {
+Q5.SimplexNoise = class extends Q5.NoiseGenerator {
 	constructor(seed) {
 		super();
 		this.grad3 = [
@@ -182,7 +182,7 @@ Q5.SimplexNoise = class extends Q5.Noise {
 	}
 };
 
-Q5.BlockyNoise = class extends Q5.Noise {
+Q5.BlockyNoise = class extends Q5.NoiseGenerator {
 	constructor(seed) {
 		super();
 		this.YWRAPB = 4;

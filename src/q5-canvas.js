@@ -86,7 +86,7 @@ Q5.modules.canvas = ($, q) => {
 		}
 		if ($._beginRender) $._beginRender();
 
-		c.mousePressed = (cb) => c.addEventListener('mousedown', cb);
+		if ($._addEventMethods) $._addEventMethods(c);
 
 		return rend;
 	};

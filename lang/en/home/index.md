@@ -2,7 +2,7 @@
 
 ## Create art with q5! 🎨
 
-- a sequel to [p5.js](https://p5js.org) and [Processing](https://processing.org/) ⭐️
+- inspired by [p5.js](https://p5js.org) and [Processing](https://processing.org/) ⭐️
 - performance optimized for interactive art 🚀
 - lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
 - beginner friendly [documentation](/learn) 📚
