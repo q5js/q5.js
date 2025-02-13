@@ -12,13 +12,13 @@ struct VertexParams {
 	@location(1) texCoord: vec2f,
 	@location(2) tintIndex: f32,
 	@location(3) matrixIndex: f32,
-	@location(4) globalAlpha: f32
+	@location(4) imageAlpha: f32
 }
 struct FragmentParams {
 	@builtin(position) position: vec4f,
 	@location(0) texCoord: vec2f,
-	@location(1) tintIndex: f32,
-	@location(2) globalAlpha: f32
+	@location(1) tintColor: vec4f,
+	@location(2) imageAlpha: f32
 }
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
@@ -28,29 +28,33 @@ struct FragmentParams {
 @group(1) @binding(0) var samp: sampler;
 @group(1) @binding(1) var texture: texture_2d<f32>;
 
-@vertex
-fn vertexMain(v: VertexParams) -> FragmentParams {
-	var vert = vec4f(v.pos, 0.0, 1.0);
-	vert = transforms[i32(v.matrixIndex)] * vert;
+fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
+	return vert;
+}
+
+@vertex
+fn vertexMain(v: VertexParams) -> FragmentParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
 
 	var f: FragmentParams;
 	f.position = vert;
 	f.texCoord = v.texCoord;
-	f.tintIndex = v.tintIndex;
-	f.globalAlpha = v.globalAlpha;
+	f.tintColor = colors[i32(v.tintIndex)];
+	f.imageAlpha = v.imageAlpha;
 	return f;
 }
 
 @fragment
 fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
-		let texColor = textureSample(texture, samp, f.texCoord);
-		let tintColor = colors[i32(f.tintIndex)];
-		
-		// Mix original and tinted colors using tint alpha as blend factor
-		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a * f.globalAlpha);
-		return mix(texColor, tinted, tintColor.a);
+	let texColor = textureSample(texture, samp, f.texCoord);
+	
+	// Mix original and tinted colors using tint alpha as blend factor
+	let tinted = vec4f(texColor.rgb * f.tintColor.rgb, texColor.a * f.imageAlpha);
+	return mix(texColor, tinted, f.tintColor.a);
 }
 `;
 
@@ -75,7 +79,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			{ shaderLocation: 1, offset: 8, format: 'float32x2' },
 			{ shaderLocation: 2, offset: 16, format: 'float32' }, // tintIndex
 			{ shaderLocation: 3, offset: 20, format: 'float32' }, // matrixIndex
-			{ shaderLocation: 4, offset: 24, format: 'float32' } // globalAlpha
+			{ shaderLocation: 4, offset: 24, format: 'float32' } // imageAlpha
 		]
 	};
 
@@ -246,7 +250,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 
 	$.imageMode = (x) => ($._imageMode = x);
 
-	const addVert = (x, y, u, v, ci, ti, ga) => {
+	const addVert = (x, y, u, v, ci, ti, ia) => {
 		let s = vertexStack,
 			i = vertIndex;
 		s[i++] = x;
@@ -255,7 +259,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		s[i++] = v;
 		s[i++] = ci;
 		s[i++] = ti;
-		s[i++] = ga;
+		s[i++] = ia;
 		vertIndex = i;
 	};
 
@@ -311,12 +315,12 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			v1 = (sy + sh) / h,
 			ti = $._matrixIndex,
 			ci = $._tint,
-			ga = $._globalAlpha;
+			ia = $._imageAlpha;
 
-		addVert(l, t, u0, v0, ci, ti, ga);
-		addVert(r, t, u1, v0, ci, ti, ga);
-		addVert(l, b, u0, v1, ci, ti, ga);
-		addVert(r, b, u1, v1, ci, ti, ga);
+		addVert(l, t, u0, v0, ci, ti, ia);
+		addVert(r, t, u1, v0, ci, ti, ia);
+		addVert(l, b, u0, v1, ci, ti, ia);
+		addVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
 			$.drawStack.push(1, img.textureIndex);

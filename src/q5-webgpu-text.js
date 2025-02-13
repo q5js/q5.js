@@ -1,7 +1,5 @@
 Q5.renderers.webgpu.text = ($, q) => {
-	let textShader = Q5.device.createShaderModule({
-		label: 'MSDF text shader',
-		code: `
+	let textShaderCode = `
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
@@ -13,7 +11,9 @@ struct VertexParams {
 struct FragmentParams {
 	@builtin(position) position : vec4f,
 	@location(0) texCoord : vec2f,
-	@location(1) fillColor : vec4f
+	@location(1) fillColor : vec4f,
+	@location(2) strokeColor : vec4f,
+	@location(3) strokeWeight : f32
 }
 struct Char {
 	texOffset: vec2f,
@@ -26,7 +26,8 @@ struct Text {
 	scale: f32,
 	matrixIndex: f32,
 	fillIndex: f32,
-	strokeIndex: f32
+	strokeIndex: f32,
+	strokeWeight: f32
 }
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
@@ -42,52 +43,73 @@ struct Text {
 
 const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 
-@vertex
-fn vertexMain(v : VertexParams) -> FragmentParams {
-	let char = textChars[v.instance];
-
-	let text = textMetadata[i32(char.w)];
-
-	let fontChar = fontChars[i32(char.z)];
-
-	let charPos = ((quad[v.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
-
-	var vert = vec4f(charPos, 0.0, 1.0);
-	vert = transforms[i32(text.matrixIndex)] * vert;
-	vert.x /= uniforms.halfWidth;
-	vert.y /= uniforms.halfHeight;
-
-	var f : FragmentParams;
-	f.position = vert;
-	f.texCoord = (quad[v.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
-	f.fillColor = colors[i32(text.fillIndex)];
-	return f;
-}
-
 fn sampleMsdf(texCoord: vec2f) -> f32 {
 	let c = textureSample(fontTexture, fontSampler, texCoord);
 	return max(min(c.r, c.g), min(max(c.r, c.g), c.b));
 }
 
+fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(matrixIndex)] * vert;
+	vert.x /= uniforms.halfWidth;
+	vert.y /= uniforms.halfHeight;
+	return vert;
+}
+
+@vertex
+fn vertexMain(v : VertexParams) -> FragmentParams {
+	let char = textChars[v.instance];
+	let text = textMetadata[i32(char.w)];
+	let fontChar = fontChars[i32(char.z)];
+
+	let charPos = ((quad[v.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
+
+	var vert = transformVertex(charPos, text.matrixIndex);
+
+	var f : FragmentParams;
+	f.position = vert;
+	f.texCoord = (quad[v.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
+	f.fillColor = colors[i32(text.fillIndex)];
+	f.strokeColor = colors[i32(text.strokeIndex)];
+	f.strokeWeight = text.strokeWeight;
+	return f;
+}
+
 @fragment
 fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
-	// pxRange (AKA distanceRange) comes from the msdfgen tool,
-	// uses the default which is 4.
 	let pxRange = 4.0;
 	let sz = vec2f(textureDimensions(fontTexture, 0));
-	let dx = sz.x*length(vec2f(dpdxFine(f.texCoord.x), dpdyFine(f.texCoord.x)));
-	let dy = sz.y*length(vec2f(dpdxFine(f.texCoord.y), dpdyFine(f.texCoord.y)));
+	let dx = sz.x * length(vec2f(dpdxFine(f.texCoord.x), dpdyFine(f.texCoord.x)));
+	let dy = sz.y * length(vec2f(dpdxFine(f.texCoord.y), dpdyFine(f.texCoord.y)));
 	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
 	let sigDist = sampleMsdf(f.texCoord) - 0.5;
 	let pxDist = sigDist * toPixels;
 	let edgeWidth = 0.5;
-	let alpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
-	if (alpha < 0.001) {
+
+	if (f.strokeWeight == 0.0) {
+		let fillAlpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
+		var color = vec4f(f.fillColor.rgb, f.fillColor.a * fillAlpha);
+		if (color.a < 0.01) {
+			discard;
+		}
+		return color;
+	}
+
+	let halfStroke = f.strokeWeight / 2.0;
+	let fillAlpha = smoothstep(-edgeWidth, edgeWidth, pxDist - halfStroke);
+	let strokeAlpha = smoothstep(-edgeWidth, edgeWidth, pxDist + halfStroke);
+	var color = mix(f.strokeColor, f.fillColor, fillAlpha);
+	color = vec4f(color.rgb, color.a * strokeAlpha);
+	if (color.a < 0.01) {
 		discard;
 	}
-	return vec4f(f.fillColor.rgb, f.fillColor.a * alpha);
+	return color;
 }
-`
+`;
+
+	let textShader = Q5.device.createShaderModule({
+		label: 'textShader',
+		code: textShaderCode
 	});
 
 	let textBindGroupLayout = Q5.device.createBindGroupLayout({
@@ -486,6 +508,8 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		txt[3] = $._matrixIndex;
 		txt[4] = $._fillSet ? $._fill : 0;
 		txt[5] = $._stroke;
+		txt[6] = $._strokeSet ? $._strokeWeight : 0;
+		txt[7] = 0; // padding
 
 		textStack.push(txt);
 		$.drawStack.push(3, measurements.printedCharCount, $._font.index);
@@ -562,7 +586,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		charBuffer.unmap();
 
 		// calculate total buffer size for metadata
-		let totalMetadataSize = textStack.length * 6 * 4;
+		let totalMetadataSize = textStack.length * 8 * 4;
 
 		// create a single buffer for all metadata
 		let textBuffer = Q5.device.createBuffer({

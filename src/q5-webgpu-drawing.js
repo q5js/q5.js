@@ -6,9 +6,7 @@ Q5.renderers.webgpu.drawing = ($, q) => {
 	const TAU = Math.PI * 2;
 	const HALF_PI = Math.PI / 2;
 
-	let drawingShader = Q5.device.createShaderModule({
-		label: 'drawingShader',
-		code: `
+	let drawingShaderCode = `
 struct Uniforms {
 	halfWidth: f32,
 	halfHeight: f32
@@ -27,12 +25,17 @@ struct FragmentParams {
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 @group(0) @binding(2) var<storage> colors : array<vec4f>;
 
-@vertex
-fn vertexMain(v: VertexParams) -> FragmentParams {
-	var vert = vec4f(v.pos, 0.0, 1.0);
-	vert = transforms[i32(v.matrixIndex)] * vert;
+fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(matrixIndex)] * vert;
 	vert.x /= uniforms.halfWidth;
 	vert.y /= uniforms.halfHeight;
+	return vert;
+}
+
+@vertex
+fn vertexMain(v: VertexParams) -> FragmentParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
 
 	var f: FragmentParams;
 	f.position = vert;
@@ -41,10 +44,14 @@ fn vertexMain(v: VertexParams) -> FragmentParams {
 }
 
 @fragment
-fn fragmentMain(@location(0) color: vec4f) -> @location(0) vec4f {
-	return color;
+fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
+	return f.color;
 }
-`
+`;
+
+	let drawingShader = Q5.device.createShaderModule({
+		label: 'drawingShader',
+		code: drawingShaderCode
 	});
 
 	let vertexBufferLayout = {

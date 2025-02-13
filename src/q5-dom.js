@@ -86,6 +86,8 @@ Q5.modules.dom = ($, q) => {
 			return el;
 		};
 
+		el.mousePressed = (cb) => el.addEventListener('mousedown', cb);
+
 		$._elements.push(el);
 		if ($.canvas) $.canvas.parentElement.append(el);
 		else document.body.append(el);

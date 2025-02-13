@@ -2726,14 +2726,14 @@ function draw() {
 	/** 🎞️
 	 * Creates a recorder. Simply hit record to start recording!
 	 * 
-	 * `format` is set to "H.264" by default. Encoding in "VP9" may not
-	 * be possible on some devices.
+	 * The following properties can be set via the recorder UI or
+	 * programmatically.
 	 * 
-	 * `bitrate` is a number in megabits per second (mbps). Its default
+	 * - `format` is set to "H.264" by default. Encoding in "VP9" may not
+	 * be possible on some devices.
+	 * - `bitrate` is a number in megabits per second (mbps). Its default
 	 * value is determined by the height of the canvas. Increasing the
 	 * bitrate will increase the quality and file size of the recording.
-	 * 
-	 * These properties can be set via the recorder UI or programmatically.
 	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
 createCanvas(200);
