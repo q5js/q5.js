@@ -367,6 +367,10 @@ header {
 	margin-left: 6px;
 }
 
+.mie-output {
+	width: 200px;
+}
+
 #themeToggle {
 	background-color: transparent;
 	border: none;
@@ -1139,6 +1143,10 @@ pre[class*="language-"] code {
 
 	#homeButton {
 		margin-left: 0;
+	}
+
+	.mie-code {
+		width: 100%;
 	}
 }
 

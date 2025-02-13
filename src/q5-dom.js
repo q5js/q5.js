@@ -86,7 +86,7 @@ Q5.modules.dom = ($, q) => {
 			return el;
 		};
 
-		$._addLegacyEventMethods(el);
+		$._addEventMethods(el);
 
 		$._elements.push(el);
 		if ($.canvas) $.canvas.parentElement.append(el);
