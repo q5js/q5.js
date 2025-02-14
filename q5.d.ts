@@ -1339,7 +1339,6 @@ createCanvas(200, 100);
 let radio = createRadio()
 	.option('square', '1')
 	.option('circle', '2');
-radio.style.color = 'aqua';
 
 function draw() {
 	background(200);
@@ -1402,16 +1401,33 @@ function draw() {
 	/** 📑
 	 * Creates a video element.
 	 * 
+	 * Note that videos must be muted to autoplay and the `play` and 
+	 * `pause` functions can only be run after a user interaction.
+	 * 
 	 * The video element can be hidden and its content can be
 	 * displayed on the canvas using the `image` function.
 	 * @param {string} src url of the video
 	 * @example
-createCanvas(200, 100);
+createCanvas(0);
 
-// example coming soon
-// let vid = createVideo('/assets/q5js_video.mp4');
-// vid.controls = true;
-// vid.loop = true;
+let vid = createVideo('/assets/apollo4.mp4');
+vid.size(200, 150);
+vid.autoplay = vid.muted = vid.loop = true;
+vid.controls = true;
+
+	 * @example
+createCanvas(200, 150);
+let vid = createVideo('/assets/apollo4.mp4');
+vid.hide();
+
+function mousePressed() {
+	vid.currentTime = 0;
+	vid.play();
+}
+function draw() {
+	image(vid, 0, 0, 200, 150);
+	filter(HUE_ROTATE, 90);
+}
 	 */
 	function createVideo(src: string): HTMLVideoElement;
 
@@ -1432,26 +1448,36 @@ createCanvas(200, 100);
 	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
 	 * @param {(vid: HTMLVideoElement) => void} [cb] callback function after the capture is created
 	 * @example
-createCanvas(0);
-let cap = createCapture(VIDEO);
-cap.size(200, 112.5);
+createCanvas(200);
+
+function mousePressed() {
+	let cap = createCapture(VIDEO);
+	cap.size(200, 112.5);
+	canvas.remove();
+}
 	 * @example
 createCanvas(200);
-let cap = createCapture(VIDEO);
-cap.hide();
+
+let cap;
+function mousePressed() {
+  cap = createCapture(VIDEO);
+  cap.hide();
+}
 
 function draw() {
-	image(cap, 0, 0, 200, 200);
-	filter(INVERT);
+  let y = frameCount % height;
+  image(cap, 0, y, 200, 200);
 }
 	* @example
-createCanvas(0);
+createCanvas(200);
 
-// standard definition (SD) video
-let cap = createCapture({
-	video: { width: 640, height: 480 }
-});
-cap.size(200, 150);
+function mousePressed() {
+	let cap = createCapture({
+		video: { width: 640, height: 480 }
+	});
+	cap.size(200, 150);
+	canvas.remove();
+}
 	 */
 	function createCapture(type?: string, flipped?: boolean, cb?: (vid: HTMLVideoElement) => void): HTMLVideoElement;
 

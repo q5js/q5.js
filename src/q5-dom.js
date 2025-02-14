@@ -268,7 +268,28 @@ Q5.modules.dom = ($, q) => {
 	$.createVideo = (src) => {
 		let el = $.createEl('video');
 		el.crossOrigin = 'anonymous';
-		if (src) el.src = src;
+
+		el._load = () => {
+			el.width ||= el.videoWidth;
+			el.height ||= el.videoHeight;
+			el.defaultWidth = el.width * $._defaultImageScale;
+			el.defaultHeight = el.height * $._defaultImageScale;
+			el.ready = true;
+		};
+
+		if (src) {
+			q._preloadCount++;
+			el._loader = new Promise((resolve) => {
+				el.addEventListener('loadeddata', () => {
+					el._load();
+					q._preloadCount--;
+					resolve(el);
+				});
+				el.src = src;
+			});
+
+			if ($._disablePreload) return el._loader;
+		}
 		return el;
 	};
 
@@ -284,13 +305,18 @@ Q5.modules.dom = ($, q) => {
 		constraints.video.facingMode ??= 'user';
 
 		let vid = $.createVideo();
-		vid.playsinline = true;
-		vid.autoplay = true;
+		vid.playsinline = vid.autoplay = true;
 		if (flipped) {
 			vid.flipped = true;
 			vid.style.transform = 'scale(-1, 1)';
 		}
-
+		vid.loadPixels = () => {
+			let g = $.createGraphics(vid.videoWidth, vid.videoHeight, { renderer: 'c2d' });
+			g.image(vid, 0, 0);
+			g.loadPixels();
+			vid.pixels = g.pixels;
+			g.remove();
+		};
 		vid._loader = (async () => {
 			let stream;
 			try {
@@ -301,19 +327,9 @@ Q5.modules.dom = ($, q) => {
 			}
 
 			vid.srcObject = stream;
-			await new Promise((resolve) => vid.addEventListener('loadedmetadata', resolve));
+			await new Promise((resolve) => vid.addEventListener('loadeddata', resolve));
 
-			vid.width ||= vid.videoWidth;
-			vid.height ||= vid.videoHeight;
-			vid.defaultWidth = vid.width * $._defaultImageScale;
-			vid.defaultHeight = vid.height * $._defaultImageScale;
-			vid.loadPixels = () => {
-				let g = $.createGraphics(vid.videoWidth, vid.videoHeight);
-				g.image(vid, 0, 0);
-				g.loadPixels();
-				vid.pixels = g.pixels;
-				g.remove();
-			};
+			vid._load();
 			if (cb) cb(vid);
 			q._preloadCount--;
 			return vid;

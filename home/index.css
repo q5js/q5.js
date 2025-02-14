@@ -410,6 +410,10 @@ footer {
 	align-items: center;
 }
 
+.iPadShowKeyboard {
+	display: none;
+}
+
 @media screen and (max-width: 1000px) {
 	.reel {
 		padding-left: 0;

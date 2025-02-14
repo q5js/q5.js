@@ -506,9 +506,9 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		txt[1] = -y;
 		txt[2] = $._textSize / 44;
 		txt[3] = $._matrixIndex;
-		txt[4] = $._fillSet ? $._fill : 0;
+		txt[4] = $._doFill && $._fillSet ? $._fill : 0;
 		txt[5] = $._stroke;
-		txt[6] = $._strokeSet ? $._strokeWeight : 0;
+		txt[6] = $._doStroke && $._strokeSet ? $._strokeWeight : 0;
 		txt[7] = 0; // padding
 
 		textStack.push(txt);

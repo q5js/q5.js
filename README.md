@@ -2,8 +2,7 @@
 
 ## Visit [q5js.org](https://q5js.org)! 🌟
 
-[q5.js](https://q5js.org) is a sequel to [p5.js][] and [Processing Java][].
-
+- inspired by [p5.js][] and [Processing Java][] ⭐️
 - performance optimized for interactive art 🚀
 - lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
 - beginner friendly [documentation](https://q5js.org/learn) 📚
