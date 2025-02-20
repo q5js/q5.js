@@ -5888,9 +5888,9 @@ fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
 	return vert;
 }
 
-fn applyTint(texColor: vec4f, tintColor: vec4f, imageAlpha: f32) -> vec4f {
+fn applyTint(texColor: vec4f, tintColor: vec4f) -> vec4f {
 	// apply the tint color to the sampled texture color at full strength
-	let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a * imageAlpha);
+	let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
 	// mix in the tint using the tint alpha as the blend strength
 	return mix(texColor, tinted, tintColor.a);
 }
@@ -5910,8 +5910,8 @@ fn vertexMain(v: VertexParams) -> FragParams {
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	var texColor = textureSample(tex, samp, f.texCoord);
-
-	return applyTint(texColor, f.tintColor, f.imageAlpha);
+	texColor.a *= f.imageAlpha;
+	return applyTint(texColor, f.tintColor);
 }
 `;
 

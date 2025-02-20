@@ -1,51 +1,24 @@
 struct VertexParams {
 	@builtin(vertex_index) vertexIndex : u32,
-	@builtin(instance_index) instanceIndex : u32
+	@location(0) pos: vec2f,
+	@location(1) texCoord: vec2f,
+	@location(2) tintIndex: f32,
+	@location(3) matrixIndex: f32,
+	@location(4) imageAlpha: f32
 }
 struct FragParams {
-	@builtin(position) position : vec4f,
-	@location(0) texCoord : vec2f,
-	@location(1) fillColor : vec4f,
-	@location(2) strokeColor : vec4f,
-	@location(3) strokeWeight : f32
-}
-struct Char {
-	texOffset: vec2f,
-	texExtent: vec2f,
-	size: vec2f,
-	offset: vec2f,
-}
-struct Text {
-	pos: vec2f,
-	scale: f32,
-	matrixIndex: f32,
-	fillIndex: f32,
-	strokeIndex: f32,
-	strokeWeight: f32
+	@builtin(position) position: vec4f,
+	@location(0) texCoord: vec2f,
+	@location(1) tintColor: vec4f,
+	@location(2) imageAlpha: f32
 }
 
 @group(0) @binding(0) var<uniform> q: Q5;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 @group(0) @binding(2) var<storage> colors : array<vec4f>;
 
-@group(1) @binding(0) var fontTexture: texture_2d<f32>;
-@group(1) @binding(1) var fontSampler: sampler;
-@group(1) @binding(2) var<storage> fontChars: array<Char>;
-
-@group(2) @binding(0) var<storage> textChars: array<vec4f>;
-@group(2) @binding(1) var<storage> textMetadata: array<Text>;
-
-const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
-
-fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
-	return ((quad[i] * fontChar.size + char.xy + fontChar.offset) *
-		text.scale) + text.pos;
-}
-
-fn calcUV(i: u32, fontChar: Char) -> vec2f {
-	return (quad[i] * vec2f(1, -1)) *
-		fontChar.texExtent + fontChar.texOffset;
-}
+@group(1) @binding(0) var samp: sampler;
+@group(1) @binding(1) var tex: texture_2d<f32>;
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
 	var vert = vec4f(pos, 0.0, 1.0);
@@ -55,57 +28,28 @@ fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
 	return vert;
 }
 
-fn calcDist(texCoord: vec2f, edgeWidth: f32) -> f32 {
-	let c = textureSample(fontTexture, fontSampler, texCoord);
-	let sigDist = max(min(c.r, c.g), min(max(c.r, c.g), c.b)) - edgeWidth;
-
-	let pxRange = 4.0;
-	let sz = vec2f(textureDimensions(fontTexture, 0));
-	let dx = sz.x * length(vec2f(dpdxFine(texCoord.x), dpdyFine(texCoord.x)));
-	let dy = sz.y * length(vec2f(dpdxFine(texCoord.y), dpdyFine(texCoord.y)));
-	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
-	return sigDist * toPixels;
+fn applyTint(texColor: vec4f, tintColor: vec4f) -> vec4f {
+	// apply the tint color to the sampled texture color at full strength
+	let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
+	// mix in the tint using the tint alpha as the blend strength
+	return mix(texColor, tinted, tintColor.a);
 }
 
 @vertex
-fn vertexMain(v : VertexParams) -> FragParams {
-	let char = textChars[v.instanceIndex];
-	let text = textMetadata[i32(char.w)];
-	let fontChar = fontChars[i32(char.z)];
-	let pos = calcPos(v.vertexIndex, char, fontChar, text);
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
 
-	var vert = transformVertex(pos, text.matrixIndex);
-
-	var f : FragParams;
+	var f: FragParams;
 	f.position = vert;
-	f.texCoord = calcUV(v.vertexIndex, fontChar);
-	f.fillColor = colors[i32(text.fillIndex)];
-	f.strokeColor = colors[i32(text.strokeIndex)];
-	f.strokeWeight = text.strokeWeight;
+	f.texCoord = v.texCoord;
+	f.tintColor = colors[i32(v.tintIndex)];
+	f.imageAlpha = v.imageAlpha;
 	return f;
 }
 
 @fragment
-fn fragMain(f : FragParams) -> @location(0) vec4f {
-	let edge = 0.5;
-	let dist = calcDist(f.texCoord, edge);
-
-	if (f.strokeWeight == 0.0) {
-		let fillAlpha = smoothstep(-edge, edge, dist);
-		let color = vec4f(f.fillColor.rgb, f.fillColor.a * fillAlpha);
-		if (color.a < 0.01) {
-			discard;
-		}
-		return color;
-	}
-
-	let halfStroke = f.strokeWeight / 2.0;
-	let fillAlpha = smoothstep(-edge, edge, dist - halfStroke);
-	let strokeAlpha = smoothstep(-edge, edge, dist + halfStroke);
-	var color = mix(f.strokeColor, f.fillColor, fillAlpha);
-	color = vec4f(color.rgb, color.a * strokeAlpha);
-	if (color.a < 0.01) {
-		discard;
-	}
-	return color;
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor = textureSample(tex, samp, f.texCoord);
+	texColor.a *= f.imageAlpha;
+	return applyTint(texColor, f.tintColor);
 }
