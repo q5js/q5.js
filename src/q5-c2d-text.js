@@ -42,7 +42,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textFont = (x) => {
-		if (typeof x != 'string') x = x.family;
+		if (x && typeof x != 'string') x = x.family;
 		if (!x || x == font) return font;
 		font = x;
 		fontMod = true;

@@ -1,6 +1,6 @@
 # <img src="https://q5js.org/q5js_logo.webp" height="64"> <img src="https://q5js.org/q5js_brand.webp" height="64">
 
-## Visit [q5js.org](https://q5js.org)! 🌟
+## Visit [q5js.org](https://q5js.org)! 💫
 
 - inspired by [p5.js][] and [Processing Java][] ⭐️
 - performance optimized for interactive art 🚀
@@ -19,6 +19,8 @@ createCanvas(100, 100);
 circle(50, 50, 50);
 ```
 
+q5 doesn't replicate all of p5's functionality, but it's a superior alternative for many use cases. 🛠️
+
 ## Documentation
 
 Browse the [q5 reference pages](https://q5js.org/learn) to learn how to use q5.js.
@@ -32,7 +34,7 @@ Use the [q5.d.ts](q5.d.ts) file in Visual Studio Code to get autocompletion and 
 	"compilerOptions": {
 		"target": "ESNext"
 	},
-	"include": ["*.js", "**/*.js", "node_modules/q5/q5.d.ts"]
+	"include": ["*.js", "*/*.js", "node_modules/q5/q5.d.ts"]
 }
 ```
 
@@ -49,8 +51,6 @@ Are you interested in volunteering to write code for q5.js or improve the q5 eco
 Please report issues or comment on existing issues before working on a pull request. Check out the [q5 project planning board](https://github.com/orgs/q5js/projects/1/views/1).
 
 All contributors must agree to the [code of conduct](CODE_OF_CONDUCT.md).
-
-If the q5 project becomes as successful as The Processing Foundation, all contributing developers will be fairly paid for their work. The project will be run as a [worker co-op](https://en.wikipedia.org/wiki/Worker_cooperative).
 
 ## Licensing
 

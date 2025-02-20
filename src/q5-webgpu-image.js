@@ -1,46 +1,52 @@
 Q5.renderers.webgpu.image = ($, q) => {
-	let vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
-		vertIndex = 0;
+	$._imagePL = 1;
+	$._videoPL = 2;
 
-	let imageShaderCode = `
-struct Uniforms {
-	halfWidth: f32,
-	halfHeight: f32
-}
+	$._imageShaderCode =
+		$._baseShaderCode +
+		/* wgsl */ `
 struct VertexParams {
+	@builtin(vertex_index) vertexIndex : u32,
 	@location(0) pos: vec2f,
 	@location(1) texCoord: vec2f,
 	@location(2) tintIndex: f32,
 	@location(3) matrixIndex: f32,
 	@location(4) imageAlpha: f32
 }
-struct FragmentParams {
+struct FragParams {
 	@builtin(position) position: vec4f,
 	@location(0) texCoord: vec2f,
 	@location(1) tintColor: vec4f,
 	@location(2) imageAlpha: f32
 }
 
-@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(0) @binding(0) var<uniform> q: Q5;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 @group(0) @binding(2) var<storage> colors : array<vec4f>;
 
 @group(1) @binding(0) var samp: sampler;
-@group(1) @binding(1) var texture: texture_2d<f32>;
+@group(1) @binding(1) var tex: texture_2d<f32>;
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
 	var vert = vec4f(pos, 0.0, 1.0);
 	vert = transforms[i32(matrixIndex)] * vert;
-	vert.x /= uniforms.halfWidth;
-	vert.y /= uniforms.halfHeight;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
 	return vert;
 }
 
+fn applyTint(texColor: vec4f, tintColor: vec4f, imageAlpha: f32) -> vec4f {
+	// apply the tint color to the sampled texture color at full strength
+	let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a * imageAlpha);
+	// mix in the tint using the tint alpha as the blend strength
+	return mix(texColor, tinted, tintColor.a);
+}
+
 @vertex
-fn vertexMain(v: VertexParams) -> FragmentParams {
+fn vertexMain(v: VertexParams) -> FragParams {
 	var vert = transformVertex(v.pos, v.matrixIndex);
 
-	var f: FragmentParams;
+	var f: FragParams;
 	f.position = vert;
 	f.texCoord = v.texCoord;
 	f.tintColor = colors[i32(v.tintIndex)];
@@ -49,28 +55,29 @@ fn vertexMain(v: VertexParams) -> FragmentParams {
 }
 
 @fragment
-fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
-	let texColor = textureSample(texture, samp, f.texCoord);
-	
-	// Mix original and tinted colors using tint alpha as blend factor
-	let tinted = vec4f(texColor.rgb * f.tintColor.rgb, texColor.a * f.imageAlpha);
-	return mix(texColor, tinted, f.tintColor.a);
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor = textureSample(tex, samp, f.texCoord);
+
+	return applyTint(texColor, f.tintColor, f.imageAlpha);
 }
 `;
 
 	let imageShader = Q5.device.createShaderModule({
 		label: 'imageShader',
-		code: imageShaderCode
+		code: $._imageShaderCode
 	});
 
-	let videoShaderCode = imageShaderCode
+	$._videoShaderCode = $._imageShaderCode
 		.replace('texture_2d<f32>', 'texture_external')
 		.replace('textureSample', 'textureSampleBaseClampToEdge');
 
 	let videoShader = Q5.device.createShaderModule({
 		label: 'videoShader',
-		code: videoShaderCode
+		code: $._videoShaderCode
 	});
+
+	let vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
+		vertIndex = 0;
 
 	let vertexBufferLayout = {
 		arrayStride: 28,
@@ -135,7 +142,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		},
 		fragment: {
 			module: imageShader,
-			entryPoint: 'fragmentMain',
+			entryPoint: 'fragMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
@@ -154,7 +161,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		},
 		fragment: {
 			module: videoShader,
-			entryPoint: 'fragmentMain',
+			entryPoint: 'fragMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
@@ -267,7 +274,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		let isVideo;
 		if (img.textureIndex == undefined) {
 			isVideo = img.tagName == 'VIDEO';
-			if (!isVideo || !img.width) return;
+			if (!isVideo || !img.width || !img.currentTime) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 
@@ -315,7 +322,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 			v1 = (sy + sh) / h,
 			ti = $._matrixIndex,
 			ci = $._tint,
-			ia = $._imageAlpha;
+			ia = $._globalAlpha;
 
 		addVert(l, t, u0, v0, ci, ti, ia);
 		addVert(r, t, u1, v0, ci, ti, ia);
@@ -323,7 +330,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		addVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
-			$.drawStack.push(1, img.textureIndex);
+			$.drawStack.push($._imagePL, img.textureIndex);
 		} else {
 			// render video
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
@@ -340,7 +347,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 				})
 			);
 
-			$.drawStack.push(2, $._textureBindGroups.length - 1);
+			$.drawStack.push($._videoPL, $._textureBindGroups.length - 1);
 
 			if (img.flipped) $.scale(-1, 1);
 		}
@@ -410,7 +417,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 5,
-			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+			usage: GPUBufferUsage.VERTEX,
 			mappedAtCreation: true
 		});
 

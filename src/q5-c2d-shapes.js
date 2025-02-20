@@ -1,4 +1,4 @@
-Q5.renderers.c2d.drawing = ($) => {
+Q5.renderers.c2d.shapes = ($) => {
 	$._doStroke = true;
 	$._doFill = true;
 	$._strokeSet = false;

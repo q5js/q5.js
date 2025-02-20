@@ -1,63 +1,22 @@
-# q5.js Modular Use
-
-For ES6 modular use, the "q5-core.js" module must be loaded first, which adds `Q5` to the global scope.
-
-```js
-import 'https://q5js.org/src/q5-core.js';
-```
-
-These modules are included in the default "q5.js" bundle:
-
-```js
-import 'https://q5js.org/src/q5-core.js';
-import 'https://q5js.org/src/q5-canvas.js';
-
-import 'https://q5js.org/src/q5-2d-canvas.js';
-import 'https://q5js.org/src/q5-2d-drawing.js';
-import 'https://q5js.org/src/q5-2d-image.js';
-import 'https://q5js.org/src/q5-2d-soft-filters.js';
-import 'https://q5js.org/src/q5-2d-text.js';
-
-import 'https://q5js.org/src/q5-ai.js';
-import 'https://q5js.org/src/q5-color.js';
-import 'https://q5js.org/src/q5-display.js';
-import 'https://q5js.org/src/q5-input.js';
-import 'https://q5js.org/src/q5-math.js';
-import 'https://q5js.org/src/q5-sound.js';
-import 'https://q5js.org/src/q5-util.js';
-import 'https://q5js.org/src/q5-vector.js';
-
-import 'https://q5js.org/src/q5-webgpu-canvas.js';
-import 'https://q5js.org/src/q5-webgpu-drawing.js';
-import 'https://q5js.org/src/q5-webgpu-image.js';
-import 'https://q5js.org/src/q5-webgpu-text.js';
-```
-
-Additional modules:
-
-```js
-import 'https://q5js.org/src/q5-dom.js';
-import 'https://q5js.org/src/q5-noisier.js';
-import 'https://q5js.org/src/q5-sensors.js';
-```
-
 # q5.js Source Code
 
 This section contains information about q5's source code for developers who want to contribute to q5.js.
 
-- [q5.js Modular Use](#q5js-modular-use)
+For information about how to use q5, see the [q5.js documentation](https://q5js.org/learn) and the [q5.js wiki pages](https://github.com/q5js/q5.js/wiki).
+
 - [q5.js Source Code](#q5js-source-code)
   - [q5-core](#q5-core)
   - [q5-canvas](#q5-canvas)
   - [c2d-canvas](#c2d-canvas)
-  - [c2d-drawing](#c2d-drawing)
+  - [c2d-shapes](#c2d-shapes)
   - [c2d-image](#c2d-image)
   - [c2d-soft-filters](#c2d-soft-filters)
   - [c2d-text](#c2d-text)
   - [webgpu-canvas](#webgpu-canvas)
-  - [webgpu-drawing](#webgpu-drawing)
+  - [webgpu-shapes](#webgpu-shapes)
   - [webgpu-image](#webgpu-image)
   - [webgpu-text](#webgpu-text)
+  - [webgpu-shaders](#webgpu-shaders)
   - [math](#math)
   - [noisier](#noisier)
 
@@ -79,9 +38,9 @@ All other c2d modules depend on this module.
 
 Though loading q5-color is recommend, it's not required since `fill` and `stroke` can be set to a CSS color string.
 
-## c2d-drawing
+## c2d-shapes
 
-Adds Canvas2D drawing functions to q5.
+Adds Canvas2D shape drawing functions to q5.
 
 ## c2d-image
 
@@ -105,11 +64,11 @@ Image based features in this module require the q5-c2d-image module.
 
 Adds WebGPU rendering support to q5.
 
-Just like with the Canvas2D renderer, anything drawn to the q5 WebGPU canvas is permanent, unless cleared or overwritten. Achieving this effect in WebGPU is complicated because the canvas texture can not be read back to the CPU. Two textures are used that can be read and copied. One is for rendering and one stores the previous frame. Each frame cycle, the previous frame is drawn onto the current frame, which is how the drawing permanence effect is achieved.
+Just like with the Canvas2D renderer, anything drawn to the q5 WebGPU canvas is permanent, unless cleared or overwritten. Achieving this effect in WebGPU is complicated because the canvas texture can not be read back to the CPU. Two textures are used that can be read from and copied to. Each frame cycle, the previous frame is drawn onto the current frame.
 
 Note that `colorStack` and `transforms` are Float32Arrays which enable faster mapping to GPU buffers at the cost of being harder to work with than JS arrays. These arrays are directly modified for best performance, over using `set`.
 
-## webgpu-drawing
+## webgpu-shapes
 
 Uses "triangle-strip" primitive topology to render shapes and strokes.
 
@@ -119,11 +78,15 @@ Performance is the primary goal of q5 WebGPU, not replicating all the advanced d
 
 ## webgpu-image
 
-Loads images as a `Q5.Image` object backed by an `HTMLCanvasElement` that use the Canvas2D renderer. When loaded or modified, the image is converted into a GPU texture that can be drawn on the WebGPU canvas. This is a slow process and should be avoided if possible. It would probably be better to use WebGPU shaders to filter images.
+Loads images as a `Q5.Image` object backed by an `HTMLCanvasElement` that use the Canvas2D renderer. When loaded or modified, the image is converted into a GPU texture that can be drawn on the WebGPU canvas. This is a slow process and should be avoided if possible. It'd be better to use WebGPU shaders to filter images.
 
 ## webgpu-text
 
 Uses the state of the art MSDF text rendering technique.
+
+## webgpu-shaders
+
+The `plane` function is actually inside the `webgpu-shapes` module. I tried creating an entirely new pipeline just for drawing planes, but I couldn't get it to be any faster than drawing rects with the shapes pipeline. I liked the idea of having a simple function for drawing planes though, in q5 they are centered rectangles with no stroke.
 
 ## math
 

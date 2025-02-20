@@ -342,7 +342,7 @@ Q5.renderers.c2d.image = ($, q) => {
 
 	$._saveCanvas = async (data, ext) => {
 		data = data.canvas || data;
-		if (data instanceof HTMLCanvasElement || data instanceof OffscreenCanvas) {
+		if (data instanceof OffscreenCanvas) {
 			const blob = await data.convertToBlob({ type: 'image/' + ext });
 
 			return await new Promise((resolve) => {

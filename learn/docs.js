@@ -398,6 +398,7 @@ function generateHeadings() {
 }
 
 async function executeDataScripts() {
+	await Q5.initWebGPU();
 	let scripts = contentArea.querySelectorAll('script[type="mini"]');
 	for (let script of scripts) {
 		let mie = new MiniEditor(script);

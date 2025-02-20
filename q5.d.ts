@@ -848,6 +848,173 @@ rect(20, 20, 60, 60);
 	 */
 	var drawingContext: CanvasRenderingContext2D;
 
+	// 🎨 color
+
+	/** 🎨
+	 * Creates a new `Color` object, which is primarily useful for storing
+	 * a color that your sketch will reuse or modify later.
+	 * 
+	 * With the default RGB color mode, colors have these components:
+	 * 
+	 * `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha`.
+	 * 
+	 * The default color format is integer, so set color components
+	 * to values between 0 and 255.
+	 * 
+	 * In q5 WebGPU, the default color mode is RGB in float format, so
+	 * set color components to values between 0 and 1.
+	 * 
+	 * The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background) functions
+	 * accept the same wide range of color representations as this function.
+	 * 
+	 * Here are some examples of valid use:
+	 * 
+	 * - `color(255)` (grayscale)
+	 * - `color(255, 200)` (grayscale, alpha)
+	 * - `color(255, 0, 0)` (r, g, b)
+	 * - `color(255, 0, 0, 10)` (r, g, b, a)
+	 * - `color('red')` (colorName)
+	 * - `color('#ff0000')` (hexColor)
+	 * - `color([255, 0, 0])` (colorComponents)
+	 * @param {string | number | Color | number[]} c0 color or first color component
+	 * @param {number} [c1] second color component
+	 * @param {number} [c2] third color component
+	 * @param {number} [c3] fourth color component (alpha)
+	 * @returns {Color} a new `Color` object
+	 * @example
+createCanvas(200);
+rect(0, 0, 100, 200);
+
+//                ( r,   g,   b,   a)
+let bottle = color(90, 100, 255, 100);
+fill(bottle);
+stroke(bottle);
+strokeWeight(30);
+circle(100, 100, 155);
+	 * @example
+createCanvas(200);
+//          (gray, alpha)
+let c = color(200, 50);
+
+function draw() {
+	background(c);
+	circle(mouseX, mouseY, 50);
+	c.g = (c.g + 1) % 255;
+}
+	 */
+	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
+
+	/** 🎨
+	 * Sets the color mode for the sketch. Changes the type of color object created by color functions.
+	 * 
+	 * In c2d, the default color mode is RGB in legacy integer format.
+	 *
+	 * In WebGPU, the default color mode is RGB in float format.
+	 * 
+	 * See the documentation for q5's color constants below for more info.
+	 * @param {'rgb' | 'srgb' | 'oklch'} mode color mode
+	 * @param {1 | 255} format color format (1 for float, 255 for integer)
+	 * @example
+createCanvas(200);
+
+colorMode(RGB, 1);
+fill(1, 0, 0);
+rect(0, 0, 66, 200);
+fill(0, 1, 0);
+rect(66, 0, 67, 200);
+fill(0, 0, 1);
+rect(133, 0, 67, 200);
+	 * @example
+createCanvas(200);
+
+colorMode(OKLCH);
+
+fill(0.25, 0.15, 0);
+rect(0, 0, 100, 200);
+
+fill(0.75, 0.15, 0)
+rect(100, 0, 100, 200);
+	 */
+	function colorMode(mode: 'rgb' | 'srgb' | 'oklch', format: 1 | 255): void;
+
+	/** 🎨
+	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
+	 * and `a`/`alpha`.
+	 * 
+	 * By default when a canvas is using the HDR `display-p3` color space,
+	 * rgb colors are mapped to the full P3 gamut, even when they use the
+	 * legacy integer 0-255 format.
+	 * @example
+createCanvas(200, 100);
+
+colorMode(RGB, 255);
+
+background(255, 0, 0);
+	 */
+	const RGB: 'rgb';
+
+	/** 🎨
+	 * This color mode limits the gamut of rgb colors to sRGB.
+	 * 
+	 * If your display is HDR capable, take a look at the following
+	 * example, note that full red appears less saturated, as it would
+	 * on an SDR display.
+	 * @example
+createCanvas(200, 100);
+
+colorMode(SRGB, 255);
+
+background(255, 0, 0);
+	 */
+	const SRGB: 'srgb';
+
+	/** 🎨
+	 * OKLCH colors have components `l`/`lightness`, `c`/`chroma`,
+	 * `h`/`hue`, and `a`/`alpha`.
+	 * 
+	 * You may be familiar with the outdated HSL/HSV color formats,
+	 * which were created in the 1970s to be more intuitive for humans
+	 * to work with than RGB. But due to technical limitations of that
+	 * time, they're not perceptually uniform, meaning colors at the same 
+	 * brightness values may appear lighter or darker depending on the hue.
+	 * 
+	 * The OKLCH format is similar to HSL/HSV but it's perceptually
+	 * uniform and supports HDR colors. Use this oklch color picker to 
+	 * explore the color space: https://oklch.com
+	 * 
+	 * `lightness`: 0 to 1
+	 * 
+	 * `chroma`: 0 to 0.3
+	 * 
+	 * `hue`: 0 to 360
+	 * 
+	 * `alpha`: 0 to 1
+	 * 
+	 * Note how seamless the hue transitions are in the following example.
+	 * @example
+createCanvas(200);
+colorMode(OKLCH);
+
+function draw() {
+	background(0.7, 0.16, frameCount % 360);
+}
+	 */
+	const OKLCH: 'oklch';
+
+	class Color {
+		/** 🎨
+		 * Use the `color` function for greater flexibility, it runs
+		 * this constructor internally.
+		 * 
+		 * This constructor only accepts 4 numbers, which are the color 
+		 * components.
+		 * 
+		 * `Color` is not actually a class itself, it's a reference to a
+		 * Q5 color class based on the color mode and format.
+		 */
+		constructor(c0: number, c1: number, c2: number, c3: number);
+	}
+
 	// 💻 display
 
 	/** 💻
@@ -869,7 +1036,7 @@ circle(25, 12.5, 16);
 	 */
 	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
 
-	// 🧑‍🎨 drawing
+	// 🧑‍🎨 shapes
 
 	/** 🧑‍🎨
 	 * Draws over the entire canvas with a color or image.
@@ -1163,337 +1330,6 @@ point(125, 50);
 	 * @returns {boolean} true if the point is within the stroke, false otherwise
 	 */
 	function inStroke(x: number, y: number): boolean;
-
-	// 📑 dom
-
-	/** 📑
-	 * The Document Object Model (DOM) is an interface for
-	 * creating and editing web pages with JavaScript.
-	 */
-
-	/** 📑
-	 * Creates a new HTML element and adds it to the page. `createEl` is
-	 * an alias.
-	 * 
-	 * Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
-	 * 
-	 * Use [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener) to respond to events such as:
-	 * - "click": when the element is clicked
-	 * - "mouseover": when the mouse hovers over the element
-	 * - "mouseout": when the mouse stops hovering over the element
-	 * - "input": when a form element's value changes
-	 * 
-	 * q5 adds some extra functionality to the elements it creates:
-	 * 
-	 * - the `position` function makes it easy to place the element
-	 * relative to the canvas
-	 * - the `size` function sets the width and height of the element
-	 * - alternatively, use the element's `x`, `y`, `width`, and `height` properties
-	 * @param {string} tag tag name of the element
-	 * @param {string} [content] content of the element
-	 * @returns {HTMLElement} element
-	 * @example
-createCanvas(200);
-
-let el = createEl('div', '*');
-el.position(50, 50);
-el.size(100, 100);
-el.style.fontSize = '136px';
-el.style.textAlign = 'center';
-el.style.backgroundColor = 'blue';
-el.style.color = 'white';
-	 */
-	function createElement(tag: string, content?: string): HTMLElement;
-
-	/** 📑
-	 * Creates a link element.
-	 * @param {string} href url
-	 * @param {string} [text] text content
-	 * @param {boolean} [newTab] whether to open the link in a new tab
-	 * @example
-createCanvas(200);
-
-let link = createA('https://q5js.org', 'q5.js');
-link.position(16, 42);
-link.style.fontSize = '80px';
-
-link.addEventListener('mouseover', () => {
-	background('blue');
-});
-	 */
-	function createA(href: string, text?: string): HTMLAnchorElement;
-
-	/** 📑
-	 * Creates a button element.
-	 * @param {string} [content] text content
-	 * @example
-createCanvas(200, 100);
-
-let btn = createButton('Click me!');
-
-btn.addEventListener('click', () => {
-	background(random(100, 255));
-});
-	 */
-	function createButton(content?: string): HTMLButtonElement;
-
-	/** 📑
-	 * Creates a checkbox element.
-	 * 
-	 * Use the `checked` property to get or set the checkbox's state.
-	 * 
-	 * The `label` property is the text label element next to the checkbox.
-	 * @param {string} [label] text label placed next to the checkbox
-	 * @param {boolean} [checked] initial state
-	 * @example
-createCanvas(200, 100);
-
-let box = createCheckbox('Check me!');
-box.label.style.color = 'lime';
-
-box.addEventListener('input', () => {
-	if (box.checked) background('lime');
-	else background('black');
-});
-	 */
-	function createCheckbox(label?: string, checked?: boolean): HTMLInputElement;
-
-	/** 📑
-	 * Creates a color input element.
-	 * 
-	 * Use the `value` property to get or set the color value.
-	 * @param {string} [value] initial color value
-	 * @example
-createCanvas(200, 100);
-
-let picker = createColorPicker();
-picker.value = '#fd7575';
-
-function draw() {
-	background(picker.value);
-}
-	 */
-	function createColorPicker(value?: string): HTMLInputElement;
-
-	/** 📑
-	 * Creates an image element.
-	 * @param {string} src url of the image
-	 * @example
-createCanvas(200, 100);
-
-let img = createImg('/assets/p5play_logo.webp')
-	.position(0, 0)
-	.size(100, 100);
-	 */
-	function createImg(src: string): HTMLImageElement;
-
-	/** 📑
-	 * Creates an input element.
-	 * 
-	 * Use the `value` property to get or set the input's value.
-	 * 
-	 * Use the `placeholder` property to set label text that appears
-	 * inside the input when it's empty.
-	 * 
-	 * See MDN's [input documentation](https://developer.mozilla.org/docs/Web/HTML/Element/input#input_types) for the full list of input types.
-	 * @param {string} [value] initial value
-	 * @param {string} [type] text input type, can be 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
-	 * @example
-createCanvas(200, 100);
-textSize(64);
-
-let input = createInput();
-input.placeholder = 'Type here!';
-input.size(200, 32);
-
-input.addEventListener('input', () => {
-	background('orange');
-	text(input.value, 10, 70);
-});
-	 */
-	function createInput(value?: string, type?: string): HTMLInputElement;
-
-	/** 📑
-	 * Creates a paragraph element.
-	 * @param {string} [content] text content
-	 * @example
-createCanvas(200, 50);
-background('coral');
-
-let p = createP('Hello, world!');
-p.style.color = 'pink';
-	 */
-	function createP(content?: string): HTMLParagraphElement;
-
-	/** 📑
-	 * Creates a radio button group.
-	 * 
-	 * Use the `option(label, value)` function to add new radio buttons
-	 * to the group.
-	 * 
-	 * Use the `value` property to get or set the value of the selected radio button.
-	 * @param {string} [groupName]
-	 * @example
-createCanvas(200, 100);
-
-let radio = createRadio()
-	.option('square', '1')
-	.option('circle', '2');
-
-function draw() {
-	background(200);
-	if (radio.value == '1') square(75, 25, 50);
-	if (radio.value == '2') circle(100, 50, 50);
-}
-	 */
-	function createRadio(groupName): HTMLDivElement;
-
-	/** 📑
-	 * Creates a select element.
-	 * 
-	 * Use the `option(label, value)` function to add new options to
-	 * the select element.
-	 * 
-	 * Set `multiple` to `true` to allow multiple options to be selected.
-	 * 
-	 * Use the `value` property to get or set the selected option value.
-	 * 
-	 * Use the `selected` property get the labels of the selected 
-	 * options or set the selected options by label. Can be a single 
-	 * string or an array of strings.
-	 * @param {string} [placeholder] optional placeholder text that appears before an option is selected
-	 * @example
-createCanvas(200, 100);
-
-let sel = createSelect('Select a color')
-	.option('Red', '#f55')
-	.option('Green', '#5f5');
-
-sel.addEventListener('change', () => {
-	background(sel.value);
-});
-	 */
-	function createSelect(placeholder): HTMLSelectElement;
-
-	/** 📑
-	 * Creates a slider element.
-	 * 
-	 * Use the `value` property to get or set the slider's value.
-	 * 
-	 * Use the `val` function to get the slider's value as a number.
-	 * @param {number} min minimum value
-	 * @param {number} max maximum value
-	 * @param {number} [value] initial value
-	 * @param {number} [step] step size
-	 * @example
-createCanvas(200);
-
-let slider = createSlider(0, 255)
-	.position(10, 10)
-	.size(180);
-
-function draw() {
-	background(slider.val());
-}
-	 */
-	function createSlider(min: number, max: number, value?: number, step?: number): HTMLInputElement;
-
-	/** 📑
-	 * Creates a video element.
-	 * 
-	 * Note that videos must be muted to autoplay and the `play` and 
-	 * `pause` functions can only be run after a user interaction.
-	 * 
-	 * The video element can be hidden and its content can be
-	 * displayed on the canvas using the `image` function.
-	 * @param {string} src url of the video
-	 * @example
-createCanvas(0);
-
-let vid = createVideo('/assets/apollo4.mp4');
-vid.size(200, 150);
-vid.autoplay = vid.muted = vid.loop = true;
-vid.controls = true;
-
-	 * @example
-createCanvas(200, 150);
-let vid = createVideo('/assets/apollo4.mp4');
-vid.hide();
-
-function mousePressed() {
-	vid.currentTime = 0;
-	vid.play();
-}
-function draw() {
-	image(vid, 0, 0, 200, 150);
-	filter(HUE_ROTATE, 90);
-}
-	 */
-	function createVideo(src: string): HTMLVideoElement;
-
-	/** 📑
-	 * Creates a capture from a connected camera, such as a webcam.
-	 * 
-	 * The capture video element can be hidden and its content can be
-	 * displayed on the canvas using the `image` function.
-	 * 
-	 * Can preload to ensure the capture is ready to use when your 
-	 * sketch starts.
-	 * 
-	 * Requests the highest video resolution from the user facing camera 	
-	 * by default. The first parameter to this function can be used to 
-	 * specify the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia)
-	 * for more info.
-	 * @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
-	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
-	 * @param {(vid: HTMLVideoElement) => void} [cb] callback function after the capture is created
-	 * @example
-createCanvas(200);
-
-function mousePressed() {
-	let cap = createCapture(VIDEO);
-	cap.size(200, 112.5);
-	canvas.remove();
-}
-	 * @example
-createCanvas(200);
-
-let cap;
-function mousePressed() {
-  cap = createCapture(VIDEO);
-  cap.hide();
-}
-
-function draw() {
-  let y = frameCount % height;
-  image(cap, 0, y, 200, 200);
-}
-	* @example
-createCanvas(200);
-
-function mousePressed() {
-	let cap = createCapture({
-		video: { width: 640, height: 480 }
-	});
-	cap.size(200, 150);
-	canvas.remove();
-}
-	 */
-	function createCapture(type?: string, flipped?: boolean, cb?: (vid: HTMLVideoElement) => void): HTMLVideoElement;
-
-	/** 📑
-	 * Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
-	 * @param {string} selector
-	 * @returns {HTMLElement} element
-	 */
-	function findElement(selector: string): HTMLElement;
-
-	/** 📑
-	 * Finds all elements in the DOM that match the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
-	 * @param {string} selector
-	 * @returns {HTMLElement[]} elements
-	 */
-	function findElements(selector: string): HTMLElement[];
 
 	// 🌆 image
 
@@ -2129,181 +1965,6 @@ text(nf(PI, 4, 2), 10, 60);
 	 */
 	const BASELINE: 'alphabetic';
 
-	// ✨ ai
-
-	/** ✨
-	 * Run this function before a line of code that isn't working as expected.
-	 * @param {string} [question] question to ask the AI
-	 */
-	function askAI(question?: string): void;
-
-	// 🎨 color
-
-	/** 🎨
-	 * Creates a new `Color` object, which is primarily useful for storing
-	 * a color that your sketch will reuse or modify later.
-	 * 
-	 * With the default RGB color mode, colors have these components:
-	 * 
-	 * `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha`.
-	 * 
-	 * The default color format is integer, so set color components
-	 * to values between 0 and 255.
-	 * 
-	 * In q5 WebGPU, the default color mode is RGB in float format, so
-	 * set color components to values between 0 and 1.
-	 * 
-	 * The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background) functions
-	 * accept the same wide range of color representations as this function.
-	 * 
-	 * Here are some examples of valid use:
-	 * 
-	 * - `color(255)` (grayscale)
-	 * - `color(255, 200)` (grayscale, alpha)
-	 * - `color(255, 0, 0)` (r, g, b)
-	 * - `color(255, 0, 0, 10)` (r, g, b, a)
-	 * - `color('red')` (colorName)
-	 * - `color('#ff0000')` (hexColor)
-	 * - `color([255, 0, 0])` (colorComponents)
-	 * @param {string | number | Color | number[]} c0 color or first color component
-	 * @param {number} [c1] second color component
-	 * @param {number} [c2] third color component
-	 * @param {number} [c3] fourth color component (alpha)
-	 * @returns {Color} a new `Color` object
-	 * @example
-createCanvas(200);
-rect(0, 0, 100, 200);
-
-//                ( r,   g,   b,   a)
-let bottle = color(90, 100, 255, 100);
-fill(bottle);
-stroke(bottle);
-strokeWeight(30);
-circle(100, 100, 155);
-	 * @example
-createCanvas(200);
-//          (gray, alpha)
-let c = color(200, 50);
-
-function draw() {
-	background(c);
-	circle(mouseX, mouseY, 50);
-	c.g = (c.g + 1) % 255;
-}
-	 */
-	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
-
-	/** 🎨
-	 * Sets the color mode for the sketch. Changes the type of color object created by color functions.
-	 * 
-	 * In c2d, the default color mode is RGB in legacy integer format.
-	 *
-	 * In WebGPU, the default color mode is RGB in float format.
-	 * 
-	 * See the documentation for q5's color constants below for more info.
-	 * @param {'rgb' | 'srgb' | 'oklch'} mode color mode
-	 * @param {1 | 255} format color format (1 for float, 255 for integer)
-	 * @example
-createCanvas(200);
-
-colorMode(RGB, 1);
-fill(1, 0, 0);
-rect(0, 0, 66, 200);
-fill(0, 1, 0);
-rect(66, 0, 67, 200);
-fill(0, 0, 1);
-rect(133, 0, 67, 200);
-	 * @example
-createCanvas(200);
-
-colorMode(OKLCH);
-
-fill(0.25, 0.15, 0);
-rect(0, 0, 100, 200);
-
-fill(0.75, 0.15, 0)
-rect(100, 0, 100, 200);
-	 */
-	function colorMode(mode: 'rgb' | 'srgb' | 'oklch', format: 1 | 255): void;
-
-	/** 🎨
-	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
-	 * and `a`/`alpha`.
-	 * 
-	 * By default when a canvas is using the HDR `display-p3` color space,
-	 * rgb colors are mapped to the full P3 gamut, even when they use the
-	 * legacy integer 0-255 format.
-	 * @example
-createCanvas(200, 100);
-
-colorMode(RGB, 255);
-
-background(255, 0, 0);
-	 */
-	const RGB: 'rgb';
-
-	/** 🎨
-	 * This color mode limits the gamut of rgb colors to sRGB.
-	 * 
-	 * If your display is HDR capable, take a look at the following
-	 * example, note that full red appears less saturated, as it would
-	 * on an SDR display.
-	 * @example
-createCanvas(200, 100);
-
-colorMode(SRGB, 255);
-
-background(255, 0, 0);
-	 */
-	const SRGB: 'srgb';
-
-	/** 🎨
-	 * OKLCH colors have components `l`/`lightness`, `c`/`chroma`,
-	 * `h`/`hue`, and `a`/`alpha`.
-	 * 
-	 * You may be familiar with the outdated HSL/HSV color formats,
-	 * which were created in the 1970s to be more intuitive for humans
-	 * to work with than RGB. But due to technical limitations of that
-	 * time, they're not perceptually uniform, meaning colors at the same 
-	 * brightness values may appear lighter or darker depending on the hue.
-	 * 
-	 * The OKLCH format is similar to HSL/HSV but it's perceptually
-	 * uniform and supports HDR colors. Use this oklch color picker to 
-	 * explore the color space: https://oklch.com
-	 * 
-	 * `lightness`: 0 to 1
-	 * 
-	 * `chroma`: 0 to 0.3
-	 * 
-	 * `hue`: 0 to 360
-	 * 
-	 * `alpha`: 0 to 1
-	 * 
-	 * Note how seamless the hue transitions are in the following example.
-	 * @example
-createCanvas(200);
-colorMode(OKLCH);
-
-function draw() {
-	background(0.7, 0.16, frameCount % 360);
-}
-	 */
-	const OKLCH: 'oklch';
-
-	class Color {
-		/** 🎨
-		 * Use the `color` function for greater flexibility, it runs
-		 * this constructor internally.
-		 * 
-		 * This constructor only accepts 4 numbers, which are the color 
-		 * components.
-		 * 
-		 * `Color` is not actually a class itself, it's a reference to a
-		 * Q5 color class based on the color mode and format.
-		 */
-		constructor(c0: number, c1: number, c2: number, c3: number);
-	}
-
 	// 🖲️ input
 
 	/** 🖲️
@@ -2730,86 +2391,6 @@ function draw() {
 	 */
 	const TAU: number;
 
-	// 🎞️ record
-
-	/** 🎞️
-	 * q5.js has a built-in canvas recorder powered by
-	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder). It provides a good balance between 
-	 * video encoding speed, quality, and file size.
-	 * 
-	 * Recording large canvases is an intensive process, so your
-	 * computer may not be able to do it in real time. That's okay,
-	 * the resulting video will playback at your sketch's target 
-	 * frame rate. But if real time interaction while recording is a 
-	 * priority, consider reducing the canvas' size, frame rate, and/or 
-	 * recording quality.
-	 * 
-	 * HDR video encoding is not yet supported by any web browser.
-	 * For that and other advanced features, consider using
-	 * a screen capture tool like [OBS Studio](https://obsproject.com).
-	 */
-
-	/** 🎞️
-	 * Creates a recorder. Simply hit record to start recording!
-	 * 
-	 * The following properties can be set via the recorder UI or
-	 * programmatically.
-	 * 
-	 * - `format` is set to "H.264" by default. Encoding in "VP9" may not
-	 * be possible on some devices.
-	 * - `bitrate` is a number in megabits per second (mbps). Its default
-	 * value is determined by the height of the canvas. Increasing the
-	 * bitrate will increase the quality and file size of the recording.
-	 * @returns {HTMLElement} a recorder, q5 DOM element
-	 * @example
-createCanvas(200);
-
-let rec = createRecorder();
-rec.bitrate = 10;
-
-function draw() {
-	circle(mouseX, randomY(), 10);
-}
-	 */
-	function createRecorder(): HTMLElement;
-
-	/** 🎞️
-	 * Starts recording the canvas or resumes recording if it was paused.
-	 * 
-	 * If no recorder exists, one is created but not displayed.
-	 */
-	function record(): void;
-
-	/** 🎞️
-	 * Pauses the canvas recording, if one is in progress.
-	 */
-	function pauseRecording(): void;
-
-	/** 🎞️
-	 * Discards the current recording.
-	 */
-	function deleteRecording(): void;
-
-	/** 🎞️
-	 * Saves the current recording as a video file.
-	 * @param {string} fileName
-	 * @example
-function draw() {
-	square(mouseX, randomY(), 10);
-}
-
-function mousePressed() {
-	if (!recording) record();
-	else saveRecording('squares');
-}
-	 */
-	function saveRecording(fileName): void;
-
-	/** 🎞️
-	 * True if the canvas is currently being recorded.
-	 */
-	var recording: boolean;
-
 	// 🔊 sound
 
 	/** 🔊
@@ -2945,6 +2526,417 @@ function mousePressed() {
 		stop(): void;
 	}
 
+	// 📑 dom
+
+	/** 📑
+	 * The Document Object Model (DOM) is an interface for
+	 * creating and editing web pages with JavaScript.
+	 */
+
+	/** 📑
+	 * Creates a new HTML element and adds it to the page. `createEl` is
+	 * an alias.
+	 * 
+	 * Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
+	 * 
+	 * Use [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener) to respond to events such as:
+	 * - "click": when the element is clicked
+	 * - "mouseover": when the mouse hovers over the element
+	 * - "mouseout": when the mouse stops hovering over the element
+	 * - "input": when a form element's value changes
+	 * 
+	 * q5 adds some extra functionality to the elements it creates:
+	 * 
+	 * - the `position` function makes it easy to place the element
+	 * relative to the canvas
+	 * - the `size` function sets the width and height of the element
+	 * - alternatively, use the element's `x`, `y`, `width`, and `height` properties
+	 * @param {string} tag tag name of the element
+	 * @param {string} [content] content of the element
+	 * @returns {HTMLElement} element
+	 * @example
+createCanvas(200);
+
+let el = createEl('div', '*');
+el.position(50, 50);
+el.size(100, 100);
+el.style.fontSize = '136px';
+el.style.textAlign = 'center';
+el.style.backgroundColor = 'blue';
+el.style.color = 'white';
+	 */
+	function createElement(tag: string, content?: string): HTMLElement;
+
+	/** 📑
+	 * Creates a link element.
+	 * @param {string} href url
+	 * @param {string} [text] text content
+	 * @param {boolean} [newTab] whether to open the link in a new tab
+	 * @example
+createCanvas(200);
+
+let link = createA('https://q5js.org', 'q5.js');
+link.position(16, 42);
+link.style.fontSize = '80px';
+
+link.addEventListener('mouseover', () => {
+	background('blue');
+});
+	 */
+	function createA(href: string, text?: string): HTMLAnchorElement;
+
+	/** 📑
+	 * Creates a button element.
+	 * @param {string} [content] text content
+	 * @example
+createCanvas(200, 100);
+
+let btn = createButton('Click me!');
+
+btn.addEventListener('click', () => {
+	background(random(100, 255));
+});
+	 */
+	function createButton(content?: string): HTMLButtonElement;
+
+	/** 📑
+	 * Creates a checkbox element.
+	 * 
+	 * Use the `checked` property to get or set the checkbox's state.
+	 * 
+	 * The `label` property is the text label element next to the checkbox.
+	 * @param {string} [label] text label placed next to the checkbox
+	 * @param {boolean} [checked] initial state
+	 * @example
+createCanvas(200, 100);
+
+let box = createCheckbox('Check me!');
+box.label.style.color = 'lime';
+
+box.addEventListener('input', () => {
+	if (box.checked) background('lime');
+	else background('black');
+});
+	 */
+	function createCheckbox(label?: string, checked?: boolean): HTMLInputElement;
+
+	/** 📑
+	 * Creates a color input element.
+	 * 
+	 * Use the `value` property to get or set the color value.
+	 * @param {string} [value] initial color value
+	 * @example
+createCanvas(200, 100);
+
+let picker = createColorPicker();
+picker.value = '#fd7575';
+
+function draw() {
+	background(picker.value);
+}
+	 */
+	function createColorPicker(value?: string): HTMLInputElement;
+
+	/** 📑
+	 * Creates an image element.
+	 * @param {string} src url of the image
+	 * @example
+createCanvas(200, 100);
+
+let img = createImg('/assets/p5play_logo.webp')
+	.position(0, 0)
+	.size(100, 100);
+	 */
+	function createImg(src: string): HTMLImageElement;
+
+	/** 📑
+	 * Creates an input element.
+	 * 
+	 * Use the `value` property to get or set the input's value.
+	 * 
+	 * Use the `placeholder` property to set label text that appears
+	 * inside the input when it's empty.
+	 * 
+	 * See MDN's [input documentation](https://developer.mozilla.org/docs/Web/HTML/Element/input#input_types) for the full list of input types.
+	 * @param {string} [value] initial value
+	 * @param {string} [type] text input type, can be 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
+	 * @example
+createCanvas(200, 100);
+textSize(64);
+
+let input = createInput();
+input.placeholder = 'Type here!';
+input.size(200, 32);
+
+input.addEventListener('input', () => {
+	background('orange');
+	text(input.value, 10, 70);
+});
+	 */
+	function createInput(value?: string, type?: string): HTMLInputElement;
+
+	/** 📑
+	 * Creates a paragraph element.
+	 * @param {string} [content] text content
+	 * @example
+createCanvas(200, 50);
+background('coral');
+
+let p = createP('Hello, world!');
+p.style.color = 'pink';
+	 */
+	function createP(content?: string): HTMLParagraphElement;
+
+	/** 📑
+	 * Creates a radio button group.
+	 * 
+	 * Use the `option(label, value)` function to add new radio buttons
+	 * to the group.
+	 * 
+	 * Use the `value` property to get or set the value of the selected radio button.
+	 * @param {string} [groupName]
+	 * @example
+createCanvas(200, 100);
+
+let radio = createRadio()
+	.option('square', '1')
+	.option('circle', '2');
+
+function draw() {
+	background(200);
+	if (radio.value == '1') square(75, 25, 50);
+	if (radio.value == '2') circle(100, 50, 50);
+}
+	 */
+	function createRadio(groupName): HTMLDivElement;
+
+	/** 📑
+	 * Creates a select element.
+	 * 
+	 * Use the `option(label, value)` function to add new options to
+	 * the select element.
+	 * 
+	 * Set `multiple` to `true` to allow multiple options to be selected.
+	 * 
+	 * Use the `value` property to get or set the selected option value.
+	 * 
+	 * Use the `selected` property get the labels of the selected 
+	 * options or set the selected options by label. Can be a single 
+	 * string or an array of strings.
+	 * @param {string} [placeholder] optional placeholder text that appears before an option is selected
+	 * @example
+createCanvas(200, 100);
+
+let sel = createSelect('Select a color')
+	.option('Red', '#f55')
+	.option('Green', '#5f5');
+
+sel.addEventListener('change', () => {
+	background(sel.value);
+});
+	 */
+	function createSelect(placeholder): HTMLSelectElement;
+
+	/** 📑
+	 * Creates a slider element.
+	 * 
+	 * Use the `value` property to get or set the slider's value.
+	 * 
+	 * Use the `val` function to get the slider's value as a number.
+	 * @param {number} min minimum value
+	 * @param {number} max maximum value
+	 * @param {number} [value] initial value
+	 * @param {number} [step] step size
+	 * @example
+createCanvas(200);
+
+let slider = createSlider(0, 255)
+	.position(10, 10)
+	.size(180);
+
+function draw() {
+	background(slider.val());
+}
+	 */
+	function createSlider(min: number, max: number, value?: number, step?: number): HTMLInputElement;
+
+	/** 📑
+	 * Creates a video element.
+	 * 
+	 * Note that videos must be muted to autoplay and the `play` and 
+	 * `pause` functions can only be run after a user interaction.
+	 * 
+	 * The video element can be hidden and its content can be
+	 * displayed on the canvas using the `image` function.
+	 * @param {string} src url of the video
+	 * @example
+createCanvas(0);
+
+let vid = createVideo('/assets/apollo4.mp4');
+vid.size(200, 150);
+vid.autoplay = vid.muted = vid.loop = true;
+vid.controls = true;
+
+	 * @example
+createCanvas(200, 150);
+let vid = createVideo('/assets/apollo4.mp4');
+vid.hide();
+
+function mousePressed() {
+	vid.currentTime = 0;
+	vid.play();
+}
+function draw() {
+	image(vid, 0, 0, 200, 150);
+	filter(HUE_ROTATE, 90);
+}
+	 */
+	function createVideo(src: string): HTMLVideoElement;
+
+	/** 📑
+	 * Creates a capture from a connected camera, such as a webcam.
+	 * 
+	 * The capture video element can be hidden and its content can be
+	 * displayed on the canvas using the `image` function.
+	 * 
+	 * Can preload to ensure the capture is ready to use when your 
+	 * sketch starts.
+	 * 
+	 * Requests the highest video resolution from the user facing camera 	
+	 * by default. The first parameter to this function can be used to 
+	 * specify the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia)
+	 * for more info.
+	 * @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
+	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
+	 * @param {(vid: HTMLVideoElement) => void} [cb] callback function after the capture is created
+	 * @example
+createCanvas(200);
+
+function mousePressed() {
+	let cap = createCapture(VIDEO);
+	cap.size(200, 112.5);
+	canvas.remove();
+}
+	 * @example
+createCanvas(200);
+
+let cap;
+function mousePressed() {
+  cap = createCapture(VIDEO);
+  cap.hide();
+}
+
+function draw() {
+  let y = frameCount % height;
+  image(cap, 0, y, 200, 200);
+}
+	* @example
+createCanvas(200);
+
+function mousePressed() {
+	let cap = createCapture({
+		video: { width: 640, height: 480 }
+	});
+	cap.size(200, 150);
+	canvas.remove();
+}
+	 */
+	function createCapture(type?: string, flipped?: boolean, cb?: (vid: HTMLVideoElement) => void): HTMLVideoElement;
+
+	/** 📑
+	 * Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * @param {string} selector
+	 * @returns {HTMLElement} element
+	 */
+	function findElement(selector: string): HTMLElement;
+
+	/** 📑
+	 * Finds all elements in the DOM that match the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * @param {string} selector
+	 * @returns {HTMLElement[]} elements
+	 */
+	function findElements(selector: string): HTMLElement[];
+
+	// 🎞️ record
+
+	/** 🎞️
+	 * q5.js has a built-in canvas recorder powered by
+	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder). It provides a good balance between 
+	 * video encoding speed, quality, and file size.
+	 * 
+	 * Recording large canvases is an intensive process, so your
+	 * computer may not be able to do it in real time. That's okay,
+	 * the resulting video will playback at your sketch's target 
+	 * frame rate. But if real time interaction while recording is a 
+	 * priority, consider reducing the canvas' size, frame rate, and/or 
+	 * recording quality.
+	 * 
+	 * HDR video encoding is not yet supported by any web browser.
+	 * For that and other advanced features, consider using
+	 * a screen capture tool like [OBS Studio](https://obsproject.com).
+	 */
+
+	/** 🎞️
+	 * Creates a recorder. Simply hit record to start recording!
+	 * 
+	 * The following properties can be set via the recorder UI or
+	 * programmatically.
+	 * 
+	 * - `format` is set to "H.264" by default. Encoding in "VP9" may not
+	 * be possible on some devices.
+	 * - `bitrate` is a number in megabits per second (mbps). Its default
+	 * value is determined by the height of the canvas. Increasing the
+	 * bitrate will increase the quality and file size of the recording.
+	 * @returns {HTMLElement} a recorder, q5 DOM element
+	 * @example
+createCanvas(200);
+
+let rec = createRecorder();
+rec.bitrate = 10;
+
+function draw() {
+	circle(mouseX, randomY(), 10);
+}
+	 */
+	function createRecorder(): HTMLElement;
+
+	/** 🎞️
+	 * Starts recording the canvas or resumes recording if it was paused.
+	 * 
+	 * If no recorder exists, one is created but not displayed.
+	 */
+	function record(): void;
+
+	/** 🎞️
+	 * Pauses the canvas recording, if one is in progress.
+	 */
+	function pauseRecording(): void;
+
+	/** 🎞️
+	 * Discards the current recording.
+	 */
+	function deleteRecording(): void;
+
+	/** 🎞️
+	 * Saves the current recording as a video file.
+	 * @param {string} fileName
+	 * @example
+function draw() {
+	square(mouseX, randomY(), 10);
+}
+
+function mousePressed() {
+	if (!recording) record();
+	else saveRecording('squares');
+}
+	 */
+	function saveRecording(fileName): void;
+
+	/** 🎞️
+	 * True if the canvas is currently being recorded.
+	 */
+	var recording: boolean;
+
 	// 🛠️ utilities
 
 	/** 🛠️
@@ -2975,7 +2967,8 @@ createCanvas(200);
 await load('/assets/Robotica.ttf');
 
 background(255);
-text('Hello, world!', 20, 100);
+textSize(24);
+text('Hello, world!', 16, 100);
 	 * @example
 let q = new Q5();
 createCanvas(200);
@@ -3260,6 +3253,234 @@ function mousePressed() {
 		 */
 		static fromAngle(angle: number, length?: number): Vector;
 	}
+
+	// ✨ ai
+
+	/** ✨
+	 * Run this function before a line of code that isn't working as expected.
+	 * @param {string} [question] question to ask the AI
+	 */
+	function askAI(question?: string): void;
+
+	// ⚡️ shaders
+
+	/** ⚡️
+	 * Custom shaders written in WGSL (WebGPU Shading Language) can be
+	 * used to create advanced visual effects in q5!
+	 * 
+	 * For more info, read the ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU)
+	 * wiki page.
+	 */
+
+	/** ⚡️
+	 * Creates a shader that q5 can use to draw shapes.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+let q = await Q5.webgpu();
+
+let wobble = createShader(`
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
+
+  let i = f32(v.vertexIndex) % 4 * 100;
+  vert.x += cos((q.time + i) * 0.01) * 0.1;
+
+	var f: FragParams;
+	f.position = vert;
+	f.color = vec4f(1, 0, 0, 1);
+	return f;
+}`);
+
+q.draw = () => {
+	clear();
+	shader(wobble);
+	plane(0, 0, 100);
+};
+	 * @example
+let q = await Q5.webgpu();
+
+let stripes = createShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let r = cos((q.mouseY + f.position.y) * 0.2);
+	return vec4(r, 0.0, 1, 1);
+}`);
+
+q.draw = () => {
+	shader(stripes);
+	triangle(-50, -50, 0, 50, 50, -50);
+};
+	 */
+	function createShader(code: string): GPUShaderModule;
+
+	/** ⚡️
+	 * A plane is a centered rectangle with no stroke.
+	 * @param {number} x center x
+	 * @param {number} y center y
+	 * @param {number} w width or side length
+	 * @param {number} [h] height
+	 * @example
+let q = await Q5.webgpu();
+createCanvas(200);
+plane(0, 0, 100);
+	 */
+	function plane(x: number, y: number, w: number, h?: number): void;
+
+	/** ⚡️
+	 * Applies a shader.
+	 * @param {GPUShaderModule} shaderModule a shader program
+	 */
+	function shader(shaderModule: GPUShaderModule): void;
+
+	/** ⚡️
+	 * Creates a shader that q5 can use to draw images.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default image shader](https://github.com/q5js/q5.js/blob/main/src/shaders/image.wgsl).
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+let q = await Q5.webgpu();
+imageMode(CENTER);
+
+let logo = loadImage('/q5js_logo.webp');
+
+let grate = createImageShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor = textureSample(tex, samp, f.texCoord);
+	texColor.a -= (q.mouseX + f.position.x) % 10 / 10;
+	return texColor;
+}`);
+
+q.draw = () => {
+	clear();
+	shader(grate);
+	image(logo, 0, 0, 200, 200);
+};
+	 */
+	function createImageShader(code: string): GPUShaderModule;
+
+	/** ⚡️
+	 * Creates a shader that q5 can use to draw video frames.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default video shader](https://github.com/q5js/q5.js/blob/main/src/shaders/video.wgsl).
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+let q = await Q5.webgpu();
+createCanvas(200, 600);
+
+let vid = createVideo('/assets/apollo4.mp4');
+vid.hide();
+
+let flipper = createVideoShader(`
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
+
+	vert.y *= cos((q.frameCount + f32(v.vertexIndex) * 10) * 0.03);
+
+	var f: FragParams;
+	f.position = vert;
+	f.texCoord = v.texCoord;
+	return f;
+}
+	
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor = textureSampleBaseClampToEdge(tex, samp, f.texCoord);
+	texColor.r = 0;
+	texColor.b *= 2;
+	return texColor;
+}`);
+
+q.draw = () => {
+	clear();
+	if (mouseIsPressed) vid.play();
+	shader(flipper);
+	image(vid, -100, 150, 200, 150);
+};
+//
+	 */
+	function createVideoShader(code: string): GPUShaderModule;
+
+	/** ⚡️
+	 * Creates a shader that q5 can use to draw text.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default text shader](https://github.com/q5js/q5.js/blob/main/src/shaders/text.wgsl).
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+let q = await Q5.webgpu();
+textAlign(CENTER, CENTER);
+
+let spin = createTextShader(`
+@vertex
+fn vertexMain(v : VertexParams) -> FragParams {
+	let char = textChars[v.instanceIndex];
+	let text = textMetadata[i32(char.w)];
+	let fontChar = fontChars[i32(char.z)];
+	let pos = calcPos(v.vertexIndex, char, fontChar, text);
+
+	var vert = transformVertex(pos, text.matrixIndex);
+
+	let i = f32(v.instanceIndex + 1);
+	vert.y *= cos((q.frameCount - 5 * i) * 0.05);
+
+	var f : FragParams;
+	f.position = vert;
+	f.texCoord = calcUV(v.vertexIndex, fontChar);
+	f.fillColor = colors[i32(text.fillIndex)];
+	f.strokeColor = colors[i32(text.strokeIndex)];
+	f.strokeWeight = text.strokeWeight;
+	return f;
+}`);
+
+q.draw = () => {
+	clear();
+	shader(spin);
+	fill(1, 0, 1);
+	textSize(32);
+	text('Hello, World!', 0, 0);
+};
+	 */
+	function createTextShader(code: string): GPUShaderModule;
+
+	/** ⚡️
+	 * Makes q5 use a default shader.
+	 * @param {string} [type] can be "shapes" (default), "image", "video", or "text"
+	 * @example
+let q = await Q5.webgpu();
+
+let stripes = createShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let g = cos((q.mouseY + f.position.y) * 0.05);
+	return vec4(1, g, 0, 1);
+}`);
+
+q.draw = () => {
+	shader(stripes);
+	background(0);
+
+	resetShader();
+	triangle(-50, -50, 0, 50, 50, -50);
+};
+*/
+	function resetShader(type?: string): void;
+
+	/** ⚡️
+	 * Makes q5 use default shaders.
+	 */
+	function resetShaders(): void;
 }
 
 export {};

@@ -1,58 +1,59 @@
-Q5.renderers.webgpu.drawing = ($, q) => {
-	let c = $.canvas,
-		drawStack = $.drawStack,
-		vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
-		vertIndex = 0;
-	const TAU = Math.PI * 2;
-	const HALF_PI = Math.PI / 2;
+Q5.renderers.webgpu.shapes = ($) => {
+	$._shapesPL = 0;
 
-	let drawingShaderCode = `
-struct Uniforms {
-	halfWidth: f32,
-	halfHeight: f32
-}
+	$._shapesShaderCode =
+		$._baseShaderCode +
+		/* wgsl */ `
 struct VertexParams {
+	@builtin(vertex_index) vertexIndex : u32,
 	@location(0) pos: vec2f,
 	@location(1) colorIndex: f32,
 	@location(2) matrixIndex: f32
 }
-struct FragmentParams {
+struct FragParams {
 	@builtin(position) position: vec4f,
 	@location(0) color: vec4f
 }
 
-@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(0) @binding(0) var<uniform> q: Q5;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 @group(0) @binding(2) var<storage> colors : array<vec4f>;
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
 	var vert = vec4f(pos, 0.0, 1.0);
 	vert = transforms[i32(matrixIndex)] * vert;
-	vert.x /= uniforms.halfWidth;
-	vert.y /= uniforms.halfHeight;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
 	return vert;
 }
 
 @vertex
-fn vertexMain(v: VertexParams) -> FragmentParams {
+fn vertexMain(v: VertexParams) -> FragParams {
 	var vert = transformVertex(v.pos, v.matrixIndex);
 
-	var f: FragmentParams;
+	var f: FragParams;
 	f.position = vert;
 	f.color = colors[i32(v.colorIndex)];
 	return f;
 }
 
 @fragment
-fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
+fn fragMain(f: FragParams) -> @location(0) vec4f {
 	return f.color;
 }
 `;
 
-	let drawingShader = Q5.device.createShaderModule({
-		label: 'drawingShader',
-		code: drawingShaderCode
+	let shapesShader = Q5.device.createShaderModule({
+		label: 'shapesShader',
+		code: $._shapesShaderCode
 	});
+
+	let c = $.canvas,
+		drawStack = $.drawStack,
+		vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
+		vertIndex = 0;
+	const TAU = Math.PI * 2;
+	const HALF_PI = Math.PI / 2;
 
 	let vertexBufferLayout = {
 		arrayStride: 16, // 4 floats * 4 bytes
@@ -64,21 +65,21 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 	};
 
 	let pipelineLayout = Q5.device.createPipelineLayout({
-		label: 'drawingPipelineLayout',
+		label: 'shapesPipelineLayout',
 		bindGroupLayouts: $.bindGroupLayouts
 	});
 
 	$._pipelineConfigs[0] = {
-		label: 'drawingPipeline',
+		label: 'shapesPipeline',
 		layout: pipelineLayout,
 		vertex: {
-			module: drawingShader,
+			module: shapesShader,
 			entryPoint: 'vertexMain',
 			buffers: [vertexBufferLayout]
 		},
 		fragment: {
-			module: drawingShader,
-			entryPoint: 'fragmentMain',
+			module: shapesShader,
+			entryPoint: 'fragMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
@@ -122,7 +123,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		v[i++] = ti;
 
 		vertIndex = i;
-		drawStack.push(0, 4);
+		drawStack.push($._shapesPL, 4);
 	};
 
 	const addArc = (x, y, a, b, startAngle, endAngle, n, ci, ti) => {
@@ -154,7 +155,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		}
 
 		vertIndex = i;
-		drawStack.push(0, (n + 1) * 2);
+		drawStack.push($._shapesPL, (n + 1) * 2);
 	};
 
 	const addArcStroke = (x, y, outerA, outerB, innerA, innerB, startAngle, endAngle, n, ci, ti) => {
@@ -189,7 +190,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 		}
 
 		vertIndex = i;
-		drawStack.push(0, (n + 1) * 2);
+		drawStack.push($._shapesPL, (n + 1) * 2);
 	};
 
 	$.rectMode = (x) => ($._rectMode = x);
@@ -293,6 +294,13 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 	};
 
 	$.square = (x, y, s) => $.rect(x, y, s, s);
+
+	$.plane = (x, y, w, h) => {
+		h ??= w;
+		let [l, r, t, b] = $._calcBox(x, y, w, h, 'center');
+		if ($._matrixDirty) $._saveMatrix();
+		addRect(l, t, r, t, r, b, l, b, $._fill, $._matrixIndex);
+	};
 
 	// prettier-ignore
 	const getArcSegments = (d) =>
@@ -539,7 +547,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 				addVert(sv[4], sv[5], sv[6], sv[7]); // v1
 				addVert(sv[12], sv[13], sv[14], sv[15]); // v3
 				addVert(sv[8], sv[9], sv[10], sv[11]); // v2
-				drawStack.push(0, 4);
+				drawStack.push($._shapesPL, 4);
 			} else {
 				// triangulate the shape
 				for (let i = 1; i < shapeVertCount - 1; i++) {
@@ -551,7 +559,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 					addVert(sv[v1], sv[v1 + 1], sv[v1 + 2], sv[v1 + 3]);
 					addVert(sv[v2], sv[v2 + 1], sv[v2 + 2], sv[v2 + 3]);
 				}
-				drawStack.push(0, (shapeVertCount - 2) * 3);
+				drawStack.push($._shapesPL, (shapeVertCount - 2) * 3);
 			}
 		}
 
@@ -621,7 +629,7 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 4,
-			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+			usage: GPUBufferUsage.VERTEX,
 			mappedAtCreation: true
 		});
 
@@ -634,7 +642,6 @@ fn fragmentMain(f: FragmentParams) -> @location(0) vec4f {
 	});
 
 	$._hooks.postRender.push(() => {
-		drawStack = $.drawStack;
 		vertIndex = 0;
 	});
 };

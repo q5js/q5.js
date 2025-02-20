@@ -91,7 +91,7 @@ class MiniEditor {
 		});
 	}
 
-	async runCode() {
+	runCode() {
 		if (!this.editorReady) {
 			console.error('Editor is not ready yet');
 			return;
@@ -126,15 +126,12 @@ class MiniEditor {
 		try {
 			let userCode = this.editor.getValue();
 
-			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?new\s+Q5\s*\([^)]*\);?/g;
+			let useWebGPU = userCode.includes('Q5.webgpu');
+
+			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|await\s+Q5\.webgpu)\s*\([^)]*\);?/g;
 			userCode = userCode.replace(q5InstanceRegex, '');
 
-			let q;
-			if (this.renderer == 'webgpu') {
-				q = await Q5.webgpu('instance', this.outputEl);
-			} else {
-				q = new Q5('instance', this.outputEl);
-			}
+			let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : null);
 
 			for (let f of q5FunctionNames) {
 				const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');

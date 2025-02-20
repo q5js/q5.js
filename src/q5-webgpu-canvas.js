@@ -1,6 +1,23 @@
 Q5.renderers.webgpu = {};
 
 Q5.renderers.webgpu.canvas = ($, q) => {
+	$._baseShaderCode = /* wgsl */ `
+struct Q5 {
+	width: f32,
+	height: f32,
+	halfWidth: f32,
+	halfHeight: f32,
+	pixelDensity: f32,
+	frameCount: f32,
+	time: f32,
+	deltaTime: f32,
+	mouseX: f32,
+	mouseY: f32,
+	mouseIsPressed: f32,
+	keyCode: f32,
+	keyIsPressed: f32
+}`;
+
 	let c = $.canvas;
 
 	c.width = $.width = 500;
@@ -42,7 +59,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		entries: [
 			{
 				binding: 0,
-				visibility: GPUShaderStage.VERTEX,
+				visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
 				buffer: { type: 'uniform' }
 			},
 			{
@@ -61,7 +78,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$.bindGroupLayouts = [mainLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
-		size: 8, // Size of two floats
+		size: 64, // Size of four floats
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 	});
 
@@ -130,8 +147,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		if (opt.alpha) opt.alphaMode = 'premultiplied';
 
 		$.ctx.configure(opt);
-
-		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array([$.canvas.hw, $.canvas.hh]));
 
 		createMainView();
 		return c;
@@ -395,9 +410,6 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	};
 
 	$._calcBox = (x, y, w, h, mode) => {
-		let hw = w / 2;
-		let hh = h / 2;
-
 		// left, right, top, bottom
 		let l, r, t, b;
 		if (!mode || mode == 'corner') {
@@ -406,6 +418,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 			t = -y;
 			b = -(y + h);
 		} else if (mode == 'center') {
+			let hw = w / 2,
+				hh = h / 2;
 			l = x - hw;
 			r = x + hw;
 			t = -(y - hh);
@@ -535,7 +549,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 	$._render = () => {
 		let transformBuffer = Q5.device.createBuffer({
 			size: matrices.length * MATRIX_SIZE * 4, // 4 bytes per float
-			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			usage: GPUBufferUsage.STORAGE,
 			mappedAtCreation: true
 		});
 
@@ -544,12 +558,30 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 		let colorsBuffer = Q5.device.createBuffer({
 			size: colorStackIndex * 4,
-			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			usage: GPUBufferUsage.STORAGE,
 			mappedAtCreation: true
 		});
 
 		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
+
+		$._uniforms = [
+			$.width,
+			$.height,
+			$.halfWidth,
+			$.halfHeight,
+			$._pixelDensity,
+			$.frameCount,
+			performance.now(),
+			$.deltaTime,
+			$.mouseX,
+			$.mouseY,
+			$.mouseIsPressed ? 1 : 0,
+			$.keyCode,
+			$.keyIsPressed ? 1 : 0
+		];
+
+		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array($._uniforms));
 
 		let mainBindGroup = Q5.device.createBindGroup({
 			layout: mainLayout,
@@ -577,18 +609,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.setPipeline($._pipelines[curPipelineIndex]);
 			}
 
-			if (curPipelineIndex == 0) {
-				// draw a shape
-				// v is the number of vertices
-				pass.draw(v, 1, drawVertOffset);
-				drawVertOffset += v;
-			} else if (curPipelineIndex <= 2) {
-				// draw an image or video frame
-				// v is the texture index
-				pass.setBindGroup(1, $._textureBindGroups[v]);
-				pass.draw(4, 1, imageVertOffset);
-				imageVertOffset += 4;
-			} else if (curPipelineIndex == 3) {
+			if (curPipelineIndex == 3 || curPipelineIndex >= 400) {
 				// draw text
 				let o = drawStack[i + 2];
 				pass.setBindGroup(1, $._fonts[o].bindGroup);
@@ -598,6 +619,17 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 				pass.draw(4, v, 0, textCharOffset);
 				textCharOffset += v;
 				i++;
+			} else if (curPipelineIndex == 1 || curPipelineIndex == 2 || curPipelineIndex >= 200) {
+				// draw an image or video frame
+				// v is the texture index
+				pass.setBindGroup(1, $._textureBindGroups[v]);
+				pass.draw(4, 1, imageVertOffset);
+				imageVertOffset += 4;
+			} else if (curPipelineIndex == 0 || curPipelineIndex >= 100) {
+				// draw a shape
+				// v is the number of vertices
+				pass.draw(v, 1, drawVertOffset);
+				drawVertOffset += v;
 			}
 		}
 	};
@@ -641,7 +673,7 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 		q.pass = $.encoder = null;
 
 		// clear the stacks for the next frame
-		$.drawStack = drawStack = [];
+		drawStack.splice(0, drawStack.length);
 		colorIndex = 1;
 		colorStackIndex = 8;
 		matrices = [matrices[0]];
@@ -656,7 +688,7 @@ Q5.initWebGPU = async () => {
 		console.warn('q5 WebGPU not supported on this browser! Use Google Chrome or Edge.');
 		return false;
 	}
-	if (!Q5.device) {
+	if (!Q5.requestedGPU) {
 		let adapter = await navigator.gpu.requestAdapter();
 		if (!adapter) {
 			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, vulkan may need to be enabled.');

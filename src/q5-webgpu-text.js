@@ -1,14 +1,14 @@
 Q5.renderers.webgpu.text = ($, q) => {
-	let textShaderCode = `
-struct Uniforms {
-	halfWidth: f32,
-	halfHeight: f32
-}
+	$._textPL = 3;
+
+	$._textShaderCode =
+		$._baseShaderCode +
+		/* wgsl */ `
 struct VertexParams {
-	@builtin(vertex_index) vertex : u32,
-	@builtin(instance_index) instance : u32
+	@builtin(vertex_index) vertexIndex : u32,
+	@builtin(instance_index) instanceIndex : u32
 }
-struct FragmentParams {
+struct FragParams {
 	@builtin(position) position : vec4f,
 	@location(0) texCoord : vec2f,
 	@location(1) fillColor : vec4f,
@@ -30,7 +30,7 @@ struct Text {
 	strokeWeight: f32
 }
 
-@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(0) @binding(0) var<uniform> q: Q5;
 @group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
 @group(0) @binding(2) var<storage> colors : array<vec4f>;
 
@@ -43,32 +43,48 @@ struct Text {
 
 const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 
-fn sampleMsdf(texCoord: vec2f) -> f32 {
-	let c = textureSample(fontTexture, fontSampler, texCoord);
-	return max(min(c.r, c.g), min(max(c.r, c.g), c.b));
+fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
+	return ((quad[i] * fontChar.size + char.xy + fontChar.offset) *
+		text.scale) + text.pos;
+}
+
+fn calcUV(i: u32, fontChar: Char) -> vec2f {
+	return (quad[i] * vec2f(1, -1)) *
+		fontChar.texExtent + fontChar.texOffset;
 }
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
 	var vert = vec4f(pos, 0.0, 1.0);
 	vert = transforms[i32(matrixIndex)] * vert;
-	vert.x /= uniforms.halfWidth;
-	vert.y /= uniforms.halfHeight;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
 	return vert;
 }
 
+fn calcDist(texCoord: vec2f, edgeWidth: f32) -> f32 {
+	let c = textureSample(fontTexture, fontSampler, texCoord);
+	let sigDist = max(min(c.r, c.g), min(max(c.r, c.g), c.b)) - edgeWidth;
+
+	let pxRange = 4.0;
+	let sz = vec2f(textureDimensions(fontTexture, 0));
+	let dx = sz.x * length(vec2f(dpdxFine(texCoord.x), dpdyFine(texCoord.x)));
+	let dy = sz.y * length(vec2f(dpdxFine(texCoord.y), dpdyFine(texCoord.y)));
+	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
+	return sigDist * toPixels;
+}
+
 @vertex
-fn vertexMain(v : VertexParams) -> FragmentParams {
-	let char = textChars[v.instance];
+fn vertexMain(v : VertexParams) -> FragParams {
+	let char = textChars[v.instanceIndex];
 	let text = textMetadata[i32(char.w)];
 	let fontChar = fontChars[i32(char.z)];
+	let pos = calcPos(v.vertexIndex, char, fontChar, text);
 
-	let charPos = ((quad[v.vertex] * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
+	var vert = transformVertex(pos, text.matrixIndex);
 
-	var vert = transformVertex(charPos, text.matrixIndex);
-
-	var f : FragmentParams;
+	var f : FragParams;
 	f.position = vert;
-	f.texCoord = (quad[v.vertex] * vec2f(1, -1)) * fontChar.texExtent + fontChar.texOffset;
+	f.texCoord = calcUV(v.vertexIndex, fontChar);
 	f.fillColor = colors[i32(text.fillIndex)];
 	f.strokeColor = colors[i32(text.strokeIndex)];
 	f.strokeWeight = text.strokeWeight;
@@ -76,19 +92,13 @@ fn vertexMain(v : VertexParams) -> FragmentParams {
 }
 
 @fragment
-fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
-	let pxRange = 4.0;
-	let sz = vec2f(textureDimensions(fontTexture, 0));
-	let dx = sz.x * length(vec2f(dpdxFine(f.texCoord.x), dpdyFine(f.texCoord.x)));
-	let dy = sz.y * length(vec2f(dpdxFine(f.texCoord.y), dpdyFine(f.texCoord.y)));
-	let toPixels = pxRange * inverseSqrt(dx * dx + dy * dy);
-	let sigDist = sampleMsdf(f.texCoord) - 0.5;
-	let pxDist = sigDist * toPixels;
-	let edgeWidth = 0.5;
+fn fragMain(f : FragParams) -> @location(0) vec4f {
+	let edge = 0.5;
+	let dist = calcDist(f.texCoord, edge);
 
 	if (f.strokeWeight == 0.0) {
-		let fillAlpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
-		var color = vec4f(f.fillColor.rgb, f.fillColor.a * fillAlpha);
+		let fillAlpha = smoothstep(-edge, edge, dist);
+		let color = vec4f(f.fillColor.rgb, f.fillColor.a * fillAlpha);
 		if (color.a < 0.01) {
 			discard;
 		}
@@ -96,8 +106,8 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	}
 
 	let halfStroke = f.strokeWeight / 2.0;
-	let fillAlpha = smoothstep(-edgeWidth, edgeWidth, pxDist - halfStroke);
-	let strokeAlpha = smoothstep(-edgeWidth, edgeWidth, pxDist + halfStroke);
+	let fillAlpha = smoothstep(-edge, edge, dist - halfStroke);
+	let strokeAlpha = smoothstep(-edge, edge, dist + halfStroke);
 	var color = mix(f.strokeColor, f.fillColor, fillAlpha);
 	color = vec4f(color.rgb, color.a * strokeAlpha);
 	if (color.a < 0.01) {
@@ -109,11 +119,11 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 	let textShader = Q5.device.createShaderModule({
 		label: 'textShader',
-		code: textShaderCode
+		code: $._textShaderCode
 	});
 
 	let textBindGroupLayout = Q5.device.createBindGroupLayout({
-		label: 'MSDF text group layout',
+		label: 'textBindGroupLayout',
 		entries: [
 			{
 				binding: 0,
@@ -136,7 +146,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	});
 
 	let fontBindGroupLayout = Q5.device.createBindGroupLayout({
-		label: 'MSDF font group layout',
+		label: 'fontBindGroupLayout',
 		entries: [
 			{
 				binding: 0,
@@ -161,12 +171,12 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 	});
 
 	$._pipelineConfigs[3] = {
-		label: 'msdf font pipeline',
+		label: 'textPipeline',
 		layout: fontPipelineLayout,
 		vertex: { module: textShader, entryPoint: 'vertexMain' },
 		fragment: {
 			module: textShader,
-			entryPoint: 'fragmentMain',
+			entryPoint: 'fragMain',
 			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
@@ -267,7 +277,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		charsBuffer.unmap();
 
 		let fontBindGroup = Q5.device.createBindGroup({
-			label: 'msdf font bind group',
+			label: 'fontBindGroup',
 			layout: fontBindGroupLayout,
 			entries: [
 				{ binding: 0, resource: texture.createView() },
@@ -512,7 +522,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		txt[7] = 0; // padding
 
 		textStack.push(txt);
-		$.drawStack.push(3, measurements.printedCharCount, $._font.index);
+		$.drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {
@@ -577,7 +587,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		// create a single buffer for all the char data
 		let charBuffer = Q5.device.createBuffer({
 			size: totalTextSize,
-			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			usage: GPUBufferUsage.STORAGE,
 			mappedAtCreation: true
 		});
 
@@ -592,7 +602,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 		let textBuffer = Q5.device.createBuffer({
 			label: 'textBuffer',
 			size: totalMetadataSize,
-			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			usage: GPUBufferUsage.STORAGE,
 			mappedAtCreation: true
 		});
 
@@ -604,7 +614,7 @@ fn fragmentMain(f : FragmentParams) -> @location(0) vec4f {
 
 		// create a single bind group for the text buffer and metadata buffer
 		$._textBindGroup = Q5.device.createBindGroup({
-			label: 'msdf text bind group',
+			label: 'textBindGroup',
 			layout: textBindGroupLayout,
 			entries: [
 				{ binding: 0, resource: { buffer: charBuffer } },
