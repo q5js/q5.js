@@ -1,3 +1,21 @@
+// q5.js shader documentation:
+// https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU
+
+struct Q5 {
+	width: f32,
+	height: f32,
+	halfWidth: f32,
+	halfHeight: f32,
+	pixelDensity: f32,
+	frameCount: f32,
+	time: f32,
+	deltaTime: f32,
+	mouseX: f32,
+	mouseY: f32,
+	mouseIsPressed: f32,
+	keyCode: f32,
+	keyIsPressed: f32
+}
 struct VertexParams {
 	@builtin(vertex_index) vertexIndex : u32,
 	@builtin(instance_index) instanceIndex : u32

@@ -3268,7 +3268,9 @@ function mousePressed() {
 	 * Custom shaders written in WGSL (WebGPU Shading Language) can be
 	 * used to create advanced visual effects in q5!
 	 * 
-	 * For more info, read the ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU)
+	 * For more information on the vertex and fragment function
+	 * input parameters, data, and helper functions made available for use 
+	 * in your custom shader code, read the ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU)
 	 * wiki page.
 	 */
 
