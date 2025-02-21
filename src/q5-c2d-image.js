@@ -79,7 +79,7 @@ Q5.renderers.c2d.image = ($, q) => {
 			};
 		});
 
-		img.src = url;
+		g.src = img.src = url;
 
 		if ($._disablePreload) return g._loader;
 		return g;

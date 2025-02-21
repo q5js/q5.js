@@ -1,6 +1,6 @@
 Q5.renderers.webgpu.image = ($, q) => {
-	$._imagePL = 1;
-	$._videoPL = 2;
+	$._imagePL = 2;
+	$._videoPL = 3;
 
 	$._imageShaderCode =
 		$._baseShaderCode +
@@ -28,7 +28,7 @@ struct FragParams {
 @group(1) @binding(1) var tex: texture_2d<f32>;
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
-	var vert = vec4f(pos, 0.0, 1.0);
+	var vert = vec4f(pos, 0f, 1f);
 	vert = transforms[i32(matrixIndex)] * vert;
 	vert.x /= q.halfWidth;
 	vert.y /= q.halfHeight;
@@ -132,7 +132,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		bindGroupLayouts: [...$.bindGroupLayouts, videoTextureLayout]
 	});
 
-	$._pipelineConfigs[1] = {
+	$._pipelineConfigs[2] = {
 		label: 'imagePipeline',
 		layout: imagePipelineLayout,
 		vertex: {
@@ -149,9 +149,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
+	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
 
-	$._pipelineConfigs[2] = {
+	$._pipelineConfigs[3] = {
 		label: 'videoPipeline',
 		layout: videoPipelineLayout,
 		vertex: {
@@ -168,9 +168,65 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
+	$._pipelines[3] = Q5.device.createRenderPipeline($._pipelineConfigs[3]);
 
 	$._textureBindGroups = [];
+
+	$._saveCanvas = async (data, ext) => {
+		let texture = data.texture,
+			w = texture.width,
+			h = texture.height,
+			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
+
+		let buffer = Q5.device.createBuffer({
+			size: bytesPerRow * h,
+			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+		});
+
+		$._buffers.push(buffer);
+
+		let en = Q5.device.createCommandEncoder();
+
+		en.copyTextureToBuffer({ texture }, { buffer, bytesPerRow, rowsPerImage: h }, { width: w, height: h });
+
+		Q5.device.queue.submit([en.finish()]);
+
+		await buffer.mapAsync(GPUMapMode.READ);
+
+		let pad = new Uint8Array(buffer.getMappedRange());
+		data = new Uint8Array(w * h * 4); // unpadded data
+
+		// Remove padding from each row and swap BGR to RGB
+		for (let y = 0; y < h; y++) {
+			const p = y * bytesPerRow; // padded row offset
+			const u = y * w * 4; // unpadded row offset
+			for (let x = 0; x < w; x++) {
+				const pp = p + x * 4; // padded pixel offset
+				const up = u + x * 4; // unpadded pixel offset
+				data[up + 0] = pad[pp + 2]; // R <- B
+				data[up + 1] = pad[pp + 1]; // G <- G
+				data[up + 2] = pad[pp + 0]; // B <- R
+				data[up + 3] = pad[pp + 3]; // A <- A
+			}
+		}
+
+		buffer.unmap();
+
+		let colorSpace = $.canvas.colorSpace;
+		data = new Uint8ClampedArray(data.buffer);
+		data = new ImageData(data, w, h, { colorSpace });
+		let cnv = new $._Canvas(w, h);
+		let ctx = cnv.getContext('2d', { colorSpace });
+		ctx.putImageData(data, 0, 0);
+
+		// Convert to blob then data URL
+		let blob = await cnv.convertToBlob({ type: 'image/' + ext });
+		return await new Promise((resolve) => {
+			let r = new FileReader();
+			r.onloadend = () => resolve(r.result);
+			r.readAsDataURL(blob);
+		});
+	};
 
 	let makeSampler = (filter) => {
 		$._imageSampler = Q5.device.createSampler({
@@ -212,7 +268,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		img.texture = texture;
 		img.textureIndex = tIdx + vidFrames;
 
-		$._textureBindGroups[tIdx + vidFrames] = Q5.device.createBindGroup({
+		$._textureBindGroups[img.textureIndex] = Q5.device.createBindGroup({
+			label: img.src || 'canvas',
 			layout: textureLayout,
 			entries: [
 				{ binding: 0, resource: $._imageSampler },
@@ -353,67 +410,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	};
 
-	$._saveCanvas = async (data, ext) => {
-		let texture = data.texture,
-			w = texture.width,
-			h = texture.height,
-			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
-
-		let buffer = Q5.device.createBuffer({
-			size: bytesPerRow * h,
-			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
-		});
-
-		$._buffers.push(buffer);
-
-		let en = Q5.device.createCommandEncoder();
-
-		en.copyTextureToBuffer({ texture }, { buffer, bytesPerRow, rowsPerImage: h }, { width: w, height: h });
-
-		Q5.device.queue.submit([en.finish()]);
-
-		await buffer.mapAsync(GPUMapMode.READ);
-
-		let pad = new Uint8Array(buffer.getMappedRange());
-		data = new Uint8Array(w * h * 4); // unpadded data
-
-		// Remove padding from each row and swap BGR to RGB
-		for (let y = 0; y < h; y++) {
-			const p = y * bytesPerRow; // padded row offset
-			const u = y * w * 4; // unpadded row offset
-			for (let x = 0; x < w; x++) {
-				const pp = p + x * 4; // padded pixel offset
-				const up = u + x * 4; // unpadded pixel offset
-				data[up + 0] = pad[pp + 2]; // R <- B
-				data[up + 1] = pad[pp + 1]; // G <- G
-				data[up + 2] = pad[pp + 0]; // B <- R
-				data[up + 3] = pad[pp + 3]; // A <- A
-			}
-		}
-
-		buffer.unmap();
-
-		let colorSpace = $.canvas.colorSpace;
-		data = new Uint8ClampedArray(data.buffer);
-		data = new ImageData(data, w, h, { colorSpace });
-		let cnv = new $._Canvas(w, h);
-		let ctx = cnv.getContext('2d', { colorSpace });
-		ctx.putImageData(data, 0, 0);
-
-		// Convert to blob then data URL
-		let blob = await cnv.convertToBlob({ type: 'image/' + ext });
-		return await new Promise((resolve) => {
-			let r = new FileReader();
-			r.onloadend = () => resolve(r.result);
-			r.readAsDataURL(blob);
-		});
-	};
-
 	$._hooks.preRender.push(() => {
 		if (!vertIndex) return;
 
 		// Switch to image pipeline
-		$.pass.setPipeline($._pipelines[1]);
+		$._pass.setPipeline($._pipelines[2]);
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 5,
@@ -424,14 +425,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
-		$.pass.setVertexBuffer(1, vertexBuffer);
+		$._pass.setVertexBuffer(1, vertexBuffer);
 
 		$._buffers.push(vertexBuffer);
 
 		if (vidFrames) {
 			// Switch to video pipeline
-			$.pass.setPipeline($._pipelines[3]);
-			$.pass.setVertexBuffer(1, vertexBuffer);
+			$._pass.setPipeline($._pipelines[3]);
+			$._pass.setVertexBuffer(1, vertexBuffer);
 		}
 	});
 

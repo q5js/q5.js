@@ -1,11 +1,12 @@
 Q5.renderers.webgpu.shaders = ($) => {
-	let pipelineTypes = ['shapes', 'image', 'video', 'text'];
+	let pipelineTypes = ['frame', 'shapes', 'image', 'video', 'text'];
 
 	let plCounters = {
-		shapes: 100,
-		image: 200,
-		video: 300,
-		text: 400
+		frame: 10,
+		shapes: 1000,
+		image: 2000,
+		video: 3000,
+		text: 4000
 	};
 
 	$._createShader = (code, type = 'shapes') => {
@@ -41,12 +42,14 @@ Q5.renderers.webgpu.shaders = ($) => {
 		let pl = plCounters[type];
 		$._pipelines[pl] = Q5.device.createRenderPipeline(config);
 		shader.pipelineIndex = pl;
+
 		plCounters[type]++;
 
 		return shader;
 	};
 
 	$.createShader = $.createShapesShader = $._createShader;
+	$.createFrameShader = (code) => $._createShader(code, 'frame');
 	$.createImageShader = (code) => $._createShader(code, 'image');
 	$.createVideoShader = (code) => $._createShader(code, 'video');
 	$.createTextShader = (code) => $._createShader(code, 'text');
@@ -60,10 +63,10 @@ Q5.renderers.webgpu.shaders = ($) => {
 	};
 
 	$.resetShaders = () => {
-		$._shapesPL = 0;
-		$._imagePL = 1;
-		$._videoPL = 2;
-		$._textPL = 3;
-		$._planePL = 4;
+		$._framePL = 0;
+		$._shapesPL = 1;
+		$._imagePL = 2;
+		$._videoPL = 3;
+		$._textPL = 4;
 	};
 };

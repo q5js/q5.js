@@ -1,5 +1,5 @@
 Q5.renderers.webgpu.shapes = ($) => {
-	$._shapesPL = 0;
+	$._shapesPL = 1;
 
 	$._shapesShaderCode =
 		$._baseShaderCode +
@@ -69,7 +69,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		bindGroupLayouts: $.bindGroupLayouts
 	});
 
-	$._pipelineConfigs[0] = {
+	$._pipelineConfigs[1] = {
 		label: 'shapesPipeline',
 		layout: pipelineLayout,
 		vertex: {
@@ -86,7 +86,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
+	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
 
 	const addVert = (x, y, ci, ti) => {
 		let v = vertexStack,
@@ -625,7 +625,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$._hooks.preRender.push(() => {
-		$.pass.setPipeline($._pipelines[0]);
+		$._pass.setPipeline($._pipelines[1]);
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 4,
@@ -636,7 +636,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
-		$.pass.setVertexBuffer(0, vertexBuffer);
+		$._pass.setVertexBuffer(0, vertexBuffer);
 
 		$._buffers.push(vertexBuffer);
 	});

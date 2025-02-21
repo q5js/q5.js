@@ -1317,7 +1317,7 @@ Q5.renderers.c2d.image = ($, q) => {
 			};
 		});
 
-		img.src = url;
+		g.src = img.src = url;
 
 		if ($._disablePreload) return g._loader;
 		return g;
@@ -4520,12 +4520,13 @@ struct Q5 {
 
 	if ($.colorMode) $.colorMode('rgb', 1);
 
-	let pass,
+	let encoder,
+		pass,
 		mainView,
 		frameA,
 		frameB,
+		frameLayout,
 		frameSampler,
-		framePipeline,
 		frameBindGroup,
 		colorIndex = 1,
 		colorStackIndex = 8;
@@ -4533,6 +4534,7 @@ struct Q5 {
 	$._pipelineConfigs = [];
 	$._pipelines = [];
 	$._buffers = [];
+	$._framePL = 0;
 
 	// local variables used for slightly better performance
 	// stores pipeline shifts and vertex counts/image indices
@@ -4599,18 +4601,40 @@ struct Q5 {
 		$._frameA = frameA = Q5.device.createTexture({ size, format, usage });
 		$._frameB = frameB = Q5.device.createTexture({ size, format, usage });
 
-		let finalShader = Q5.device.createShaderModule({
-			code: `
-@vertex fn v(@builtin(vertex_index)i:u32)->@builtin(position)vec4<f32>{
-	const pos=array(vec2(-1f,-1f),vec2(1f,-1f),vec2(-1f,1f),vec2(1f,1f));
-	return vec4(pos[i],0f,1f);
+		$._frameShaderCode =
+			$._baseShaderCode +
+			/* wgsl */ `
+struct VertexParams {
+	@builtin(vertex_index) vertexIndex: u32
 }
-@group(0) @binding(0) var s: sampler;
-@group(0) @binding(1) var t: texture_2d<f32>;
-@fragment fn f(@builtin(position)c:vec4<f32>)->@location(0)vec4<f32>{
-	let uv=c.xy/vec2(${w}, ${h});
-	return textureSample(t,s,uv);
-}`
+struct FragParams {
+	@builtin(position) position: vec4f,
+	@location(0) texCoord: vec2f
+}
+
+const ndc = array(vec2f(-1,-1), vec2f(1,-1), vec2f(-1,1), vec2f(1,1));
+const quad = array(vec2f(0,1), vec2f(1,1), vec2f(0,0), vec2f(1,0));
+
+@group(0) @binding(0) var<uniform> q: Q5;
+@group(0) @binding(1) var samp: sampler;
+@group(0) @binding(2) var tex: texture_2d<f32>;
+
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	var f: FragParams;
+	f.position = vec4f(ndc[v.vertexIndex], 0.0, 1.0);
+	f.texCoord = quad[v.vertexIndex];
+	return f;
+}
+
+@fragment
+fn fragMain(f: FragParams ) -> @location(0) vec4f {
+	return textureSample(tex, samp, f.texCoord);
+}`;
+
+		let frameShader = Q5.device.createShaderModule({
+			label: 'frameShader',
+			code: $._frameShaderCode
 		});
 
 		frameSampler = Q5.device.createSampler({
@@ -4618,18 +4642,45 @@ struct Q5 {
 			minFilter: 'linear'
 		});
 
-		// Create a pipeline for rendering
-		framePipeline = Q5.device.createRenderPipeline({
-			layout: 'auto',
-			vertex: { module: finalShader, entryPoint: 'v' },
+		frameLayout = Q5.device.createBindGroupLayout({
+			label: 'frameLayout',
+			entries: [
+				{
+					binding: 0,
+					visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+					buffer: { type: 'uniform' }
+				},
+				{
+					binding: 1,
+					visibility: GPUShaderStage.FRAGMENT,
+					sampler: { type: 'filtering' }
+				},
+				{
+					binding: 2,
+					visibility: GPUShaderStage.FRAGMENT,
+					texture: { viewDimension: '2d', sampleType: 'float' }
+				}
+			]
+		});
+
+		let framePipelineLayout = Q5.device.createPipelineLayout({
+			bindGroupLayouts: [frameLayout]
+		});
+
+		$._pipelineConfigs[0] = {
+			layout: framePipelineLayout,
+			vertex: { module: frameShader, entryPoint: 'vertexMain' },
 			fragment: {
-				module: finalShader,
-				entryPoint: 'f',
-				targets: [{ format, writeMask: GPUColorWrite.ALL }]
+				module: frameShader,
+				entryPoint: 'fragMain',
+				targets: [{ format, blend: $.blendConfigs.normal }]
 			},
 			primitive: { topology: 'triangle-strip' },
 			multisample: { count: 4 }
-		});
+		};
+
+		// Create a pipeline for rendering frames
+		$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
 	};
 
 	$._createCanvas = (w, h, opt) => {
@@ -4992,33 +5043,27 @@ struct Q5 {
 		}
 	};
 
-	let shouldClear = false;
+	let shouldClear;
 	$.clear = () => {
 		shouldClear = true;
 	};
 
-	const _drawFrame = () => {
-		pass.setPipeline(framePipeline);
-		pass.setBindGroup(0, frameBindGroup);
-		pass.draw(4);
-	};
-
 	$._beginRender = () => {
+		if (encoder) return;
+
 		// swap the frame textures
 		const temp = frameA;
 		frameA = frameB;
 		frameB = temp;
 
-		$.encoder = Q5.device.createCommandEncoder();
+		encoder = Q5.device.createCommandEncoder();
 
-		let target = shouldClear ? $.ctx.getCurrentTexture().createView() : frameA.createView();
-
-		pass = q.pass = $.encoder.beginRenderPass({
+		$._pass = pass = encoder.beginRenderPass({
 			label: 'q5-webgpu',
 			colorAttachments: [
 				{
 					view: mainView,
-					resolveTarget: target,
+					resolveTarget: frameA.createView(),
 					loadOp: 'clear',
 					storeOp: 'store',
 					clearValue: [0, 0, 0, 0]
@@ -5026,17 +5071,21 @@ struct Q5 {
 			]
 		});
 
-		if (!shouldClear) {
-			frameBindGroup = Q5.device.createBindGroup({
-				layout: framePipeline.getBindGroupLayout(0),
-				entries: [
-					{ binding: 0, resource: frameSampler },
-					{ binding: 1, resource: frameB.createView() }
-				]
-			});
+		frameBindGroup = Q5.device.createBindGroup({
+			layout: frameLayout,
+			entries: [
+				{ binding: 0, resource: { buffer: uniformBuffer } },
+				{ binding: 1, resource: frameSampler },
+				{ binding: 2, resource: frameB.createView() }
+			]
+		});
 
-			_drawFrame();
+		if (!shouldClear) {
+			pass.setPipeline($._pipelines[0]);
+			pass.setBindGroup(0, frameBindGroup);
+			pass.draw(4);
 		}
+		shouldClear = false;
 	};
 
 	$._render = () => {
@@ -5102,7 +5151,7 @@ struct Q5 {
 				pass.setPipeline($._pipelines[curPipelineIndex]);
 			}
 
-			if (curPipelineIndex == 3 || curPipelineIndex >= 400) {
+			if (curPipelineIndex == 4 || curPipelineIndex >= 4000) {
 				// draw text
 				let o = drawStack[i + 2];
 				pass.setBindGroup(1, $._fonts[o].bindGroup);
@@ -5112,13 +5161,13 @@ struct Q5 {
 				pass.draw(4, v, 0, textCharOffset);
 				textCharOffset += v;
 				i++;
-			} else if (curPipelineIndex == 1 || curPipelineIndex == 2 || curPipelineIndex >= 200) {
+			} else if (curPipelineIndex == 2 || curPipelineIndex == 3 || curPipelineIndex >= 2000) {
 				// draw an image or video frame
 				// v is the texture index
 				pass.setBindGroup(1, $._textureBindGroups[v]);
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
-			} else if (curPipelineIndex == 0 || curPipelineIndex >= 100) {
+			} else if (curPipelineIndex == 1 || curPipelineIndex >= 1000) {
 				// draw a shape
 				// v is the number of vertices
 				pass.draw(v, 1, drawVertOffset);
@@ -5130,32 +5179,33 @@ struct Q5 {
 	$._finishRender = () => {
 		pass.end();
 
-		if (!shouldClear) {
-			pass = $.encoder.beginRenderPass({
-				colorAttachments: [
-					{
-						view: mainView,
-						resolveTarget: $.ctx.getCurrentTexture().createView(),
-						loadOp: 'clear',
-						storeOp: 'store',
-						clearValue: [0, 0, 0, 0]
-					}
-				]
-			});
+		pass = encoder.beginRenderPass({
+			colorAttachments: [
+				{
+					view: mainView,
+					resolveTarget: $.ctx.getCurrentTexture().createView(),
+					loadOp: 'clear',
+					storeOp: 'store',
+					clearValue: [0, 0, 0, 0]
+				}
+			]
+		});
 
-			frameBindGroup = Q5.device.createBindGroup({
-				layout: framePipeline.getBindGroupLayout(0),
-				entries: [
-					{ binding: 0, resource: frameSampler },
-					{ binding: 1, resource: frameA.createView() }
-				]
-			});
-			_drawFrame();
-			pass.end();
-			shouldClear = false;
-		}
+		frameBindGroup = Q5.device.createBindGroup({
+			layout: frameLayout,
+			entries: [
+				{ binding: 0, resource: { buffer: uniformBuffer } },
+				{ binding: 1, resource: frameSampler },
+				{ binding: 2, resource: frameA.createView() }
+			]
+		});
 
-		Q5.device.queue.submit([$.encoder.finish()]);
+		pass.setPipeline($._pipelines[$._framePL]);
+		pass.setBindGroup(0, frameBindGroup);
+		pass.draw(4);
+		pass.end();
+
+		Q5.device.queue.submit([encoder.finish()]);
 
 		// destroy buffers
 		Q5.device.queue.onSubmittedWorkDone().then(() => {
@@ -5163,7 +5213,7 @@ struct Q5 {
 			$._buffers = [];
 		});
 
-		q.pass = $.encoder = null;
+		$._pass = pass = encoder = null;
 
 		// clear the stacks for the next frame
 		drawStack.splice(0, drawStack.length);
@@ -5205,7 +5255,7 @@ Q5.webgpu = async function (scope, parent) {
 	return new Q5(scope, parent, 'webgpu');
 };
 Q5.renderers.webgpu.shapes = ($) => {
-	$._shapesPL = 0;
+	$._shapesPL = 1;
 
 	$._shapesShaderCode =
 		$._baseShaderCode +
@@ -5275,7 +5325,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		bindGroupLayouts: $.bindGroupLayouts
 	});
 
-	$._pipelineConfigs[0] = {
+	$._pipelineConfigs[1] = {
 		label: 'shapesPipeline',
 		layout: pipelineLayout,
 		vertex: {
@@ -5292,7 +5342,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
+	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
 
 	const addVert = (x, y, ci, ti) => {
 		let v = vertexStack,
@@ -5831,7 +5881,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$._hooks.preRender.push(() => {
-		$.pass.setPipeline($._pipelines[0]);
+		$._pass.setPipeline($._pipelines[1]);
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 4,
@@ -5842,7 +5892,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
-		$.pass.setVertexBuffer(0, vertexBuffer);
+		$._pass.setVertexBuffer(0, vertexBuffer);
 
 		$._buffers.push(vertexBuffer);
 	});
@@ -5852,8 +5902,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	});
 };
 Q5.renderers.webgpu.image = ($, q) => {
-	$._imagePL = 1;
-	$._videoPL = 2;
+	$._imagePL = 2;
+	$._videoPL = 3;
 
 	$._imageShaderCode =
 		$._baseShaderCode +
@@ -5881,7 +5931,7 @@ struct FragParams {
 @group(1) @binding(1) var tex: texture_2d<f32>;
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
-	var vert = vec4f(pos, 0.0, 1.0);
+	var vert = vec4f(pos, 0f, 1f);
 	vert = transforms[i32(matrixIndex)] * vert;
 	vert.x /= q.halfWidth;
 	vert.y /= q.halfHeight;
@@ -5985,7 +6035,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		bindGroupLayouts: [...$.bindGroupLayouts, videoTextureLayout]
 	});
 
-	$._pipelineConfigs[1] = {
+	$._pipelineConfigs[2] = {
 		label: 'imagePipeline',
 		layout: imagePipelineLayout,
 		vertex: {
@@ -6002,9 +6052,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
+	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
 
-	$._pipelineConfigs[2] = {
+	$._pipelineConfigs[3] = {
 		label: 'videoPipeline',
 		layout: videoPipelineLayout,
 		vertex: {
@@ -6021,9 +6071,65 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
+	$._pipelines[3] = Q5.device.createRenderPipeline($._pipelineConfigs[3]);
 
 	$._textureBindGroups = [];
+
+	$._saveCanvas = async (data, ext) => {
+		let texture = data.texture,
+			w = texture.width,
+			h = texture.height,
+			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
+
+		let buffer = Q5.device.createBuffer({
+			size: bytesPerRow * h,
+			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+		});
+
+		$._buffers.push(buffer);
+
+		let en = Q5.device.createCommandEncoder();
+
+		en.copyTextureToBuffer({ texture }, { buffer, bytesPerRow, rowsPerImage: h }, { width: w, height: h });
+
+		Q5.device.queue.submit([en.finish()]);
+
+		await buffer.mapAsync(GPUMapMode.READ);
+
+		let pad = new Uint8Array(buffer.getMappedRange());
+		data = new Uint8Array(w * h * 4); // unpadded data
+
+		// Remove padding from each row and swap BGR to RGB
+		for (let y = 0; y < h; y++) {
+			const p = y * bytesPerRow; // padded row offset
+			const u = y * w * 4; // unpadded row offset
+			for (let x = 0; x < w; x++) {
+				const pp = p + x * 4; // padded pixel offset
+				const up = u + x * 4; // unpadded pixel offset
+				data[up + 0] = pad[pp + 2]; // R <- B
+				data[up + 1] = pad[pp + 1]; // G <- G
+				data[up + 2] = pad[pp + 0]; // B <- R
+				data[up + 3] = pad[pp + 3]; // A <- A
+			}
+		}
+
+		buffer.unmap();
+
+		let colorSpace = $.canvas.colorSpace;
+		data = new Uint8ClampedArray(data.buffer);
+		data = new ImageData(data, w, h, { colorSpace });
+		let cnv = new $._Canvas(w, h);
+		let ctx = cnv.getContext('2d', { colorSpace });
+		ctx.putImageData(data, 0, 0);
+
+		// Convert to blob then data URL
+		let blob = await cnv.convertToBlob({ type: 'image/' + ext });
+		return await new Promise((resolve) => {
+			let r = new FileReader();
+			r.onloadend = () => resolve(r.result);
+			r.readAsDataURL(blob);
+		});
+	};
 
 	let makeSampler = (filter) => {
 		$._imageSampler = Q5.device.createSampler({
@@ -6065,7 +6171,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		img.texture = texture;
 		img.textureIndex = tIdx + vidFrames;
 
-		$._textureBindGroups[tIdx + vidFrames] = Q5.device.createBindGroup({
+		$._textureBindGroups[img.textureIndex] = Q5.device.createBindGroup({
+			label: img.src || 'canvas',
 			layout: textureLayout,
 			entries: [
 				{ binding: 0, resource: $._imageSampler },
@@ -6206,67 +6313,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	};
 
-	$._saveCanvas = async (data, ext) => {
-		let texture = data.texture,
-			w = texture.width,
-			h = texture.height,
-			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
-
-		let buffer = Q5.device.createBuffer({
-			size: bytesPerRow * h,
-			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
-		});
-
-		$._buffers.push(buffer);
-
-		let en = Q5.device.createCommandEncoder();
-
-		en.copyTextureToBuffer({ texture }, { buffer, bytesPerRow, rowsPerImage: h }, { width: w, height: h });
-
-		Q5.device.queue.submit([en.finish()]);
-
-		await buffer.mapAsync(GPUMapMode.READ);
-
-		let pad = new Uint8Array(buffer.getMappedRange());
-		data = new Uint8Array(w * h * 4); // unpadded data
-
-		// Remove padding from each row and swap BGR to RGB
-		for (let y = 0; y < h; y++) {
-			const p = y * bytesPerRow; // padded row offset
-			const u = y * w * 4; // unpadded row offset
-			for (let x = 0; x < w; x++) {
-				const pp = p + x * 4; // padded pixel offset
-				const up = u + x * 4; // unpadded pixel offset
-				data[up + 0] = pad[pp + 2]; // R <- B
-				data[up + 1] = pad[pp + 1]; // G <- G
-				data[up + 2] = pad[pp + 0]; // B <- R
-				data[up + 3] = pad[pp + 3]; // A <- A
-			}
-		}
-
-		buffer.unmap();
-
-		let colorSpace = $.canvas.colorSpace;
-		data = new Uint8ClampedArray(data.buffer);
-		data = new ImageData(data, w, h, { colorSpace });
-		let cnv = new $._Canvas(w, h);
-		let ctx = cnv.getContext('2d', { colorSpace });
-		ctx.putImageData(data, 0, 0);
-
-		// Convert to blob then data URL
-		let blob = await cnv.convertToBlob({ type: 'image/' + ext });
-		return await new Promise((resolve) => {
-			let r = new FileReader();
-			r.onloadend = () => resolve(r.result);
-			r.readAsDataURL(blob);
-		});
-	};
-
 	$._hooks.preRender.push(() => {
 		if (!vertIndex) return;
 
 		// Switch to image pipeline
-		$.pass.setPipeline($._pipelines[1]);
+		$._pass.setPipeline($._pipelines[2]);
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 5,
@@ -6277,14 +6328,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
-		$.pass.setVertexBuffer(1, vertexBuffer);
+		$._pass.setVertexBuffer(1, vertexBuffer);
 
 		$._buffers.push(vertexBuffer);
 
 		if (vidFrames) {
 			// Switch to video pipeline
-			$.pass.setPipeline($._pipelines[3]);
-			$.pass.setVertexBuffer(1, vertexBuffer);
+			$._pass.setPipeline($._pipelines[3]);
+			$._pass.setVertexBuffer(1, vertexBuffer);
 		}
 	});
 
@@ -6304,7 +6355,7 @@ Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
 Q5.renderers.webgpu.text = ($, q) => {
-	$._textPL = 3;
+	$._textPL = 4;
 
 	$._textShaderCode =
 		$._baseShaderCode +
@@ -6475,7 +6526,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
 	});
 
-	$._pipelineConfigs[3] = {
+	$._pipelineConfigs[4] = {
 		label: 'textPipeline',
 		layout: fontPipelineLayout,
 		vertex: { module: textShader, entryPoint: 'vertexMain' },
@@ -6488,7 +6539,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[3] = Q5.device.createRenderPipeline($._pipelineConfigs[3]);
+	$._pipelines[4] = Q5.device.createRenderPipeline($._pipelineConfigs[4]);
 
 	class MsdfFont {
 		constructor(bindGroup, lineHeight, chars, kernings) {
@@ -6934,13 +6985,14 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	});
 };
 Q5.renderers.webgpu.shaders = ($) => {
-	let pipelineTypes = ['shapes', 'image', 'video', 'text'];
+	let pipelineTypes = ['frame', 'shapes', 'image', 'video', 'text'];
 
 	let plCounters = {
-		shapes: 100,
-		image: 200,
-		video: 300,
-		text: 400
+		frame: 10,
+		shapes: 1000,
+		image: 2000,
+		video: 3000,
+		text: 4000
 	};
 
 	$._createShader = (code, type = 'shapes') => {
@@ -6976,12 +7028,14 @@ Q5.renderers.webgpu.shaders = ($) => {
 		let pl = plCounters[type];
 		$._pipelines[pl] = Q5.device.createRenderPipeline(config);
 		shader.pipelineIndex = pl;
+
 		plCounters[type]++;
 
 		return shader;
 	};
 
 	$.createShader = $.createShapesShader = $._createShader;
+	$.createFrameShader = (code) => $._createShader(code, 'frame');
 	$.createImageShader = (code) => $._createShader(code, 'image');
 	$.createVideoShader = (code) => $._createShader(code, 'video');
 	$.createTextShader = (code) => $._createShader(code, 'text');
@@ -6995,10 +7049,10 @@ Q5.renderers.webgpu.shaders = ($) => {
 	};
 
 	$.resetShaders = () => {
-		$._shapesPL = 0;
-		$._imagePL = 1;
-		$._videoPL = 2;
-		$._textPL = 3;
-		$._planePL = 4;
+		$._framePL = 0;
+		$._shapesPL = 1;
+		$._imagePL = 2;
+		$._videoPL = 3;
+		$._textPL = 4;
 	};
 };

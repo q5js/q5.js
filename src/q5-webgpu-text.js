@@ -1,5 +1,5 @@
 Q5.renderers.webgpu.text = ($, q) => {
-	$._textPL = 3;
+	$._textPL = 4;
 
 	$._textShaderCode =
 		$._baseShaderCode +
@@ -170,7 +170,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
 	});
 
-	$._pipelineConfigs[3] = {
+	$._pipelineConfigs[4] = {
 		label: 'textPipeline',
 		layout: fontPipelineLayout,
 		vertex: { module: textShader, entryPoint: 'vertexMain' },
@@ -183,7 +183,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[3] = Q5.device.createRenderPipeline($._pipelineConfigs[3]);
+	$._pipelines[4] = Q5.device.createRenderPipeline($._pipelineConfigs[4]);
 
 	class MsdfFont {
 		constructor(bindGroup, lineHeight, chars, kernings) {
