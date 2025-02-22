@@ -3552,13 +3552,13 @@ Q5.modules.record = ($, q) => {
 .rec button,
 .rec select,
 .rec input,
-.rec .record-timer {
+.rec span {
 	font-family: sans-serif;
 	font-size: 14px;
 	padding: 2px 10px;
 	border-radius: 18px;
 	outline: none;
-	background-color: #232529;
+	background: #232529;
 	color: #d4dae6;
 	box-shadow: #0000001a 0px 4px 12px;
 	border: 1px solid #46494e;
@@ -3567,13 +3567,28 @@ Q5.modules.record = ($, q) => {
 	transition: all 0.3s;
 }
 
+.rec .bitrate input {
+	border-radius: 18px 0 0 18px;
+	border-right: 0;
+	width: 40px;
+	padding: 2px 5px 2px 10px;
+	text-align: right;
+}
+
+.rec .bitrate span {
+	border-radius: 0 18px 18px 0;
+	border-left: 0;
+	padding: 2px 10px 2px 5px;
+	background: #333;
+}
+
 .rec .record-button { 
 	color: #cc3e44;
 	font-size: 18px;
 }
 
 .rec select:hover,
-.rec button:hover { background-color: #292b30; }
+.rec button:hover { background: #292b30; }
 
 .rec button:disabled {
 	opacity: 0.5;
@@ -3617,10 +3632,17 @@ Q5.modules.record = ($, q) => {
 		formatSelect.title = 'Video Format';
 		rec.append(formatSelect);
 
+		let div = $.createEl('div');
+		div.className = 'bitrate';
+		div.style.display = 'flex';
+		rec.append(div);
+
 		bitrateInput = $.createInput();
-		bitrateInput.title = 'Video Bitrate';
-		bitrateInput.style.width = '48px';
-		rec.append(bitrateInput);
+		let span = document.createElement('span');
+		span.textContent = 'mbps';
+		bitrateInput.title = span.title = 'Video Bitrate';
+		div.append(bitrateInput);
+		div.append(span);
 
 		rec.encoderSettings = {};
 

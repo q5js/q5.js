@@ -3389,7 +3389,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 q.draw = () => {
 	stroke(1);
-	strokeWeight(4);
+	strokeWeight(8);
 	line(mouseX, mouseY, pmouseX, pmouseY);
 	mouseIsPressed ? resetShaders() : shader(boxy);
 };
