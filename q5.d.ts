@@ -3340,6 +3340,63 @@ plane(0, 0, 100);
 	function shader(shaderModule: GPUShaderModule): void;
 
 	/** ⚡️
+	 * Makes q5 use a default shader.
+	 * @param {string} [type] can be "shapes" (default), "image", "video", or "text"
+	 * @example
+let q = await Q5.webgpu();
+
+let stripes = createShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let g = cos((q.mouseY + f.position.y) * 0.05);
+	return vec4(1, g, 0, 1);
+}`);
+
+q.draw = () => {
+	shader(stripes);
+	background(0);
+
+	resetShader();
+	triangle(-50, -50, 0, 50, 50, -50);
+};
+*/
+	function resetShader(type?: string): void;
+
+	/** ⚡️
+	 * Makes q5 use default shaders.
+	 */
+	function resetShaders(): void;
+
+	/** ⚡️
+	 * Creates a shader that q5 can use to draw frames.
+	 * 
+	 * `createCanvas` must be run before using this function.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default frame shader](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).
+	 * @example
+let q = await Q5.webgpu();
+createCanvas(200);
+
+let boxy = createFrameShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let x = sin(f.texCoord.y * 4 + q.time * 0.002);
+	let y = cos(f.texCoord.x * 4 + q.time * 0.002);
+	let uv = f.texCoord + vec2f(x, y);
+	return textureSample(tex, samp, uv);
+}`);
+
+q.draw = () => {
+	stroke(1);
+	strokeWeight(4);
+	line(mouseX, mouseY, pmouseX, pmouseY);
+	mouseIsPressed ? resetShaders() : shader(boxy);
+};
+	 */
+	function createFrameShader(code: string): GPUShaderModule;
+
+	/** ⚡️
 	 * Creates a shader that q5 can use to draw images.
 	 * 
 	 * Use this function to customize a copy of the
@@ -3356,14 +3413,14 @@ let grate = createImageShader(`
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	var texColor = textureSample(tex, samp, f.texCoord);
-	texColor.a -= (q.mouseX + f.position.x) % 10 / 10;
+	texColor.b += (q.mouseX + f.position.x) % 20 / 10;
 	return texColor;
 }`);
 
 q.draw = () => {
-	clear();
+	background(0.7);
 	shader(grate);
-	image(logo, 0, 0, 200, 200);
+	image(logo, 0, 0, 180, 180);
 };
 	 */
 	function createImageShader(code: string): GPUShaderModule;
@@ -3455,34 +3512,6 @@ q.draw = () => {
 };
 	 */
 	function createTextShader(code: string): GPUShaderModule;
-
-	/** ⚡️
-	 * Makes q5 use a default shader.
-	 * @param {string} [type] can be "shapes" (default), "image", "video", or "text"
-	 * @example
-let q = await Q5.webgpu();
-
-let stripes = createShader(`
-@fragment
-fn fragMain(f: FragParams) -> @location(0) vec4f {
-	let g = cos((q.mouseY + f.position.y) * 0.05);
-	return vec4(1, g, 0, 1);
-}`);
-
-q.draw = () => {
-	shader(stripes);
-	background(0);
-
-	resetShader();
-	triangle(-50, -50, 0, 50, 50, -50);
-};
-*/
-	function resetShader(type?: string): void;
-
-	/** ⚡️
-	 * Makes q5 use default shaders.
-	 */
-	function resetShaders(): void;
 }
 
 export {};

@@ -54,6 +54,7 @@ struct Text {
 @group(2) @binding(1) var<storage> textMetadata: array<Text>;
 
 const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
+const uvs = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
 
 fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
 	return ((quad[i] * fontChar.size + char.xy + fontChar.offset) *
@@ -61,8 +62,7 @@ fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
 }
 
 fn calcUV(i: u32, fontChar: Char) -> vec2f {
-	return (quad[i] * vec2f(1, -1)) *
-		fontChar.texExtent + fontChar.texOffset;
+	return uvs[i] * fontChar.texExtent + fontChar.texOffset;
 }
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
