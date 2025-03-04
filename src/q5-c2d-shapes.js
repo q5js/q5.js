@@ -29,22 +29,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	// DRAWING
 
-	$.background = function (c) {
-		$.ctx.save();
-		$.ctx.resetTransform();
-		$.ctx.globalAlpha = 1;
-		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
-		else {
-			if (Q5.Color && !c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
-			}
-			$.ctx.fillStyle = c.toString();
-			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
-		}
-		$.ctx.restore();
-	};
-
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
 			$._da && ((x0 *= $._da), (y0 *= $._da), (x1 *= $._da), (y1 *= $._da));

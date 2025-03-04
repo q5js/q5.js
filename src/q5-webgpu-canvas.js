@@ -42,6 +42,7 @@ struct Q5 {
 	$._pipelines = [];
 	$._buffers = [];
 	$._framePL = 0;
+	$._prevFramePL = 0;
 
 	// local variables used for slightly better performance
 	// stores pipeline shifts and vertex counts/image indices
@@ -180,7 +181,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			fragment: {
 				module: frameShader,
 				entryPoint: 'fragMain',
-				targets: [{ format, blend: $.blendConfigs.normal }]
+				targets: [{ format }]
 			},
 			primitive: { topology: 'triangle-strip' },
 			multisample: { count: 4 }
@@ -555,9 +556,23 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		shouldClear = true;
 	};
 
-	$._beginRender = () => {
-		if (encoder) return;
+	$.background = (r, g, b, a) => {
+		$.push();
+		$.resetMatrix();
+		if (r.canvas) {
+			let img = r;
+			$._imageMode = 'corner';
+			$.image(img, -c.hw, -c.hh, c.w, c.h);
+		} else {
+			$._rectMode = 'corner';
+			$.fill(r, g, b, a);
+			$._doStroke = false;
+			$.rect(-c.hw, -c.hh, c.w, c.h);
+		}
+		$.pop();
+	};
 
+	$._beginRender = () => {
 		// swap the frame textures
 		const temp = frameA;
 		frameA = frameB;
@@ -588,7 +603,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		});
 
 		if (!shouldClear) {
-			pass.setPipeline($._pipelines[0]);
+			pass.setPipeline($._pipelines[$._prevFramePL]);
 			pass.setBindGroup(0, frameBindGroup);
 			pass.draw(4);
 		}
@@ -605,6 +620,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		new Float32Array(transformBuffer.getMappedRange()).set(transforms.slice(0, matrices.length * MATRIX_SIZE));
 		transformBuffer.unmap();
 
+		$._buffers.push(transformBuffer);
+
 		let colorsBuffer = Q5.device.createBuffer({
 			size: colorStackIndex * 4,
 			usage: GPUBufferUsage.STORAGE,
@@ -613,6 +630,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
+
+		$._buffers.push(colorsBuffer);
 
 		$._uniforms = [
 			$.width,
@@ -679,11 +698,24 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				// v is the number of vertices
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
+			} else if (curPipelineIndex < 1000) {
+				// draw a frame
+				frameBindGroup = Q5.device.createBindGroup({
+					layout: frameLayout,
+					entries: [
+						{ binding: 0, resource: { buffer: uniformBuffer } },
+						{ binding: 1, resource: frameSampler },
+						{ binding: 2, resource: frameB.createView() }
+					]
+				});
+				pass.setBindGroup(0, frameBindGroup);
+				pass.draw(4);
+				i--;
 			}
 		}
 	};
 
-	$._finishRender = () => {
+	$._finishRender = async () => {
 		pass.end();
 
 		pass = encoder.beginRenderPass({
@@ -713,14 +745,13 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		pass.end();
 
 		Q5.device.queue.submit([encoder.finish()]);
+		$._pass = pass = encoder = null;
 
 		// destroy buffers
 		Q5.device.queue.onSubmittedWorkDone().then(() => {
 			for (let b of $._buffers) b.destroy();
 			$._buffers = [];
 		});
-
-		$._pass = pass = encoder = null;
 
 		// clear the stacks for the next frame
 		drawStack.splice(0, drawStack.length);

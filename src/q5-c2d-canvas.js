@@ -37,6 +37,22 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	if ($._scope == 'image') return;
 
+	$.background = function (c) {
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.globalAlpha = 1;
+		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
+		else {
+			if (Q5.Color && !c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
+			$.ctx.fillStyle = c.toString();
+			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
+		}
+		$.ctx.restore();
+	};
+
 	$._resizeCanvas = (w, h) => {
 		let t = {};
 		for (let prop in $.ctx) {

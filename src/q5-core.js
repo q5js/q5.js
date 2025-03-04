@@ -41,7 +41,8 @@ function Q5(scope, parent, renderer) {
 
 	$.canvas = $.ctx = $.drawingContext = null;
 	$.pixels = [];
-	let looper = null;
+	let looper = null,
+		useRAF = true;
 
 	$.frameCount = 0;
 	$.deltaTime = 16;
@@ -83,13 +84,22 @@ function Q5(scope, parent, renderer) {
 			$._didResize = false;
 		}
 
-		if ($._loop) looper = raf($._draw);
-		else if ($.frameCount && !$._redraw) return;
+		if ($._loop) {
+			if (useRAF) looper = raf($._draw);
+			else {
+				let nextTS = ts + $._targetFrameDuration;
+				let frameDelay = nextTS - performance.now();
+				while (frameDelay < 0) frameDelay += $._targetFrameDuration;
+				log(frameDelay);
+				looper = setTimeout(() => $._draw(nextTS), frameDelay);
+			}
+		} else if ($.frameCount && !$._redraw) return;
 
-		if (looper && $.frameCount) {
-			let time_since_last = ts - $._lastFrameTime;
-			if (time_since_last < $._targetFrameDuration - 4) return;
+		if ($.frameCount && useRAF) {
+			let timeSinceLast = ts - $._lastFrameTime;
+			if (timeSinceLast < $._targetFrameDuration - 4) return;
 		}
+
 		q.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
 		q.frameCount++;
@@ -117,6 +127,10 @@ function Q5(scope, parent, renderer) {
 	};
 	$.noLoop = () => {
 		$._loop = false;
+		if (looper) {
+			if (useRAF) cancelAnimationFrame(looper);
+			else clearTimeout(looper);
+		}
 		looper = null;
 	};
 	$.loop = () => {
@@ -140,6 +154,14 @@ function Q5(scope, parent, renderer) {
 		if (hz) {
 			$._targetFrameRate = hz;
 			$._targetFrameDuration = 1000 / hz;
+
+			if ($._loop && $._setupDone && looper != null) {
+				if (useRAF) cancelAnimationFrame(looper);
+				else clearTimeout(looper);
+				looper = null;
+			}
+			useRAF = hz <= 60;
+			setTimeout(() => $._draw(), $._targetFrameDuration);
 		}
 		return $._frameRate;
 	};

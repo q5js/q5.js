@@ -8,17 +8,12 @@ declare global {
 	// ⭐️ core
 
 	/** ⭐️
-	 * Welcome to q5's documentation! ☺️
+	 * Welcome to q5's documentation! 🤩
 	 * 
 	 * First time coding? Check out the [q5 Beginner's Brief](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief).
 	 * 
-	 * On these Learn pages you'll find concise descriptions for
-	 * q5's functions and variables. Scroll through entire topics without
-	 * needing to click between separate pages.
-	 * 
-	 * Experiment with editing the code in the interactive mini examples,
-	 * which are often only 8 lines or less. They automatically
-	 * update as you type, so you can see results right away.
+	 * On these Learn pages, you can experiment with editing the 
+	 * interactive mini examples. Have fun! 😎
 	 */
 
 	/** ⭐️

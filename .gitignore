@@ -1,5 +1,6 @@
 dev/assets
 dev/experiments
+dev/wgsl
 dev/sketch.js
 dev/sketch-p5.js
 node_modules

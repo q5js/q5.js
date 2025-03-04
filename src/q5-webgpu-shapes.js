@@ -608,22 +608,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		$.endShape(true);
 	};
 
-	$.background = (r, g, b, a) => {
-		$.push();
-		$.resetMatrix();
-		if (r.canvas) {
-			let img = r;
-			$._imageMode = 'corner';
-			$.image(img, -c.hw, -c.hh, c.w, c.h);
-		} else {
-			$._rectMode = 'corner';
-			$.fill(r, g, b, a);
-			$._doStroke = false;
-			$.rect(-c.hw, -c.hh, c.w, c.h);
-		}
-		$.pop();
-	};
-
 	$._hooks.preRender.push(() => {
 		$._pass.setPipeline($._pipelines[1]);
 
