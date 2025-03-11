@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.21
+ * @version 2.22
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -110,7 +110,6 @@ function Q5(scope, parent, renderer) {
 		try {
 			$.draw();
 		} catch (e) {
-			if (!Q5.disableFriendlyErrors && $._askAI) $._askAI(e);
 			if (!Q5.errorTolerant) $.noLoop();
 			throw e;
 		}
@@ -265,14 +264,7 @@ function Q5(scope, parent, renderer) {
 	for (let k of userFns) {
 		if (!t[k]) $[k] = () => {};
 		else if ($._isGlobal) {
-			$[k] = (event) => {
-				try {
-					return t[k](event);
-				} catch (e) {
-					if ($._askAI) $._askAI(e);
-					throw e;
-				}
-			};
+			$[k] = (event) => t[k](event);
 		}
 	}
 
@@ -336,7 +328,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.21';
+Q5.version = Q5.VERSION = '2.22';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

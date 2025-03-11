@@ -41,6 +41,7 @@ Q5.renderers.webgpu.shaders = ($) => {
 
 		let pl = plCounters[type];
 		$._pipelines[pl] = Q5.device.createRenderPipeline(config);
+		$._pipelines[pl].shader = shader;
 		shader.pipelineIndex = pl;
 
 		plCounters[type]++;
@@ -55,15 +56,17 @@ Q5.renderers.webgpu.shaders = ($) => {
 	$.createTextShader = (code) => $._createShader(code, 'text');
 
 	$.shader = (shader) => {
-		$['_' + shader.type + 'PL'] = shader.pipelineIndex;
+		if (shader.applyBeforeDraw) $._prevFramePL = shader.pipelineIndex;
+		else $['_' + shader.type + 'PL'] = shader.pipelineIndex;
 	};
 
 	$.resetShader = (type = 'shapes') => {
+		if (type == 'frame') $._prevFramePL = 0;
 		$['_' + type + 'PL'] = pipelineTypes.indexOf(type);
 	};
 
 	$.resetShaders = () => {
-		$._framePL = 0;
+		$._prevFramePL = $._framePL = 0;
 		$._shapesPL = 1;
 		$._imagePL = 2;
 		$._videoPL = 3;

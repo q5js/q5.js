@@ -900,15 +900,18 @@ function draw() {
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
 
 	/** 🎨
-	 * Sets the color mode for the sketch. Changes the type of color object created by color functions.
+	 * Sets the color mode for the sketch, which changes how colors are
+	 * interpreted and displayed.
 	 * 
-	 * In c2d, the default color mode is RGB in legacy integer format.
+	 * The default color mode is RGB in legacy integer format.
 	 *
-	 * In WebGPU, the default color mode is RGB in float format.
+	 * In WebGPU, the default is RGB in float format (best performance).
 	 * 
-	 * See the documentation for q5's color constants below for more info.
-	 * @param {'rgb' | 'srgb' | 'oklch'} mode color mode
+	 * Color gamut is 'display-p3' by default, if the device supports HDR.
+	 * 
+	 * @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} mode color mode
 	 * @param {1 | 255} format color format (1 for float, 255 for integer)
+	 * @param {'srgb' | 'display-p3'} [gamut] color gamut
 	 * @example
 createCanvas(200);
 
@@ -930,62 +933,53 @@ rect(0, 0, 100, 200);
 fill(0.75, 0.15, 0)
 rect(100, 0, 100, 200);
 	 */
-	function colorMode(mode: 'rgb' | 'srgb' | 'oklch', format: 1 | 255): void;
+	function colorMode(mode: 'rgb' | 'oklch', format: 1 | 255, gamut: 'srgb' | 'display-p3'): void;
 
 	/** 🎨
 	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
 	 * and `a`/`alpha`.
 	 * 
-	 * By default when a canvas is using the HDR `display-p3` color space,
+	 * By default when a canvas is using the HDR "display-p3" color space,
 	 * rgb colors are mapped to the full P3 gamut, even when they use the
 	 * legacy integer 0-255 format.
 	 * @example
 createCanvas(200, 100);
 
-colorMode(RGB, 255);
+colorMode(RGB);
 
 background(255, 0, 0);
 	 */
 	const RGB: 'rgb';
 
 	/** 🎨
-	 * This color mode limits the gamut of rgb colors to sRGB.
+	 * OKLCH colors have components `l`/`lightness`, `c`/`chroma`,
+	 * `h`/`hue`, and `a`/`alpha`. It's more intuitive for humans
+	 * to work with color in these terms than RGB.
 	 * 
-	 * If your display is HDR capable, take a look at the following
-	 * example, note that full red appears less saturated, as it would
-	 * on an SDR display.
+	 * OKLCH is perceptually uniform, meaning colors at the
+	 * same lightness and chroma (colorfulness) will appear to
+	 * have equal luminance, regardless of the hue.
+	 *
+	 * OKLCH can accurately represent all colors visible to the
+	 * human eye, unlike many other color spaces that are bounded
+	 * to a gamut. The maximum lightness and chroma values that
+	 * correspond to sRGB or P3 gamut limits vary depending on
+	 * the hue. Colors that are out of gamut will be clipped to
+	 * the nearest in-gamut color.
+	 * 
+	 * Use the [OKLCH color picker](https://oklch.com) to find
+	 * in-gamut colors.
+	 * 
+	 * - `lightness`: 0 to 1
+	 * - `chroma`: 0 to ~0.4
+	 * - `hue`: 0 to 360
+	 * - `alpha`: 0 to 1
 	 * @example
 createCanvas(200, 100);
 
-colorMode(SRGB, 255);
+colorMode(OKLCH);
 
-background(255, 0, 0);
-	 */
-	const SRGB: 'srgb';
-
-	/** 🎨
-	 * OKLCH colors have components `l`/`lightness`, `c`/`chroma`,
-	 * `h`/`hue`, and `a`/`alpha`.
-	 * 
-	 * You may be familiar with the outdated HSL/HSV color formats,
-	 * which were created in the 1970s to be more intuitive for humans
-	 * to work with than RGB. But due to technical limitations of that
-	 * time, they're not perceptually uniform, meaning colors at the same 
-	 * brightness values may appear lighter or darker depending on the hue.
-	 * 
-	 * The OKLCH format is similar to HSL/HSV but it's perceptually
-	 * uniform and supports HDR colors. Use this oklch color picker to 
-	 * explore the color space: https://oklch.com
-	 * 
-	 * `lightness`: 0 to 1
-	 * 
-	 * `chroma`: 0 to 0.3
-	 * 
-	 * `hue`: 0 to 360
-	 * 
-	 * `alpha`: 0 to 1
-	 * 
-	 * Note how seamless the hue transitions are in the following example.
+background(0.64, 0.3, 30);
 	 * @example
 createCanvas(200);
 colorMode(OKLCH);
@@ -996,16 +990,119 @@ function draw() {
 	 */
 	const OKLCH: 'oklch';
 
+	/** 🎨
+	 * HSL colors have components `h`/`hue`, `s`/`saturation`,
+	 * `l`/`lightness`, and `a`/`alpha`.
+	 * 
+	 * HSL was created in the 1970s to approximate human perception
+	 * of color, trading accuracy for simpler computations. It's
+	 * not perceptually uniform, so colors with the same lightness
+	 * can appear darker or lighter, depending on their hue
+	 * and saturation. Yet, the lightness and saturation values that
+	 * correspond to gamut limits are always 100, regardless of the
+	 * hue. This can make HSL easier to work with than OKLCH.
+	 * 
+	 * HSL colors are mapped to the full P3 gamut when
+	 * using the "display-p3" color space.
+	 * 
+	 * - `hue`: 0 to 360
+	 * - `saturation`: 0 to 100
+	 * - `lightness`: 0 to 100
+	 * - `alpha`: 0 to 1
+	 * @example
+createCanvas(200, 100);
+
+colorMode(HSL);
+
+background(0, 100, 50);
+	 * @example
+createCanvas(200, 220);
+noStroke();
+
+colorMode(HSL);
+for (let h = 0; h < 360; h += 10) {
+  for (let l = 0; l <= 100; l += 10) {
+    fill(h, 100, l);
+    rect(h * (11/20), l * 2, 6, 20);
+  }
+}
+	 */
+	const HSL: 'hsl';
+
+	/** 🎨
+	 * HSB colors have components `h`/`hue`, `s`/`saturation`,
+	 * `b`/`brightness` (aka `v`/`value`), and `a`/`alpha`.
+	 * 
+	 * HSB is similar to HSL, but instead of lightness
+	 * (black to white), it uses brightness (black to
+	 * full color). To produce white, set brightness
+	 * to 100 and saturation to 0.
+	 * 
+	 * - `hue`: 0 to 360
+	 * - `saturation`: 0 to 100
+	 * - `brightness`: 0 to 100
+	 * - `alpha`: 0 to 1
+	 * @example
+createCanvas(200, 100);
+
+colorMode(HSB);
+
+background(0, 100, 100);
+	 * @example
+createCanvas(200, 220);
+noStroke();
+
+colorMode(HSB);
+for (let h = 0; h < 360; h += 10) {
+  for (let b = 0; b <= 100; b += 10) {
+    fill(h, 100, b);
+    rect(h * (11/20), b * 2, 6, 20);
+  }
+}
+	 */
+	const HSB: 'hsb';
+
+	/** 🎨
+	 * Limits the color gamut to the sRGB color space.
+	 * 
+	 * If your display is HDR capable, note that full red appears
+	 * less saturated and darker in this example, as it would on
+	 * an SDR display.
+	 * @example
+createCanvas(200, 100);
+
+colorMode(RGB, 255, SRGB);
+
+background(255, 0, 0);
+	 */
+	const SRGB: 'srgb';
+
+	/** 🎨
+	 * Expands the color gamut to the P3 color space.
+	 * 
+	 * This is the default color gamut on devices that support HDR.
+	 * 
+	 * If your display is HDR capable, note that full red appears
+	 * fully saturated and bright in the following example.
+	 * @example
+createCanvas(200, 100);
+
+colorMode(RGB, 255, DISPLAY_P3);
+
+background(255, 0, 0);
+	 */
+	const DISPLAY_P3: 'display-p3';
+
 	class Color {
 		/** 🎨
+		 * This constructor strictly accepts 4 numbers, which are the color 
+		 * components.
+		 * 
 		 * Use the `color` function for greater flexibility, it runs
 		 * this constructor internally.
 		 * 
-		 * This constructor only accepts 4 numbers, which are the color 
-		 * components.
-		 * 
 		 * `Color` is not actually a class itself, it's a reference to a
-		 * Q5 color class based on the color mode and format.
+		 * Q5 color class based on the color mode, format, and gamut.
 		 */
 		constructor(c0: number, c1: number, c2: number, c3: number);
 	}

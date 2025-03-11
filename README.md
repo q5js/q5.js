@@ -68,6 +68,16 @@ https://webgpu.github.io/webgpu-samples/?sample=textRenderingMsdf
 WebGPU blendMode:
 https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html
 
+HSLtoRGB:
+https://stackoverflow.com/a/64090995/3792062
+
+HSBtoHSL:
+https://stackoverflow.com/a/66469632/3792062
+
+OKLCHtoRGB:
+https://gist.github.com/dkaraush/65d19d61396f5f3cd8ba7d1b4b3c9432
+https://github.com/color-js/color.js/blob/main/src/spaces/oklch.js
+
 A JS Implementation of Ziggurat Algorithm:
 http://ziggurat.glitch.me/
 

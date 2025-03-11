@@ -362,8 +362,8 @@ Q5.renderers.c2d.shapes = ($) => {
 	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
 		$.ctx.save();
 		$.ctx.globalCompositeOperation = 'destination-out';
-		$.ctx.fillStyle = `rgba(0, 0, 0, ${fillAlpha / 255})`;
-		$.ctx.strokeStyle = `rgba(0, 0, 0, ${strokeAlpha / 255})`;
+		$.ctx.fillStyle = `rgb(0 0 0 / ${fillAlpha / 255})`;
+		$.ctx.strokeStyle = `rgb(0 0 0 / ${strokeAlpha / 255})`;
 	};
 
 	$.noErase = function () {

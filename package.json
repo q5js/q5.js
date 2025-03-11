@@ -1,7 +1,7 @@
 {
 	"name": "q5",
-	"version": "2.21.6",
-	"description": "Beginner friendly graphics framework that's powered by WebGPU and optimized for interactive art!",
+	"version": "2.22.0",
+	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
 	"author": "quinton-ashley",
 	"contributors": [
 		"Tezumie",

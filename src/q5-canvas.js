@@ -190,7 +190,7 @@ Q5.modules.canvas = ($, q) => {
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
-		$._setCanvasSize(c.w, c.h);
+		$._resizeCanvas(c.w, c.h);
 		return v;
 	};
 

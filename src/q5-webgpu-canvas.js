@@ -41,10 +41,11 @@ struct Q5 {
 	$._pipelineConfigs = [];
 	$._pipelines = [];
 	$._buffers = [];
-	$._framePL = 0;
 	$._prevFramePL = 0;
+	$._framePL = 0;
 
 	// local variables used for slightly better performance
+
 	// stores pipeline shifts and vertex counts/image indices
 	let drawStack = ($.drawStack = []);
 
@@ -81,7 +82,7 @@ struct Q5 {
 	$.bindGroupLayouts = [mainLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
-		size: 64, // Size of four floats
+		size: 64,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 	});
 
@@ -209,27 +210,23 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		createMainView();
 	};
 
-	$.pixelDensity = (v) => {
-		if (!v || v == $._pixelDensity) return $._pixelDensity;
-		$._pixelDensity = v;
-		$._setCanvasSize(c.w, c.h);
-		createMainView();
-		return v;
-	};
-
-	// current color index, used to associate a vertex with a color
 	let addColor = (r, g, b, a = 1) => {
-		if (typeof r == 'string') r = $.color(r);
-		else if (b == undefined) {
+		if (typeof r == 'string' || $._colorMode != 'rgb') {
+			r = $.color(r, g, b, a);
+		} else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
 			a = g ?? 1;
 			g = b = r;
 		}
 		if (r._q5Color) {
-			a = r.a;
-			b = r.b;
-			g = r.g;
-			r = r.r;
+			let c = r;
+			if (c.r) ({ r, g, b, a } = c);
+			else {
+				if (c.c) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
+				else if (c.l) c = Q5.HSLtoRGB(c.h, c.s, c.l);
+				else c = Q5.HSLtoRGB(...Q5.HSBtoHSL(c.h, c.s, c.b));
+				[r, g, b, a] = c;
+			}
 		}
 
 		let cs = colorStack,
@@ -262,7 +259,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$._tint = colorIndex;
 	};
 	$.opacity = (a) => ($._globalAlpha = a);
-
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
 	$.noTint = () => ($._tint = 1);
@@ -270,6 +266,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	$._strokeWeight = 1;
 	$._hsw = 0.5;
 	$._scaledSW = 1;
+
 	$.strokeWeight = (v) => {
 		v = Math.abs(v);
 		$._strokeWeight = v;
@@ -420,7 +417,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$._matrixDirty = true;
 	};
 
-	// function to save the current matrix state if dirty
+	// saves the current matrix state
 	$._saveMatrix = () => {
 		transforms.set(matrix, matrices.length * MATRIX_SIZE);
 		$._matrixIndex = matrices.length;
@@ -552,6 +549,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 
 	let shouldClear;
+
 	$.clear = () => {
 		shouldClear = true;
 	};
@@ -693,24 +691,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				pass.setBindGroup(1, $._textureBindGroups[v]);
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
-			} else if (curPipelineIndex == 1 || curPipelineIndex >= 1000) {
+			} else {
 				// draw a shape
 				// v is the number of vertices
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
-			} else if (curPipelineIndex < 1000) {
-				// draw a frame
-				frameBindGroup = Q5.device.createBindGroup({
-					layout: frameLayout,
-					entries: [
-						{ binding: 0, resource: { buffer: uniformBuffer } },
-						{ binding: 1, resource: frameSampler },
-						{ binding: 2, resource: frameB.createView() }
-					]
-				});
-				pass.setBindGroup(0, frameBindGroup);
-				pass.draw(4);
-				i--;
 			}
 		}
 	};
