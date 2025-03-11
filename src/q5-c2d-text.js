@@ -124,7 +124,7 @@ Q5.renderers.c2d.text = ($, q) => {
 
 	$.createTextImage = (str, w, h) => {
 		genTextImage = true;
-		img = $.text(str, 0, 0, w, h);
+		let img = $.text(str, 0, 0, w, h);
 		genTextImage = false;
 		return img;
 	};
