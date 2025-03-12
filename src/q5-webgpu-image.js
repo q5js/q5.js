@@ -306,9 +306,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.createGraphics = (w, h, opt) => {
 		let g = _createGraphics(w, h, opt);
-		$._addTexture(g, g._frameA);
-		$._addTexture(g, g._frameB);
-		g._beginRender();
+		if (g.canvas.renderer == 'webgpu') {
+			$._addTexture(g, g._frameA);
+			$._addTexture(g, g._frameB);
+			g._beginRender();
+		}
 		return g;
 	};
 

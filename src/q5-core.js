@@ -270,7 +270,7 @@ function Q5(scope, parent, renderer) {
 
 	async function _setup() {
 		$._startDone = true;
-		if ($._preloadCount > 0) return raf(_setup);
+		if ($._preloadCount > 0 || $._g?._preloadCount > 0) return raf(_setup);
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;

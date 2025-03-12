@@ -222,10 +222,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			let c = r;
 			if (c.r) ({ r, g, b, a } = c);
 			else {
-				if (c.c) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
-				else if (c.l) c = Q5.HSLtoRGB(c.h, c.s, c.l);
+				a = c.a;
+				if (c.c != undefined) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
+				else if (c.l != undefined) c = Q5.HSLtoRGB(c.h, c.s, c.l);
 				else c = Q5.HSLtoRGB(...Q5.HSBtoHSL(c.h, c.s, c.b));
-				[r, g, b, a] = c;
+				[r, g, b] = c;
 			}
 		}
 

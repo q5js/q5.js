@@ -270,7 +270,7 @@ function Q5(scope, parent, renderer) {
 
 	async function _setup() {
 		$._startDone = true;
-		if ($._preloadCount > 0) return raf(_setup);
+		if ($._preloadCount > 0 || $._g?._preloadCount > 0) return raf(_setup);
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
@@ -4907,10 +4907,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			let c = r;
 			if (c.r) ({ r, g, b, a } = c);
 			else {
-				if (c.c) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
-				else if (c.l) c = Q5.HSLtoRGB(c.h, c.s, c.l);
+				a = c.a;
+				if (c.c != undefined) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
+				else if (c.l != undefined) c = Q5.HSLtoRGB(c.h, c.s, c.l);
 				else c = Q5.HSLtoRGB(...Q5.HSBtoHSL(c.h, c.s, c.b));
-				[r, g, b, a] = c;
+				[r, g, b] = c;
 			}
 		}
 
@@ -6401,9 +6402,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.createGraphics = (w, h, opt) => {
 		let g = _createGraphics(w, h, opt);
-		$._addTexture(g, g._frameA);
-		$._addTexture(g, g._frameB);
-		g._beginRender();
+		if (g.canvas.renderer == 'webgpu') {
+			$._addTexture(g, g._frameA);
+			$._addTexture(g, g._frameB);
+			g._beginRender();
+		}
 		return g;
 	};
 
@@ -6890,6 +6893,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		leadPercent = 1.25;
 
 	$.textFont = (fontName) => {
+		if (!fontName) return $._font;
 		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;

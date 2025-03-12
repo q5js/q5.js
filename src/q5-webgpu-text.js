@@ -342,6 +342,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		leadPercent = 1.25;
 
 	$.textFont = (fontName) => {
+		if (!fontName) return $._font;
 		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;
