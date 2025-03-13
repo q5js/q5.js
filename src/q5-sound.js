@@ -56,6 +56,9 @@ Q5.modules.sound = ($, q) => {
 			if (Q5._offlineAudio) {
 				Q5._offlineAudio = false;
 				Q5.aud = new window.AudioContext();
+				Q5.soundOut = Q5.aud.createGain();
+				Q5.soundOut.connect(Q5.aud.destination);
+
 				for (let s of sounds) s.init();
 			}
 			return Q5.aud.resume();
@@ -66,6 +69,8 @@ Q5.modules.sound = ($, q) => {
 if (window.OfflineAudioContext) {
 	Q5.aud = new window.OfflineAudioContext(2, 1, 44100);
 	Q5._offlineAudio = true;
+	Q5.soundOut = Q5.aud.createGain();
+	Q5.soundOut.connect(Q5.aud.destination);
 }
 
 Q5.Sound = class {
@@ -85,7 +90,7 @@ Q5.Sound = class {
 		this.gainNode = Q5.aud.createGain();
 		this.pannerNode = Q5.aud.createStereoPanner();
 		this.gainNode.connect(this.pannerNode);
-		this.pannerNode.connect(Q5.aud.destination);
+		this.pannerNode.connect(Q5.soundOut);
 
 		this.loaded = true;
 		if (this._volume) this.volume = this._volume;

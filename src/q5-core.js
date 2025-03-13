@@ -198,7 +198,9 @@ function Q5(scope, parent, renderer) {
 	if ($._graphics) return;
 
 	if (scope == 'global') {
-		Object.assign(Q5, $);
+		let tmp = Object.assign({}, $);
+		delete tmp.Color;
+		Object.assign(Q5, tmp);
 		delete Q5.Q5;
 	}
 

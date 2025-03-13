@@ -198,7 +198,9 @@ function Q5(scope, parent, renderer) {
 	if ($._graphics) return;
 
 	if (scope == 'global') {
-		Object.assign(Q5, $);
+		let tmp = Object.assign({}, $);
+		delete tmp.Color;
+		Object.assign(Q5, tmp);
 		delete Q5.Q5;
 	}
 
@@ -3686,7 +3688,7 @@ Q5.PerlinNoise = class extends Q5.NoiseGenerator {
 	}
 };
 Q5.modules.record = ($, q) => {
-	let rec, btn0, btn1, timer, formatSelect, bitrateInput;
+	let rec, btn0, btn1, timer, formatSelect, bitrateInput, audioToggle;
 
 	$.recording = false;
 
@@ -3737,6 +3739,11 @@ Q5.modules.record = ($, q) => {
 	transition: all 0.3s;
 }
 
+.rec .audio-toggle {
+	font-size: 16px;
+	padding: 2px 10px;
+}
+
 .rec .bitrate input {
 	border-radius: 18px 0 0 18px;
 	border-right: 0;
@@ -3758,7 +3765,7 @@ Q5.modules.record = ($, q) => {
 }
 
 .rec select:hover,
-.rec button:hover { background: #292b30; }
+.rec button:hover { background: #32343b; }
 
 .rec button:disabled {
 	opacity: 0.5;
@@ -3783,17 +3790,19 @@ Q5.modules.record = ($, q) => {
 		rec.resetTimer = () => (rec.time = { hours: 0, minutes: 0, seconds: 0, frames: 0 });
 		rec.resetTimer();
 
-		rec.formats = opt.formats || {
-			'H.264': 'video/mp4; codecs="avc1.42E01E"',
-			VP9: 'video/mp4; codecs=vp9'
+		let f = 'video/mp4; codecs=';
+		rec.formats = {
+			'H.264': f + '"avc1.42E01E"',
+			VP9: f + 'vp9'
 		};
+		let highProfile = f + '"avc1.640034"';
 
-		// remove unsupported formats
-		for (let format in rec.formats) {
-			if (!MediaRecorder.isTypeSupported(rec.formats[format])) {
-				delete rec.formats[format];
-			}
+		let pixelCount = $.canvas.width * $.canvas.height;
+		if (pixelCount > 3200000 && MediaRecorder.isTypeSupported(highProfile)) {
+			rec.formats['H.264'] = highProfile;
 		}
+
+		Object.assign(rec.formats, opt.formats);
 
 		formatSelect = $.createSelect('format');
 		for (const name in rec.formats) {
@@ -3813,6 +3822,20 @@ Q5.modules.record = ($, q) => {
 		bitrateInput.title = span.title = 'Video Bitrate';
 		div.append(bitrateInput);
 		div.append(span);
+
+		audioToggle = $.createEl('button');
+		audioToggle.className = 'audio-toggle active';
+		audioToggle.textContent = '🔊';
+		audioToggle.title = 'Toggle Audio Recording';
+		rec.append(audioToggle);
+
+		rec.captureAudio = true;
+
+		audioToggle.addEventListener('click', () => {
+			rec.captureAudio = !rec.captureAudio;
+			audioToggle.textContent = rec.captureAudio ? '🔊' : '🔇';
+			audioToggle.classList.toggle('active', rec.captureAudio);
+		});
 
 		rec.encoderSettings = {};
 
@@ -3849,7 +3872,7 @@ Q5.modules.record = ($, q) => {
 		rec.format = 'H.264';
 
 		let h = $.canvas.height;
-		rec.bitrate = h >= 4320 ? 128 : h >= 2160 ? 75 : h >= 1440 ? 50 : h >= 1080 ? 32 : h >= 720 ? 26 : 16;
+		rec.bitrate = h >= 4320 ? 96 : h >= 2160 ? 64 : h >= 1440 ? 48 : h >= 1080 ? 32 : h >= 720 ? 26 : 16;
 
 		btn0.addEventListener('click', () => {
 			if (!$.recording) start();
@@ -3870,20 +3893,29 @@ Q5.modules.record = ($, q) => {
 	function start() {
 		if ($.recording) return;
 
+		$.userStartAudio();
+
 		if (!rec.stream) {
 			rec.frameRate ??= $.getTargetFrameRate();
 			let canvasStream = $.canvas.captureStream(rec.frameRate);
-			// let audioStream = Q5.aud.createMediaStreamDestination().stream;
-			// rec.stream = new MediaStream([canvasStream.getTracks()[0], ...audioStream.getTracks()]);
-			rec.stream = canvasStream;
+
+			rec.videoTrack = canvasStream.getVideoTracks()[0];
+
+			if (rec.captureAudio && $.getAudioContext) {
+				let aud = $.getAudioContext();
+				let dest = aud.createMediaStreamDestination();
+
+				// if using p5.sound
+				if (aud.destination.input) aud.destination.input.connect(dest);
+				else Q5.soundOut.connect(dest);
+
+				rec.audioTrack = dest.stream.getAudioTracks()[0];
+
+				rec.stream = new MediaStream([rec.videoTrack, rec.audioTrack]);
+			} else rec.stream = canvasStream;
 		}
 
-		try {
-			rec.mediaRecorder = new MediaRecorder(rec.stream, rec.encoderSettings);
-		} catch (e) {
-			console.error('Failed to initialize MediaRecorder: ', e);
-			return;
-		}
+		rec.mediaRecorder = new MediaRecorder(rec.stream, rec.encoderSettings);
 
 		rec.chunks = [];
 		rec.mediaRecorder.addEventListener('dataavailable', (e) => {
@@ -4089,6 +4121,9 @@ Q5.modules.sound = ($, q) => {
 			if (Q5._offlineAudio) {
 				Q5._offlineAudio = false;
 				Q5.aud = new window.AudioContext();
+				Q5.soundOut = Q5.aud.createGain();
+				Q5.soundOut.connect(Q5.aud.destination);
+
 				for (let s of sounds) s.init();
 			}
 			return Q5.aud.resume();
@@ -4099,6 +4134,8 @@ Q5.modules.sound = ($, q) => {
 if (window.OfflineAudioContext) {
 	Q5.aud = new window.OfflineAudioContext(2, 1, 44100);
 	Q5._offlineAudio = true;
+	Q5.soundOut = Q5.aud.createGain();
+	Q5.soundOut.connect(Q5.aud.destination);
 }
 
 Q5.Sound = class {
@@ -4118,7 +4155,7 @@ Q5.Sound = class {
 		this.gainNode = Q5.aud.createGain();
 		this.pannerNode = Q5.aud.createStereoPanner();
 		this.gainNode.connect(this.pannerNode);
-		this.pannerNode.connect(Q5.aud.destination);
+		this.pannerNode.connect(Q5.soundOut);
 
 		this.loaded = true;
 		if (this._volume) this.volume = this._volume;

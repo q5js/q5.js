@@ -2952,16 +2952,19 @@ function mousePressed() {
 	// 🎞️ record
 
 	/** 🎞️
-	 * q5.js has a built-in canvas recorder powered by
-	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder). It provides a good balance between 
-	 * video encoding speed, quality, and file size.
+	 * q5's built-in canvas recorder is powered by
+	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder), which prioritizes low-latency recording, so note
+	 * that consistent frame rates are not guaranteed.
 	 * 
 	 * Recording large canvases is an intensive process, so your
-	 * computer may not be able to do it in real time. That's okay,
-	 * the resulting video will playback at your sketch's target 
-	 * frame rate. But if real time interaction while recording is a 
-	 * priority, consider reducing the canvas' size, frame rate, and/or 
-	 * recording quality.
+	 * computer may not be able to do it in real time. If real time
+	 * interaction while recording is a priority, consider reducing
+	 * the canvas' size, frame rate, and/or recording bitrate.
+	 * 
+	 * I recommend recording at the high bitrates set by default
+	 * for the best video quality, then re-encoding the video at a
+	 * consistent frame rate and higher compression level using a tool
+	 * like ffmpeg or HandBrake.
 	 * 
 	 * HDR video encoding is not yet supported by any web browser.
 	 * For that and other advanced features, consider using
@@ -2974,11 +2977,12 @@ function mousePressed() {
 	 * The following properties can be set via the recorder UI or
 	 * programmatically.
 	 * 
-	 * - `format` is set to "H.264" by default. Encoding in "VP9" may not
-	 * be possible on some devices.
+	 * - `format` is set to "H.264" by default.
 	 * - `bitrate` is a number in megabits per second (mbps). Its default
 	 * value is determined by the height of the canvas. Increasing the
 	 * bitrate will increase the quality and file size of the recording.
+	 * - `captureAudio` is set to true by default. Set to false to disable
+	 * audio recording.
 	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
 createCanvas(200);
