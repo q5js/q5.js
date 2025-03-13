@@ -391,7 +391,7 @@ Q5.modules.canvas = ($, q) => {
 			w = null;
 		}
 		options ??= arguments[3];
-
+		if (typeof options == 'string') options = { renderer: options };
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (typeof options == 'object') Object.assign(opt, options);
 
@@ -430,6 +430,7 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$.createGraphics = function (w, h, opt = {}) {
+		if (typeof opt == 'string') opt = { renderer: opt };
 		let g = new Q5('graphics', undefined, opt.renderer || ($._webgpuFallback ? 'webgpu-fallback' : $._renderer));
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
@@ -655,6 +656,7 @@ Q5.HUE_ROTATE = 13;
 
 Q5.C2D = Q5.P2D = Q5.P2DHDR = 'c2d';
 Q5.WEBGL = 'webgl';
+Q5.WEBGPU = 'webgpu';
 
 Q5.canvasOptions = {
 	alpha: false,
