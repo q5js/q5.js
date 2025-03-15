@@ -2483,6 +2483,18 @@ function draw() {
 	 */
 	const TAU: number;
 
+	/** 🧮
+	 * Half of PI.
+	 * Approximately 1.5708.
+	 */
+	const HALF_PI: number;
+
+	/** 🧮
+	 * A quarter of PI.
+	 * Approximately 0.7854.
+	 */
+	const QUARTER_PI: number;
+
 	// 🔊 sound
 
 	/** 🔊

@@ -771,10 +771,12 @@ Q5.initWebGPU = async () => {
 	return true;
 };
 
-Q5.webgpu = async function (scope, parent) {
+Q5.WebGPU = async function (scope, parent) {
 	if (!scope || scope == 'global') Q5._hasGlobal = true;
 	if (!(await Q5.initWebGPU())) {
 		return new Q5(scope, parent, 'webgpu-fallback');
 	}
 	return new Q5(scope, parent, 'webgpu');
 };
+
+Q5.webgpu = Q5.WebGPU;

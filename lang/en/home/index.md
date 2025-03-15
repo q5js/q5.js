@@ -7,7 +7,7 @@
 - lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
 - beginner friendly [documentation](/learn) 📚
 - compatible with popular p5 addons 🧩
-- no dependencies, ~100kb minified 📦
+- no dependencies, ~130kb minified 📦
 - free to use under the LGPL (just like p5.js) 🆓
 
 # 1-1
@@ -46,9 +46,9 @@ You can [use q5 offline](https://github.com/q5js/q5.js/wiki/Get-Started) or add 
 
 ## Support q5 💙
 
-q5 is open source and anyone can use it for free under the terms of the LGPL (just like p5.js).
+[q5 is open source on GitHub](https://github.com/q5js/q5.js) and anyone can use it for free under the terms of the LGPL (just like p5.js).
 
-We need your support though! If you enjoy using q5.js, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/q5play).
+We need your support though! If you enjoy using q5, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/q5play).
 
 # 10-0
 
@@ -70,7 +70,7 @@ This project aims to continue the legacy of the incredible work done by [Ben Fry
 
 The original [q5xjs (v0)](https://github.com/LingDong-/q5xjs) was created by [@LingDong~](https://github.com/LingDong-) and released under the public domain Unlicense license. We forked and significantly extended the abandoned codebase.
 
-q5.js v2 is open source under the LGPLv3, created and actively maintained by the q5 team: [@quinton-ashley](https://github.com/quinton-ashley) and [@Tezumie](https://github.com/Tezumie).
+q5.js is open source under the LGPLv3, created and actively maintained by [@quinton-ashley](https://github.com/quinton-ashley). The q5 team includes contributor [@Tezumie](https://github.com/Tezumie).
 
 # 100
 
