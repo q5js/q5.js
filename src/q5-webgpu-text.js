@@ -350,6 +350,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textSize = (size) => {
+		if (size == undefined) return $._textSize;
 		$._textSize = size;
 		if (!leadingSet) {
 			leading = size * leadPercent;

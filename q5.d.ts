@@ -343,6 +343,11 @@ q.circle(100, 50, 20);
 		static Image: {
 			new(w: number, h: number, opt?: any): Q5.Image;
 		}
+
+		/** ⭐️
+		 * Creates a new Q5 instance with the q5.js WebGPU renderer.
+		 */
+		static WebGPU(): Q5;
 	}
 
 	namespace Q5 {
