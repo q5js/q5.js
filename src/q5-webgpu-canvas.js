@@ -210,7 +210,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		createMainView();
 	};
 
-	let addColor = (r, g, b, a = 1) => {
+	let addColor = (r, g, b, a) => {
 		if (typeof r == 'string' || $._colorMode != 'rgb') {
 			r = $.color(r, g, b, a);
 		} else if (b == undefined) {
@@ -218,6 +218,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			a = g ?? 1;
 			g = b = r;
 		}
+		a ??= 1;
 		if (r._q5Color) {
 			let c = r;
 			if (c.r) ({ r, g, b, a } = c);
