@@ -671,9 +671,7 @@ Q5.renderers.c2d = {};
 Q5.renderers.c2d.canvas = ($, q) => {
 	let c = $.canvas;
 
-	if ($.colorMode) {
-		$.colorMode(Q5.canvasOptions.colorSpace != 'srgb' ? 'rgb' : 'srgb', 255);
-	}
+	if ($.colorMode) $.colorMode('rgb', 255);
 
 	$._createCanvas = function (w, h, options) {
 		if (!c) {
@@ -2043,71 +2041,6 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		$.image(img, x, y);
 		$._imageMode = og;
-	};
-};
-Q5.modules.ai = ($) => {
-	$.askAI = (question = '') => {
-		Q5.disableFriendlyErrors = false;
-		throw Error('Ask AI ✨ ' + question);
-	};
-
-	$._askAI = async (e) => {
-		let askAI = e.message?.includes('Ask AI ✨');
-		let stackLines = e.stack?.split('\n');
-		if (!e.stack || stackLines.length <= 1) return;
-
-		let idx = 1;
-		let sep = '(';
-		if (navigator.userAgent.indexOf('Chrome') == -1) {
-			idx = 0;
-			sep = '@';
-		}
-		while (stackLines[idx].indexOf('q5') >= 0) idx++;
-
-		let errFile = stackLines[idx].split(sep).at(-1);
-		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
-		let parts = errFile.split(':');
-		let lineNum = parseInt(parts.at(-2));
-		if (askAI) lineNum++;
-		parts[parts.length - 1] = parts.at(-1).split(')')[0];
-		let fileUrl = parts.slice(0, -2).join(':');
-		let fileBase = fileUrl.split('/').at(-1);
-
-		try {
-			let res = await (await fetch(fileUrl)).text();
-			let lines = res.split('\n');
-			let errLine = lines[lineNum - 1].trim();
-
-			let context = '';
-			let i = 1;
-			while (context.length < 1600) {
-				if (lineNum - i >= 0) {
-					context = lines[lineNum - i].trim() + '\n' + context;
-				}
-				if (lineNum + i < lines.length) {
-					context += lines[lineNum + i].trim() + '\n';
-				} else break;
-				i++;
-			}
-
-			let question =
-				askAI && e.message.length > 10 ? e.message.slice(10) : 'Whats+wrong+with+this+line%3F+short+answer';
-
-			let url =
-				'https://chatgpt.com/?q=using+q5.js+not+p5.js+' +
-				question +
-				(askAI ? '' : '%0A%0A' + encodeURIComponent(e.name + ': ' + e.message)) +
-				'%0A%0ALine%3A+' +
-				encodeURIComponent(errLine) +
-				'%0A%0AExcerpt+for+context%3A%0A%0A' +
-				encodeURIComponent(context);
-
-			console.warn('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
-
-			console.warn('Ask AI ✨ ' + url);
-
-			if (askAI) return window.open(url, '_blank');
-		} catch (err) {}
 	};
 };
 Q5.modules.color = ($, q) => {
@@ -4771,10 +4704,10 @@ struct Q5 {
 	// local variables used for slightly better performance
 
 	// stores pipeline shifts and vertex counts/image indices
-	let drawStack = ($.drawStack = []);
+	let drawStack = ($._drawStack = []);
 
 	// colors used for each draw call
-	let colorStack = ($.colorStack = new Float32Array(1e6));
+	let colorStack = ($._colorStack = new Float32Array(1e6));
 
 	// prettier-ignore
 	colorStack.set([
@@ -4803,7 +4736,7 @@ struct Q5 {
 		]
 	});
 
-	$.bindGroupLayouts = [mainLayout];
+	$._bindGroupLayouts = [mainLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
 		size: 64,
@@ -4945,7 +4878,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		a ??= 1;
 		if (r._q5Color) {
 			let c = r;
-			if (c.r) ({ r, g, b, a } = c);
+			if (c.r != undefined) ({ r, g, b, a } = c);
 			else {
 				a = c.a;
 				if (c.c != undefined) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
@@ -5556,7 +5489,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	});
 
 	let c = $.canvas,
-		drawStack = $.drawStack,
+		drawStack = $._drawStack,
 		vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
 		vertIndex = 0;
 	const TAU = Math.PI * 2;
@@ -5573,7 +5506,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let pipelineLayout = Q5.device.createPipelineLayout({
 		label: 'shapesPipelineLayout',
-		bindGroupLayouts: $.bindGroupLayouts
+		bindGroupLayouts: $._bindGroupLayouts
 	});
 
 	$._pipelineConfigs[1] = {
@@ -6262,12 +6195,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let imagePipelineLayout = Q5.device.createPipelineLayout({
 		label: 'imagePipelineLayout',
-		bindGroupLayouts: [...$.bindGroupLayouts, textureLayout]
+		bindGroupLayouts: [...$._bindGroupLayouts, textureLayout]
 	});
 
 	let videoPipelineLayout = Q5.device.createPipelineLayout({
 		label: 'videoPipelineLayout',
-		bindGroupLayouts: [...$.bindGroupLayouts, videoTextureLayout]
+		bindGroupLayouts: [...$._bindGroupLayouts, videoTextureLayout]
 	});
 
 	$._pipelineConfigs[2] = {
@@ -6527,7 +6460,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		addVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
-			$.drawStack.push($._imagePL, img.textureIndex);
+			$._drawStack.push($._imagePL, img.textureIndex);
 		} else {
 			// render video
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
@@ -6544,7 +6477,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				})
 			);
 
-			$.drawStack.push($._videoPL, $._textureBindGroups.length - 1);
+			$._drawStack.push($._videoPL, $._textureBindGroups.length - 1);
 
 			if (img.flipped) $.scale(-1, 1);
 		}
@@ -6760,7 +6693,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	});
 
 	let fontPipelineLayout = Q5.device.createPipelineLayout({
-		bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
+		bindGroupLayouts: [...$._bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
 	});
 
 	$._pipelineConfigs[4] = {
@@ -7117,7 +7050,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		txt[7] = 0; // padding
 
 		textStack.push(txt);
-		$.drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
+		$._drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {
@@ -7130,11 +7063,11 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		if ($._doFill) {
 			let fi = $._fill * 4;
-			$._g.fill(colorStack.slice(fi, fi + 4));
+			$._g.fill($._colorStack.slice(fi, fi + 4));
 		}
 		if ($._doStroke) {
 			let si = $._stroke * 4;
-			$._g.stroke(colorStack.slice(si, si + 4));
+			$._g.stroke($._colorStack.slice(si, si + 4));
 		}
 
 		let img = $._g.createTextImage(str, w, h);

@@ -49,7 +49,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	});
 
 	let c = $.canvas,
-		drawStack = $.drawStack,
+		drawStack = $._drawStack,
 		vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
 		vertIndex = 0;
 	const TAU = Math.PI * 2;
@@ -66,7 +66,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let pipelineLayout = Q5.device.createPipelineLayout({
 		label: 'shapesPipelineLayout',
-		bindGroupLayouts: $.bindGroupLayouts
+		bindGroupLayouts: $._bindGroupLayouts
 	});
 
 	$._pipelineConfigs[1] = {

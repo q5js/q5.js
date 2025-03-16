@@ -124,12 +124,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let imagePipelineLayout = Q5.device.createPipelineLayout({
 		label: 'imagePipelineLayout',
-		bindGroupLayouts: [...$.bindGroupLayouts, textureLayout]
+		bindGroupLayouts: [...$._bindGroupLayouts, textureLayout]
 	});
 
 	let videoPipelineLayout = Q5.device.createPipelineLayout({
 		label: 'videoPipelineLayout',
-		bindGroupLayouts: [...$.bindGroupLayouts, videoTextureLayout]
+		bindGroupLayouts: [...$._bindGroupLayouts, videoTextureLayout]
 	});
 
 	$._pipelineConfigs[2] = {
@@ -389,7 +389,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		addVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
-			$.drawStack.push($._imagePL, img.textureIndex);
+			$._drawStack.push($._imagePL, img.textureIndex);
 		} else {
 			// render video
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
@@ -406,7 +406,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				})
 			);
 
-			$.drawStack.push($._videoPL, $._textureBindGroups.length - 1);
+			$._drawStack.push($._videoPL, $._textureBindGroups.length - 1);
 
 			if (img.flipped) $.scale(-1, 1);
 		}

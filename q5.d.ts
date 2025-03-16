@@ -190,7 +190,7 @@ function draw() {
 	 * 
 	 * Useful for adding post-processing effects when it's not possible
 	 * to do so at the end of the `draw` function, such as when using
-	 * libraries like p5play that draw to the canvas after the `draw`
+	 * addons like p5play that auto-draw to the canvas after the `draw`
 	 * function is run.
 	 * @example
 function draw() {
@@ -300,7 +300,7 @@ function draw() {
 		 * this constructor as well but its use is deprecated, use
 		 * [q5's namespaced instance mode](https://github.com/q5js/q5.js/wiki/Instance-Mode) instead.
 		 * 
-		 * Run [`Q5.webgpu()`](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) instead of this constructor to use
+		 * Run [`Q5.WebGPU()`](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) instead of this constructor to use
 		 * q5's WebGPU renderer.
 		 * @param {string | Function} [scope]
 		 *   - "global": (default) adds q5 functions and variables to the global scope
@@ -314,6 +314,13 @@ circle(100, 50, 80);
 let q = new Q5('instance');
 q.createCanvas(200, 100);
 q.circle(100, 50, 20);
+		 * @example
+let q = await Q5.WebGPU();
+
+q.draw = () => {
+	background(0.8);
+	circle(mouseX, 0, 80);
+}
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
@@ -367,8 +374,8 @@ q.circle(100, 50, 20);
 	 * by the user, a 200x200 canvas will be created automatically before
 	 * the draw loop starts.
 	 * 
-	 * In q5 WebGPU, this function must be run before running other
-	 * q5 functions.
+	 * When using q5 WebGPU, create a canvas before using any other
+	 * q5 functions. The origin of a WebGPU canvas is at its center.
 	 * @param {number} [w] width or size of the canvas
 	 * @param {number} [h] height of the canvas
 	 * @param {Object} [opt] options for the canvas
@@ -378,6 +385,10 @@ q.circle(100, 50, 20);
 	 * @example
 createCanvas(200, 100);
 circle(100, 50, 80);
+	 * @example
+await Q5.WebGPU();
+createCanvas(200, 100);
+circle(0, 0, 80);
 	 * @example
 createCanvas(200, 200, { alpha: true });
 
@@ -854,12 +865,8 @@ rect(20, 20, 60, 60);
 	 * Creates a new `Color` object, which is primarily useful for storing
 	 * a color that your sketch will reuse or modify later.
 	 * 
-	 * With the default RGB color mode, colors have these components:
-	 * 
-	 * `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha`.
-	 * 
-	 * The default color format is integer, so set color components
-	 * to values between 0 and 255.
+	 * With the default RGB color mode, colors have `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha` components. The default color 
+	 * format is integer, so set components to values between 0 and 255.
 	 * 
 	 * In q5 WebGPU, the default color mode is RGB in float format, so
 	 * set color components to values between 0 and 1.
@@ -901,6 +908,16 @@ function draw() {
 	circle(mouseX, mouseY, 50);
 	c.g = (c.g + 1) % 255;
 }
+	 * @example
+let q = await Q5.WebGPU();
+
+//           (r, g, b,   a)
+let c = color(0, 1, 1, 0.2);
+
+q.draw = () => {
+	fill(c);
+	circle(mouseX, mouseY, 50);
+};
 	 */
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
 
@@ -1780,17 +1797,17 @@ function setup() {
 	 * @param {number} [wrapWidth] maximum line width in characters
 	 * @param {number} [lineLimit] maximum number of lines
 	 * @example
-createCanvas(200);
+createCanvas(200, 100);
 background('silver');
 
 textSize(32);
-text('Hello, world!', 12, 106);
+text('Hello, world!', 12, 60);
 	 * @example
 createCanvas(200);
 background(200);
 textSize(20);
 
-let info = "q5.js is a JavaScript library for creative coding. It's a sequel to p5.js that's optimized for interactive art.";
+let info = "q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.";
 
 text(info, 12, 30, 20, 6);
 //
@@ -1799,20 +1816,17 @@ text(info, 12, 30, 20, 6);
 	function text(str: string, x: number, y: number, wrapWidth?: number, lineLimit?: number): void;
 
 	/** ✍️
-	 * Loads a font from a URL and optionally runs a callback function
-	 * with the font name once it's loaded.
+	 * Loads a font from a URL.
 	 * 
-	 * In q5 c2d, you can load fonts in any format accepted in CSS, such as
-	 * .ttf and .otf files.
+	 * The font file can be in any format accepted in CSS, such as
+	 * .ttf and .otf files. The example below loads [Robotica](https://www.dafont.com/robotica-courtney.font) created by Courtney Novits.
 	 * 
-	 * The example below loads "Robotica.ttf" created by Courtney Novits:
-	 * https://www.dafont.com/robotica-courtney.font
+	 * If no fonts are loaded, the default sans-serif font is used.
 	 *
-	 * In q5 WebGPU, fonts must be in MSDF format with the file ending
-	 * "-msdf.json". If no font is loaded before `text` is run, then
-	 * the default sans serif font, Microsoft YaHei, is loaded:
-	 * https://q5js.org/fonts/sans-serif-msdf.json
-	 * https://q5js.org/fonts/sans-serif.png
+	 * In q5 WebGPU, only fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
+	 * with the file ending "-msdf.json" can be used to render text with 
+	 * the `text` function. Fonts in other formats can be used with the
+	 * [`textImage`](https://q5js.org/learn/#textImage) function.
 	 * @param {string} url uRL of the font to load
 	 * @param {(font: FontFace) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
 	 * @returns {FontFace} font
@@ -1823,30 +1837,36 @@ loadFont('/assets/Robotica.ttf');
 
 function setup() {
 	background(200);
-	textSize(48);
-	text('Hello!', 12, 114);
+	textSize(66);
+	text('Hello!', 0, 200);
 }
 	 */
-	function loadFont(url: string, cb?: (font: FontFace) => void): string;
+	function loadFont(url: string, cb?: (font: FontFace) => void): FontFace;
 
 	/** ✍️
 	 * Sets the current font to be used for rendering text.
 	 * 
-	 * By default, the font is set to "sans-serif" or the last font
-	 * loaded.
-	 * 
-	 * In q5 c2d, you can set the font to any font accepted in CSS,
-	 * such as "serif" or "monospace".
-	 * https://developer.mozilla.org/docs/Web/CSS/font-family
+	 * By default, the font is set to the [CSS font family](https://developer.mozilla.org/docs/Web/CSS/font-family)
+	 * "sans-serif" or the last font loaded.
 	 * @param {string} fontName name of the font family or a FontFace object
 	 * @example
-createCanvas(200);
+createCanvas(200, 160);
 background(200);
 
 textFont('serif');
 
 textSize(32);
-text('Hello, world!', 12, 106);
+text('Hello, world!', 15, 90);
+	 * @example
+let q = await Q5.WebGPU();
+createCanvas(200);
+background(0.8);
+
+textFont('monospace');
+
+q.setup = () => {
+  text('Hello, world!', -65, 0);
+}
 	 */
 	function textFont(fontName: string): void;
 
@@ -1959,15 +1979,14 @@ createCanvas(200);
 	 * @param {number} [lineLimit] maximum number of lines
 	 * @returns {Q5.Image} an image object representing the rendered text
 	 * @example
-createCanvas(200, 200);
-textSize(80);
+createCanvas(200);
+textSize(96);
+
 let img = createTextImage('🐶');
 img.filter(INVERT);
 
 function draw() {
-	background(200);
-	text('🐶', 10, 75);
-	image(img, 110, 75);
+  image(img, 55, 10);
 }
 	 */
 	function createTextImage(str: string, wrapWidth: number, lineLimit: number): Q5.Image;
@@ -1975,25 +1994,31 @@ function draw() {
 	/** ✍️
 	 * Renders an image generated from text onto the canvas.
 	 * 
+	 * If the first parameter is a string, an image of the text will be 
+	 * created and cached automatically.
+	 * 
 	 * The positioning of the image is affected by the current text
 	 * alignment and baseline settings.
 	 * 
-	 * If the first parameter is a string, an image of the text is
-	 * created automatically, then drawn.
-	 * @param {Q5.Image} img image object or text
+	 * In q5 WebGPU, this function is the only way to draw multi-colored 
+	 * text, such as emojis. It can also be used to draw text from
+	 * ttf font files. Don't use this function to draw text that
+	 * changes every frame.
+	 * @param {Q5.Image | string} img image or text
 	 * @param {number} x x-coordinate where the image should be placed
 	 * @param {number} y y-coordinate where the image should be placed
 	 * @example
+let q = await Q5.WebGPU();
 createCanvas(200, 200);
-textSize(80);
+textSize(96);
 textAlign(CENTER, CENTER);
 
-function draw() {
-	background(200);
-	textImage('🐶', 100, 100);
-}
+q.draw = () => {
+	background(0.8);
+	textImage('🐶', 0, 0);
+};
 	 */
-	function textImage(img: HTMLImageElement, x: number, y: number): void;
+	function textImage(img: Q5.Image | String, x: number, y: number): void;
 
 	/** ✍️
 	 * Number formatter, can be used to display a number as a string with
@@ -2008,7 +2033,7 @@ createCanvas(200, 100);
 background(200);
 
 textSize(32);
-text(nf(PI, 4, 2), 10, 60);
+text(nf(PI, 4, 5), 10, 60);
 	 */
 	function nf(n: number, l: number, r: number): string;
 
@@ -3367,14 +3392,6 @@ function mousePressed() {
 		static fromAngle(angle: number, length?: number): Vector;
 	}
 
-	// ✨ ai
-
-	/** ✨
-	 * Run this function before a line of code that isn't working as expected.
-	 * @param {string} [question] question to ask the AI
-	 */
-	function askAI(question?: string): void;
-
 	// ⚡️ shaders
 
 	/** ⚡️
@@ -3395,7 +3412,7 @@ function mousePressed() {
 	 * @param {string} code WGSL shader code excerpt
 	 * @returns {GPUShaderModule} a shader program
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 
 let wobble = createShader(`
 @vertex
@@ -3417,7 +3434,7 @@ q.draw = () => {
 	plane(0, 0, 100);
 };
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 
 let stripes = createShader(`
 @fragment
@@ -3440,7 +3457,7 @@ q.draw = () => {
 	 * @param {number} w width or side length
 	 * @param {number} [h] height
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 createCanvas(200);
 plane(0, 0, 100);
 	 */
@@ -3456,7 +3473,7 @@ plane(0, 0, 100);
 	 * Makes q5 use a default shader.
 	 * @param {string} [type] can be "shapes" (default), "image", "video", or "text"
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 
 let stripes = createShader(`
 @fragment
@@ -3488,7 +3505,7 @@ q.draw = () => {
 	 * Use this function to customize a copy of the
 	 * [default frame shader](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 createCanvas(200);
 
 let boxy = createFrameShader(`
@@ -3517,7 +3534,7 @@ q.draw = () => {
 	 * @param {string} code WGSL shader code excerpt
 	 * @returns {GPUShaderModule} a shader program
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 imageMode(CENTER);
 
 let logo = loadImage('/q5js_logo.webp');
@@ -3546,7 +3563,7 @@ q.draw = () => {
 	 * @param {string} code WGSL shader code excerpt
 	 * @returns {GPUShaderModule} a shader program
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 createCanvas(200, 600);
 
 let vid = createVideo('/assets/apollo4.mp4');
@@ -3591,7 +3608,7 @@ q.draw = () => {
 	 * @param {string} code WGSL shader code excerpt
 	 * @returns {GPUShaderModule} a shader program
 	 * @example
-let q = await Q5.webgpu();
+let q = await Q5.WebGPU();
 textAlign(CENTER, CENTER);
 
 let spin = createTextShader(`

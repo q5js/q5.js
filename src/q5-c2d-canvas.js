@@ -3,9 +3,7 @@ Q5.renderers.c2d = {};
 Q5.renderers.c2d.canvas = ($, q) => {
 	let c = $.canvas;
 
-	if ($.colorMode) {
-		$.colorMode(Q5.canvasOptions.colorSpace != 'srgb' ? 'rgb' : 'srgb', 255);
-	}
+	if ($.colorMode) $.colorMode('rgb', 255);
 
 	$._createCanvas = function (w, h, options) {
 		if (!c) {

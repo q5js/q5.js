@@ -167,7 +167,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	});
 
 	let fontPipelineLayout = Q5.device.createPipelineLayout({
-		bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
+		bindGroupLayouts: [...$._bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
 	});
 
 	$._pipelineConfigs[4] = {
@@ -524,7 +524,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		txt[7] = 0; // padding
 
 		textStack.push(txt);
-		$.drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
+		$._drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {
@@ -537,11 +537,11 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		if ($._doFill) {
 			let fi = $._fill * 4;
-			$._g.fill(colorStack.slice(fi, fi + 4));
+			$._g.fill($._colorStack.slice(fi, fi + 4));
 		}
 		if ($._doStroke) {
 			let si = $._stroke * 4;
-			$._g.stroke(colorStack.slice(si, si + 4));
+			$._g.stroke($._colorStack.slice(si, si + 4));
 		}
 
 		let img = $._g.createTextImage(str, w, h);

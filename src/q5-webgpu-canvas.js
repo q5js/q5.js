@@ -47,10 +47,10 @@ struct Q5 {
 	// local variables used for slightly better performance
 
 	// stores pipeline shifts and vertex counts/image indices
-	let drawStack = ($.drawStack = []);
+	let drawStack = ($._drawStack = []);
 
 	// colors used for each draw call
-	let colorStack = ($.colorStack = new Float32Array(1e6));
+	let colorStack = ($._colorStack = new Float32Array(1e6));
 
 	// prettier-ignore
 	colorStack.set([
@@ -79,7 +79,7 @@ struct Q5 {
 		]
 	});
 
-	$.bindGroupLayouts = [mainLayout];
+	$._bindGroupLayouts = [mainLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
 		size: 64,
@@ -221,7 +221,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		a ??= 1;
 		if (r._q5Color) {
 			let c = r;
-			if (c.r) ({ r, g, b, a } = c);
+			if (c.r != undefined) ({ r, g, b, a } = c);
 			else {
 				a = c.a;
 				if (c.c != undefined) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);

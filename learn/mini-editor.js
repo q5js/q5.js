@@ -126,9 +126,9 @@ class MiniEditor {
 		try {
 			let userCode = this.editor.getValue();
 
-			let useWebGPU = userCode.includes('Q5.webgpu');
+			let useWebGPU = userCode.includes('Q5.WebGPU');
 
-			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|await\s+Q5\.webgpu)\s*\([^)]*\);?/g;
+			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|(await\s+)*Q5\.WebGPU)\s*\([^)]*\);?/g;
 			userCode = userCode.replace(q5InstanceRegex, '');
 
 			let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : null);
