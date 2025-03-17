@@ -21,6 +21,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	$.loadFont = (url, cb) => {
 		q._preloadCount++;
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
+
 		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
 		f._loader = (async () => {
@@ -284,3 +285,5 @@ Q5.renderers.c2d.text = ($, q) => {
 		$._imageMode = og;
 	};
 };
+
+Q5.fonts = [];

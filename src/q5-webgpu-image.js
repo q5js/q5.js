@@ -252,7 +252,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			texture = Q5.device.createTexture({
 				size: textureSize,
 				format: 'bgra8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+				usage:
+					GPUTextureUsage.TEXTURE_BINDING |
+					GPUTextureUsage.COPY_SRC |
+					GPUTextureUsage.COPY_DST |
+					GPUTextureUsage.RENDER_ATTACHMENT
 			});
 
 			Q5.device.queue.copyExternalImageToTexture(

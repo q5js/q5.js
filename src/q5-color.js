@@ -98,7 +98,9 @@ Q5.modules.color = ($, q) => {
 					if (c3) c3 /= 255;
 				}
 			}
-			if (Array.isArray(c0)) [c0, c1, c2, c3] = c0;
+			if (Array.isArray(c0) || c0.constructor == Float32Array) {
+				[c0, c1, c2, c3] = c0;
+			}
 		}
 
 		if (c2 == undefined) {

@@ -2009,13 +2009,22 @@ function draw() {
 	 * @param {number} y y-coordinate where the image should be placed
 	 * @example
 let q = await Q5.WebGPU();
-createCanvas(200, 200);
+createCanvas(200);
+background(0.8);
 textSize(96);
 textAlign(CENTER, CENTER);
 
-q.draw = () => {
+textImage('🐶', 0, 0);
+	 * @example
+let q = await Q5.WebGPU();
+createCanvas(200);
+
+loadFont('/assets/Robotica.ttf');
+
+q.setup = () => {
 	background(0.8);
-	textImage('🐶', 0, 0);
+	textSize(66);
+	textImage('Hello!', -100, 100);
 };
 	 */
 	function textImage(img: Q5.Image | String, x: number, y: number): void;

@@ -1780,6 +1780,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	$.loadFont = (url, cb) => {
 		q._preloadCount++;
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
+
 		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
 		f._loader = (async () => {
@@ -2043,6 +2044,8 @@ Q5.renderers.c2d.text = ($, q) => {
 		$._imageMode = og;
 	};
 };
+
+Q5.fonts = [];
 Q5.modules.color = ($, q) => {
 	$.RGB = $.RGBA = $._colorMode = 'rgb';
 	$.HSL = 'hsl';
@@ -2143,7 +2146,9 @@ Q5.modules.color = ($, q) => {
 					if (c3) c3 /= 255;
 				}
 			}
-			if (Array.isArray(c0)) [c0, c1, c2, c3] = c0;
+			if (Array.isArray(c0) || c0.constructor == Float32Array) {
+				[c0, c1, c2, c3] = c0;
+			}
 		}
 
 		if (c2 == undefined) {
@@ -6323,7 +6328,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			texture = Q5.device.createTexture({
 				size: textureSize,
 				format: 'bgra8unorm',
-				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+				usage:
+					GPUTextureUsage.TEXTURE_BINDING |
+					GPUTextureUsage.COPY_SRC |
+					GPUTextureUsage.COPY_DST |
+					GPUTextureUsage.RENDER_ATTACHMENT
 			});
 
 			Q5.device.queue.copyExternalImageToTexture(
@@ -7061,11 +7070,11 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$.createTextImage = (str, w, h) => {
 		$._g.textSize($._textSize);
 
-		if ($._doFill) {
+		if ($._doFill && $._fillSet) {
 			let fi = $._fill * 4;
 			$._g.fill($._colorStack.slice(fi, fi + 4));
 		}
-		if ($._doStroke) {
+		if ($._doStroke && $._strokeSet) {
 			let si = $._stroke * 4;
 			$._g.stroke($._colorStack.slice(si, si + 4));
 		}

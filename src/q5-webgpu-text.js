@@ -535,11 +535,11 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$.createTextImage = (str, w, h) => {
 		$._g.textSize($._textSize);
 
-		if ($._doFill) {
+		if ($._doFill && $._fillSet) {
 			let fi = $._fill * 4;
 			$._g.fill($._colorStack.slice(fi, fi + 4));
 		}
-		if ($._doStroke) {
+		if ($._doStroke && $._strokeSet) {
 			let si = $._stroke * 4;
 			$._g.stroke($._colorStack.slice(si, si + 4));
 		}
