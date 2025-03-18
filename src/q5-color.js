@@ -1,5 +1,5 @@
 Q5.modules.color = ($, q) => {
-	$.RGB = $.RGBA = $._colorMode = 'rgb';
+	$.RGB = $.RGBA = $.RGBHDR = $._colorMode = 'rgb';
 	$.HSL = 'hsl';
 	$.HSB = 'hsb';
 	$.OKLCH = 'oklch';
@@ -10,8 +10,8 @@ Q5.modules.color = ($, q) => {
 	$.colorMode = (mode, format, gamut) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
-		format ??= srgb ? 'integer' : 'float';
-		$._colorFormat = format == 'float' || format == 1 ? 1 : 255;
+		format ??= mode == 'rgb' ? (srgb ? 255 : 1) : 1;
+		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
 		} else if (mode == 'hsl') {

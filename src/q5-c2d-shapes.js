@@ -359,11 +359,15 @@ Q5.renderers.c2d.shapes = ($) => {
 		);
 	};
 
-	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
+	$.erase = function (fillAlpha, strokeAlpha) {
+		if ($._colorFormat == 255) {
+			if (fillAlpha) fillAlpha /= 255;
+			if (strokeAlpha) strokeAlpha /= 255;
+		}
 		$.ctx.save();
 		$.ctx.globalCompositeOperation = 'destination-out';
-		$.ctx.fillStyle = `rgb(0 0 0 / ${fillAlpha / 255})`;
-		$.ctx.strokeStyle = `rgb(0 0 0 / ${strokeAlpha / 255})`;
+		$.ctx.fillStyle = `rgb(0 0 0 / ${fillAlpha || 1})`;
+		$.ctx.strokeStyle = `rgb(0 0 0 / ${strokeAlpha || 1})`;
 	};
 
 	$.noErase = function () {

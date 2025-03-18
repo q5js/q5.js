@@ -273,7 +273,7 @@ function draw() {
 	 * Disable the preload system in q5 to make load* functions
 	 * return promises, to match p5.js v2 behavior.
 	 * @example
-new Q5();
+createCanvas(200);
 disablePreloadSystem();
 
 logo = await loadImage('/q5js_logo.webp');
@@ -294,14 +294,11 @@ function draw() {
 		 * by running [`createCanvas`](https://q5js.org/learn/#createCanvas) 
 		 * on the file level.
 		 * 
-		 * If users don't create a new instance of Q5 themselves, an 
+		 * If you don't create a new instance of Q5, an 
 		 * instance will be created automatically, replicating
 		 * p5's limited global mode. p5's instance mode is supported by 
 		 * this constructor as well but its use is deprecated, use
 		 * [q5's namespaced instance mode](https://github.com/q5js/q5.js/wiki/Instance-Mode) instead.
-		 * 
-		 * Run [`Q5.WebGPU()`](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) instead of this constructor to use
-		 * q5's WebGPU renderer.
 		 * @param {string | Function} [scope]
 		 *   - "global": (default) adds q5 functions and variables to the global scope
 		 *   - "instance": does not add q5 functions or variables to the global scope
@@ -314,13 +311,6 @@ circle(100, 50, 80);
 let q = new Q5('instance');
 q.createCanvas(200, 100);
 q.circle(100, 50, 20);
-		 * @example
-let q = await Q5.WebGPU();
-
-q.draw = () => {
-	background(0.8);
-	circle(mouseX, 0, 80);
-}
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
@@ -352,15 +342,47 @@ q.draw = () => {
 		}
 
 		/** ⭐️
-		 * Creates a new Q5 instance with the q5.js WebGPU renderer.
+		 * Creates a new Q5 instance with the [q5 WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer).
+		 * @example
+let q = await Q5.WebGPU();
+
+q.draw = () => {
+	background(0.8);
+	circle(mouseX, 0, 80);
+};
 		 */
 		static WebGPU(): Q5;
+
+		/** ⭐️
+		 * The draw function is run 60 times per second by default.
+		 */
+		draw(): void; //-
+
+		/** ⭐️
+		 * The setup function is run once, when the program starts.
+		 */
+		setup(): void; //-
+
+		/** ⭐️
+		 * Load assets in the preload function to ensure that they'll be
+		 * ready to use in the setup and draw functions.
+		 * 
+		 * q5's preload system can also be used without a preload function
+		 * if you create a canvas first.
+		 */
+		preload(): void; //-
+
+		/** ⭐️
+		 * The number of frames that have been displayed since the program 
+		 * started.
+		 */
+		postProcess(): void; //-
 	}
 
 	namespace Q5 {
 		interface Image {
-			width: number;
-			height: number;
+			width: number; //-
+			height: number; //-
 		}
 	}
 
@@ -1127,6 +1149,27 @@ background(255, 0, 0);
 		 * Q5 color class based on the color mode, format, and gamut.
 		 */
 		constructor(c0: number, c1: number, c2: number, c3: number);
+
+		/** 🎨
+		 * Checks if this color is exactly equal to another color.
+		 */
+		equals(other: Color): boolean;
+
+		/** 🎨
+		 * Checks if the color is the same as another color,
+		 * disregarding their alpha values.
+		 */
+		isSameColor(other: Color): boolean;
+
+		/** 🎨
+		 * Produces a CSS color string representation.
+		 */
+		toString(): string;
+
+		/** 🎨
+		 * An array of the color's components.
+		 */
+		levels: number[];
 	}
 
 	// 💻 display
@@ -1163,10 +1206,12 @@ circle(25, 12.5, 16);
 createCanvas(200, 100);
 background('crimson');
 	 * @example
-function draw() {
-	background(128, 100);
+let q = await Q5.WebGPU();
+
+q.draw = () => {
+	background(0.5, 0.4);
 	circle(mouseX, mouseY, 20);
-}
+};
 	 */
 	function background(filler: Color | Q5.Image): void;
 
@@ -1414,14 +1459,19 @@ point(125, 50);
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
 	/** 🧑‍🎨
-	 * Sets the canvas to erase mode, where shapes will erase what's underneath them instead of drawing over it.
-	 * @param {number} [fillAlpha] opacity level of the fill color from 0 to 255
-	 * @param {number} [strokeAlpha] opacity level of the stroke color from 0 to 255
+	 * Sets the canvas to erase mode, where shapes will erase what's 
+	 * underneath them instead of drawing over it.
+	 * 
+	 * Not available in q5 WebGPU.
+	 * @param {number} [fillAlpha] opacity level of the fill color
+	 * @param {number} [strokeAlpha] opacity level of the stroke color
 	 */
 	function erase(fillAlpha?: number, strokeAlpha?: number): void;
 
 	/** 🧑‍🎨
 	 * Resets the canvas from erase mode to normal drawing mode.
+	 * 
+	 * Not available in q5 WebGPU.
 	 */
 	function noErase(): void;
 
@@ -1459,8 +1509,17 @@ createCanvas(200);
 let logo = loadImage('/q5js_logo.webp');
 
 function draw() {
-	image(logo, 0, 0, 200, 200);
+	background(logo);
 }
+	 * @example
+let q = await Q5.WebGPU();
+createCanvas(200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+q.draw = () => {
+	background(logo);
+};
 	 */
 	function loadImage(url: string, cb?: (img: any) => void, opt?: any): Q5.Image;
 
@@ -1475,6 +1534,14 @@ function draw() {
 	 * @param {number} [sy] y position in the source to start clipping a subsection from
 	 * @param {number} [sw] width of the subsection of the source image
 	 * @param {number} [sh] height of the subsection of the source image
+	 * @example
+createCanvas(200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function draw() {
+	image(logo, 0, 0, 200, 200);
+}
 	 * @example
 createCanvas(200);
 
@@ -2001,9 +2068,9 @@ function draw() {
 	 * alignment and baseline settings.
 	 * 
 	 * In q5 WebGPU, this function is the only way to draw multi-colored 
-	 * text, such as emojis. It can also be used to draw text from
-	 * ttf font files. Don't use this function to draw text that
-	 * changes every frame.
+	 * text, like emojis, and to use fonts that aren't in MSDF format. 
+	 * Using this function to draw text that changes every frame has
+	 * a very high performance cost.
 	 * @param {Q5.Image | string} img image or text
 	 * @param {number} x x-coordinate where the image should be placed
 	 * @param {number} y y-coordinate where the image should be placed
@@ -3244,6 +3311,14 @@ function mousePressed() {
 	 */
 	class Vector {
 		/** ↗️
+		 * Constructs a new Vector object.
+		 * @param {number} x x component of the vector
+		 * @param {number} y y component of the vector
+		 * @param {number} [z] optional. The z component of the vector
+		 */
+		constructor(x: number, y: number, z?: number);
+
+		/** ↗️
 		 * The x component of the vector.
 		 */
 		x: number;
@@ -3256,15 +3331,7 @@ function mousePressed() {
 		/** ↗️
 		 * The z component of the vector, if applicable.
 		 */
-		z?: number;
-
-		/** ↗️
-		 * Constructs a new Vector object.
-		 * @param {number} x x component of the vector
-		 * @param {number} y y component of the vector
-		 * @param {number} [z] optional. The z component of the vector
-		 */
-		constructor(x: number, y: number, z?: number);
+		z: number;
 
 		/** ↗️
 		 * Adds a vector to this vector.

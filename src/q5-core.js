@@ -95,7 +95,7 @@ function Q5(scope, parent, renderer) {
 			}
 		} else if ($.frameCount && !$._redraw) return;
 
-		if ($.frameCount && useRAF) {
+		if ($.frameCount && useRAF && !$._redraw) {
 			let timeSinceLast = ts - $._lastFrameTime;
 			if (timeSinceLast < $._targetFrameDuration - 4) return;
 		}

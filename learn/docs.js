@@ -34,6 +34,7 @@ function convertTSDefToMarkdown(data) {
 		insideParams = false,
 		insideProps = false,
 		insideExample = false,
+		hasExample = false,
 		jsDocBuffer = '',
 		inClassDef = false,
 		currentClassName = '',
@@ -90,7 +91,7 @@ function convertTSDefToMarkdown(data) {
 					if (insideExample) {
 						line = '```\n\n' + line;
 					}
-					insideExample = true;
+					insideExample = hasExample = true;
 				}
 				jsDocBuffer += line + '\n';
 			}
@@ -106,36 +107,58 @@ function convertTSDefToMarkdown(data) {
 			currentClassName = classMatch[1];
 			inClassDef = true;
 		} else if (inClassDef && line.startsWith('constructor')) {
-			let params = stripParams(line.slice(11));
-			markdownCode += `## ${curEmoji} ${currentClassName}${params} &lt;class&gt;\n\n`;
+			let params = stripParams(line.slice(12, -2));
+			markdownCode += `## ${curEmoji} ${currentClassName}(${params}) &lt;class&gt;\n\n`;
 			markdownCode += jsDocBuffer + '\n\n';
 			jsDocBuffer = '';
-		} else if (inClassDef && line.startsWith('static')) {
-			jsDocBuffer = '';
-			continue;
+			hasExample = false;
 		} else if (line.startsWith('new')) {
+			continue;
+		} else if (line.endsWith('//-')) {
+			jsDocBuffer = '';
 			continue;
 		} else if (line.includes('(')) {
 			let funcMatch = line.match(/(\w+)\s*\((.*)\)\s*:\s*(\w+)/);
 			if (funcMatch) {
 				let [_, funcName, funcParams, funcType] = funcMatch;
 				if (!line.startsWith('function ')) {
-					funcName = currentClassName.toLowerCase() + '.' + funcName;
+					if (!line.startsWith('static')) {
+						funcName = currentClassName.toLowerCase() + '.' + funcName;
+					} else {
+						if (!hasExample) {
+							jsDocBuffer = '';
+							continue;
+						}
+						funcName = currentClassName + '.' + funcName;
+					}
 				}
 				funcParams = stripParams(funcParams);
 				let funcHeader = `## ${curEmoji} ${funcName}(${funcParams}) &lt;${funcType}&gt;\n\n`;
 				markdownCode += funcHeader + jsDocBuffer + '\n\n';
 				jsDocBuffer = '';
+				hasExample = false;
 			}
-		} else if (line.startsWith('var ') || line.startsWith('let ') || line.startsWith('const ')) {
-			let varMatch = line.match(/(var|let|const)\s+(\w+)/);
-			if (varMatch) {
-				let varName = varMatch[2].trim();
-				let type = line.split(':')[1].slice(1, -1);
-				let varHeader = `## ${curEmoji} ${varName} &lt;${type}&gt;\n\n`;
-				markdownCode += varHeader + jsDocBuffer + '\n\n';
-				jsDocBuffer = '';
+		} else if (line.includes(':')) {
+			let l = line.split(':');
+			let varName = l[0].split(' ').at(-1).trim();
+
+			// if var is a class property
+			if (!line.match(/^(var|let|const)/)) {
+				if (!line.startsWith('static')) {
+					varName = currentClassName.toLowerCase() + '.' + varName;
+				} else {
+					if (!hasExample) {
+						jsDocBuffer = '';
+						continue;
+					}
+					varName = currentClassName + '.' + varName;
+				}
 			}
+			let type = l[1].slice(1, -1);
+			let varHeader = `## ${curEmoji} ${varName} &lt;${type}&gt;\n\n`;
+			markdownCode += varHeader + jsDocBuffer + '\n\n';
+			jsDocBuffer = '';
+			hasExample = false;
 		} else if (line.startsWith('namespace') || line.startsWith('interface')) {
 			continue;
 		} else if (line !== '}' && !line.includes(':')) {

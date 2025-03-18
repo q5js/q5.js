@@ -95,7 +95,7 @@ function Q5(scope, parent, renderer) {
 			}
 		} else if ($.frameCount && !$._redraw) return;
 
-		if ($.frameCount && useRAF) {
+		if ($.frameCount && useRAF && !$._redraw) {
 			let timeSinceLast = ts - $._lastFrameTime;
 			if (timeSinceLast < $._targetFrameDuration - 4) return;
 		}
@@ -1229,11 +1229,15 @@ Q5.renderers.c2d.shapes = ($) => {
 		);
 	};
 
-	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
+	$.erase = function (fillAlpha, strokeAlpha) {
+		if ($._colorFormat == 255) {
+			if (fillAlpha) fillAlpha /= 255;
+			if (strokeAlpha) strokeAlpha /= 255;
+		}
 		$.ctx.save();
 		$.ctx.globalCompositeOperation = 'destination-out';
-		$.ctx.fillStyle = `rgb(0 0 0 / ${fillAlpha / 255})`;
-		$.ctx.strokeStyle = `rgb(0 0 0 / ${strokeAlpha / 255})`;
+		$.ctx.fillStyle = `rgb(0 0 0 / ${fillAlpha || 1})`;
+		$.ctx.strokeStyle = `rgb(0 0 0 / ${strokeAlpha || 1})`;
 	};
 
 	$.noErase = function () {
@@ -2047,7 +2051,7 @@ Q5.renderers.c2d.text = ($, q) => {
 
 Q5.fonts = [];
 Q5.modules.color = ($, q) => {
-	$.RGB = $.RGBA = $._colorMode = 'rgb';
+	$.RGB = $.RGBA = $.RGBHDR = $._colorMode = 'rgb';
 	$.HSL = 'hsl';
 	$.HSB = 'hsb';
 	$.OKLCH = 'oklch';
@@ -2058,8 +2062,8 @@ Q5.modules.color = ($, q) => {
 	$.colorMode = (mode, format, gamut) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
-		format ??= srgb ? 'integer' : 'float';
-		$._colorFormat = format == 'float' || format == 1 ? 1 : 255;
+		format ??= mode == 'rgb' ? (srgb ? 255 : 1) : 1;
+		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
 		} else if (mode == 'hsl') {
