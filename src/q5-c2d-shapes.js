@@ -5,8 +5,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	$._fillSet = false;
 	$._ellipseMode = Q5.CENTER;
 	$._rectMode = Q5.CORNER;
-	$._curveDetail = 20;
-	$._curveAlpha = 0.0;
 
 	let firstVertex = true;
 	let curveBuff = [];
@@ -23,9 +21,7 @@ Q5.renderers.c2d.shapes = ($) => {
 	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
 	$.ellipseMode = (x) => ($._ellipseMode = x);
 	$.rectMode = (x) => ($._rectMode = x);
-	$.curveDetail = (x) => ($._curveDetail = x);
-	$.curveAlpha = (x) => ($._curveAlpha = x);
-	$.curveTightness = (x) => ($._curveAlpha = x);
+	$.curveDetail = () => {};
 
 	// DRAWING
 

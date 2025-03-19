@@ -556,6 +556,9 @@ Q5.modules.canvas = ($, q) => {
 		'_shadowOffsetY',
 		'_shadowBlur',
 		'_tint',
+		'_colorMode',
+		'_colorFormat',
+		'Color',
 		'_imageMode',
 		'_rectMode',
 		'_ellipseMode',
@@ -573,6 +576,7 @@ Q5.modules.canvas = ($, q) => {
 	$.popStyles = () => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
+		q.Color = styles.Color;
 	};
 
 	if (window && $._scope != 'graphics') {
@@ -604,6 +608,9 @@ Q5.SQUARE = 'butt';
 Q5.PROJECT = 'square';
 Q5.MITER = 'miter';
 Q5.BEVEL = 'bevel';
+Q5.NONE = 'none';
+
+Q5.SIMPLE = 'simple';
 
 Q5.CHORD_OPEN = 0;
 Q5.PIE_OPEN = 1;
@@ -875,8 +882,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	$._fillSet = false;
 	$._ellipseMode = Q5.CENTER;
 	$._rectMode = Q5.CORNER;
-	$._curveDetail = 20;
-	$._curveAlpha = 0.0;
 
 	let firstVertex = true;
 	let curveBuff = [];
@@ -893,9 +898,7 @@ Q5.renderers.c2d.shapes = ($) => {
 	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
 	$.ellipseMode = (x) => ($._ellipseMode = x);
 	$.rectMode = (x) => ($._rectMode = x);
-	$.curveDetail = (x) => ($._curveDetail = x);
-	$.curveAlpha = (x) => ($._curveAlpha = x);
-	$.curveTightness = (x) => ($._curveAlpha = x);
+	$.curveDetail = () => {};
 
 	// DRAWING
 
@@ -1771,6 +1774,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		leading = 15,
 		leadDiff = 3,
 		emphasis = 'normal',
+		weight = 'normal',
 		fontMod = false,
 		styleHash = 0,
 		styleHashes = [],
@@ -1814,7 +1818,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textSize = (x) => {
-		if (x == undefined || x == $._textSize) return $._textSize;
+		if (x == undefined) return $._textSize;
 		if ($._da) x *= $._da;
 		$._textSize = x;
 		fontMod = true;
@@ -1826,8 +1830,15 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textStyle = (x) => {
-		if (!x || x == emphasis) return emphasis;
+		if (!x) return emphasis;
 		emphasis = x;
+		fontMod = true;
+		styleHash = -1;
+	};
+
+	$.textWeight = (x) => {
+		if (!x) return weight;
+		weight = x;
 		fontMod = true;
 		styleHash = -1;
 	};
@@ -1850,7 +1861,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	const updateFont = () => {
-		$.ctx.font = `${emphasis} ${$._textSize}px ${font}`;
+		$.ctx.font = `${emphasis} ${weight} ${$._textSize}px ${font}`;
 		fontMod = false;
 	};
 
@@ -1905,10 +1916,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		let ctx = $.ctx;
 		let img, tX, tY;
 
-		if (fontMod) {
-			ctx.font = `${emphasis} ${$._textSize}px ${font}`;
-			fontMod = false;
-		}
+		if (fontMod) updateFont();
 
 		if (useCache || genTextImage) {
 			if (styleHash == -1) updateStyleHash();
@@ -2062,7 +2070,7 @@ Q5.modules.color = ($, q) => {
 	$.colorMode = (mode, format, gamut) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
-		format ??= mode == 'rgb' ? (srgb ? 255 : 1) : 1;
+		format ??= mode == 'rgb' ? ($.canvas.renderer == 'c2d' || srgb ? 255 : 1) : 1;
 		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
@@ -4877,14 +4885,15 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 
 	let addColor = (r, g, b, a) => {
+		let cf = $._colorFormat;
 		if (typeof r == 'string' || $._colorMode != 'rgb') {
 			r = $.color(r, g, b, a);
 		} else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
-			a = g ?? 1;
+			a = g ?? cf;
 			g = b = r;
 		}
-		a ??= 1;
+		a ??= cf;
 		if (r._q5Color) {
 			let c = r;
 			if (c.r != undefined) ({ r, g, b, a } = c);
@@ -4895,6 +4904,13 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				else c = Q5.HSLtoRGB(...Q5.HSBtoHSL(c.h, c.s, c.b));
 				[r, g, b] = c;
 			}
+		}
+
+		if (cf == 255) {
+			r /= 255;
+			g /= 255;
+			b /= 255;
+			a /= 255;
 		}
 
 		let cs = colorStack,
@@ -5592,7 +5608,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			// calculate perimeter vertex
 			let vx = x + a * Math.cos(t);
-			let vy = y + b * Math.sin(t);
+			let vy = y - b * Math.sin(t);
 
 			// add perimeter vertex
 			v[i++] = vx;
@@ -5618,11 +5634,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		for (let j = 0; j <= n; j++) {
 			// Outer vertex
 			let vxOuter = x + outerA * Math.cos(t);
-			let vyOuter = y + outerB * Math.sin(t);
+			let vyOuter = y - outerB * Math.sin(t);
 
 			// Inner vertex
 			let vxInner = x + innerA * Math.cos(t);
-			let vyInner = y + innerB * Math.sin(t);
+			let vyInner = y - innerB * Math.sin(t);
 
 			// Add vertices for triangle strip
 			v[i++] = vxOuter;
@@ -5701,10 +5717,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if ($._doFill) {
 			ci = $._fill;
 			// Corner arcs
-			addArc(r, b, rr, rr, -HALF_PI, 0, n, ci, ti);
-			addArc(l, b, rr, rr, -Math.PI, -HALF_PI, n, ci, ti);
-			addArc(l, t, rr, rr, Math.PI, HALF_PI, n, ci, ti);
-			addArc(r, t, rr, rr, 0, HALF_PI, n, ci, ti);
+			addArc(r, b, rr, rr, 0, HALF_PI, n, ci, ti);
+			addArc(l, b, rr, rr, Math.PI, HALF_PI, n, ci, ti);
+			addArc(l, t, rr, rr, -Math.PI, -HALF_PI, n, ci, ti);
+			addArc(r, t, rr, rr, -HALF_PI, 0, n, ci, ti);
 
 			addRect(l, trr, r, trr, r, brr, l, brr, ci, ti); // center
 			addRect(l, t, lrr, t, lrr, b, l, b, ci, ti); // Left
@@ -5720,10 +5736,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				innerA = rr - hsw,
 				innerB = rr - hsw;
 			// Corner arc strokes
-			addArcStroke(r, b, outerA, outerB, innerA, innerB, -HALF_PI, 0, n, ci, ti);
-			addArcStroke(l, b, outerA, outerB, innerA, innerB, -Math.PI, -HALF_PI, n, ci, ti);
-			addArcStroke(l, t, outerA, outerB, innerA, innerB, Math.PI, HALF_PI, n, ci, ti);
-			addArcStroke(r, t, outerA, outerB, innerA, innerB, 0, HALF_PI, n, ci, ti);
+			addArcStroke(r, b, outerA, outerB, innerA, innerB, 0, HALF_PI, n, ci, ti);
+			addArcStroke(l, b, outerA, outerB, innerA, innerB, Math.PI, HALF_PI, n, ci, ti);
+			addArcStroke(l, t, outerA, outerB, innerA, innerB, -Math.PI, -HALF_PI, n, ci, ti);
+			addArcStroke(r, t, outerA, outerB, innerA, innerB, -HALF_PI, 0, n, ci, ti);
 
 			let lrrMin = lrr - hsw,
 				lrrMax = lrr + hsw,
@@ -5842,8 +5858,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			b = (h - y) / 2;
 		}
 
-		let ti = $._matrixIndex;
 		if ($._matrixDirty) $._saveMatrix();
+		let ti = $._matrixIndex;
 		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * $._scale);
 
 		// Draw fill
@@ -5853,8 +5869,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		// Draw stroke
 		if ($._doStroke) {
-			let sw = $._strokeWeight;
-			addArcStroke(x, -y, a + sw, b + sw, a - sw, b - sw, start, stop, n, $._stroke, ti);
+			let hsw = $._hsw;
+			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, $._stroke, ti);
+			if ($._strokeJoin == 'round') {
+				addArc(x + a * Math.cos(start), -y - b * Math.sin(start), hsw, hsw, 0, TAU, n, $._stroke, ti);
+				addArc(x + a * Math.cos(stop), -y - b * Math.sin(stop), hsw, hsw, 0, TAU, n, $._stroke, ti);
+			}
 		}
 	};
 
@@ -5875,10 +5895,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$._strokeJoin = 'round';
-
-	$.strokeJoin = (x) => {
-		$._strokeJoin = x;
-	};
+	$.strokeJoin = (x) => ($._strokeJoin = x);
+	$.lineMode = () => ($._strokeJoin = 'none');
 
 	$.line = (x1, y1, x2, y2) => {
 		if ($._matrixDirty) $._saveMatrix();
@@ -5905,6 +5923,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	};
 
+	let curveSegments = 20;
+	$.curveDetail = (x) => (curveSegments = x);
+
 	let shapeVertCount;
 	let sv = []; // shape vertices
 	let curveVertices = []; // curve vertices
@@ -5925,6 +5946,51 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		curveVertices.push({ x: x, y: -y });
 	};
+
+	$.bezierVertex = function (cx1, cy1, cx2, cy2, x, y) {
+		if (shapeVertCount === 0) throw new Error('Shape needs a vertex()');
+		if ($._matrixDirty) $._saveMatrix();
+
+		// Get the last vertex as the starting point (P₀)
+		let prevIndex = (shapeVertCount - 1) * 4;
+		let startX = sv[prevIndex];
+		let startY = sv[prevIndex + 1];
+
+		let step = 1 / curveSegments;
+
+		let vx, vy;
+		let quadratic = arguments.length == 4;
+		if (quadratic) {
+			x = cx2;
+			y = cy2;
+		}
+
+		let end = 1 + step;
+		for (let t = step; t <= end; t += step) {
+			// Start from 0.1 to avoid duplicating the start point
+			let t2 = t * t;
+
+			let mt = 1 - t;
+			let mt2 = mt * mt;
+
+			if (quadratic) {
+				vx = mt2 * startX + 2 * mt * t * cx1 + t2 * x;
+				vy = mt2 * startY + 2 * mt * t * -cy1 + t2 * -y;
+			} else {
+				let t3 = t2 * t;
+				let mt3 = mt2 * mt;
+
+				// Cubic Bezier formula
+				vx = mt3 * startX + 3 * mt2 * t * cx1 + 3 * mt * t2 * cx2 + t3 * x;
+				vy = mt3 * startY + 3 * mt2 * t * -cy1 + 3 * mt * t2 * -cy2 + t3 * -y;
+			}
+
+			sv.push(vx, vy, $._fill, $._matrixIndex);
+			shapeVertCount++;
+		}
+	};
+
+	$.quadraticVertex = (cx, cy, x, y) => $.bezierVertex(cx, cy, x, y);
 
 	$.endShape = (close) => {
 		if (curveVertices.length > 0) {
@@ -6026,11 +6092,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 				addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
 			}
-			if (close) {
-				let v1 = (shapeVertCount - 1) * 4;
-				let v2 = 0;
-				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
-			}
+			let v1 = (shapeVertCount - 1) * 4;
+			let v2 = 0;
+			if (close) $.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
+			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
 			$._strokeJoin = ogStrokeJoin;
 		}
 
@@ -6038,6 +6103,22 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		shapeVertCount = 0;
 		sv = [];
 		curveVertices = [];
+	};
+
+	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+		$.beginShape();
+		$.curveVertex(x1, y1);
+		$.curveVertex(x2, y2);
+		$.curveVertex(x3, y3);
+		$.curveVertex(x4, y4);
+		$.endShape();
+	};
+
+	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+		$.beginShape();
+		$.vertex(x1, y1);
+		$.bezierVertex(x2, y2, x3, y3, x4, y4);
+		$.endShape();
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {

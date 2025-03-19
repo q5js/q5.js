@@ -217,6 +217,9 @@ Q5.modules.canvas = ($, q) => {
 		'_shadowOffsetY',
 		'_shadowBlur',
 		'_tint',
+		'_colorMode',
+		'_colorFormat',
+		'Color',
 		'_imageMode',
 		'_rectMode',
 		'_ellipseMode',
@@ -234,6 +237,7 @@ Q5.modules.canvas = ($, q) => {
 	$.popStyles = () => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
+		q.Color = styles.Color;
 	};
 
 	if (window && $._scope != 'graphics') {
@@ -265,6 +269,9 @@ Q5.SQUARE = 'butt';
 Q5.PROJECT = 'square';
 Q5.MITER = 'miter';
 Q5.BEVEL = 'bevel';
+Q5.NONE = 'none';
+
+Q5.SIMPLE = 'simple';
 
 Q5.CHORD_OPEN = 0;
 Q5.PIE_OPEN = 1;

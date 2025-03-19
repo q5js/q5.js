@@ -10,7 +10,7 @@ Q5.modules.color = ($, q) => {
 	$.colorMode = (mode, format, gamut) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
-		format ??= mode == 'rgb' ? (srgb ? 255 : 1) : 1;
+		format ??= mode == 'rgb' ? ($.canvas.renderer == 'c2d' || srgb ? 255 : 1) : 1;
 		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;

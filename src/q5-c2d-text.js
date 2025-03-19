@@ -8,6 +8,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		leading = 15,
 		leadDiff = 3,
 		emphasis = 'normal',
+		weight = 'normal',
 		fontMod = false,
 		styleHash = 0,
 		styleHashes = [],
@@ -51,7 +52,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textSize = (x) => {
-		if (x == undefined || x == $._textSize) return $._textSize;
+		if (x == undefined) return $._textSize;
 		if ($._da) x *= $._da;
 		$._textSize = x;
 		fontMod = true;
@@ -63,8 +64,15 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textStyle = (x) => {
-		if (!x || x == emphasis) return emphasis;
+		if (!x) return emphasis;
 		emphasis = x;
+		fontMod = true;
+		styleHash = -1;
+	};
+
+	$.textWeight = (x) => {
+		if (!x) return weight;
+		weight = x;
 		fontMod = true;
 		styleHash = -1;
 	};
@@ -87,7 +95,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	const updateFont = () => {
-		$.ctx.font = `${emphasis} ${$._textSize}px ${font}`;
+		$.ctx.font = `${emphasis} ${weight} ${$._textSize}px ${font}`;
 		fontMod = false;
 	};
 
@@ -142,10 +150,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		let ctx = $.ctx;
 		let img, tX, tY;
 
-		if (fontMod) {
-			ctx.font = `${emphasis} ${$._textSize}px ${font}`;
-			fontMod = false;
-		}
+		if (fontMod) updateFont();
 
 		if (useCache || genTextImage) {
 			if (styleHash == -1) updateStyleHash();

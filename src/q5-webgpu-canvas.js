@@ -211,14 +211,15 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 
 	let addColor = (r, g, b, a) => {
+		let cf = $._colorFormat;
 		if (typeof r == 'string' || $._colorMode != 'rgb') {
 			r = $.color(r, g, b, a);
 		} else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
-			a = g ?? 1;
+			a = g ?? cf;
 			g = b = r;
 		}
-		a ??= 1;
+		a ??= cf;
 		if (r._q5Color) {
 			let c = r;
 			if (c.r != undefined) ({ r, g, b, a } = c);
@@ -229,6 +230,13 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				else c = Q5.HSLtoRGB(...Q5.HSBtoHSL(c.h, c.s, c.b));
 				[r, g, b] = c;
 			}
+		}
+
+		if (cf == 255) {
+			r /= 255;
+			g /= 255;
+			b /= 255;
+			a /= 255;
 		}
 
 		let cs = colorStack,

@@ -1281,6 +1281,8 @@ ellipse(100, 50, 160, 80);
 	 * Draws an arc, which is a section of an ellipse.
 	 * 
 	 * `ellipseMode` affects how the arc is drawn.
+	 * 
+	 * q5 WebGPU only supports the default `PIE_OPEN` mode.
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} w width of the ellipse
@@ -1328,51 +1330,41 @@ point(125, 50);
 
 	/** 🧑‍🎨
 	 * Sets the global composite operation for the canvas context.
-	 * @param {string} val composite operation to set
+	 * @param {string} val composite operation
 	 */
 	function blendMode(val: string): void;
 
 	/** 🧑‍🎨
 	 * Sets the line cap style for the canvas context.
-	 * @param {CanvasLineCap} val line cap style to set ('butt', 'round', 'square')
+	 * @param {CanvasLineCap} val line cap style ('butt', 'round', 'square')
 	 */
 	function strokeCap(val: CanvasLineCap): void;
 
 	/** 🧑‍🎨
 	 * Sets the line join style for the canvas context.
-	 * @param {CanvasLineJoin} val line join style to set ('round', 'bevel', 'miter')
+	 * @param {CanvasLineJoin} val line join style ('round', 'bevel', 'miter')
 	 */
 	function strokeJoin(val: CanvasLineJoin): void;
 
 	/** 🧑‍🎨
 	 * Sets the ellipse mode.
-	 * @param {string} val ellipse mode to set
+	 * @param {string} val ellipse mode
 	 */
 	function ellipseMode(val: string): void;
 
 	/** 🧑‍🎨
 	 * Sets the rectangle mode.
-	 * @param {string} val rectangle mode to set
+	 * @param {string} val rectangle mode
 	 */
 	function rectMode(val: string): void;
 
 	/** 🧑‍🎨
-	 * Sets the curve detail level.
-	 * @param {number} val curve detail level to set
+	 * Sets the amount of straight line segments used to make a curve.
+	 * 
+	 * Only takes effect in q5 WebGPU.
+	 * @param {number} val curve detail level
 	 */
 	function curveDetail(val: number): void;
-
-	/** 🧑‍🎨
-	 * Sets the curve alpha value.
-	 * @param {number} val curve alpha value to set
-	 */
-	function curveAlpha(val: number): void;
-
-	/** 🧑‍🎨
-	 * Sets the curve tightness value.
-	 * @param {number} val curve tightness value to set
-	 */
-	function curveTightness(val: number): void;
 
 	/** 🧑‍🎨
 	 * Starts storing vertices for a convex shape.
@@ -1386,11 +1378,15 @@ point(125, 50);
 
 	/** 🧑‍🎨
 	 * Starts storing vertices for a contour.
+	 * 
+	 * Not available in q5 WebGPU.
 	 */
 	function beginContour(): void;
 
 	/** 🧑‍🎨
 	 * Ends storing vertices for a contour.
+	 * 
+	 * Not available in q5 WebGPU.
 	 */
 	function endContour(): void;
 
@@ -1987,13 +1983,26 @@ text('Hello, world!', 12, 106);
 	 * @example
 createCanvas(200);
 background(200);
+textSize(32);
 
 textAlign(CENTER, MIDDLE);
-
-textSize(32);
 text('Hello, world!', 100, 100);
 	 */
 	function textAlign(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
+
+	/**
+	 * Sets the text weight.
+	 * @param {number} weight font weight
+	 * @example
+createCanvas(200);
+background(200);
+textSize(32);
+textAlign(CENTER, MIDDLE);
+
+textWeight(100);
+text('Hello, world!', 100, 100);
+	 */
+	function textWeight(weight: number): void;
 
 	/** ✍️
 	 * Calculates and returns the width of a given string of text.
@@ -2114,7 +2123,7 @@ text(nf(PI, 4, 5), 10, 60);
 	function nf(n: number, l: number, r: number): string;
 
 	/** ✍️
-	 * Normal font weight.
+	 * Normal font style.
 	 */
 	const NORMAL: 'normal';
 
@@ -3431,7 +3440,7 @@ function mousePressed() {
 
 		/** ↗️
 		 * Rotates the vector to a specific angle without changing its magnitude.
-		 * @param {number} angle angle in radians to set the heading to
+		 * @param {number} angle angle in radians
 		 * @returns {Vector} this vector after setting the heading
 		 */
 		setHeading(angle: number): Vector;
