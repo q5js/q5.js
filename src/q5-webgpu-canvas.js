@@ -312,16 +312,17 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 	$.resetMatrix();
 
-	$.translate = (x, y, z) => {
+	$.translate = (x, y, z = 0) => {
 		if (!x && !y && !z) return;
 		// update the translation values
-		matrix[12] += x;
-		matrix[13] -= y;
-		matrix[14] += z || 0;
+		let m = matrix;
+		m[12] += x * m[0];
+		m[13] -= y * m[5];
+		m[14] += z * m[10];
 		$._matrixDirty = true;
 	};
 
-	$.rotate = (a) => {
+	$.rotate = $.rotateZ = (a) => {
 		if (!a) return;
 		if ($._angleMode) a *= $._DEGTORAD;
 

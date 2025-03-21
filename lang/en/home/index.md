@@ -7,7 +7,7 @@
 - lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
 - beginner friendly [documentation](/learn) 📚
 - compatible with popular p5 addons 🧩
-- no dependencies, ~100kb minified 📦
+- no dependencies, ~110kb minified 📦
 - free to use under the LGPL (just like p5.js) 🆓
 
 # 1-1
@@ -48,7 +48,7 @@ You can [use q5 offline](https://github.com/q5js/q5.js/wiki/Get-Started) or add 
 
 [q5 is open source on GitHub](https://github.com/q5js/q5.js) and anyone can use it for free under the terms of the LGPL (just like p5.js).
 
-We need your support though! If you enjoy using q5, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/q5play).
+If you enjoy using q5, we need your support via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley), [Ko-fi](https://ko-fi.com/q5play), or [Patreon](https://www.patreon.com/q5play).
 
 # 10-0
 
