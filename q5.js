@@ -233,7 +233,7 @@ function Q5(scope, parent, renderer) {
 		};
 
 	let t = globalScope || $;
-	$._isTouchAware = t.touchStarted || t.touchMoved || t.mouseReleased;
+	$._isTouchAware = t.touchStarted || t.touchMoved || t.touchEnded;
 
 	if ($._isGlobal) {
 		$.preload = t.preload;

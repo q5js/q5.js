@@ -38,16 +38,11 @@ body {
 	background-color: var(--brand-secondary);
 	color: var(--primary);
 	font-size: 18px;
-	/* text-shadow: 0 0 16px rgb(255 255 255 / 25%); */
 }
 
 h2 {
 	color: var(--brand-primary);
-	text-shadow: 0 0 32px #b7ebff80;
 	font-size: 28px;
-	margin-top: 8px;
-	margin-bottom: 0px;
-	font-family: 'adobe-heiti-std', monospace;
 }
 
 p {
@@ -69,6 +64,10 @@ pre {
 
 a {
 	color: var(--blue1);
+}
+
+a:hover {
+	color: var(--blue);
 }
 
 md {
@@ -131,7 +130,7 @@ main {
 }
 
 #reel0 {
-	width: 100%;
+	width: 0;
 	background-color: unset;
 	height: 100vh;
 	margin-bottom: 0;

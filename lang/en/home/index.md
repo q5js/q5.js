@@ -54,10 +54,14 @@ If you enjoy using q5, we need your support via [GitHub Sponsors](https://github
 
 ## Exclusive Features 💫
 
-- WebGPU rendering support ⚡️
+# 10-1
+
 - frame your canvas with [`displayMode`](/learn/#displayMode) 🖼️
 - [top-level global mode](https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode) ⚙️
 - modular use from [source](https://github.com/q5js/q5.js/tree/main/src) 📦
+
+# 10-2
+
 - 98% smaller than p5 + p5.sound + p5.capture 🌳
 - includes [sound](/learn/#soundSection) playback and mixing 🔊
 - includes canvas [recorder](/learn/#recordSection) 🎞️
