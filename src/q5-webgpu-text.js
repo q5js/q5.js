@@ -320,7 +320,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			delete f._loader;
 			if (cb) cb(f);
 		});
-		if ($._disablePreload) return f._loader;
+		if (!$._usePreload) return f._loader;
 		return f;
 	};
 

@@ -137,4 +137,13 @@ Q5.modules.util = ($, q) => {
 		if (neg) s = '-' + s;
 		return s;
 	};
+
+	$.shuffle = (a, modify) => {
+		if (!modify) a = [...a];
+		for (let i = a.length - 1; i > 0; i--) {
+			let j = Math.floor($.random() * (i + 1));
+			[a[i], a[j]] = [a[j], a[i]];
+		}
+		return a;
+	};
 };

@@ -73,7 +73,9 @@ function Q5(scope, parent, renderer) {
 
 	$._incrementPreload = () => q._preloadCount++;
 	$._decrementPreload = () => q._preloadCount--;
-	$.disablePreloadSystem = () => ($._disablePreload = true);
+
+	$._usePreload = true;
+	$.usePreloadSystem = (v) => ($._usePreload = v);
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();

@@ -288,7 +288,7 @@ Q5.modules.dom = ($, q) => {
 				el.src = src;
 			});
 
-			if ($._disablePreload) return el._loader;
+			if (!$._usePreload) return el._loader;
 		}
 		return el;
 	};
@@ -335,7 +335,7 @@ Q5.modules.dom = ($, q) => {
 			return vid;
 		})();
 
-		if ($._disablePreload) return vid._loader;
+		if (!$._usePreload) return vid._loader;
 		return vid;
 	};
 

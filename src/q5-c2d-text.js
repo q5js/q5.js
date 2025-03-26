@@ -39,7 +39,7 @@ Q5.renderers.c2d.text = ($, q) => {
 			return f;
 		})();
 		$.textFont(name);
-		if ($._disablePreload) return f._loader;
+		if (!$._usePreload) return f._loader;
 		return f;
 	};
 

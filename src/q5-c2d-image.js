@@ -81,7 +81,7 @@ Q5.renderers.c2d.image = ($, q) => {
 
 		g.src = img.src = url;
 
-		if ($._disablePreload) return g._loader;
+		if (!$._usePreload) return g._loader;
 		return g;
 	};
 

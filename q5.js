@@ -73,7 +73,9 @@ function Q5(scope, parent, renderer) {
 
 	$._incrementPreload = () => q._preloadCount++;
 	$._decrementPreload = () => q._preloadCount--;
-	$.disablePreloadSystem = () => ($._disablePreload = true);
+
+	$._usePreload = true;
+	$.usePreloadSystem = (v) => ($._usePreload = v);
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
@@ -1341,7 +1343,7 @@ Q5.renderers.c2d.image = ($, q) => {
 
 		g.src = img.src = url;
 
-		if ($._disablePreload) return g._loader;
+		if (!$._usePreload) return g._loader;
 		return g;
 	};
 
@@ -1805,7 +1807,7 @@ Q5.renderers.c2d.text = ($, q) => {
 			return f;
 		})();
 		$.textFont(name);
-		if ($._disablePreload) return f._loader;
+		if (!$._usePreload) return f._loader;
 		return f;
 	};
 
@@ -2935,7 +2937,7 @@ Q5.modules.dom = ($, q) => {
 				el.src = src;
 			});
 
-			if ($._disablePreload) return el._loader;
+			if (!$._usePreload) return el._loader;
 		}
 		return el;
 	};
@@ -2982,7 +2984,7 @@ Q5.modules.dom = ($, q) => {
 			return vid;
 		})();
 
-		if ($._disablePreload) return vid._loader;
+		if (!$._usePreload) return vid._loader;
 		return vid;
 	};
 
@@ -4039,7 +4041,7 @@ Q5.modules.sound = ($, q) => {
 			return s;
 		})();
 
-		if ($._disablePreload) return s._loader;
+		if (!$._usePreload) return s._loader;
 		return s;
 	};
 
@@ -4364,6 +4366,15 @@ Q5.modules.util = ($, q) => {
 		let s = parts.join('.');
 		if (neg) s = '-' + s;
 		return s;
+	};
+
+	$.shuffle = (a, modify) => {
+		if (!modify) a = [...a];
+		for (let i = a.length - 1; i > 0; i--) {
+			let j = Math.floor($.random() * (i + 1));
+			[a[i], a[j]] = [a[j], a[i]];
+		}
+		return a;
 	};
 };
 Q5.modules.vector = ($) => {
@@ -6941,7 +6952,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			delete f._loader;
 			if (cb) cb(f);
 		});
-		if ($._disablePreload) return f._loader;
+		if (!$._usePreload) return f._loader;
 		return f;
 	};
 

@@ -22,7 +22,7 @@ Q5.modules.sound = ($, q) => {
 			return s;
 		})();
 
-		if ($._disablePreload) return s._loader;
+		if (!$._usePreload) return s._loader;
 		return s;
 	};
 

@@ -257,24 +257,26 @@ function draw() {
 	var deltaTime: number;
 
 	/** ⭐️
-	 * q5 uses the same preload system as p5.js v1
+	 * By default, q5 uses the same preload system as p5.js v1
 	 * to load assets asynchronously, before the setup and draw
-	 * functions are run. It makes it very easy for users to
-	 * load many images, sounds, and other assets at the same time.
+	 * functions are run. It makes it easy for users to
+	 * load many images, sounds, and other assets in parallel.
 	 * 
-	 * In p5.js v2, the preload system was entirely removed in
+	 * In p5 v2, the preload system was entirely removed in
 	 * favor of having load* functions, such as `loadImage`,
 	 * return promises.
 	 * 
-	 * In q5 the [`load`](https://q5js.org/learn/#load) function can be used to load a file or
-	 * multiple files, and it returns a promise that resolves
-	 * when the file(s) are loaded.
+	 * By default, q5 also supports use of `async setup` for loading.
+	 * Use the [`load`](https://q5js.org/learn/#load)
+	 * function to load a file or multiple files. It returns
+	 * a promise that resolves when the file(s) are loaded.
 	 * 
-	 * Disable the preload system in q5 to make load* functions
-	 * return promises, to match p5.js v2 behavior.
+	 * Alternatively, disable the preload system in q5 to make
+	 * load* functions return promises, to match p5 v2 behavior.
+	 * @param {boolean} value true by default, whether to enable or disable the preload system, affects the return value of load* functions
 	 * @example
 createCanvas(200);
-disablePreloadSystem();
+usePreloadSystem(false);
 
 logo = await loadImage('/q5js_logo.webp');
 
@@ -282,7 +284,7 @@ function draw() {
 	background(logo);
 }
 	 */
-	function disablePreloadSystem(): void;
+	function usePreloadSystem(value: boolean): void;
 
 	class Q5 {
 		/** ⭐️
@@ -3193,7 +3195,7 @@ background(255);
 textSize(24);
 text('Hello, world!', 16, 100);
 	 * @example
-let q = new Q5();
+let q = await Q5.WebGPU();
 createCanvas(200);
 
 let [jump, retro] = await load(
@@ -3257,6 +3259,24 @@ function mousePressed() {
 	 * @param {(result: object[]) => void} cb a callback function that is run when the file is loaded
 	 */
 	function loadCSV(url: string, cb: (result: object[]) => void): void;
+
+	/** 🛠️
+	 * nf is short for number format. It formats a number
+	 * to a string with a specified number of digits.
+	 * @param {number} num number to format
+	 * @param {number} digits number of digits to format to
+	 * @returns {string} formatted number
+	 */
+	function nf(num: number, digits: number): string;
+
+	/** 🛠
+	 * Shuffles the elements of an array.
+	 * 
+	 * @param {any[]} arr array to shuffle
+	 * @param {boolean} [modify] whether to modify the original array, false by default which copies the array before shuffling
+	 * @returns {any[]} shuffled array
+	 */
+	function shuffle(arr: any[]): any[];
 
 	/** 🛠️
 	 * Stores an item in localStorage.
