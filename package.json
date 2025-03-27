@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "2.23.10",
+	"version": "2.23.11",
 	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
 	"author": "quinton-ashley",
 	"contributors": [
@@ -12,7 +12,7 @@
 	"main": "q5-server.js",
 	"types": "q5.d.ts",
 	"scripts": {
-		"bundle": "cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-shapes.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-color.js src/q5-display.js src/q5-dom.js src/q5-input.js src/q5-math.js src/q5-record.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu-canvas.js src/q5-webgpu-shapes.js src/q5-webgpu-image.js src/q5-webgpu-text.js src/q5-webgpu-shaders.js > q5.js",
+		"bundle": "cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-shapes.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-color.js src/q5-display.js src/q5-dom.js src/q5-fes.js src/q5-input.js src/q5-math.js src/q5-record.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu-canvas.js src/q5-webgpu-shapes.js src/q5-webgpu-image.js src/q5-webgpu-text.js src/q5-webgpu-shaders.js > q5.js",
 		"min": "terser q5.js --compress ecma=2025 --mangle > q5.min.js",
 		"dist": "bun bundle && bun min",
 		"dist-p5play": "bun dist && cp q5.js ../../web/p5play-web/v3/q5.js && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",

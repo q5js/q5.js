@@ -273,7 +273,7 @@ function draw() {
 	 * 
 	 * Alternatively, disable the preload system in q5 to make
 	 * load* functions return promises, to match p5 v2 behavior.
-	 * @param {boolean} value true by default, whether to enable or disable the preload system, affects the return value of load* functions
+	 * @param {boolean} val true by default, whether to enable or disable the preload system, affects the return value of load* functions
 	 * @example
 createCanvas(200);
 usePreloadSystem(false);
@@ -284,7 +284,7 @@ function draw() {
 	background(logo);
 }
 	 */
-	function usePreloadSystem(value: boolean): void;
+	function usePreloadSystem(val: boolean): void;
 
 	class Q5 {
 		/** ⭐️
@@ -1331,31 +1331,31 @@ point(125, 50);
 	function point(x: number, y: number): void;
 
 	/** 🧑‍🎨
-	 * Sets the global composite operation for the canvas context.
+	 * Set the global composite operation for the canvas context.
 	 * @param {string} val composite operation
 	 */
 	function blendMode(val: string): void;
 
 	/** 🧑‍🎨
-	 * Sets the line cap style for the canvas context.
-	 * @param {CanvasLineCap} val line cap style ('butt', 'round', 'square')
+	 * Set the line cap style to `ROUND`, `SQUARE`, or `BUTT`.
+	 * @param {CanvasLineCap} val line cap style
 	 */
 	function strokeCap(val: CanvasLineCap): void;
 
 	/** 🧑‍🎨
-	 * Sets the line join style for the canvas context.
-	 * @param {CanvasLineJoin} val line join style ('round', 'bevel', 'miter')
+	 * Set the line join style to `ROUND`, `BEVEL`, or `MITER`.
+	 * @param {CanvasLineJoin} val line join style
 	 */
 	function strokeJoin(val: CanvasLineJoin): void;
 
 	/** 🧑‍🎨
-	 * Sets the ellipse mode.
+	 * Set ellipse mode to `CENTER`, `RADIUS`, or `CORNER`.
 	 * @param {string} val ellipse mode
 	 */
 	function ellipseMode(val: string): void;
 
 	/** 🧑‍🎨
-	 * Sets the rectangle mode.
+	 * Set the rectangle mode to `CORNER`, `CORNERS`, `RADIUS`, or `CENTER`.
 	 * @param {string} val rectangle mode
 	 */
 	function rectMode(val: string): void;
@@ -1364,7 +1364,11 @@ point(125, 50);
 	 * Sets the amount of straight line segments used to make a curve.
 	 * 
 	 * Only takes effect in q5 WebGPU.
-	 * @param {number} val curve detail level
+	 * @param {number} val curve detail level, default is 20
+	 * @example
+await Q5.WebGPU();
+curveDetail(2);
+circle(100, 100, 80);
 	 */
 	function curveDetail(val: number): void;
 
@@ -2402,6 +2406,13 @@ background(200);
 function draw() {
 	circle(randomX(), 50, random(50));
 }
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+function draw() {
+	circle(randomX(-60), 50, random(50));
+}
 	 */
 	function randomX(margin?: number): number;
 
@@ -2449,14 +2460,14 @@ function draw() {
 
 	/** 🧮
 	 * Maps a number from one range to another.
-	 * @param {number} value incoming value to be converted
+	 * @param {number} val incoming value to be converted
 	 * @param {number} start1 lower bound of the value's current range
 	 * @param {number} stop1 upper bound of the value's current range
 	 * @param {number} start2 lower bound of the value's target range
 	 * @param {number} stop2 upper bound of the value's target range
 	 * @returns {number} mapped value
 	 */
-	function map(value: number, start1: number, stop1: number, start2: number, stop2: number): number;
+	function map(val: number, start1: number, stop1: number, start2: number, stop2: number): number;
 
 	/** 🧮
 	 * Sets the mode for interpreting and drawing angles. Can be either 'degrees' or 'radians'.
@@ -3281,9 +3292,9 @@ function mousePressed() {
 	/** 🛠️
 	 * Stores an item in localStorage.
 	 * @param {string} key key under which to store the item
-	 * @param {string} value value to store
+	 * @param {string} val value to store
 	 */
-	function storeItem(key: string, value: string): void;
+	function storeItem(key: string, val: string): void;
 
 	/** 🛠️
 	 * Retrieves an item from localStorage.

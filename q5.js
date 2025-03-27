@@ -113,6 +113,7 @@ function Q5(scope, parent, renderer) {
 			$.draw();
 		} catch (e) {
 			if (!Q5.errorTolerant) $.noLoop();
+			if ($._fes) $._fes(e);
 			throw e;
 		}
 		for (let m of Q5.methods.post) m.call($);
@@ -268,7 +269,14 @@ function Q5(scope, parent, renderer) {
 	for (let k of userFns) {
 		if (!t[k]) $[k] = () => {};
 		else if ($._isGlobal) {
-			$[k] = (event) => t[k](event);
+			$[k] = (event) => {
+				try {
+					return t[k](event);
+				} catch (e) {
+					if ($._fes) $._fes(e);
+					throw e;
+				}
+			};
 		}
 	}
 
@@ -288,7 +296,7 @@ function Q5(scope, parent, renderer) {
 			$.preload();
 			if (!$._startDone) _setup();
 		} catch (e) {
-			if ($._askAI) $._askAI(e);
+			if ($._fes) $._fes(e);
 			throw e;
 		}
 	}
@@ -2990,6 +2998,44 @@ Q5.modules.dom = ($, q) => {
 
 	$.findElement = (selector) => document.querySelector(selector);
 	$.findElements = (selector) => document.querySelectorAll(selector);
+};
+Q5.modules.fes = ($) => {
+	$._fes = async (e) => {
+		if (Q5.disableFriendlyErrors) return;
+
+		let stackLines = e.stack?.split('\n');
+		if (!e.stack || stackLines.length <= 1) return;
+
+		let idx = 1;
+		let sep = '(';
+		if (navigator.userAgent.indexOf('Chrome') == -1) {
+			idx = 0;
+			sep = '@';
+		}
+		while (stackLines[idx].indexOf('q5') >= 0) idx++;
+
+		let errFile = stackLines[idx].split(sep).at(-1);
+		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
+		let parts = errFile.split(':');
+		let lineNum = parseInt(parts.at(-2));
+		parts[parts.length - 1] = parts.at(-1).split(')')[0];
+		let fileUrl = parts.slice(0, -2).join(':');
+		let fileBase = fileUrl.split('/').at(-1);
+
+		try {
+			let res = await (await fetch(fileUrl)).text();
+			let lines = res.split('\n');
+			let errLine = lines[lineNum - 1].trim();
+
+			let bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)];
+
+			console.log(
+				'%cq5.js ' + bug + '%c Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine,
+				'background: #b7ebff; color: #000;',
+				''
+			);
+		} catch (err) {}
+	};
 };
 Q5.modules.input = ($, q) => {
 	if ($._scope == 'graphics') return;
@@ -5883,7 +5929,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if ($._doStroke) {
 			let hsw = $._hsw;
 			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, $._stroke, ti);
-			if ($._strokeJoin == 'round') {
+			if ($._strokeCap == 'round') {
 				addArc(x + a * Math.cos(start), -y - b * Math.sin(start), hsw, hsw, 0, TAU, n, $._stroke, ti);
 				addArc(x + a * Math.cos(stop), -y - b * Math.sin(stop), hsw, hsw, 0, TAU, n, $._stroke, ti);
 			}
@@ -5906,9 +5952,13 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	};
 
-	$._strokeJoin = 'round';
+	$._strokeCap = $._strokeJoin = 'round';
+	$.strokeCap = (x) => ($._strokeCap = x);
 	$.strokeJoin = (x) => ($._strokeJoin = x);
-	$.lineMode = () => ($._strokeJoin = 'none');
+	$.lineMode = () => {
+		$._strokeCap = 'square';
+		$._strokeJoin = 'none';
+	};
 
 	$.line = (x1, y1, x2, y2) => {
 		if ($._matrixDirty) $._saveMatrix();
@@ -5928,7 +5978,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if ($._scaledSW > 2 && $._strokeJoin != 'none') {
+		if ($._scaledSW > 2 && $._strokeCap != 'square') {
 			let n = getArcSegments($._scaledSW);
 			addArc(x1, -y1, hsw, hsw, 0, TAU, n, ci, ti);
 			addArc(x2, -y2, hsw, hsw, 0, TAU, n, ci, ti);
@@ -6094,8 +6144,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let hsw = $._hsw,
 				n = getArcSegments($._scaledSW),
 				ti = $._matrixIndex,
-				ogStrokeJoin = $._strokeJoin;
-			$._strokeJoin = 'none';
+				ogStrokeCap = $._strokeCap;
+			$._strokeCap = 'square';
 			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
@@ -6108,7 +6158,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let v2 = 0;
 			if (close) $.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
 			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
-			$._strokeJoin = ogStrokeJoin;
+			$._strokeCap = ogStrokeCap;
 		}
 
 		// reset for the next shape

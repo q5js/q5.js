@@ -406,7 +406,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if ($._doStroke) {
 			let hsw = $._hsw;
 			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, $._stroke, ti);
-			if ($._strokeJoin == 'round') {
+			if ($._strokeCap == 'round') {
 				addArc(x + a * Math.cos(start), -y - b * Math.sin(start), hsw, hsw, 0, TAU, n, $._stroke, ti);
 				addArc(x + a * Math.cos(stop), -y - b * Math.sin(stop), hsw, hsw, 0, TAU, n, $._stroke, ti);
 			}
@@ -429,9 +429,13 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	};
 
-	$._strokeJoin = 'round';
+	$._strokeCap = $._strokeJoin = 'round';
+	$.strokeCap = (x) => ($._strokeCap = x);
 	$.strokeJoin = (x) => ($._strokeJoin = x);
-	$.lineMode = () => ($._strokeJoin = 'none');
+	$.lineMode = () => {
+		$._strokeCap = 'square';
+		$._strokeJoin = 'none';
+	};
 
 	$.line = (x1, y1, x2, y2) => {
 		if ($._matrixDirty) $._saveMatrix();
@@ -451,7 +455,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if ($._scaledSW > 2 && $._strokeJoin != 'none') {
+		if ($._scaledSW > 2 && $._strokeCap != 'square') {
 			let n = getArcSegments($._scaledSW);
 			addArc(x1, -y1, hsw, hsw, 0, TAU, n, ci, ti);
 			addArc(x2, -y2, hsw, hsw, 0, TAU, n, ci, ti);
@@ -617,8 +621,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let hsw = $._hsw,
 				n = getArcSegments($._scaledSW),
 				ti = $._matrixIndex,
-				ogStrokeJoin = $._strokeJoin;
-			$._strokeJoin = 'none';
+				ogStrokeCap = $._strokeCap;
+			$._strokeCap = 'square';
 			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
@@ -631,7 +635,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let v2 = 0;
 			if (close) $.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
 			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
-			$._strokeJoin = ogStrokeJoin;
+			$._strokeCap = ogStrokeCap;
 		}
 
 		// reset for the next shape

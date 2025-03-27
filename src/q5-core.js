@@ -113,6 +113,7 @@ function Q5(scope, parent, renderer) {
 			$.draw();
 		} catch (e) {
 			if (!Q5.errorTolerant) $.noLoop();
+			if ($._fes) $._fes(e);
 			throw e;
 		}
 		for (let m of Q5.methods.post) m.call($);
@@ -268,7 +269,14 @@ function Q5(scope, parent, renderer) {
 	for (let k of userFns) {
 		if (!t[k]) $[k] = () => {};
 		else if ($._isGlobal) {
-			$[k] = (event) => t[k](event);
+			$[k] = (event) => {
+				try {
+					return t[k](event);
+				} catch (e) {
+					if ($._fes) $._fes(e);
+					throw e;
+				}
+			};
 		}
 	}
 
@@ -288,7 +296,7 @@ function Q5(scope, parent, renderer) {
 			$.preload();
 			if (!$._startDone) _setup();
 		} catch (e) {
-			if ($._askAI) $._askAI(e);
+			if ($._fes) $._fes(e);
 			throw e;
 		}
 	}
