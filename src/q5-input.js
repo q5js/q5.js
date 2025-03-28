@@ -48,7 +48,7 @@ Q5.modules.input = ($, q) => {
 			let sy = c.scrollHeight / $.height || 1;
 			q.mouseX = (e.clientX - rect.left) / sx;
 			q.mouseY = (e.clientY - rect.top) / sy;
-			if (c.renderer == 'webgpu') {
+			if (c.webgpu || $._webgpuFallback) {
 				q.mouseX -= c.hw;
 				q.mouseY -= c.hh;
 			}
@@ -141,9 +141,15 @@ Q5.modules.input = ($, q) => {
 		const rect = $.canvas.getBoundingClientRect();
 		const sx = $.canvas.scrollWidth / $.width || 1;
 		const sy = $.canvas.scrollHeight / $.height || 1;
+		let modX = 0,
+			modY = 0;
+		if ($.canvas.webgpu || $._webgpuFallback) {
+			modX = $.halfWidth;
+			modY = $.halfHeight;
+		}
 		return {
-			x: (touch.clientX - rect.left) / sx,
-			y: (touch.clientY - rect.top) / sy,
+			x: (touch.clientX - rect.left) / sx - modX,
+			y: (touch.clientY - rect.top) / sy - modY,
 			id: touch.identifier
 		};
 	}

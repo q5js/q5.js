@@ -726,10 +726,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.globalAlpha = 1;
 		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
 		else {
-			if (Q5.Color && !c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
-			}
+			if (Q5.Color && !c._q5Color) c = $.color(...arguments);
 			$.ctx.fillStyle = c.toString();
 			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		}
@@ -763,9 +760,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.fill = function (c) {
 		$._doFill = $._fillSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
@@ -775,9 +771,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.stroke = function (c) {
 		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
@@ -799,10 +794,10 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.shadow = function (c) {
 		if (Q5.Color) {
-			if (!c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+				c = $.color(...arguments);
 			}
+			if (c.a <= 0) return ($._doShadow = false);
 		}
 		$.ctx.shadowColor = $._shadow = c.toString();
 		$._doShadow = true;
@@ -855,7 +850,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		if ($.ctx) {
 			$.ctx.resetTransform();
 			$.scale($._pixelDensity);
-			if ($._webgpuFallback) $.translate($.canvas.hw, $.canvas.hh);
+			if ($._webgpuFallback) $.translate($.halfWidth, $.halfHeight);
 		}
 	};
 
@@ -3087,7 +3082,7 @@ Q5.modules.input = ($, q) => {
 			let sy = c.scrollHeight / $.height || 1;
 			q.mouseX = (e.clientX - rect.left) / sx;
 			q.mouseY = (e.clientY - rect.top) / sy;
-			if (c.renderer == 'webgpu') {
+			if (c.webgpu || $._webgpuFallback) {
 				q.mouseX -= c.hw;
 				q.mouseY -= c.hh;
 			}
@@ -3180,9 +3175,15 @@ Q5.modules.input = ($, q) => {
 		const rect = $.canvas.getBoundingClientRect();
 		const sx = $.canvas.scrollWidth / $.width || 1;
 		const sy = $.canvas.scrollHeight / $.height || 1;
+		let modX = 0,
+			modY = 0;
+		if ($.canvas.webgpu || $._webgpuFallback) {
+			modX = $.halfWidth;
+			modY = $.halfHeight;
+		}
 		return {
-			x: (touch.clientX - rect.left) / sx,
-			y: (touch.clientY - rect.top) / sy,
+			x: (touch.clientX - rect.left) / sx - modX,
+			y: (touch.clientY - rect.top) / sy - modY,
 			id: touch.identifier
 		};
 	}
@@ -3391,7 +3392,7 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
-	if ($._renderer == 'c2d' && !$._webgpuFallback) {
+	if (!$.canvas.webgpu && !$._webgpuFallback) {
 		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
 		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
 	} else {
@@ -6533,7 +6534,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.createGraphics = (w, h, opt) => {
 		let g = _createGraphics(w, h, opt);
-		if (g.canvas.renderer == 'webgpu') {
+		if (g.canvas.webgpu) {
 			$._addTexture(g, g._frameA);
 			$._addTexture(g, g._frameB);
 			g._beginRender();

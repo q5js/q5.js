@@ -41,10 +41,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.globalAlpha = 1;
 		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
 		else {
-			if (Q5.Color && !c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
-			}
+			if (Q5.Color && !c._q5Color) c = $.color(...arguments);
 			$.ctx.fillStyle = c.toString();
 			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		}
@@ -78,9 +75,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.fill = function (c) {
 		$._doFill = $._fillSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
@@ -90,9 +86,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.stroke = function (c) {
 		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
@@ -114,10 +109,10 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.shadow = function (c) {
 		if (Q5.Color) {
-			if (!c._q5Color) {
-				if (typeof c != 'string') c = $.color(...arguments);
-				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+				c = $.color(...arguments);
 			}
+			if (c.a <= 0) return ($._doShadow = false);
 		}
 		$.ctx.shadowColor = $._shadow = c.toString();
 		$._doShadow = true;
@@ -170,7 +165,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		if ($.ctx) {
 			$.ctx.resetTransform();
 			$.scale($._pixelDensity);
-			if ($._webgpuFallback) $.translate($.canvas.hw, $.canvas.hh);
+			if ($._webgpuFallback) $.translate($.halfWidth, $.halfHeight);
 		}
 	};
 
