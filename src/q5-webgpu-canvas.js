@@ -1,6 +1,10 @@
 Q5.renderers.webgpu = {};
 
 Q5.renderers.webgpu.canvas = ($, q) => {
+	let c = $.canvas;
+
+	if ($.colorMode) $.colorMode('rgb', 1);
+
 	$._baseShaderCode = /* wgsl */ `
 struct Q5 {
 	width: f32,
@@ -18,14 +22,8 @@ struct Q5 {
 	keyIsPressed: f32
 }`;
 
-	let c = $.canvas;
-
-	c.width = $.width = 500;
-	c.height = $.height = 500;
-
-	$._g = $.createGraphics(1, 1, { renderer: 'c2d' });
-
-	if ($.colorMode) $.colorMode('rgb', 1);
+	$._g = $.createGraphics(1, 1, 'c2d');
+	$._g.colorMode($.RGB, 1);
 
 	let encoder,
 		pass,

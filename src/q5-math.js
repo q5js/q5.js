@@ -138,7 +138,7 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
-	if (!$.canvas.webgpu && !$._webgpuFallback) {
+	if ($._c2d) {
 		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
 		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
 	} else {

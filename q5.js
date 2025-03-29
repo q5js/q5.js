@@ -10,10 +10,11 @@ function Q5(scope, parent, renderer) {
 	$._q5 = true;
 	$._parent = parent;
 	if (renderer == 'webgpu-fallback') {
-		$._webgpuFallback = true;
 		$._renderer = 'c2d';
+		$._webgpu = $._webgpuFallback = true;
 	} else {
 		$._renderer = renderer || Q5.render;
+		$['_' + $._renderer] = true;
 	}
 	$._preloadCount = 0;
 
@@ -195,8 +196,6 @@ function Q5(scope, parent, renderer) {
 			$[k] = Q5[k];
 		}
 	}
-
-	if ($._webgpuFallback) $.colorMode('rgb', 1);
 
 	if ($._graphics) return;
 
@@ -850,7 +849,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		if ($.ctx) {
 			$.ctx.resetTransform();
 			$.scale($._pixelDensity);
-			if ($._webgpuFallback) $.translate($.halfWidth, $.halfHeight);
+			if ($._webgpu) $.translate($.halfWidth, $.halfHeight);
 		}
 	};
 
@@ -2075,7 +2074,7 @@ Q5.modules.color = ($, q) => {
 	$.colorMode = (mode, format, gamut) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
-		format ??= mode == 'rgb' ? ($.canvas.renderer == 'c2d' || srgb ? 255 : 1) : 1;
+		format ??= mode == 'rgb' ? ($._c2d || srgb ? 255 : 1) : 1;
 		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
@@ -3082,7 +3081,7 @@ Q5.modules.input = ($, q) => {
 			let sy = c.scrollHeight / $.height || 1;
 			q.mouseX = (e.clientX - rect.left) / sx;
 			q.mouseY = (e.clientY - rect.top) / sy;
-			if (c.webgpu || $._webgpuFallback) {
+			if ($._webgpu) {
 				q.mouseX -= c.hw;
 				q.mouseY -= c.hh;
 			}
@@ -3177,7 +3176,7 @@ Q5.modules.input = ($, q) => {
 		const sy = $.canvas.scrollHeight / $.height || 1;
 		let modX = 0,
 			modY = 0;
-		if ($.canvas.webgpu || $._webgpuFallback) {
+		if ($._webgpu) {
 			modX = $.halfWidth;
 			modY = $.halfHeight;
 		}
@@ -3392,7 +3391,7 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
-	if (!$.canvas.webgpu && !$._webgpuFallback) {
+	if ($._c2d) {
 		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
 		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
 	} else {
@@ -4733,6 +4732,10 @@ for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
 Q5.renderers.webgpu = {};
 
 Q5.renderers.webgpu.canvas = ($, q) => {
+	let c = $.canvas;
+
+	if ($.colorMode) $.colorMode('rgb', 1);
+
 	$._baseShaderCode = /* wgsl */ `
 struct Q5 {
 	width: f32,
@@ -4750,14 +4753,8 @@ struct Q5 {
 	keyIsPressed: f32
 }`;
 
-	let c = $.canvas;
-
-	c.width = $.width = 500;
-	c.height = $.height = 500;
-
-	$._g = $.createGraphics(1, 1, { renderer: 'c2d' });
-
-	if ($.colorMode) $.colorMode('rgb', 1);
+	$._g = $.createGraphics(1, 1, 'c2d');
+	$._g.colorMode($.RGB, 1);
 
 	let encoder,
 		pass,
@@ -6991,8 +6988,6 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		if (cb) cb(fontName);
 	};
-
-	$._g.colorMode($.RGB, 1);
 
 	$.loadFont = (url, cb) => {
 		let ext = url.slice(url.lastIndexOf('.') + 1);

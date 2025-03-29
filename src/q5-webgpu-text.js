@@ -309,8 +309,6 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (cb) cb(fontName);
 	};
 
-	$._g.colorMode($.RGB, 1);
-
 	$.loadFont = (url, cb) => {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
 		if (ext != 'json') return $._g.loadFont(url, cb);

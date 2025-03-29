@@ -48,7 +48,7 @@ Q5.modules.input = ($, q) => {
 			let sy = c.scrollHeight / $.height || 1;
 			q.mouseX = (e.clientX - rect.left) / sx;
 			q.mouseY = (e.clientY - rect.top) / sy;
-			if (c.webgpu || $._webgpuFallback) {
+			if ($._webgpu) {
 				q.mouseX -= c.hw;
 				q.mouseY -= c.hh;
 			}
@@ -143,7 +143,7 @@ Q5.modules.input = ($, q) => {
 		const sy = $.canvas.scrollHeight / $.height || 1;
 		let modX = 0,
 			modY = 0;
-		if ($.canvas.webgpu || $._webgpuFallback) {
+		if ($._webgpu) {
 			modX = $.halfWidth;
 			modY = $.halfHeight;
 		}

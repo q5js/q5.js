@@ -10,10 +10,11 @@ function Q5(scope, parent, renderer) {
 	$._q5 = true;
 	$._parent = parent;
 	if (renderer == 'webgpu-fallback') {
-		$._webgpuFallback = true;
 		$._renderer = 'c2d';
+		$._webgpu = $._webgpuFallback = true;
 	} else {
 		$._renderer = renderer || Q5.render;
+		$['_' + $._renderer] = true;
 	}
 	$._preloadCount = 0;
 
@@ -195,8 +196,6 @@ function Q5(scope, parent, renderer) {
 			$[k] = Q5[k];
 		}
 	}
-
-	if ($._webgpuFallback) $.colorMode('rgb', 1);
 
 	if ($._graphics) return;
 
