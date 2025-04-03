@@ -138,13 +138,7 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
-	if ($._c2d) {
-		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
-		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
-	} else {
-		$.randomX = (v = 0) => $.random(-$.canvas.hw - v, $.canvas.hw + v);
-		$.randomY = (v = 0) => $.random(-$.canvas.hh - v, $.canvas.hh + v);
-	}
+	$.randSym = (v = 1) => $.random(-v, v);
 
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();

@@ -1716,7 +1716,7 @@ createCanvas(200);
 let c = color('lime');
 
 function draw() {
-	set(randomX(), randomY(), c);
+	set(random(200), random(200), c);
 	updatePixels();
 }
 	 */
@@ -2376,11 +2376,13 @@ function mouseWheel(e) {
 
 	// 🧮 math
 
-		/** 🧮
-	 * Generates random numbers. If no arguments are provided, returns a random number between 0 and 1.
-	 * If one number argument is provided, returns a random number between 0 and the provided value.
-	 * If two number arguments are provided, returns a random number between the two values.
-	 * If an array is provided, returns a random element from the array.
+	/** 🧮
+	 * Generates a random value.
+	 * 
+	 * - If no inputs are provided, returns a number between 0 and 1.
+	 * - If one numerical input is provided, returns a number between 0 and the provided value.
+	 * - If two numerical inputs are provided, returns a number between the two values.
+	 * - If an array is provided, returns a random element from the array.
 	 * @param {number | any[]} [low] lower bound (inclusive) or an array
 	 * @param {number} [high] upper bound (exclusive)
 	 * @returns {number | any} a random number or element
@@ -2390,52 +2392,35 @@ background(200);
 frameRate(5);
 
 function draw() {
-	circle(100, 100, random(200));
+	circle(100, 100, random(20, 200));
+}
+	 * @example
+function draw() {
+	circle(random(200), random(200), 10);
 }
 	 */
 	function random(low?: number | any[], high?: number): number | any;
 
-	/** 🧮
-	 * Generates a random number within the range of the canvas width.
-	 * @param {number} [margin] distance to extend (positive) or contract (negative) the range from canvas edges
-	 * @returns {number} random x value
+	/**
+	 * Generates a random number within a symmetric range around zero.
+	 * 
+	 * Equivalent to `random(-val, val)`.
+	 * @param {number} val absolute maximum value, default is 1
+	 * @returns {number} random number between -val and val
 	 * @example
+function draw() {
+	translate(mouseX, mouseY);
+	circle(randSym(5), randSym(5), 5);
+}
+	 * @example
+let q = await Q5.WebGPU();
 createCanvas(200, 100);
-background(200);
 
-function draw() {
-	circle(randomX(), 50, random(50));
-}
-	 * @example
-createCanvas(200, 100);
-background(200);
-
-function draw() {
-	circle(randomX(-60), 50, random(50));
-}
+q.draw = () => {
+	circle(randSym(100), 0, random(50));
+};
 	 */
-	function randomX(margin?: number): number;
-
-	/** 🧮
-	 * Generates a random number within the range of the canvas height.
-	 * @param {number} [margin] distance to extend (positive) or contract (negative) the range from canvas edges
-	 * @returns {number} random y value
-	 * @example
-createCanvas(200);
-background(200);
-
-function draw() {
-	circle(100, randomY(), random(50));
-}
-	 * @example
-createCanvas(200);
-background(200);
-
-function draw() {
-	circle(randomX(), randomY(-60), 10);
-}
-	 */
-	function randomY(margin?: number): number;
+	function randSym(val: number): number;
 
 	/** 🧮
 	 * Calculates the distance between two points.
@@ -3131,7 +3116,7 @@ let rec = createRecorder();
 rec.bitrate = 10;
 
 function draw() {
-	circle(mouseX, randomY(), 10);
+	circle(mouseX, random(height), 10);
 }
 	 */
 	function createRecorder(): HTMLElement;
@@ -3158,7 +3143,7 @@ function draw() {
 	 * @param {string} fileName
 	 * @example
 function draw() {
-	square(mouseX, randomY(), 10);
+	square(mouseX, random(200), 10);
 }
 
 function mousePressed() {

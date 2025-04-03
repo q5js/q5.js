@@ -16,7 +16,6 @@ function Q5(scope, parent, renderer) {
 		$._renderer = renderer || Q5.render;
 		$['_' + $._renderer] = true;
 	}
-	$._preloadCount = 0;
 
 	let autoLoaded = scope == 'auto';
 	scope ??= 'global';
@@ -72,11 +71,13 @@ function Q5(scope, parent, renderer) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
+	$._preloadCount = 0;
 	$._incrementPreload = () => q._preloadCount++;
 	$._decrementPreload = () => q._preloadCount--;
 
 	$._usePreload = true;
 	$.usePreloadSystem = (v) => ($._usePreload = v);
+	$.isPreloadSupported = () => $._usePreload;
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();

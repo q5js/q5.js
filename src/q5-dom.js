@@ -92,6 +92,8 @@ Q5.modules.dom = ($, q) => {
 		if ($.canvas) $.canvas.parentElement.append(el);
 		else document.body.append(el);
 
+		el.elt = el; // p5 compat
+
 		return el;
 	};
 	$.createEl = $.createElement;

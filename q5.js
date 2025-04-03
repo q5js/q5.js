@@ -16,7 +16,6 @@ function Q5(scope, parent, renderer) {
 		$._renderer = renderer || Q5.render;
 		$['_' + $._renderer] = true;
 	}
-	$._preloadCount = 0;
 
 	let autoLoaded = scope == 'auto';
 	scope ??= 'global';
@@ -72,11 +71,13 @@ function Q5(scope, parent, renderer) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
+	$._preloadCount = 0;
 	$._incrementPreload = () => q._preloadCount++;
 	$._decrementPreload = () => q._preloadCount--;
 
 	$._usePreload = true;
 	$.usePreloadSystem = (v) => ($._usePreload = v);
+	$.isPreloadSupported = () => $._usePreload;
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
@@ -2743,6 +2744,8 @@ Q5.modules.dom = ($, q) => {
 		if ($.canvas) $.canvas.parentElement.append(el);
 		else document.body.append(el);
 
+		el.elt = el; // p5 compat
+
 		return el;
 	};
 	$.createEl = $.createElement;
@@ -3391,13 +3394,7 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
-	if ($._c2d) {
-		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
-		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
-	} else {
-		$.randomX = (v = 0) => $.random(-$.canvas.hw - v, $.canvas.hw + v);
-		$.randomY = (v = 0) => $.random(-$.canvas.hh - v, $.canvas.hh + v);
-	}
+	$.randSym = (v = 1) => $.random(-v, v);
 
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();
@@ -6095,9 +6092,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			}
 		}
 
-		if (shapeVertCount < 3) {
-			throw new Error('A shape must have at least 3 vertices.');
-		}
+		if (!shapeVertCount) return;
+		if (shapeVertCount == 1) return $.point(sv[0], -sv[1]);
+		if (shapeVertCount == 2) return $.line(sv[0], -sv[1], sv[4], -sv[5]);
 
 		// close the shape if requested
 		if (close) {

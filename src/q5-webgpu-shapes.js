@@ -574,9 +574,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			}
 		}
 
-		if (shapeVertCount < 3) {
-			throw new Error('A shape must have at least 3 vertices.');
-		}
+		if (!shapeVertCount) return;
+		if (shapeVertCount == 1) return $.point(sv[0], -sv[1]);
+		if (shapeVertCount == 2) return $.line(sv[0], -sv[1], sv[4], -sv[5]);
 
 		// close the shape if requested
 		if (close) {
