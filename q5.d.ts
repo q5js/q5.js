@@ -2402,6 +2402,8 @@ function draw() {
 	function random(low?: number | any[], high?: number): number | any;
 
 	/**
+	 * ___Experimental! May be renamed or removed in the future.___
+	 * 
 	 * Generates a random number within a symmetric range around zero.
 	 * 
 	 * Equivalent to `random(-val, val)`.

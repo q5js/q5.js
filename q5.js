@@ -4722,10 +4722,11 @@ Q5.Vector.mult = (v, u) => v.copy().mult(u);
 Q5.Vector.normalize = (v) => v.copy().normalize();
 Q5.Vector.rem = (v, u) => v.copy().rem(u);
 Q5.Vector.sub = (v, u) => v.copy().sub(u);
-
-for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
-	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
-}
+Q5.Vector.reflect = (v, n) => v.copy().reflect(n);
+Q5.Vector.random2D = () => new Q5.Vector().random2D();
+Q5.Vector.random3D = () => new Q5.Vector().random3D();
+Q5.Vector.fromAngle = (th, l) => new Q5.Vector().fromAngle(th, l);
+Q5.Vector.fromAngles = (th, ph, l) => new Q5.Vector().fromAngles(th, ph, l);
 Q5.renderers.webgpu = {};
 
 Q5.renderers.webgpu.canvas = ($, q) => {
