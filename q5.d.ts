@@ -2417,7 +2417,7 @@ let q = await Q5.WebGPU();
 createCanvas(200, 100);
 
 q.draw = () => {
-	circle(randSym(100), 0, random(50));
+	circle(randSym(50), 0, random(50));
 };
 	 */
 	function randSym(val: number): number;
