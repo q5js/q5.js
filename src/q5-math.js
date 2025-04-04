@@ -138,7 +138,7 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
-	$.randSym = (v = 1) => $.random(-v, v);
+	$.jit = (amt = 1) => $.random(-amt, amt);
 
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();

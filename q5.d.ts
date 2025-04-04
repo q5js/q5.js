@@ -2404,25 +2404,24 @@ function draw() {
 	/**
 	 * ___Experimental! May be renamed or removed in the future.___
 	 * 
-	 * Generates a random number within a symmetric range around zero.
+	 * Generates a random number within a symmetric jitter range around zero.
 	 * 
-	 * Equivalent to `random(-val, val)`.
-	 * @param {number} val absolute maximum value, default is 1
+	 * Equivalent to `random(-amount, amount)`.
+	 * @param {number} amount absolute maximum amount of jitter, default is 1
 	 * @returns {number} random number between -val and val
 	 * @example
 function draw() {
-	translate(mouseX, mouseY);
-	circle(randSym(5), randSym(5), 5);
+	circle(mouseX + jit(3), mouseY + jit(3), 5);
 }
 	 * @example
 let q = await Q5.WebGPU();
 createCanvas(200, 100);
 
 q.draw = () => {
-	circle(randSym(50), 0, random(50));
+	circle(jit(50), 0, random(50));
 };
 	 */
-	function randSym(val: number): number;
+	function jit(amount: number): number;
 
 	/** 🧮
 	 * Calculates the distance between two points.
