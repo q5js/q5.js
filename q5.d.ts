@@ -2404,7 +2404,8 @@ function draw() {
 	/**
 	 * ___Experimental! May be renamed or removed in the future.___
 	 * 
-	 * Generates a random number within a symmetric jitter range around zero.
+	 * Generates a random number within a symmetric 
+	 * [jitter](https://en.wikipedia.org/wiki/Jitter) range around zero.
 	 * 
 	 * Equivalent to `random(-amount, amount)`.
 	 * @param {number} amount absolute maximum amount of jitter, default is 1
@@ -2561,7 +2562,7 @@ function draw() {
 function draw() {
 	background(200);
 	let n = noise(frameCount * 0.01);
-	square(n * 200, n * 200, 10);
+	square(100, 100, n * 200);
 }
 	 */
 	function noise(x?: number, y?: number, z?: number): number;
@@ -2592,7 +2593,7 @@ function draw() {
 	const TWO_PI: number;
 
 	/** 🧮
-	 * Alias for 2 * PI.
+	 * 2 * PI.
 	 * Approximately 6.28319.
 	 */
 	const TAU: number;

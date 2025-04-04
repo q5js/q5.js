@@ -23,7 +23,7 @@ struct Q5 {
 }`;
 
 	$._g = $.createGraphics(1, 1, 'c2d');
-	$._g.colorMode($.RGB, 1);
+	if ($._g.colorMode) $._g.colorMode($.RGB, 1);
 
 	let encoder,
 		pass,
@@ -495,14 +495,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 	// prettier-ignore
 	let blendFactors = [
-			'zero',                // 0
-			'one',                 // 1
-			'src-alpha',           // 2
-			'one-minus-src-alpha', // 3
-			'dst',                 // 4
-			'dst-alpha',           // 5
-			'one-minus-dst-alpha', // 6
-			'one-minus-src'        // 7
+		'zero',                // 0
+		'one',                 // 1
+		'src-alpha',           // 2
+		'one-minus-src-alpha', // 3
+		'dst',                 // 4
+		'dst-alpha',           // 5
+		'one-minus-dst-alpha', // 6
+		'one-minus-src'        // 7
 	];
 	let blendOps = [
 		'add', // 0
@@ -512,18 +512,22 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		'max' // 4
 	];
 
-	// other blend modes are not supported yet
 	const blendModes = {
-		normal: [2, 3, 0, 2, 3, 0],
-		// destination_over: [6, 1, 0, 6, 1, 0],
-		additive: [1, 1, 0, 1, 1, 0]
-		// source_in: [5, 0, 0, 5, 0, 0],
-		// destination_in: [0, 2, 0, 0, 2, 0],
-		// source_out: [6, 0, 0, 6, 0, 0],
-		// destination_out: [0, 3, 0, 0, 3, 0],
-		// source_atop: [5, 3, 0, 5, 3, 0],
-		// destination_atop: [6, 2, 0, 6, 2, 0]
+		'source-over': [2, 3, 0, 2, 3, 0],
+		'destination-over': [6, 1, 0, 6, 1, 0],
+		'source-in': [5, 0, 0, 5, 0, 0],
+		'destination-in': [0, 2, 0, 0, 2, 0],
+		'source-out': [6, 0, 0, 6, 0, 0],
+		'destination-out': [0, 3, 0, 0, 3, 0],
+		'source-atop': [5, 3, 0, 5, 3, 0],
+		'destination-atop': [6, 2, 0, 6, 2, 0],
+		lighter: [1, 1, 0, 1, 1, 0],
+		darken: [1, 1, 3, 3, 5, 0],
+		lighten: [1, 1, 4, 3, 5, 0],
+		replace: [1, 0, 0, 1, 0, 0]
 	};
+
+	$._blendModeNames = Object.keys(blendModes);
 
 	$.blendConfigs = {};
 
@@ -542,19 +546,17 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		};
 	}
 
-	$._blendMode = 'normal';
+	$._blendMode = 'source-over';
 
 	$.blendMode = (mode) => {
 		if (mode == $._blendMode) return;
-		if (mode == 'source-over') mode = 'normal';
-		if (mode == 'lighter') mode = 'additive';
-		mode = mode.toLowerCase().replace(/[ -]/g, '_');
 		$._blendMode = mode;
-
-		for (let i = 0; i < $._pipelines.length; i++) {
-			$._pipelineConfigs[i].fragment.targets[0].blend = $.blendConfigs[mode];
-			$._pipelines[i] = Q5.device.createRenderPipeline($._pipelineConfigs[i]);
+		let i = $._blendModeNames.indexOf(mode);
+		if (i == -1) {
+			console.error(`Blend mode "${mode}" not supported in q5.js WebGPU.`);
+			return;
 		}
+		drawStack.push(0, i);
 	};
 
 	let shouldClear;
@@ -679,7 +681,17 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		for (let i = 0; i < drawStack.length; i += 2) {
 			let v = drawStack[i + 1];
 
-			if (curPipelineIndex != drawStack[i]) {
+			if (drawStack[i] != curPipelineIndex) {
+				if (drawStack[i] == 0) {
+					// change blend mode
+					let mode = $._blendModeNames[v];
+					for (let i = 1; i < $._pipelines.length; i++) {
+						$._pipelineConfigs[i].fragment.targets[0].blend = $.blendConfigs[mode];
+						$._pipelines[i] = Q5.device.createRenderPipeline($._pipelineConfigs[i]);
+					}
+					continue;
+				}
+
 				curPipelineIndex = drawStack[i];
 				pass.setPipeline($._pipelines[curPipelineIndex]);
 			}
