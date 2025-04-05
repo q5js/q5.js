@@ -45,7 +45,6 @@ Q5.renderers.c2d.image = ($, q) => {
 				`q5 doesn't support GIFs. Use a video or p5play animation instead. https://github.com/q5js/q5.js/issues/84`
 			);
 		}
-		q._preloadCount++;
 		let last = [...arguments].at(-1);
 		if (typeof last == 'object') {
 			opt = last;
@@ -68,16 +67,13 @@ Q5.renderers.c2d.image = ($, q) => {
 				g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
 
 				g.ctx.drawImage(img, 0, 0);
-				q._preloadCount--;
 				if (cb) cb(g);
 				delete g._loader;
 				resolve(g);
 			};
-			img.onerror = (e) => {
-				q._preloadCount--;
-				reject(e);
-			};
+			img.onerror = reject;
 		});
+		$._preloadPromises.push(g._loader);
 
 		g.src = img.src = url;
 

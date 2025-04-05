@@ -216,14 +216,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$._fonts = [];
 	let fonts = {};
 
-	let createFont = async (fontJsonUrl, fontName, cb) => {
-		q._preloadCount++;
-
+	async function createFont(fontJsonUrl, fontName, cb) {
 		let res = await fetch(fontJsonUrl);
-		if (res.status == 404) {
-			q._preloadCount--;
-			return '';
-		}
+		if (res.status == 404) return '';
+
 		let atlas = await res.json();
 
 		let slashIdx = fontJsonUrl.lastIndexOf('/');
@@ -304,10 +300,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		$._fonts.push($._font);
 		fonts[fontName] = $._font;
 
-		q._preloadCount--;
-
 		if (cb) cb(fontName);
-	};
+	}
 
 	$.loadFont = (url, cb) => {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
@@ -318,6 +312,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			delete f._loader;
 			if (cb) cb(f);
 		});
+		$._preloadPromises.push(f._loader);
+
 		if (!$._usePreload) return f._loader;
 		return f;
 	};

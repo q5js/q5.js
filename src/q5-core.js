@@ -71,13 +71,18 @@ function Q5(scope, parent, renderer) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
-	$._preloadCount = 0;
-	$._incrementPreload = () => q._preloadCount++;
-	$._decrementPreload = () => q._preloadCount--;
-
+	$._preloadPromises = [];
 	$._usePreload = true;
 	$.usePreloadSystem = (v) => ($._usePreload = v);
 	$.isPreloadSupported = () => $._usePreload;
+
+	const resolvers = [];
+	$._incrementPreload = () => {
+		$._preloadPromises.push(new Promise((resolve) => resolvers.push(resolve)));
+	};
+	$._decrementPreload = () => {
+		if (resolvers.length) resolvers.pop()();
+	};
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
@@ -131,7 +136,7 @@ function Q5(scope, parent, renderer) {
 	};
 	$.noLoop = () => {
 		$._loop = false;
-		if (looper) {
+		if (looper != null) {
 			if (useRAF) cancelAnimationFrame(looper);
 			else clearTimeout(looper);
 		}
@@ -155,17 +160,20 @@ function Q5(scope, parent, renderer) {
 	};
 
 	$.frameRate = (hz) => {
-		if (hz) {
+		if (hz != $._targetFrameRate) {
 			$._targetFrameRate = hz;
 			$._targetFrameDuration = 1000 / hz;
 
-			if ($._loop && $._setupDone && looper != null) {
+			if ($._loop && looper != null) {
 				if (useRAF) cancelAnimationFrame(looper);
 				else clearTimeout(looper);
 				looper = null;
 			}
 			useRAF = hz <= 60;
-			setTimeout(() => $._draw(), $._targetFrameDuration);
+			if ($._setupDone) {
+				if (useRAF) looper = raf($._draw);
+				else looper = setTimeout(() => $._draw(), $._targetFrameDuration);
+			}
 		}
 		return $._frameRate;
 	};
@@ -282,7 +290,8 @@ function Q5(scope, parent, renderer) {
 
 	async function _setup() {
 		$._startDone = true;
-		if ($._preloadCount > 0 || $._g?._preloadCount > 0) return raf(_setup);
+		await Promise.all($._preloadPromises);
+		if ($._g) await Promise.all($._g._preloadPromises);
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;

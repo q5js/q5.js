@@ -20,7 +20,6 @@ Q5.renderers.c2d.text = ($, q) => {
 	let cache = ($._textCache = {});
 
 	$.loadFont = (url, cb) => {
-		q._preloadCount++;
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
 
 		let f = new FontFace(name, `url(${url})`);
@@ -32,12 +31,12 @@ Q5.renderers.c2d.text = ($, q) => {
 			} catch (e) {
 				err = e;
 			}
-			q._preloadCount--;
 			delete f._loader;
 			if (err) throw err;
 			if (cb) cb(f);
 			return f;
 		})();
+		$._preloadPromises.push(f._loader);
 		$.textFont(name);
 		if (!$._usePreload) return f._loader;
 		return f;

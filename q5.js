@@ -71,13 +71,18 @@ function Q5(scope, parent, renderer) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
-	$._preloadCount = 0;
-	$._incrementPreload = () => q._preloadCount++;
-	$._decrementPreload = () => q._preloadCount--;
-
+	$._preloadPromises = [];
 	$._usePreload = true;
 	$.usePreloadSystem = (v) => ($._usePreload = v);
 	$.isPreloadSupported = () => $._usePreload;
+
+	const resolvers = [];
+	$._incrementPreload = () => {
+		$._preloadPromises.push(new Promise((resolve) => resolvers.push(resolve)));
+	};
+	$._decrementPreload = () => {
+		if (resolvers.length) resolvers.pop()();
+	};
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
@@ -131,7 +136,7 @@ function Q5(scope, parent, renderer) {
 	};
 	$.noLoop = () => {
 		$._loop = false;
-		if (looper) {
+		if (looper != null) {
 			if (useRAF) cancelAnimationFrame(looper);
 			else clearTimeout(looper);
 		}
@@ -155,17 +160,20 @@ function Q5(scope, parent, renderer) {
 	};
 
 	$.frameRate = (hz) => {
-		if (hz) {
+		if (hz != $._targetFrameRate) {
 			$._targetFrameRate = hz;
 			$._targetFrameDuration = 1000 / hz;
 
-			if ($._loop && $._setupDone && looper != null) {
+			if ($._loop && looper != null) {
 				if (useRAF) cancelAnimationFrame(looper);
 				else clearTimeout(looper);
 				looper = null;
 			}
 			useRAF = hz <= 60;
-			setTimeout(() => $._draw(), $._targetFrameDuration);
+			if ($._setupDone) {
+				if (useRAF) looper = raf($._draw);
+				else looper = setTimeout(() => $._draw(), $._targetFrameDuration);
+			}
 		}
 		return $._frameRate;
 	};
@@ -282,7 +290,8 @@ function Q5(scope, parent, renderer) {
 
 	async function _setup() {
 		$._startDone = true;
-		if ($._preloadCount > 0 || $._g?._preloadCount > 0) return raf(_setup);
+		await Promise.all($._preloadPromises);
+		if ($._g) await Promise.all($._g._preloadPromises);
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
@@ -1310,7 +1319,6 @@ Q5.renderers.c2d.image = ($, q) => {
 				`q5 doesn't support GIFs. Use a video or p5play animation instead. https://github.com/q5js/q5.js/issues/84`
 			);
 		}
-		q._preloadCount++;
 		let last = [...arguments].at(-1);
 		if (typeof last == 'object') {
 			opt = last;
@@ -1333,16 +1341,13 @@ Q5.renderers.c2d.image = ($, q) => {
 				g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
 
 				g.ctx.drawImage(img, 0, 0);
-				q._preloadCount--;
 				if (cb) cb(g);
 				delete g._loader;
 				resolve(g);
 			};
-			img.onerror = (e) => {
-				q._preloadCount--;
-				reject(e);
-			};
+			img.onerror = reject;
 		});
+		$._preloadPromises.push(g._loader);
 
 		g.src = img.src = url;
 
@@ -1791,7 +1796,6 @@ Q5.renderers.c2d.text = ($, q) => {
 	let cache = ($._textCache = {});
 
 	$.loadFont = (url, cb) => {
-		q._preloadCount++;
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
 
 		let f = new FontFace(name, `url(${url})`);
@@ -1803,12 +1807,12 @@ Q5.renderers.c2d.text = ($, q) => {
 			} catch (e) {
 				err = e;
 			}
-			q._preloadCount--;
 			delete f._loader;
 			if (err) throw err;
 			if (cb) cb(f);
 			return f;
 		})();
+		$._preloadPromises.push(f._loader);
 		$.textFont(name);
 		if (!$._usePreload) return f._loader;
 		return f;
@@ -2932,15 +2936,14 @@ Q5.modules.dom = ($, q) => {
 		};
 
 		if (src) {
-			q._preloadCount++;
 			el._loader = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
 					el._load();
-					q._preloadCount--;
 					resolve(el);
 				});
 				el.src = src;
 			});
+			$._preloadPromises.push(el._loader);
 
 			if (!$._usePreload) return el._loader;
 		}
@@ -2948,8 +2951,6 @@ Q5.modules.dom = ($, q) => {
 	};
 
 	$.createCapture = function (type, flipped = true, cb) {
-		q._preloadCount++;
-
 		let constraints = typeof type == 'string' ? { [type]: true } : type || { video: true, audio: true };
 
 		if (constraints.video === true) {
@@ -2976,7 +2977,6 @@ Q5.modules.dom = ($, q) => {
 			try {
 				stream = await navigator.mediaDevices.getUserMedia(constraints);
 			} catch (e) {
-				q._preloadCount--;
 				throw e;
 			}
 
@@ -2985,9 +2985,9 @@ Q5.modules.dom = ($, q) => {
 
 			vid._load();
 			if (cb) cb(vid);
-			q._preloadCount--;
 			return vid;
 		})();
+		$._preloadPromises.push(vid._loader);
 
 		if (!$._usePreload) return vid._loader;
 		return vid;
@@ -4065,8 +4065,6 @@ Q5.modules.sound = ($, q) => {
 	let sounds = [];
 
 	$.loadSound = (url, cb) => {
-		q._preloadCount++;
-
 		let s = new Q5.Sound();
 		sounds.push(s);
 
@@ -4077,37 +4075,34 @@ Q5.modules.sound = ($, q) => {
 			} catch (e) {
 				err = e;
 			}
-			q._preloadCount--;
 			delete s._loader;
 			if (err) throw err;
 			if (cb) cb(s);
 			return s;
 		})();
+		$._preloadPromises.push(s._loader);
 
 		if (!$._usePreload) return s._loader;
 		return s;
 	};
 
 	$.loadAudio = (url, cb) => {
-		q._preloadCount++;
 		let a = new Audio(url);
 		a.crossOrigin = 'Anonymous';
-		a.addEventListener('canplaythrough', () => {
-			if (!a.loaded) {
-				q._preloadCount--;
-				a.loaded = true;
-				if (cb) cb(a);
-			}
+		a._loader = new Promise((resolve, reject) => {
+			a.addEventListener('canplaythrough', () => {
+				if (!a.loaded) {
+					a.loaded = true;
+					if (cb) cb(a);
+					resolve(a);
+				}
+			});
+			a.addEventListener('suspend', resolve);
+			a.addEventListener('error', reject);
 		});
-		let preloadSkip = () => {
-			a._preloadSkip = true;
-			q._preloadCount--;
-		};
-		a.addEventListener('suspend', preloadSkip);
-		a.addEventListener('error', (e) => {
-			preloadSkip();
-			throw e;
-		});
+		$._preloadPromises.push(a._loader);
+
+		if (!$._usePreload) return a._loader;
 		return a;
 	};
 
@@ -4273,7 +4268,6 @@ Q5.Sound = class {
 };
 Q5.modules.util = ($, q) => {
 	$._loadFile = (url, cb, type) => {
-		q._preloadCount++;
 		let ret = {};
 		ret._loader = new Promise((resolve, reject) => {
 			fetch(url)
@@ -4291,7 +4285,6 @@ Q5.modules.util = ($, q) => {
 					else Object.assign(ret, f);
 					delete ret._loader;
 					if (cb) cb(f);
-					q._preloadCount--;
 					resolve(f);
 				});
 		});
@@ -6526,10 +6519,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.loadImage = (src, cb) => {
-		q._preloadCount++;
 		let g = $._g.loadImage(src, (img) => {
 			$._addTexture(img);
-			q._preloadCount--;
 			if (cb) cb(g);
 		});
 		return g;
@@ -6906,14 +6897,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$._fonts = [];
 	let fonts = {};
 
-	let createFont = async (fontJsonUrl, fontName, cb) => {
-		q._preloadCount++;
-
+	async function createFont(fontJsonUrl, fontName, cb) {
 		let res = await fetch(fontJsonUrl);
-		if (res.status == 404) {
-			q._preloadCount--;
-			return '';
-		}
+		if (res.status == 404) return '';
+
 		let atlas = await res.json();
 
 		let slashIdx = fontJsonUrl.lastIndexOf('/');
@@ -6994,10 +6981,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		$._fonts.push($._font);
 		fonts[fontName] = $._font;
 
-		q._preloadCount--;
-
 		if (cb) cb(fontName);
-	};
+	}
 
 	$.loadFont = (url, cb) => {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
@@ -7008,6 +6993,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			delete f._loader;
 			if (cb) cb(f);
 		});
+		$._preloadPromises.push(f._loader);
+
 		if (!$._usePreload) return f._loader;
 		return f;
 	};

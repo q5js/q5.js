@@ -344,7 +344,7 @@ q.circle(100, 50, 20);
 		}
 
 		/** ⭐️
-		 * Creates a new Q5 instance with the [q5 WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer).
+		 * Creates a new Q5 instance that uses [q5's WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer).
 		 * @example
 let q = await Q5.WebGPU();
 

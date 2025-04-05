@@ -1,6 +1,5 @@
 Q5.modules.util = ($, q) => {
 	$._loadFile = (url, cb, type) => {
-		q._preloadCount++;
 		let ret = {};
 		ret._loader = new Promise((resolve, reject) => {
 			fetch(url)
@@ -18,7 +17,6 @@ Q5.modules.util = ($, q) => {
 					else Object.assign(ret, f);
 					delete ret._loader;
 					if (cb) cb(f);
-					q._preloadCount--;
 					resolve(f);
 				});
 		});

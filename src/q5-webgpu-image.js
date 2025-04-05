@@ -295,10 +295,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.loadImage = (src, cb) => {
-		q._preloadCount++;
 		let g = $._g.loadImage(src, (img) => {
 			$._addTexture(img);
-			q._preloadCount--;
 			if (cb) cb(g);
 		});
 		return g;

@@ -280,15 +280,14 @@ Q5.modules.dom = ($, q) => {
 		};
 
 		if (src) {
-			q._preloadCount++;
 			el._loader = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
 					el._load();
-					q._preloadCount--;
 					resolve(el);
 				});
 				el.src = src;
 			});
+			$._preloadPromises.push(el._loader);
 
 			if (!$._usePreload) return el._loader;
 		}
@@ -296,8 +295,6 @@ Q5.modules.dom = ($, q) => {
 	};
 
 	$.createCapture = function (type, flipped = true, cb) {
-		q._preloadCount++;
-
 		let constraints = typeof type == 'string' ? { [type]: true } : type || { video: true, audio: true };
 
 		if (constraints.video === true) {
@@ -324,7 +321,6 @@ Q5.modules.dom = ($, q) => {
 			try {
 				stream = await navigator.mediaDevices.getUserMedia(constraints);
 			} catch (e) {
-				q._preloadCount--;
 				throw e;
 			}
 
@@ -333,9 +329,9 @@ Q5.modules.dom = ($, q) => {
 
 			vid._load();
 			if (cb) cb(vid);
-			q._preloadCount--;
 			return vid;
 		})();
+		$._preloadPromises.push(vid._loader);
 
 		if (!$._usePreload) return vid._loader;
 		return vid;
