@@ -196,6 +196,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$.rectMode = (x) => ($._rectMode = x);
 
 	$.rect = (x, y, w, h, rr = 0) => {
+		h ??= w;
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 		let ci, ti;
 		if ($._matrixDirty) $._saveMatrix();

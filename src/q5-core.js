@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.24
+ * @version 2.25
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -99,7 +99,6 @@ function Q5(scope, parent, renderer) {
 				let nextTS = ts + $._targetFrameDuration;
 				let frameDelay = nextTS - performance.now();
 				while (frameDelay < 0) frameDelay += $._targetFrameDuration;
-				log(frameDelay);
 				looper = setTimeout(() => $._draw(nextTS), frameDelay);
 			}
 		} else if ($.frameCount && !$._redraw) return;
@@ -223,10 +222,22 @@ function Q5(scope, parent, renderer) {
 		if (n[0] != '_' && typeof $[n] == 'function') $[n] = fn.bind($);
 	}
 
+	for (let [n, fn] of Object.entries(Q5.preloadMethods)) {
+		$[n] = function () {
+			$._incrementPreload();
+			return fn.apply($, arguments);
+			// fn is responsible for calling $._decrementPreload
+		};
+	}
+
 	if (scope == 'global') {
 		let props = Object.getOwnPropertyNames($);
 		for (let p of props) {
 			if (p[0] != '_') globalScope[p] = $[p];
+		}
+		// to support p5.sound
+		for (let p of ['_incrementPreload', '_decrementPreload']) {
+			globalScope[p] = $[p];
 		}
 	}
 
@@ -335,7 +346,9 @@ Q5.methods = {
 	remove: []
 };
 Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
-Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
+
+Q5.preloadMethods = {};
+Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
 
 if (Q5._server) global.p5 ??= global.Q5 = Q5;
 
@@ -349,7 +362,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.24';
+Q5.version = Q5.VERSION = '2.25';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

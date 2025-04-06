@@ -2242,7 +2242,7 @@ function draw() {
 	 * 
 	 * Useful for playing sounds.
 	 * @example
-createCanvas(200, 100);
+createCanvas(200);
 
 let gray = 100;
 function mousePressed() {
@@ -2404,8 +2404,9 @@ function draw() {
 	/**
 	 * ___Experimental! May be renamed or removed in the future.___
 	 * 
-	 * Generates a random number within a symmetric 
-	 * [jitter](https://en.wikipedia.org/wiki/Jitter) range around zero.
+	 * Generates a random number within a symmetric range around zero.
+	 * 
+	 * Can be used to create a jitter effect (random displacement).
 	 * 
 	 * Equivalent to `random(-amount, amount)`.
 	 * @param {number} amount absolute maximum amount of jitter, default is 1
@@ -2423,6 +2424,58 @@ q.draw = () => {
 };
 	 */
 	function jit(amount: number): number;
+
+	/** 🧮
+	 * Generates a noise value based on the x, y, and z inputs.
+	 * 
+	 * Uses [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise) by default.
+	 * @param {number} [x] x-coordinate input
+	 * @param {number} [y] y-coordinate input
+	 * @param {number} [z] z-coordinate input
+	 * @returns {number} a noise value
+	 * @example
+function draw() {
+	background(200);
+	let n = noise(frameCount * 0.01);
+	circle(100, 100, n * 200);
+}
+	 * @example
+function draw() {
+	background(200);
+	let t = (frameCount + mouseX) * 0.02;
+	for (let x = -5; x < 220; x += 10) {
+		let n = noise(t, x * 0.1);
+		circle(x, 100, n * 40);
+	}
+}
+	 * @example
+let q = await Q5.WebGPU();
+
+q.draw = () => {
+	let t = millis() * 0.002;
+	for (let x = -100; x < 100; x += 5) {
+		for (let y = -100; y < 100; y += 5) {
+			fill(noise(t, (mouseX + x) * .05, y * .05));
+			square(x, y, 5);
+		}
+	}
+};
+	 * @example
+let q = await Q5.WebGPU();
+
+q.draw = () => {
+	let zoom = mouseY / 2000;
+	let t = millis() * 0.002;
+	noStroke();
+	for (let x = -100; x < 100; x++) {
+		for (let y = -100; y < 100; y++) {
+			fill(noise(t, x * zoom, y * zoom));
+			square(x, y, 1);
+		}
+	}
+};
+	 */
+	function noise(x?: number, y?: number, z?: number): number;
 
 	/** 🧮
 	 * Calculates the distance between two points.
@@ -2504,6 +2557,89 @@ function draw() {
 	function norm(n: number, start: number, stop: number): number;
 
 	/** 🧮
+	 * Calculates the fractional part of a number.
+	 * @param {number} n a number
+	 * @returns {number} fractional part of the number
+	 */
+	function fract(n: number): number;
+
+	/** 🧮
+	 * Calculates the absolute value of a number.
+	 * @param {number} n a number
+	 * @returns {number} absolute value of the number
+	 */
+	function abs(n: number): number;
+
+	/** 🧮
+	 * Rounds a number.
+	 * @param {number} n number to round
+	 * @param {number} [d] number of decimal places to round to
+	 * @returns {number} rounded number
+	 * @example
+createCanvas(200, 100);
+background(200);
+textSize(32);
+text(round(PI, 5), 10, 60);
+	 */
+	function round(n: number, d: number): number;
+
+	/** 🧮
+	 * Rounds a number up.
+	 * @param {number} n a number
+	 * @returns {number} rounded number
+	 * @example
+createCanvas(200, 100);
+background(200);
+textSize(32);
+text(ceil(PI), 10, 60);
+	 */
+	function ceil(n: number): number;
+
+	/** 🧮
+	 * Rounds a number down.
+	 * @param {number} n a number
+	 * @returns {number} rounded number
+	 * @example
+createCanvas(200, 100);
+background(200);
+textSize(32);
+text(floor(-PI), 10, 60);
+	 */
+	function floor(n: number): number;
+
+	/** 🧮
+	 * Returns the smallest value in a sequence of numbers.
+	 * @param {...number} args numbers to compare
+	 * @returns {number} minimum
+	 * @example
+function draw() {
+	background(min(mouseX, 100));
+}
+	 */
+	function min(...args: number[]): number;
+
+	/** 🧮
+	 * Returns the largest value in a sequence of numbers.
+	 * @param {...number} args numbers to compare
+	 * @returns {number} maximum
+	 * @example
+function draw() {
+	background(max(mouseX, 100));
+}
+	 */
+	function max(...args: number[]): number;
+
+	/** 🧮
+	 * Calculates the value of a base raised to a power.
+	 * 
+	 * For example, `pow(2, 3)` calculates 2 * 2 * 2 which is 8.
+	 * @param {number} base base
+	 * @param {number} exponent exponent
+	 * @returns {number} base raised to the power of exponent
+	 */
+	function pow(base: number, exponent: number): number;
+
+	/** 🧮
 	 * Calculates the square of a number.
 	 * @param {number} n number to square
 	 * @returns {number} square of the number
@@ -2511,11 +2647,25 @@ function draw() {
 	function sq(n: number): number;
 
 	/** 🧮
-	 * Calculates the fractional part of a number.
-	 * @param {number} n number whose fractional part is to be calculated
-	 * @returns {number} fractional part of the number
+	 * Calculates the square root of a number.
+	 * @param {number} n a number
+	 * @returns {number} square root of the number
 	 */
-	function fract(n: number): number;
+	function sqrt(n: number): number;
+
+	/** 🧮
+	 * Calculates the natural logarithm (base e) of a number.
+	 * @param {number} n a number
+	 * @returns {number} natural logarithm of the number
+	 */
+	function loge(n: number): number;
+
+	/** 🧮
+	 * Calculates e raised to the power of a number.
+	 * @param {number} exponent power to raise e to
+	 * @returns {number} e raised to the power of exponent
+	 */
+	function exp(exponent: number): number;
 
 	/** 🧮
 	 * Sets the seed for the random number generator.
@@ -2551,21 +2701,6 @@ function draw() {
 	 * @param {'perlin' | 'simplex' | 'blocky'} mode noise generation mode
 	 */
 	function noiseMode(mode: 'perlin' | 'simplex' | 'blocky'): void;
-
-	/** 🧮
-	 * Generates a noise value based on the x, y, and z inputs.
-	 * @param {number} [x] x-coordinate input
-	 * @param {number} [y] y-coordinate input
-	 * @param {number} [z] z-coordinate input
-	 * @returns {number} a noise value
-	 * @example
-function draw() {
-	background(200);
-	let n = noise(frameCount * 0.01);
-	square(100, 100, n * 200);
-}
-	 */
-	function noise(x?: number, y?: number, z?: number): number;
 
 	/** 🧮
 	 * Sets the seed value for noise generation.

@@ -108,6 +108,8 @@ struct Q5 {
 		$._frameA = frameA = Q5.device.createTexture({ size, format, usage });
 		$._frameB = frameB = Q5.device.createTexture({ size, format, usage });
 
+		$.canvas.texture = frameA;
+
 		$._frameShaderCode =
 			$._baseShaderCode +
 			/* wgsl */ `

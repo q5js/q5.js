@@ -52,6 +52,9 @@ Q5.renderers.c2d.shapes = ($) => {
 		w /= 2;
 		h /= 2;
 
+		w = Math.abs(w);
+		h = Math.abs(h);
+
 		if (!$._doFill && mode == $.PIE_OPEN) mode = $.CHORD_OPEN;
 
 		$.ctx.beginPath();
@@ -93,7 +96,7 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	function ellipse(x, y, w, h) {
 		$.ctx.beginPath();
-		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, TAU);
+		$.ctx.ellipse(x, y, Math.abs(w / 2), Math.abs(h / 2), 0, 0, TAU);
 		ink();
 	}
 
@@ -124,7 +127,7 @@ Q5.renderers.c2d.shapes = ($) => {
 				d *= $._da;
 			}
 			$.ctx.beginPath();
-			$.ctx.arc(x, y, d / 2, 0, TAU);
+			$.ctx.arc(x, y, Math.abs(d / 2), 0, TAU);
 			ink();
 		} else $.ellipse(x, y, d, d);
 	};

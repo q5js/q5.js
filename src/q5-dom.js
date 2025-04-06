@@ -280,16 +280,16 @@ Q5.modules.dom = ($, q) => {
 		};
 
 		if (src) {
-			el._loader = new Promise((resolve) => {
+			el.promise = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
 					el._load();
 					resolve(el);
 				});
 				el.src = src;
 			});
-			$._preloadPromises.push(el._loader);
+			$._preloadPromises.push(el.promise);
 
-			if (!$._usePreload) return el._loader;
+			if (!$._usePreload) return el.promise;
 		}
 		return el;
 	};
@@ -316,7 +316,7 @@ Q5.modules.dom = ($, q) => {
 			vid.pixels = g.pixels;
 			g.remove();
 		};
-		vid._loader = (async () => {
+		vid.promise = (async () => {
 			let stream;
 			try {
 				stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -331,9 +331,9 @@ Q5.modules.dom = ($, q) => {
 			if (cb) cb(vid);
 			return vid;
 		})();
-		$._preloadPromises.push(vid._loader);
+		$._preloadPromises.push(vid.promise);
 
-		if (!$._usePreload) return vid._loader;
+		if (!$._usePreload) return vid.promise;
 		return vid;
 	};
 

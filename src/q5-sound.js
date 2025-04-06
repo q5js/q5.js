@@ -6,28 +6,28 @@ Q5.modules.sound = ($, q) => {
 		let s = new Q5.Sound();
 		sounds.push(s);
 
-		s._loader = (async () => {
+		s.promise = (async () => {
 			let err;
 			try {
 				await s.load(url);
 			} catch (e) {
 				err = e;
 			}
-			delete s._loader;
+			delete s.promise;
 			if (err) throw err;
 			if (cb) cb(s);
 			return s;
 		})();
-		$._preloadPromises.push(s._loader);
+		$._preloadPromises.push(s.promise);
 
-		if (!$._usePreload) return s._loader;
+		if (!$._usePreload) return s.promise;
 		return s;
 	};
 
 	$.loadAudio = (url, cb) => {
 		let a = new Audio(url);
 		a.crossOrigin = 'Anonymous';
-		a._loader = new Promise((resolve, reject) => {
+		a.promise = new Promise((resolve, reject) => {
 			a.addEventListener('canplaythrough', () => {
 				if (!a.loaded) {
 					a.loaded = true;
@@ -38,9 +38,9 @@ Q5.modules.sound = ($, q) => {
 			a.addEventListener('suspend', resolve);
 			a.addEventListener('error', reject);
 		});
-		$._preloadPromises.push(a._loader);
+		$._preloadPromises.push(a.promise);
 
-		if (!$._usePreload) return a._loader;
+		if (!$._usePreload) return a.promise;
 		return a;
 	};
 

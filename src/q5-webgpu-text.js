@@ -13,7 +13,8 @@ struct FragParams {
 	@location(0) texCoord : vec2f,
 	@location(1) fillColor : vec4f,
 	@location(2) strokeColor : vec4f,
-	@location(3) strokeWeight : f32
+	@location(3) strokeWeight : f32,
+	@location(4) edge : f32
 }
 struct Char {
 	texOffset: vec2f,
@@ -27,7 +28,8 @@ struct Text {
 	matrixIndex: f32,
 	fillIndex: f32,
 	strokeIndex: f32,
-	strokeWeight: f32
+	strokeWeight: f32,
+	edge: f32
 }
 
 @group(0) @binding(0) var<uniform> q: Q5;
@@ -88,12 +90,13 @@ fn vertexMain(v : VertexParams) -> FragParams {
 	f.fillColor = colors[i32(text.fillIndex)];
 	f.strokeColor = colors[i32(text.strokeIndex)];
 	f.strokeWeight = text.strokeWeight;
+	f.edge = text.edge;
 	return f;
 }
 
 @fragment
 fn fragMain(f : FragParams) -> @location(0) vec4f {
-	let edge = 0.5;
+	let edge = f.edge;
 	let dist = calcDist(f.texCoord, edge);
 
 	if (f.strokeWeight == 0.0) {
@@ -305,26 +308,27 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 	$.loadFont = (url, cb) => {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
+		if (url == ext) return $._loadDefaultFont(url, cb);
 		if (ext != 'json') return $._g.loadFont(url, cb);
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
 		let f = { family: fontName };
-		f._loader = createFont(url, fontName, () => {
-			delete f._loader;
+		f.promise = createFont(url, fontName, () => {
+			delete f.promise;
 			if (cb) cb(f);
 		});
-		$._preloadPromises.push(f._loader);
+		$._preloadPromises.push(f.promise);
 
-		if (!$._usePreload) return f._loader;
+		if (!$._usePreload) return f.promise;
 		return f;
 	};
 
-	$._loadDefaultFont = (fontName) => {
+	$._loadDefaultFont = (fontName, cb) => {
 		fonts[fontName] = null;
-		if (navigator.onLine) {
-			$.loadFont(`https://q5js.org/fonts/${fontName}-msdf.json`);
-		} else {
-			$.loadFont(`/node_modules/q5/builtinFonts/${fontName}-msdf.json`);
+		let url = `https://q5js.org/fonts/${fontName}-msdf.json`;
+		if (!navigator.onLine) {
+			url = `/node_modules/q5/builtinFonts/${fontName}-msdf.json`;
 		}
+		return $.loadFont(url, cb);
 	};
 
 	$._textSize = 18;
@@ -340,7 +344,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;
-		else if (font === undefined) $._loadDefaultFont(fontName);
+		else if (font === undefined) return $._loadDefaultFont(fontName);
 	};
 
 	$.textSize = (size) => {
@@ -350,6 +354,33 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			leading = size * leadPercent;
 			leadDiff = leading - size;
 		}
+	};
+
+	let weights = {
+		thin: 100,
+		extralight: 200,
+		light: 300,
+		normal: 400,
+		regular: 400,
+		medium: 500,
+		semibold: 600,
+		bold: 700,
+		bolder: 800,
+		extrabold: 800,
+		black: 900,
+		heavy: 900
+	};
+
+	// ranges from 0.35 (black) to 0.65 (thin)
+	$._textEdge = 0.5;
+
+	$.textWeight = (weight) => {
+		if (!weight) return $._textWeight;
+		if (typeof weight == 'string') {
+			weight = weights[weight.toLowerCase().replace(/[ _-]/g, '')];
+			if (!weight) throw new Error(`Invalid font weight: ${weight}`);
+		}
+		$._textEdge = 0.6875 - weight * 0.000375;
 	};
 
 	$.textLeading = (lineHeight) => {
@@ -510,12 +541,12 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		txt[0] = x;
 		txt[1] = -y;
-		txt[2] = $._textSize / 44;
+		txt[2] = $._textSize / 42;
 		txt[3] = $._matrixIndex;
 		txt[4] = $._doFill && $._fillSet ? $._fill : 0;
 		txt[5] = $._stroke;
 		txt[6] = $._doStroke && $._strokeSet ? $._strokeWeight : 0;
-		txt[7] = 0; // padding
+		txt[7] = $._textEdge;
 
 		textStack.push(txt);
 		$._drawStack.push($._textPL, measurements.printedCharCount, $._font.index);

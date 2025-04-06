@@ -12,33 +12,32 @@ Q5.renderers.c2d.text = ($, q) => {
 		fontMod = false,
 		styleHash = 0,
 		styleHashes = [],
-		useCache = false,
 		genTextImage = false,
-		cacheSize = 0,
-		cacheMax = 12000;
+		cacheSize = 0;
 
 	let cache = ($._textCache = {});
+	$._textCacheMaxSize = 12000;
 
 	$.loadFont = (url, cb) => {
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
 
 		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
-		f._loader = (async () => {
+		f.promise = (async () => {
 			let err;
 			try {
 				await f.load();
 			} catch (e) {
 				err = e;
 			}
-			delete f._loader;
+			delete f.promise;
 			if (err) throw err;
 			if (cb) cb(f);
 			return f;
 		})();
-		$._preloadPromises.push(f._loader);
+		$._preloadPromises.push(f.promise);
 		$.textFont(name);
-		if (!$._usePreload) return f._loader;
+		if (!$._usePreload) return f.promise;
 		return f;
 	};
 
@@ -124,12 +123,6 @@ Q5.renderers.c2d.text = ($, q) => {
 		styleHash = hash >>> 0;
 	};
 
-	$.textCache = (enable, maxSize) => {
-		if (maxSize) cacheMax = maxSize;
-		if (enable !== undefined) useCache = enable;
-		return useCache;
-	};
-
 	$.createTextImage = (str, w, h) => {
 		genTextImage = true;
 		let img = $.text(str, 0, 0, w, h);
@@ -151,7 +144,7 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		if (fontMod) updateFont();
 
-		if (useCache || genTextImage) {
+		if (genTextImage) {
 			if (styleHash == -1) updateStyleHash();
 
 			img = cache[str];
@@ -159,8 +152,7 @@ Q5.renderers.c2d.text = ($, q) => {
 
 			if (img) {
 				if (img._fill == $._fill && img._stroke == $._stroke && img._strokeWeight == $._strokeWeight) {
-					if (genTextImage) return img;
-					return $.textImage(img, x, y);
+					return img;
 				} else img.clear();
 			}
 		}
@@ -188,7 +180,7 @@ Q5.renderers.c2d.text = ($, q) => {
 			lines = wrapped;
 		}
 
-		if (!useCache && !genTextImage) {
+		if (!genTextImage) {
 			tX = x;
 			tY = y;
 		} else {
@@ -249,12 +241,12 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 
-		if (useCache || genTextImage) {
+		if (genTextImage) {
 			styleHashes.push(styleHash);
 			(cache[str] ??= {})[styleHash] = img;
 
 			cacheSize++;
-			if (cacheSize > cacheMax) {
+			if (cacheSize > $._textCacheMaxSize) {
 				let half = Math.ceil(cacheSize / 2);
 				let hashes = styleHashes.splice(0, half);
 				for (let s in cache) {
@@ -264,8 +256,7 @@ Q5.renderers.c2d.text = ($, q) => {
 				cacheSize -= half;
 			}
 
-			if (genTextImage) return img;
-			$.textImage(img, x, y);
+			return img;
 		}
 	};
 

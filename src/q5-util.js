@@ -1,7 +1,7 @@
 Q5.modules.util = ($, q) => {
 	$._loadFile = (url, cb, type) => {
 		let ret = {};
-		ret._loader = new Promise((resolve, reject) => {
+		ret.promise = new Promise((resolve, reject) => {
 			fetch(url)
 				.then((res) => {
 					if (!res.ok) {
@@ -15,7 +15,7 @@ Q5.modules.util = ($, q) => {
 					if (type == 'csv') f = $.CSV.parse(f);
 					if (typeof f == 'string') ret.text = f;
 					else Object.assign(ret, f);
-					delete ret._loader;
+					delete ret.promise;
 					if (cb) cb(f);
 					resolve(f);
 				});
@@ -27,14 +27,15 @@ Q5.modules.util = ($, q) => {
 	$.loadJSON = (url, cb) => $._loadFile(url, cb, 'json');
 	$.loadCSV = (url, cb) => $._loadFile(url, cb, 'csv');
 
-	const imgRegex = /(jpe?g|png|gif|webp|avif|svg)/,
-		fontRegex = /(ttf|otf|woff2?|eot|json)/,
-		audioRegex = /(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/;
+	const imgRegex = /(jpe?g|png|gif|webp|avif|svg)/i,
+		fontRegex = /(ttf|otf|woff2?|eot|json)/i,
+		fontCategoryRegex = /(serif|sans-serif|monospace|cursive|fantasy)/i,
+		audioRegex = /(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/i;
 
 	$.load = function (...urls) {
 		if (Array.isArray(urls[0])) urls = urls[0];
 
-		let loaders = [];
+		let promises = [];
 
 		for (let url of urls) {
 			let ext = url.split('.').pop().toLowerCase();
@@ -46,18 +47,18 @@ Q5.modules.util = ($, q) => {
 				obj = $.loadCSV(url);
 			} else if (imgRegex.test(ext)) {
 				obj = $.loadImage(url);
-			} else if (fontRegex.test(ext)) {
+			} else if (fontRegex.test(ext) || fontCategoryRegex.test(url)) {
 				obj = $.loadFont(url);
 			} else if (audioRegex.test(ext)) {
 				obj = $.loadSound(url);
 			} else {
 				obj = $.loadText(url);
 			}
-			loaders.push(obj._loader);
+			promises.push(obj.promise);
 		}
 
-		if (urls.length == 1) return loaders[0];
-		return Promise.all(loaders);
+		if (urls.length == 1) return promises[0];
+		return Promise.all(promises);
 	};
 
 	async function saveFile(data, name, ext) {

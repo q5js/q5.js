@@ -57,7 +57,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		let img = new window.Image();
 		img.crossOrigin = 'Anonymous';
 
-		g._loader = new Promise((resolve, reject) => {
+		g.promise = new Promise((resolve, reject) => {
 			img.onload = () => {
 				img._pixelDensity = pd;
 				g.defaultWidth = img.width * $._defaultImageScale;
@@ -68,16 +68,16 @@ Q5.renderers.c2d.image = ($, q) => {
 
 				g.ctx.drawImage(img, 0, 0);
 				if (cb) cb(g);
-				delete g._loader;
+				delete g.promise;
 				resolve(g);
 			};
 			img.onerror = reject;
 		});
-		$._preloadPromises.push(g._loader);
+		$._preloadPromises.push(g.promise);
 
 		g.src = img.src = url;
 
-		if (!$._usePreload) return g._loader;
+		if (!$._usePreload) return g.promise;
 		return g;
 	};
 
