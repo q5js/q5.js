@@ -210,16 +210,25 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		createMainView();
 	};
 
+	let usingRGB = true,
+		colorFormat = 1;
+
+	let cm = $.colorMode;
+	$.colorMode = function () {
+		cm(...arguments);
+		usingRGB = $._colorMode == 'rgb';
+		colorFormat = $._colorFormat;
+	};
+
 	let addColor = (r, g, b, a) => {
-		let cf = $._colorFormat;
-		if (typeof r == 'string' || $._colorMode != 'rgb') {
+		if (typeof r === 'string' || usingRGB === false) {
 			r = $.color(r, g, b, a);
-		} else if (b == undefined) {
+		} else if (b === undefined) {
 			// grayscale mode `fill(1, 0.5)`
-			a = g ?? cf;
+			a = g ?? colorFormat;
 			g = b = r;
 		}
-		a ??= cf;
+		a ??= colorFormat;
 		if (r._q5Color) {
 			let c = r;
 			if (c.r != undefined) ({ r, g, b, a } = c);
@@ -232,7 +241,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			}
 		}
 
-		if (cf == 255) {
+		if (colorFormat === 255) {
 			r /= 255;
 			g /= 255;
 			b /= 255;

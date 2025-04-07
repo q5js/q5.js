@@ -183,9 +183,11 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (!genTextImage) {
 			tX = x;
 			tY = y;
+			if ($._textBaseline == 'middle') tY -= leading * (lines.length - 1) * 0.5;
+			else if ($._textBaseline == 'bottom') tY -= leading * (lines.length - 1);
 		} else {
 			tX = 0;
-			tY = leading * lines.length;
+			tY = leading;
 
 			if (!img) {
 				let ogBaseline = $.ctx.textBaseline;
@@ -197,15 +199,24 @@ Q5.renderers.c2d.text = ($, q) => {
 
 				$.ctx.textBaseline = ogBaseline;
 
-				img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(tY + descent), {
+				let maxWidth = 0;
+				for (let line of lines) {
+					let lineWidth = ctx.measureText(line).width;
+					if (lineWidth > maxWidth) maxWidth = lineWidth;
+				}
+
+				let imgW = Math.ceil(maxWidth),
+					imgH = Math.ceil(leading * lines.length + descent);
+
+				img = $.createImage.call($, imgW, imgH, {
 					pixelDensity: $._pixelDensity
 				});
 
 				img._ascent = ascent;
 				img._descent = descent;
 				img._top = descent + leadDiff;
-				img._middle = img._top + ascent * 0.5;
-				img._bottom = img._top + ascent;
+				img._middle = img._top + ascent * 0.5 + leading * (lines.length - 1) * 0.5;
+				img._bottom = img._top + ascent + leading * (lines.length - 1);
 				img._leading = leading;
 			} else {
 				img.modified = true;
@@ -256,6 +267,7 @@ Q5.renderers.c2d.text = ($, q) => {
 				cacheSize -= half;
 			}
 
+			$.save(img);
 			return img;
 		}
 	};

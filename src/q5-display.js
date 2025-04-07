@@ -3,10 +3,8 @@ Q5.modules.display = ($) => {
 
 	let c = $.canvas;
 
-	$.CENTERED = 'centered';
-	$.FULLSCREEN = 'fullscreen';
 	$.MAXED = 'maxed';
-
+	$.SMOOTH = 'smooth';
 	$.PIXELATED = 'pixelated';
 
 	if (Q5._instanceCount == 0 && !Q5._server) {
@@ -30,15 +28,13 @@ html, body {
 	-webkit-font-smoothing: none;
 }
 .q5-centered,
-.q5-maxed,
-.q5-fullscreen {
+.q5-maxed {
   display: flex;
 	align-items: center;
 	justify-content: center;
 }
 main.q5-centered,
-main.q5-maxed,
-.q5-fullscreen {
+main.q5-maxed {
 	height: 100vh;
 }
 main {
@@ -59,8 +55,8 @@ main {
 			if ($.noSmooth) $.noSmooth();
 			if ($.textFont) $.textFont('monospace');
 		}
-		if (c.displayMode == 'default' || c.displayMode == 'normal') {
-			p.classList.remove('q5-centered', 'q5-maxed', 'q5-fullscreen');
+		if (c.displayMode == 'normal') {
+			p.classList.remove('q5-centered', 'q5-maxed');
 			s.width = c.w * c.displayScale + 'px';
 			s.height = c.h * c.displayScale + 'px';
 		} else {
@@ -88,6 +84,7 @@ main {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
+		if (displayMode == 'fullscreen') displayMode = 'maxed';
 		if (displayMode == 'center') displayMode = 'centered';
 		Object.assign(c, { displayMode, renderQuality, displayScale });
 		if ($.ctx) $.pushStyles();
@@ -96,7 +93,7 @@ main {
 	};
 
 	$.fullscreen = (v) => {
-		if (v === undefined) return document.fullscreenElement;
+		if (v == undefined) return document.fullscreenElement;
 		if (v) document.body.requestFullscreen();
 		else document.body.exitFullscreen();
 	};

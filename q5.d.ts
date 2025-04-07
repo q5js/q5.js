@@ -841,13 +841,6 @@ square(0, 0, 50);
 	function displayDensity(): number;
 
 	/** ⬜️
-	 * Enables or disables fullscreen mode.
-	 * @param {boolean} [v] boolean indicating whether to enable or disable fullscreen mode
-	 * @returns {void | boolean} true if fullscreen mode is enabled, false otherwise
-	 */
-	function fullscreen(v?: boolean): void | boolean;
-
-	/** ⬜️
 	 * Any position coordinates or dimensions you use will be scaled based
 	 * on the unit provided to this function.
 	 * 
@@ -1178,22 +1171,50 @@ background(255, 0, 0);
 
 	/** 💻
 	 * Customize how your canvas is presented.
-	 * @param {string} mode
-	 *   - "normal": (default) canvas is not repositioned
-	 *   - "centered": canvas is moved to the center of its parent
-	 *   - "maxed": canvas will be scaled to fill the parent element, with letterboxing if necessary to preserve its aspect ratio
-	 * @param {string} renderQuality
-	 *   - "smooth": (default) smooth upscaling if the canvas is scaled
-	 *   - "pixelated": pixels rendered as sharp squares
+	 * @param {string} mode Display modes:
+	 *   - NORMAL: (default) canvas is not repositioned
+	 *   - CENTER: canvas is moved to the center of its parent
+	 *   - MAXED: canvas will be scaled to fill the parent element, with letterboxing if necessary to preserve its aspect ratio
+	 * @param {string} renderQuality Render quality settings:
+	 *   - SMOOTH: (default) smooth upscaling if the canvas is scaled
+	 *   - PIXELATED: pixels rendered as sharp squares
 	 * @param {number} scale can also be given as a string (for example "x2")
 	 * @example
 createCanvas(50, 25);
 
-displayMode('centered', 'pixelated', 4);
+displayMode(CENTER, PIXELATED, 4);
 
 circle(25, 12.5, 16);
 	 */
 	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
+
+	/** 💻
+	 * Enables or disables fullscreen mode.
+	 * @param {boolean} [v] boolean indicating whether to enable or disable fullscreen mode
+	 */
+	function fullscreen(v?: boolean): void;
+
+	/** 💻
+	 * A `displayMode` setting.
+	 * 
+	 * The canvas will be scaled to fill the parent element,
+	 * with letterboxing if necessary to preserve its aspect ratio.
+	 */
+	const MAXED: 'maxed';
+
+	/** 💻
+	 * A `displayMode` render quality.
+	 * 
+	 * Smooth upscaling is used if the canvas is scaled.
+	 */
+	const SMOOTH: 'smooth';
+
+	/** 💻
+	 * A `displayMode` render quality.
+	 * 
+	 * Pixels are rendered as sharp squares if the canvas is scaled.
+	 */
+	const PIXELATED: 'pixelated';
 
 	// 🧑‍🎨 shapes
 
@@ -2452,11 +2473,12 @@ function draw() {
 let q = await Q5.WebGPU();
 
 q.draw = () => {
+	noStroke();
 	let t = millis() * 0.002;
 	for (let x = -100; x < 100; x += 5) {
 		for (let y = -100; y < 100; y += 5) {
 			fill(noise(t, (mouseX + x) * .05, y * .05));
-			square(x, y, 5);
+			square(x, y, 4);
 		}
 	}
 };
@@ -2466,11 +2488,10 @@ let q = await Q5.WebGPU();
 q.draw = () => {
 	let zoom = mouseY / 2000;
 	let t = millis() * 0.002;
-	noStroke();
-	for (let x = -100; x < 100; x++) {
-		for (let y = -100; y < 100; y++) {
-			fill(noise(t, x * zoom, y * zoom));
-			square(x, y, 1);
+	for (let x = -50; x < 50; x++) {
+		for (let y = -50; y < 50; y++) {
+			stroke(noise(t, x * zoom, y * zoom));
+			point(x, y, 1);
 		}
 	}
 };

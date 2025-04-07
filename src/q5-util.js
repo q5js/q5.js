@@ -65,7 +65,11 @@ Q5.modules.util = ($, q) => {
 		name = name || 'untitled';
 		ext = ext || 'png';
 		if (imgRegex.test(ext)) {
-			data = await $._saveCanvas(data, ext);
+			if ($.canvas?.renderer == 'webgpu' && data.canvas.renderer == 'c2d') {
+				data = await $._g._saveCanvas(data, ext);
+			} else {
+				data = await $._saveCanvas(data, ext);
+			}
 		} else {
 			let type = 'text/plain';
 			if (ext == 'json') {

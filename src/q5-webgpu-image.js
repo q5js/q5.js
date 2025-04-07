@@ -172,8 +172,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$._textureBindGroups = [];
 
-	$._saveCanvas = async (data, ext) => {
-		let texture = data.texture,
+	$._saveCanvas = async (img, ext) => {
+		if (img._graphics && img._drawStack?.length) img._completeFrame();
+
+		let texture = img.texture,
 			w = texture.width,
 			h = texture.height,
 			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
@@ -194,7 +196,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		await buffer.mapAsync(GPUMapMode.READ);
 
 		let pad = new Uint8Array(buffer.getMappedRange());
-		data = new Uint8Array(w * h * 4); // unpadded data
+		let data = new Uint8Array(w * h * 4); // unpadded data
 
 		// Remove padding from each row and swap BGR to RGB
 		for (let y = 0; y < h; y++) {
@@ -289,7 +291,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let g = new Q5Image(...arguments);
 		if (w > 1 && h > 1) {
 			$._addTexture(g);
-			g.modified = true;
+			img.modified = true;
 		}
 		return g;
 	};
@@ -312,6 +314,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			$._addTexture(g, g._frameA);
 			$._addTexture(g, g._frameB);
 			g._beginRender();
+		} else {
+			g.modified = true;
 		}
 		return g;
 	};
@@ -347,17 +351,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			h = cnv.height,
 			pd = img._pixelDensity || 1;
 
-		if (img._graphics) {
-			let g = img;
-			if (g.drawStack.length) {
-				g._render();
-				g._finishRender();
-				g.textureIndex += g.frameCount % 2 == 0 ? -1 : 1;
-				g.resetMatrix();
-				g._beginRender();
-				g.frameCount++;
-			}
-		}
+		if (img._graphics && img._drawStack?.length) img._completeFrame();
 
 		if (img.modified) {
 			Q5.device.queue.copyExternalImageToTexture(
@@ -412,6 +406,15 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			if (img.flipped) $.scale(-1, 1);
 		}
+	};
+
+	$._completeFrame = () => {
+		$._render();
+		$._finishRender();
+		$.textureIndex += $.frameCount % 2 == 0 ? -1 : 1;
+		$.resetMatrix();
+		$._beginRender();
+		$.frameCount++;
 	};
 
 	$._hooks.preRender.push(() => {

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.25
+ * @version 2.21
  * @author quinton-ashley, Tezumie, and LingDong-
  * @license LGPL-3.0
  * @class Q5
@@ -10,12 +10,12 @@ function Q5(scope, parent, renderer) {
 	$._q5 = true;
 	$._parent = parent;
 	if (renderer == 'webgpu-fallback') {
+		$._webgpuFallback = true;
 		$._renderer = 'c2d';
-		$._webgpu = $._webgpuFallback = true;
 	} else {
 		$._renderer = renderer || Q5.render;
-		$['_' + $._renderer] = true;
 	}
+	$._preloadCount = 0;
 
 	let autoLoaded = scope == 'auto';
 	scope ??= 'global';
@@ -41,8 +41,7 @@ function Q5(scope, parent, renderer) {
 
 	$.canvas = $.ctx = $.drawingContext = null;
 	$.pixels = [];
-	let looper = null,
-		useRAF = true;
+	let looper = null;
 
 	$.frameCount = 0;
 	$.deltaTime = 16;
@@ -71,18 +70,9 @@ function Q5(scope, parent, renderer) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
-	$._preloadPromises = [];
-	$._usePreload = true;
-	$.usePreloadSystem = (v) => ($._usePreload = v);
-	$.isPreloadSupported = () => $._usePreload;
-
-	const resolvers = [];
-	$._incrementPreload = () => {
-		$._preloadPromises.push(new Promise((resolve) => resolvers.push(resolve)));
-	};
-	$._decrementPreload = () => {
-		if (resolvers.length) resolvers.pop()();
-	};
+	$._incrementPreload = () => q._preloadCount++;
+	$._decrementPreload = () => q._preloadCount--;
+	$.disablePreloadSystem = () => ($._disablePreload = true);
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
@@ -93,21 +83,13 @@ function Q5(scope, parent, renderer) {
 			$._didResize = false;
 		}
 
-		if ($._loop) {
-			if (useRAF) looper = raf($._draw);
-			else {
-				let nextTS = ts + $._targetFrameDuration;
-				let frameDelay = nextTS - performance.now();
-				while (frameDelay < 0) frameDelay += $._targetFrameDuration;
-				looper = setTimeout(() => $._draw(nextTS), frameDelay);
-			}
-		} else if ($.frameCount && !$._redraw) return;
+		if ($._loop) looper = raf($._draw);
+		else if ($.frameCount && !$._redraw) return;
 
-		if ($.frameCount && useRAF && !$._redraw) {
-			let timeSinceLast = ts - $._lastFrameTime;
-			if (timeSinceLast < $._targetFrameDuration - 4) return;
+		if (looper && $.frameCount) {
+			let time_since_last = ts - $._lastFrameTime;
+			if (time_since_last < $._targetFrameDuration - 4) return;
 		}
-
 		q.deltaTime = ts - $._lastFrameTime;
 		$._frameRate = 1000 / $.deltaTime;
 		q.frameCount++;
@@ -118,8 +100,8 @@ function Q5(scope, parent, renderer) {
 		try {
 			$.draw();
 		} catch (e) {
+			if (!Q5.disableFriendlyErrors && $._askAI) $._askAI(e);
 			if (!Q5.errorTolerant) $.noLoop();
-			if ($._fes) $._fes(e);
 			throw e;
 		}
 		for (let m of Q5.methods.post) m.call($);
@@ -135,10 +117,6 @@ function Q5(scope, parent, renderer) {
 	};
 	$.noLoop = () => {
 		$._loop = false;
-		if (looper != null) {
-			if (useRAF) cancelAnimationFrame(looper);
-			else clearTimeout(looper);
-		}
 		looper = null;
 	};
 	$.loop = () => {
@@ -159,20 +137,9 @@ function Q5(scope, parent, renderer) {
 	};
 
 	$.frameRate = (hz) => {
-		if (hz != $._targetFrameRate) {
+		if (hz) {
 			$._targetFrameRate = hz;
 			$._targetFrameDuration = 1000 / hz;
-
-			if ($._loop && looper != null) {
-				if (useRAF) cancelAnimationFrame(looper);
-				else clearTimeout(looper);
-				looper = null;
-			}
-			useRAF = hz <= 60;
-			if ($._setupDone) {
-				if (useRAF) looper = raf($._draw);
-				else looper = setTimeout(() => $._draw(), $._targetFrameDuration);
-			}
 		}
 		return $._frameRate;
 	};
@@ -205,12 +172,12 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
+	if ($._webgpuFallback) $.colorMode('rgb', 1);
+
 	if ($._graphics) return;
 
 	if (scope == 'global') {
-		let tmp = Object.assign({}, $);
-		delete tmp.Color;
-		Object.assign(Q5, tmp);
+		Object.assign(Q5, $);
 		delete Q5.Q5;
 	}
 
@@ -222,22 +189,10 @@ function Q5(scope, parent, renderer) {
 		if (n[0] != '_' && typeof $[n] == 'function') $[n] = fn.bind($);
 	}
 
-	for (let [n, fn] of Object.entries(Q5.preloadMethods)) {
-		$[n] = function () {
-			$._incrementPreload();
-			return fn.apply($, arguments);
-			// fn is responsible for calling $._decrementPreload
-		};
-	}
-
 	if (scope == 'global') {
 		let props = Object.getOwnPropertyNames($);
 		for (let p of props) {
 			if (p[0] != '_') globalScope[p] = $[p];
-		}
-		// to support p5.sound
-		for (let p of ['_incrementPreload', '_decrementPreload']) {
-			globalScope[p] = $[p];
 		}
 	}
 
@@ -255,7 +210,7 @@ function Q5(scope, parent, renderer) {
 		};
 
 	let t = globalScope || $;
-	$._isTouchAware = t.touchStarted || t.touchMoved || t.touchEnded;
+	$._isTouchAware = t.touchStarted || t.touchMoved || t.mouseReleased;
 
 	if ($._isGlobal) {
 		$.preload = t.preload;
@@ -292,7 +247,7 @@ function Q5(scope, parent, renderer) {
 				try {
 					return t[k](event);
 				} catch (e) {
-					if ($._fes) $._fes(e);
+					if ($._askAI) $._askAI(e);
 					throw e;
 				}
 			};
@@ -301,8 +256,7 @@ function Q5(scope, parent, renderer) {
 
 	async function _setup() {
 		$._startDone = true;
-		await Promise.all($._preloadPromises);
-		if ($._g) await Promise.all($._g._preloadPromises);
+		if ($._preloadCount > 0) return raf(_setup);
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
@@ -316,7 +270,7 @@ function Q5(scope, parent, renderer) {
 			$.preload();
 			if (!$._startDone) _setup();
 		} catch (e) {
-			if ($._fes) $._fes(e);
+			if ($._askAI) $._askAI(e);
 			throw e;
 		}
 	}
@@ -346,9 +300,7 @@ Q5.methods = {
 	remove: []
 };
 Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
-
-Q5.preloadMethods = {};
-Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
+Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.prototype[n] = fn[n]);
 
 if (Q5._server) global.p5 ??= global.Q5 = Q5;
 
@@ -362,7 +314,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.25';
+Q5.version = Q5.VERSION = '2.21';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -423,7 +375,7 @@ Q5.modules.canvas = ($, q) => {
 			w = null;
 		}
 		options ??= arguments[3];
-		if (typeof options == 'string') options = { renderer: options };
+
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (typeof options == 'object') Object.assign(opt, options);
 
@@ -455,6 +407,7 @@ Q5.modules.canvas = ($, q) => {
 		if ($._hooks) {
 			for (let m of $._hooks.postCanvas) m();
 		}
+		if ($._beginRender) $._beginRender();
 
 		if ($._addEventMethods) $._addEventMethods(c);
 
@@ -462,7 +415,6 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$.createGraphics = function (w, h, opt = {}) {
-		if (typeof opt == 'string') opt = { renderer: opt };
 		let g = new Q5('graphics', undefined, opt.renderer || ($._webgpuFallback ? 'webgpu-fallback' : $._renderer));
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
@@ -562,7 +514,7 @@ Q5.modules.canvas = ($, q) => {
 	$.pixelDensity = (v) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
-		$._resizeCanvas(c.w, c.h);
+		$._setCanvasSize(c.w, c.h);
 		return v;
 	};
 
@@ -588,9 +540,6 @@ Q5.modules.canvas = ($, q) => {
 		'_shadowOffsetY',
 		'_shadowBlur',
 		'_tint',
-		'_colorMode',
-		'_colorFormat',
-		'Color',
 		'_imageMode',
 		'_rectMode',
 		'_ellipseMode',
@@ -608,7 +557,6 @@ Q5.modules.canvas = ($, q) => {
 	$.popStyles = () => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
-		q.Color = styles.Color;
 	};
 
 	if (window && $._scope != 'graphics') {
@@ -640,9 +588,6 @@ Q5.SQUARE = 'butt';
 Q5.PROJECT = 'square';
 Q5.MITER = 'miter';
 Q5.BEVEL = 'bevel';
-Q5.NONE = 'none';
-
-Q5.SIMPLE = 'simple';
 
 Q5.CHORD_OPEN = 0;
 Q5.PIE_OPEN = 1;
@@ -695,7 +640,6 @@ Q5.HUE_ROTATE = 13;
 
 Q5.C2D = Q5.P2D = Q5.P2DHDR = 'c2d';
 Q5.WEBGL = 'webgl';
-Q5.WEBGPU = 'webgpu';
 
 Q5.canvasOptions = {
 	alpha: false,
@@ -710,7 +654,9 @@ Q5.renderers.c2d = {};
 Q5.renderers.c2d.canvas = ($, q) => {
 	let c = $.canvas;
 
-	if ($.colorMode) $.colorMode('rgb', 255);
+	if ($.colorMode) {
+		$.colorMode(Q5.canvasOptions.colorSpace != 'srgb' ? 'rgb' : 'srgb', 255);
+	}
 
 	$._createCanvas = function (w, h, options) {
 		if (!c) {
@@ -742,19 +688,6 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	if ($._scope == 'image') return;
 
-	$.background = function (c) {
-		$.ctx.save();
-		$.ctx.resetTransform();
-		$.ctx.globalAlpha = 1;
-		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
-		else {
-			if (Q5.Color && !c._q5Color) c = $.color(...arguments);
-			$.ctx.fillStyle = c.toString();
-			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
-		}
-		$.ctx.restore();
-	};
-
 	$._resizeCanvas = (w, h) => {
 		let t = {};
 		for (let prop in $.ctx) {
@@ -782,8 +715,9 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.fill = function (c) {
 		$._doFill = $._fillSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
-				c = $.color(...arguments);
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 			}
 			if (c.a <= 0) return ($._doFill = false);
 		}
@@ -793,8 +727,9 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.stroke = function (c) {
 		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
-				c = $.color(...arguments);
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 			}
 			if (c.a <= 0) return ($._doStroke = false);
 		}
@@ -816,10 +751,10 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.shadow = function (c) {
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
-				c = $.color(...arguments);
+			if (!c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
 			}
-			if (c.a <= 0) return ($._doShadow = false);
 		}
 		$.ctx.shadowColor = $._shadow = c.toString();
 		$._doShadow = true;
@@ -872,7 +807,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		if ($.ctx) {
 			$.ctx.resetTransform();
 			$.scale($._pixelDensity);
-			if ($._webgpu) $.translate($.halfWidth, $.halfHeight);
+			if ($._webgpuFallback) $.translate($.canvas.hw, $.canvas.hh);
 		}
 	};
 
@@ -909,6 +844,8 @@ Q5.renderers.c2d.shapes = ($) => {
 	$._fillSet = false;
 	$._ellipseMode = Q5.CENTER;
 	$._rectMode = Q5.CORNER;
+	$._curveDetail = 20;
+	$._curveAlpha = 0.0;
 
 	let firstVertex = true;
 	let curveBuff = [];
@@ -925,9 +862,27 @@ Q5.renderers.c2d.shapes = ($) => {
 	$.strokeJoin = (x) => ($.ctx.lineJoin = x);
 	$.ellipseMode = (x) => ($._ellipseMode = x);
 	$.rectMode = (x) => ($._rectMode = x);
-	$.curveDetail = () => {};
+	$.curveDetail = (x) => ($._curveDetail = x);
+	$.curveAlpha = (x) => ($._curveAlpha = x);
+	$.curveTightness = (x) => ($._curveAlpha = x);
 
 	// DRAWING
+
+	$.background = function (c) {
+		$.ctx.save();
+		$.ctx.resetTransform();
+		$.ctx.globalAlpha = 1;
+		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
+		else {
+			if (Q5.Color && !c._q5Color) {
+				if (typeof c != 'string') c = $.color(...arguments);
+				else if ($._namedColors[c]) c = $.color(...$._namedColors[c]);
+			}
+			$.ctx.fillStyle = c.toString();
+			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
+		}
+		$.ctx.restore();
+	};
 
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
@@ -955,9 +910,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 		w /= 2;
 		h /= 2;
-
-		w = Math.abs(w);
-		h = Math.abs(h);
 
 		if (!$._doFill && mode == $.PIE_OPEN) mode = $.CHORD_OPEN;
 
@@ -1000,7 +952,7 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	function ellipse(x, y, w, h) {
 		$.ctx.beginPath();
-		$.ctx.ellipse(x, y, Math.abs(w / 2), Math.abs(h / 2), 0, 0, TAU);
+		$.ctx.ellipse(x, y, w / 2, h / 2, 0, 0, TAU);
 		ink();
 	}
 
@@ -1031,7 +983,7 @@ Q5.renderers.c2d.shapes = ($) => {
 				d *= $._da;
 			}
 			$.ctx.beginPath();
-			$.ctx.arc(x, y, Math.abs(d / 2), 0, TAU);
+			$.ctx.arc(x, y, d / 2, 0, TAU);
 			ink();
 		} else $.ellipse(x, y, d, d);
 	};
@@ -1262,15 +1214,11 @@ Q5.renderers.c2d.shapes = ($) => {
 		);
 	};
 
-	$.erase = function (fillAlpha, strokeAlpha) {
-		if ($._colorFormat == 255) {
-			if (fillAlpha) fillAlpha /= 255;
-			if (strokeAlpha) strokeAlpha /= 255;
-		}
+	$.erase = function (fillAlpha = 255, strokeAlpha = 255) {
 		$.ctx.save();
 		$.ctx.globalCompositeOperation = 'destination-out';
-		$.ctx.fillStyle = `rgb(0 0 0 / ${fillAlpha || 1})`;
-		$.ctx.strokeStyle = `rgb(0 0 0 / ${strokeAlpha || 1})`;
+		$.ctx.fillStyle = `rgba(0, 0, 0, ${fillAlpha / 255})`;
+		$.ctx.strokeStyle = `rgba(0, 0, 0, ${strokeAlpha / 255})`;
 	};
 
 	$.noErase = function () {
@@ -1335,6 +1283,7 @@ Q5.renderers.c2d.image = ($, q) => {
 				`q5 doesn't support GIFs. Use a video or p5play animation instead. https://github.com/q5js/q5.js/issues/84`
 			);
 		}
+		q._preloadCount++;
 		let last = [...arguments].at(-1);
 		if (typeof last == 'object') {
 			opt = last;
@@ -1347,7 +1296,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		let img = new window.Image();
 		img.crossOrigin = 'Anonymous';
 
-		g.promise = new Promise((resolve, reject) => {
+		g._loader = new Promise((resolve, reject) => {
 			img.onload = () => {
 				img._pixelDensity = pd;
 				g.defaultWidth = img.width * $._defaultImageScale;
@@ -1357,17 +1306,20 @@ Q5.renderers.c2d.image = ($, q) => {
 				g._setImageSize(Math.ceil(g.naturalWidth / pd), Math.ceil(g.naturalHeight / pd));
 
 				g.ctx.drawImage(img, 0, 0);
+				q._preloadCount--;
 				if (cb) cb(g);
-				delete g.promise;
+				delete g._loader;
 				resolve(g);
 			};
-			img.onerror = reject;
+			img.onerror = (e) => {
+				q._preloadCount--;
+				reject(e);
+			};
 		});
-		$._preloadPromises.push(g.promise);
 
-		g.src = img.src = url;
+		img.src = url;
 
-		if (!$._usePreload) return g.promise;
+		if ($._disablePreload) return g._loader;
 		return g;
 	};
 
@@ -1800,36 +1752,36 @@ Q5.renderers.c2d.text = ($, q) => {
 		leading = 15,
 		leadDiff = 3,
 		emphasis = 'normal',
-		weight = 'normal',
 		fontMod = false,
 		styleHash = 0,
 		styleHashes = [],
+		useCache = false,
 		genTextImage = false,
-		cacheSize = 0;
+		cacheSize = 0,
+		cacheMax = 12000;
 
 	let cache = ($._textCache = {});
-	$._textCacheMaxSize = 12000;
 
 	$.loadFont = (url, cb) => {
+		q._preloadCount++;
 		let name = url.split('/').pop().split('.')[0].replace(' ', '');
-
 		let f = new FontFace(name, `url(${url})`);
 		document.fonts.add(f);
-		f.promise = (async () => {
+		f._loader = (async () => {
 			let err;
 			try {
 				await f.load();
 			} catch (e) {
 				err = e;
 			}
-			delete f.promise;
+			q._preloadCount--;
+			delete f._loader;
 			if (err) throw err;
 			if (cb) cb(f);
 			return f;
 		})();
-		$._preloadPromises.push(f.promise);
 		$.textFont(name);
-		if (!$._usePreload) return f.promise;
+		if ($._disablePreload) return f._loader;
 		return f;
 	};
 
@@ -1842,7 +1794,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textSize = (x) => {
-		if (x == undefined) return $._textSize;
+		if (x == undefined || x == $._textSize) return $._textSize;
 		if ($._da) x *= $._da;
 		$._textSize = x;
 		fontMod = true;
@@ -1854,15 +1806,8 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textStyle = (x) => {
-		if (!x) return emphasis;
+		if (!x || x == emphasis) return emphasis;
 		emphasis = x;
-		fontMod = true;
-		styleHash = -1;
-	};
-
-	$.textWeight = (x) => {
-		if (!x) return weight;
-		weight = x;
 		fontMod = true;
 		styleHash = -1;
 	};
@@ -1885,7 +1830,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	const updateFont = () => {
-		$.ctx.font = `${emphasis} ${weight} ${$._textSize}px ${font}`;
+		$.ctx.font = `${emphasis} ${$._textSize}px ${font}`;
 		fontMod = false;
 	};
 
@@ -1915,9 +1860,15 @@ Q5.renderers.c2d.text = ($, q) => {
 		styleHash = hash >>> 0;
 	};
 
+	$.textCache = (enable, maxSize) => {
+		if (maxSize) cacheMax = maxSize;
+		if (enable !== undefined) useCache = enable;
+		return useCache;
+	};
+
 	$.createTextImage = (str, w, h) => {
 		genTextImage = true;
-		let img = $.text(str, 0, 0, w, h);
+		img = $.text(str, 0, 0, w, h);
 		genTextImage = false;
 		return img;
 	};
@@ -1934,9 +1885,12 @@ Q5.renderers.c2d.text = ($, q) => {
 		let ctx = $.ctx;
 		let img, tX, tY;
 
-		if (fontMod) updateFont();
+		if (fontMod) {
+			ctx.font = `${emphasis} ${$._textSize}px ${font}`;
+			fontMod = false;
+		}
 
-		if (genTextImage) {
+		if (useCache || genTextImage) {
 			if (styleHash == -1) updateStyleHash();
 
 			img = cache[str];
@@ -1944,7 +1898,8 @@ Q5.renderers.c2d.text = ($, q) => {
 
 			if (img) {
 				if (img._fill == $._fill && img._stroke == $._stroke && img._strokeWeight == $._strokeWeight) {
-					return img;
+					if (genTextImage) return img;
+					return $.textImage(img, x, y);
 				} else img.clear();
 			}
 		}
@@ -1972,14 +1927,12 @@ Q5.renderers.c2d.text = ($, q) => {
 			lines = wrapped;
 		}
 
-		if (!genTextImage) {
+		if (!useCache && !genTextImage) {
 			tX = x;
 			tY = y;
-			if ($._textBaseline == 'middle') tY -= leading * (lines.length - 1) * 0.5;
-			else if ($._textBaseline == 'bottom') tY -= leading * (lines.length - 1);
 		} else {
 			tX = 0;
-			tY = leading;
+			tY = leading * lines.length;
 
 			if (!img) {
 				let ogBaseline = $.ctx.textBaseline;
@@ -1991,24 +1944,15 @@ Q5.renderers.c2d.text = ($, q) => {
 
 				$.ctx.textBaseline = ogBaseline;
 
-				let maxWidth = 0;
-				for (let line of lines) {
-					let lineWidth = ctx.measureText(line).width;
-					if (lineWidth > maxWidth) maxWidth = lineWidth;
-				}
-
-				let imgW = Math.ceil(maxWidth),
-					imgH = Math.ceil(leading * lines.length + descent);
-
-				img = $.createImage.call($, imgW, imgH, {
+				img = $.createImage.call($, Math.ceil(ctx.measureText(str).width), Math.ceil(tY + descent), {
 					pixelDensity: $._pixelDensity
 				});
 
 				img._ascent = ascent;
 				img._descent = descent;
 				img._top = descent + leadDiff;
-				img._middle = img._top + ascent * 0.5 + leading * (lines.length - 1) * 0.5;
-				img._bottom = img._top + ascent + leading * (lines.length - 1);
+				img._middle = img._top + ascent * 0.5;
+				img._bottom = img._top + ascent;
 				img._leading = leading;
 			} else {
 				img.modified = true;
@@ -2044,12 +1988,12 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 
-		if (genTextImage) {
+		if (useCache || genTextImage) {
 			styleHashes.push(styleHash);
 			(cache[str] ??= {})[styleHash] = img;
 
 			cacheSize++;
-			if (cacheSize > $._textCacheMaxSize) {
+			if (cacheSize > cacheMax) {
 				let half = Math.ceil(cacheSize / 2);
 				let hashes = styleHashes.splice(0, half);
 				for (let s in cache) {
@@ -2059,8 +2003,8 @@ Q5.renderers.c2d.text = ($, q) => {
 				cacheSize -= half;
 			}
 
-			$.save(img);
-			return img;
+			if (genTextImage) return img;
+			$.textImage(img, x, y);
 		}
 	};
 
@@ -2084,33 +2028,88 @@ Q5.renderers.c2d.text = ($, q) => {
 		$._imageMode = og;
 	};
 };
+Q5.modules.ai = ($) => {
+	$.askAI = (question = '') => {
+		Q5.disableFriendlyErrors = false;
+		throw Error('Ask AI ✨ ' + question);
+	};
 
-Q5.fonts = [];
+	$._askAI = async (e) => {
+		let askAI = e.message?.includes('Ask AI ✨');
+		let stackLines = e.stack?.split('\n');
+		if (!e.stack || stackLines.length <= 1) return;
+
+		let idx = 1;
+		let sep = '(';
+		if (navigator.userAgent.indexOf('Chrome') == -1) {
+			idx = 0;
+			sep = '@';
+		}
+		while (stackLines[idx].indexOf('q5') >= 0) idx++;
+
+		let errFile = stackLines[idx].split(sep).at(-1);
+		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
+		let parts = errFile.split(':');
+		let lineNum = parseInt(parts.at(-2));
+		if (askAI) lineNum++;
+		parts[parts.length - 1] = parts.at(-1).split(')')[0];
+		let fileUrl = parts.slice(0, -2).join(':');
+		let fileBase = fileUrl.split('/').at(-1);
+
+		try {
+			let res = await (await fetch(fileUrl)).text();
+			let lines = res.split('\n');
+			let errLine = lines[lineNum - 1].trim();
+
+			let context = '';
+			let i = 1;
+			while (context.length < 1600) {
+				if (lineNum - i >= 0) {
+					context = lines[lineNum - i].trim() + '\n' + context;
+				}
+				if (lineNum + i < lines.length) {
+					context += lines[lineNum + i].trim() + '\n';
+				} else break;
+				i++;
+			}
+
+			let question =
+				askAI && e.message.length > 10 ? e.message.slice(10) : 'Whats+wrong+with+this+line%3F+short+answer';
+
+			let url =
+				'https://chatgpt.com/?q=using+q5.js+not+p5.js+' +
+				question +
+				(askAI ? '' : '%0A%0A' + encodeURIComponent(e.name + ': ' + e.message)) +
+				'%0A%0ALine%3A+' +
+				encodeURIComponent(errLine) +
+				'%0A%0AExcerpt+for+context%3A%0A%0A' +
+				encodeURIComponent(context);
+
+			console.warn('Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine);
+
+			console.warn('Ask AI ✨ ' + url);
+
+			if (askAI) return window.open(url, '_blank');
+		} catch (err) {}
+	};
+};
 Q5.modules.color = ($, q) => {
-	$.RGB = $.RGBA = $.RGBHDR = $._colorMode = 'rgb';
-	$.HSL = 'hsl';
-	$.HSB = 'hsb';
+	$.RGB = $.RGBA = $._colorMode = 'rgb';
+	$.SRGB = 'srgb';
 	$.OKLCH = 'oklch';
 
-	$.SRGB = 'srgb';
-	$.DISPLAY_P3 = 'display-p3';
-
-	$.colorMode = (mode, format, gamut) => {
+	$.colorMode = (mode, format) => {
 		$._colorMode = mode;
-		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
-		format ??= mode == 'rgb' ? ($._c2d || srgb ? 255 : 1) : 1;
-		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
+		let srgb = $.canvas.colorSpace == 'srgb' || mode == 'srgb';
+		format ??= srgb ? 'integer' : 'float';
+		$._colorFormat = format == 'float' || format == 1 ? 1 : 255;
 		if (mode == 'oklch') {
 			q.Color = Q5.ColorOKLCH;
-		} else if (mode == 'hsl') {
-			q.Color = srgb ? Q5.ColorHSL : Q5.ColorHSL_P3;
-		} else if (mode == 'hsb') {
-			q.Color = srgb ? Q5.ColorHSB : Q5.ColorHSB_P3;
 		} else {
 			if ($._colorFormat == 255) {
-				q.Color = srgb ? Q5.ColorRGB_8 : Q5.ColorRGB_P3_8;
+				q.Color = srgb ? Q5.ColorRGBA_8 : Q5.ColorRGBA_P3_8;
 			} else {
-				q.Color = srgb ? Q5.ColorRGB : Q5.ColorRGB_P3;
+				q.Color = srgb ? Q5.ColorRGBA : Q5.ColorRGBA_P3;
 			}
 			$._colorMode = 'rgb';
 		}
@@ -2186,9 +2185,7 @@ Q5.modules.color = ($, q) => {
 					if (c3) c3 /= 255;
 				}
 			}
-			if (Array.isArray(c0) || c0.constructor == Float32Array) {
-				[c0, c1, c2, c3] = c0;
-			}
+			if (Array.isArray(c0)) [c0, c1, c2, c3] = c0;
 		}
 
 		if (c2 == undefined) {
@@ -2206,8 +2203,7 @@ Q5.modules.color = ($, q) => {
 
 	$.lightness = (c) => {
 		if (c.l) return c.l;
-		let l = (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100;
-		return $._colorFormat == 255 ? l / 255 : l;
+		return ((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 100) / 255;
 	};
 	$.hue = (c) => {
 		if (c.h) return c.h;
@@ -2252,12 +2248,6 @@ Q5.Color = class {
 	constructor() {
 		this._q5Color = true;
 	}
-	get alpha() {
-		return this.a;
-	}
-	set alpha(v) {
-		this.a = v;
-	}
 };
 
 Q5.ColorOKLCH = class extends Q5.Color {
@@ -2299,9 +2289,15 @@ Q5.ColorOKLCH = class extends Q5.Color {
 	set hue(v) {
 		this.h = v;
 	}
+	get alpha() {
+		return this.a;
+	}
+	set alpha(v) {
+		this.a = v;
+	}
 };
 
-Q5.ColorRGB = class extends Q5.Color {
+Q5.ColorRGBA = class extends Q5.Color {
 	constructor(r, g, b, a) {
 		super();
 		this.r = r;
@@ -2321,7 +2317,6 @@ Q5.ColorRGB = class extends Q5.Color {
 	toString() {
 		return `color(srgb ${this.r} ${this.g} ${this.b} / ${this.a})`;
 	}
-
 	get red() {
 		return this.r;
 	}
@@ -2340,16 +2335,22 @@ Q5.ColorRGB = class extends Q5.Color {
 	set blue(v) {
 		this.b = v;
 	}
+	get alpha() {
+		return this.a;
+	}
+	set alpha(v) {
+		this.a = v;
+	}
 };
 
-Q5.ColorRGB_P3 = class extends Q5.ColorRGB {
+Q5.ColorRGBA_P3 = class extends Q5.ColorRGBA {
 	toString() {
 		return `color(display-p3 ${this.r} ${this.g} ${this.b} / ${this.a})`;
 	}
 };
 
-// legacy 8-bit (0-255) integer color format, srgb color space
-Q5.ColorRGB_8 = class extends Q5.ColorRGB {
+// legacy 8-bit (0-255) integer color format
+Q5.ColorRGBA_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {
 		super(r, g, b, a ?? 255);
 	}
@@ -2372,7 +2373,7 @@ Q5.ColorRGB_8 = class extends Q5.ColorRGB {
 };
 
 // p3 10-bit color in integer color format, for backwards compatibility
-Q5.ColorRGB_P3_8 = class extends Q5.ColorRGB_8 {
+Q5.ColorRGBA_P3_8 = class extends Q5.ColorRGBA {
 	constructor(r, g, b, a) {
 		super(r, g, b, a ?? 255);
 		this._edited = true;
@@ -2417,166 +2418,15 @@ Q5.ColorRGB_P3_8 = class extends Q5.ColorRGB_8 {
 		return this._css;
 	}
 };
-
-Q5.ColorHSL = class extends Q5.Color {
-	constructor(h, s, l, a) {
-		super();
-		this.h = h;
-		this.s = s;
-		this.l = l;
-		this.a = a ?? 1;
-	}
-	get levels() {
-		return [this.h, this.s, this.l, this.a];
-	}
-	equals(c) {
-		return c && this.h == c.h && this.s == c.s && this.l == c.l && this.a == c.a;
-	}
-	isSameColor(c) {
-		return c && this.h == c.h && this.s == c.s && this.l == c.l;
-	}
-	toString() {
-		return `hsl(${this.h} ${this.s} ${this.l} / ${this.a})`;
-	}
-
-	get hue() {
-		return this.h;
-	}
-	set hue(v) {
-		this.h = v;
-	}
-	get saturation() {
-		return this.s;
-	}
-	set saturation(v) {
-		this.s = v;
-	}
-	get lightness() {
-		return this.l;
-	}
-	set lightness(v) {
-		this.l = v;
-	}
-};
-
-Q5.ColorHSL_P3 = class extends Q5.ColorHSL {
-	toString() {
-		let o = Q5.HSLtoRGB(this.h, this.s, this.l);
-		return `color(display-p3 ${o.join(' ')} / ${this.a})`;
-	}
-};
-
-Q5.ColorHSB = class extends Q5.ColorHSL {
-	constructor(h, s, b, a) {
-		super(h, s, b, a);
-		delete this.l;
-		this.b = b;
-	}
-	get levels() {
-		return [this.h, this.s, this.b, this.a];
-	}
-	equals(c) {
-		return c && this.h == c.h && this.s == c.s && this.b == c.b && this.a == c.a;
-	}
-	isSameColor(c) {
-		return c && this.h == c.h && this.s == c.s && this.b == c.b;
-	}
-	toString() {
-		let o = Q5.HSBtoHSL(this.h, this.s, this.b);
-		return `hsl(${o.join(' ')} / ${this.a})`;
-	}
-
-	get v() {
-		return this.b;
-	}
-	set v(v) {
-		this.b = v;
-	}
-	get brightness() {
-		return this.b;
-	}
-	set brightness(v) {
-		this.b = v;
-	}
-	get value() {
-		return this.b;
-	}
-	set value(v) {
-		this.b = v;
-	}
-};
-
-Q5.ColorHSB_P3 = class extends Q5.ColorHSB {
-	toString() {
-		let o = Q5.HSLtoRGB(...Q5.HSBtoHSL(this.h, this.s, this.b));
-		return `color(display-p3 ${o.join(' ')} / ${this.a})`;
-	}
-};
-
-Q5.HSLtoRGB = (h, s, l) => {
-	l /= 100;
-	let m = (s / 100) * Math.min(l, 1 - l);
-	let f = (n, k = (n + h / 30) % 12) => l - m * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-	return [f(0), f(8), f(4)];
-};
-
-Q5.HSBtoHSL = (h, s, v, l = v * (1 - s / 200)) => [h, !l || l == 100 ? 0 : ((v - l) / Math.min(l, 100 - l)) * 100, l];
-
-{
-	const multiplyMatrices = (A, B) => [
-		A[0] * B[0] + A[1] * B[1] + A[2] * B[2],
-		A[3] * B[0] + A[4] * B[1] + A[5] * B[2],
-		A[6] * B[0] + A[7] * B[1] + A[8] * B[2]
-	];
-
-	const oklch2oklab = (l, c, h) => [
-		l,
-		isNaN(h) ? 0 : c * Math.cos((h * Math.PI) / 180),
-		isNaN(h) ? 0 : c * Math.sin((h * Math.PI) / 180)
-	];
-
-	const srgbLinear2rgb = (rgb) =>
-		rgb.map((c) =>
-			Math.max(
-				0,
-				Math.min(1, Math.abs(c) > 0.0031308 ? (c < 0 ? -1 : 1) * (1.055 * Math.abs(c) ** (1 / 2.4) - 0.055) : 12.92 * c)
-			)
-		);
-
-	const oklab2xyz = (lab) => {
-		const LMSg = multiplyMatrices(
-			[
-				1, 0.3963377773761749, 0.2158037573099136, 1, -0.1055613458156586, -0.0638541728258133, 1, -0.0894841775298119,
-				-1.2914855480194092
-			],
-			lab
-		);
-		return multiplyMatrices(
-			[
-				1.2268798758459243, -0.5578149944602171, 0.2813910456659647, -0.0405757452148008, 1.112286803280317,
-				-0.0717110580655164, -0.0763729366746601, -0.4214933324022432, 1.5869240198367816
-			],
-			LMSg.map((val) => val ** 3)
-		);
-	};
-	const xyz2rgbLinear = (xyz) =>
-		multiplyMatrices(
-			[
-				3.2409699419045226, -1.537383177570094, -0.4986107602930034, -0.9692436362808796, 1.8759675015077202,
-				0.04155505740717559, 0.05563007969699366, -0.20397695888897652, 1.0569715142428786
-			],
-			xyz
-		);
-
-	Q5.OKLCHtoRGB = (l, c, h) => srgbLinear2rgb(xyz2rgbLinear(oklab2xyz(oklch2oklab(l, c, h))));
-}
 Q5.modules.display = ($) => {
 	if (!$.canvas || $._scope == 'graphics') return;
 
 	let c = $.canvas;
 
+	$.CENTERED = 'centered';
+	$.FULLSCREEN = 'fullscreen';
 	$.MAXED = 'maxed';
-	$.SMOOTH = 'smooth';
+
 	$.PIXELATED = 'pixelated';
 
 	if (Q5._instanceCount == 0 && !Q5._server) {
@@ -2600,13 +2450,15 @@ html, body {
 	-webkit-font-smoothing: none;
 }
 .q5-centered,
-.q5-maxed {
+.q5-maxed,
+.q5-fullscreen {
   display: flex;
 	align-items: center;
 	justify-content: center;
 }
 main.q5-centered,
-main.q5-maxed {
+main.q5-maxed,
+.q5-fullscreen {
 	height: 100vh;
 }
 main {
@@ -2627,8 +2479,8 @@ main {
 			if ($.noSmooth) $.noSmooth();
 			if ($.textFont) $.textFont('monospace');
 		}
-		if (c.displayMode == 'normal') {
-			p.classList.remove('q5-centered', 'q5-maxed');
+		if (c.displayMode == 'default' || c.displayMode == 'normal') {
+			p.classList.remove('q5-centered', 'q5-maxed', 'q5-fullscreen');
 			s.width = c.w * c.displayScale + 'px';
 			s.height = c.h * c.displayScale + 'px';
 		} else {
@@ -2656,7 +2508,6 @@ main {
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
-		if (displayMode == 'fullscreen') displayMode = 'maxed';
 		if (displayMode == 'center') displayMode = 'centered';
 		Object.assign(c, { displayMode, renderQuality, displayScale });
 		if ($.ctx) $.pushStyles();
@@ -2665,7 +2516,7 @@ main {
 	};
 
 	$.fullscreen = (v) => {
-		if (v == undefined) return document.fullscreenElement;
+		if (v === undefined) return document.fullscreenElement;
 		if (v) document.body.requestFullscreen();
 		else document.body.exitFullscreen();
 	};
@@ -2763,8 +2614,6 @@ Q5.modules.dom = ($, q) => {
 		$._elements.push(el);
 		if ($.canvas) $.canvas.parentElement.append(el);
 		else document.body.append(el);
-
-		el.elt = el; // p5 compat
 
 		return el;
 	};
@@ -2952,21 +2801,24 @@ Q5.modules.dom = ($, q) => {
 		};
 
 		if (src) {
-			el.promise = new Promise((resolve) => {
+			q._preloadCount++;
+			el._loader = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
 					el._load();
+					q._preloadCount--;
 					resolve(el);
 				});
 				el.src = src;
 			});
-			$._preloadPromises.push(el.promise);
 
-			if (!$._usePreload) return el.promise;
+			if ($._disablePreload) return el._loader;
 		}
 		return el;
 	};
 
 	$.createCapture = function (type, flipped = true, cb) {
+		q._preloadCount++;
+
 		let constraints = typeof type == 'string' ? { [type]: true } : type || { video: true, audio: true };
 
 		if (constraints.video === true) {
@@ -2988,11 +2840,12 @@ Q5.modules.dom = ($, q) => {
 			vid.pixels = g.pixels;
 			g.remove();
 		};
-		vid.promise = (async () => {
+		vid._loader = (async () => {
 			let stream;
 			try {
 				stream = await navigator.mediaDevices.getUserMedia(constraints);
 			} catch (e) {
+				q._preloadCount--;
 				throw e;
 			}
 
@@ -3001,54 +2854,16 @@ Q5.modules.dom = ($, q) => {
 
 			vid._load();
 			if (cb) cb(vid);
+			q._preloadCount--;
 			return vid;
 		})();
-		$._preloadPromises.push(vid.promise);
 
-		if (!$._usePreload) return vid.promise;
+		if ($._disablePreload) return vid._loader;
 		return vid;
 	};
 
 	$.findElement = (selector) => document.querySelector(selector);
 	$.findElements = (selector) => document.querySelectorAll(selector);
-};
-Q5.modules.fes = ($) => {
-	$._fes = async (e) => {
-		if (Q5.disableFriendlyErrors) return;
-
-		let stackLines = e.stack?.split('\n');
-		if (!e.stack || stackLines.length <= 1) return;
-
-		let idx = 1;
-		let sep = '(';
-		if (navigator.userAgent.indexOf('Chrome') == -1) {
-			idx = 0;
-			sep = '@';
-		}
-		while (stackLines[idx].indexOf('q5') >= 0) idx++;
-
-		let errFile = stackLines[idx].split(sep).at(-1);
-		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
-		let parts = errFile.split(':');
-		let lineNum = parseInt(parts.at(-2));
-		parts[parts.length - 1] = parts.at(-1).split(')')[0];
-		let fileUrl = parts.slice(0, -2).join(':');
-		let fileBase = fileUrl.split('/').at(-1);
-
-		try {
-			let res = await (await fetch(fileUrl)).text();
-			let lines = res.split('\n');
-			let errLine = lines[lineNum - 1].trim();
-
-			let bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)];
-
-			console.log(
-				'%cq5.js ' + bug + '%c Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine,
-				'background: #b7ebff; color: #000;',
-				''
-			);
-		} catch (err) {}
-	};
 };
 Q5.modules.input = ($, q) => {
 	if ($._scope == 'graphics') return;
@@ -3100,7 +2915,7 @@ Q5.modules.input = ($, q) => {
 			let sy = c.scrollHeight / $.height || 1;
 			q.mouseX = (e.clientX - rect.left) / sx;
 			q.mouseY = (e.clientY - rect.top) / sy;
-			if ($._webgpu) {
+			if (c.renderer == 'webgpu') {
 				q.mouseX -= c.hw;
 				q.mouseY -= c.hh;
 			}
@@ -3193,15 +3008,9 @@ Q5.modules.input = ($, q) => {
 		const rect = $.canvas.getBoundingClientRect();
 		const sx = $.canvas.scrollWidth / $.width || 1;
 		const sy = $.canvas.scrollHeight / $.height || 1;
-		let modX = 0,
-			modY = 0;
-		if ($._webgpu) {
-			modX = $.halfWidth;
-			modY = $.halfHeight;
-		}
 		return {
-			x: (touch.clientX - rect.left) / sx - modX,
-			y: (touch.clientY - rect.top) / sy - modY,
+			x: (touch.clientX - rect.left) / sx,
+			y: (touch.clientY - rect.top) / sy,
 			id: touch.identifier
 		};
 	}
@@ -3410,7 +3219,13 @@ Q5.modules.math = ($, q) => {
 		}
 	};
 
-	$.jit = (amt = 1) => $.random(-amt, amt);
+	if ($._renderer == 'c2d' && !$._webgpuFallback) {
+		$.randomX = (v = 0) => $.random(-v, $.canvas.w + v);
+		$.randomY = (v = 0) => $.random(-v, $.canvas.h + v);
+	} else {
+		$.randomX = (v = 0) => $.random(-$.canvas.hw - v, $.canvas.hw + v);
+		$.randomY = (v = 0) => $.random(-$.canvas.hh - v, $.canvas.hh + v);
+	}
 
 	$.randomGenerator = (method) => {
 		if (method == $.LCG) rng1 = lcg();
@@ -3701,7 +3516,7 @@ Q5.PerlinNoise = class extends Q5.NoiseGenerator {
 	}
 };
 Q5.modules.record = ($, q) => {
-	let rec, btn0, btn1, timer, formatSelect, bitrateInput, audioToggle;
+	let rec, btn0, btn1, timer, formatSelect, bitrateInput;
 
 	$.recording = false;
 
@@ -3737,13 +3552,13 @@ Q5.modules.record = ($, q) => {
 .rec button,
 .rec select,
 .rec input,
-.rec span {
+.rec .record-timer {
 	font-family: sans-serif;
 	font-size: 14px;
 	padding: 2px 10px;
 	border-radius: 18px;
 	outline: none;
-	background: #232529;
+	background-color: #232529;
 	color: #d4dae6;
 	box-shadow: #0000001a 0px 4px 12px;
 	border: 1px solid #46494e;
@@ -3752,33 +3567,13 @@ Q5.modules.record = ($, q) => {
 	transition: all 0.3s;
 }
 
-.rec .audio-toggle {
-	font-size: 16px;
-	padding: 2px 10px;
-}
-
-.rec .bitrate input {
-	border-radius: 18px 0 0 18px;
-	border-right: 0;
-	width: 40px;
-	padding: 2px 5px 2px 10px;
-	text-align: right;
-}
-
-.rec .bitrate span {
-	border-radius: 0 18px 18px 0;
-	border-left: 0;
-	padding: 2px 10px 2px 5px;
-	background: #333;
-}
-
 .rec .record-button { 
 	color: #cc3e44;
 	font-size: 18px;
 }
 
 .rec select:hover,
-.rec button:hover { background: #32343b; }
+.rec button:hover { background-color: #292b30; }
 
 .rec button:disabled {
 	opacity: 0.5;
@@ -3803,19 +3598,17 @@ Q5.modules.record = ($, q) => {
 		rec.resetTimer = () => (rec.time = { hours: 0, minutes: 0, seconds: 0, frames: 0 });
 		rec.resetTimer();
 
-		let f = 'video/mp4; codecs=';
-		rec.formats = {
-			'H.264': f + '"avc1.42E01E"',
-			VP9: f + 'vp9'
+		rec.formats = opt.formats || {
+			'H.264': 'video/mp4; codecs="avc1.42E01E"',
+			VP9: 'video/mp4; codecs=vp9'
 		};
-		let highProfile = f + '"avc1.640034"';
 
-		let pixelCount = $.canvas.width * $.canvas.height;
-		if (pixelCount > 3200000 && MediaRecorder.isTypeSupported(highProfile)) {
-			rec.formats['H.264'] = highProfile;
+		// remove unsupported formats
+		for (let format in rec.formats) {
+			if (!MediaRecorder.isTypeSupported(rec.formats[format])) {
+				delete rec.formats[format];
+			}
 		}
-
-		Object.assign(rec.formats, opt.formats);
 
 		formatSelect = $.createSelect('format');
 		for (const name in rec.formats) {
@@ -3824,31 +3617,10 @@ Q5.modules.record = ($, q) => {
 		formatSelect.title = 'Video Format';
 		rec.append(formatSelect);
 
-		let div = $.createEl('div');
-		div.className = 'bitrate';
-		div.style.display = 'flex';
-		rec.append(div);
-
 		bitrateInput = $.createInput();
-		let span = document.createElement('span');
-		span.textContent = 'mbps';
-		bitrateInput.title = span.title = 'Video Bitrate';
-		div.append(bitrateInput);
-		div.append(span);
-
-		audioToggle = $.createEl('button');
-		audioToggle.className = 'audio-toggle active';
-		audioToggle.textContent = '🔊';
-		audioToggle.title = 'Toggle Audio Recording';
-		rec.append(audioToggle);
-
-		rec.captureAudio = true;
-
-		audioToggle.addEventListener('click', () => {
-			rec.captureAudio = !rec.captureAudio;
-			audioToggle.textContent = rec.captureAudio ? '🔊' : '🔇';
-			audioToggle.classList.toggle('active', rec.captureAudio);
-		});
+		bitrateInput.title = 'Video Bitrate';
+		bitrateInput.style.width = '48px';
+		rec.append(bitrateInput);
 
 		rec.encoderSettings = {};
 
@@ -3885,7 +3657,7 @@ Q5.modules.record = ($, q) => {
 		rec.format = 'H.264';
 
 		let h = $.canvas.height;
-		rec.bitrate = h >= 4320 ? 96 : h >= 2160 ? 64 : h >= 1440 ? 48 : h >= 1080 ? 32 : h >= 720 ? 26 : 16;
+		rec.bitrate = h >= 4320 ? 128 : h >= 2160 ? 75 : h >= 1440 ? 50 : h >= 1080 ? 32 : h >= 720 ? 26 : 16;
 
 		btn0.addEventListener('click', () => {
 			if (!$.recording) start();
@@ -3906,29 +3678,20 @@ Q5.modules.record = ($, q) => {
 	function start() {
 		if ($.recording) return;
 
-		$.userStartAudio();
-
 		if (!rec.stream) {
 			rec.frameRate ??= $.getTargetFrameRate();
 			let canvasStream = $.canvas.captureStream(rec.frameRate);
-
-			rec.videoTrack = canvasStream.getVideoTracks()[0];
-
-			if (rec.captureAudio && $.getAudioContext) {
-				let aud = $.getAudioContext();
-				let dest = aud.createMediaStreamDestination();
-
-				// if using p5.sound
-				if (aud.destination.input) aud.destination.input.connect(dest);
-				else Q5.soundOut.connect(dest);
-
-				rec.audioTrack = dest.stream.getAudioTracks()[0];
-
-				rec.stream = new MediaStream([rec.videoTrack, rec.audioTrack]);
-			} else rec.stream = canvasStream;
+			// let audioStream = Q5.aud.createMediaStreamDestination().stream;
+			// rec.stream = new MediaStream([canvasStream.getTracks()[0], ...audioStream.getTracks()]);
+			rec.stream = canvasStream;
 		}
 
-		rec.mediaRecorder = new MediaRecorder(rec.stream, rec.encoderSettings);
+		try {
+			rec.mediaRecorder = new MediaRecorder(rec.stream, rec.encoderSettings);
+		} catch (e) {
+			console.error('Failed to initialize MediaRecorder: ', e);
+			return;
+		}
 
 		rec.chunks = [];
 		rec.mediaRecorder.addEventListener('dataavailable', (e) => {
@@ -4081,44 +3844,49 @@ Q5.modules.sound = ($, q) => {
 	let sounds = [];
 
 	$.loadSound = (url, cb) => {
+		q._preloadCount++;
+
 		let s = new Q5.Sound();
 		sounds.push(s);
 
-		s.promise = (async () => {
+		s._loader = (async () => {
 			let err;
 			try {
 				await s.load(url);
 			} catch (e) {
 				err = e;
 			}
-			delete s.promise;
+			q._preloadCount--;
+			delete s._loader;
 			if (err) throw err;
 			if (cb) cb(s);
 			return s;
 		})();
-		$._preloadPromises.push(s.promise);
 
-		if (!$._usePreload) return s.promise;
+		if ($._disablePreload) return s._loader;
 		return s;
 	};
 
 	$.loadAudio = (url, cb) => {
+		q._preloadCount++;
 		let a = new Audio(url);
 		a.crossOrigin = 'Anonymous';
-		a.promise = new Promise((resolve, reject) => {
-			a.addEventListener('canplaythrough', () => {
-				if (!a.loaded) {
-					a.loaded = true;
-					if (cb) cb(a);
-					resolve(a);
-				}
-			});
-			a.addEventListener('suspend', resolve);
-			a.addEventListener('error', reject);
+		a.addEventListener('canplaythrough', () => {
+			if (!a.loaded) {
+				q._preloadCount--;
+				a.loaded = true;
+				if (cb) cb(a);
+			}
 		});
-		$._preloadPromises.push(a.promise);
-
-		if (!$._usePreload) return a.promise;
+		let preloadSkip = () => {
+			a._preloadSkip = true;
+			q._preloadCount--;
+		};
+		a.addEventListener('suspend', preloadSkip);
+		a.addEventListener('error', (e) => {
+			preloadSkip();
+			throw e;
+		});
 		return a;
 	};
 
@@ -4129,9 +3897,6 @@ Q5.modules.sound = ($, q) => {
 			if (Q5._offlineAudio) {
 				Q5._offlineAudio = false;
 				Q5.aud = new window.AudioContext();
-				Q5.soundOut = Q5.aud.createGain();
-				Q5.soundOut.connect(Q5.aud.destination);
-
 				for (let s of sounds) s.init();
 			}
 			return Q5.aud.resume();
@@ -4142,8 +3907,6 @@ Q5.modules.sound = ($, q) => {
 if (window.OfflineAudioContext) {
 	Q5.aud = new window.OfflineAudioContext(2, 1, 44100);
 	Q5._offlineAudio = true;
-	Q5.soundOut = Q5.aud.createGain();
-	Q5.soundOut.connect(Q5.aud.destination);
 }
 
 Q5.Sound = class {
@@ -4163,7 +3926,7 @@ Q5.Sound = class {
 		this.gainNode = Q5.aud.createGain();
 		this.pannerNode = Q5.aud.createStereoPanner();
 		this.gainNode.connect(this.pannerNode);
-		this.pannerNode.connect(Q5.soundOut);
+		this.pannerNode.connect(Q5.aud.destination);
 
 		this.loaded = true;
 		if (this._volume) this.volume = this._volume;
@@ -4284,8 +4047,9 @@ Q5.Sound = class {
 };
 Q5.modules.util = ($, q) => {
 	$._loadFile = (url, cb, type) => {
+		q._preloadCount++;
 		let ret = {};
-		ret.promise = new Promise((resolve, reject) => {
+		ret._loader = new Promise((resolve, reject) => {
 			fetch(url)
 				.then((res) => {
 					if (!res.ok) {
@@ -4299,8 +4063,9 @@ Q5.modules.util = ($, q) => {
 					if (type == 'csv') f = $.CSV.parse(f);
 					if (typeof f == 'string') ret.text = f;
 					else Object.assign(ret, f);
-					delete ret.promise;
+					delete ret._loader;
 					if (cb) cb(f);
+					q._preloadCount--;
 					resolve(f);
 				});
 		});
@@ -4311,15 +4076,14 @@ Q5.modules.util = ($, q) => {
 	$.loadJSON = (url, cb) => $._loadFile(url, cb, 'json');
 	$.loadCSV = (url, cb) => $._loadFile(url, cb, 'csv');
 
-	const imgRegex = /(jpe?g|png|gif|webp|avif|svg)/i,
-		fontRegex = /(ttf|otf|woff2?|eot|json)/i,
-		fontCategoryRegex = /(serif|sans-serif|monospace|cursive|fantasy)/i,
-		audioRegex = /(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/i;
+	const imgRegex = /(jpe?g|png|gif|webp|avif|svg)/,
+		fontRegex = /(ttf|otf|woff2?|eot|json)/,
+		audioRegex = /(wav|flac|mp3|ogg|m4a|aac|aiff|weba)/;
 
 	$.load = function (...urls) {
 		if (Array.isArray(urls[0])) urls = urls[0];
 
-		let promises = [];
+		let loaders = [];
 
 		for (let url of urls) {
 			let ext = url.split('.').pop().toLowerCase();
@@ -4331,29 +4095,25 @@ Q5.modules.util = ($, q) => {
 				obj = $.loadCSV(url);
 			} else if (imgRegex.test(ext)) {
 				obj = $.loadImage(url);
-			} else if (fontRegex.test(ext) || fontCategoryRegex.test(url)) {
+			} else if (fontRegex.test(ext)) {
 				obj = $.loadFont(url);
 			} else if (audioRegex.test(ext)) {
 				obj = $.loadSound(url);
 			} else {
 				obj = $.loadText(url);
 			}
-			promises.push(obj.promise);
+			loaders.push(obj._loader);
 		}
 
-		if (urls.length == 1) return promises[0];
-		return Promise.all(promises);
+		if (urls.length == 1) return loaders[0];
+		return Promise.all(loaders);
 	};
 
 	async function saveFile(data, name, ext) {
 		name = name || 'untitled';
 		ext = ext || 'png';
 		if (imgRegex.test(ext)) {
-			if ($.canvas?.renderer == 'webgpu' && data.canvas.renderer == 'c2d') {
-				data = await $._g._saveCanvas(data, ext);
-			} else {
-				data = await $._saveCanvas(data, ext);
-			}
+			data = await $._saveCanvas(data, ext);
 		} else {
 			let type = 'text/plain';
 			if (ext == 'json') {
@@ -4423,15 +4183,6 @@ Q5.modules.util = ($, q) => {
 		let s = parts.join('.');
 		if (neg) s = '-' + s;
 		return s;
-	};
-
-	$.shuffle = (a, modify) => {
-		if (!modify) a = [...a];
-		for (let i = a.length - 1; i > 0; i--) {
-			let j = Math.floor($.random() * (i + 1));
-			[a[i], a[j]] = [a[j], a[i]];
-		}
-		return a;
 	};
 };
 Q5.modules.vector = ($) => {
@@ -4736,18 +4487,13 @@ Q5.Vector.mult = (v, u) => v.copy().mult(u);
 Q5.Vector.normalize = (v) => v.copy().normalize();
 Q5.Vector.rem = (v, u) => v.copy().rem(u);
 Q5.Vector.sub = (v, u) => v.copy().sub(u);
-Q5.Vector.reflect = (v, n) => v.copy().reflect(n);
-Q5.Vector.random2D = () => new Q5.Vector().random2D();
-Q5.Vector.random3D = () => new Q5.Vector().random3D();
-Q5.Vector.fromAngle = (th, l) => new Q5.Vector().fromAngle(th, l);
-Q5.Vector.fromAngles = (th, ph, l) => new Q5.Vector().fromAngles(th, ph, l);
+
+for (let k of ['fromAngle', 'fromAngles', 'random2D', 'random3D']) {
+	Q5.Vector[k] = (u, v, t) => new Q5.Vector()[k](u, v, t);
+}
 Q5.renderers.webgpu = {};
 
 Q5.renderers.webgpu.canvas = ($, q) => {
-	let c = $.canvas;
-
-	if ($.colorMode) $.colorMode('rgb', 1);
-
 	$._baseShaderCode = /* wgsl */ `
 struct Q5 {
 	width: f32,
@@ -4765,16 +4511,21 @@ struct Q5 {
 	keyIsPressed: f32
 }`;
 
-	$._g = $.createGraphics(1, 1, 'c2d');
-	if ($._g.colorMode) $._g.colorMode($.RGB, 1);
+	let c = $.canvas;
 
-	let encoder,
-		pass,
+	c.width = $.width = 500;
+	c.height = $.height = 500;
+
+	$._g = $.createGraphics(1, 1, { renderer: 'c2d' });
+
+	if ($.colorMode) $.colorMode('rgb', 1);
+
+	let pass,
 		mainView,
 		frameA,
 		frameB,
-		frameLayout,
 		frameSampler,
+		framePipeline,
 		frameBindGroup,
 		colorIndex = 1,
 		colorStackIndex = 8;
@@ -4782,16 +4533,13 @@ struct Q5 {
 	$._pipelineConfigs = [];
 	$._pipelines = [];
 	$._buffers = [];
-	$._prevFramePL = 0;
-	$._framePL = 0;
 
 	// local variables used for slightly better performance
-
 	// stores pipeline shifts and vertex counts/image indices
-	let drawStack = ($._drawStack = []);
+	let drawStack = ($.drawStack = []);
 
 	// colors used for each draw call
-	let colorStack = ($._colorStack = new Float32Array(1e6));
+	let colorStack = ($.colorStack = new Float32Array(1e6));
 
 	// prettier-ignore
 	colorStack.set([
@@ -4820,10 +4568,10 @@ struct Q5 {
 		]
 	});
 
-	$._bindGroupLayouts = [mainLayout];
+	$.bindGroupLayouts = [mainLayout];
 
 	let uniformBuffer = Q5.device.createBuffer({
-		size: 64,
+		size: 64, // Size of four floats
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 	});
 
@@ -4851,42 +4599,18 @@ struct Q5 {
 		$._frameA = frameA = Q5.device.createTexture({ size, format, usage });
 		$._frameB = frameB = Q5.device.createTexture({ size, format, usage });
 
-		$.canvas.texture = frameA;
-
-		$._frameShaderCode =
-			$._baseShaderCode +
-			/* wgsl */ `
-struct VertexParams {
-	@builtin(vertex_index) vertexIndex: u32
+		let finalShader = Q5.device.createShaderModule({
+			code: `
+@vertex fn v(@builtin(vertex_index)i:u32)->@builtin(position)vec4<f32>{
+	const pos=array(vec2(-1f,-1f),vec2(1f,-1f),vec2(-1f,1f),vec2(1f,1f));
+	return vec4(pos[i],0f,1f);
 }
-struct FragParams {
-	@builtin(position) position: vec4f,
-	@location(0) texCoord: vec2f
-}
-
-const ndc = array(vec2f(-1,-1), vec2f(1,-1), vec2f(-1,1), vec2f(1,1));
-const quad = array(vec2f(0,1), vec2f(1,1), vec2f(0,0), vec2f(1,0));
-
-@group(0) @binding(0) var<uniform> q: Q5;
-@group(0) @binding(1) var samp: sampler;
-@group(0) @binding(2) var tex: texture_2d<f32>;
-
-@vertex
-fn vertexMain(v: VertexParams) -> FragParams {
-	var f: FragParams;
-	f.position = vec4f(ndc[v.vertexIndex], 0.0, 1.0);
-	f.texCoord = quad[v.vertexIndex];
-	return f;
-}
-
-@fragment
-fn fragMain(f: FragParams ) -> @location(0) vec4f {
-	return textureSample(tex, samp, f.texCoord);
-}`;
-
-		let frameShader = Q5.device.createShaderModule({
-			label: 'frameShader',
-			code: $._frameShaderCode
+@group(0) @binding(0) var s: sampler;
+@group(0) @binding(1) var t: texture_2d<f32>;
+@fragment fn f(@builtin(position)c:vec4<f32>)->@location(0)vec4<f32>{
+	let uv=c.xy/vec2(${w}, ${h});
+	return textureSample(t,s,uv);
+}`
 		});
 
 		frameSampler = Q5.device.createSampler({
@@ -4894,45 +4618,18 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			minFilter: 'linear'
 		});
 
-		frameLayout = Q5.device.createBindGroupLayout({
-			label: 'frameLayout',
-			entries: [
-				{
-					binding: 0,
-					visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-					buffer: { type: 'uniform' }
-				},
-				{
-					binding: 1,
-					visibility: GPUShaderStage.FRAGMENT,
-					sampler: { type: 'filtering' }
-				},
-				{
-					binding: 2,
-					visibility: GPUShaderStage.FRAGMENT,
-					texture: { viewDimension: '2d', sampleType: 'float' }
-				}
-			]
-		});
-
-		let framePipelineLayout = Q5.device.createPipelineLayout({
-			bindGroupLayouts: [frameLayout]
-		});
-
-		$._pipelineConfigs[0] = {
-			layout: framePipelineLayout,
-			vertex: { module: frameShader, entryPoint: 'vertexMain' },
+		// Create a pipeline for rendering
+		framePipeline = Q5.device.createRenderPipeline({
+			layout: 'auto',
+			vertex: { module: finalShader, entryPoint: 'v' },
 			fragment: {
-				module: frameShader,
-				entryPoint: 'fragMain',
-				targets: [{ format }]
+				module: finalShader,
+				entryPoint: 'f',
+				targets: [{ format, writeMask: GPUColorWrite.ALL }]
 			},
 			primitive: { topology: 'triangle-strip' },
 			multisample: { count: 4 }
-		};
-
-		// Create a pipeline for rendering frames
-		$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
+		});
 	};
 
 	$._createCanvas = (w, h, opt) => {
@@ -4953,42 +4650,27 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		createMainView();
 	};
 
-	let usingRGB = true,
-		colorFormat = 1;
-
-	let cm = $.colorMode;
-	$.colorMode = function () {
-		cm(...arguments);
-		usingRGB = $._colorMode == 'rgb';
-		colorFormat = $._colorFormat;
+	$.pixelDensity = (v) => {
+		if (!v || v == $._pixelDensity) return $._pixelDensity;
+		$._pixelDensity = v;
+		$._setCanvasSize(c.w, c.h);
+		createMainView();
+		return v;
 	};
 
-	let addColor = (r, g, b, a) => {
-		if (typeof r === 'string' || usingRGB === false) {
-			r = $.color(r, g, b, a);
-		} else if (b === undefined) {
+	// current color index, used to associate a vertex with a color
+	let addColor = (r, g, b, a = 1) => {
+		if (typeof r == 'string') r = $.color(r);
+		else if (b == undefined) {
 			// grayscale mode `fill(1, 0.5)`
-			a = g ?? colorFormat;
+			a = g ?? 1;
 			g = b = r;
 		}
-		a ??= colorFormat;
 		if (r._q5Color) {
-			let c = r;
-			if (c.r != undefined) ({ r, g, b, a } = c);
-			else {
-				a = c.a;
-				if (c.c != undefined) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
-				else if (c.l != undefined) c = Q5.HSLtoRGB(c.h, c.s, c.l);
-				else c = Q5.HSLtoRGB(...Q5.HSBtoHSL(c.h, c.s, c.b));
-				[r, g, b] = c;
-			}
-		}
-
-		if (colorFormat === 255) {
-			r /= 255;
-			g /= 255;
-			b /= 255;
-			a /= 255;
+			a = r.a;
+			b = r.b;
+			g = r.g;
+			r = r.r;
 		}
 
 		let cs = colorStack,
@@ -5021,6 +4703,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$._tint = colorIndex;
 	};
 	$.opacity = (a) => ($._globalAlpha = a);
+
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
 	$.noTint = () => ($._tint = 1);
@@ -5028,7 +4711,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	$._strokeWeight = 1;
 	$._hsw = 0.5;
 	$._scaledSW = 1;
-
 	$.strokeWeight = (v) => {
 		v = Math.abs(v);
 		$._strokeWeight = v;
@@ -5064,17 +4746,16 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 	$.resetMatrix();
 
-	$.translate = (x, y, z = 0) => {
+	$.translate = (x, y, z) => {
 		if (!x && !y && !z) return;
 		// update the translation values
-		let m = matrix;
-		m[12] += x * m[0];
-		m[13] -= y * m[5];
-		m[14] += z * m[10];
+		matrix[12] += x;
+		matrix[13] -= y;
+		matrix[14] += z || 0;
 		$._matrixDirty = true;
 	};
 
-	$.rotate = $.rotateZ = (a) => {
+	$.rotate = (a) => {
 		if (!a) return;
 		if ($._angleMode) a *= $._DEGTORAD;
 
@@ -5180,7 +4861,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$._matrixDirty = true;
 	};
 
-	// saves the current matrix state
+	// function to save the current matrix state if dirty
 	$._saveMatrix = () => {
 		transforms.set(matrix, matrices.length * MATRIX_SIZE);
 		$._matrixIndex = matrices.length;
@@ -5249,14 +4930,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 	// prettier-ignore
 	let blendFactors = [
-		'zero',                // 0
-		'one',                 // 1
-		'src-alpha',           // 2
-		'one-minus-src-alpha', // 3
-		'dst',                 // 4
-		'dst-alpha',           // 5
-		'one-minus-dst-alpha', // 6
-		'one-minus-src'        // 7
+			'zero',                // 0
+			'one',                 // 1
+			'src-alpha',           // 2
+			'one-minus-src-alpha', // 3
+			'dst',                 // 4
+			'dst-alpha',           // 5
+			'one-minus-dst-alpha', // 6
+			'one-minus-src'        // 7
 	];
 	let blendOps = [
 		'add', // 0
@@ -5266,22 +4947,18 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		'max' // 4
 	];
 
+	// other blend modes are not supported yet
 	const blendModes = {
-		'source-over': [2, 3, 0, 2, 3, 0],
-		'destination-over': [6, 1, 0, 6, 1, 0],
-		'source-in': [5, 0, 0, 5, 0, 0],
-		'destination-in': [0, 2, 0, 0, 2, 0],
-		'source-out': [6, 0, 0, 6, 0, 0],
-		'destination-out': [0, 3, 0, 0, 3, 0],
-		'source-atop': [5, 3, 0, 5, 3, 0],
-		'destination-atop': [6, 2, 0, 6, 2, 0],
-		lighter: [1, 1, 0, 1, 1, 0],
-		darken: [1, 1, 3, 3, 5, 0],
-		lighten: [1, 1, 4, 3, 5, 0],
-		replace: [1, 0, 0, 1, 0, 0]
+		normal: [2, 3, 0, 2, 3, 0],
+		// destination_over: [6, 1, 0, 6, 1, 0],
+		additive: [1, 1, 0, 1, 1, 0]
+		// source_in: [5, 0, 0, 5, 0, 0],
+		// destination_in: [0, 2, 0, 0, 2, 0],
+		// source_out: [6, 0, 0, 6, 0, 0],
+		// destination_out: [0, 3, 0, 0, 3, 0],
+		// source_atop: [5, 3, 0, 5, 3, 0],
+		// destination_atop: [6, 2, 0, 6, 2, 0]
 	};
-
-	$._blendModeNames = Object.keys(blendModes);
 
 	$.blendConfigs = {};
 
@@ -5300,39 +4977,30 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		};
 	}
 
-	$._blendMode = 'source-over';
+	$._blendMode = 'normal';
 
 	$.blendMode = (mode) => {
 		if (mode == $._blendMode) return;
+		if (mode == 'source-over') mode = 'normal';
+		if (mode == 'lighter') mode = 'additive';
+		mode = mode.toLowerCase().replace(/[ -]/g, '_');
 		$._blendMode = mode;
-		let i = $._blendModeNames.indexOf(mode);
-		if (i == -1) {
-			console.error(`Blend mode "${mode}" not supported in q5.js WebGPU.`);
-			return;
+
+		for (let i = 0; i < $._pipelines.length; i++) {
+			$._pipelineConfigs[i].fragment.targets[0].blend = $.blendConfigs[mode];
+			$._pipelines[i] = Q5.device.createRenderPipeline($._pipelineConfigs[i]);
 		}
-		drawStack.push(0, i);
 	};
 
-	let shouldClear;
-
+	let shouldClear = false;
 	$.clear = () => {
 		shouldClear = true;
 	};
 
-	$.background = (r, g, b, a) => {
-		$.push();
-		$.resetMatrix();
-		if (r.canvas) {
-			let img = r;
-			$._imageMode = 'corner';
-			$.image(img, -c.hw, -c.hh, c.w, c.h);
-		} else {
-			$._rectMode = 'corner';
-			$.fill(r, g, b, a);
-			$._doStroke = false;
-			$.rect(-c.hw, -c.hh, c.w, c.h);
-		}
-		$.pop();
+	const _drawFrame = () => {
+		pass.setPipeline(framePipeline);
+		pass.setBindGroup(0, frameBindGroup);
+		pass.draw(4);
 	};
 
 	$._beginRender = () => {
@@ -5341,14 +5009,16 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		frameA = frameB;
 		frameB = temp;
 
-		encoder = Q5.device.createCommandEncoder();
+		$.encoder = Q5.device.createCommandEncoder();
 
-		$._pass = pass = encoder.beginRenderPass({
+		let target = shouldClear ? $.ctx.getCurrentTexture().createView() : frameA.createView();
+
+		pass = q.pass = $.encoder.beginRenderPass({
 			label: 'q5-webgpu',
 			colorAttachments: [
 				{
 					view: mainView,
-					resolveTarget: frameA.createView(),
+					resolveTarget: target,
 					loadOp: 'clear',
 					storeOp: 'store',
 					clearValue: [0, 0, 0, 0]
@@ -5356,21 +5026,17 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			]
 		});
 
-		frameBindGroup = Q5.device.createBindGroup({
-			layout: frameLayout,
-			entries: [
-				{ binding: 0, resource: { buffer: uniformBuffer } },
-				{ binding: 1, resource: frameSampler },
-				{ binding: 2, resource: frameB.createView() }
-			]
-		});
-
 		if (!shouldClear) {
-			pass.setPipeline($._pipelines[$._prevFramePL]);
-			pass.setBindGroup(0, frameBindGroup);
-			pass.draw(4);
+			frameBindGroup = Q5.device.createBindGroup({
+				layout: framePipeline.getBindGroupLayout(0),
+				entries: [
+					{ binding: 0, resource: frameSampler },
+					{ binding: 1, resource: frameB.createView() }
+				]
+			});
+
+			_drawFrame();
 		}
-		shouldClear = false;
 	};
 
 	$._render = () => {
@@ -5383,8 +5049,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		new Float32Array(transformBuffer.getMappedRange()).set(transforms.slice(0, matrices.length * MATRIX_SIZE));
 		transformBuffer.unmap();
 
-		$._buffers.push(transformBuffer);
-
 		let colorsBuffer = Q5.device.createBuffer({
 			size: colorStackIndex * 4,
 			usage: GPUBufferUsage.STORAGE,
@@ -5393,8 +5057,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		new Float32Array(colorsBuffer.getMappedRange()).set(colorStack.slice(0, colorStackIndex));
 		colorsBuffer.unmap();
-
-		$._buffers.push(colorsBuffer);
 
 		$._uniforms = [
 			$.width,
@@ -5435,22 +5097,12 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		for (let i = 0; i < drawStack.length; i += 2) {
 			let v = drawStack[i + 1];
 
-			if (drawStack[i] != curPipelineIndex) {
-				if (drawStack[i] == 0) {
-					// change blend mode
-					let mode = $._blendModeNames[v];
-					for (let i = 1; i < $._pipelines.length; i++) {
-						$._pipelineConfigs[i].fragment.targets[0].blend = $.blendConfigs[mode];
-						$._pipelines[i] = Q5.device.createRenderPipeline($._pipelineConfigs[i]);
-					}
-					continue;
-				}
-
+			if (curPipelineIndex != drawStack[i]) {
 				curPipelineIndex = drawStack[i];
 				pass.setPipeline($._pipelines[curPipelineIndex]);
 			}
 
-			if (curPipelineIndex == 4 || curPipelineIndex >= 4000) {
+			if (curPipelineIndex == 3 || curPipelineIndex >= 400) {
 				// draw text
 				let o = drawStack[i + 2];
 				pass.setBindGroup(1, $._fonts[o].bindGroup);
@@ -5460,13 +5112,13 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				pass.draw(4, v, 0, textCharOffset);
 				textCharOffset += v;
 				i++;
-			} else if (curPipelineIndex == 2 || curPipelineIndex == 3 || curPipelineIndex >= 2000) {
+			} else if (curPipelineIndex == 1 || curPipelineIndex == 2 || curPipelineIndex >= 200) {
 				// draw an image or video frame
 				// v is the texture index
 				pass.setBindGroup(1, $._textureBindGroups[v]);
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
-			} else {
+			} else if (curPipelineIndex == 0 || curPipelineIndex >= 100) {
 				// draw a shape
 				// v is the number of vertices
 				pass.draw(v, 1, drawVertOffset);
@@ -5475,43 +5127,43 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		}
 	};
 
-	$._finishRender = async () => {
+	$._finishRender = () => {
 		pass.end();
 
-		pass = encoder.beginRenderPass({
-			colorAttachments: [
-				{
-					view: mainView,
-					resolveTarget: $.ctx.getCurrentTexture().createView(),
-					loadOp: 'clear',
-					storeOp: 'store',
-					clearValue: [0, 0, 0, 0]
-				}
-			]
-		});
+		if (!shouldClear) {
+			pass = $.encoder.beginRenderPass({
+				colorAttachments: [
+					{
+						view: mainView,
+						resolveTarget: $.ctx.getCurrentTexture().createView(),
+						loadOp: 'clear',
+						storeOp: 'store',
+						clearValue: [0, 0, 0, 0]
+					}
+				]
+			});
 
-		frameBindGroup = Q5.device.createBindGroup({
-			layout: frameLayout,
-			entries: [
-				{ binding: 0, resource: { buffer: uniformBuffer } },
-				{ binding: 1, resource: frameSampler },
-				{ binding: 2, resource: frameA.createView() }
-			]
-		});
+			frameBindGroup = Q5.device.createBindGroup({
+				layout: framePipeline.getBindGroupLayout(0),
+				entries: [
+					{ binding: 0, resource: frameSampler },
+					{ binding: 1, resource: frameA.createView() }
+				]
+			});
+			_drawFrame();
+			pass.end();
+			shouldClear = false;
+		}
 
-		pass.setPipeline($._pipelines[$._framePL]);
-		pass.setBindGroup(0, frameBindGroup);
-		pass.draw(4);
-		pass.end();
-
-		Q5.device.queue.submit([encoder.finish()]);
-		$._pass = pass = encoder = null;
+		Q5.device.queue.submit([$.encoder.finish()]);
 
 		// destroy buffers
 		Q5.device.queue.onSubmittedWorkDone().then(() => {
 			for (let b of $._buffers) b.destroy();
 			$._buffers = [];
 		});
+
+		q.pass = $.encoder = null;
 
 		// clear the stacks for the next frame
 		drawStack.splice(0, drawStack.length);
@@ -5545,17 +5197,15 @@ Q5.initWebGPU = async () => {
 	return true;
 };
 
-Q5.WebGPU = async function (scope, parent) {
+Q5.webgpu = async function (scope, parent) {
 	if (!scope || scope == 'global') Q5._hasGlobal = true;
 	if (!(await Q5.initWebGPU())) {
 		return new Q5(scope, parent, 'webgpu-fallback');
 	}
 	return new Q5(scope, parent, 'webgpu');
 };
-
-Q5.webgpu = Q5.WebGPU;
 Q5.renderers.webgpu.shapes = ($) => {
-	$._shapesPL = 1;
+	$._shapesPL = 0;
 
 	$._shapesShaderCode =
 		$._baseShaderCode +
@@ -5605,7 +5255,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	});
 
 	let c = $.canvas,
-		drawStack = $._drawStack,
+		drawStack = $.drawStack,
 		vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
 		vertIndex = 0;
 	const TAU = Math.PI * 2;
@@ -5622,10 +5272,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let pipelineLayout = Q5.device.createPipelineLayout({
 		label: 'shapesPipelineLayout',
-		bindGroupLayouts: $._bindGroupLayouts
+		bindGroupLayouts: $.bindGroupLayouts
 	});
 
-	$._pipelineConfigs[1] = {
+	$._pipelineConfigs[0] = {
 		label: 'shapesPipeline',
 		layout: pipelineLayout,
 		vertex: {
@@ -5642,7 +5292,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
+	$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
 
 	const addVert = (x, y, ci, ti) => {
 		let v = vertexStack,
@@ -5699,7 +5349,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			// calculate perimeter vertex
 			let vx = x + a * Math.cos(t);
-			let vy = y - b * Math.sin(t);
+			let vy = y + b * Math.sin(t);
 
 			// add perimeter vertex
 			v[i++] = vx;
@@ -5725,11 +5375,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		for (let j = 0; j <= n; j++) {
 			// Outer vertex
 			let vxOuter = x + outerA * Math.cos(t);
-			let vyOuter = y - outerB * Math.sin(t);
+			let vyOuter = y + outerB * Math.sin(t);
 
 			// Inner vertex
 			let vxInner = x + innerA * Math.cos(t);
-			let vyInner = y - innerB * Math.sin(t);
+			let vyInner = y + innerB * Math.sin(t);
 
 			// Add vertices for triangle strip
 			v[i++] = vxOuter;
@@ -5752,7 +5402,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$.rectMode = (x) => ($._rectMode = x);
 
 	$.rect = (x, y, w, h, rr = 0) => {
-		h ??= w;
 		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
 		let ci, ti;
 		if ($._matrixDirty) $._saveMatrix();
@@ -5809,10 +5458,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if ($._doFill) {
 			ci = $._fill;
 			// Corner arcs
-			addArc(r, b, rr, rr, 0, HALF_PI, n, ci, ti);
-			addArc(l, b, rr, rr, Math.PI, HALF_PI, n, ci, ti);
-			addArc(l, t, rr, rr, -Math.PI, -HALF_PI, n, ci, ti);
-			addArc(r, t, rr, rr, -HALF_PI, 0, n, ci, ti);
+			addArc(r, b, rr, rr, -HALF_PI, 0, n, ci, ti);
+			addArc(l, b, rr, rr, -Math.PI, -HALF_PI, n, ci, ti);
+			addArc(l, t, rr, rr, Math.PI, HALF_PI, n, ci, ti);
+			addArc(r, t, rr, rr, 0, HALF_PI, n, ci, ti);
 
 			addRect(l, trr, r, trr, r, brr, l, brr, ci, ti); // center
 			addRect(l, t, lrr, t, lrr, b, l, b, ci, ti); // Left
@@ -5828,10 +5477,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				innerA = rr - hsw,
 				innerB = rr - hsw;
 			// Corner arc strokes
-			addArcStroke(r, b, outerA, outerB, innerA, innerB, 0, HALF_PI, n, ci, ti);
-			addArcStroke(l, b, outerA, outerB, innerA, innerB, Math.PI, HALF_PI, n, ci, ti);
-			addArcStroke(l, t, outerA, outerB, innerA, innerB, -Math.PI, -HALF_PI, n, ci, ti);
-			addArcStroke(r, t, outerA, outerB, innerA, innerB, -HALF_PI, 0, n, ci, ti);
+			addArcStroke(r, b, outerA, outerB, innerA, innerB, -HALF_PI, 0, n, ci, ti);
+			addArcStroke(l, b, outerA, outerB, innerA, innerB, -Math.PI, -HALF_PI, n, ci, ti);
+			addArcStroke(l, t, outerA, outerB, innerA, innerB, Math.PI, HALF_PI, n, ci, ti);
+			addArcStroke(r, t, outerA, outerB, innerA, innerB, 0, HALF_PI, n, ci, ti);
 
 			let lrrMin = lrr - hsw,
 				lrrMax = lrr + hsw,
@@ -5950,8 +5599,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			b = (h - y) / 2;
 		}
 
-		if ($._matrixDirty) $._saveMatrix();
 		let ti = $._matrixIndex;
+		if ($._matrixDirty) $._saveMatrix();
 		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * $._scale);
 
 		// Draw fill
@@ -5961,12 +5610,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		// Draw stroke
 		if ($._doStroke) {
-			let hsw = $._hsw;
-			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, $._stroke, ti);
-			if ($._strokeCap == 'round') {
-				addArc(x + a * Math.cos(start), -y - b * Math.sin(start), hsw, hsw, 0, TAU, n, $._stroke, ti);
-				addArc(x + a * Math.cos(stop), -y - b * Math.sin(stop), hsw, hsw, 0, TAU, n, $._stroke, ti);
-			}
+			let sw = $._strokeWeight;
+			addArcStroke(x, -y, a + sw, b + sw, a - sw, b - sw, start, stop, n, $._stroke, ti);
 		}
 	};
 
@@ -5986,12 +5631,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	};
 
-	$._strokeCap = $._strokeJoin = 'round';
-	$.strokeCap = (x) => ($._strokeCap = x);
-	$.strokeJoin = (x) => ($._strokeJoin = x);
-	$.lineMode = () => {
-		$._strokeCap = 'square';
-		$._strokeJoin = 'none';
+	$._strokeJoin = 'round';
+
+	$.strokeJoin = (x) => {
+		$._strokeJoin = x;
 	};
 
 	$.line = (x1, y1, x2, y2) => {
@@ -6012,15 +5655,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if ($._scaledSW > 2 && $._strokeCap != 'square') {
+		if ($._scaledSW > 2 && $._strokeJoin != 'none') {
 			let n = getArcSegments($._scaledSW);
 			addArc(x1, -y1, hsw, hsw, 0, TAU, n, ci, ti);
 			addArc(x2, -y2, hsw, hsw, 0, TAU, n, ci, ti);
 		}
 	};
-
-	let curveSegments = 20;
-	$.curveDetail = (x) => (curveSegments = x);
 
 	let shapeVertCount;
 	let sv = []; // shape vertices
@@ -6042,51 +5682,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if ($._matrixDirty) $._saveMatrix();
 		curveVertices.push({ x: x, y: -y });
 	};
-
-	$.bezierVertex = function (cx1, cy1, cx2, cy2, x, y) {
-		if (shapeVertCount === 0) throw new Error('Shape needs a vertex()');
-		if ($._matrixDirty) $._saveMatrix();
-
-		// Get the last vertex as the starting point (P₀)
-		let prevIndex = (shapeVertCount - 1) * 4;
-		let startX = sv[prevIndex];
-		let startY = sv[prevIndex + 1];
-
-		let step = 1 / curveSegments;
-
-		let vx, vy;
-		let quadratic = arguments.length == 4;
-		if (quadratic) {
-			x = cx2;
-			y = cy2;
-		}
-
-		let end = 1 + step;
-		for (let t = step; t <= end; t += step) {
-			// Start from 0.1 to avoid duplicating the start point
-			let t2 = t * t;
-
-			let mt = 1 - t;
-			let mt2 = mt * mt;
-
-			if (quadratic) {
-				vx = mt2 * startX + 2 * mt * t * cx1 + t2 * x;
-				vy = mt2 * startY + 2 * mt * t * -cy1 + t2 * -y;
-			} else {
-				let t3 = t2 * t;
-				let mt3 = mt2 * mt;
-
-				// Cubic Bezier formula
-				vx = mt3 * startX + 3 * mt2 * t * cx1 + 3 * mt * t2 * cx2 + t3 * x;
-				vy = mt3 * startY + 3 * mt2 * t * -cy1 + 3 * mt * t2 * -cy2 + t3 * -y;
-			}
-
-			sv.push(vx, vy, $._fill, $._matrixIndex);
-			shapeVertCount++;
-		}
-	};
-
-	$.quadraticVertex = (cx, cy, x, y) => $.bezierVertex(cx, cy, x, y);
 
 	$.endShape = (close) => {
 		if (curveVertices.length > 0) {
@@ -6131,9 +5726,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			}
 		}
 
-		if (!shapeVertCount) return;
-		if (shapeVertCount == 1) return $.point(sv[0], -sv[1]);
-		if (shapeVertCount == 2) return $.line(sv[0], -sv[1], sv[4], -sv[5]);
+		if (shapeVertCount < 3) {
+			throw new Error('A shape must have at least 3 vertices.');
+		}
 
 		// close the shape if requested
 		if (close) {
@@ -6178,8 +5773,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let hsw = $._hsw,
 				n = getArcSegments($._scaledSW),
 				ti = $._matrixIndex,
-				ogStrokeCap = $._strokeCap;
-			$._strokeCap = 'square';
+				ogStrokeJoin = $._strokeJoin;
+			$._strokeJoin = 'none';
 			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
@@ -6188,33 +5783,18 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 				addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
 			}
-			let v1 = (shapeVertCount - 1) * 4;
-			let v2 = 0;
-			if (close) $.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
-			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
-			$._strokeCap = ogStrokeCap;
+			if (close) {
+				let v1 = (shapeVertCount - 1) * 4;
+				let v2 = 0;
+				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
+			}
+			$._strokeJoin = ogStrokeJoin;
 		}
 
 		// reset for the next shape
 		shapeVertCount = 0;
 		sv = [];
 		curveVertices = [];
-	};
-
-	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
-		$.beginShape();
-		$.curveVertex(x1, y1);
-		$.curveVertex(x2, y2);
-		$.curveVertex(x3, y3);
-		$.curveVertex(x4, y4);
-		$.endShape();
-	};
-
-	$.bezier = (x1, y1, x2, y2, x3, y3, x4, y4) => {
-		$.beginShape();
-		$.vertex(x1, y1);
-		$.bezierVertex(x2, y2, x3, y3, x4, y4);
-		$.endShape();
 	};
 
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {
@@ -6234,8 +5814,24 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		$.endShape(true);
 	};
 
+	$.background = (r, g, b, a) => {
+		$.push();
+		$.resetMatrix();
+		if (r.canvas) {
+			let img = r;
+			$._imageMode = 'corner';
+			$.image(img, -c.hw, -c.hh, c.w, c.h);
+		} else {
+			$._rectMode = 'corner';
+			$.fill(r, g, b, a);
+			$._doStroke = false;
+			$.rect(-c.hw, -c.hh, c.w, c.h);
+		}
+		$.pop();
+	};
+
 	$._hooks.preRender.push(() => {
-		$._pass.setPipeline($._pipelines[1]);
+		$.pass.setPipeline($._pipelines[0]);
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 4,
@@ -6246,7 +5842,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
-		$._pass.setVertexBuffer(0, vertexBuffer);
+		$.pass.setVertexBuffer(0, vertexBuffer);
 
 		$._buffers.push(vertexBuffer);
 	});
@@ -6256,8 +5852,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	});
 };
 Q5.renderers.webgpu.image = ($, q) => {
-	$._imagePL = 2;
-	$._videoPL = 3;
+	$._imagePL = 1;
+	$._videoPL = 2;
 
 	$._imageShaderCode =
 		$._baseShaderCode +
@@ -6285,7 +5881,7 @@ struct FragParams {
 @group(1) @binding(1) var tex: texture_2d<f32>;
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
-	var vert = vec4f(pos, 0f, 1f);
+	var vert = vec4f(pos, 0.0, 1.0);
 	vert = transforms[i32(matrixIndex)] * vert;
 	vert.x /= q.halfWidth;
 	vert.y /= q.halfHeight;
@@ -6381,15 +5977,15 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let imagePipelineLayout = Q5.device.createPipelineLayout({
 		label: 'imagePipelineLayout',
-		bindGroupLayouts: [...$._bindGroupLayouts, textureLayout]
+		bindGroupLayouts: [...$.bindGroupLayouts, textureLayout]
 	});
 
 	let videoPipelineLayout = Q5.device.createPipelineLayout({
 		label: 'videoPipelineLayout',
-		bindGroupLayouts: [...$._bindGroupLayouts, videoTextureLayout]
+		bindGroupLayouts: [...$.bindGroupLayouts, videoTextureLayout]
 	});
 
-	$._pipelineConfigs[2] = {
+	$._pipelineConfigs[1] = {
 		label: 'imagePipeline',
 		layout: imagePipelineLayout,
 		vertex: {
@@ -6406,9 +6002,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
+	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
 
-	$._pipelineConfigs[3] = {
+	$._pipelineConfigs[2] = {
 		label: 'videoPipeline',
 		layout: videoPipelineLayout,
 		vertex: {
@@ -6425,67 +6021,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[3] = Q5.device.createRenderPipeline($._pipelineConfigs[3]);
+	$._pipelines[2] = Q5.device.createRenderPipeline($._pipelineConfigs[2]);
 
 	$._textureBindGroups = [];
-
-	$._saveCanvas = async (img, ext) => {
-		if (img._graphics && img._drawStack?.length) img._completeFrame();
-
-		let texture = img.texture,
-			w = texture.width,
-			h = texture.height,
-			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
-
-		let buffer = Q5.device.createBuffer({
-			size: bytesPerRow * h,
-			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
-		});
-
-		$._buffers.push(buffer);
-
-		let en = Q5.device.createCommandEncoder();
-
-		en.copyTextureToBuffer({ texture }, { buffer, bytesPerRow, rowsPerImage: h }, { width: w, height: h });
-
-		Q5.device.queue.submit([en.finish()]);
-
-		await buffer.mapAsync(GPUMapMode.READ);
-
-		let pad = new Uint8Array(buffer.getMappedRange());
-		let data = new Uint8Array(w * h * 4); // unpadded data
-
-		// Remove padding from each row and swap BGR to RGB
-		for (let y = 0; y < h; y++) {
-			const p = y * bytesPerRow; // padded row offset
-			const u = y * w * 4; // unpadded row offset
-			for (let x = 0; x < w; x++) {
-				const pp = p + x * 4; // padded pixel offset
-				const up = u + x * 4; // unpadded pixel offset
-				data[up + 0] = pad[pp + 2]; // R <- B
-				data[up + 1] = pad[pp + 1]; // G <- G
-				data[up + 2] = pad[pp + 0]; // B <- R
-				data[up + 3] = pad[pp + 3]; // A <- A
-			}
-		}
-
-		buffer.unmap();
-
-		let colorSpace = $.canvas.colorSpace;
-		data = new Uint8ClampedArray(data.buffer);
-		data = new ImageData(data, w, h, { colorSpace });
-		let cnv = new $._Canvas(w, h);
-		let ctx = cnv.getContext('2d', { colorSpace });
-		ctx.putImageData(data, 0, 0);
-
-		// Convert to blob then data URL
-		let blob = await cnv.convertToBlob({ type: 'image/' + ext });
-		return await new Promise((resolve) => {
-			let r = new FileReader();
-			r.onloadend = () => resolve(r.result);
-			r.readAsDataURL(blob);
-		});
-	};
 
 	let makeSampler = (filter) => {
 		$._imageSampler = Q5.device.createSampler({
@@ -6511,11 +6049,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			texture = Q5.device.createTexture({
 				size: textureSize,
 				format: 'bgra8unorm',
-				usage:
-					GPUTextureUsage.TEXTURE_BINDING |
-					GPUTextureUsage.COPY_SRC |
-					GPUTextureUsage.COPY_DST |
-					GPUTextureUsage.RENDER_ATTACHMENT
+				usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
 			});
 
 			Q5.device.queue.copyExternalImageToTexture(
@@ -6531,8 +6065,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		img.texture = texture;
 		img.textureIndex = tIdx + vidFrames;
 
-		$._textureBindGroups[img.textureIndex] = Q5.device.createBindGroup({
-			label: img.src || 'canvas',
+		$._textureBindGroups[tIdx + vidFrames] = Q5.device.createBindGroup({
 			layout: textureLayout,
 			entries: [
 				{ binding: 0, resource: $._imageSampler },
@@ -6548,14 +6081,16 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let g = new Q5Image(...arguments);
 		if (w > 1 && h > 1) {
 			$._addTexture(g);
-			img.modified = true;
+			g.modified = true;
 		}
 		return g;
 	};
 
 	$.loadImage = (src, cb) => {
+		q._preloadCount++;
 		let g = $._g.loadImage(src, (img) => {
 			$._addTexture(img);
+			q._preloadCount--;
 			if (cb) cb(g);
 		});
 		return g;
@@ -6567,13 +6102,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.createGraphics = (w, h, opt) => {
 		let g = _createGraphics(w, h, opt);
-		if (g.canvas.webgpu) {
-			$._addTexture(g, g._frameA);
-			$._addTexture(g, g._frameB);
-			g._beginRender();
-		} else {
-			g.modified = true;
-		}
+		$._addTexture(g, g._frameA);
+		$._addTexture(g, g._frameB);
+		g._beginRender();
 		return g;
 	};
 
@@ -6608,7 +6139,17 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			h = cnv.height,
 			pd = img._pixelDensity || 1;
 
-		if (img._graphics && img._drawStack?.length) img._completeFrame();
+		if (img._graphics) {
+			let g = img;
+			if (g.drawStack.length) {
+				g._render();
+				g._finishRender();
+				g.textureIndex += g.frameCount % 2 == 0 ? -1 : 1;
+				g.resetMatrix();
+				g._beginRender();
+				g.frameCount++;
+			}
+		}
 
 		if (img.modified) {
 			Q5.device.queue.copyExternalImageToTexture(
@@ -6642,7 +6183,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		addVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
-			$._drawStack.push($._imagePL, img.textureIndex);
+			$.drawStack.push($._imagePL, img.textureIndex);
 		} else {
 			// render video
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
@@ -6659,26 +6200,73 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				})
 			);
 
-			$._drawStack.push($._videoPL, $._textureBindGroups.length - 1);
+			$.drawStack.push($._videoPL, $._textureBindGroups.length - 1);
 
 			if (img.flipped) $.scale(-1, 1);
 		}
 	};
 
-	$._completeFrame = () => {
-		$._render();
-		$._finishRender();
-		$.textureIndex += $.frameCount % 2 == 0 ? -1 : 1;
-		$.resetMatrix();
-		$._beginRender();
-		$.frameCount++;
+	$._saveCanvas = async (data, ext) => {
+		let texture = data.texture,
+			w = texture.width,
+			h = texture.height,
+			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
+
+		let buffer = Q5.device.createBuffer({
+			size: bytesPerRow * h,
+			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+		});
+
+		$._buffers.push(buffer);
+
+		let en = Q5.device.createCommandEncoder();
+
+		en.copyTextureToBuffer({ texture }, { buffer, bytesPerRow, rowsPerImage: h }, { width: w, height: h });
+
+		Q5.device.queue.submit([en.finish()]);
+
+		await buffer.mapAsync(GPUMapMode.READ);
+
+		let pad = new Uint8Array(buffer.getMappedRange());
+		data = new Uint8Array(w * h * 4); // unpadded data
+
+		// Remove padding from each row and swap BGR to RGB
+		for (let y = 0; y < h; y++) {
+			const p = y * bytesPerRow; // padded row offset
+			const u = y * w * 4; // unpadded row offset
+			for (let x = 0; x < w; x++) {
+				const pp = p + x * 4; // padded pixel offset
+				const up = u + x * 4; // unpadded pixel offset
+				data[up + 0] = pad[pp + 2]; // R <- B
+				data[up + 1] = pad[pp + 1]; // G <- G
+				data[up + 2] = pad[pp + 0]; // B <- R
+				data[up + 3] = pad[pp + 3]; // A <- A
+			}
+		}
+
+		buffer.unmap();
+
+		let colorSpace = $.canvas.colorSpace;
+		data = new Uint8ClampedArray(data.buffer);
+		data = new ImageData(data, w, h, { colorSpace });
+		let cnv = new $._Canvas(w, h);
+		let ctx = cnv.getContext('2d', { colorSpace });
+		ctx.putImageData(data, 0, 0);
+
+		// Convert to blob then data URL
+		let blob = await cnv.convertToBlob({ type: 'image/' + ext });
+		return await new Promise((resolve) => {
+			let r = new FileReader();
+			r.onloadend = () => resolve(r.result);
+			r.readAsDataURL(blob);
+		});
 	};
 
 	$._hooks.preRender.push(() => {
 		if (!vertIndex) return;
 
 		// Switch to image pipeline
-		$._pass.setPipeline($._pipelines[2]);
+		$.pass.setPipeline($._pipelines[1]);
 
 		let vertexBuffer = Q5.device.createBuffer({
 			size: vertIndex * 5,
@@ -6689,14 +6277,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
 		vertexBuffer.unmap();
 
-		$._pass.setVertexBuffer(1, vertexBuffer);
+		$.pass.setVertexBuffer(1, vertexBuffer);
 
 		$._buffers.push(vertexBuffer);
 
 		if (vidFrames) {
 			// Switch to video pipeline
-			$._pass.setPipeline($._pipelines[3]);
-			$._pass.setVertexBuffer(1, vertexBuffer);
+			$.pass.setPipeline($._pipelines[3]);
+			$.pass.setVertexBuffer(1, vertexBuffer);
 		}
 	});
 
@@ -6716,7 +6304,7 @@ Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
 Q5.renderers.webgpu.text = ($, q) => {
-	$._textPL = 4;
+	$._textPL = 3;
 
 	$._textShaderCode =
 		$._baseShaderCode +
@@ -6730,8 +6318,7 @@ struct FragParams {
 	@location(0) texCoord : vec2f,
 	@location(1) fillColor : vec4f,
 	@location(2) strokeColor : vec4f,
-	@location(3) strokeWeight : f32,
-	@location(4) edge : f32
+	@location(3) strokeWeight : f32
 }
 struct Char {
 	texOffset: vec2f,
@@ -6745,8 +6332,7 @@ struct Text {
 	matrixIndex: f32,
 	fillIndex: f32,
 	strokeIndex: f32,
-	strokeWeight: f32,
-	edge: f32
+	strokeWeight: f32
 }
 
 @group(0) @binding(0) var<uniform> q: Q5;
@@ -6761,7 +6347,6 @@ struct Text {
 @group(2) @binding(1) var<storage> textMetadata: array<Text>;
 
 const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
-const uvs = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
 
 fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
 	return ((quad[i] * fontChar.size + char.xy + fontChar.offset) *
@@ -6769,7 +6354,8 @@ fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
 }
 
 fn calcUV(i: u32, fontChar: Char) -> vec2f {
-	return uvs[i] * fontChar.texExtent + fontChar.texOffset;
+	return (quad[i] * vec2f(1, -1)) *
+		fontChar.texExtent + fontChar.texOffset;
 }
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
@@ -6807,13 +6393,12 @@ fn vertexMain(v : VertexParams) -> FragParams {
 	f.fillColor = colors[i32(text.fillIndex)];
 	f.strokeColor = colors[i32(text.strokeIndex)];
 	f.strokeWeight = text.strokeWeight;
-	f.edge = text.edge;
 	return f;
 }
 
 @fragment
 fn fragMain(f : FragParams) -> @location(0) vec4f {
-	let edge = f.edge;
+	let edge = 0.5;
 	let dist = calcDist(f.texCoord, edge);
 
 	if (f.strokeWeight == 0.0) {
@@ -6887,10 +6472,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	});
 
 	let fontPipelineLayout = Q5.device.createPipelineLayout({
-		bindGroupLayouts: [...$._bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
+		bindGroupLayouts: [...$.bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
 	});
 
-	$._pipelineConfigs[4] = {
+	$._pipelineConfigs[3] = {
 		label: 'textPipeline',
 		layout: fontPipelineLayout,
 		vertex: { module: textShader, entryPoint: 'vertexMain' },
@@ -6903,7 +6488,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		multisample: { count: 4 }
 	};
 
-	$._pipelines[4] = Q5.device.createRenderPipeline($._pipelineConfigs[4]);
+	$._pipelines[3] = Q5.device.createRenderPipeline($._pipelineConfigs[3]);
 
 	class MsdfFont {
 		constructor(bindGroup, lineHeight, chars, kernings) {
@@ -6936,10 +6521,14 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$._fonts = [];
 	let fonts = {};
 
-	async function createFont(fontJsonUrl, fontName, cb) {
-		let res = await fetch(fontJsonUrl);
-		if (res.status == 404) return '';
+	let createFont = async (fontJsonUrl, fontName, cb) => {
+		q._preloadCount++;
 
+		let res = await fetch(fontJsonUrl);
+		if (res.status == 404) {
+			q._preloadCount--;
+			return '';
+		}
 		let atlas = await res.json();
 
 		let slashIdx = fontJsonUrl.lastIndexOf('/');
@@ -7020,32 +6609,33 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		$._fonts.push($._font);
 		fonts[fontName] = $._font;
 
+		q._preloadCount--;
+
 		if (cb) cb(fontName);
-	}
+	};
+
+	$._g.colorMode($.RGB, 1);
 
 	$.loadFont = (url, cb) => {
 		let ext = url.slice(url.lastIndexOf('.') + 1);
-		if (url == ext) return $._loadDefaultFont(url, cb);
 		if (ext != 'json') return $._g.loadFont(url, cb);
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
 		let f = { family: fontName };
-		f.promise = createFont(url, fontName, () => {
-			delete f.promise;
+		f._loader = createFont(url, fontName, () => {
+			delete f._loader;
 			if (cb) cb(f);
 		});
-		$._preloadPromises.push(f.promise);
-
-		if (!$._usePreload) return f.promise;
+		if ($._disablePreload) return f._loader;
 		return f;
 	};
 
-	$._loadDefaultFont = (fontName, cb) => {
+	$._loadDefaultFont = (fontName) => {
 		fonts[fontName] = null;
-		let url = `https://q5js.org/fonts/${fontName}-msdf.json`;
-		if (!navigator.onLine) {
-			url = `/node_modules/q5/builtinFonts/${fontName}-msdf.json`;
+		if (navigator.onLine) {
+			$.loadFont(`https://q5js.org/fonts/${fontName}-msdf.json`);
+		} else {
+			$.loadFont(`/node_modules/q5/builtinFonts/${fontName}-msdf.json`);
 		}
-		return $.loadFont(url, cb);
 	};
 
 	$._textSize = 18;
@@ -7057,47 +6647,18 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		leadPercent = 1.25;
 
 	$.textFont = (fontName) => {
-		if (!fontName) return $._font;
 		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;
-		else if (font === undefined) return $._loadDefaultFont(fontName);
+		else if (font === undefined) $._loadDefaultFont(fontName);
 	};
 
 	$.textSize = (size) => {
-		if (size == undefined) return $._textSize;
 		$._textSize = size;
 		if (!leadingSet) {
 			leading = size * leadPercent;
 			leadDiff = leading - size;
 		}
-	};
-
-	let weights = {
-		thin: 100,
-		extralight: 200,
-		light: 300,
-		normal: 400,
-		regular: 400,
-		medium: 500,
-		semibold: 600,
-		bold: 700,
-		bolder: 800,
-		extrabold: 800,
-		black: 900,
-		heavy: 900
-	};
-
-	// ranges from 0.35 (black) to 0.65 (thin)
-	$._textEdge = 0.5;
-
-	$.textWeight = (weight) => {
-		if (!weight) return $._textWeight;
-		if (typeof weight == 'string') {
-			weight = weights[weight.toLowerCase().replace(/[ _-]/g, '')];
-			if (!weight) throw new Error(`Invalid font weight: ${weight}`);
-		}
-		$._textEdge = 0.6875 - weight * 0.000375;
 	};
 
 	$.textLeading = (lineHeight) => {
@@ -7258,15 +6819,15 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		txt[0] = x;
 		txt[1] = -y;
-		txt[2] = $._textSize / 42;
+		txt[2] = $._textSize / 44;
 		txt[3] = $._matrixIndex;
 		txt[4] = $._doFill && $._fillSet ? $._fill : 0;
 		txt[5] = $._stroke;
 		txt[6] = $._doStroke && $._strokeSet ? $._strokeWeight : 0;
-		txt[7] = $._textEdge;
+		txt[7] = 0; // padding
 
 		textStack.push(txt);
-		$._drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
+		$.drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {
@@ -7277,13 +6838,13 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$.createTextImage = (str, w, h) => {
 		$._g.textSize($._textSize);
 
-		if ($._doFill && $._fillSet) {
+		if ($._doFill) {
 			let fi = $._fill * 4;
-			$._g.fill($._colorStack.slice(fi, fi + 4));
+			$._g.fill(colorStack.slice(fi, fi + 4));
 		}
-		if ($._doStroke && $._strokeSet) {
+		if ($._doStroke) {
 			let si = $._stroke * 4;
-			$._g.stroke($._colorStack.slice(si, si + 4));
+			$._g.stroke(colorStack.slice(si, si + 4));
 		}
 
 		let img = $._g.createTextImage(str, w, h);
@@ -7373,14 +6934,13 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	});
 };
 Q5.renderers.webgpu.shaders = ($) => {
-	let pipelineTypes = ['frame', 'shapes', 'image', 'video', 'text'];
+	let pipelineTypes = ['shapes', 'image', 'video', 'text'];
 
 	let plCounters = {
-		frame: 10,
-		shapes: 1000,
-		image: 2000,
-		video: 3000,
-		text: 4000
+		shapes: 100,
+		image: 200,
+		video: 300,
+		text: 400
 	};
 
 	$._createShader = (code, type = 'shapes') => {
@@ -7415,35 +6975,30 @@ Q5.renderers.webgpu.shaders = ($) => {
 
 		let pl = plCounters[type];
 		$._pipelines[pl] = Q5.device.createRenderPipeline(config);
-		$._pipelines[pl].shader = shader;
 		shader.pipelineIndex = pl;
-
 		plCounters[type]++;
 
 		return shader;
 	};
 
 	$.createShader = $.createShapesShader = $._createShader;
-	$.createFrameShader = (code) => $._createShader(code, 'frame');
 	$.createImageShader = (code) => $._createShader(code, 'image');
 	$.createVideoShader = (code) => $._createShader(code, 'video');
 	$.createTextShader = (code) => $._createShader(code, 'text');
 
 	$.shader = (shader) => {
-		if (shader.applyBeforeDraw) $._prevFramePL = shader.pipelineIndex;
-		else $['_' + shader.type + 'PL'] = shader.pipelineIndex;
+		$['_' + shader.type + 'PL'] = shader.pipelineIndex;
 	};
 
 	$.resetShader = (type = 'shapes') => {
-		if (type == 'frame') $._prevFramePL = 0;
 		$['_' + type + 'PL'] = pipelineTypes.indexOf(type);
 	};
 
 	$.resetShaders = () => {
-		$._prevFramePL = $._framePL = 0;
-		$._shapesPL = 1;
-		$._imagePL = 2;
-		$._videoPL = 3;
-		$._textPL = 4;
+		$._shapesPL = 0;
+		$._imagePL = 1;
+		$._videoPL = 2;
+		$._textPL = 3;
+		$._planePL = 4;
 	};
 };
