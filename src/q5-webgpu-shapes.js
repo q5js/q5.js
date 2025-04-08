@@ -80,7 +80,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: shapesShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }

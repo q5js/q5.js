@@ -4956,12 +4956,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	let usingRGB = true,
 		colorFormat = 1;
 
-	let cm = $.colorMode;
-	$.colorMode = function () {
-		cm(...arguments);
-		usingRGB = $._colorMode == 'rgb';
-		colorFormat = $._colorFormat;
-	};
+	if ($.colorMode) {
+		let cm = $.colorMode;
+		$.colorMode = function () {
+			cm(...arguments);
+			usingRGB = $._colorMode == 'rgb';
+			colorFormat = $._colorFormat;
+		};
+	}
 
 	let addColor = (r, g, b, a) => {
 		if (typeof r === 'string' || usingRGB === false) {
@@ -5636,7 +5638,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: shapesShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -6400,7 +6402,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: imageShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -6419,7 +6421,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: videoShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -6897,7 +6899,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: textShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs.normal }]
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }

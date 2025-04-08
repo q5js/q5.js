@@ -2478,12 +2478,13 @@ q.draw = () => {
 	for (let x = -100; x < 100; x += 5) {
 		for (let y = -100; y < 100; y += 5) {
 			fill(noise(t, (mouseX + x) * .05, y * .05));
-			square(x, y, 4);
+			square(x, y, 5);
 		}
 	}
 };
 	 * @example
 let q = await Q5.WebGPU();
+frameRate(30);
 
 q.draw = () => {
 	let zoom = mouseY / 2000;

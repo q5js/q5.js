@@ -213,12 +213,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	let usingRGB = true,
 		colorFormat = 1;
 
-	let cm = $.colorMode;
-	$.colorMode = function () {
-		cm(...arguments);
-		usingRGB = $._colorMode == 'rgb';
-		colorFormat = $._colorFormat;
-	};
+	if ($.colorMode) {
+		let cm = $.colorMode;
+		$.colorMode = function () {
+			cm(...arguments);
+			usingRGB = $._colorMode == 'rgb';
+			colorFormat = $._colorFormat;
+		};
+	}
 
 	let addColor = (r, g, b, a) => {
 		if (typeof r === 'string' || usingRGB === false) {
