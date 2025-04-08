@@ -1,294 +1,397 @@
 Q5.renderers.c2d.text = ($, q) => {
-	$._textAlign = 'left';
-	$._textBaseline = 'alphabetic';
-	$._textSize = 12;
+  $._textAlign = "left";
+  $._textBaseline = "alphabetic";
+  $._textSize = 12;
 
-	let font = 'sans-serif',
-		leadingSet = false,
-		leading = 15,
-		leadDiff = 3,
-		emphasis = 'normal',
-		weight = 'normal',
-		fontMod = false,
-		styleHash = 0,
-		styleHashes = [],
-		genTextImage = false,
-		cacheSize = 0;
+  let font = "sans-serif",
+    leadingSet = false,
+    leading = 15,
+    leadDiff = 3,
+    emphasis = "normal",
+    weight = "normal",
+    fontMod = false,
+    styleHash = 0,
+    styleHashes = [],
+    genTextImage = false,
+    cacheSize = 0;
 
-	let cache = ($._textCache = {});
-	$._textCacheMaxSize = 12000;
+  let cache = ($._textCache = {});
+  $._textCacheMaxSize = 12000;
 
-	$.loadFont = (url, cb) => {
-		let name = url.split('/').pop().split('.')[0].replace(' ', '');
+  $.loadFont = (url, cb) => {
+    // Check if this is a Google Fonts URL
+    if (url.startsWith("https://fonts.googleapis.com/css")) {
+      return loadGoogleFont(url, cb);
+    }
 
-		let f = new FontFace(name, `url(${url})`);
-		document.fonts.add(f);
-		f.promise = (async () => {
-			let err;
-			try {
-				await f.load();
-			} catch (e) {
-				err = e;
-			}
-			delete f.promise;
-			if (err) throw err;
-			if (cb) cb(f);
-			return f;
-		})();
-		$._preloadPromises.push(f.promise);
-		$.textFont(name);
-		if (!$._usePreload) return f.promise;
-		return f;
-	};
+    // Handle regular font files
+    let name = url.split("/").pop().split(".")[0].replace(" ", "");
 
-	$.textFont = (x) => {
-		if (x && typeof x != 'string') x = x.family;
-		if (!x || x == font) return font;
-		font = x;
-		fontMod = true;
-		styleHash = -1;
-	};
+    let f = new FontFace(name, `url(${url})`);
+    document.fonts.add(f);
+    f.promise = (async () => {
+      let err;
+      try {
+        await f.load();
+      } catch (e) {
+        err = e;
+      }
+      delete f.promise;
+      if (err) throw err;
+      if (cb) cb(f);
+      return f;
+    })();
+    $._preloadPromises.push(f.promise);
+    $.textFont(name);
+    if (!$._usePreload) return f.promise;
+    return f;
+  };
 
-	$.textSize = (x) => {
-		if (x == undefined) return $._textSize;
-		if ($._da) x *= $._da;
-		$._textSize = x;
-		fontMod = true;
-		styleHash = -1;
-		if (!leadingSet) {
-			leading = x * 1.25;
-			leadDiff = leading - x;
-		}
-	};
+  // Helper function to load Google Fonts
+  const loadGoogleFont = async (url, cb) => {
+    // Extract the font family name from the URL
+    const urlParams = new URL(url).searchParams;
+    const familyParam = urlParams.get("family");
+    if (!familyParam) {
+      console.error("Invalid Google Fonts URL: missing family parameter");
+      return null;
+    }
 
-	$.textStyle = (x) => {
-		if (!x) return emphasis;
-		emphasis = x;
-		fontMod = true;
-		styleHash = -1;
-	};
+    // Extract the base font family name (without weight/style parameters)
+    const fontFamily = familyParam.split(":")[0];
 
-	$.textWeight = (x) => {
-		if (!x) return weight;
-		weight = x;
-		fontMod = true;
-		styleHash = -1;
-	};
+    // Create a font object with the family name
+    let fontObj = { family: fontFamily };
 
-	$.textLeading = (x) => {
-		if (x == undefined) return leading || $._textSize * 1.25;
-		leadingSet = true;
-		if (x == leading) return leading;
-		if ($._da) x *= $._da;
-		leading = x;
-		leadDiff = x - $._textSize;
-		styleHash = -1;
-	};
+    // Fetch the CSS stylesheet
+    fontObj.promise = (async () => {
+      try {
+        // Fetch the CSS content
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch Google Font: ${response.status} ${response.statusText}`);
+        }
 
-	$.textAlign = (horiz, vert) => {
-		$.ctx.textAlign = $._textAlign = horiz;
-		if (vert) {
-			$.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? 'middle' : vert;
-		}
-	};
+        const css = await response.text();
 
-	const updateFont = () => {
-		$.ctx.font = `${emphasis} ${weight} ${$._textSize}px ${font}`;
-		fontMod = false;
-	};
+        // Parse the CSS to extract @font-face rules
+        const fontFaceRegex = /@font-face\s*{([^}]*)}/g;
+        const srcRegex = /src:\s*url\(([^)]+)\)[^;]*;/;
+        const fontFamilyRegex = /font-family:\s*['"]([^'"]+)['"]/;
+        const fontWeightRegex = /font-weight:\s*([^;]+);/;
+        const fontStyleRegex = /font-style:\s*([^;]+);/;
 
-	$.textWidth = (str) => {
-		if (fontMod) updateFont();
-		return $.ctx.measureText(str).width;
-	};
-	$.textAscent = (str) => {
-		if (fontMod) updateFont();
-		return $.ctx.measureText(str).actualBoundingBoxAscent;
-	};
-	$.textDescent = (str) => {
-		if (fontMod) updateFont();
-		return $.ctx.measureText(str).actualBoundingBoxDescent;
-	};
+        let fontFaceMatch;
+        let loadedFaces = [];
 
-	$.textFill = $.fill;
-	$.textStroke = $.stroke;
+        // Process each @font-face rule
+        while ((fontFaceMatch = fontFaceRegex.exec(css)) !== null) {
+          const fontFaceCSS = fontFaceMatch[1];
 
-	let updateStyleHash = () => {
-		let styleString = font + $._textSize + emphasis + leading;
+          // Extract font URL
+          const srcMatch = srcRegex.exec(fontFaceCSS);
+          if (!srcMatch) continue;
+          const fontUrl = srcMatch[1];
 
-		let hash = 5381;
-		for (let i = 0; i < styleString.length; i++) {
-			hash = (hash * 33) ^ styleString.charCodeAt(i);
-		}
-		styleHash = hash >>> 0;
-	};
+          // Extract font family
+          const familyMatch = fontFamilyRegex.exec(fontFaceCSS);
+          if (!familyMatch) continue;
+          const family = familyMatch[1];
 
-	$.createTextImage = (str, w, h) => {
-		genTextImage = true;
-		let img = $.text(str, 0, 0, w, h);
-		genTextImage = false;
-		return img;
-	};
+          // Extract font weight and style (optional)
+          const weightMatch = fontWeightRegex.exec(fontFaceCSS);
+          const weight = weightMatch ? weightMatch[1] : "400";
 
-	let lines = [];
+          const styleMatch = fontStyleRegex.exec(fontFaceCSS);
+          const style = styleMatch ? styleMatch[1] : "normal";
 
-	$.text = (str, x, y, w, h) => {
-		if (str === undefined || (!$._doFill && !$._doStroke)) return;
-		str = str.toString();
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
-		let ctx = $.ctx;
-		let img, tX, tY;
+          // Create a unique name for this font face
+          const faceName = `${family}-${weight}-${style}`.replace(/\s+/g, "-");
 
-		if (fontMod) updateFont();
+          // Create and load the font face
+          const fontFace = new FontFace(family, `url(${fontUrl})`, {
+            weight,
+            style,
+          });
 
-		if (genTextImage) {
-			if (styleHash == -1) updateStyleHash();
+          document.fonts.add(fontFace);
 
-			img = cache[str];
-			if (img) img = img[styleHash];
+          try {
+            await fontFace.load();
+            loadedFaces.push(fontFace);
+          } catch (e) {
+            console.error(`Failed to load font face: ${faceName}`, e);
+          }
+        }
 
-			if (img) {
-				if (img._fill == $._fill && img._stroke == $._stroke && img._strokeWeight == $._strokeWeight) {
-					return img;
-				} else img.clear();
-			}
-		}
+        // Store the loaded font faces in the font object
+        fontObj.faces = loadedFaces;
 
-		if (str.indexOf('\n') == -1) lines[0] = str;
-		else lines = str.split('\n');
+        // Set the text font to the loaded font family
+        $.textFont(fontFamily);
 
-		if (str.length > w) {
-			let wrapped = [];
-			for (let line of lines) {
-				let i = 0;
+        if (cb) cb(fontObj);
+        return fontObj;
+      } catch (e) {
+        console.error("Error loading Google Font:", e);
+        throw e;
+      }
+    })();
 
-				while (i < line.length) {
-					let max = i + w;
-					if (max >= line.length) {
-						wrapped.push(line.slice(i));
-						break;
-					}
-					let end = line.lastIndexOf(' ', max);
-					if (end === -1 || end < i) end = max;
-					wrapped.push(line.slice(i, end));
-					i = end + 1;
-				}
-			}
-			lines = wrapped;
-		}
+    $._preloadPromises.push(fontObj.promise);
 
-		if (!genTextImage) {
-			tX = x;
-			tY = y;
-			if ($._textBaseline == 'middle') tY -= leading * (lines.length - 1) * 0.5;
-			else if ($._textBaseline == 'bottom') tY -= leading * (lines.length - 1);
-		} else {
-			tX = 0;
-			tY = leading;
+    if (!$._usePreload) return fontObj.promise;
+    return fontObj;
+  };
 
-			if (!img) {
-				let ogBaseline = $.ctx.textBaseline;
-				$.ctx.textBaseline = 'alphabetic';
+  $.textFont = (x) => {
+    if (x && typeof x != "string") x = x.family;
+    if (!x || x == font) return font;
+    font = x;
+    fontMod = true;
+    styleHash = -1;
+  };
 
-				let measure = ctx.measureText(' ');
-				let ascent = measure.fontBoundingBoxAscent;
-				let descent = measure.fontBoundingBoxDescent;
+  $.textSize = (x) => {
+    if (x == undefined) return $._textSize;
+    if ($._da) x *= $._da;
+    $._textSize = x;
+    fontMod = true;
+    styleHash = -1;
+    if (!leadingSet) {
+      leading = x * 1.25;
+      leadDiff = leading - x;
+    }
+  };
 
-				$.ctx.textBaseline = ogBaseline;
+  $.textStyle = (x) => {
+    if (!x) return emphasis;
+    emphasis = x;
+    fontMod = true;
+    styleHash = -1;
+  };
 
-				let maxWidth = 0;
-				for (let line of lines) {
-					let lineWidth = ctx.measureText(line).width;
-					if (lineWidth > maxWidth) maxWidth = lineWidth;
-				}
+  $.textWeight = (x) => {
+    if (!x) return weight;
+    weight = x;
+    fontMod = true;
+    styleHash = -1;
+  };
 
-				let imgW = Math.ceil(maxWidth),
-					imgH = Math.ceil(leading * lines.length + descent);
+  $.textLeading = (x) => {
+    if (x == undefined) return leading || $._textSize * 1.25;
+    leadingSet = true;
+    if (x == leading) return leading;
+    if ($._da) x *= $._da;
+    leading = x;
+    leadDiff = x - $._textSize;
+    styleHash = -1;
+  };
 
-				img = $.createImage.call($, imgW, imgH, {
-					pixelDensity: $._pixelDensity
-				});
+  $.textAlign = (horiz, vert) => {
+    $.ctx.textAlign = $._textAlign = horiz;
+    if (vert) {
+      $.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? "middle" : vert;
+    }
+  };
 
-				img._ascent = ascent;
-				img._descent = descent;
-				img._top = descent + leadDiff;
-				img._middle = img._top + ascent * 0.5 + leading * (lines.length - 1) * 0.5;
-				img._bottom = img._top + ascent + leading * (lines.length - 1);
-				img._leading = leading;
-			} else {
-				img.modified = true;
-			}
+  const updateFont = () => {
+    $.ctx.font = `${emphasis} ${weight} ${$._textSize}px ${font}`;
+    fontMod = false;
+  };
 
-			img._fill = $._fill;
-			img._stroke = $._stroke;
-			img._strokeWeight = $._strokeWeight;
+  $.textWidth = (str) => {
+    if (fontMod) updateFont();
+    return $.ctx.measureText(str).width;
+  };
+  $.textAscent = (str) => {
+    if (fontMod) updateFont();
+    return $.ctx.measureText(str).actualBoundingBoxAscent;
+  };
+  $.textDescent = (str) => {
+    if (fontMod) updateFont();
+    return $.ctx.measureText(str).actualBoundingBoxDescent;
+  };
 
-			ctx = img.ctx;
+  $.textFill = $.fill;
+  $.textStroke = $.stroke;
 
-			ctx.font = $.ctx.font;
-			ctx.fillStyle = $._fill;
-			ctx.strokeStyle = $._stroke;
-			ctx.lineWidth = $.ctx.lineWidth;
-		}
+  let updateStyleHash = () => {
+    let styleString = font + $._textSize + emphasis + leading;
 
-		let ogFill;
-		if (!$._fillSet) {
-			ogFill = ctx.fillStyle;
-			ctx.fillStyle = 'black';
-		}
+    let hash = 5381;
+    for (let i = 0; i < styleString.length; i++) {
+      hash = (hash * 33) ^ styleString.charCodeAt(i);
+    }
+    styleHash = hash >>> 0;
+  };
 
-		let lineAmount = 0;
-		for (let line of lines) {
-			if ($._doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
-			if ($._doFill) ctx.fillText(line, tX, tY);
-			tY += leading;
-			lineAmount++;
-			if (lineAmount >= h) break;
-		}
-		lines = [];
+  $.createTextImage = (str, w, h) => {
+    genTextImage = true;
+    let img = $.text(str, 0, 0, w, h);
+    genTextImage = false;
+    return img;
+  };
 
-		if (!$._fillSet) ctx.fillStyle = ogFill;
+  let lines = [];
 
-		if (genTextImage) {
-			styleHashes.push(styleHash);
-			(cache[str] ??= {})[styleHash] = img;
+  $.text = (str, x, y, w, h) => {
+    if (str === undefined || (!$._doFill && !$._doStroke)) return;
+    str = str.toString();
+    if ($._da) {
+      x *= $._da;
+      y *= $._da;
+    }
+    let ctx = $.ctx;
+    let img, tX, tY;
 
-			cacheSize++;
-			if (cacheSize > $._textCacheMaxSize) {
-				let half = Math.ceil(cacheSize / 2);
-				let hashes = styleHashes.splice(0, half);
-				for (let s in cache) {
-					s = cache[s];
-					for (let h of hashes) delete s[h];
-				}
-				cacheSize -= half;
-			}
-			return img;
-		}
-	};
+    if (fontMod) updateFont();
 
-	$.textImage = (img, x, y) => {
-		if (typeof img == 'string') img = $.createTextImage(img);
+    if (genTextImage) {
+      if (styleHash == -1) updateStyleHash();
 
-		let og = $._imageMode;
-		$._imageMode = 'corner';
+      img = cache[str];
+      if (img) img = img[styleHash];
 
-		let ta = $._textAlign;
-		if (ta == 'center') x -= img.canvas.hw;
-		else if (ta == 'right') x -= img.width;
+      if (img) {
+        if (img._fill == $._fill && img._stroke == $._stroke && img._strokeWeight == $._strokeWeight) {
+          return img;
+        } else img.clear();
+      }
+    }
 
-		let bl = $._textBaseline;
-		if (bl == 'alphabetic') y -= img._leading;
-		else if (bl == 'middle') y -= img._middle;
-		else if (bl == 'bottom') y -= img._bottom;
-		else if (bl == 'top') y -= img._top;
+    if (str.indexOf("\n") == -1) lines[0] = str;
+    else lines = str.split("\n");
 
-		$.image(img, x, y);
-		$._imageMode = og;
-	};
+    if (str.length > w) {
+      let wrapped = [];
+      for (let line of lines) {
+        let i = 0;
+
+        while (i < line.length) {
+          let max = i + w;
+          if (max >= line.length) {
+            wrapped.push(line.slice(i));
+            break;
+          }
+          let end = line.lastIndexOf(" ", max);
+          if (end === -1 || end < i) end = max;
+          wrapped.push(line.slice(i, end));
+          i = end + 1;
+        }
+      }
+      lines = wrapped;
+    }
+
+    if (!genTextImage) {
+      tX = x;
+      tY = y;
+      if ($._textBaseline == "middle") tY -= leading * (lines.length - 1) * 0.5;
+      else if ($._textBaseline == "bottom") tY -= leading * (lines.length - 1);
+    } else {
+      tX = 0;
+      tY = leading;
+
+      if (!img) {
+        let ogBaseline = $.ctx.textBaseline;
+        $.ctx.textBaseline = "alphabetic";
+
+        let measure = ctx.measureText(" ");
+        let ascent = measure.fontBoundingBoxAscent;
+        let descent = measure.fontBoundingBoxDescent;
+
+        $.ctx.textBaseline = ogBaseline;
+
+        let maxWidth = 0;
+        for (let line of lines) {
+          let lineWidth = ctx.measureText(line).width;
+          if (lineWidth > maxWidth) maxWidth = lineWidth;
+        }
+
+        let imgW = Math.ceil(maxWidth),
+          imgH = Math.ceil(leading * lines.length + descent);
+
+        img = $.createImage.call($, imgW, imgH, {
+          pixelDensity: $._pixelDensity,
+        });
+
+        img._ascent = ascent;
+        img._descent = descent;
+        img._top = descent + leadDiff;
+        img._middle = img._top + ascent * 0.5 + leading * (lines.length - 1) * 0.5;
+        img._bottom = img._top + ascent + leading * (lines.length - 1);
+        img._leading = leading;
+      } else {
+        img.modified = true;
+      }
+
+      img._fill = $._fill;
+      img._stroke = $._stroke;
+      img._strokeWeight = $._strokeWeight;
+
+      ctx = img.ctx;
+
+      ctx.font = $.ctx.font;
+      ctx.fillStyle = $._fill;
+      ctx.strokeStyle = $._stroke;
+      ctx.lineWidth = $.ctx.lineWidth;
+    }
+
+    let ogFill;
+    if (!$._fillSet) {
+      ogFill = ctx.fillStyle;
+      ctx.fillStyle = "black";
+    }
+
+    let lineAmount = 0;
+    for (let line of lines) {
+      if ($._doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
+      if ($._doFill) ctx.fillText(line, tX, tY);
+      tY += leading;
+      lineAmount++;
+      if (lineAmount >= h) break;
+    }
+    lines = [];
+
+    if (!$._fillSet) ctx.fillStyle = ogFill;
+
+    if (genTextImage) {
+      styleHashes.push(styleHash);
+      (cache[str] ??= {})[styleHash] = img;
+
+      cacheSize++;
+      if (cacheSize > $._textCacheMaxSize) {
+        let half = Math.ceil(cacheSize / 2);
+        let hashes = styleHashes.splice(0, half);
+        for (let s in cache) {
+          s = cache[s];
+          for (let h of hashes) delete s[h];
+        }
+        cacheSize -= half;
+      }
+      return img;
+    }
+  };
+
+  $.textImage = (img, x, y) => {
+    if (typeof img == "string") img = $.createTextImage(img);
+
+    let og = $._imageMode;
+    $._imageMode = "corner";
+
+    let ta = $._textAlign;
+    if (ta == "center") x -= img.canvas.hw;
+    else if (ta == "right") x -= img.width;
+
+    let bl = $._textBaseline;
+    if (bl == "alphabetic") y -= img._leading;
+    else if (bl == "middle") y -= img._middle;
+    else if (bl == "bottom") y -= img._bottom;
+    else if (bl == "top") y -= img._top;
+
+    $.image(img, x, y);
+    $._imageMode = og;
+  };
 };
 
 Q5.fonts = [];
