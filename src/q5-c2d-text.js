@@ -266,8 +266,6 @@ Q5.renderers.c2d.text = ($, q) => {
 				}
 				cacheSize -= half;
 			}
-
-			$.save(img);
 			return img;
 		}
 	};

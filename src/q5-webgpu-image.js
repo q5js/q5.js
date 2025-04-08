@@ -291,7 +291,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let g = new Q5Image(...arguments);
 		if (w > 1 && h > 1) {
 			$._addTexture(g);
-			img.modified = true;
+			g.modified = true;
 		}
 		return g;
 	};
@@ -309,6 +309,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let _createGraphics = $.createGraphics;
 
 	$.createGraphics = (w, h, opt) => {
+		if (!Q5.enableExperimentalFeatures) {
+			throw new Error(
+				'createGraphics not supported yet in q5 WebGPU. Set Q5.enableExperimentalFeatures to true for testing.'
+			);
+		}
+
 		let g = _createGraphics(w, h, opt);
 		if (g.canvas.webgpu) {
 			$._addTexture(g, g._frameA);
@@ -411,10 +417,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._completeFrame = () => {
 		$._render();
 		$._finishRender();
-		$.textureIndex += $.frameCount % 2 == 0 ? -1 : 1;
-		$.resetMatrix();
-		$._beginRender();
-		$.frameCount++;
+		// $.textureIndex += $.frameCount % 2 == 0 ? -1 : 1;
+		// $.resetMatrix();
+		// $._beginRender();
+		// $.frameCount++;
 	};
 
 	$._hooks.preRender.push(() => {
