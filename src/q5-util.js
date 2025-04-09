@@ -65,7 +65,7 @@ Q5.modules.util = ($, q) => {
 		name = name || 'untitled';
 		ext = ext || 'png';
 		if (imgRegex.test(ext)) {
-			if ($.canvas?.renderer == 'webgpu' && data.canvas.renderer == 'c2d') {
+			if ($.canvas?.renderer == 'webgpu' && data.canvas?.renderer == 'c2d') {
 				data = await $._g._saveCanvas(data, ext);
 			} else {
 				data = await $._saveCanvas(data, ext);
@@ -90,8 +90,9 @@ Q5.modules.util = ($, q) => {
 		if (!a || (typeof a == 'string' && (!b || (!c && b.length < 5)))) {
 			c = b;
 			b = a;
-			a = $.canvas;
+			a = $;
 		}
+		if (a == $.canvas) a = $;
 		if (c) saveFile(a, b, c);
 		else if (b) {
 			let lastDot = b.lastIndexOf('.');

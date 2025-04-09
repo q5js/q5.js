@@ -733,7 +733,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		}
 	};
 
-	$._finishRender = async () => {
+	$._finishRender = () => {
 		pass.end();
 
 		pass = encoder.beginRenderPass({
@@ -765,12 +765,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		Q5.device.queue.submit([encoder.finish()]);
 		$._pass = pass = encoder = null;
 
-		// destroy buffers
-		Q5.device.queue.onSubmittedWorkDone().then(() => {
-			for (let b of $._buffers) b.destroy();
-			$._buffers = [];
-		});
-
 		// clear the stacks for the next frame
 		drawStack.splice(0, drawStack.length);
 		colorIndex = 1;
@@ -778,9 +772,15 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrices = [matrices[0]];
 		matricesIndexStack = [];
 
-		$.texture = frameA;
+		$._texture = frameA;
 
 		for (let m of $._hooks.postRender) m();
+
+		// destroy buffers
+		Q5.device.queue.onSubmittedWorkDone().then(() => {
+			for (let b of $._buffers) b.destroy();
+			$._buffers = [];
+		});
 	};
 };
 
