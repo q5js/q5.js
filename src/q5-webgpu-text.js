@@ -569,17 +569,9 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			$._g.stroke($._colorStack.slice(si, si + 4));
 		}
 
-		let img = $._g.createTextImage(str, w, h);
-		if (img.textureIndex == undefined) {
-			$._createTexture(img);
-			let _copy = img.copy;
-			img.copy = function () {
-				let copy = _copy();
-				$._createTexture(copy);
-				return copy;
-			};
-		}
-		return img;
+		let g = $._g.createTextImage(str, w, h);
+		$._extendImage(g);
+		return g;
 	};
 
 	$.textImage = (img, x, y) => {

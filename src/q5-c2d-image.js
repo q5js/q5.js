@@ -1,33 +1,4 @@
 Q5.renderers.c2d.image = ($, q) => {
-	class Q5Image {
-		constructor(w, h, opt = {}) {
-			let $ = this;
-			$._scope = 'image';
-			$.canvas = $.ctx = $.drawingContext = null;
-			$.pixels = [];
-			Q5.modules.canvas($, $);
-			let r = Q5.renderers.c2d;
-			for (let m of ['canvas', 'image', 'soft_filters']) {
-				if (r[m]) r[m]($, $);
-			}
-			$._pixelDensity = opt.pixelDensity || 1;
-			$.createCanvas(w, h, opt);
-			let scale = $._pixelDensity * q._defaultImageScale;
-			$.defaultWidth = w * scale;
-			$.defaultHeight = h * scale;
-			delete $.createCanvas;
-			$._loop = false;
-		}
-		get w() {
-			return this.width;
-		}
-		get h() {
-			return this.height;
-		}
-	}
-
-	Q5.Image ??= Q5Image;
-
 	$._tint = null;
 	let imgData = null;
 
@@ -35,7 +6,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		opt ??= {};
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace || Q5.canvasOptions.colorSpace;
-		return new Q5.Image(w, h, opt);
+		return new Q5.Image($, w, h, opt);
 	};
 
 	$.loadImage = function (url, cb, opt) {
@@ -272,7 +243,7 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.copy = () => {
 		let img = $.get();
 		for (let prop in $) {
-			if (typeof $[prop] != 'function' && !/(canvas|ctx|texture|textureIndex)/.test(prop)) {
+			if (typeof $[prop] != 'function' && !/(canvas|ctx|texture)/.test(prop)) {
 				img[prop] = $[prop];
 			}
 		}
@@ -354,4 +325,31 @@ Q5.renderers.c2d.image = ($, q) => {
 		$._tint = (c._q5Color ? c : $.color(...arguments)).toString();
 	};
 	$.noTint = () => ($._tint = null);
+};
+
+Q5.Image = class {
+	constructor(q, w, h, opt = {}) {
+		let $ = this;
+		$._scope = 'image';
+		$.canvas = $.ctx = $.drawingContext = null;
+		$.pixels = [];
+		Q5.modules.canvas($, $);
+		let r = Q5.renderers.c2d;
+		for (let m of ['canvas', 'image', 'softFilters']) {
+			if (r[m]) r[m]($, $);
+		}
+		$._pixelDensity = opt.pixelDensity || 1;
+		$.createCanvas(w, h, opt);
+		let scale = $._pixelDensity * q._defaultImageScale;
+		$.defaultWidth = w * scale;
+		$.defaultHeight = h * scale;
+		delete $.createCanvas;
+		$._loop = false;
+	}
+	get w() {
+		return this.width;
+	}
+	get h() {
+		return this.height;
+	}
 };

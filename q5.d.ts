@@ -857,7 +857,8 @@ rect(20, 20, 60, 60);
 	/** ⬜️
 	 * Creates a graphics buffer.
 	 * 
-	 * Not recommended for use in q5 WebGPU.
+	 * Disabled by default in q5 WebGPU.
+	 * See issue [#104](https://github.com/q5js/q5.js/issues/104) for details.
 	 * @param {number} w width
 	 * @param {number} h height
 	 * @param {Object} [opt] options

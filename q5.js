@@ -1,7 +1,8 @@
 /**
  * q5.js
- * @version 2.25
- * @author quinton-ashley, Tezumie, and LingDong-
+ * @version 2.26
+ * @author quinton-ashley
+ * @contributors Tezumie, LingDong-
  * @license LGPL-3.0
  * @class Q5
  */
@@ -362,7 +363,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.25';
+Q5.version = Q5.VERSION = '2.26';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -1289,35 +1290,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 };
 Q5.renderers.c2d.image = ($, q) => {
-	class Q5Image {
-		constructor(w, h, opt = {}) {
-			let $ = this;
-			$._scope = 'image';
-			$.canvas = $.ctx = $.drawingContext = null;
-			$.pixels = [];
-			Q5.modules.canvas($, $);
-			let r = Q5.renderers.c2d;
-			for (let m of ['canvas', 'image', 'soft_filters']) {
-				if (r[m]) r[m]($, $);
-			}
-			$._pixelDensity = opt.pixelDensity || 1;
-			$.createCanvas(w, h, opt);
-			let scale = $._pixelDensity * q._defaultImageScale;
-			$.defaultWidth = w * scale;
-			$.defaultHeight = h * scale;
-			delete $.createCanvas;
-			$._loop = false;
-		}
-		get w() {
-			return this.width;
-		}
-		get h() {
-			return this.height;
-		}
-	}
-
-	Q5.Image ??= Q5Image;
-
 	$._tint = null;
 	let imgData = null;
 
@@ -1325,7 +1297,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		opt ??= {};
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace || Q5.canvasOptions.colorSpace;
-		return new Q5.Image(w, h, opt);
+		return new Q5.Image($, w, h, opt);
 	};
 
 	$.loadImage = function (url, cb, opt) {
@@ -1562,7 +1534,7 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.copy = () => {
 		let img = $.get();
 		for (let prop in $) {
-			if (typeof $[prop] != 'function' && !/(canvas|ctx|texture|textureIndex)/.test(prop)) {
+			if (typeof $[prop] != 'function' && !/(canvas|ctx|texture)/.test(prop)) {
 				img[prop] = $[prop];
 			}
 		}
@@ -1645,8 +1617,35 @@ Q5.renderers.c2d.image = ($, q) => {
 	};
 	$.noTint = () => ($._tint = null);
 };
+
+Q5.Image = class {
+	constructor(q, w, h, opt = {}) {
+		let $ = this;
+		$._scope = 'image';
+		$.canvas = $.ctx = $.drawingContext = null;
+		$.pixels = [];
+		Q5.modules.canvas($, $);
+		let r = Q5.renderers.c2d;
+		for (let m of ['canvas', 'image', 'softFilters']) {
+			if (r[m]) r[m]($, $);
+		}
+		$._pixelDensity = opt.pixelDensity || 1;
+		$.createCanvas(w, h, opt);
+		let scale = $._pixelDensity * q._defaultImageScale;
+		$.defaultWidth = w * scale;
+		$.defaultHeight = h * scale;
+		delete $.createCanvas;
+		$._loop = false;
+	}
+	get w() {
+		return this.width;
+	}
+	get h() {
+		return this.height;
+	}
+};
 /* software implementation of image filters */
-Q5.renderers.c2d.soft_filters = ($) => {
+Q5.renderers.c2d.softFilters = ($) => {
 	let u = null; // uint8 temporary buffer
 
 	function ensureBuf() {
@@ -4401,10 +4400,10 @@ Q5.modules.util = ($, q) => {
 	}
 
 	if (typeof localStorage == 'object') {
-		$.storeItem = localStorage.setItem;
-		$.getItem = localStorage.getItem;
-		$.removeItem = localStorage.removeItem;
-		$.clearStorage = localStorage.clear;
+		$.storeItem = (name, val) => localStorage.setItem(name, val);
+		$.getItem = (name) => localStorage.getItem(name);
+		$.removeItem = (name) => localStorage.removeItem(name);
+		$.clearStorage = () => localStorage.clear();
 	}
 
 	$.year = () => new Date().getFullYear();
@@ -4846,10 +4845,9 @@ struct Q5 {
 			GPUTextureUsage.TEXTURE_BINDING |
 			GPUTextureUsage.RENDER_ATTACHMENT;
 
-		$._frameA = frameA = Q5.device.createTexture({ size, format, usage });
-		$._frameB = frameB = Q5.device.createTexture({ size, format, usage });
-
-		$.canvas.texture = frameA;
+		// start swapped so that beginRender will make frameA the first frame
+		$._frameA = frameB = Q5.device.createTexture({ label: 'frameA', size, format, usage });
+		$._frameB = frameA = Q5.device.createTexture({ label: 'frameB', size, format, usage });
 
 		$._frameShaderCode =
 			$._baseShaderCode +
@@ -5519,6 +5517,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		colorStackIndex = 8;
 		matrices = [matrices[0]];
 		matricesIndexStack = [];
+
+		$.texture = frameA;
 
 		for (let m of $._hooks.postRender) m();
 	};
@@ -6430,10 +6430,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._textureBindGroups = [];
 
 	$._saveCanvas = async (img, ext) => {
-		if (img._graphics && img._drawStack?.length) img._completeFrame();
+		let graphicsFrame = img._graphics && img._drawStack?.length;
+		if (graphicsFrame) img.finishFrame();
 
-		let texture = img.texture,
-			w = texture.width,
+		let texture = img.texture;
+
+		if (graphicsFrame) img.beginFrame();
+
+		let w = texture.width,
 			h = texture.height,
 			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
 
@@ -6505,9 +6509,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._addTexture = (img, texture) => {
 		let cnv = img.canvas || img;
 
-		let textureSize = [cnv.width, cnv.height, 1];
-
 		if (!texture) {
+			let textureSize = [cnv.width, cnv.height, 1];
+
 			texture = Q5.device.createTexture({
 				size: textureSize,
 				format: 'bgra8unorm',
@@ -6528,10 +6532,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			);
 		}
 
+		texture.index = tIdx + vidFrames;
 		img.texture = texture;
-		img.textureIndex = tIdx + vidFrames;
 
-		$._textureBindGroups[img.textureIndex] = Q5.device.createBindGroup({
+		$._textureBindGroups[texture.index] = Q5.device.createBindGroup({
 			label: img.src || 'canvas',
 			layout: textureLayout,
 			entries: [
@@ -6543,43 +6547,57 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		tIdx++;
 	};
 
-	let Q5Image = Q5.Image;
-	Q5.Image = function (w, h) {
-		let g = new Q5Image(...arguments);
-		if (w > 1 && h > 1) {
-			$._addTexture(g);
-			g.modified = true;
-		}
-		return g;
-	};
-
 	$.loadImage = (src, cb) => {
-		let g = $._g.loadImage(src, (img) => {
-			$._addTexture(img);
+		let g = $._g.loadImage(src, () => {
+			$._extendImage(g);
 			if (cb) cb(g);
 		});
 		return g;
 	};
 
-	$.createImage = $._g.createImage;
+	$._extendImage = (g) => {
+		$._addTexture(g);
+		let _copy = g.copy;
+		g.copy = function () {
+			let copy = _copy();
+			$._addTexture(copy);
+			return copy;
+		};
+		g.modified = true;
+	};
+
+	$.createImage = (w, h, opt) => {
+		let g = $._g.createImage(w, h, opt);
+		$._extendImage(g);
+		return g;
+	};
 
 	let _createGraphics = $.createGraphics;
 
-	$.createGraphics = (w, h, opt) => {
-		if (!Q5.enableExperimentalFeatures) {
+	$.createGraphics = (w, h, opt = {}) => {
+		if (!Q5.experimental) {
 			throw new Error(
-				'createGraphics not supported yet in q5 WebGPU. Set Q5.enableExperimentalFeatures to true for testing.'
+				'createGraphics is disabled by default in q5 WebGPU. See issue https://github.com/q5js/q5.js/issues/104 for details.'
 			);
 		}
-
+		if (typeof opt == 'string') opt = { renderer: opt };
+		opt.renderer ??= 'c2d';
 		let g = _createGraphics(w, h, opt);
 		if (g.canvas.webgpu) {
 			$._addTexture(g, g._frameA);
 			$._addTexture(g, g._frameB);
 			g._beginRender();
-		} else {
-			g.modified = true;
-		}
+
+			g.finishFrame = function () {
+				this._render();
+				this._finishRender();
+			};
+			g.beginFrame = function () {
+				this.resetMatrix();
+				this._beginRender();
+				this.frameCount++;
+			};
+		} else $._extendImage(g);
 		return g;
 	};
 
@@ -6600,21 +6618,21 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		let isVideo;
-		if (img.textureIndex == undefined) {
+		if (img.texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
 			if (!isVideo || !img.width || !img.currentTime) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 
-		let cnv = img.canvas || img;
-
 		if ($._matrixDirty) $._saveMatrix();
 
-		let w = cnv.width,
+		let cnv = img.canvas || img,
+			w = cnv.width,
 			h = cnv.height,
-			pd = img._pixelDensity || 1;
+			pd = img._pixelDensity || 1,
+			graphicsFrame = img._graphics && img._drawStack?.length;
 
-		if (img._graphics && img._drawStack?.length) img._completeFrame();
+		if (graphicsFrame) img.finishFrame();
 
 		if (img.modified) {
 			Q5.device.queue.copyExternalImageToTexture(
@@ -6622,6 +6640,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				{ texture: img.texture, colorSpace: $.canvas.colorSpace },
 				[w, h, 1]
 			);
+			img.frameCount++;
 			img.modified = false;
 		}
 
@@ -6648,7 +6667,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		addVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
-			$._drawStack.push($._imagePL, img.textureIndex);
+			$._drawStack.push($._imagePL, img.texture.index);
+
+			if (graphicsFrame) img.beginFrame();
 		} else {
 			// render video
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
@@ -6669,15 +6690,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			if (img.flipped) $.scale(-1, 1);
 		}
-	};
-
-	$._completeFrame = () => {
-		$._render();
-		$._finishRender();
-		// $.textureIndex += $.frameCount % 2 == 0 ? -1 : 1;
-		// $.resetMatrix();
-		// $._beginRender();
-		// $.frameCount++;
 	};
 
 	$._hooks.preRender.push(() => {
@@ -7292,17 +7304,9 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			$._g.stroke($._colorStack.slice(si, si + 4));
 		}
 
-		let img = $._g.createTextImage(str, w, h);
-		if (img.textureIndex == undefined) {
-			$._createTexture(img);
-			let _copy = img.copy;
-			img.copy = function () {
-				let copy = _copy();
-				$._createTexture(copy);
-				return copy;
-			};
-		}
-		return img;
+		let g = $._g.createTextImage(str, w, h);
+		$._extendImage(g);
+		return g;
 	};
 
 	$.textImage = (img, x, y) => {

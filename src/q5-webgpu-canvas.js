@@ -105,10 +105,9 @@ struct Q5 {
 			GPUTextureUsage.TEXTURE_BINDING |
 			GPUTextureUsage.RENDER_ATTACHMENT;
 
-		$._frameA = frameA = Q5.device.createTexture({ size, format, usage });
-		$._frameB = frameB = Q5.device.createTexture({ size, format, usage });
-
-		$.canvas.texture = frameA;
+		// start swapped so that beginRender will make frameA the first frame
+		$._frameA = frameB = Q5.device.createTexture({ label: 'frameA', size, format, usage });
+		$._frameB = frameA = Q5.device.createTexture({ label: 'frameB', size, format, usage });
 
 		$._frameShaderCode =
 			$._baseShaderCode +
@@ -778,6 +777,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		colorStackIndex = 8;
 		matrices = [matrices[0]];
 		matricesIndexStack = [];
+
+		$.texture = frameA;
 
 		for (let m of $._hooks.postRender) m();
 	};

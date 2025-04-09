@@ -173,10 +173,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._textureBindGroups = [];
 
 	$._saveCanvas = async (img, ext) => {
-		if (img._graphics && img._drawStack?.length) img._completeFrame();
+		let graphicsFrame = img._graphics && img._drawStack?.length;
+		if (graphicsFrame) img.finishFrame();
 
-		let texture = img.texture,
-			w = texture.width,
+		let texture = img.texture;
+
+		if (graphicsFrame) img.beginFrame();
+
+		let w = texture.width,
 			h = texture.height,
 			bytesPerRow = Math.ceil((w * 4) / 256) * 256;
 
@@ -248,9 +252,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._addTexture = (img, texture) => {
 		let cnv = img.canvas || img;
 
-		let textureSize = [cnv.width, cnv.height, 1];
-
 		if (!texture) {
+			let textureSize = [cnv.width, cnv.height, 1];
+
 			texture = Q5.device.createTexture({
 				size: textureSize,
 				format: 'bgra8unorm',
@@ -271,10 +275,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			);
 		}
 
+		texture.index = tIdx + vidFrames;
 		img.texture = texture;
-		img.textureIndex = tIdx + vidFrames;
 
-		$._textureBindGroups[img.textureIndex] = Q5.device.createBindGroup({
+		$._textureBindGroups[texture.index] = Q5.device.createBindGroup({
 			label: img.src || 'canvas',
 			layout: textureLayout,
 			entries: [
@@ -286,43 +290,57 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		tIdx++;
 	};
 
-	let Q5Image = Q5.Image;
-	Q5.Image = function (w, h) {
-		let g = new Q5Image(...arguments);
-		if (w > 1 && h > 1) {
-			$._addTexture(g);
-			g.modified = true;
-		}
-		return g;
-	};
-
 	$.loadImage = (src, cb) => {
-		let g = $._g.loadImage(src, (img) => {
-			$._addTexture(img);
+		let g = $._g.loadImage(src, () => {
+			$._extendImage(g);
 			if (cb) cb(g);
 		});
 		return g;
 	};
 
-	$.createImage = $._g.createImage;
+	$._extendImage = (g) => {
+		$._addTexture(g);
+		let _copy = g.copy;
+		g.copy = function () {
+			let copy = _copy();
+			$._addTexture(copy);
+			return copy;
+		};
+		g.modified = true;
+	};
+
+	$.createImage = (w, h, opt) => {
+		let g = $._g.createImage(w, h, opt);
+		$._extendImage(g);
+		return g;
+	};
 
 	let _createGraphics = $.createGraphics;
 
-	$.createGraphics = (w, h, opt) => {
-		if (!Q5.enableExperimentalFeatures) {
+	$.createGraphics = (w, h, opt = {}) => {
+		if (!Q5.experimental) {
 			throw new Error(
-				'createGraphics not supported yet in q5 WebGPU. Set Q5.enableExperimentalFeatures to true for testing.'
+				'createGraphics is disabled by default in q5 WebGPU. See issue https://github.com/q5js/q5.js/issues/104 for details.'
 			);
 		}
-
+		if (typeof opt == 'string') opt = { renderer: opt };
+		opt.renderer ??= 'c2d';
 		let g = _createGraphics(w, h, opt);
 		if (g.canvas.webgpu) {
 			$._addTexture(g, g._frameA);
 			$._addTexture(g, g._frameB);
 			g._beginRender();
-		} else {
-			g.modified = true;
-		}
+
+			g.finishFrame = function () {
+				this._render();
+				this._finishRender();
+			};
+			g.beginFrame = function () {
+				this.resetMatrix();
+				this._beginRender();
+				this.frameCount++;
+			};
+		} else $._extendImage(g);
 		return g;
 	};
 
@@ -343,21 +361,21 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
 		let isVideo;
-		if (img.textureIndex == undefined) {
+		if (img.texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
 			if (!isVideo || !img.width || !img.currentTime) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 
-		let cnv = img.canvas || img;
-
 		if ($._matrixDirty) $._saveMatrix();
 
-		let w = cnv.width,
+		let cnv = img.canvas || img,
+			w = cnv.width,
 			h = cnv.height,
-			pd = img._pixelDensity || 1;
+			pd = img._pixelDensity || 1,
+			graphicsFrame = img._graphics && img._drawStack?.length;
 
-		if (img._graphics && img._drawStack?.length) img._completeFrame();
+		if (graphicsFrame) img.finishFrame();
 
 		if (img.modified) {
 			Q5.device.queue.copyExternalImageToTexture(
@@ -365,6 +383,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				{ texture: img.texture, colorSpace: $.canvas.colorSpace },
 				[w, h, 1]
 			);
+			img.frameCount++;
 			img.modified = false;
 		}
 
@@ -391,7 +410,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		addVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
-			$._drawStack.push($._imagePL, img.textureIndex);
+			$._drawStack.push($._imagePL, img.texture.index);
+
+			if (graphicsFrame) img.beginFrame();
 		} else {
 			// render video
 			let externalTexture = Q5.device.importExternalTexture({ source: img });
@@ -412,15 +433,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			if (img.flipped) $.scale(-1, 1);
 		}
-	};
-
-	$._completeFrame = () => {
-		$._render();
-		$._finishRender();
-		// $.textureIndex += $.frameCount % 2 == 0 ? -1 : 1;
-		// $.resetMatrix();
-		// $._beginRender();
-		// $.frameCount++;
 	};
 
 	$._hooks.preRender.push(() => {

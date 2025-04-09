@@ -119,10 +119,10 @@ Q5.modules.util = ($, q) => {
 	}
 
 	if (typeof localStorage == 'object') {
-		$.storeItem = localStorage.setItem;
-		$.getItem = localStorage.getItem;
-		$.removeItem = localStorage.removeItem;
-		$.clearStorage = localStorage.clear;
+		$.storeItem = (name, val) => localStorage.setItem(name, val);
+		$.getItem = (name) => localStorage.getItem(name);
+		$.removeItem = (name) => localStorage.removeItem(name);
+		$.clearStorage = () => localStorage.clear();
 	}
 
 	$.year = () => new Date().getFullYear();

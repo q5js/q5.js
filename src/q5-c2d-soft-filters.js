@@ -1,5 +1,5 @@
 /* software implementation of image filters */
-Q5.renderers.c2d.soft_filters = ($) => {
+Q5.renderers.c2d.softFilters = ($) => {
 	let u = null; // uint8 temporary buffer
 
 	function ensureBuf() {
