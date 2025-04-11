@@ -65,11 +65,11 @@ Q5.renderers.c2d.text = ($, q) => {
 
 				const css = await response.text();
 
-				const fontFaceRegex = /@font-face\s*{([^}]*)}/g;
-				const srcRegex = /src:\s*url\(([^)]+)\)[^;]*;/;
-				const fontFamilyRegex = /font-family:\s*['"]([^'"]+)['"]/;
-				const fontWeightRegex = /font-weight:\s*([^;]+);/;
-				const fontStyleRegex = /font-style:\s*([^;]+);/;
+				const fontFaceRegex = /@font-face\s*{([^}]*)}/g; // Matches each @font-face block
+				const srcRegex = /src:\s*url\(([^)]+)\)[^;]*;/; // Extracts the URL from the src property
+				const fontFamilyRegex = /font-family:\s*['"]([^'"]+)['"]/; // Extracts the font-family name
+				const fontWeightRegex = /font-weight:\s*([^;]+);/; // Extracts the font-weight value
+				const fontStyleRegex = /font-style:\s*([^;]+);/; // Extracts the font-style value
 
 				let fontFaceMatch;
 				let loadedFaces = [];
