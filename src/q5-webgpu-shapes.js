@@ -464,7 +464,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	let curveSegments = 20;
-	$.curveDetail = (x) => (curveSegments = x);
+	$.curveDetail = (v) => (curveSegments = v);
+
+	let bezierSegments = 20;
+	$.bezierDetail = (v) => (bezierSegments = v);
 
 	let shapeVertCount;
 	let sv = []; // shape vertices
@@ -496,7 +499,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let startX = sv[prevIndex];
 		let startY = sv[prevIndex + 1];
 
-		let step = 1 / curveSegments;
+		let step = 1 / bezierSegments;
 
 		let vx, vy;
 		let quadratic = arguments.length == 4;
@@ -544,6 +547,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				}
 			}
 
+			// Use curveSegments to determine step size
+			let step = 1 / curveSegments;
+
 			// calculate catmull-rom spline curve points
 			for (let i = 0; i < points.length - 3; i++) {
 				let p0 = points[i];
@@ -551,7 +557,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				let p2 = points[i + 2];
 				let p3 = points[i + 3];
 
-				for (let t = 0; t <= 1; t += 0.1) {
+				for (let t = 0; t <= 1; t += step) {
 					let t2 = t * t;
 					let t3 = t2 * t;
 

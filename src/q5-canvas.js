@@ -58,21 +58,44 @@ Q5.modules.canvas = ($, q) => {
 
 		if ($._scope != 'image') {
 			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
-			else if (window.IntersectionObserver) {
-				let wasObserved = false;
-				new IntersectionObserver((e) => {
-					c.visible = e[0].isIntersecting;
-					if (!wasObserved) {
-						$._wasLooping = $._loop;
-						wasObserved = true;
-					}
-					if (c.visible) {
-						if ($._wasLooping && !$._loop) $.loop();
-					} else {
-						$._wasLooping = $._loop;
-						$.noLoop();
-					}
-				}).observe(c);
+			else if (!Q5._server) {
+				// the canvas can become detached from the DOM
+				// if the innerHTML of one of its parents is edited
+				// check if canvas is still attached to the DOM
+				let el = c;
+				while (el && el.parentElement != document.body) {
+					el = el.parentElement;
+				}
+				if (!el) {
+					// reattach canvas to the DOM
+					document.getElementById(c.id)?.remove();
+					addCanvas();
+				}
+
+				if (window.IntersectionObserver) {
+					let wasObserved = false;
+					new IntersectionObserver((e) => {
+						let isIntersecting = e[0].isIntersecting;
+
+						if (!isIntersecting) {
+							// the canvas might still be onscreen, just behind other elements
+							let r = c.getBoundingClientRect();
+							c.visible = r.top < window.innerHeight && r.bottom > 0 && r.left < window.innerWidth && r.right > 0;
+						} else c.visible = true;
+
+						if (!wasObserved) {
+							$._wasLooping = $._loop;
+							wasObserved = true;
+						}
+
+						if (c.visible) {
+							if ($._wasLooping && !$._loop) $.loop();
+						} else {
+							$._wasLooping = $._loop;
+							$.noLoop();
+						}
+					}).observe(c);
+				}
 			}
 		}
 
@@ -237,7 +260,9 @@ Q5.modules.canvas = ($, q) => {
 	$.popStyles = () => {
 		let styles = $._styles.pop();
 		for (let s of $._styleNames) $[s] = styles[s];
-		q.Color = styles.Color;
+
+		if ($._webgpu) $.colorMode($._colorMode, $._colorFormat);
+		else q.Color = styles.Color;
 	};
 
 	if (window && $._scope != 'graphics') {

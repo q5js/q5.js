@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.26
+ * @version 2.27
  * @author quinton-ashley
  * @contributors Tezumie, LingDong-
  * @license LGPL-3.0
@@ -160,7 +160,7 @@ function Q5(scope, parent, renderer) {
 	};
 
 	$.frameRate = (hz) => {
-		if (hz != $._targetFrameRate) {
+		if (hz && hz != $._targetFrameRate) {
 			$._targetFrameRate = hz;
 			$._targetFrameDuration = 1000 / hz;
 
@@ -256,18 +256,8 @@ function Q5(scope, parent, renderer) {
 		};
 
 	let t = globalScope || $;
-	$._isTouchAware = t.touchStarted || t.touchMoved || t.touchEnded;
 
-	if ($._isGlobal) {
-		$.preload = t.preload;
-		$.setup = t.setup;
-		$.draw = t.draw;
-		$.postProcess = t.postProcess;
-	}
-	$.preload ??= () => {};
-	$.setup ??= () => {};
-	$.draw ??= () => {};
-	$.postProcess ??= () => {};
+	$._isTouchAware = t.touchStarted || t.touchMoved || t.touchEnded;
 
 	let userFns = [
 		'setup',
@@ -277,6 +267,7 @@ function Q5(scope, parent, renderer) {
 		'mouseReleased',
 		'mouseDragged',
 		'mouseClicked',
+		'doubleClicked',
 		'mouseWheel',
 		'keyPressed',
 		'keyReleased',
@@ -286,12 +277,15 @@ function Q5(scope, parent, renderer) {
 		'touchEnded',
 		'windowResized'
 	];
-	for (let k of userFns) {
-		if (!t[k]) $[k] = () => {};
+	// shim if undefined
+	for (let name of userFns) $[name] ??= () => {};
+
+	function wrapWithFES(fn) {
+		if (!t[fn]) $[fn] = () => {};
 		else if ($._isGlobal) {
-			$[k] = (event) => {
+			$[fn] = (event) => {
 				try {
-					return t[k](event);
+					return t[fn](event);
 				} catch (e) {
 					if ($._fes) $._fes(e);
 					throw e;
@@ -300,26 +294,22 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	async function _setup() {
-		$._startDone = true;
+	async function _start() {
+		wrapWithFES('preload');
+		$.preload();
 		await Promise.all($._preloadPromises);
 		if ($._g) await Promise.all($._g._preloadPromises);
+
+		for (let name of userFns) wrapWithFES(name);
+
+		$.draw = t.draw || (() => {});
+
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
-		if ($.frameCount) return;
 		if ($.ctx === null) $.createCanvas(200, 200);
+		if ($.frameCount) return;
 		raf($._draw);
-	}
-
-	function _start() {
-		try {
-			$.preload();
-			if (!$._startDone) _setup();
-		} catch (e) {
-			if ($._fes) $._fes(e);
-			throw e;
-		}
 	}
 
 	if (autoLoaded) _start();
@@ -363,7 +353,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.26';
+Q5.version = Q5.VERSION = '2.27';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

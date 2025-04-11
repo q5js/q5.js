@@ -209,6 +209,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		createMainView();
 	};
 
+	// since these values are checked so often in `addColor`,
+	// they're stored in local variables for better performance
 	let usingRGB = true,
 		colorFormat = 1;
 

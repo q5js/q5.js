@@ -924,7 +924,7 @@ let c = color(200, 50);
 function draw() {
 	background(c);
 	circle(mouseX, mouseY, 50);
-	c.g = (c.g + 1) % 255;
+	c.g = (c.g + 1) % 256;
 }
 	 * @example
 let q = await Q5.WebGPU();
@@ -1359,28 +1359,114 @@ point(125, 50);
 	function blendMode(val: string): void;
 
 	/** 🧑‍🎨
-	 * Set the line cap style to `ROUND`, `SQUARE`, or `BUTT`.
+	 * Set the line cap style to `ROUND`, `SQUARE`, or `PROJECT`.
 	 * @param {CanvasLineCap} val line cap style
-	 */
+	 * @example
+createCanvas(200);
+background(200);
+strokeWeight(20);
+
+strokeCap(ROUND);
+line(50, 50, 150, 50);
+
+strokeCap(SQUARE);
+line(50, 100, 150, 100);
+
+strokeCap(PROJECT);
+line(50, 150, 150, 150);
+	*/
 	function strokeCap(val: CanvasLineCap): void;
 
 	/** 🧑‍🎨
 	 * Set the line join style to `ROUND`, `BEVEL`, or `MITER`.
 	 * @param {CanvasLineJoin} val line join style
-	 */
+	 * @example
+createCanvas(200);
+background(200);
+strokeWeight(10);
+
+strokeJoin(ROUND);
+triangle(50, 20, 150, 20, 50, 70);
+
+strokeJoin(BEVEL);
+triangle(150, 50, 50, 100, 150, 150);
+
+strokeJoin(MITER);
+triangle(50, 130, 150, 180, 50, 180);
+	*/
 	function strokeJoin(val: CanvasLineJoin): void;
 
 	/** 🧑‍🎨
-	 * Set ellipse mode to `CENTER`, `RADIUS`, or `CORNER`.
+	 * Set to `CORNER`, `CENTER`, `RADIUS`, or `CORNERS`.
+	 * 
+	 * Changes how the first four inputs to
+	 * `rect` and `square` are interpreted.
+	 * @param {string} val rectangle mode
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+rectMode(CORNER);
+rect(50, 25, 100, 50);
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+rectMode(CENTER);
+rect(100, 50, 100, 50);
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+rectMode(RADIUS);
+rect(100, 50, 50, 25);
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+rectMode(CORNERS);
+rect(50, 25, 150, 75);
+	 */
+	function rectMode(val: string): void;
+
+		/** 🧑‍🎨
+	 * Set to `CENTER`, `RADIUS`, `CORNER`, or `CORNERS`.
+	 * 
+	 * Changes how the first four inputs to
+	 * `ellipse`, `circle`, and `arc` are interpreted.
 	 * @param {string} val ellipse mode
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+ellipseMode(CENTER);
+ellipse(100, 50, 100, 50);
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+ellipseMode(RADIUS);
+ellipse(100, 50, 50, 25);
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+ellipseMode(CORNER);
+ellipse(50, 25, 100, 50);
+	 * @example
+createCanvas(200, 100);
+background(200);
+
+ellipseMode(CORNERS);
+ellipse(50, 25, 150, 75);
 	 */
 	function ellipseMode(val: string): void;
 
+
 	/** 🧑‍🎨
-	 * Set the rectangle mode to `CORNER`, `CORNERS`, `RADIUS`, or `CENTER`.
-	 * @param {string} val rectangle mode
+	 * Draws a curve.
 	 */
-	function rectMode(val: string): void;
+	function curve( x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
 	/** 🧑‍🎨
 	 * Sets the amount of straight line segments used to make a curve.
@@ -1389,8 +1475,13 @@ point(125, 50);
 	 * @param {number} val curve detail level, default is 20
 	 * @example
 await Q5.WebGPU();
-curveDetail(2);
-circle(100, 100, 80);
+
+curveDetail(4);
+
+strokeWeight(10);
+stroke(0, 1, 1);
+noFill();
+curve(-100, -200, -50, 0, 50, 0, 100, -200);
 	 */
 	function curveDetail(val: number): void;
 
@@ -1519,6 +1610,19 @@ circle(100, 100, 80);
 	 */
 	function inStroke(x: number, y: number): boolean;
 
+	/** 🧑‍🎨
+	 */
+	const CORNER: 'corner';
+
+	/** 🧑‍🎨
+	 */
+	const RADIUS: 'radius';
+
+	/** 🧑‍🎨
+	 */
+	const CORNERS: 'corners';
+
+
 	// 🌆 image
 
 	/** 🌆
@@ -1579,9 +1683,10 @@ function draw() {
 
 	/** 🌆
 	 * Sets the image mode, which determines the position and alignment of images drawn on the canvas.
-	 * `CORNER`: (default) images will be drawn from the top-left corner
-	 * `CORNERS`: images will be drawn from the top-left to the bottom-right corner
-	 * `CENTER`: images will be drawn centered at (dx, dy)
+	 * 
+	 * - `CORNER`: (default) images will be drawn from the top-left corner
+	 * - `CORNERS`: images will be drawn from the top-left to the bottom-right corner
+	 * - `CENTER`: images will be drawn centered at (dx, dy)
 	 * @param {string} mode
 	 * @example
 createCanvas(200);
@@ -2203,6 +2308,16 @@ text(nf(PI, 4, 5), 10, 60);
 	// 🖲️ input
 
 	/** 🖲️
+	 * Note that input responses inside `draw` can be delayed by
+	 * up to one frame cycle: from the exact moment an input event occurs 
+	 * to the next time a frame is drawn.
+	 * 
+	 * Play sounds or trigger other non-visual feedback immediately
+	 * by responding to input events inside functions like
+	 * `mousePressed` and `keyPressed`.
+	 */
+
+	/** 🖲️
 	 * Current X position of the mouse.
 	 * @example
 function draw() {
@@ -2257,22 +2372,72 @@ function draw() {
 	let mouseIsPressed: boolean;
 
 	/** 🖲️
-	 * Define this function to respond to mouse events immediately.
-	 * 
-	 * There can be a delay of up to one frame between a mouse event
-	 * and the next time the `draw` function is run.
-	 * 
-	 * Useful for playing sounds.
+	 * Define this function to respond to mouse down events.
 	 * @example
 createCanvas(200);
+let gray = 95;
 
-let gray = 100;
 function mousePressed() {
-	background(gray);
-	gray += 10;
+	background(gray % 256);
+	gray += 40;
 }
 	 */
 	function mousePressed(): void;
+
+	/** 🖲️
+	 * Define this function to respond to mouse up events.
+	 * @example
+createCanvas(200);
+let gray = 95;
+
+function mouseReleased() {
+	background(gray % 256);
+	gray += 40;
+}
+	 */
+	function mouseReleased(): void;
+
+	/** 🖲️
+	 * Define this function to respond to mouse move events.
+	 * @example
+createCanvas(200);
+let gray = 95;
+
+function mouseMoved() {
+	background(gray % 256);
+	gray++;
+}
+	 */
+	function mouseMoved(): void;
+
+	/** 🖲️
+	 * Define this function to respond to mouse drag events.
+	 * 
+	 * Dragging the mouse is defined as moving the mouse
+	 * while a mouse button is pressed.
+	 * @example
+createCanvas(200);
+let gray = 95;
+
+function mouseDragged() {
+	background(gray % 256);
+	gray++;
+}
+	 */
+	function mouseDragged(): void;
+
+	/** 🖲️
+	 * Define this function to respond to mouse double click events.
+	 * @example
+createCanvas(200);
+let gray = 95;
+
+function doubleClicked() {
+	background(gray % 256);
+	gray += 40;
+}
+	 */
+	function doubleClicked(): void;
 
 	/** 🖲️
 	 * The name of the last key pressed.
@@ -2296,7 +2461,8 @@ function draw() {
 	let keyIsPressed: boolean;
 
 	/** 🖲️
-	 * Returns true if the user is pressing the specified key, false otherwise. Accepts case-insensitive key names.
+	 * Returns true if the user is pressing the specified key, false 
+	 * otherwise. Accepts case-insensitive key names.
 	 * @param {string} key key to check
 	 * @returns {boolean} true if the key is pressed, false otherwise
 	 * @example
@@ -2311,22 +2477,30 @@ function draw() {
 	function keyIsDown(key: string): boolean;
 
 	/** 🖲️
-	 * Define this function to respond to key press events immediately.
-	 * 
-	 * There can be a delay of up to one frame between a key press event
-	 * and the next time the `draw` function is run.
-	 * 
-	 * Useful for playing sounds.
+	 * Define this function to respond to key down events.
 	 * @example
-createCanvas(200, 100);
+createCanvas(200);
 
-let gray = 100;
+let gray = 95;
 function keyPressed() {
-	background(gray);
-	gray += 10;
+	background(gray % 256);
+	gray += 40;
 }
 	 */
 	function keyPressed(): void;
+
+	/** 🖲️
+	 * Define this function to respond to key up events.
+	 * @example
+createCanvas(200);
+
+let gray = 95;
+function keyReleased() {
+	background(gray % 256);
+	gray += 40;
+}
+	 */
+	function keyReleased(): void;
 
 	/** 🖲️
 	 * Array of current touches, each touch being an object with
@@ -2387,12 +2561,29 @@ function mouseWheel(e) {
 	function mouseWheel(event: any): void;
 
 	/** 🖲️
-	 * Requests that the pointer be locked to the document body, hiding the cursor and allowing for unlimited movement.
+	 * Requests that the pointer be locked to the document body, hiding
+	 * the cursor and allowing for unlimited movement.
+	 * 
+	 * Operating systems enable mouse acceleration by default, which is useful when you sometimes want slow precise movement (think about you might use a graphics package), but also want to move great distances with a faster mouse movement (think about scrolling, and selecting several files). For some games however, raw mouse input data is preferred for controlling camera rotation — where the same distance movement, fast or slow, results in the same rotation.
+	 * @param {boolean} unadjustedMovement set to true to disable OS-level mouse acceleration and access raw mouse input
+	 * @example
+function draw() {
+	circle(mouseX / 10,  mouseY / 10, 10);
+}
+
+function doubleClicked() {
+	if (!document.pointerLockElement) {
+		requestPointerLock();
+	} else {
+		exitPointerLock();
+	}
+}
 	 */
-	function requestPointerLock(): void;
+	function requestPointerLock(unadjustedMovement): void;
 
 	/** 🖲️
-	 * Exits pointer lock, showing the cursor again and stopping the unlimited movement.
+	 * Exits pointer lock, showing the cursor again and stopping
+	 * the unlimited movement.
 	 */
 	function exitPointerLock(): void;
 

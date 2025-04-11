@@ -42,7 +42,12 @@ Q5.modules.input = ($, q) => {
 
 	$._updateMouse = (e) => {
 		if (e.changedTouches) return;
-		if (c) {
+
+		if (document.pointerLockElement) {
+			// In pointer lock mode, update position based on movement
+			q.mouseX += e.movementX;
+			q.mouseY += e.movementY;
+		} else if (c) {
 			let rect = c.getBoundingClientRect();
 			let sx = c.scrollWidth / $.width || 1;
 			let sy = c.scrollHeight / $.height || 1;
@@ -60,10 +65,8 @@ Q5.modules.input = ($, q) => {
 		q.moveY = e.movementY;
 	};
 
-	let pressedInCanvas = 0;
-
 	$._onmousedown = (e) => {
-		pressedInCanvas++;
+		if (!c?.visible) return;
 		$._startAudio();
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
@@ -78,19 +81,30 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onmouseup = (e) => {
+		if (!c?.visible) return;
 		$._updateMouse(e);
 		q.mouseIsPressed = false;
 		$.mouseReleased(e);
 	};
 
 	$._onclick = (e) => {
+		if (!c?.visible) return;
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
 		$.mouseClicked(e);
 		q.mouseIsPressed = false;
 	};
 
+	$._ondblclick = (e) => {
+		if (!c?.visible) return;
+		$._updateMouse(e);
+		q.mouseIsPressed = true;
+		$.doubleClicked(e);
+		q.mouseIsPressed = false;
+	};
+
 	$._onwheel = (e) => {
+		if (!c?.visible) return;
 		$._updateMouse(e);
 		e.delta = e.deltaY;
 		if ($.mouseWheel(e) == false || $._noScroll) e.preventDefault();
@@ -111,10 +125,10 @@ Q5.modules.input = ($, q) => {
 	$.noCursor = () => ($.canvas.style.cursor = 'none');
 	$.noScroll = () => ($._noScroll = true);
 
-	if (window) {
-		$.lockMouse = document.body?.requestPointerLock;
-		$.unlockMouse = document.exitPointerLock;
-	}
+	$.requestPointerLock = (unadjustedMovement = false) => {
+		return document.body?.requestPointerLock({ unadjustedMovement });
+	};
+	$.exitPointerLock = () => document.exitPointerLock();
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
@@ -155,6 +169,7 @@ Q5.modules.input = ($, q) => {
 	}
 
 	$._ontouchstart = (e) => {
+		if (!c?.visible) return;
 		$._startAudio();
 		q.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
@@ -168,6 +183,7 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._ontouchmove = (e) => {
+		if (!c?.visible) return;
 		q.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware) {
 			q.mouseX = $.touches[0].x;
@@ -178,6 +194,7 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._ontouchend = (e) => {
+		if (!c?.visible) return;
 		q.touches = [...e.touches].map(getTouchInfo);
 		if (!$._isTouchAware && !$.touches.length) {
 			q.mouseIsPressed = false;
@@ -186,11 +203,18 @@ Q5.modules.input = ($, q) => {
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
 
-	if (c) {
-		let l = c.addEventListener.bind(c);
+	if (window) {
+		let l = window.addEventListener;
+		l('keydown', (e) => $._onkeydown(e), false);
+		l('keyup', (e) => $._onkeyup(e), false);
+
 		l('mousedown', (e) => $._onmousedown(e));
-		l('wheel', (e) => $._onwheel(e));
+		l('mousemove', (e) => $._onmousemove(e), false);
+		l('mouseup', (e) => $._onmouseup(e));
 		l('click', (e) => $._onclick(e));
+		l('dblclick', (e) => $._ondblclick(e));
+
+		if (!c) l('wheel', (e) => $._onwheel(e));
 
 		l('touchstart', (e) => $._ontouchstart(e));
 		l('touchmove', (e) => $._ontouchmove(e));
@@ -198,23 +222,8 @@ Q5.modules.input = ($, q) => {
 		l('touchcancel', (e) => $._ontouchend(e));
 	}
 
-	if (window) {
-		let l = window.addEventListener;
-		l('keydown', (e) => $._onkeydown(e), false);
-		l('keyup', (e) => $._onkeyup(e), false);
-
-		if (!c) {
-			l('mousedown', (e) => $._onmousedown(e));
-			l('wheel', (e) => $._onwheel(e));
-			l('click', (e) => $._onclick(e));
-		}
-
-		l('mousemove', (e) => $._onmousemove(e), false);
-		l('mouseup', (e) => {
-			if (pressedInCanvas > 0) {
-				pressedInCanvas--;
-				$._onmouseup(e);
-			}
-		});
-	}
+	// making the window level event listener for wheel events
+	// not passive would be necessary to be able to use `e.preventDefault`
+	// but browsers warn that it's bad for performance
+	if (c) c.addEventListener('wheel', (e) => $._onwheel(e));
 };

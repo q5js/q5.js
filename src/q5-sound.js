@@ -59,6 +59,10 @@ Q5.modules.sound = ($, q) => {
 			return Q5.aud.resume();
 		}
 	};
+
+	$.outputVolume = (level) => {
+		if (Q5.soundOut) Q5.soundOut.gain.value = level;
+	};
 };
 
 if (window.OfflineAudioContext) {
@@ -108,6 +112,7 @@ Q5.Sound = class {
 		source.onended = () => {
 			if (!this.paused) {
 				this.ended = true;
+				if (this._onended) this._onended();
 				this.sources.delete(source);
 			}
 		};
@@ -202,5 +207,8 @@ Q5.Sound = class {
 	}
 	isLooping() {
 		return this._loop;
+	}
+	onended(cb) {
+		this._onended = cb;
 	}
 };
