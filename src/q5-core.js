@@ -2,7 +2,7 @@
  * q5.js
  * @version 2.27
  * @author quinton-ashley
- * @contributors Tezumie, LingDong-
+ * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
  * @class Q5
  */
@@ -87,7 +87,6 @@ function Q5(scope, parent, renderer) {
 
 	$._draw = (timestamp) => {
 		let ts = timestamp || performance.now();
-		$._lastFrameTime ??= ts - $._targetFrameDuration;
 
 		if ($._didResize) {
 			$.windowResized();
@@ -137,7 +136,7 @@ function Q5(scope, parent, renderer) {
 	$.noLoop = () => {
 		$._loop = false;
 		if (looper != null) {
-			if (useRAF) cancelAnimationFrame(looper);
+			if (useRAF && window.cancelAnimationFrame) cancelAnimationFrame(looper);
 			else clearTimeout(looper);
 		}
 		looper = null;
@@ -165,7 +164,7 @@ function Q5(scope, parent, renderer) {
 			$._targetFrameDuration = 1000 / hz;
 
 			if ($._loop && looper != null) {
-				if (useRAF) cancelAnimationFrame(looper);
+				if (useRAF && window.cancelAnimationFrame) cancelAnimationFrame(looper);
 				else clearTimeout(looper);
 				looper = null;
 			}
@@ -309,6 +308,7 @@ function Q5(scope, parent, renderer) {
 		$._setupDone = true;
 		if ($.ctx === null) $.createCanvas(200, 200);
 		if ($.frameCount) return;
+		$._lastFrameTime = performance.now() - 15;
 		raf($._draw);
 	}
 

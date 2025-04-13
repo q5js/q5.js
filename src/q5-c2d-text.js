@@ -19,33 +19,37 @@ Q5.renderers.c2d.text = ($, q) => {
 	$._textCacheMaxSize = 12000;
 
 	$.loadFont = (url, cb) => {
-		if (url.startsWith('https://fonts.googleapis.com/css')) {
-			return loadGoogleFont(url, cb);
+		let f;
+
+		if (url.includes('fonts.googleapis.com/css')) {
+			f = loadGoogleFont(url, cb);
+		} else {
+			let name = url.split('/').pop().split('.')[0].replace(' ', '');
+
+			f = new FontFace(name, `url(${url})`);
+			document.fonts.add(f);
+			f.promise = (async () => {
+				let err;
+				try {
+					await f.load();
+				} catch (e) {
+					err = e;
+				}
+				delete f.promise;
+				if (err) throw err;
+				if (cb) cb(f);
+				return f;
+			})();
 		}
 
-		let name = url.split('/').pop().split('.')[0].replace(' ', '');
-
-		let f = new FontFace(name, `url(${url})`);
-		document.fonts.add(f);
-		f.promise = (async () => {
-			let err;
-			try {
-				await f.load();
-			} catch (e) {
-				err = e;
-			}
-			delete f.promise;
-			if (err) throw err;
-			if (cb) cb(f);
-			return f;
-		})();
 		$._preloadPromises.push(f.promise);
-		$.textFont(name);
+		$.textFont(f.family);
 		if (!$._usePreload) return f.promise;
 		return f;
 	};
 
-	const loadGoogleFont = async (url, cb) => {
+	function loadGoogleFont(url, cb) {
+		if (!url.startsWith('http')) url = 'https://' + url;
 		const urlParams = new URL(url).searchParams;
 		const familyParam = urlParams.get('family');
 		if (!familyParam) {
@@ -54,48 +58,48 @@ Q5.renderers.c2d.text = ($, q) => {
 		}
 
 		const fontFamily = familyParam.split(':')[0];
-		let fontObj = { family: fontFamily };
+		let f = { family: fontFamily };
 
-		fontObj.promise = (async () => {
+		f.promise = (async () => {
 			try {
-				const response = await fetch(url);
-				if (!response.ok) {
-					throw new Error(`Failed to fetch Google Font: ${response.status} ${response.statusText}`);
+				const res = await fetch(url);
+				if (!res.ok) {
+					throw new Error(`Failed to fetch Google Font: ${res.status} ${res.statusText}`);
 				}
 
-				const css = await response.text();
+				let css = await res.text();
 
-				const fontFaceRegex = /@font-face\s*{([^}]*)}/g; // Matches each @font-face block
-				const srcRegex = /src:\s*url\(([^)]+)\)[^;]*;/; // Extracts the URL from the src property
-				const fontFamilyRegex = /font-family:\s*['"]([^'"]+)['"]/; // Extracts the font-family name
-				const fontWeightRegex = /font-weight:\s*([^;]+);/; // Extracts the font-weight value
-				const fontStyleRegex = /font-style:\s*([^;]+);/; // Extracts the font-style value
+				let fontFaceRegex = /@font-face\s*{([^}]*)}/g;
+				let srcRegex = /src:\s*url\(([^)]+)\)[^;]*;/;
+				let fontFamilyRegex = /font-family:\s*['"]([^'"]+)['"]/;
+				let fontWeightRegex = /font-weight:\s*([^;]+);/;
+				let fontStyleRegex = /font-style:\s*([^;]+);/;
 
 				let fontFaceMatch;
 				let loadedFaces = [];
 
 				while ((fontFaceMatch = fontFaceRegex.exec(css)) !== null) {
-					const fontFaceCSS = fontFaceMatch[1];
+					let fontFaceCSS = fontFaceMatch[1];
 
-					const srcMatch = srcRegex.exec(fontFaceCSS);
+					let srcMatch = srcRegex.exec(fontFaceCSS);
 					if (!srcMatch) continue;
-					const fontUrl = srcMatch[1];
+					let fontUrl = srcMatch[1];
 
-					const familyMatch = fontFamilyRegex.exec(fontFaceCSS);
+					let familyMatch = fontFamilyRegex.exec(fontFaceCSS);
 					if (!familyMatch) continue;
-					const family = familyMatch[1];
+					let family = familyMatch[1];
 
-					const weightMatch = fontWeightRegex.exec(fontFaceCSS);
-					const weight = weightMatch ? weightMatch[1] : '400';
+					let weightMatch = fontWeightRegex.exec(fontFaceCSS);
+					let weight = weightMatch ? weightMatch[1] : '400';
 
-					const styleMatch = fontStyleRegex.exec(fontFaceCSS);
-					const style = styleMatch ? styleMatch[1] : 'normal';
+					let styleMatch = fontStyleRegex.exec(fontFaceCSS);
+					let style = styleMatch ? styleMatch[1] : 'normal';
 
-					const faceName = `${family}-${weight}-${style}`.replace(/\s+/g, '-');
+					let faceName = `${family}-${weight}-${style}`.replace(/\s+/g, '-');
 
-					const fontFace = new FontFace(family, `url(${fontUrl})`, {
+					let fontFace = new FontFace(family, `url(${fontUrl})`, {
 						weight,
-						style,
+						style
 					});
 
 					document.fonts.add(fontFace);
@@ -108,23 +112,18 @@ Q5.renderers.c2d.text = ($, q) => {
 					}
 				}
 
-				fontObj.faces = loadedFaces;
-
-				$.textFont(fontFamily);
-
-				if (cb) cb(fontObj);
-				return fontObj;
+				f.faces = loadedFaces;
+				delete f.promise;
+				if (cb) cb(f);
+				return f;
 			} catch (e) {
 				console.error('Error loading Google Font:', e);
 				throw e;
 			}
 		})();
 
-		$._preloadPromises.push(fontObj.promise);
-
-		if (!$._usePreload) return fontObj.promise;
-		return fontObj;
-	};
+		return f;
+	}
 
 	$.textFont = (x) => {
 		if (x && typeof x != 'string') x = x.family;

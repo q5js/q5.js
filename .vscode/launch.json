@@ -17,7 +17,7 @@
 			"request": "launch",
 			"name": "Run Tests (node)",
 			"skipFiles": ["<node_internals>/**"],
-			"program": "test"
+			"program": "${workspaceFolder}/node_modules/.bin/jest"
 		},
 		{
 			"type": "bun",

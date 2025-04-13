@@ -2015,7 +2015,12 @@ text(info, 12, 30, 20, 6);
 	 * Loads a font from a URL.
 	 * 
 	 * The font file can be in any format accepted in CSS, such as
-	 * .ttf and .otf files. The example below loads [Robotica](https://www.dafont.com/robotica-courtney.font) created by Courtney Novits.
+	 * .ttf and .otf files. The first example below loads
+	 * [Robotica](https://www.dafont.com/robotica-courtney.font).
+	 * 
+	 * Also supports loading [Google fonts](https://fonts.google.com/) 
+	 * from urls. The second example loads
+	 * [Pacifico](https://fonts.google.com/specimen/Pacifico).
 	 * 
 	 * If no fonts are loaded, the default sans-serif font is used.
 	 *
@@ -2027,14 +2032,26 @@ text(info, 12, 30, 20, 6);
 	 * @param {(font: FontFace) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
 	 * @returns {FontFace} font
 	 * @example
-createCanvas(200);
+createCanvas(200, 56);
 
 loadFont('/assets/Robotica.ttf');
 
 function setup() {
-	background(200);
-	textSize(66);
-	text('Hello!', 0, 200);
+  fill('skyblue');
+  textSize(64);
+  text('Hello!', 2, 54);
+}
+	 * @example
+createCanvas(200, 74);
+
+let pacifico = loadFont(
+  'fonts.googleapis.com/css2?family=Pacifico'
+);
+
+function setup() {
+  fill('hotpink');
+  textSize(68);
+  text('Hello!', 2, 68);
 }
 	 */
 	function loadFont(url: string, cb?: (font: FontFace) => void): FontFace;
@@ -2125,7 +2142,17 @@ text('Hello, world!', 100, 100);
 
 	/**
 	 * Sets the text weight.
-	 * @param {number} weight font weight
+	 * 
+	 * - 100: thin
+	 * - 200: extra-light
+	 * - 300: light
+	 * - 400: normal/regular
+	 * - 500: medium
+	 * - 600: semi-bold
+	 * - 700: bold
+	 * - 800: bolder/extra-bold
+	 * - 900: black/heavy
+	 * @param {number | string} weight font weight
 	 * @example
 createCanvas(200);
 background(200);
@@ -2135,7 +2162,7 @@ textAlign(CENTER, MIDDLE);
 textWeight(100);
 text('Hello, world!', 100, 100);
 	 */
-	function textWeight(weight: number): void;
+	function textWeight(weight: number | string): void;
 
 	/** ✍️
 	 * Calculates and returns the width of a given string of text.
