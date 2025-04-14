@@ -271,24 +271,19 @@ function draw() {
 	/** ⭐️
 	 * By default, q5 supports the p5.js v1 
 	 * [preload](https://q5js.org/learn/#preload)
-	 * system because it makes it easy to load assets
-	 * before the `setup` and `draw` functions are run.
-	 * 
-	 * q5's preload system is promise based and uses
+	 * system, which uses
 	 * [`Promise.all`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
-	 * to load assets asynchronously in parallel.
+	 * behind the scenes to load assets in parallel.
 	 * 
 	 * To match p5.js v2 behavior, q5 automatically makes
 	 * load* functions, such as `loadImage`, return promises
-	 * before running `setup` if it's defined as an async function.
+	 * in `setup` if it's defined as an async function.
 	 * 
 	 * This function can be used at any point in your sketch
-	 * to make load* functions return promises or not.
+	 * to make load* functions return promises or not. Yet, consider 
+	 * using [`load`](https://q5js.org/learn/#load) instead.
 	 * 
-	 * Consider simply using
-	 * [`load`](https://q5js.org/learn/#load) instead.
-	 * 
-	 * @param {boolean} [val] true by default, whether to enable or disable promise based loading
+	 * @param {boolean} [val] Whether load* functions should return promises or not. If this parameter is undefined the value is set to true.
 	 * @example
 createCanvas(200);
 
@@ -420,7 +415,7 @@ q.draw = () => {
 	 * q5 functions. The origin of a WebGPU canvas is at its center.
 	 * @param {number} [w] width or size of the canvas
 	 * @param {number} [h] height of the canvas
-	 * @param {Object} [opt] options for the canvas
+	 * @param {object} [opt] options for the canvas
 	 * @param {boolean} [opt.alpha] whether the canvas should have an alpha channel that allows it to be seen through, default is false
 	 * @param {string} [opt.colorSpace] color space of the canvas, either "srgb" or "display-p3", default is "display-p3" for devices that support HDR colors
 	 * @returns {HTMLCanvasElement} created canvas element
@@ -879,7 +874,7 @@ rect(20, 20, 60, 60);
 	 * See issue [#104](https://github.com/q5js/q5.js/issues/104) for details.
 	 * @param {number} w width
 	 * @param {number} h height
-	 * @param {Object} [opt] options
+	 * @param {object} [opt] options
 	 * @returns {Q5} a new Q5 graphics buffer
 	 */
 	function createGraphics(w: number, h: number, opt?: any): Q5;
@@ -1415,70 +1410,78 @@ triangle(50, 130, 150, 180, 50, 180);
 	function strokeJoin(val: CanvasLineJoin): void;
 
 	/** 🧑‍🎨
-	 * Set to `CORNER`, `CENTER`, `RADIUS`, or `CORNERS`.
+	 * Set to `CORNER` (default), `CENTER`, `RADIUS`, or `CORNERS`.
 	 * 
 	 * Changes how the first four inputs to
 	 * `rect` and `square` are interpreted.
-	 * @param {string} val rectangle mode
+	 * @param {string} mode
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 rectMode(CORNER);
+
+//  ( x,  y,   w,  h)
 rect(50, 25, 100, 50);
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 rectMode(CENTER);
+
+//  ( cX, cY,   w,  h)
 rect(100, 50, 100, 50);
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 rectMode(RADIUS);
+
+//  ( cX, cY, rX, rY)
 rect(100, 50, 50, 25);
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 rectMode(CORNERS);
+
+//  ( x1, y1, x2, y2)
 rect(50, 25, 150, 75);
 	 */
-	function rectMode(val: string): void;
+	function rectMode(mode: string): void;
 
 		/** 🧑‍🎨
-	 * Set to `CENTER`, `RADIUS`, `CORNER`, or `CORNERS`.
+	 * Set to `CENTER` (default), `RADIUS`, `CORNER`, or `CORNERS`.
 	 * 
 	 * Changes how the first four inputs to
 	 * `ellipse`, `circle`, and `arc` are interpreted.
-	 * @param {string} val ellipse mode
+	 * @param {string} mode
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 ellipseMode(CENTER);
+
+//     (  x,  y,   w,  h)
 ellipse(100, 50, 100, 50);
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 ellipseMode(RADIUS);
+
+//     (  x,  y, rX, rY)
 ellipse(100, 50, 50, 25);
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 ellipseMode(CORNER);
+
+//     (lX, tY,   w,  h)
 ellipse(50, 25, 100, 50);
 	 * @example
 createCanvas(200, 100);
 background(200);
-
 ellipseMode(CORNERS);
+
+//     ( x1, y1, x2, y2)
 ellipse(50, 25, 150, 75);
 	 */
-	function ellipseMode(val: string): void;
+	function ellipseMode(mode: string): void;
 
 
 	/** 🧑‍🎨
@@ -1640,15 +1643,15 @@ curve(-100, -200, -50, 0, 50, 0, 100, -200);
 	 */
 	const CORNERS: 'corners';
 
-
 	// 🌆 image
 
 	/** 🌆
 	 * Loads an image from a URL and optionally runs a callback function.
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param {string} url url of the image to load
-	 * @param {(img: any) => void} [cb] callback function after the image is loaded
-	 * @param {any} [opt] optional parameters for loading the image
-	 * @returns {Q5.Image} image
+	 * @returns {Q5.Image | Promise<Q5.Image>} image or promise
 	 * @example
 createCanvas(200);
 
@@ -1667,11 +1670,11 @@ q.draw = () => {
 	background(logo);
 };
 	 */
-	function loadImage(url: string, cb?: (img: any) => void, opt?: any): Q5.Image;
+	function loadImage(url: string): Q5.Image | Promise<Q5.Image>;
 
 	/** 🌆
-	 * Draws an image to the canvas.
-	 * @param {any} img image to draw
+	 * Draws an image or video frame to the canvas.
+	 * @param {Q5.Image | HTMLVideoElement} img image or video to draw
 	 * @param {number} dx x position to draw the image at
 	 * @param {number} dy y position to draw the image at
 	 * @param {number} [dw] width of the destination image
@@ -1697,23 +1700,42 @@ function draw() {
   image(logo, 0, 0, 200, 200, 256, 256, 512, 512);
 }
 	 */
-	function image(img: any, dx: number, dy: number, dw?: number, dh?: number, sx?: number, sy?: number, sw?: number, sh?: number): void;
+	function image(img: Q5.Image | HTMLVideoElement, dx: number, dy: number, dw?: number, dh?: number, sx?: number, sy?: number, sw?: number, sh?: number): void;
 
 	/** 🌆
-	 * Sets the image mode, which determines the position and alignment of images drawn on the canvas.
+	 * Set to `CORNER` (default), `CORNERS`, or `CENTER`.
 	 * 
-	 * - `CORNER`: (default) images will be drawn from the top-left corner
-	 * - `CORNERS`: images will be drawn from the top-left to the bottom-right corner
-	 * - `CENTER`: images will be drawn centered at (dx, dy)
+	 * Changes how inputs to `image` are interpreted.
 	 * @param {string} mode
 	 * @example
 createCanvas(200);
+let logo = loadImage('/q5js_logo.webp');
 
+function draw() {
+	imageMode(CORNER);
+
+	//   ( img,  x,  y,   w,   h)
+	image(logo, 50, 50, 100, 100);
+}
+	 * @example
+createCanvas(200);
 let logo = loadImage('/q5js_logo.webp');
 
 function draw() {
 	imageMode(CENTER);
-	image(logo, 100, 100, 200, 200);
+
+	//   ( img,  cX,  cY,   w,   h)
+	image(logo, 100, 100, 100, 100);
+}
+	 * @example
+createCanvas(200);
+let logo = loadImage('/q5js_logo.webp');
+
+function draw() {
+	imageMode(CORNERS);
+
+	//   ( img, x1, y1,  x2,  y2)
+	image(logo, 50, 50, 100, 100);
 }
 	 */
 	function imageMode(mode: string): void;
@@ -2046,9 +2068,11 @@ text(info, 12, 30, 20, 6);
 	 * with the file ending "-msdf.json" can be used to render text with 
 	 * the `text` function. Fonts in other formats can be used with the
 	 * [`textImage`](https://q5js.org/learn/#textImage) function.
-	 * @param {string} url uRL of the font to load
-	 * @param {(font: FontFace) => void} [cb] optional callback function that receives the font name as an argument once the font is loaded
-	 * @returns {FontFace} font
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
+	 * @param {string} url URL of the font to load
+	 * @returns {FontFace | Promise<FontFace>} font or promise
 	 * @example
 createCanvas(200, 56);
 
@@ -2072,7 +2096,7 @@ function setup() {
   text('Hello!', 2, 68);
 }
 	 */
-	function loadFont(url: string, cb?: (font: FontFace) => void): FontFace;
+	function loadFont(url: string): FontFace | Promise<FontFace>
 
 	/** ✍️
 	 * Sets the current font to be used for rendering text.
@@ -3086,8 +3110,11 @@ function draw() {
 	 * For backwards compatibility with the p5.sound API, the functions 
 	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 	 * are also implemented, but their use is deprecated.
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param {string} url sound file
-	 * @returns {Sound} a new `Sound` object
+	 * @returns {Sound | Promise<Sound>} a new `Sound` object or promise
 	 * @example
 createCanvas(200);
 
@@ -3098,7 +3125,7 @@ function mousePressed() {
 	sound.play();
 }
 	 */
-	function loadSound(url: string): Sound;
+	function loadSound(url: string): Sound | Promise<Sound>;
 
 	/**
 	 * Loads audio data from a file and returns an [HTMLAudioElement](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement).
@@ -3107,8 +3134,11 @@ function mousePressed() {
 	 * 
 	 * Note that audio can only be played after the first user 
 	 * interaction with the page!
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param url audio file
-	 * @returns {HTMLAudioElement} an HTMLAudioElement
+	 * @returns {HTMLAudioElement | Promise<HTMLAudioElement>} an HTMLAudioElement or promise
 	 * @example
 createCanvas(200);
 
@@ -3119,7 +3149,7 @@ function mousePressed() {
 	audio.play();
 }
 	 */
-	function loadAudio(url: string): HTMLAudioElement;
+	function loadAudio(url: string): HTMLAudioElement | Promise<HTMLAudioElement>;
 
 	/** 🔊
 	 * Returns the AudioContext in use or undefined if it doesn't exist.
@@ -3437,7 +3467,11 @@ function draw() {
 	 * 
 	 * The video element can be hidden and its content can be
 	 * displayed on the canvas using the `image` function.
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param {string} src url of the video
+	 * @returns {HTMLVideoElement | Promise<HTMLVideoElement>} a new video element or promise
 	 * @example
 createCanvas(0);
 
@@ -3460,7 +3494,7 @@ function draw() {
 	filter(HUE_ROTATE, 90);
 }
 	 */
-	function createVideo(src: string): HTMLVideoElement;
+	function createVideo(src: string): HTMLVideoElement | Promise<HTMLVideoElement>;
 
 	/** 📑
 	 * Creates a capture from a connected camera, such as a webcam.
@@ -3475,9 +3509,12 @@ function draw() {
 	 * by default. The first parameter to this function can be used to 
 	 * specify the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia)
 	 * for more info.
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
 	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
-	 * @param {(vid: HTMLVideoElement) => void} [cb] callback function after the capture is created
+	 * @returns {HTMLVideoElement | Promise<HTMLVideoElement>} a new video element or promise
 	 * @example
 createCanvas(200);
 
@@ -3510,7 +3547,7 @@ function mousePressed() {
 	canvas.remove();
 }
 	 */
-	function createCapture(type?: string, flipped?: boolean, cb?: (vid: HTMLVideoElement) => void): HTMLVideoElement;
+	function createCapture(type?: string, flipped?: boolean): HTMLVideoElement | Promise<HTMLVideoElement>;
 
 	/** 📑
 	 * Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
@@ -3687,26 +3724,34 @@ function mousePressed() {
 	function save(data?: object, fileName?: string): void;
 
 	/** 🛠️
-	 * Loads a text file from the specified url. Result is one string.
+	 * Loads a text file from the specified url.
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param {string} url text file
-	 * @param {(result: string) => void} cb a callback function that is run when the file is loaded
+	 * @returns {object | Promise} an object containing the loaded text in the property `obj.text` or a promise
 	 */
-	function loadText(url: string, cb: (result: string) => void): void;
+	function loadText(url: string): object | Promise<object>;
 
 	/** 🛠️
-	 * Loads a JSON file from the specified url. Result depends on the
-	 * JSON file's contents, but is typically an object or array.
+	 * Loads a JSON file from the specified url.
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param {string} url JSON file
-	 * @param {(result: any) => void} cb a callback function that is run when the file is loaded
+	 * @returns {any | Promise} an object or array containing the loaded JSON or a promise
 	 */
-	function loadJSON(url: string, cb: (result: any) => void): void;
+	function loadJSON(url: string): any | Promise<any>;
 
 	/** 🛠️
-	 * Loads a CSV file from the specified url. Result is an array of objects.
+	 * Loads a CSV file from the specified url.
+	 * 
+	 * Returns a promise if used in `async setup`.
+	 * 
 	 * @param {string} url CSV file
-	 * @param {(result: object[]) => void} cb a callback function that is run when the file is loaded
+	 * @returns {object[] | Promise<object[]>} an array of objects containing the loaded CSV or a promise
 	 */
-	function loadCSV(url: string, cb: (result: object[]) => void): void;
+	function loadCSV(url: string): object[] | Promise<object[]>;
 
 	/** 🛠️
 	 * nf is short for number format. It formats a number
