@@ -28,7 +28,7 @@ Q5.modules.fes = ($) => {
 
 			let bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)];
 
-			console.log(
+			$.log(
 				'%cq5.js ' + bug + '%c Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine,
 				'background: #b7ebff; color: #000;',
 				''

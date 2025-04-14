@@ -28,10 +28,22 @@ function draw() {
 
 	/** ⭐️
 	 * The setup function is run once, when the program starts.
+	 * 
+	 * It can also be defined as an async function and used to load assets.
 	 * @example
 function setup() {
 	createCanvas(200, 100);
 	background('aqua');
+}
+	* @example
+let logo;
+
+async function setup() {
+	logo = await loadImage('/q5js_logo.webp');
+}
+
+function draw() {
+	background(logo);
 }
 	 */
 	function setup(): void;
@@ -257,34 +269,35 @@ function draw() {
 	var deltaTime: number;
 
 	/** ⭐️
-	 * By default, q5 uses the same preload system as p5.js v1
-	 * to load assets asynchronously, before the setup and draw
-	 * functions are run. It makes it easy for users to
-	 * load many images, sounds, and other assets in parallel.
+	 * By default, q5 supports the p5.js v1 
+	 * [preload](https://q5js.org/learn/#preload)
+	 * system because it makes it easy to load assets
+	 * before the `setup` and `draw` functions are run.
 	 * 
-	 * In p5 v2, the preload system was entirely removed in
-	 * favor of having load* functions, such as `loadImage`,
-	 * return promises.
+	 * q5's preload system is promise based and uses
+	 * [`Promise.all`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
+	 * to load assets asynchronously in parallel.
 	 * 
-	 * By default, q5 also supports use of `async setup` for loading.
-	 * Use the [`load`](https://q5js.org/learn/#load)
-	 * function to load a file or multiple files. It returns
-	 * a promise that resolves when the file(s) are loaded.
+	 * To match p5.js v2 behavior, q5 automatically makes
+	 * load* functions, such as `loadImage`, return promises
+	 * before running `setup` if it's defined as an async function.
 	 * 
-	 * Alternatively, disable the preload system in q5 to make
-	 * load* functions return promises, to match p5 v2 behavior.
-	 * @param {boolean} val true by default, whether to enable or disable the preload system, affects the return value of load* functions
+	 * This function can be used at any point in your sketch
+	 * to make load* functions return promises or not.
+	 * 
+	 * Consider simply using
+	 * [`load`](https://q5js.org/learn/#load) instead.
+	 * 
+	 * @param {boolean} [val] true by default, whether to enable or disable promise based loading
 	 * @example
 createCanvas(200);
-usePreloadSystem(false);
 
-logo = await loadImage('/q5js_logo.webp');
+usePromiseLoading();
 
-function draw() {
-	background(logo);
-}
+let logo = await loadImage('/q5js_logo.webp');
+background(logo);
 	 */
-	function usePreloadSystem(val: boolean): void;
+	function usePromiseLoading(val?: boolean): void;
 
 	class Q5 {
 		/** ⭐️
@@ -333,6 +346,11 @@ q.circle(100, 50, 20);
 		 * True if the device supports HDR (the display-p3 colorspace).
 		 */
 		static supportsHDR: boolean;
+
+		/** ⭐️
+		 * Set to true to keep draw looping after an error. False by default.
+		 */
+		static errorTolerant: boolean;
 
 		/** ⭐️
 		 * Modules added to this object will be added to new Q5 instances.
@@ -2044,7 +2062,7 @@ function setup() {
 	 * @example
 createCanvas(200, 74);
 
-let pacifico = loadFont(
+loadFont(
   'fonts.googleapis.com/css2?family=Pacifico'
 );
 
@@ -2532,8 +2550,64 @@ function keyReleased() {
 	/** 🖲️
 	 * Array of current touches, each touch being an object with
 	 * id, x, and y properties.
+	 * @example
+function draw() {
+	background(200);
+	for (let touch of touches) {
+		circle(touch.x, touch.y, 100);
+	}
+}
+
+function touchStarted() {}
 	 */
 	let touches: any[];
+
+	/** 🖲️
+	 * Define this function to respond to touch down events.
+	 * 
+	 * By default this function will prevent the default behavior of
+	 * scrolling the page when the touch started inside the canvas.
+	 * Return true to allow the default behavior.
+	 * @example
+createCanvas(200);
+
+let gray = 95;
+function touchStarted() {
+	background(gray % 256);
+	gray += 40;
+}
+	 */
+	function touchStarted(): void;
+
+	/** 🖲️
+	 * Define this function to respond to touch down events.
+	 * 
+	 * By default this function will prevent the default behavior of
+	 * scrolling the page when the touch started inside the canvas.
+	 * Return true to allow the default behavior.
+	 * @example
+createCanvas(200);
+
+let gray = 95;
+function touchEnded() {
+	background(gray % 256);
+	gray += 40;
+}
+	 */
+	function touchEnded(): void;
+
+	/** 🖲️
+	 * Define this function to respond to touch move events.
+	 * @example
+createCanvas(200);
+let gray = 95;
+
+function touchMoved() {
+	background(gray % 256);
+	gray++;
+}
+	 */
+	function touchMoved(): void;
 
 	/** 🖲️
 	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/docs/Web/CSS/cursor) or image.

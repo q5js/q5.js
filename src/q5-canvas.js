@@ -96,7 +96,7 @@ Q5.modules.canvas = ($, q) => {
 						}
 					}).observe(c);
 				}
-			}
+			} else c.visible = true;
 		}
 
 		$._setCanvasSize(w, h);

@@ -54,10 +54,16 @@ Q5.modules.sound = ($, q) => {
 				Q5.soundOut = Q5.aud.createGain();
 				Q5.soundOut.connect(Q5.aud.destination);
 
-				for (let s of sounds) s.init();
+				for (let inst of Q5.instances) {
+					inst._userAudioStarted();
+				}
 			}
 			return Q5.aud.resume();
 		}
+	};
+
+	$._userAudioStarted = () => {
+		for (let s of sounds) s.init();
 	};
 
 	$.outputVolume = (level) => {
@@ -83,6 +89,7 @@ Q5.Sound = class {
 		let res = await fetch(url);
 		this.buffer = await res.arrayBuffer();
 		this.buffer = await Q5.aud.decodeAudioData(this.buffer);
+		if (Q5.aud) this.init();
 	}
 
 	init() {

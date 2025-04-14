@@ -54,7 +54,7 @@ Q5.modules.util = ($, q) => {
 			} else {
 				obj = $.loadText(url);
 			}
-			promises.push(obj.promise);
+			promises.push($._usePreload ? obj.promise : obj);
 		}
 
 		if (urls.length == 1) return promises[0];

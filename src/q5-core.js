@@ -74,7 +74,8 @@ function Q5(scope, parent, renderer) {
 
 	$._preloadPromises = [];
 	$._usePreload = true;
-	$.usePreloadSystem = (v) => ($._usePreload = v);
+	$.usePromiseLoading = (v = true) => ($._usePreload = !v);
+	$.usePreloadSystem = (v = true) => ($._usePreload = v);
 	$.isPreloadSupported = () => $._usePreload;
 
 	const resolvers = [];
@@ -299,6 +300,8 @@ function Q5(scope, parent, renderer) {
 		await Promise.all($._preloadPromises);
 		if ($._g) await Promise.all($._g._preloadPromises);
 
+		if (t.setup?.constructor.name == 'AsyncFunction') $.usePromiseLoading();
+
 		for (let name of userFns) wrapWithFES(name);
 
 		$.draw = t.draw || (() => {});
@@ -311,6 +314,8 @@ function Q5(scope, parent, renderer) {
 		$._lastFrameTime = performance.now() - 15;
 		raf($._draw);
 	}
+
+	Q5.instances.push($);
 
 	if (autoLoaded) _start();
 	else setTimeout(_start, 32);
@@ -325,6 +330,7 @@ Q5._server = typeof process == 'object';
 Q5._esm = this === undefined;
 
 Q5._instanceCount = 0;
+Q5.instances = [];
 Q5._friendlyError = (msg, func) => {
 	if (!Q5.disableFriendlyErrors) console.error(func + ': ' + msg);
 };

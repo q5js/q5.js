@@ -74,7 +74,8 @@ function Q5(scope, parent, renderer) {
 
 	$._preloadPromises = [];
 	$._usePreload = true;
-	$.usePreloadSystem = (v) => ($._usePreload = v);
+	$.usePromiseLoading = (v = true) => ($._usePreload = !v);
+	$.usePreloadSystem = (v = true) => ($._usePreload = v);
 	$.isPreloadSupported = () => $._usePreload;
 
 	const resolvers = [];
@@ -299,6 +300,8 @@ function Q5(scope, parent, renderer) {
 		await Promise.all($._preloadPromises);
 		if ($._g) await Promise.all($._g._preloadPromises);
 
+		if (t.setup?.constructor.name == 'AsyncFunction') $.usePromiseLoading();
+
 		for (let name of userFns) wrapWithFES(name);
 
 		$.draw = t.draw || (() => {});
@@ -311,6 +314,8 @@ function Q5(scope, parent, renderer) {
 		$._lastFrameTime = performance.now() - 15;
 		raf($._draw);
 	}
+
+	Q5.instances.push($);
 
 	if (autoLoaded) _start();
 	else setTimeout(_start, 32);
@@ -325,6 +330,7 @@ Q5._server = typeof process == 'object';
 Q5._esm = this === undefined;
 
 Q5._instanceCount = 0;
+Q5.instances = [];
 Q5._friendlyError = (msg, func) => {
 	if (!Q5.disableFriendlyErrors) console.error(func + ': ' + msg);
 };
@@ -458,7 +464,7 @@ Q5.modules.canvas = ($, q) => {
 						}
 					}).observe(c);
 				}
-			}
+			} else c.visible = true;
 		}
 
 		$._setCanvasSize(w, h);
@@ -3138,7 +3144,7 @@ Q5.modules.fes = ($) => {
 
 			let bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)];
 
-			console.log(
+			$.log(
 				'%cq5.js ' + bug + '%c Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine,
 				'background: #b7ebff; color: #000;',
 				''
@@ -3213,8 +3219,10 @@ Q5.modules.input = ($, q) => {
 		q.moveY = e.movementY;
 	};
 
+	let pressAmt = 0;
+
 	$._onmousedown = (e) => {
-		if (!c?.visible) return;
+		pressAmt++;
 		$._startAudio();
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
@@ -3223,20 +3231,21 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onmousemove = (e) => {
+		if (c && !c.visible) return;
 		$._updateMouse(e);
 		if ($.mouseIsPressed) $.mouseDragged(e);
 		else $.mouseMoved(e);
 	};
 
 	$._onmouseup = (e) => {
-		if (!c?.visible) return;
+		if (pressAmt > 0) pressAmt--;
+		else return;
 		$._updateMouse(e);
 		q.mouseIsPressed = false;
 		$.mouseReleased(e);
 	};
 
 	$._onclick = (e) => {
-		if (!c?.visible) return;
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
 		$.mouseClicked(e);
@@ -3244,7 +3253,6 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._ondblclick = (e) => {
-		if (!c?.visible) return;
 		$._updateMouse(e);
 		q.mouseIsPressed = true;
 		$.doubleClicked(e);
@@ -3252,7 +3260,6 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onwheel = (e) => {
-		if (!c?.visible) return;
 		$._updateMouse(e);
 		e.delta = e.deltaY;
 		if ($.mouseWheel(e) == false || $._noScroll) e.preventDefault();
@@ -3317,37 +3324,19 @@ Q5.modules.input = ($, q) => {
 	}
 
 	$._ontouchstart = (e) => {
-		if (!c?.visible) return;
 		$._startAudio();
 		q.touches = [...e.touches].map(getTouchInfo);
-		if (!$._isTouchAware) {
-			q.mouseX = $.touches[0].x;
-			q.mouseY = $.touches[0].y;
-			q.mouseIsPressed = true;
-			q.mouseButton = $.LEFT;
-			$.mousePressed(e);
-		}
-		$.touchStarted(e);
+		if (!$.touchStarted(e)) e.preventDefault();
 	};
 
 	$._ontouchmove = (e) => {
-		if (!c?.visible) return;
+		if (c && !c.visible) return;
 		q.touches = [...e.touches].map(getTouchInfo);
-		if (!$._isTouchAware) {
-			q.mouseX = $.touches[0].x;
-			q.mouseY = $.touches[0].y;
-			if (!$.mouseDragged(e)) e.preventDefault();
-		}
 		if (!$.touchMoved(e)) e.preventDefault();
 	};
 
 	$._ontouchend = (e) => {
-		if (!c?.visible) return;
 		q.touches = [...e.touches].map(getTouchInfo);
-		if (!$._isTouchAware && !$.touches.length) {
-			q.mouseIsPressed = false;
-			if (!$.mouseReleased(e)) e.preventDefault();
-		}
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
 
@@ -3356,24 +3345,30 @@ Q5.modules.input = ($, q) => {
 		l('keydown', (e) => $._onkeydown(e), false);
 		l('keyup', (e) => $._onkeyup(e), false);
 
-		l('mousedown', (e) => $._onmousedown(e));
-		l('mousemove', (e) => $._onmousemove(e), false);
-		l('mouseup', (e) => $._onmouseup(e));
+		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
+
+		l(pointer + 'move', (e) => $._onmousemove(e), false);
+
+		l('touchmove', (e) => $._ontouchmove(e));
+
+		if (!c) l('wheel', (e) => $._onwheel(e));
+		// making the window level event listener for wheel events
+		// not passive would be necessary to be able to use `e.preventDefault`
+		// but browsers warn that it's bad for performance
+		else c.addEventListener('wheel', (e) => $._onwheel(e));
+
+		if (!$._isGlobal && c) l = c.addEventListener.bind(c);
+
+		l(pointer + 'down', (e) => $._onmousedown(e));
+		l(pointer + 'up', (e) => $._onmouseup(e));
+
 		l('click', (e) => $._onclick(e));
 		l('dblclick', (e) => $._ondblclick(e));
 
-		if (!c) l('wheel', (e) => $._onwheel(e));
-
 		l('touchstart', (e) => $._ontouchstart(e));
-		l('touchmove', (e) => $._ontouchmove(e));
 		l('touchend', (e) => $._ontouchend(e));
 		l('touchcancel', (e) => $._ontouchend(e));
 	}
-
-	// making the window level event listener for wheel events
-	// not passive would be necessary to be able to use `e.preventDefault`
-	// but browsers warn that it's bad for performance
-	if (c) c.addEventListener('wheel', (e) => $._onwheel(e));
 };
 Q5.modules.math = ($, q) => {
 	$.RADIANS = 0;
@@ -4237,10 +4232,16 @@ Q5.modules.sound = ($, q) => {
 				Q5.soundOut = Q5.aud.createGain();
 				Q5.soundOut.connect(Q5.aud.destination);
 
-				for (let s of sounds) s.init();
+				for (let inst of Q5.instances) {
+					inst._userAudioStarted();
+				}
 			}
 			return Q5.aud.resume();
 		}
+	};
+
+	$._userAudioStarted = () => {
+		for (let s of sounds) s.init();
 	};
 
 	$.outputVolume = (level) => {
@@ -4266,6 +4267,7 @@ Q5.Sound = class {
 		let res = await fetch(url);
 		this.buffer = await res.arrayBuffer();
 		this.buffer = await Q5.aud.decodeAudioData(this.buffer);
+		if (Q5.aud) this.init();
 	}
 
 	init() {
@@ -4451,7 +4453,7 @@ Q5.modules.util = ($, q) => {
 			} else {
 				obj = $.loadText(url);
 			}
-			promises.push(obj.promise);
+			promises.push($._usePreload ? obj.promise : obj);
 		}
 
 		if (urls.length == 1) return promises[0];
