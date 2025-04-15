@@ -1648,7 +1648,7 @@ curve(-100, -200, -50, 0, 50, 0, 100, -200);
 	/** 🌆
 	 * Loads an image from a URL and optionally runs a callback function.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} url url of the image to load
 	 * @returns {Q5.Image | Promise<Q5.Image>} image or promise
@@ -2069,7 +2069,7 @@ text(info, 12, 30, 20, 6);
 	 * the `text` function. Fonts in other formats can be used with the
 	 * [`textImage`](https://q5js.org/learn/#textImage) function.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} url URL of the font to load
 	 * @returns {FontFace | Promise<FontFace>} font or promise
@@ -3111,7 +3111,7 @@ function draw() {
 	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 	 * are also implemented, but their use is deprecated.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} url sound file
 	 * @returns {Sound | Promise<Sound>} a new `Sound` object or promise
@@ -3135,7 +3135,7 @@ function mousePressed() {
 	 * Note that audio can only be played after the first user 
 	 * interaction with the page!
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param url audio file
 	 * @returns {HTMLAudioElement | Promise<HTMLAudioElement>} an HTMLAudioElement or promise
@@ -3468,7 +3468,7 @@ function draw() {
 	 * The video element can be hidden and its content can be
 	 * displayed on the canvas using the `image` function.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} src url of the video
 	 * @returns {HTMLVideoElement | Promise<HTMLVideoElement>} a new video element or promise
@@ -3510,7 +3510,7 @@ function draw() {
 	 * specify the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia)
 	 * for more info.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
 	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
@@ -3726,7 +3726,7 @@ function mousePressed() {
 	/** 🛠️
 	 * Loads a text file from the specified url.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} url text file
 	 * @returns {object | Promise} an object containing the loaded text in the property `obj.text` or a promise
@@ -3736,7 +3736,7 @@ function mousePressed() {
 	/** 🛠️
 	 * Loads a JSON file from the specified url.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} url JSON file
 	 * @returns {any | Promise} an object or array containing the loaded JSON or a promise
@@ -3746,7 +3746,7 @@ function mousePressed() {
 	/** 🛠️
 	 * Loads a CSV file from the specified url.
 	 * 
-	 * Returns a promise if used in `async setup`.
+	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} url CSV file
 	 * @returns {object[] | Promise<object[]>} an array of objects containing the loaded CSV or a promise

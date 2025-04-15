@@ -304,7 +304,7 @@ function Q5(scope, parent, renderer) {
 
 		for (let name of userFns) wrapWithFES(name);
 
-		$.draw = t.draw || (() => {});
+		$.draw ??= t.draw || (() => {});
 
 		millisStart = performance.now();
 		await $.setup();
