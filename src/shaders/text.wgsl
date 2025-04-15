@@ -25,7 +25,8 @@ struct FragParams {
 	@location(0) texCoord : vec2f,
 	@location(1) fillColor : vec4f,
 	@location(2) strokeColor : vec4f,
-	@location(3) strokeWeight : f32
+	@location(3) strokeWeight : f32,
+	@location(4) edge : f32
 }
 struct Char {
 	texOffset: vec2f,
@@ -39,7 +40,8 @@ struct Text {
 	matrixIndex: f32,
 	fillIndex: f32,
 	strokeIndex: f32,
-	strokeWeight: f32
+	strokeWeight: f32,
+	edge: f32
 }
 
 @group(0) @binding(0) var<uniform> q: Q5;
@@ -100,12 +102,13 @@ fn vertexMain(v : VertexParams) -> FragParams {
 	f.fillColor = colors[i32(text.fillIndex)];
 	f.strokeColor = colors[i32(text.strokeIndex)];
 	f.strokeWeight = text.strokeWeight;
+	f.edge = text.edge;
 	return f;
 }
 
 @fragment
 fn fragMain(f : FragParams) -> @location(0) vec4f {
-	let edge = 0.5;
+	let edge = f.edge;
 	let dist = calcDist(f.texCoord, edge);
 
 	if (f.strokeWeight == 0.0) {

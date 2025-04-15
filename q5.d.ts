@@ -540,6 +540,8 @@ circle(150, 100, 80);
 
 	/** ⬜️
 	 * Sets the global opacity, which affects all subsequent drawing operations, except `background`. Default is 1, fully opaque.
+	 * 
+	 * In q5 WebGPU this function only affects images.
 	 * @param {number} alpha opacity level, ranging from 0 to 1
 	 * @example
 createCanvas(200);
@@ -4228,6 +4230,7 @@ fn vertexMain(v : VertexParams) -> FragParams {
 	f.fillColor = colors[i32(text.fillIndex)];
 	f.strokeColor = colors[i32(text.strokeIndex)];
 	f.strokeWeight = text.strokeWeight;
+	f.edge = text.edge;
 	return f;
 }`);
 
