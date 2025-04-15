@@ -24,7 +24,7 @@ It's like getting a free computer upgrade! 🖥️
 
 ## Start coding! 💻
 
-No installation required! Use an online code editor: [Project IDX](https://idx.google.com/new?template=https:%2F%2Fgithub.com%2Fq5js%2Fq5-webgpu-template), [OpenProcessing](https://openprocessing.org/sketch/2534845), or [CodePen](https://codepen.io/qashto/pen/jENEJNy).
+No installation required! Use an online code editor: [Firebase Studio](https://studio.firebase.google.com/new?template=https:%2F%2Fgithub.com%2Fq5js%2Fq5-webgpu-template), [OpenProcessing](https://openprocessing.org/sketch/2534845), or [CodePen](https://codepen.io/qashto/pen/jENEJNy).
 
 # 4-1
 
