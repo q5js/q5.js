@@ -2060,8 +2060,8 @@ text(info, 12, 30, 20, 6);
 	 * .ttf and .otf files. The first example below loads
 	 * [Robotica](https://www.dafont.com/robotica-courtney.font).
 	 * 
-	 * Also supports loading [Google fonts](https://fonts.google.com/) 
-	 * from urls. The second example loads
+	 * Also supports loading [Google fonts](https://fonts.google.com/).
+	 * The second example loads
 	 * [Pacifico](https://fonts.google.com/specimen/Pacifico).
 	 * 
 	 * If no fonts are loaded, the default sans-serif font is used.

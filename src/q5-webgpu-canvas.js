@@ -25,6 +25,11 @@ struct Q5 {
 	$._g = $.createGraphics(1, 1, 'c2d');
 	if ($._g.colorMode) $._g.colorMode($.RGB, 1);
 
+	$._hooks = {
+		prerender: [],
+		postrender: []
+	};
+
 	let encoder,
 		pass,
 		mainView,
@@ -685,7 +690,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		pass.setBindGroup(0, mainBindGroup);
 
-		for (let m of $._hooks.preRender) m();
+		for (let m of $._hooks.prerender) m();
 
 		let drawVertOffset = 0,
 			imageVertOffset = 0,
@@ -776,7 +781,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		$._texture = frameA;
 
-		for (let m of $._hooks.postRender) m();
+		for (let m of $._hooks.postrender) m();
 
 		// destroy buffers
 		Q5.device.queue.onSubmittedWorkDone().then(() => {

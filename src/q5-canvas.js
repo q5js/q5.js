@@ -104,10 +104,6 @@ Q5.modules.canvas = ($, q) => {
 		Object.assign(c, opt);
 		let rend = $._createCanvas(c.w, c.h, opt);
 
-		if ($._hooks) {
-			for (let m of $._hooks.postCanvas) m();
-		}
-
 		if ($._addEventMethods) $._addEventMethods(c);
 
 		return rend;

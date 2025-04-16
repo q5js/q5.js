@@ -684,7 +684,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		$.endShape(true);
 	};
 
-	$._hooks.preRender.push(() => {
+	$._hooks.prerender.push(() => {
 		$._pass.setPipeline($._pipelines[1]);
 
 		let vertexBuffer = Q5.device.createBuffer({
@@ -701,7 +701,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		$._buffers.push(vertexBuffer);
 	});
 
-	$._hooks.postRender.push(() => {
+	$._hooks.postrender.push(() => {
 		vertIndex = 0;
 	});
 };

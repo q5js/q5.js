@@ -60,7 +60,6 @@ class MiniEditor {
 				this.editor = monaco.editor.create(this.editorEl, {
 					value: this.initialCode,
 					language: 'javascript',
-					wordWrap: true,
 					folding: false,
 					renderLineHighlight: 'none',
 					theme: 'vs-dark',
@@ -131,7 +130,7 @@ class MiniEditor {
 			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|(await\s+)*Q5\.WebGPU)\s*\([^)]*\);?/g;
 			userCode = userCode.replace(q5InstanceRegex, '');
 
-			let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : null);
+			let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : 'c2d');
 
 			for (let f of q5FunctionNames) {
 				const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');

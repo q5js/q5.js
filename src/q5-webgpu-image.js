@@ -435,7 +435,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	};
 
-	$._hooks.preRender.push(() => {
+	$._hooks.prerender.push(() => {
 		if (!vertIndex) return;
 
 		// Switch to image pipeline
@@ -461,7 +461,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 	});
 
-	$._hooks.postRender.push(() => {
+	$._hooks.postrender.push(() => {
 		vertIndex = 0;
 		$._textureBindGroups.splice(tIdx, vidFrames);
 		vidFrames = 0;

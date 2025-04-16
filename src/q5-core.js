@@ -14,7 +14,7 @@ function Q5(scope, parent, renderer) {
 		$._renderer = 'c2d';
 		$._webgpu = $._webgpuFallback = true;
 	} else {
-		$._renderer = renderer || Q5.render;
+		$._renderer = renderer || 'c2d';
 		$['_' + $._renderer] = true;
 	}
 
@@ -51,11 +51,12 @@ function Q5(scope, parent, renderer) {
 	$._targetFrameDuration = 16.666666666666668;
 	$._frameRate = $._fps = 60;
 	$._loop = true;
-	$._hooks = {
-		postCanvas: [],
-		preRender: [],
-		postRender: []
-	};
+
+	async function runHooks(name) {
+		for (let hook of Q5.lifecycleHooks[name]) {
+			await hook.call($);
+		}
+	}
 
 	let millisStart = 0;
 	$.millis = () => performance.now() - millisStart;
@@ -86,7 +87,7 @@ function Q5(scope, parent, renderer) {
 		if (resolvers.length) resolvers.pop()();
 	};
 
-	$._draw = (timestamp) => {
+	async function _draw(timestamp) {
 		let ts = timestamp || performance.now();
 
 		if ($._didResize) {
@@ -95,12 +96,12 @@ function Q5(scope, parent, renderer) {
 		}
 
 		if ($._loop) {
-			if (useRAF) looper = raf($._draw);
+			if (useRAF) looper = raf(_draw);
 			else {
 				let nextTS = ts + $._targetFrameDuration;
 				let frameDelay = nextTS - performance.now();
 				while (frameDelay < 0) frameDelay += $._targetFrameDuration;
-				looper = setTimeout(() => $._draw(nextTS), frameDelay);
+				looper = setTimeout(() => _draw(nextTS), frameDelay);
 			}
 		} else if ($.frameCount && !$._redraw) return;
 
@@ -114,26 +115,28 @@ function Q5(scope, parent, renderer) {
 		q.frameCount++;
 		let pre = performance.now();
 		$.resetMatrix();
+
 		if ($._beginRender) $._beginRender();
-		for (let m of Q5.methods.pre) m.call($);
+		await runHooks('predraw');
 		try {
-			$.draw();
+			await $.draw();
 		} catch (e) {
 			if (!Q5.errorTolerant) $.noLoop();
 			if ($._fes) $._fes(e);
 			throw e;
 		}
-		for (let m of Q5.methods.post) m.call($);
-		$.postProcess();
+		await runHooks('postdraw');
+		await $.postProcess();
 		if ($._render) $._render();
 		if ($._finishRender) $._finishRender();
+
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;
 		q.moveX = q.moveY = 0;
 		$._lastFrameTime = ts;
 		let post = performance.now();
 		$._fps = Math.round(1000 / (post - pre));
-	};
+	}
 	$.noLoop = () => {
 		$._loop = false;
 		if (looper != null) {
@@ -144,19 +147,20 @@ function Q5(scope, parent, renderer) {
 	};
 	$.loop = () => {
 		$._loop = true;
-		if ($._setupDone && looper == null) $._draw();
+		if ($._setupDone && looper == null) _draw();
 	};
 	$.isLooping = () => $._loop;
-	$.redraw = (n = 1) => {
+	$.redraw = async (n = 1) => {
 		$._redraw = true;
 		for (let i = 0; i < n; i++) {
-			$._draw();
+			await _draw();
 		}
 		$._redraw = false;
 	};
-	$.remove = () => {
+	$.remove = async () => {
 		$.noLoop();
 		$.canvas.remove();
+		await runHooks('remove');
 	};
 
 	$.frameRate = (hz) => {
@@ -171,8 +175,8 @@ function Q5(scope, parent, renderer) {
 			}
 			useRAF = hz <= 60;
 			if ($._setupDone) {
-				if (useRAF) looper = raf($._draw);
-				else looper = setTimeout(() => $._draw(), $._targetFrameDuration);
+				if (useRAF) looper = raf(_draw);
+				else looper = setTimeout(() => _draw(), $._targetFrameDuration);
 			}
 		}
 		return $._frameRate;
@@ -215,8 +219,8 @@ function Q5(scope, parent, renderer) {
 		delete Q5.Q5;
 	}
 
-	for (let m of Q5.methods.init) {
-		m.call($);
+	for (let hook of Q5.lifecycleHooks.init) {
+		hook.call($);
 	}
 
 	for (let [n, fn] of Object.entries(Q5.prototype)) {
@@ -294,34 +298,38 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	async function _start() {
+	async function start() {
 		wrapWithFES('preload');
 		$.preload();
 		await Promise.all($._preloadPromises);
 		if ($._g) await Promise.all($._g._preloadPromises);
 
-		if (t.setup?.constructor.name == 'AsyncFunction') $.usePromiseLoading();
+		if (t.setup?.constructor.name == 'AsyncFunction') {
+			$.usePromiseLoading();
+		}
 
 		for (let name of userFns) wrapWithFES(name);
 
 		$.draw ??= t.draw || (() => {});
 
+		await runHooks('presetup');
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
+		await runHooks('postsetup');
 		if ($.ctx === null) $.createCanvas(200, 200);
+
 		if ($.frameCount) return;
+
 		$._lastFrameTime = performance.now() - 15;
-		raf($._draw);
+		raf(_draw);
 	}
 
 	Q5.instances.push($);
 
-	if (autoLoaded) _start();
-	else setTimeout(_start, 32);
+	if (autoLoaded) start();
+	else setTimeout(start, 32);
 }
-
-Q5.render = 'c2d';
 
 Q5.renderers = {};
 Q5.modules = {};
@@ -336,13 +344,30 @@ Q5._friendlyError = (msg, func) => {
 };
 Q5._validateParameters = () => true;
 
-Q5.methods = {
+Q5.lifecycleHooks = {
 	init: [],
-	pre: [],
-	post: [],
+	presetup: [],
+	postsetup: [],
+	predraw: [],
+	postdraw: [],
 	remove: []
 };
-Q5.prototype.registerMethod = (m, fn) => Q5.methods[m].push(fn);
+
+Q5.registerAddon = (addon) => {
+	let lifecycles = {};
+	addon(Q5, Q5.prototype, lifecycles);
+	for (let name in lifecycles) {
+		Q5.lifecycleHooks[name].push(lifecycles[name]);
+	}
+};
+
+Q5.prototype.registerMethod = (m, fn) => {
+	if (m == 'beforeSetup' || m.includes('Preload')) m = 'presetup';
+	if (m == 'afterSetup') m = 'postsetup';
+	if (m == 'pre') m = 'predraw';
+	if (m == 'post') m = 'postdraw';
+	Q5.lifecycleHooks[m].push(fn);
+};
 
 Q5.preloadMethods = {};
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);

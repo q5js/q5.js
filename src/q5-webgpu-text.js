@@ -310,7 +310,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (url.startsWith('https://fonts.googleapis.com/css')) {
 			return $._g.loadFont(url, cb);
 		}
-		
+
 		let ext = url.slice(url.lastIndexOf('.') + 1);
 		if (url == ext) return $._loadDefaultFont(url, cb);
 		if (ext != 'json') return $._g.loadFont(url, cb);
@@ -598,7 +598,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		$._imageMode = og;
 	};
 
-	$._hooks.preRender.push(() => {
+	$._hooks.prerender.push(() => {
 		if (!charStack.length) return;
 
 		// calculate total buffer size for text data
@@ -646,7 +646,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		});
 	});
 
-	$._hooks.postRender.push(() => {
+	$._hooks.postrender.push(() => {
 		charStack = [];
 		textStack = [];
 	});
