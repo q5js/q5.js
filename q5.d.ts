@@ -369,6 +369,29 @@ q.draw = () => {
 		static WebGPU(): Q5;
 
 		/** ⭐️
+		 * ___Experimental! Might be changed.___
+		 * 
+		 * Registers an addon with q5.js.
+		 * 
+		 * Addons can augment q5 with new functionality and register
+		 * functions to be executed at specific points in the q5 lifecycle:
+		 * init, presetup, postsetup, predraw, postdraw, and remove.
+		 * 
+		 * @param {Function} addon A function that receives `Q5`, `Q5.prototype`, and a `lifecycles` object.
+		 * @example
+// addon.js
+Q5.registerAddon((Q5, proto, lifecycles) => {
+  lifecycles.postsetup = function () {
+		this.background('blue');
+	};
+});
+
+// sketch.js
+createCanvas(200);
+		 */
+		static registerAddon(addon: Function): void; //-
+
+		/** ⭐️
 		 * The draw function is run 60 times per second by default.
 		 */
 		draw(): void; //-
@@ -2184,7 +2207,7 @@ text('Hello, world!', 100, 100);
 	 */
 	function textAlign(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
 
-	/**
+	/** ✍️
 	 * Sets the text weight.
 	 * 
 	 * - 100: thin
@@ -2741,9 +2764,7 @@ function draw() {
 	 */
 	function random(low?: number | any[], high?: number): number | any;
 
-	/**
-	 * ___Experimental! May be renamed or removed in the future.___
-	 * 
+	/** 🧮
 	 * Generates a random number within a symmetric range around zero.
 	 * 
 	 * Can be used to create a jitter effect (random displacement).
@@ -3129,7 +3150,7 @@ function mousePressed() {
 	 */
 	function loadSound(url: string): Sound | Promise<Sound>;
 
-	/**
+	/** 🔊
 	 * Loads audio data from a file and returns an [HTMLAudioElement](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement).
 	 * 
 	 * Audio is considered loaded when the [canplaythrough event](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event) is fired.

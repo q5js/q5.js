@@ -316,8 +316,8 @@ function Q5(scope, parent, renderer) {
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
-		await runHooks('postsetup');
 		if ($.ctx === null) $.createCanvas(200, 200);
+		await runHooks('postsetup');
 
 		if ($.frameCount) return;
 
