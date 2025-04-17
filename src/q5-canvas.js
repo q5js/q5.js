@@ -222,45 +222,6 @@ Q5.modules.canvas = ($, q) => {
 		} else $._da = 0;
 	};
 
-	$._styleNames = [
-		'_fill',
-		'_stroke',
-		'_strokeWeight',
-		'_doStroke',
-		'_doFill',
-		'_strokeSet',
-		'_fillSet',
-		'_shadow',
-		'_doShadow',
-		'_shadowOffsetX',
-		'_shadowOffsetY',
-		'_shadowBlur',
-		'_tint',
-		'_colorMode',
-		'_colorFormat',
-		'Color',
-		'_imageMode',
-		'_rectMode',
-		'_ellipseMode',
-		'_textSize',
-		'_textAlign',
-		'_textBaseline'
-	];
-	$._styles = [];
-
-	$.pushStyles = () => {
-		let styles = {};
-		for (let s of $._styleNames) styles[s] = $[s];
-		$._styles.push(styles);
-	};
-	$.popStyles = () => {
-		let styles = $._styles.pop();
-		for (let s of $._styleNames) $[s] = styles[s];
-
-		if ($._webgpu) $.colorMode($._colorMode, $._colorFormat);
-		else q.Color = styles.Color;
-	};
-
 	if (window && $._scope != 'graphics') {
 		window.addEventListener('resize', () => {
 			$._didResize = true;

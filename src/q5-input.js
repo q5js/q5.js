@@ -84,10 +84,10 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onmouseup = (e) => {
+		q.mouseIsPressed = false;
 		if (pressAmt > 0) pressAmt--;
 		else return;
 		$._updateMouse(e);
-		q.mouseIsPressed = false;
 		$.mouseReleased(e);
 	};
 
@@ -192,10 +192,11 @@ Q5.modules.input = ($, q) => {
 		l('keyup', (e) => $._onkeyup(e), false);
 
 		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
-
 		l(pointer + 'move', (e) => $._onmousemove(e), false);
-
 		l('touchmove', (e) => $._ontouchmove(e));
+		l(pointer + 'up', (e) => $._onmouseup(e));
+		l('touchend', (e) => $._ontouchend(e));
+		l('touchcancel', (e) => $._ontouchend(e));
 
 		if (!c) l('wheel', (e) => $._onwheel(e));
 		// making the window level event listener for wheel events
@@ -206,13 +207,8 @@ Q5.modules.input = ($, q) => {
 		if (!$._isGlobal && c) l = c.addEventListener.bind(c);
 
 		l(pointer + 'down', (e) => $._onmousedown(e));
-		l(pointer + 'up', (e) => $._onmouseup(e));
-
+		l('touchstart', (e) => $._ontouchstart(e));
 		l('click', (e) => $._onclick(e));
 		l('dblclick', (e) => $._ondblclick(e));
-
-		l('touchstart', (e) => $._ontouchstart(e));
-		l('touchend', (e) => $._ontouchend(e));
-		l('touchcancel', (e) => $._ontouchend(e));
 	}
 };

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.27
+ * @version 2.28
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -264,6 +264,7 @@ function Q5(scope, parent, renderer) {
 	$._isTouchAware = t.touchStarted || t.touchMoved || t.touchEnded;
 
 	let userFns = [
+		'preload',
 		'setup',
 		'postProcess',
 		'mouseMoved',
@@ -284,18 +285,16 @@ function Q5(scope, parent, renderer) {
 	// shim if undefined
 	for (let name of userFns) $[name] ??= () => {};
 
-	function wrapWithFES(fn) {
-		if (!t[fn]) $[fn] = () => {};
-		else if ($._isGlobal) {
-			$[fn] = (event) => {
-				try {
-					return t[fn](event);
-				} catch (e) {
-					if ($._fes) $._fes(e);
-					throw e;
-				}
-			};
-		}
+	function wrapWithFES(name) {
+		const fn = t[name] || $[name];
+		$[name] = (event) => {
+			try {
+				return fn(event);
+			} catch (e) {
+				if ($._fes) $._fes(e);
+				throw e;
+			}
+		};
 	}
 
 	async function start() {
@@ -384,7 +383,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.27';
+Q5.version = Q5.VERSION = '2.28';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.27
+ * @version 2.28
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -264,6 +264,7 @@ function Q5(scope, parent, renderer) {
 	$._isTouchAware = t.touchStarted || t.touchMoved || t.touchEnded;
 
 	let userFns = [
+		'preload',
 		'setup',
 		'postProcess',
 		'mouseMoved',
@@ -284,18 +285,16 @@ function Q5(scope, parent, renderer) {
 	// shim if undefined
 	for (let name of userFns) $[name] ??= () => {};
 
-	function wrapWithFES(fn) {
-		if (!t[fn]) $[fn] = () => {};
-		else if ($._isGlobal) {
-			$[fn] = (event) => {
-				try {
-					return t[fn](event);
-				} catch (e) {
-					if ($._fes) $._fes(e);
-					throw e;
-				}
-			};
-		}
+	function wrapWithFES(name) {
+		const fn = t[name] || $[name];
+		$[name] = (event) => {
+			try {
+				return fn(event);
+			} catch (e) {
+				if ($._fes) $._fes(e);
+				throw e;
+			}
+		};
 	}
 
 	async function start() {
@@ -384,7 +383,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.27';
+Q5.version = Q5.VERSION = '2.28';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -613,45 +612,6 @@ Q5.modules.canvas = ($, q) => {
 			q.width = $._dau = unit;
 			q.height = (c.h / c.w) * unit;
 		} else $._da = 0;
-	};
-
-	$._styleNames = [
-		'_fill',
-		'_stroke',
-		'_strokeWeight',
-		'_doStroke',
-		'_doFill',
-		'_strokeSet',
-		'_fillSet',
-		'_shadow',
-		'_doShadow',
-		'_shadowOffsetX',
-		'_shadowOffsetY',
-		'_shadowBlur',
-		'_tint',
-		'_colorMode',
-		'_colorFormat',
-		'Color',
-		'_imageMode',
-		'_rectMode',
-		'_ellipseMode',
-		'_textSize',
-		'_textAlign',
-		'_textBaseline'
-	];
-	$._styles = [];
-
-	$.pushStyles = () => {
-		let styles = {};
-		for (let s of $._styleNames) styles[s] = $[s];
-		$._styles.push(styles);
-	};
-	$.popStyles = () => {
-		let styles = $._styles.pop();
-		for (let s of $._styleNames) $[s] = styles[s];
-
-		if ($._webgpu) $.colorMode($._colorMode, $._colorFormat);
-		else q.Color = styles.Color;
 	};
 
 	if (window && $._scope != 'graphics') {
@@ -919,13 +879,45 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		}
 	};
 
-	$.pushMatrix = () => $.ctx.save();
-	$.popMatrix = () => $.ctx.restore();
+	$._styleNames = [
+		'_fill',
+		'_stroke',
+		'_strokeWeight',
+		'_doFill',
+		'_doStroke',
+		'_fillSet',
+		'_strokeSet',
+		'_shadow',
+		'_doShadow',
+		'_shadowOffsetX',
+		'_shadowOffsetY',
+		'_shadowBlur',
+		'_tint',
+		'_textSize',
+		'_textAlign',
+		'_textBaseline',
+		'_imageMode',
+		'_rectMode',
+		'_ellipseMode',
+		'_colorMode',
+		'_colorFormat',
+		'Color'
+	];
+	$._styles = [];
 
-	let _popStyles = $.popStyles;
+	$.pushStyles = () => {
+		let styles = {};
+		for (let s of $._styleNames) styles[s] = $[s];
+		$._styles.push(styles);
+	};
+
+	function popStyles() {
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+	}
 
 	$.popStyles = () => {
-		_popStyles();
+		popStyles();
 
 		$.ctx.fillStyle = $._fill;
 		$.ctx.strokeStyle = $._stroke;
@@ -936,13 +928,16 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.shadowBlur = $._doShadow ? $._shadowBlur : 0;
 	};
 
+	$.pushMatrix = () => $.ctx.save();
+	$.popMatrix = () => $.ctx.restore();
+
 	$.push = () => {
 		$.ctx.save();
 		$.pushStyles();
 	};
 	$.pop = () => {
 		$.ctx.restore();
-		_popStyles();
+		popStyles();
 	};
 };
 Q5.renderers.c2d.shapes = ($) => {
@@ -3259,10 +3254,10 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onmouseup = (e) => {
+		q.mouseIsPressed = false;
 		if (pressAmt > 0) pressAmt--;
 		else return;
 		$._updateMouse(e);
-		q.mouseIsPressed = false;
 		$.mouseReleased(e);
 	};
 
@@ -3367,10 +3362,11 @@ Q5.modules.input = ($, q) => {
 		l('keyup', (e) => $._onkeyup(e), false);
 
 		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
-
 		l(pointer + 'move', (e) => $._onmousemove(e), false);
-
 		l('touchmove', (e) => $._ontouchmove(e));
+		l(pointer + 'up', (e) => $._onmouseup(e));
+		l('touchend', (e) => $._ontouchend(e));
+		l('touchcancel', (e) => $._ontouchend(e));
 
 		if (!c) l('wheel', (e) => $._onwheel(e));
 		// making the window level event listener for wheel events
@@ -3381,14 +3377,9 @@ Q5.modules.input = ($, q) => {
 		if (!$._isGlobal && c) l = c.addEventListener.bind(c);
 
 		l(pointer + 'down', (e) => $._onmousedown(e));
-		l(pointer + 'up', (e) => $._onmouseup(e));
-
+		l('touchstart', (e) => $._ontouchstart(e));
 		l('click', (e) => $._onclick(e));
 		l('dblclick', (e) => $._ondblclick(e));
-
-		l('touchstart', (e) => $._ontouchstart(e));
-		l('touchend', (e) => $._ontouchend(e));
-		l('touchcancel', (e) => $._ontouchend(e));
 	}
 };
 Q5.modules.math = ($, q) => {
@@ -4905,11 +4896,6 @@ struct Q5 {
 	$._g = $.createGraphics(1, 1, 'c2d');
 	if ($._g.colorMode) $._g.colorMode($.RGB, 1);
 
-	$._hooks = {
-		prerender: [],
-		postrender: []
-	};
-
 	let encoder,
 		pass,
 		mainView,
@@ -4919,21 +4905,26 @@ struct Q5 {
 		frameSampler,
 		frameBindGroup,
 		colorIndex = 1,
-		colorStackIndex = 8;
+		colorStackIndex = 8,
+		prevFramePL = 0,
+		framePL = 0;
 
 	$._pipelineConfigs = [];
 	$._pipelines = [];
 	$._buffers = [];
-	$._prevFramePL = 0;
-	$._framePL = 0;
+
+	$._hooks = {
+		prerender: [],
+		postrender: []
+	};
 
 	// local variables used for slightly better performance
 
 	// stores pipeline shifts and vertex counts/image indices
-	let drawStack = ($._drawStack = []);
+	let drawStack = [];
 
 	// colors used for each draw call
-	let colorStack = ($._colorStack = new Float32Array(1e6));
+	let colorStack = new Float32Array(1e6);
 
 	// prettier-ignore
 	colorStack.set([
@@ -5097,29 +5088,38 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	// since these values are checked so often in `addColor`,
 	// they're stored in local variables for better performance
 	let usingRGB = true,
-		colorFormat = 1;
+		_colorMode = 'rgb',
+		_colorFormat = 1;
 
 	if ($.colorMode) {
-		let cm = $.colorMode;
+		let colorMode = $.colorMode;
 		$.colorMode = function () {
-			cm(...arguments);
-			usingRGB = $._colorMode == 'rgb';
-			colorFormat = $._colorFormat;
+			colorMode(...arguments);
+			_colorMode = $._colorMode;
+			usingRGB = _colorMode == 'rgb';
+			_colorFormat = $._colorFormat;
 		};
 	}
 
-	let addColor = (r, g, b, a) => {
-		if (typeof r === 'string' || usingRGB === false) {
-			r = $.color(r, g, b, a);
+	const addColor = (r, g, b, a) => {
+		let isColor = r._q5Color;
+
+		if (usingRGB === false || (g === undefined && !isColor && typeof r !== 'number')) {
+			if (usingRGB === false || typeof r == 'string' || !Array.isArray(r)) {
+				r = $.color(r, g, b, a);
+			} else {
+				[r, g, b, a] = r;
+			}
 		} else if (b === undefined) {
 			// grayscale mode `fill(1, 0.5)`
-			a = g ?? colorFormat;
+			a = g ?? _colorFormat;
 			g = b = r;
 		}
-		a ??= colorFormat;
-		if (r._q5Color) {
+		a ??= _colorFormat;
+
+		if (isColor === true) {
 			let c = r;
-			if (c.r != undefined) ({ r, g, b, a } = c);
+			if (usingRGB) ({ r, g, b, a } = c);
 			else {
 				a = c.a;
 				if (c.c != undefined) c = Q5.OKLCHtoRGB(c.l, c.c, c.h);
@@ -5129,7 +5129,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			}
 		}
 
-		if (colorFormat === 255) {
+		if (_colorFormat === 255) {
 			r /= 255;
 			g /= 255;
 			b /= 255;
@@ -5147,38 +5147,42 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		colorIndex++;
 	};
 
-	$._stroke = 0;
-	$._fill = $._tint = $._globalAlpha = 1;
-	$._doFill = $._doStroke = true;
+	let doFill = true,
+		doStroke = true,
+		fillSet = false,
+		strokeSet = false,
+		strokeIdx = 0,
+		fillIdx = 1,
+		tintIdx = 1,
+		globalAlpha = 1,
+		sw = 1, // stroke weight
+		hsw = 0.5, // half the stroke weight
+		scaledSW = 1;
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
-		$._doFill = $._fillSet = true;
-		$._fill = colorIndex;
+		doFill = fillSet = true;
+		fillIdx = colorIndex;
 	};
 	$.stroke = (r, g, b, a) => {
 		addColor(r, g, b, a);
-		$._doStroke = $._strokeSet = true;
-		$._stroke = colorIndex;
+		doStroke = strokeSet = true;
+		strokeIdx = colorIndex;
 	};
 	$.tint = (r, g, b, a) => {
 		addColor(r, g, b, a);
-		$._tint = colorIndex;
+		tintIdx = colorIndex;
 	};
-	$.opacity = (a) => ($._globalAlpha = a);
-	$.noFill = () => ($._doFill = false);
-	$.noStroke = () => ($._doStroke = false);
-	$.noTint = () => ($._tint = 1);
-
-	$._strokeWeight = 1;
-	$._hsw = 0.5;
-	$._scaledSW = 1;
+	$.opacity = (a) => (globalAlpha = a);
+	$.noFill = () => (doFill = false);
+	$.noStroke = () => (doStroke = false);
+	$.noTint = () => (tintIdx = 1);
 
 	$.strokeWeight = (v) => {
 		v = Math.abs(v);
-		$._strokeWeight = v;
-		$._scaledSW = v * $._scale;
-		$._hsw = v / 2;
+		sw = v;
+		scaledSW = v * _scale;
+		hsw = v / 2;
 	};
 
 	const MAX_TRANSFORMS = $._graphics ? 1000 : 1e7,
@@ -5187,10 +5191,9 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 	let matrix,
 		matrices = [],
-		matricesIndexStack = [];
-
-	// tracks if the matrix has been modified
-	$._matrixDirty = false;
+		matricesIdxStack = [],
+		matrixIdx = 0,
+		matrixDirty = false; // tracks if the matrix has been modified
 
 	// initialize with a 4x4 identity matrix
 	// prettier-ignore
@@ -5205,7 +5208,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 	$.resetMatrix = () => {
 		matrix = matrices[0].slice();
-		$._matrixIndex = 0;
+		matrixIdx = 0;
 	};
 	$.resetMatrix();
 
@@ -5216,7 +5219,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		m[12] += x * m[0];
 		m[13] -= y * m[5];
 		m[14] += z * m[10];
-		$._matrixDirty = true;
+		matrixDirty = true;
 	};
 
 	$.rotate = $.rotateZ = (a) => {
@@ -5245,16 +5248,16 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			m[5] = m5 * cosR - m4 * sinR;
 		}
 
-		$._matrixDirty = true;
+		matrixDirty = true;
 	};
 
-	$._scale = 1;
+	let _scale = 1;
 
 	$.scale = (x = 1, y, z = 1) => {
 		y ??= x;
 
-		$._scale = Math.max(Math.abs(x), Math.abs(y));
-		$._scaledSW = $._strokeWeight * $._scale;
+		_scale = Math.max(Math.abs(x), Math.abs(y));
+		scaledSW = sw * _scale;
 
 		let m = matrix;
 
@@ -5271,7 +5274,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		m[10] *= z;
 		m[11] *= z;
 
-		$._matrixDirty = true;
+		matrixDirty = true;
 	};
 
 	$.shearX = (ang) => {
@@ -5288,7 +5291,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		m[0] = m0 + m4 * tanAng;
 		m[1] = m1 + m5 * tanAng;
 
-		$._matrixDirty = true;
+		matrixDirty = true;
 	};
 
 	$.shearY = (ang) => {
@@ -5305,7 +5308,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		m[4] = m4 + m0 * tanAng;
 		m[5] = m5 + m1 * tanAng;
 
-		$._matrixDirty = true;
+		matrixDirty = true;
 	};
 
 	$.applyMatrix = (...args) => {
@@ -5322,38 +5325,93 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		// overwrite the current transformation matrix
 		matrix = m.slice();
-		$._matrixDirty = true;
+		matrixDirty = true;
 	};
 
 	// saves the current matrix state
-	$._saveMatrix = () => {
+	const saveMatrix = () => {
 		transforms.set(matrix, matrices.length * MATRIX_SIZE);
-		$._matrixIndex = matrices.length;
+		matrixIdx = matrices.length;
 		matrices.push(matrix.slice());
-		$._matrixDirty = false;
+		matrixDirty = false;
 	};
 
 	// push the current matrix index onto the stack
 	$.pushMatrix = () => {
-		if ($._matrixDirty) $._saveMatrix();
-		matricesIndexStack.push($._matrixIndex);
+		if (matrixDirty) saveMatrix();
+		matricesIdxStack.push(matrixIdx);
 	};
 
 	$.popMatrix = () => {
-		if (!matricesIndexStack.length) {
+		if (!matricesIdxStack.length) {
 			return console.warn('Matrix index stack is empty!');
 		}
 		// pop the last matrix index and set it as the current matrix index
-		let idx = matricesIndexStack.pop();
+		let idx = matricesIdxStack.pop();
 		matrix = matrices[idx].slice();
-		$._matrixIndex = idx;
-		$._matrixDirty = false;
+		matrixIdx = idx;
+		matrixDirty = false;
 	};
 
-	let _pushStyles = $.pushStyles;
+	let styles = [];
+
 	$.pushStyles = () => {
-		_pushStyles();
-		$.strokeWeight($._strokeWeight);
+		styles.push([
+			fillIdx,
+			strokeIdx,
+			sw,
+			hsw,
+			scaledSW,
+			doFill,
+			doStroke,
+			fillSet,
+			strokeSet,
+			tintIdx,
+			_textSize,
+			_textAlign,
+			_textBaseline,
+			_imageMode,
+			_rectMode,
+			_ellipseMode,
+			usingRGB,
+			_colorMode,
+			_colorFormat,
+			Color
+		]);
+	};
+
+	$.popStyles = () => {
+		let s = styles.pop();
+
+		// array destructuring to local variables is way better
+		// for performance than copying from one object to another
+		[
+			fillIdx,
+			strokeIdx,
+			sw,
+			hsw,
+			scaledSW,
+			doFill,
+			doStroke,
+			fillSet,
+			strokeSet,
+			tintIdx,
+			_textSize,
+			_textAlign,
+			_textBaseline,
+			_imageMode,
+			_rectMode,
+			_ellipseMode,
+			usingRGB,
+			_colorMode,
+			_colorFormat
+		] = s;
+
+		// since these values are used outside of q5-webgpu
+		// they need to be stored on the instance
+		$._colorFormat = _colorFormat;
+		$._colorMode = _colorMode;
+		$.Color = s.at(-1);
 	};
 
 	$.push = () => {
@@ -5366,7 +5424,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$.popStyles();
 	};
 
-	$._calcBox = (x, y, w, h, mode) => {
+	const calcBox = (x, y, w, h, mode) => {
 		// left, right, top, bottom
 		let l, r, t, b;
 		if (!mode || mode == 'corner') {
@@ -5426,7 +5484,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		replace: [1, 0, 0, 1, 0, 0]
 	};
 
-	$._blendModeNames = Object.keys(blendModes);
+	let blendModeNames = Object.keys(blendModes);
 
 	$.blendConfigs = {};
 
@@ -5445,12 +5503,12 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		};
 	}
 
-	$._blendMode = 'source-over';
+	let _blendMode = 'source-over';
 
 	$.blendMode = (mode) => {
-		if (mode == $._blendMode) return;
-		$._blendMode = mode;
-		let i = $._blendModeNames.indexOf(mode);
+		if (mode == _blendMode) return;
+		_blendMode = mode;
+		let i = blendModeNames.indexOf(mode);
 		if (i == -1) {
 			console.error(`Blend mode "${mode}" not supported in q5.js WebGPU.`);
 			return;
@@ -5465,19 +5523,17 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 
 	$.background = (r, g, b, a) => {
-		$.push();
-		$.resetMatrix();
 		if (r.canvas) {
+			$.push();
+			$.resetMatrix();
 			let img = r;
-			$._imageMode = 'corner';
+			_imageMode = 'corner';
 			$.image(img, -c.hw, -c.hh, c.w, c.h);
+			$.pop();
 		} else {
-			$._rectMode = 'corner';
-			$.fill(r, g, b, a);
-			$._doStroke = false;
-			$.rect(-c.hw, -c.hh, c.w, c.h);
+			addColor(r, g, b, a);
+			addRect(-c.hw, c.hh, c.hw, c.hh, c.hw, -c.hh, -c.hw, -c.hh, colorIndex, 0);
 		}
-		$.pop();
 	};
 
 	$._beginRender = () => {
@@ -5511,7 +5567,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		});
 
 		if (!shouldClear) {
-			pass.setPipeline($._pipelines[$._prevFramePL]);
+			pass.setPipeline($._pipelines[prevFramePL]);
 			pass.setBindGroup(0, frameBindGroup);
 			pass.draw(4);
 		}
@@ -5583,7 +5639,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			if (drawStack[i] != curPipelineIndex) {
 				if (drawStack[i] == 0) {
 					// change blend mode
-					let mode = $._blendModeNames[v];
+					let mode = blendModeNames[v];
 					for (let i = 1; i < $._pipelines.length; i++) {
 						$._pipelineConfigs[i].fragment.targets[0].blend = $.blendConfigs[mode];
 						$._pipelines[i] = Q5.device.createRenderPipeline($._pipelineConfigs[i]);
@@ -5644,7 +5700,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			]
 		});
 
-		pass.setPipeline($._pipelines[$._framePL]);
+		pass.setPipeline($._pipelines[framePL]);
 		pass.setBindGroup(0, frameBindGroup);
 		pass.draw(4);
 		pass.end();
@@ -5657,7 +5713,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		colorIndex = 1;
 		colorStackIndex = 8;
 		matrices = [matrices[0]];
-		matricesIndexStack = [];
+		matricesIdxStack = [];
 
 		$._texture = frameA;
 
@@ -5669,40 +5725,10 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			$._buffers = [];
 		});
 	};
-};
 
-Q5.initWebGPU = async () => {
-	if (!navigator.gpu) {
-		console.warn('q5 WebGPU not supported on this browser! Use Google Chrome or Edge.');
-		return false;
-	}
-	if (!Q5.requestedGPU) {
-		let adapter = await navigator.gpu.requestAdapter();
-		if (!adapter) {
-			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, vulkan may need to be enabled.');
-			return false;
-		}
-		Q5.device = await adapter.requestDevice();
+	/* SHAPES */
 
-		Q5.device.lost.then((e) => {
-			console.error('WebGPU crashed!');
-			console.error(e);
-		});
-	}
-	return true;
-};
-
-Q5.WebGPU = async function (scope, parent) {
-	if (!scope || scope == 'global') Q5._hasGlobal = true;
-	if (!(await Q5.initWebGPU())) {
-		return new Q5(scope, parent, 'webgpu-fallback');
-	}
-	return new Q5(scope, parent, 'webgpu');
-};
-
-Q5.webgpu = Q5.WebGPU;
-Q5.renderers.webgpu.shapes = ($) => {
-	$._shapesPL = 1;
+	let shapesPL = 1;
 
 	$._shapesShaderCode =
 		$._baseShaderCode +
@@ -5751,14 +5777,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._shapesShaderCode
 	});
 
-	let c = $.canvas,
-		drawStack = $._drawStack,
-		vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
-		vertIndex = 0;
+	let shapesVertStack = new Float32Array($._graphics ? 1000 : 1e7),
+		shapesVertIdx = 0;
 	const TAU = Math.PI * 2;
 	const HALF_PI = Math.PI / 2;
 
-	let vertexBufferLayout = {
+	let shapesVertBuffLayout = {
 		arrayStride: 16, // 4 floats * 4 bytes
 		attributes: [
 			{ format: 'float32x2', offset: 0, shaderLocation: 0 }, // position
@@ -5778,7 +5802,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		vertex: {
 			module: shapesShader,
 			entryPoint: 'vertexMain',
-			buffers: [vertexBufferLayout]
+			buffers: [shapesVertBuffLayout]
 		},
 		fragment: {
 			module: shapesShader,
@@ -5792,18 +5816,18 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._pipelines[1] = Q5.device.createRenderPipeline($._pipelineConfigs[1]);
 
 	const addVert = (x, y, ci, ti) => {
-		let v = vertexStack,
-			i = vertIndex;
+		let v = shapesVertStack,
+			i = shapesVertIdx;
 		v[i++] = x;
 		v[i++] = y;
 		v[i++] = ci;
 		v[i++] = ti;
-		vertIndex = i;
+		shapesVertIdx = i;
 	};
 
 	const addRect = (x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) => {
-		let v = vertexStack,
-			i = vertIndex;
+		let v = shapesVertStack,
+			i = shapesVertIdx;
 
 		v[i++] = x1;
 		v[i++] = y1;
@@ -5825,8 +5849,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		v[i++] = ci;
 		v[i++] = ti;
 
-		vertIndex = i;
-		drawStack.push($._shapesPL, 4);
+		shapesVertIdx = i;
+		drawStack.push(shapesPL, 4);
 	};
 
 	const addArc = (x, y, a, b, startAngle, endAngle, n, ci, ti) => {
@@ -5834,8 +5858,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let angleIncrement = angleRange / n;
 		let t = startAngle;
 
-		let v = vertexStack,
-			i = vertIndex;
+		let v = shapesVertStack,
+			i = shapesVertIdx;
 
 		for (let j = 0; j <= n; j++) {
 			// add center vertex
@@ -5857,8 +5881,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			t += angleIncrement;
 		}
 
-		vertIndex = i;
-		drawStack.push($._shapesPL, (n + 1) * 2);
+		shapesVertIdx = i;
+		drawStack.push(shapesPL, (n + 1) * 2);
 	};
 
 	const addArcStroke = (x, y, outerA, outerB, innerA, innerB, startAngle, endAngle, n, ci, ti) => {
@@ -5866,8 +5890,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let angleIncrement = angleRange / n;
 		let t = startAngle;
 
-		let v = vertexStack,
-			i = vertIndex;
+		let v = shapesVertStack,
+			i = shapesVertIdx;
 
 		for (let j = 0; j <= n; j++) {
 			// Outer vertex
@@ -5892,45 +5916,46 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			t += angleIncrement;
 		}
 
-		vertIndex = i;
-		drawStack.push($._shapesPL, (n + 1) * 2);
+		shapesVertIdx = i;
+		drawStack.push(shapesPL, (n + 1) * 2);
 	};
 
-	$.rectMode = (x) => ($._rectMode = x);
+	let _rectMode = 'corner';
+
+	$.rectMode = (x) => (_rectMode = x);
 
 	$.rect = (x, y, w, h, rr = 0) => {
 		h ??= w;
-		let [l, r, t, b] = $._calcBox(x, y, w, h, $._rectMode);
+		let [l, r, t, b] = calcBox(x, y, w, h, _rectMode);
 		let ci, ti;
-		if ($._matrixDirty) $._saveMatrix();
-		ti = $._matrixIndex;
+		if (matrixDirty) saveMatrix();
+		ti = matrixIdx;
 
 		if (!rr) {
-			if ($._doFill) {
-				ci = $._fill;
+			if (doFill) {
+				ci = fillIdx;
 				addRect(l, t, r, t, r, b, l, b, ci, ti);
 			}
 
-			if ($._doStroke) {
-				ci = $._stroke;
-				let sw = $._strokeWeight / 2;
+			if (doStroke) {
+				ci = strokeIdx;
 
 				// Calculate stroke positions
-				let lsw = l - sw,
-					rsw = r + sw,
-					tsw = t + sw,
-					bsw = b - sw,
-					lpsw = l + sw,
-					rpsw = r - sw,
-					tpsw = t - sw,
-					bpsw = b + sw;
+				let lsw = l - hsw,
+					rsw = r + hsw,
+					tsw = t + hsw,
+					bsw = b - hsw,
+					lpsw = l + hsw,
+					rpsw = r - hsw,
+					tpsw = t - hsw,
+					bpsw = b + hsw;
 
 				addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // Top
 				addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // Bottom
 
 				// Adjust side strokes to avoid overlapping corners
-				tsw = t - sw;
-				bsw = b + sw;
+				tsw = t - hsw;
+				bsw = b + hsw;
 
 				addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // Left
 				addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // Right
@@ -5946,15 +5971,15 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		// Clamp radius
 		rr = Math.min(rr, Math.min(w, h) / 2);
 
-		let n = getArcSegments(rr * $._scale);
+		let n = getArcSegments(rr * _scale);
 
 		let trr = t + rr,
 			brr = b - rr,
 			lrr = l - rr,
 			rrr = r + rr;
 
-		if ($._doFill) {
-			ci = $._fill;
+		if (doFill) {
+			ci = fillIdx;
 			// Corner arcs
 			addArc(r, b, rr, rr, 0, HALF_PI, n, ci, ti);
 			addArc(l, b, rr, rr, Math.PI, HALF_PI, n, ci, ti);
@@ -5966,9 +5991,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			addRect(rrr, t, r, t, r, b, rrr, b, ci, ti); // Right
 		}
 
-		if ($._doStroke) {
-			ci = $._stroke;
-			let hsw = $._hsw;
+		if (doStroke) {
+			ci = strokeIdx;
 
 			let outerA = rr + hsw,
 				outerB = rr + hsw,
@@ -6001,9 +6025,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.plane = (x, y, w, h) => {
 		h ??= w;
-		let [l, r, t, b] = $._calcBox(x, y, w, h, 'center');
-		if ($._matrixDirty) $._saveMatrix();
-		addRect(l, t, r, t, r, b, l, b, $._fill, $._matrixIndex);
+		let [l, r, t, b] = calcBox(x, y, w, h, 'center');
+		if (matrixDirty) saveMatrix();
+		addRect(l, t, r, t, r, b, l, b, fillIdx, matrixIdx);
 	};
 
 	// prettier-ignore
@@ -6037,24 +6061,24 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		d < 2400 ? 90 :
 		100;
 
-	$._ellipseMode = Q5.CENTER;
-	$.ellipseMode = (x) => ($._ellipseMode = x);
+	let _ellipseMode = 'center';
+
+	$.ellipseMode = (x) => (_ellipseMode = x);
 
 	$.ellipse = (x, y, w, h) => {
-		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * $._scale);
+		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * _scale);
 		let a = w / 2;
 		let b = w == h ? a : h / 2;
 
-		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._matrixIndex;
+		if (matrixDirty) saveMatrix();
+		let ti = matrixIdx;
 
-		if ($._doFill) {
-			addArc(x, -y, a, b, 0, TAU, n, $._fill, ti);
+		if (doFill) {
+			addArc(x, -y, a, b, 0, TAU, n, fillIdx, ti);
 		}
-		if ($._doStroke) {
-			let sw = $._strokeWeight / 2;
+		if (doStroke) {
 			// Draw the stroke as a ring using triangle strips
-			addArcStroke(x, -y, a + sw, b + sw, a - sw, b - sw, 0, TAU, n, $._stroke, ti);
+			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, 0, TAU, n, strokeIdx, ti);
 		}
 	};
 
@@ -6079,74 +6103,72 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		// Calculate position based on ellipseMode
 		let a, b;
-		if ($._ellipseMode == $.CENTER) {
+		if (_ellipseMode == $.CENTER) {
 			a = w / 2;
 			b = h / 2;
-		} else if ($._ellipseMode == $.RADIUS) {
+		} else if (_ellipseMode == $.RADIUS) {
 			a = w;
 			b = h;
-		} else if ($._ellipseMode == $.CORNER) {
+		} else if (_ellipseMode == $.CORNER) {
 			x += w / 2;
 			y += h / 2;
 			a = w / 2;
 			b = h / 2;
-		} else if ($._ellipseMode == $.CORNERS) {
+		} else if (_ellipseMode == $.CORNERS) {
 			x = (x + w) / 2;
 			y = (y + h) / 2;
 			a = (w - x) / 2;
 			b = (h - y) / 2;
 		}
 
-		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._matrixIndex;
-		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * $._scale);
+		if (matrixDirty) saveMatrix();
+		let ti = matrixIdx;
+		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * _scale);
 
 		// Draw fill
-		if ($._doFill) {
-			addArc(x, -y, a, b, start, stop, n, $._fill, ti);
+		if (doFill) {
+			addArc(x, -y, a, b, start, stop, n, fillIdx, ti);
 		}
 
 		// Draw stroke
-		if ($._doStroke) {
-			let hsw = $._hsw;
-			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, $._stroke, ti);
-			if ($._strokeCap == 'round') {
-				addArc(x + a * Math.cos(start), -y - b * Math.sin(start), hsw, hsw, 0, TAU, n, $._stroke, ti);
-				addArc(x + a * Math.cos(stop), -y - b * Math.sin(stop), hsw, hsw, 0, TAU, n, $._stroke, ti);
+		if (doStroke) {
+			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, strokeIdx, ti);
+			if (_strokeCap == 'round') {
+				addArc(x + a * Math.cos(start), -y - b * Math.sin(start), hsw, hsw, 0, TAU, n, strokeIdx, ti);
+				addArc(x + a * Math.cos(stop), -y - b * Math.sin(stop), hsw, hsw, 0, TAU, n, strokeIdx, ti);
 			}
 		}
 	};
 
 	$.point = (x, y) => {
-		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._matrixIndex,
-			ci = $._stroke,
-			sw = $._strokeWeight;
+		if (matrixDirty) saveMatrix();
+		let ti = matrixIdx,
+			ci = strokeIdx;
 
-		if ($._scaledSW < 2) {
-			let [l, r, t, b] = $._calcBox(x, y, sw, sw, 'corner');
+		if (scaledSW < 2) {
+			let [l, r, t, b] = calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
-			let n = getArcSegments($._scaledSW);
+			let n = getArcSegments(scaledSW);
 			sw /= 2;
 			addArc(x, -y, sw, sw, 0, TAU, n, ci, ti);
 		}
 	};
 
-	$._strokeCap = $._strokeJoin = 'round';
-	$.strokeCap = (x) => ($._strokeCap = x);
-	$.strokeJoin = (x) => ($._strokeJoin = x);
+	let _strokeCap = 'round',
+		_strokeJoin = 'round';
+
+	$.strokeCap = (x) => (_strokeCap = x);
+	$.strokeJoin = (x) => (_strokeJoin = x);
 	$.lineMode = () => {
-		$._strokeCap = 'square';
-		$._strokeJoin = 'none';
+		_strokeCap = 'square';
+		_strokeJoin = 'none';
 	};
 
 	$.line = (x1, y1, x2, y2) => {
-		if ($._matrixDirty) $._saveMatrix();
-		let ti = $._matrixIndex,
-			ci = $._stroke,
-			sw = $._strokeWeight,
-			hsw = $._hsw;
+		if (matrixDirty) saveMatrix();
+		let ti = matrixIdx,
+			ci = strokeIdx;
 
 		// calculate the direction vector and length
 		let dx = x2 - x1,
@@ -6159,8 +6181,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
 
-		if ($._scaledSW > 2 && $._strokeCap != 'square') {
-			let n = getArcSegments($._scaledSW);
+		if (scaledSW > 2 && _strokeCap != 'square') {
+			let n = getArcSegments(scaledSW);
 			addArc(x1, -y1, hsw, hsw, 0, TAU, n, ci, ti);
 			addArc(x2, -y2, hsw, hsw, 0, TAU, n, ci, ti);
 		}
@@ -6183,19 +6205,19 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.vertex = (x, y) => {
-		if ($._matrixDirty) $._saveMatrix();
-		sv.push(x, -y, $._fill, $._matrixIndex);
+		if (matrixDirty) saveMatrix();
+		sv.push(x, -y, fillIdx, matrixIdx);
 		shapeVertCount++;
 	};
 
 	$.curveVertex = (x, y) => {
-		if ($._matrixDirty) $._saveMatrix();
+		if (matrixDirty) saveMatrix();
 		curveVertices.push({ x: x, y: -y });
 	};
 
 	$.bezierVertex = function (cx1, cy1, cx2, cy2, x, y) {
 		if (shapeVertCount === 0) throw new Error('Shape needs a vertex()');
-		if ($._matrixDirty) $._saveMatrix();
+		if (matrixDirty) saveMatrix();
 
 		// Get the last vertex as the starting point (P₀)
 		let prevIndex = (shapeVertCount - 1) * 4;
@@ -6231,7 +6253,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				vy = mt3 * startY + 3 * mt2 * t * -cy1 + 3 * mt * t2 * -cy2 + t3 * -y;
 			}
 
-			sv.push(vx, vy, $._fill, $._matrixIndex);
+			sv.push(vx, vy, fillIdx, matrixIdx);
 			shapeVertCount++;
 		}
 	};
@@ -6278,7 +6300,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 							(2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
 							(-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
 
-					sv.push(x, y, $._fill, $._matrixIndex);
+					sv.push(x, y, fillIdx, matrixIdx);
 					shapeVertCount++;
 				}
 			}
@@ -6304,14 +6326,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			}
 		}
 
-		if ($._doFill) {
+		if (doFill) {
 			if (shapeVertCount == 5) {
 				// for quads, draw two triangles
 				addVert(sv[0], sv[1], sv[2], sv[3]); // v0
 				addVert(sv[4], sv[5], sv[6], sv[7]); // v1
 				addVert(sv[12], sv[13], sv[14], sv[15]); // v3
 				addVert(sv[8], sv[9], sv[10], sv[11]); // v2
-				drawStack.push($._shapesPL, 4);
+				drawStack.push(shapesPL, 4);
 			} else {
 				// triangulate the shape
 				for (let i = 1; i < shapeVertCount - 1; i++) {
@@ -6323,29 +6345,28 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 					addVert(sv[v1], sv[v1 + 1], sv[v1 + 2], sv[v1 + 3]);
 					addVert(sv[v2], sv[v2 + 1], sv[v2 + 2], sv[v2 + 3]);
 				}
-				drawStack.push($._shapesPL, (shapeVertCount - 2) * 3);
+				drawStack.push(shapesPL, (shapeVertCount - 2) * 3);
 			}
 		}
 
-		if ($._doStroke) {
-			let hsw = $._hsw,
-				n = getArcSegments($._scaledSW),
-				ti = $._matrixIndex,
-				ogStrokeCap = $._strokeCap;
-			$._strokeCap = 'square';
+		if (doStroke) {
+			let n = getArcSegments(scaledSW),
+				ti = matrixIdx,
+				ogStrokeCap = _strokeCap;
+			_strokeCap = 'square';
 			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
 				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
 
-				addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
+				addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, strokeIdx, ti);
 			}
 			let v1 = (shapeVertCount - 1) * 4;
 			let v2 = 0;
 			if (close) $.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
-			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, $._stroke, ti);
-			$._strokeCap = ogStrokeCap;
+			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, strokeIdx, ti);
+			_strokeCap = ogStrokeCap;
 		}
 
 		// reset for the next shape
@@ -6390,87 +6411,88 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._hooks.prerender.push(() => {
 		$._pass.setPipeline($._pipelines[1]);
 
-		let vertexBuffer = Q5.device.createBuffer({
-			size: vertIndex * 4,
+		let shapesVertBuff = Q5.device.createBuffer({
+			size: shapesVertIdx * 4,
 			usage: GPUBufferUsage.VERTEX,
 			mappedAtCreation: true
 		});
 
-		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
-		vertexBuffer.unmap();
+		new Float32Array(shapesVertBuff.getMappedRange()).set(shapesVertStack.slice(0, shapesVertIdx));
+		shapesVertBuff.unmap();
 
-		$._pass.setVertexBuffer(0, vertexBuffer);
+		$._pass.setVertexBuffer(0, shapesVertBuff);
 
-		$._buffers.push(vertexBuffer);
+		$._buffers.push(shapesVertBuff);
 	});
 
 	$._hooks.postrender.push(() => {
-		vertIndex = 0;
+		shapesVertIdx = 0;
 	});
-};
-Q5.renderers.webgpu.image = ($, q) => {
-	$._imagePL = 2;
-	$._videoPL = 3;
+
+	/* IMAGE */
+
+	let imagePL = 2,
+		videoPL = 3;
 
 	$._imageShaderCode =
 		$._baseShaderCode +
 		/* wgsl */ `
-struct VertexParams {
-	@builtin(vertex_index) vertexIndex : u32,
-	@location(0) pos: vec2f,
-	@location(1) texCoord: vec2f,
-	@location(2) tintIndex: f32,
-	@location(3) matrixIndex: f32,
-	@location(4) imageAlpha: f32
-}
-struct FragParams {
-	@builtin(position) position: vec4f,
-	@location(0) texCoord: vec2f,
-	@location(1) tintColor: vec4f,
-	@location(2) imageAlpha: f32
-}
-
-@group(0) @binding(0) var<uniform> q: Q5;
-@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
-@group(0) @binding(2) var<storage> colors : array<vec4f>;
-
-@group(1) @binding(0) var samp: sampler;
-@group(1) @binding(1) var tex: texture_2d<f32>;
-
-fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
-	var vert = vec4f(pos, 0f, 1f);
-	vert = transforms[i32(matrixIndex)] * vert;
-	vert.x /= q.halfWidth;
-	vert.y /= q.halfHeight;
-	return vert;
-}
-
-fn applyTint(texColor: vec4f, tintColor: vec4f) -> vec4f {
-	// apply the tint color to the sampled texture color at full strength
-	let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
-	// mix in the tint using the tint alpha as the blend strength
-	return mix(texColor, tinted, tintColor.a);
-}
-
-@vertex
-fn vertexMain(v: VertexParams) -> FragParams {
-	var vert = transformVertex(v.pos, v.matrixIndex);
-
-	var f: FragParams;
-	f.position = vert;
-	f.texCoord = v.texCoord;
-	f.tintColor = colors[i32(v.tintIndex)];
-	f.imageAlpha = v.imageAlpha;
-	return f;
-}
-
-@fragment
-fn fragMain(f: FragParams) -> @location(0) vec4f {
-	var texColor = textureSample(tex, samp, f.texCoord);
-	texColor.a *= f.imageAlpha;
-	return applyTint(texColor, f.tintColor);
-}
-`;
+	struct VertexParams {
+		@builtin(vertex_index) vertexIndex : u32,
+		@location(0) pos: vec2f,
+		@location(1) texCoord: vec2f,
+		@location(2) tintIndex: f32,
+		@location(3) matrixIndex: f32,
+		@location(4) imageAlpha: f32
+	}
+	struct FragParams {
+		@builtin(position) position: vec4f,
+		@location(0) texCoord: vec2f,
+		@location(1) tintColor: vec4f,
+		@location(2) imageAlpha: f32
+	}
+	
+	@group(0) @binding(0) var<uniform> q: Q5;
+	@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+	@group(0) @binding(2) var<storage> colors : array<vec4f>;
+	
+	@group(1) @binding(0) var samp: sampler;
+	@group(1) @binding(1) var tex: texture_2d<f32>;
+	
+	fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+		var vert = vec4f(pos, 0f, 1f);
+		vert = transforms[i32(matrixIndex)] * vert;
+		vert.x /= q.halfWidth;
+		vert.y /= q.halfHeight;
+		return vert;
+	}
+	
+	fn applyTint(texColor: vec4f, tintColor: vec4f) -> vec4f {
+		// apply the tint color to the sampled texture color at full strength
+		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
+		// mix in the tint using the tint alpha as the blend strength
+		return mix(texColor, tinted, tintColor.a);
+	}
+	
+	@vertex
+	fn vertexMain(v: VertexParams) -> FragParams {
+		var vert = transformVertex(v.pos, v.matrixIndex);
+	
+		var f: FragParams;
+		f.position = vert;
+		f.texCoord = v.texCoord;
+		f.tintColor = colors[i32(v.tintIndex)];
+		f.imageAlpha = v.imageAlpha;
+		return f;
+	}
+	
+	@fragment
+	fn fragMain(f: FragParams) -> @location(0) vec4f {
+		var texColor = textureSample(tex, samp, f.texCoord);
+		texColor.a *= f.imageAlpha;
+		return applyTint(texColor, f.tintColor);
+	}
+	`;
 
 	let imageShader = Q5.device.createShaderModule({
 		label: 'imageShader',
@@ -6486,10 +6508,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._videoShaderCode
 	});
 
-	let vertexStack = new Float32Array($._graphics ? 1000 : 1e7),
-		vertIndex = 0;
+	let imgVertStack = new Float32Array($._graphics ? 1000 : 1e7),
+		imgVertIdx = 0;
 
-	let vertexBufferLayout = {
+	let imgVertBuffLayout = {
 		arrayStride: 28,
 		attributes: [
 			{ shaderLocation: 0, offset: 0, format: 'float32x2' },
@@ -6548,7 +6570,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		vertex: {
 			module: imageShader,
 			entryPoint: 'vertexMain',
-			buffers: [{ arrayStride: 0, attributes: [] }, vertexBufferLayout]
+			buffers: [{ arrayStride: 0, attributes: [] }, imgVertBuffLayout]
 		},
 		fragment: {
 			module: imageShader,
@@ -6567,7 +6589,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		vertex: {
 			module: videoShader,
 			entryPoint: 'vertexMain',
-			buffers: [{ arrayStride: 0, attributes: [] }, vertexBufferLayout]
+			buffers: [{ arrayStride: 0, attributes: [] }, imgVertBuffLayout]
 		},
 		fragment: {
 			module: videoShader,
@@ -6747,11 +6769,13 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		return g;
 	};
 
-	$.imageMode = (x) => ($._imageMode = x);
+	let _imageMode = 'corner';
 
-	const addVert = (x, y, u, v, ci, ti, ia) => {
-		let s = vertexStack,
-			i = vertIndex;
+	$.imageMode = (x) => (_imageMode = x);
+
+	const addImgVert = (x, y, u, v, ci, ti, ia) => {
+		let s = imgVertStack,
+			i = imgVertIdx;
 		s[i++] = x;
 		s[i++] = y;
 		s[i++] = u;
@@ -6759,7 +6783,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		s[i++] = ci;
 		s[i++] = ti;
 		s[i++] = ia;
-		vertIndex = i;
+		imgVertIdx = i;
 	};
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
@@ -6770,7 +6794,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			if (img.flipped) $.scale(-1, 1);
 		}
 
-		if ($._matrixDirty) $._saveMatrix();
+		if (matrixDirty) saveMatrix();
 
 		let cnv = img.canvas || img,
 			w = cnv.width,
@@ -6800,23 +6824,23 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		sx *= pd;
 		sy *= pd;
 
-		let [l, r, t, b] = $._calcBox(dx, dy, dw, dh, $._imageMode);
+		let [l, r, t, b] = calcBox(dx, dy, dw, dh, _imageMode);
 
 		let u0 = sx / w,
 			v0 = sy / h,
 			u1 = (sx + sw) / w,
 			v1 = (sy + sh) / h,
-			ti = $._matrixIndex,
-			ci = $._tint,
-			ia = $._globalAlpha;
+			ti = matrixIdx,
+			ci = tintIdx,
+			ia = globalAlpha;
 
-		addVert(l, t, u0, v0, ci, ti, ia);
-		addVert(r, t, u1, v0, ci, ti, ia);
-		addVert(l, b, u0, v1, ci, ti, ia);
-		addVert(r, b, u1, v1, ci, ti, ia);
+		addImgVert(l, t, u0, v0, ci, ti, ia);
+		addImgVert(r, t, u1, v0, ci, ti, ia);
+		addImgVert(l, b, u0, v1, ci, ti, ia);
+		addImgVert(r, b, u1, v1, ci, ti, ia);
 
 		if (!isVideo) {
-			$._drawStack.push($._imagePL, img._texture.index);
+			drawStack.push(imagePL, img._texture.index);
 
 			if (makeFrame) {
 				img.resetMatrix();
@@ -6839,55 +6863,47 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				})
 			);
 
-			$._drawStack.push($._videoPL, $._textureBindGroups.length - 1);
+			drawStack.push(videoPL, $._textureBindGroups.length - 1);
 
 			if (img.flipped) $.scale(-1, 1);
 		}
 	};
 
 	$._hooks.prerender.push(() => {
-		if (!vertIndex) return;
+		if (!imgVertIdx) return;
 
 		// Switch to image pipeline
 		$._pass.setPipeline($._pipelines[2]);
 
-		let vertexBuffer = Q5.device.createBuffer({
-			size: vertIndex * 5,
+		let imgVertBuff = Q5.device.createBuffer({
+			size: imgVertIdx * 5,
 			usage: GPUBufferUsage.VERTEX,
 			mappedAtCreation: true
 		});
 
-		new Float32Array(vertexBuffer.getMappedRange()).set(vertexStack.slice(0, vertIndex));
-		vertexBuffer.unmap();
+		new Float32Array(imgVertBuff.getMappedRange()).set(imgVertStack.slice(0, imgVertIdx));
+		imgVertBuff.unmap();
 
-		$._pass.setVertexBuffer(1, vertexBuffer);
+		$._pass.setVertexBuffer(1, imgVertBuff);
 
-		$._buffers.push(vertexBuffer);
+		$._buffers.push(imgVertBuff);
 
 		if (vidFrames) {
 			// Switch to video pipeline
 			$._pass.setPipeline($._pipelines[3]);
-			$._pass.setVertexBuffer(1, vertexBuffer);
+			$._pass.setVertexBuffer(1, imgVertBuff);
 		}
 	});
 
 	$._hooks.postrender.push(() => {
-		vertIndex = 0;
+		imgVertIdx = 0;
 		$._textureBindGroups.splice(tIdx, vidFrames);
 		vidFrames = 0;
 	});
-};
 
-Q5.THRESHOLD = 1;
-Q5.GRAY = 2;
-Q5.OPAQUE = 3;
-Q5.INVERT = 4;
-Q5.POSTERIZE = 5;
-Q5.DILATE = 6;
-Q5.ERODE = 7;
-Q5.BLUR = 8;
-Q5.renderers.webgpu.text = ($, q) => {
-	$._textPL = 4;
+	/* TEXT */
+
+	let textPL = 4;
 
 	$._textShaderCode =
 		$._baseShaderCode +
@@ -7223,10 +7239,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		return $.loadFont(url, cb);
 	};
 
-	$._textSize = 18;
-	$._textAlign = 'left';
-	$._textBaseline = 'alphabetic';
-	let leadingSet = false,
+	let _textSize = 18,
+		_textAlign = 'left',
+		_textBaseline = 'alphabetic',
+		leadingSet = false,
 		leading = 22.5,
 		leadDiff = 4.5,
 		leadPercent = 1.25;
@@ -7240,8 +7256,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textSize = (size) => {
-		if (size == undefined) return $._textSize;
-		$._textSize = size;
+		if (size == undefined) return _textSize;
+		_textSize = size;
 		if (!leadingSet) {
 			leading = size * leadPercent;
 			leadDiff = leading - size;
@@ -7264,7 +7280,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	// ranges from 0.35 (black) to 0.65 (thin)
-	$._textEdge = 0.5;
+	let textEdge = 0.5;
 
 	$.textWeight = (weight) => {
 		if (!weight) return $._textWeight;
@@ -7272,19 +7288,19 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			weight = weights[weight.toLowerCase().replace(/[ _-]/g, '')];
 			if (!weight) throw new Error(`Invalid font weight: ${weight}`);
 		}
-		$._textEdge = 0.6875 - weight * 0.000375;
+		textEdge = 0.6875 - weight * 0.000375;
 	};
 
 	$.textLeading = (lineHeight) => {
 		$._font.lineHeight = leading = lineHeight;
-		leadDiff = leading - $._textSize;
-		leadPercent = leading / $._textSize;
+		leadDiff = leading - _textSize;
+		leadPercent = leading / _textSize;
 		leadingSet = true;
 	};
 
 	$.textAlign = (horiz, vert) => {
-		$._textAlign = horiz;
-		if (vert) $._textBaseline = vert;
+		_textAlign = horiz;
+		if (vert) _textBaseline = vert;
 	};
 
 	let charStack = [],
@@ -7383,8 +7399,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		let charsData = [];
 
-		let ta = $._textAlign,
-			tb = $._textBaseline,
+		let ta = _textAlign,
+			tb = _textBaseline,
 			textIndex = textStack.length,
 			o = 0, // offset
 			measurements;
@@ -7398,8 +7414,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 				o += 4;
 			});
 
-			if (tb == 'alphabetic') y -= $._textSize;
-			else if (tb == 'center') y -= $._textSize * 0.5;
+			if (tb == 'alphabetic') y -= _textSize;
+			else if (tb == 'center') y -= _textSize * 0.5;
 			else if (tb == 'bottom') y -= leading;
 		} else {
 			// measure the text to get the line widths before setting
@@ -7407,7 +7423,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			measurements = measureText($._font, str);
 
 			let offsetY = 0;
-			if (tb == 'alphabetic') y -= $._textSize;
+			if (tb == 'alphabetic') y -= _textSize;
 			else if (tb == 'center') offsetY = measurements.height * 0.5;
 			else if (tb == 'bottom') offsetY = measurements.height;
 
@@ -7429,19 +7445,19 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		let txt = [];
 
-		if ($._matrixDirty) $._saveMatrix();
+		if (matrixDirty) saveMatrix();
 
 		txt[0] = x;
 		txt[1] = -y;
-		txt[2] = $._textSize / 42;
-		txt[3] = $._matrixIndex;
-		txt[4] = $._doFill && $._fillSet ? $._fill : 0;
-		txt[5] = $._stroke;
-		txt[6] = $._doStroke && $._strokeSet ? $._strokeWeight : 0;
-		txt[7] = $._textEdge;
+		txt[2] = _textSize / 42;
+		txt[3] = matrixIdx;
+		txt[4] = doFill && fillSet ? fillIdx : 0;
+		txt[5] = strokeIdx;
+		txt[6] = doStroke && strokeSet ? sw : 0;
+		txt[7] = textEdge;
 
 		textStack.push(txt);
-		$._drawStack.push($._textPL, measurements.printedCharCount, $._font.index);
+		drawStack.push(textPL, measurements.printedCharCount, $._font.index);
 	};
 
 	$.textWidth = (str) => {
@@ -7450,15 +7466,15 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.createTextImage = (str, w, h) => {
-		$._g.textSize($._textSize);
+		$._g.textSize(_textSize);
 
-		if ($._doFill && $._fillSet) {
-			let fi = $._fill * 4;
-			$._g.fill($._colorStack.slice(fi, fi + 4));
+		if (doFill && fillSet) {
+			let fi = fillIdx * 4;
+			$._g.fill(colorStack.slice(fi, fi + 4));
 		}
-		if ($._doStroke && $._strokeSet) {
-			let si = $._stroke * 4;
-			$._g.stroke($._colorStack.slice(si, si + 4));
+		if (doStroke && strokeSet) {
+			let si = strokeIdx * 4;
+			$._g.stroke(colorStack.slice(si, si + 4));
 		}
 
 		let g = $._g.createTextImage(str, w, h);
@@ -7469,21 +7485,21 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$.textImage = (img, x, y) => {
 		if (typeof img == 'string') img = $.createTextImage(img);
 
-		let og = $._imageMode;
-		$._imageMode = 'corner';
+		let og = _imageMode;
+		_imageMode = 'corner';
 
-		let ta = $._textAlign;
+		let ta = _textAlign;
 		if (ta == 'center') x -= img.canvas.hw;
 		else if (ta == 'right') x -= img.width;
 
-		let bl = $._textBaseline;
+		let bl = _textBaseline;
 		if (bl == 'alphabetic') y -= img._leading;
 		else if (bl == 'center') y -= img._middle;
 		else if (bl == 'bottom') y -= img._bottom;
 		else if (bl == 'top') y -= img._top;
 
 		$.image(img, x, y);
-		$._imageMode = og;
+		_imageMode = og;
 	};
 
 	$._hooks.prerender.push(() => {
@@ -7538,8 +7554,9 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		charStack = [];
 		textStack = [];
 	});
-};
-Q5.renderers.webgpu.shaders = ($) => {
+
+	/* SHADERS */
+
 	let pipelineTypes = ['frame', 'shapes', 'image', 'video', 'text'];
 
 	let plCounters = {
@@ -7597,20 +7614,69 @@ Q5.renderers.webgpu.shaders = ($) => {
 	$.createTextShader = (code) => $._createShader(code, 'text');
 
 	$.shader = (shader) => {
-		if (shader.applyBeforeDraw) $._prevFramePL = shader.pipelineIndex;
-		else $['_' + shader.type + 'PL'] = shader.pipelineIndex;
+		let type = shader.type;
+		let idx = shader.pipelineIndex;
+
+		if (type == 'frame') {
+			if (shader.applyBeforeDraw) prevFramePL = idx;
+			else framePL = idx;
+		} else if (type == 'shapes') shapesPL = idx;
+		else if (type == 'image') imagePL = idx;
+		else if (type == 'video') videoPL = idx;
+		else if (type == 'text') textPL = idx;
 	};
 
-	$.resetShader = (type = 'shapes') => {
-		if (type == 'frame') $._prevFramePL = 0;
-		$['_' + type + 'PL'] = pipelineTypes.indexOf(type);
-	};
+	$.resetShader = $.resetShapesShader = () => (shapesPL = 1);
+	$.resetFrameShader = () => (prevFramePL = framePL = 0);
+	$.resetImageShader = () => (imagePL = 2);
+	$.resetVideoShader = () => (videoPL = 3);
+	$.resetTextShader = () => (textPL = 4);
 
 	$.resetShaders = () => {
-		$._prevFramePL = $._framePL = 0;
-		$._shapesPL = 1;
-		$._imagePL = 2;
-		$._videoPL = 3;
-		$._textPL = 4;
+		prevFramePL = framePL = 0;
+		shapesPL = 1;
+		imagePL = 2;
+		videoPL = 3;
+		textPL = 4;
 	};
 };
+
+Q5.THRESHOLD = 1;
+Q5.GRAY = 2;
+Q5.OPAQUE = 3;
+Q5.INVERT = 4;
+Q5.POSTERIZE = 5;
+Q5.DILATE = 6;
+Q5.ERODE = 7;
+Q5.BLUR = 8;
+
+Q5.initWebGPU = async () => {
+	if (!navigator.gpu) {
+		console.warn('q5 WebGPU not supported on this browser! Use Google Chrome or Edge.');
+		return false;
+	}
+	if (!Q5.requestedGPU) {
+		let adapter = await navigator.gpu.requestAdapter();
+		if (!adapter) {
+			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, vulkan may need to be enabled.');
+			return false;
+		}
+		Q5.device = await adapter.requestDevice();
+
+		Q5.device.lost.then((e) => {
+			console.error('WebGPU crashed!');
+			console.error(e);
+		});
+	}
+	return true;
+};
+
+Q5.WebGPU = async function (scope, parent) {
+	if (!scope || scope == 'global') Q5._hasGlobal = true;
+	if (!(await Q5.initWebGPU())) {
+		return new Q5(scope, parent, 'webgpu-fallback');
+	}
+	return new Q5(scope, parent, 'webgpu');
+};
+
+Q5.webgpu = Q5.WebGPU;

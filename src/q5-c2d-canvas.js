@@ -169,13 +169,45 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		}
 	};
 
-	$.pushMatrix = () => $.ctx.save();
-	$.popMatrix = () => $.ctx.restore();
+	$._styleNames = [
+		'_fill',
+		'_stroke',
+		'_strokeWeight',
+		'_doFill',
+		'_doStroke',
+		'_fillSet',
+		'_strokeSet',
+		'_shadow',
+		'_doShadow',
+		'_shadowOffsetX',
+		'_shadowOffsetY',
+		'_shadowBlur',
+		'_tint',
+		'_textSize',
+		'_textAlign',
+		'_textBaseline',
+		'_imageMode',
+		'_rectMode',
+		'_ellipseMode',
+		'_colorMode',
+		'_colorFormat',
+		'Color'
+	];
+	$._styles = [];
 
-	let _popStyles = $.popStyles;
+	$.pushStyles = () => {
+		let styles = {};
+		for (let s of $._styleNames) styles[s] = $[s];
+		$._styles.push(styles);
+	};
+
+	function popStyles() {
+		let styles = $._styles.pop();
+		for (let s of $._styleNames) $[s] = styles[s];
+	}
 
 	$.popStyles = () => {
-		_popStyles();
+		popStyles();
 
 		$.ctx.fillStyle = $._fill;
 		$.ctx.strokeStyle = $._stroke;
@@ -186,12 +218,15 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.shadowBlur = $._doShadow ? $._shadowBlur : 0;
 	};
 
+	$.pushMatrix = () => $.ctx.save();
+	$.popMatrix = () => $.ctx.restore();
+
 	$.push = () => {
 		$.ctx.save();
 		$.pushStyles();
 	};
 	$.pop = () => {
 		$.ctx.restore();
-		_popStyles();
+		popStyles();
 	};
 };

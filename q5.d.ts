@@ -4091,8 +4091,7 @@ plane(0, 0, 100);
 	function shader(shaderModule: GPUShaderModule): void;
 
 	/** ⚡️
-	 * Makes q5 use a default shader.
-	 * @param {string} [type] can be "shapes" (default), "image", "video", or "text"
+	 * Make q5 use the default shapes shader.
 	 * @example
 let q = await Q5.WebGPU();
 
@@ -4111,10 +4110,30 @@ q.draw = () => {
 	triangle(-50, -50, 0, 50, 50, -50);
 };
 */
-	function resetShader(type?: string): void;
+	function resetShader(): void;
 
 	/** ⚡️
-	 * Makes q5 use default shaders.
+	 * Make q5 use the default frame shader.
+	 */
+	function resetFrameShader(): void;
+
+	/** ⚡️
+	 * Make q5 use the default image shader.
+	 */
+	function resetImageShader(): void;
+
+	/** ⚡️
+	 * Make q5 use the default video shader.
+	 */
+	function resetVideoShader(): void;
+
+	/** ⚡️
+	 * Make q5 use the default text shader.
+	 */
+	function resetTextShader(): void;
+
+	/** ⚡️
+	 * Make q5 use all default shaders.
 	 */
 	function resetShaders(): void;
 
@@ -4195,7 +4214,8 @@ let flipper = createVideoShader(`
 fn vertexMain(v: VertexParams) -> FragParams {
 	var vert = transformVertex(v.pos, v.matrixIndex);
 
-	vert.y *= cos((q.frameCount + f32(v.vertexIndex) * 10) * 0.03);
+	var vi = f32(v.vertexIndex);
+	vert.y *= cos((q.frameCount + vi * 10) * 0.03);
 
 	var f: FragParams;
 	f.position = vert;
@@ -4205,7 +4225,8 @@ fn vertexMain(v: VertexParams) -> FragParams {
 	
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
-	var texColor = textureSampleBaseClampToEdge(tex, samp, f.texCoord);
+	var texColor =
+		textureSampleBaseClampToEdge(tex, samp, f.texCoord);
 	texColor.r = 0;
 	texColor.b *= 2;
 	return texColor;
@@ -4217,7 +4238,6 @@ q.draw = () => {
 	shader(flipper);
 	image(vid, -100, 150, 200, 150);
 };
-//
 	 */
 	function createVideoShader(code: string): GPUShaderModule;
 
