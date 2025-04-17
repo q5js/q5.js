@@ -713,7 +713,7 @@ Q5.renderers.c2d = {};
 Q5.renderers.c2d.canvas = ($, q) => {
 	let c = $.canvas;
 
-	if ($.colorMode) $.colorMode('rgb', 255);
+	if ($.colorMode) $.colorMode('rgb', $._webgpu ? 1 : 255);
 
 	$._createCanvas = function (w, h, options) {
 		if (!c) {
