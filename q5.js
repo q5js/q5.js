@@ -3278,7 +3278,10 @@ Q5.modules.input = ($, q) => {
 	$._onwheel = (e) => {
 		$._updateMouse(e);
 		e.delta = e.deltaY;
-		if ($.mouseWheel(e) == false || $._noScroll) e.preventDefault();
+		let ret = $.mouseWheel(e);
+		if (($._isGlobal && !ret) || ret == false || $._noScroll) {
+			e.preventDefault();
+		}
 	};
 
 	$.cursor = (name, x, y) => {

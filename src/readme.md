@@ -65,9 +65,9 @@ Image based features in this module require the q5-c2d-image module.
 
 Adds WebGPU rendering support to q5.
 
-The q5 WebGPU renderer is contained within a single file because using local variables within a monolithic scope is faster than sharing data between scopes via properties on an object. This is tradeoff made with intent to favor performance over modularity and best practices for code organization.
+The q5 WebGPU renderer is contained within a single file because using local variables within a single scope is faster than sharing data between scopes via properties on an object. This is tradeoff made with intent to favor performance over modularity and best practices for code organization.
 
-The goal with q5 WebGPU is to push JavaScript to its limits and achieve the best performance possible.
+The goal with q5 WebGPU is to push JavaScript to its limits and achieve the best performance possible!
 
 ### webgpu-canvas
 

@@ -2683,7 +2683,7 @@ noCursor();
 	 * Prevents mouse wheel events from propagating and causing
 	 * the page to scroll when the mouse is inside the canvas.
 	 * 
-	 * Useful for games and interactive art that fill the screen.
+	 * Useful for interactive art that fill the screen.
 	 * @example
 createCanvas(200, 100);
 noScroll();
