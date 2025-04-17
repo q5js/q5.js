@@ -2684,6 +2684,8 @@ noCursor();
 	 * the page to scroll when the mouse is inside the canvas.
 	 * 
 	 * Useful for interactive art that fill the screen.
+	 * 
+	 * This is the default behavior for global mode sketches.
 	 * @example
 createCanvas(200, 100);
 noScroll();
@@ -2696,7 +2698,7 @@ noScroll();
 	 * `event.deltaX` and `event.deltaY` are the horizontal and vertical
 	 * scroll amounts, respectively.
 	 * 
-	 * Return false to prevent the default behavior of scrolling the page.
+	 * Return true to allow the default behavior of scrolling the page.
 	 * @example
 let x = y = 100;
 function draw() {
