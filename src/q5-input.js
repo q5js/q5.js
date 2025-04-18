@@ -109,7 +109,7 @@ Q5.modules.input = ($, q) => {
 		$._updateMouse(e);
 		e.delta = e.deltaY;
 		let ret = $.mouseWheel(e);
-		if (($._isGlobal && !ret) || ret == false || $._noScroll) {
+		if (($._isGlobal && !ret) || ret == false) {
 			e.preventDefault();
 		}
 	};
@@ -127,7 +127,6 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$.noCursor = () => ($.canvas.style.cursor = 'none');
-	$.noScroll = () => ($._noScroll = true);
 
 	$.requestPointerLock = (unadjustedMovement = false) => {
 		return document.body?.requestPointerLock({ unadjustedMovement });
@@ -201,13 +200,9 @@ Q5.modules.input = ($, q) => {
 		l('touchend', (e) => $._ontouchend(e));
 		l('touchcancel', (e) => $._ontouchend(e));
 
-		if (!c) l('wheel', (e) => $._onwheel(e));
-		// making the window level event listener for wheel events
-		// not passive would be necessary to be able to use `e.preventDefault`
-		// but browsers warn that it's bad for performance
-		else c.addEventListener('wheel', (e) => $._onwheel(e));
+		c.addEventListener('wheel', (e) => $._onwheel(e));
 
-		if (!$._isGlobal && c) l = c.addEventListener.bind(c);
+		if (!$._isGlobal) l = c.addEventListener.bind(c);
 
 		l(pointer + 'down', (e) => $._onmousedown(e));
 		l('touchstart', (e) => $._ontouchstart(e));

@@ -4,7 +4,10 @@ This section contains information about q5's source code for developers who want
 
 For information about how to use q5, see the [q5.js documentation](https://q5js.org/learn) and the [q5.js wiki pages](https://github.com/q5js/q5.js/wiki).
 
+## Table of Contents
+
 - [q5.js Source Code](#q5js-source-code)
+  - [Table of Contents](#table-of-contents)
   - [q5-core](#q5-core)
   - [q5-canvas](#q5-canvas)
   - [q5-c2d-canvas](#q5-c2d-canvas)
@@ -25,7 +28,9 @@ For information about how to use q5, see the [q5.js documentation](https://q5js.
 
 The core module provides the absolute basic functionality necessary to run q5.
 
-It loads other modules by passing `$` (alias for `this`) and `q` (which in global mode is a proxy for `this` and `window` or `global`).
+It loads other modules by passing `$` an alias for `this`, which is the q5 instance. `q` in global mode is a proxy for `this` and `window` or `global`, in instance mode it's equivalent to `this`.
+
+Properties on `$` that are prefixed with a `_` are "soft private" props that are accessible to the user and can be used, but are not part of the public API. Mostly these are used by other q5 modules.
 
 ## q5-canvas
 

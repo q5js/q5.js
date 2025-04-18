@@ -2680,19 +2680,6 @@ noCursor();
 	function noCursor(): void;
 
 	/** 🖲️
-	 * Prevents mouse wheel events from propagating and causing
-	 * the page to scroll when the mouse is inside the canvas.
-	 * 
-	 * Useful for interactive art that fill the screen.
-	 * 
-	 * This is the default behavior for global mode sketches.
-	 * @example
-createCanvas(200, 100);
-noScroll();
-	 */
-	function noScroll(): void;
-
-	/** 🖲️
 	 * Define this function to respond to mouse wheel events.
 	 * 
 	 * `event.deltaX` and `event.deltaY` are the horizontal and vertical
