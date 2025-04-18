@@ -64,23 +64,22 @@ Q5.modules.util = ($, q) => {
 	async function saveFile(data, name, ext) {
 		name = name || 'untitled';
 		ext = ext || 'png';
+
+		let blob;
 		if (imgRegex.test(ext)) {
-			if ($.canvas?.renderer == 'webgpu' && data.canvas?.renderer == 'c2d') {
-				data = await $._g._saveCanvas(data, ext);
-			} else {
-				data = await $._saveCanvas(data, ext);
-			}
+			let cnv = data.canvas || data;
+			blob = await cnv.convertToBlob({ type: 'image/' + ext });
 		} else {
 			let type = 'text/plain';
 			if (ext == 'json') {
 				if (typeof data != 'string') data = JSON.stringify(data);
 				type = 'text/json';
 			}
-			data = new Blob([data], { type });
-			data = URL.createObjectURL(data);
+			blob = new Blob([data], { type });
 		}
+
 		let a = document.createElement('a');
-		a.href = data;
+		a.href = URL.createObjectURL(blob);
 		a.download = name + '.' + ext;
 		a.click();
 		setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -92,7 +91,6 @@ Q5.modules.util = ($, q) => {
 			b = a;
 			a = $;
 		}
-		if (a == $.canvas) a = $;
 		if (c) saveFile(a, b, c);
 		else if (b) {
 			let lastDot = b.lastIndexOf('.');

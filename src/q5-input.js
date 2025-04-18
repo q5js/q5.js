@@ -200,9 +200,9 @@ Q5.modules.input = ($, q) => {
 		l('touchend', (e) => $._ontouchend(e));
 		l('touchcancel', (e) => $._ontouchend(e));
 
-		c.addEventListener('wheel', (e) => $._onwheel(e));
+		if (c) c.addEventListener('wheel', (e) => $._onwheel(e));
 
-		if (!$._isGlobal) l = c.addEventListener.bind(c);
+		if (!$._isGlobal && c) l = c.addEventListener.bind(c);
 
 		l(pointer + 'down', (e) => $._onmousedown(e));
 		l('touchstart', (e) => $._ontouchstart(e));

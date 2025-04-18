@@ -1,11 +1,21 @@
 Q5.renderers.c2d.image = ($, q) => {
+	const c = $.canvas;
+
+	if (c) {
+		// polyfill for HTMLCanvasElement
+		c.convertToBlob ??= (opt) =>
+			new Promise((resolve) => {
+				c.toBlob((blob) => resolve(blob), opt.type, opt.quality);
+			});
+	}
+
 	$._tint = null;
 	let imgData = null;
 
 	$.createImage = (w, h, opt) => {
 		opt ??= {};
 		opt.alpha ??= true;
-		opt.colorSpace ??= $.canvas.colorSpace || Q5.canvasOptions.colorSpace;
+		opt.colorSpace ??= c.colorSpace || Q5.canvasOptions.colorSpace;
 		return new Q5.Image($, w, h, opt);
 	};
 
@@ -163,14 +173,13 @@ Q5.renderers.c2d.image = ($, q) => {
 		if (!f) $._softFilter(type, value);
 
 		$.ctx.globalCompositeOperation = 'source-over';
-		$.ctx.drawImage($.canvas, 0, 0, $.canvas.w, $.canvas.h);
+		$.ctx.drawImage(c, 0, 0, c.w, c.h);
 		$.ctx.restore();
 		$.modified = $._retint = true;
 	};
 
 	if ($._scope == 'image') {
 		$.resize = (w, h) => {
-			let c = $.canvas;
 			let o = new $._Canvas(c.width, c.height);
 			let tmpCtx = o.getContext('2d', {
 				colorSpace: c.colorSpace
@@ -188,13 +197,13 @@ Q5.renderers.c2d.image = ($, q) => {
 	}
 
 	$._getImageData = (x, y, w, h) => {
-		return $.ctx.getImageData(x, y, w, h, { colorSpace: $.canvas.colorSpace });
+		return $.ctx.getImageData(x, y, w, h, { colorSpace: c.colorSpace });
 	};
 
 	$.trim = () => {
 		let pd = $._pixelDensity || 1;
-		let w = $.canvas.width;
-		let h = $.canvas.height;
+		let w = c.width;
+		let h = c.height;
 		let data = $._getImageData(0, 0, w, h).data;
 		let left = w,
 			right = 0,
@@ -235,7 +244,7 @@ Q5.renderers.c2d.image = ($, q) => {
 
 	$.inset = (x, y, w, h, dx, dy, dw, dh) => {
 		let pd = $._pixelDensity || 1;
-		$.ctx.drawImage($.canvas, x * pd, y * pd, w * pd, h * pd, dx, dy, dw, dh);
+		$.ctx.drawImage(c, x * pd, y * pd, w * pd, h * pd, dx, dy, dw, dh);
 
 		$.modified = $._retint = true;
 	};
@@ -261,7 +270,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		w ??= $.width;
 		h ??= $.height;
 		let img = $.createImage(w, h, { pixelDensity: pd });
-		img.ctx.drawImage($.canvas, x, y, w * pd, h * pd, 0, 0, w, h);
+		img.ctx.drawImage(c, x, y, w * pd, h * pd, 0, 0, w, h);
 		img.width = w;
 		img.height = h;
 		return img;
@@ -282,7 +291,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		let mod = $._pixelDensity || 1;
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
-				let idx = 4 * ((y * mod + i) * $.canvas.width + x * mod + j);
+				let idx = 4 * ((y * mod + i) * c.width + x * mod + j);
 				$.pixels[idx] = c.r;
 				$.pixels[idx + 1] = c.g;
 				$.pixels[idx + 2] = c.b;
@@ -292,7 +301,7 @@ Q5.renderers.c2d.image = ($, q) => {
 	};
 
 	$.loadPixels = () => {
-		imgData = $._getImageData(0, 0, $.canvas.width, $.canvas.height);
+		imgData = $._getImageData(0, 0, c.width, c.height);
 		q.pixels = imgData.data;
 	};
 	$.updatePixels = () => {
@@ -306,20 +315,6 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
 
 	if ($._scope == 'image') return;
-
-	$._saveCanvas = async (data, ext) => {
-		data = data.canvas || data;
-		if (data instanceof OffscreenCanvas) {
-			const blob = await data.convertToBlob({ type: 'image/' + ext });
-
-			return await new Promise((resolve) => {
-				const reader = new FileReader();
-				reader.onloadend = () => resolve(reader.result);
-				reader.readAsDataURL(blob);
-			});
-		}
-		return data.toDataURL('image/' + ext);
-	};
 
 	$.tint = function (c) {
 		$._tint = (c._q5Color ? c : $.color(...arguments)).toString();

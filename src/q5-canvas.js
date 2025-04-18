@@ -7,10 +7,10 @@ Q5.modules.canvas = ($, q) => {
 
 	if (Q5._server) {
 		if (Q5._createServerCanvas) {
-			q.canvas = Q5._createServerCanvas(100, 100);
+			q.canvas = Q5._createServerCanvas(200, 200);
 		}
 	} else if ($._scope == 'image' || $._scope == 'graphics') {
-		q.canvas = new $._Canvas(100, 100);
+		q.canvas = new $._Canvas(200, 200);
 	}
 
 	if (!$.canvas) {
@@ -21,12 +21,13 @@ Q5.modules.canvas = ($, q) => {
 		} else $.noCanvas();
 	}
 
-	let c = $.canvas;
+	$.displayDensity = () => window.devicePixelRatio || 1;
+
 	$.width = 200;
 	$.height = 200;
 	$._pixelDensity = 1;
 
-	$.displayDensity = () => window.devicePixelRatio || 1;
+	let c = $.canvas;
 
 	if (c) {
 		c.width = 200;
