@@ -301,11 +301,19 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	$.noTint = () => (tintIdx = 1);
 
 	$.strokeWeight = (v) => {
+		if (v === undefined) return sw;
 		v = Math.abs(v);
 		sw = v;
 		scaledSW = v * _scale;
 		hsw = v / 2;
 	};
+
+	$._getFillIdx = () => fillIdx;
+	$._setFillIdx = (v) => (fillIdx = v);
+	$._doFill = () => (doFill = true);
+	$._getStrokeIdx = () => strokeIdx;
+	$._setStrokeIdx = (v) => (strokeIdx = v);
+	$._doStroke = () => (doStroke = true);
 
 	const MAX_TRANSFORMS = $._graphics ? 1000 : 1e7,
 		MATRIX_SIZE = 16, // 4x4 matrix
