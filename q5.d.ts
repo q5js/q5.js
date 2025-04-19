@@ -2704,6 +2704,9 @@ function mouseWheel(e) {
 	 * the cursor and allowing for unlimited movement.
 	 * 
 	 * Operating systems enable mouse acceleration by default, which is useful when you sometimes want slow precise movement (think about you might use a graphics package), but also want to move great distances with a faster mouse movement (think about scrolling, and selecting several files). For some games however, raw mouse input data is preferred for controlling camera rotation — where the same distance movement, fast or slow, results in the same rotation.
+	 * 
+	 * To exit pointer lock mode, call `document.exitPointerLock()`.
+	 * 
 	 * @param {boolean} unadjustedMovement set to true to disable OS-level mouse acceleration and access raw mouse input
 	 * @example
 function draw() {
@@ -2712,19 +2715,13 @@ function draw() {
 
 function doubleClicked() {
 	if (!document.pointerLockElement) {
-		requestPointerLock();
+		pointerLock();
 	} else {
-		exitPointerLock();
+		document.exitPointerLock();
 	}
 }
 	 */
-	function requestPointerLock(unadjustedMovement): void;
-
-	/** 🖲️
-	 * Exits pointer lock, showing the cursor again and stopping
-	 * the unlimited movement.
-	 */
-	function exitPointerLock(): void;
+	function pointerLock(unadjustedMovement: boolean): void;
 
 	// 🧮 math
 

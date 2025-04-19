@@ -128,10 +128,9 @@ Q5.modules.input = ($, q) => {
 
 	$.noCursor = () => ($.canvas.style.cursor = 'none');
 
-	$.requestPointerLock = (unadjustedMovement = false) => {
-		return document.body?.requestPointerLock({ unadjustedMovement });
+	$.pointerLock = (unadjustedMovement = false) => {
+		document.body?.requestPointerLock({ unadjustedMovement });
 	};
-	$.exitPointerLock = () => document.exitPointerLock();
 
 	$._onkeydown = (e) => {
 		if (e.repeat) return;
