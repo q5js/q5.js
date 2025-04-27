@@ -1339,7 +1339,8 @@ Q5.renderers.c2d.image = ($, q) => {
 	}
 
 	$._tint = null;
-	let imgData = null;
+	let imgData = null,
+		pixels = null;
 
 	$.createImage = (w, h, opt) => {
 		opt ??= {};
@@ -1591,8 +1592,11 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.get = (x, y, w, h) => {
 		let pd = $._pixelDensity || 1;
 		if (x !== undefined && w === undefined) {
-			let c = $._getImageData(x * pd, y * pd, 1, 1).data;
-			return [c[0], c[1], c[2], c[3] / 255];
+			if (!pixels) $.loadPixels();
+			let px = Math.floor(x * pd),
+				py = Math.floor(y * pd),
+				idx = 4 * (py * c.width + px);
+			return [pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]];
 		}
 		x = Math.floor(x || 0) * pd;
 		y = Math.floor(y || 0) * pd;
@@ -1616,22 +1620,22 @@ Q5.renderers.c2d.image = ($, q) => {
 			$._tint = old;
 			return;
 		}
-		if (!$.pixels.length) $.loadPixels();
+		if (!pixels) $.loadPixels();
 		let mod = $._pixelDensity || 1;
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
 				let idx = 4 * ((y * mod + i) * c.width + x * mod + j);
-				$.pixels[idx] = val.r;
-				$.pixels[idx + 1] = val.g;
-				$.pixels[idx + 2] = val.b;
-				$.pixels[idx + 3] = val.a;
+				pixels[idx] = val.r;
+				pixels[idx + 1] = val.g;
+				pixels[idx + 2] = val.b;
+				pixels[idx + 3] = val.a;
 			}
 		}
 	};
 
 	$.loadPixels = () => {
 		imgData = $._getImageData(0, 0, c.width, c.height);
-		q.pixels = imgData.data;
+		q.pixels = pixels = imgData.data;
 	};
 	$.updatePixels = () => {
 		if (imgData != null) {
@@ -5389,7 +5393,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			usingRGB,
 			_colorMode,
 			_colorFormat,
-			Color
+			$.Color
 		]);
 	};
 

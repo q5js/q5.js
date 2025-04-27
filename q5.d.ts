@@ -1876,13 +1876,30 @@ function setup() {
 	function mask(img: Q5.Image): void;
 
 	/** 🌆
-	 * Retrieves a subsection of an image or canvas, as a q5 Image.
-	 * Or if width and height are both 1, returns the color of the pixel at the given coordinates in `[R, G, B, A]` array format.
+	 * Retrieves a subsection of an image or canvas as a new Q5 Image
+	 * or the color of a pixel in the image or canvas.
+	 * 
+	 * If only x and y are specified, this function returns the color of the pixel
+	 * at the given coordinate in `[R, G, B, A]` array format. If `loadPixels`
+	 * has never been run, it's run by this function.
+	 * 
+	 * If you make changes to the canvas or image, you must call `loadPixels`
+	 * before using this function to get current color data.
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {number} [w] width of the area
-	 * @param {number} [h] height of the area
+	 * @param {number} [w] width of the area, default is 1
+	 * @param {number} [h] height of the area, default is 1
 	 * @returns {Image | number[]}
+	 * @example
+function draw() {
+	background(200);
+	noStroke();
+	circle(100, 100, frameCount % 200);
+
+	loadPixels();
+  let col = get(mouseX, mouseY);
+  text(col, mouseX, mouseY);
+}
 	 * @example
 createCanvas(200);
 

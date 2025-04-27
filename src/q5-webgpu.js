@@ -506,7 +506,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			usingRGB,
 			_colorMode,
 			_colorFormat,
-			Color
+			$.Color
 		]);
 	};
 
