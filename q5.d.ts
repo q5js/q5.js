@@ -1876,6 +1876,35 @@ function setup() {
 	function mask(img: Q5.Image): void;
 
 	/** 🌆
+	 * Returns a copy of the image.
+	 * @returns {Q5.Image}
+	 */
+	function copy(): Q5.Image;
+
+	/** 🌆
+	 * Displays a region of the image on another region of the image.
+	 * Can be used to create a detail inset, aka a magnifying glass effect.
+	 * @param {number} sx x-coordinate of the source region
+	 * @param {number} sy y-coordinate of the source region
+	 * @param {number} sw width of the source region
+	 * @param {number} sh height of the source region
+	 * @param {number} dx x-coordinate of the destination region
+	 * @param {number} dy y-coordinate of the destination region
+	 * @param {number} dw width of the destination region
+	 * @param {number} dh height of the destination region
+	 * @example
+createCanvas(200);
+
+let logo = loadImage('/q5js_logo.webp');
+
+function setup() {
+	logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
+	image(logo, 0, 0, 200, 200);
+}
+	 */
+	function inset(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
+
+	/** 🌆
 	 * Retrieves a subsection of an image or canvas as a new Q5 Image
 	 * or the color of a pixel in the image or canvas.
 	 * 
@@ -1889,7 +1918,7 @@ function setup() {
 	 * @param {number} y
 	 * @param {number} [w] width of the area, default is 1
 	 * @param {number} [h] height of the area, default is 1
-	 * @returns {Image | number[]}
+	 * @returns {Q5.Image | number[]}
 	 * @example
 function draw() {
 	background(200);
@@ -1934,50 +1963,35 @@ function draw() {
 	function set(x: number, y: number, val: any): void;
 
 	/** 🌆
-	 * Returns a copy of the image.
-	 * @returns {Q5.Image}
-	 */
-	function copy(): Q5.Image;
-
-	/** 🌆
-	 * Displays a region of the image on another region of the image.
-	 * Can be used to create a detail inset, aka a magnifying glass effect.
-	 * @param {number} sx x-coordinate of the source region
-	 * @param {number} sy y-coordinate of the source region
-	 * @param {number} sw width of the source region
-	 * @param {number} sh height of the source region
-	 * @param {number} dx x-coordinate of the destination region
-	 * @param {number} dy y-coordinate of the destination region
-	 * @param {number} dw width of the destination region
-	 * @param {number} dh height of the destination region
-	 * @example
-createCanvas(200);
-
-let logo = loadImage('/q5js_logo.webp');
-
-function setup() {
-	logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
-	image(logo, 0, 0, 200, 200);
-}
-	 */
-	function inset(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
-
-	/** 🌆
-	 * Array of pixels in the canvas or image. Use `loadPixels` to load the pixel data.
+	 * Array of pixel color data from a canvas or image.
+	 * 
+	 * Each pixel is represented by four consecutive values in the array,
+	 * corresponding to its red, green, blue, and alpha channels.
+	 * 
+	 * The top left pixel's data is at the beginning of the array
+	 * and the bottom right pixel's data is at the end, going from
+	 * left to right and top to bottom.
+	 * 
+	 * Use `loadPixels` to load current pixel data from a canvas or image.
 	 */
 	var pixels: number[];
 
 	/** 🌆
-	 * Loads pixel data into the canvas' or image's `pixels` array.
+	 * Loads pixel data into `pixels` from the canvas or image.
+	 * 
+	 * The example below sets some pixels' green channel
+	 * to a random 0-255 value.
 	 * @example
-createCanvas(200);
+frameRate(5);
 let icon = loadImage('/q5js_icon.png');
 
-function setup() {
-	icon.loadPixels();
-	for (let i=0; i < 65536; i+=16) icon.pixels[i] = 255;
-	icon.updatePixels();
-	image(icon, 0, 0, 200, 200);
+function draw() {
+  icon.loadPixels();
+  for (let i = 0; i < icon.pixels.length; i += 16) {
+    icon.pixels[i + 1] = random(255);
+  }
+  icon.updatePixels();
+  background(icon);
 }
 	 */
 	function loadPixels(): void;
@@ -1986,14 +2000,13 @@ function setup() {
 	 * Applies changes in the `pixels` array to the canvas or image.
 	 * @example
 createCanvas(200);
-function setup() {
-	for (let x = 0; x < 200; x += 5) {
-		for (let y = 0; y < 200; y += 5) {
-			set(x, y, color('red'));
-		}
+
+for (let x = 0; x < 200; x += 5) {
+	for (let y = 0; y < 200; y += 5) {
+		set(x, y, color('pink'));
 	}
-	updatePixels();
 }
+updatePixels();
 	 */
 	function updatePixels(): void;
 
