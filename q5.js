@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.28
+ * @version 2.29
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -24,13 +24,13 @@ function Q5(scope, parent, renderer) {
 		if (!(window.setup || window.update || window.draw)) return;
 		scope = 'global';
 	}
-	$._scope = scope;
 	let globalScope;
 	if (scope == 'global') {
 		Q5._hasGlobal = $._isGlobal = true;
 		globalScope = Q5._esm ? globalThis : !Q5._server ? window : global;
 	}
-	if (scope == 'graphics') $._graphics = true;
+	if (scope == 'graphics') $._isGraphics = true;
+	if (scope == 'image') $._isImage = true;
 
 	let q = new Proxy($, {
 		set: (t, p, v) => {
@@ -210,9 +210,9 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	if ($._graphics) return;
+	if ($._isGraphics) return;
 
-	if (scope == 'global') {
+	if ($._isGlobal) {
 		let tmp = Object.assign({}, $);
 		delete tmp.Color;
 		Object.assign(Q5, tmp);
@@ -235,7 +235,7 @@ function Q5(scope, parent, renderer) {
 		};
 	}
 
-	if (scope == 'global') {
+	if ($._isGlobal) {
 		let props = Object.getOwnPropertyNames($);
 		for (let p of props) {
 			if (p[0] != '_') globalScope[p] = $[p];
@@ -383,7 +383,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.28';
+Q5.version = Q5.VERSION = '2.29';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -401,7 +401,7 @@ Q5.modules.canvas = ($, q) => {
 		if (Q5._createServerCanvas) {
 			q.canvas = Q5._createServerCanvas(200, 200);
 		}
-	} else if ($._scope == 'image' || $._scope == 'graphics') {
+	} else if ($._isImage || $._isGraphics) {
 		q.canvas = new $._Canvas(200, 200);
 	}
 
@@ -424,7 +424,7 @@ Q5.modules.canvas = ($, q) => {
 	if (c) {
 		c.width = 200;
 		c.height = 200;
-		if ($._scope != 'image') {
+		if (!$._isImage) {
 			c.renderer = $._renderer;
 			c[$._renderer] = true;
 
@@ -449,8 +449,8 @@ Q5.modules.canvas = ($, q) => {
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (typeof options == 'object') Object.assign(opt, options);
 
-		if ($._scope != 'image') {
-			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
+		if (!$._isImage) {
+			if ($._isGraphics) $._pixelDensity = this._pixelDensity;
 			else if (!Q5._server) {
 				// the canvas can become detached from the DOM
 				// if the innerHTML of one of its parents is edited
@@ -554,9 +554,9 @@ Q5.modules.canvas = ($, q) => {
 	};
 	$.defaultImageScale(0.5);
 
-	if ($._scope == 'image') return;
+	if ($._isImage) return;
 
-	if (c && $._scope != 'graphics') {
+	if (c && !$._isGraphics) {
 		c.parent = (el) => {
 			if (c.parentElement) c.parentElement.removeChild(c);
 
@@ -615,7 +615,7 @@ Q5.modules.canvas = ($, q) => {
 		} else $._da = 0;
 	};
 
-	if (window && $._scope != 'graphics') {
+	if (window && $._isGraphics) {
 		window.addEventListener('resize', () => {
 			$._didResize = true;
 			q.windowWidth = window.innerWidth;
@@ -723,7 +723,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		}
 		q.ctx = q.drawingContext = c.getContext('2d', options);
 
-		if ($._scope != 'image') {
+		if (!$._isImage) {
 			// default styles
 			$.ctx.fillStyle = $._fill = 'white';
 			$.ctx.strokeStyle = $._stroke = 'black';
@@ -744,7 +744,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.restore();
 	};
 
-	if ($._scope == 'image') return;
+	if ($._isImage) return;
 
 	$.background = function (c) {
 		$.ctx.save();
@@ -752,7 +752,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.globalAlpha = 1;
 		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
 		else {
-			if (Q5.Color && !c._q5Color) c = $.color(...arguments);
+			if (Q5.Color && !c._isColor) c = $.color(...arguments);
 			$.ctx.fillStyle = c.toString();
 			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		}
@@ -786,7 +786,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.fill = function (c) {
 		$._doFill = $._fillSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doFill = false);
@@ -797,7 +797,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.stroke = function (c) {
 		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doStroke = false);
@@ -820,7 +820,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.shadow = function (c) {
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doShadow = false);
@@ -1507,7 +1507,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		$.modified = $._retint = true;
 	};
 
-	if ($._scope == 'image') {
+	if ($._isImage) {
 		$.resize = (w, h) => {
 			let o = new $._Canvas(c.width, c.height);
 			let tmpCtx = o.getContext('2d', {
@@ -1643,10 +1643,10 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.smooth = () => ($.ctx.imageSmoothingEnabled = true);
 	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
 
-	if ($._scope == 'image') return;
+	if ($._isImage) return;
 
 	$.tint = function (c) {
-		$._tint = (c._q5Color ? c : $.color(...arguments)).toString();
+		$._tint = (c._isColor ? c : $.color(...arguments)).toString();
 	};
 	$.noTint = () => ($._tint = null);
 };
@@ -1654,7 +1654,7 @@ Q5.renderers.c2d.image = ($, q) => {
 Q5.Image = class {
 	constructor(q, w, h, opt = {}) {
 		let $ = this;
-		$._scope = 'image';
+		$._isImage = true;
 		$.canvas = $.ctx = $.drawingContext = null;
 		$.pixels = [];
 		Q5.modules.canvas($, $);
@@ -2266,7 +2266,7 @@ Q5.modules.color = ($, q) => {
 
 	$.color = (c0, c1, c2, c3) => {
 		let C = $.Color;
-		if (c0._q5Color) return new C(...c0.levels);
+		if (c0._isColor) return new C(...c0.levels);
 		if (c1 == undefined) {
 			if (typeof c0 == 'string') {
 				if (c0[0] == '#') {
@@ -2364,7 +2364,8 @@ Q5.modules.color = ($, q) => {
 
 Q5.Color = class {
 	constructor() {
-		this._q5Color = true;
+		this._isColor = true;
+		this._q5Color = true; // deprecated
 	}
 	get alpha() {
 		return this.a;
@@ -2685,7 +2686,7 @@ Q5.HSBtoHSL = (h, s, v, l = v * (1 - s / 200)) => [h, !l || l == 100 ? 0 : ((v -
 	Q5.OKLCHtoRGB = (l, c, h) => srgbLinear2rgb(xyz2rgbLinear(oklab2xyz(oklch2oklab(l, c, h))));
 }
 Q5.modules.display = ($) => {
-	if (!$.canvas || $._scope == 'graphics') return;
+	if (!$.canvas || $._isGraphics) return;
 
 	let c = $.canvas;
 
@@ -3165,7 +3166,7 @@ Q5.modules.fes = ($) => {
 	};
 };
 Q5.modules.input = ($, q) => {
-	if ($._scope == 'graphics') return;
+	if ($._isGraphics) return;
 
 	$.mouseX = 0;
 	$.mouseY = 0;
@@ -4209,6 +4210,7 @@ Q5.modules.sound = ($, q) => {
 
 	$.loadAudio = (url, cb) => {
 		let a = new Audio(url);
+		a._isAudio = true;
 		a.crossOrigin = 'Anonymous';
 		a.promise = new Promise((resolve, reject) => {
 			a.addEventListener('canplaythrough', () => {
@@ -4263,6 +4265,7 @@ if (window.OfflineAudioContext) {
 
 Q5.Sound = class {
 	constructor() {
+		this._isSound = true;
 		this.sources = new Set();
 		this.loaded = this.paused = false;
 	}
@@ -4563,6 +4566,7 @@ Q5.Vector = class {
 		this.x = x || 0;
 		this.y = y || 0;
 		this.z = z || 0;
+		this._isVector = true;
 		this._$ = $ || window;
 		this._cn = null;
 		this._cnsq = null;
@@ -5088,7 +5092,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	}
 
 	const addColor = (r, g, b, a) => {
-		if (usingRGB === false || (g === undefined && !r._q5Color && typeof r !== 'number')) {
+		if (usingRGB === false || (g === undefined && !r._isColor && typeof r !== 'number')) {
 			if (usingRGB === false || typeof r == 'string' || !Array.isArray(r)) {
 				r = $.color(r, g, b, a);
 			} else {
@@ -5101,7 +5105,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		}
 		a ??= _colorFormat;
 
-		if (r._q5Color) {
+		if (r._isColor) {
 			let c = r;
 			if (usingRGB) ({ r, g, b, a } = c);
 			else {
@@ -5177,7 +5181,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	$._setStrokeIdx = (v) => (strokeIdx = v);
 	$._doStroke = () => (doStroke = true);
 
-	const MAX_TRANSFORMS = $._graphics ? 1000 : 1e7,
+	const MAX_TRANSFORMS = $._isGraphics ? 1000 : 1e7,
 		MATRIX_SIZE = 16, // 4x4 matrix
 		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE);
 
@@ -5864,7 +5868,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._shapesShaderCode
 	});
 
-	let shapesVertStack = new Float32Array($._graphics ? 1000 : 1e7),
+	let shapesVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
 		shapesVertIdx = 0;
 	const TAU = Math.PI * 2;
 	const HALF_PI = Math.PI / 2;
@@ -6574,7 +6578,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._videoShaderCode
 	});
 
-	let imgVertStack = new Float32Array($._graphics ? 1000 : 1e7),
+	let imgVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
 		imgVertIdx = 0;
 
 	let imgVertBuffLayout = {
@@ -6865,7 +6869,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			w = cnv.width,
 			h = cnv.height,
 			pd = img._pixelDensity || 1,
-			makeFrame = img._graphics && img._drawStack?.length;
+			makeFrame = img._isGraphics && img._drawStack?.length;
 
 		if (makeFrame) {
 			img._render();

@@ -178,7 +178,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		$.modified = $._retint = true;
 	};
 
-	if ($._scope == 'image') {
+	if ($._isImage) {
 		$.resize = (w, h) => {
 			let o = new $._Canvas(c.width, c.height);
 			let tmpCtx = o.getContext('2d', {
@@ -314,10 +314,10 @@ Q5.renderers.c2d.image = ($, q) => {
 	$.smooth = () => ($.ctx.imageSmoothingEnabled = true);
 	$.noSmooth = () => ($.ctx.imageSmoothingEnabled = false);
 
-	if ($._scope == 'image') return;
+	if ($._isImage) return;
 
 	$.tint = function (c) {
-		$._tint = (c._q5Color ? c : $.color(...arguments)).toString();
+		$._tint = (c._isColor ? c : $.color(...arguments)).toString();
 	};
 	$.noTint = () => ($._tint = null);
 };
@@ -325,7 +325,7 @@ Q5.renderers.c2d.image = ($, q) => {
 Q5.Image = class {
 	constructor(q, w, h, opt = {}) {
 		let $ = this;
-		$._scope = 'image';
+		$._isImage = true;
 		$.canvas = $.ctx = $.drawingContext = null;
 		$.pixels = [];
 		Q5.modules.canvas($, $);

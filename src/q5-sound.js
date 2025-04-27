@@ -26,6 +26,7 @@ Q5.modules.sound = ($, q) => {
 
 	$.loadAudio = (url, cb) => {
 		let a = new Audio(url);
+		a._isAudio = true;
 		a.crossOrigin = 'Anonymous';
 		a.promise = new Promise((resolve, reject) => {
 			a.addEventListener('canplaythrough', () => {
@@ -80,6 +81,7 @@ if (window.OfflineAudioContext) {
 
 Q5.Sound = class {
 	constructor() {
+		this._isSound = true;
 		this.sources = new Set();
 		this.loaded = this.paused = false;
 	}

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 2.28
+ * @version 2.29
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -24,13 +24,13 @@ function Q5(scope, parent, renderer) {
 		if (!(window.setup || window.update || window.draw)) return;
 		scope = 'global';
 	}
-	$._scope = scope;
 	let globalScope;
 	if (scope == 'global') {
 		Q5._hasGlobal = $._isGlobal = true;
 		globalScope = Q5._esm ? globalThis : !Q5._server ? window : global;
 	}
-	if (scope == 'graphics') $._graphics = true;
+	if (scope == 'graphics') $._isGraphics = true;
+	if (scope == 'image') $._isImage = true;
 
 	let q = new Proxy($, {
 		set: (t, p, v) => {
@@ -210,9 +210,9 @@ function Q5(scope, parent, renderer) {
 		}
 	}
 
-	if ($._graphics) return;
+	if ($._isGraphics) return;
 
-	if (scope == 'global') {
+	if ($._isGlobal) {
 		let tmp = Object.assign({}, $);
 		delete tmp.Color;
 		Object.assign(Q5, tmp);
@@ -235,7 +235,7 @@ function Q5(scope, parent, renderer) {
 		};
 	}
 
-	if (scope == 'global') {
+	if ($._isGlobal) {
 		let props = Object.getOwnPropertyNames($);
 		for (let p of props) {
 			if (p[0] != '_') globalScope[p] = $[p];
@@ -383,7 +383,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '2.28';
+Q5.version = Q5.VERSION = '2.29';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

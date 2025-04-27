@@ -1,5 +1,5 @@
 Q5.modules.input = ($, q) => {
-	if ($._scope == 'graphics') return;
+	if ($._isGraphics) return;
 
 	$.mouseX = 0;
 	$.mouseY = 0;

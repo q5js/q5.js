@@ -226,7 +226,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	}
 
 	const addColor = (r, g, b, a) => {
-		if (usingRGB === false || (g === undefined && !r._q5Color && typeof r !== 'number')) {
+		if (usingRGB === false || (g === undefined && !r._isColor && typeof r !== 'number')) {
 			if (usingRGB === false || typeof r == 'string' || !Array.isArray(r)) {
 				r = $.color(r, g, b, a);
 			} else {
@@ -239,7 +239,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		}
 		a ??= _colorFormat;
 
-		if (r._q5Color) {
+		if (r._isColor) {
 			let c = r;
 			if (usingRGB) ({ r, g, b, a } = c);
 			else {
@@ -315,7 +315,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	$._setStrokeIdx = (v) => (strokeIdx = v);
 	$._doStroke = () => (doStroke = true);
 
-	const MAX_TRANSFORMS = $._graphics ? 1000 : 1e7,
+	const MAX_TRANSFORMS = $._isGraphics ? 1000 : 1e7,
 		MATRIX_SIZE = 16, // 4x4 matrix
 		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE);
 
@@ -1002,7 +1002,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._shapesShaderCode
 	});
 
-	let shapesVertStack = new Float32Array($._graphics ? 1000 : 1e7),
+	let shapesVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
 		shapesVertIdx = 0;
 	const TAU = Math.PI * 2;
 	const HALF_PI = Math.PI / 2;
@@ -1712,7 +1712,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._videoShaderCode
 	});
 
-	let imgVertStack = new Float32Array($._graphics ? 1000 : 1e7),
+	let imgVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
 		imgVertIdx = 0;
 
 	let imgVertBuffLayout = {
@@ -2003,7 +2003,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			w = cnv.width,
 			h = cnv.height,
 			pd = img._pixelDensity || 1,
-			makeFrame = img._graphics && img._drawStack?.length;
+			makeFrame = img._isGraphics && img._drawStack?.length;
 
 		if (makeFrame) {
 			img._render();

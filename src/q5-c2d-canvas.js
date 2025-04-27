@@ -12,7 +12,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		}
 		q.ctx = q.drawingContext = c.getContext('2d', options);
 
-		if ($._scope != 'image') {
+		if (!$._isImage) {
 			// default styles
 			$.ctx.fillStyle = $._fill = 'white';
 			$.ctx.strokeStyle = $._stroke = 'black';
@@ -33,7 +33,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.restore();
 	};
 
-	if ($._scope == 'image') return;
+	if ($._isImage) return;
 
 	$.background = function (c) {
 		$.ctx.save();
@@ -41,7 +41,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		$.ctx.globalAlpha = 1;
 		if (c.canvas) $.image(c, 0, 0, $.canvas.width, $.canvas.height);
 		else {
-			if (Q5.Color && !c._q5Color) c = $.color(...arguments);
+			if (Q5.Color && !c._isColor) c = $.color(...arguments);
 			$.ctx.fillStyle = c.toString();
 			$.ctx.fillRect(0, 0, $.canvas.width, $.canvas.height);
 		}
@@ -75,7 +75,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.fill = function (c) {
 		$._doFill = $._fillSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doFill = false);
@@ -86,7 +86,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.stroke = function (c) {
 		$._doStroke = $._strokeSet = true;
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doStroke = false);
@@ -109,7 +109,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.shadow = function (c) {
 		if (Q5.Color) {
-			if (!c._q5Color && (typeof c != 'string' || $._namedColors[c])) {
+			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
 			if (c.a <= 0) return ($._doShadow = false);

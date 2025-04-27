@@ -9,7 +9,7 @@ Q5.modules.canvas = ($, q) => {
 		if (Q5._createServerCanvas) {
 			q.canvas = Q5._createServerCanvas(200, 200);
 		}
-	} else if ($._scope == 'image' || $._scope == 'graphics') {
+	} else if ($._isImage || $._isGraphics) {
 		q.canvas = new $._Canvas(200, 200);
 	}
 
@@ -32,7 +32,7 @@ Q5.modules.canvas = ($, q) => {
 	if (c) {
 		c.width = 200;
 		c.height = 200;
-		if ($._scope != 'image') {
+		if (!$._isImage) {
 			c.renderer = $._renderer;
 			c[$._renderer] = true;
 
@@ -57,8 +57,8 @@ Q5.modules.canvas = ($, q) => {
 		let opt = Object.assign({}, Q5.canvasOptions);
 		if (typeof options == 'object') Object.assign(opt, options);
 
-		if ($._scope != 'image') {
-			if ($._scope == 'graphics') $._pixelDensity = this._pixelDensity;
+		if (!$._isImage) {
+			if ($._isGraphics) $._pixelDensity = this._pixelDensity;
 			else if (!Q5._server) {
 				// the canvas can become detached from the DOM
 				// if the innerHTML of one of its parents is edited
@@ -162,9 +162,9 @@ Q5.modules.canvas = ($, q) => {
 	};
 	$.defaultImageScale(0.5);
 
-	if ($._scope == 'image') return;
+	if ($._isImage) return;
 
-	if (c && $._scope != 'graphics') {
+	if (c && !$._isGraphics) {
 		c.parent = (el) => {
 			if (c.parentElement) c.parentElement.removeChild(c);
 
@@ -223,7 +223,7 @@ Q5.modules.canvas = ($, q) => {
 		} else $._da = 0;
 	};
 
-	if (window && $._scope != 'graphics') {
+	if (window && $._isGraphics) {
 		window.addEventListener('resize', () => {
 			$._didResize = true;
 			q.windowWidth = window.innerWidth;

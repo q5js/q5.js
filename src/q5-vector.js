@@ -8,6 +8,7 @@ Q5.Vector = class {
 		this.x = x || 0;
 		this.y = y || 0;
 		this.z = z || 0;
+		this._isVector = true;
 		this._$ = $ || window;
 		this._cn = null;
 		this._cnsq = null;

@@ -1,5 +1,5 @@
 Q5.modules.display = ($) => {
-	if (!$.canvas || $._scope == 'graphics') return;
+	if (!$.canvas || $._isGraphics) return;
 
 	let c = $.canvas;
 

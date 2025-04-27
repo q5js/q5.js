@@ -99,6 +99,8 @@ function draw() {
 	/** ⭐️
 	 * Redraws the canvas n times. If no input parameter is provided,
 	 * it calls the draw function once.
+	 * 
+	 * This is an async function.
 	 * @param {number} [n] number of times to redraw the canvas, default is 1
 	 * @example
 createCanvas(200);
@@ -3288,7 +3290,7 @@ link.position(16, 42);
 link.style.fontSize = '80px';
 
 link.addEventListener('mouseover', () => {
-	background('blue');
+	background('cyan');
 });
 	 */
 	function createA(href: string, text?: string): HTMLAnchorElement;

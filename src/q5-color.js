@@ -64,7 +64,7 @@ Q5.modules.color = ($, q) => {
 
 	$.color = (c0, c1, c2, c3) => {
 		let C = $.Color;
-		if (c0._q5Color) return new C(...c0.levels);
+		if (c0._isColor) return new C(...c0.levels);
 		if (c1 == undefined) {
 			if (typeof c0 == 'string') {
 				if (c0[0] == '#') {
@@ -162,7 +162,8 @@ Q5.modules.color = ($, q) => {
 
 Q5.Color = class {
 	constructor() {
-		this._q5Color = true;
+		this._isColor = true;
+		this._q5Color = true; // deprecated
 	}
 	get alpha() {
 		return this.a;
