@@ -1904,7 +1904,7 @@ function setup() {
 	 * Run `updatePixels` to apply the changes.
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {any} c color, canvas, or image
+	 * @param {any} val color, canvas, or image
 	 * @example
 createCanvas(200);
 let c = color('lime');
@@ -1914,7 +1914,7 @@ function draw() {
 	updatePixels();
 }
 	 */
-	function set(x: number, y: number, c: any): void;
+	function set(x: number, y: number, val: any): void;
 
 	/** 🌆
 	 * Returns a copy of the image.

@@ -231,7 +231,7 @@ function Q5(scope, parent, renderer) {
 		$[n] = function () {
 			$._incrementPreload();
 			return fn.apply($, arguments);
-			// fn is responsible for calling $._decrementPreload
+			// the addon function is responsible for calling $._decrementPreload
 		};
 	}
 
@@ -1605,14 +1605,14 @@ Q5.renderers.c2d.image = ($, q) => {
 		return img;
 	};
 
-	$.set = (x, y, c) => {
+	$.set = (x, y, val) => {
 		x = Math.floor(x);
 		y = Math.floor(y);
 		$.modified = $._retint = true;
-		if (c.canvas) {
+		if (val.canvas) {
 			let old = $._tint;
 			$._tint = null;
-			$.image(c, x, y);
+			$.image(val, x, y);
 			$._tint = old;
 			return;
 		}
@@ -1621,10 +1621,10 @@ Q5.renderers.c2d.image = ($, q) => {
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
 				let idx = 4 * ((y * mod + i) * c.width + x * mod + j);
-				$.pixels[idx] = c.r;
-				$.pixels[idx + 1] = c.g;
-				$.pixels[idx + 2] = c.b;
-				$.pixels[idx + 3] = c.a;
+				$.pixels[idx] = val.r;
+				$.pixels[idx + 1] = val.g;
+				$.pixels[idx + 2] = val.b;
+				$.pixels[idx + 3] = val.a;
 			}
 		}
 	};
@@ -3165,6 +3165,23 @@ Q5.modules.fes = ($) => {
 		} catch (err) {}
 	};
 };
+
+if (typeof navigator != undefined && navigator.onLine) {
+	async function checkLatestVersion() {
+		try {
+			let response = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
+			if (!response.ok) return;
+			let data = await response.json();
+			let l = data.tags.latest;
+			l = l.slice(0, l.lastIndexOf('.'));
+			if (l != Q5.version) {
+				console.warn(`q5.js v${l} is now available! Consider updating from v${Q5.version}.`);
+			}
+		} catch (e) {}
+	}
+
+	checkLatestVersion();
+}
 Q5.modules.input = ($, q) => {
 	if ($._isGraphics) return;
 

@@ -231,7 +231,7 @@ function Q5(scope, parent, renderer) {
 		$[n] = function () {
 			$._incrementPreload();
 			return fn.apply($, arguments);
-			// fn is responsible for calling $._decrementPreload
+			// the addon function is responsible for calling $._decrementPreload
 		};
 	}
 

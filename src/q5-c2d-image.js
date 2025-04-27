@@ -276,14 +276,14 @@ Q5.renderers.c2d.image = ($, q) => {
 		return img;
 	};
 
-	$.set = (x, y, c) => {
+	$.set = (x, y, val) => {
 		x = Math.floor(x);
 		y = Math.floor(y);
 		$.modified = $._retint = true;
-		if (c.canvas) {
+		if (val.canvas) {
 			let old = $._tint;
 			$._tint = null;
-			$.image(c, x, y);
+			$.image(val, x, y);
 			$._tint = old;
 			return;
 		}
@@ -292,10 +292,10 @@ Q5.renderers.c2d.image = ($, q) => {
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
 				let idx = 4 * ((y * mod + i) * c.width + x * mod + j);
-				$.pixels[idx] = c.r;
-				$.pixels[idx + 1] = c.g;
-				$.pixels[idx + 2] = c.b;
-				$.pixels[idx + 3] = c.a;
+				$.pixels[idx] = val.r;
+				$.pixels[idx + 1] = val.g;
+				$.pixels[idx + 2] = val.b;
+				$.pixels[idx + 3] = val.a;
 			}
 		}
 	};

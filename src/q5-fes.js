@@ -36,3 +36,20 @@ Q5.modules.fes = ($) => {
 		} catch (err) {}
 	};
 };
+
+if (typeof navigator != undefined && navigator.onLine) {
+	async function checkLatestVersion() {
+		try {
+			let response = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
+			if (!response.ok) return;
+			let data = await response.json();
+			let l = data.tags.latest;
+			l = l.slice(0, l.lastIndexOf('.'));
+			if (l != Q5.version) {
+				console.warn(`q5.js v${l} is now available! Consider updating from v${Q5.version}.`);
+			}
+		} catch (e) {}
+	}
+
+	checkLatestVersion();
+}
