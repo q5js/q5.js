@@ -44,25 +44,19 @@ main {
 		);
 	}
 
-	$._adjustDisplay = () => {
+	$._adjustDisplay = (forced) => {
 		let s = c.style;
-		let p = c.parentElement;
-		if (!s || !p || !c.displayMode) return;
-		if (c.renderQuality == 'pixelated') {
-			c.classList.add('q5-pixelated');
-			$.pixelDensity(1);
-			$.defaultImageScale(1);
-			if ($.noSmooth) $.noSmooth();
-			if ($.textFont) $.textFont('monospace');
-		}
+		// if the canvas doesn't have a style,
+		// it may be a server side canvas, so return
+		if (!s) return;
 		if (c.displayMode == 'normal') {
-			p.classList.remove('q5-centered', 'q5-maxed');
+			// unless the canvas needs to be resized, return
+			if (!forced) return;
 			s.width = c.w * c.displayScale + 'px';
 			s.height = c.h * c.displayScale + 'px';
 		} else {
-			p.classList.add('q5-' + c.displayMode);
-			p = p.getBoundingClientRect();
-			if (c.w / c.h > p.width / p.height) {
+			let parent = c.parentElement.getBoundingClientRect();
+			if (c.w / c.h > parent.width / parent.height) {
 				if (c.displayMode == 'centered') {
 					s.width = c.w * c.displayScale + 'px';
 					s.maxWidth = '100%';
@@ -86,9 +80,26 @@ main {
 		}
 		if (displayMode == 'fullscreen') displayMode = 'maxed';
 		if (displayMode == 'center') displayMode = 'centered';
+
+		if (c.displayMode) {
+			c.parentElement.classList.remove('q5-' + c.displayMode);
+			c.classList.remove('q5-pixelated');
+		}
+
+		c.parentElement.classList.add('q5-' + displayMode);
+
+		if (renderQuality == 'pixelated') {
+			c.classList.add('q5-pixelated');
+			$.pixelDensity(1);
+			$.defaultImageScale(1);
+			if ($.noSmooth) $.noSmooth();
+			if ($.textFont) $.textFont('monospace');
+		}
+
 		Object.assign(c, { displayMode, renderQuality, displayScale });
+
 		if ($.ctx) $.pushStyles();
-		$._adjustDisplay();
+		$._adjustDisplay(true);
 		if ($.ctx) $.popStyles();
 	};
 

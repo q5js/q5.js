@@ -40,10 +40,11 @@ Q5.modules.canvas = ($, q) => {
 		}
 	}
 
-	$._adjustDisplay = () => {
-		if (c.style) {
-			c.style.width = c.w + 'px';
-			c.style.height = c.h + 'px';
+	$._adjustDisplay = (forced) => {
+		let s = c.style;
+		if (s && forced) {
+			s.width = c.w + 'px';
+			s.height = c.h + 'px';
 		}
 	};
 
@@ -141,8 +142,10 @@ Q5.modules.canvas = ($, q) => {
 			q.height = h;
 		} else $.flexibleCanvas($._dau);
 
-		if ($.displayMode && !c.displayMode) $.displayMode();
-		else $._adjustDisplay();
+		if (c.parentElement) {
+			if ($.displayMode && !c.displayMode) $.displayMode();
+			else $._adjustDisplay(true);
+		}
 	};
 
 	$._setImageSize = (w, h) => {
