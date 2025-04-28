@@ -53,8 +53,8 @@ function Q5(scope, parent, renderer) {
 	$._loop = true;
 
 	async function runHooks(name) {
-		for (let hook of Q5.lifecycleHooks[name]) {
-			await hook.call($);
+		for (let hook of Q5.hooks[name]) {
+			await hook.call($, q);
 		}
 	}
 
@@ -219,8 +219,8 @@ function Q5(scope, parent, renderer) {
 		delete Q5.Q5;
 	}
 
-	for (let hook of Q5.lifecycleHooks.init) {
-		hook.call($);
+	for (let hook of Q5.hooks.init) {
+		hook.call($, q);
 	}
 
 	for (let [n, fn] of Object.entries(Q5.prototype)) {
@@ -343,7 +343,7 @@ Q5._friendlyError = (msg, func) => {
 };
 Q5._validateParameters = () => true;
 
-Q5.lifecycleHooks = {
+Q5.hooks = {
 	init: [],
 	presetup: [],
 	postsetup: [],
@@ -352,20 +352,24 @@ Q5.lifecycleHooks = {
 	remove: []
 };
 
+Q5.addHook = (name, fn) => Q5.hooks[name].push(fn);
+
+// p5 v2 compat
 Q5.registerAddon = (addon) => {
 	let lifecycles = {};
 	addon(Q5, Q5.prototype, lifecycles);
 	for (let name in lifecycles) {
-		Q5.lifecycleHooks[name].push(lifecycles[name]);
+		Q5.hooks[name].push(lifecycles[name]);
 	}
 };
 
+// p5 v1 compat
 Q5.prototype.registerMethod = (m, fn) => {
 	if (m == 'beforeSetup' || m.includes('Preload')) m = 'presetup';
 	if (m == 'afterSetup') m = 'postsetup';
 	if (m == 'pre') m = 'predraw';
 	if (m == 'post') m = 'postdraw';
-	Q5.lifecycleHooks[m].push(fn);
+	Q5.hooks[m].push(fn);
 };
 
 Q5.preloadMethods = {};
