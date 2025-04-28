@@ -54,7 +54,7 @@ function Q5(scope, parent, renderer) {
 
 	async function runHooks(name) {
 		for (let hook of Q5.hooks[name]) {
-			await hook.call($, q);
+			await hook.call($, $, q);
 		}
 	}
 
@@ -220,7 +220,7 @@ function Q5(scope, parent, renderer) {
 	}
 
 	for (let hook of Q5.hooks.init) {
-		hook.call($, q);
+		hook.call($, $, q);
 	}
 
 	for (let [n, fn] of Object.entries(Q5.prototype)) {
