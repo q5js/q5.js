@@ -226,7 +226,7 @@ Q5.modules.canvas = ($, q) => {
 		} else $._da = 0;
 	};
 
-	if (window && $._isGraphics) {
+	if (window && !$._isGraphics) {
 		window.addEventListener('resize', () => {
 			$._didResize = true;
 			q.windowWidth = window.innerWidth;
