@@ -178,6 +178,7 @@ Q5.renderers.c2d.shapes = ($) => {
 			bl *= $._da;
 			br *= $._da;
 		}
+		$.ctx.beginPath();
 		$.ctx.roundRect(x, y, w, h, [tl, tr, br, bl]);
 		ink();
 	}
