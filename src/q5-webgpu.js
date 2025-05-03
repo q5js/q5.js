@@ -325,11 +325,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrixIdx = 0,
 		matrixDirty = false; // tracks if the matrix has been modified
 
-	// initialize with a 4x4 identity matrix
+	// 4x4 identity matrix with y axis flipped
 	// prettier-ignore
 	matrices.push([
 		1, 0, 0, 0,
-		0, 1, 0, 0,
+		0, -1, 0, 0, // -1 here flips the y axis
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	]);
@@ -342,13 +342,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 	$.resetMatrix();
 
-	$.translate = (x, y, z = 0) => {
-		if (!x && !y && !z) return;
-		// update the translation values
+	$.translate = (x, y) => {
+		if (!x && !y) return;
 		let m = matrix;
-		m[12] += x * m[0];
-		m[13] -= y * m[5];
-		m[14] += z * m[10];
+
+		// Apply translation in sheared/skewed space (2D only)
+		m[12] += x * m[0] + y * m[4];
+		m[13] += x * m[1] + y * m[5];
+
 		matrixDirty = true;
 	};
 
@@ -418,8 +419,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			m4 = m[4],
 			m5 = m[5];
 
-		m[0] = m0 + m4 * tanAng;
-		m[1] = m1 + m5 * tanAng;
+		m[4] = m4 + m0 * tanAng;
+		m[5] = m5 + m1 * tanAng;
 
 		matrixDirty = true;
 	};
@@ -435,8 +436,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			m4 = m[4],
 			m5 = m[5];
 
-		m[4] = m4 + m0 * tanAng;
-		m[5] = m5 + m1 * tanAng;
+		m[0] = m0 + m4 * tanAng;
+		m[1] = m1 + m5 * tanAng;
 
 		matrixDirty = true;
 	};
@@ -560,21 +561,21 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		if (!mode || mode == 'corner') {
 			l = x;
 			r = x + w;
-			t = -y;
-			b = -(y + h);
+			t = y;
+			b = y + h;
 		} else if (mode == 'center') {
 			let hw = w / 2,
 				hh = h / 2;
 			l = x - hw;
 			r = x + hw;
-			t = -(y - hh);
-			b = -(y + hh);
+			t = y - hh;
+			b = y + hh;
 		} else {
 			// CORNERS
 			l = x;
 			r = w;
-			t = -y;
-			b = -h;
+			t = y;
+			b = h;
 		}
 
 		return [l, r, t, b];
@@ -1095,7 +1096,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			// calculate perimeter vertex
 			let vx = x + a * Math.cos(t);
-			let vy = y - b * Math.sin(t);
+			let vy = y + b * Math.sin(t);
 
 			// add perimeter vertex
 			v[i++] = vx;
@@ -1121,11 +1122,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		for (let j = 0; j <= n; j++) {
 			// Outer vertex
 			let vxOuter = x + outerA * Math.cos(t);
-			let vyOuter = y - outerB * Math.sin(t);
+			let vyOuter = y + outerB * Math.sin(t);
 
 			// Inner vertex
 			let vxInner = x + innerA * Math.cos(t);
-			let vyInner = y - innerB * Math.sin(t);
+			let vyInner = y + innerB * Math.sin(t);
 
 			// Add vertices for triangle strip
 			v[i++] = vxOuter;
@@ -1190,26 +1191,26 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		l += rr;
 		r -= rr;
-		t -= rr;
-		b += rr;
+		t += rr;
+		b -= rr;
 
 		// Clamp radius
 		rr = Math.min(rr, Math.min(w, h) / 2);
 
 		let n = getArcSegments(rr * _scale);
 
-		let trr = t + rr,
-			brr = b - rr,
+		let trr = t - rr,
+			brr = b + rr,
 			lrr = l - rr,
 			rrr = r + rr;
 
 		if (doFill) {
 			ci = fillIdx;
 			// Corner arcs
-			addArc(r, b, rr, rr, 0, HALF_PI, n, ci, ti);
-			addArc(l, b, rr, rr, Math.PI, HALF_PI, n, ci, ti);
-			addArc(l, t, rr, rr, -Math.PI, -HALF_PI, n, ci, ti);
-			addArc(r, t, rr, rr, -HALF_PI, 0, n, ci, ti);
+			addArc(l, t, rr, -rr, -HALF_PI, Math.PI, n, ci, ti); // top-left
+			addArc(r, t, rr, -rr, HALF_PI, 0, n, ci, ti); // top-right
+			addArc(r, b, rr, -rr, 0, -HALF_PI, n, ci, ti); // bottom-right
+			addArc(l, b, rr, -rr, -HALF_PI, -Math.PI, n, ci, ti); // bottom-left
 
 			addRect(l, trr, r, trr, r, brr, l, brr, ci, ti); // center
 			addRect(l, t, lrr, t, lrr, b, l, b, ci, ti); // Left
@@ -1223,11 +1224,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				outerB = rr + hsw,
 				innerA = rr - hsw,
 				innerB = rr - hsw;
+
 			// Corner arc strokes
-			addArcStroke(r, b, outerA, outerB, innerA, innerB, 0, HALF_PI, n, ci, ti);
-			addArcStroke(l, b, outerA, outerB, innerA, innerB, Math.PI, HALF_PI, n, ci, ti);
-			addArcStroke(l, t, outerA, outerB, innerA, innerB, -Math.PI, -HALF_PI, n, ci, ti);
-			addArcStroke(r, t, outerA, outerB, innerA, innerB, -HALF_PI, 0, n, ci, ti);
+			addArcStroke(l, t, outerA, -outerB, innerA, -innerB, Math.PI, HALF_PI, n, ci, ti); // top-left
+			addArcStroke(r, t, outerA, -outerB, innerA, -innerB, HALF_PI, 0, n, ci, ti); // top-right
+			addArcStroke(r, b, outerA, -outerB, innerA, -innerB, 0, -HALF_PI, n, ci, ti); // bottom-right
+			addArcStroke(l, b, outerA, -outerB, innerA, -innerB, -HALF_PI, -Math.PI, n, ci, ti); // bottom-left
 
 			let lrrMin = lrr - hsw,
 				lrrMax = lrr + hsw,
@@ -1299,11 +1301,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let ti = matrixIdx;
 
 		if (doFill) {
-			addArc(x, -y, a, b, 0, TAU, n, fillIdx, ti);
+			addArc(x, y, a, b, 0, TAU, n, fillIdx, ti);
 		}
 		if (doStroke) {
 			// Draw the stroke as a ring using triangle strips
-			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, 0, TAU, n, strokeIdx, ti);
+			addArcStroke(x, y, a + hsw, b + hsw, a - hsw, b - hsw, 0, TAU, n, strokeIdx, ti);
 		}
 	};
 
@@ -1352,15 +1354,15 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		// Draw fill
 		if (doFill) {
-			addArc(x, -y, a, b, start, stop, n, fillIdx, ti);
+			addArc(x, y, a, b, start, stop, n, fillIdx, ti);
 		}
 
 		// Draw stroke
 		if (doStroke) {
-			addArcStroke(x, -y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, strokeIdx, ti);
+			addArcStroke(x, y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, strokeIdx, ti);
 			if (_strokeCap == 'round') {
-				addArc(x + a * Math.cos(start), -y - b * Math.sin(start), hsw, hsw, 0, TAU, n, strokeIdx, ti);
-				addArc(x + a * Math.cos(stop), -y - b * Math.sin(stop), hsw, hsw, 0, TAU, n, strokeIdx, ti);
+				addArc(x + a * Math.cos(start), y + b * Math.sin(start), hsw, hsw, 0, TAU, n, strokeIdx, ti);
+				addArc(x + a * Math.cos(stop), y + b * Math.sin(stop), hsw, hsw, 0, TAU, n, strokeIdx, ti);
 			}
 		}
 	};
@@ -1376,7 +1378,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		} else {
 			let n = getArcSegments(scaledSW);
 			sw /= 2;
-			addArc(x, -y, sw, sw, 0, TAU, n, ci, ti);
+			addArc(x, y, sw, sw, 0, TAU, n, ci, ti);
 		}
 	};
 
@@ -1404,12 +1406,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let px = -(dy / length) * hsw,
 			py = (dx / length) * hsw;
 
-		addRect(x1 + px, -y1 - py, x1 - px, -y1 + py, x2 - px, -y2 + py, x2 + px, -y2 - py, ci, ti);
+		addRect(x1 + px, y1 + py, x1 - px, y1 - py, x2 - px, y2 - py, x2 + px, y2 + py, ci, ti);
 
 		if (scaledSW > 2 && _strokeCap != 'square') {
 			let n = getArcSegments(scaledSW);
-			addArc(x1, -y1, hsw, hsw, 0, TAU, n, ci, ti);
-			addArc(x2, -y2, hsw, hsw, 0, TAU, n, ci, ti);
+			addArc(x1, y1, hsw, hsw, 0, TAU, n, ci, ti);
+			addArc(x2, y2, hsw, hsw, 0, TAU, n, ci, ti);
 		}
 	};
 
@@ -1431,13 +1433,13 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.vertex = (x, y) => {
 		if (matrixDirty) saveMatrix();
-		sv.push(x, -y, fillIdx, matrixIdx);
+		sv.push(x, y, fillIdx, matrixIdx);
 		shapeVertCount++;
 	};
 
 	$.curveVertex = (x, y) => {
 		if (matrixDirty) saveMatrix();
-		curveVertices.push({ x: x, y: -y });
+		curveVertices.push({ x, y });
 	};
 
 	$.bezierVertex = function (cx1, cy1, cx2, cy2, x, y) {
@@ -1468,14 +1470,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			if (quadratic) {
 				vx = mt2 * startX + 2 * mt * t * cx1 + t2 * x;
-				vy = mt2 * startY + 2 * mt * t * -cy1 + t2 * -y;
+				vy = mt2 * startY + 2 * mt * t * cy1 + t2 * y;
 			} else {
 				let t3 = t2 * t;
 				let mt3 = mt2 * mt;
 
 				// Cubic Bezier formula
 				vx = mt3 * startX + 3 * mt2 * t * cx1 + 3 * mt * t2 * cx2 + t3 * x;
-				vy = mt3 * startY + 3 * mt2 * t * -cy1 + 3 * mt * t2 * -cy2 + t3 * -y;
+				vy = mt3 * startY + 3 * mt2 * t * cy1 + 3 * mt * t2 * cy2 + t3 * y;
 			}
 
 			sv.push(vx, vy, fillIdx, matrixIdx);
@@ -1532,8 +1534,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 
 		if (!shapeVertCount) return;
-		if (shapeVertCount == 1) return $.point(sv[0], -sv[1]);
-		if (shapeVertCount == 2) return $.line(sv[0], -sv[1], sv[4], -sv[5]);
+		if (shapeVertCount == 1) return $.point(sv[0], sv[1]);
+		if (shapeVertCount == 2) return $.line(sv[0], sv[1], sv[4], sv[5]);
 
 		// close the shape if requested
 		if (close) {
@@ -1583,13 +1585,13 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
-				$.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
+				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
 
 				addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, strokeIdx, ti);
 			}
 			let v1 = (shapeVertCount - 1) * 4;
 			let v2 = 0;
-			if (close) $.line(sv[v1], -sv[v1 + 1], sv[v2], -sv[v2 + 1]);
+			if (close) $.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
 			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, strokeIdx, ti);
 			_strokeCap = ogStrokeCap;
 		}
@@ -2118,7 +2120,7 @@ struct Text {
 @group(2) @binding(0) var<storage> textChars: array<vec4f>;
 @group(2) @binding(1) var<storage> textMetadata: array<Text>;
 
-const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
+const quad = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
 const uvs = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
 
 fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
@@ -2345,7 +2347,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			fontChars[o + 4] = char.width; // size.x
 			fontChars[o + 5] = char.height; // size.y
 			fontChars[o + 6] = char.xoffset; // offset.x
-			fontChars[o + 7] = -char.yoffset; // offset.y
+			fontChars[o + 7] = char.yoffset; // offset.y
 			o += 8;
 		}
 		charsBuffer.unmap();
@@ -2579,7 +2581,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (ta == 'left' && !hasNewline) {
 			measurements = measureText($._font, str, (textX, textY, line, char) => {
 				charsData[o] = textX;
-				charsData[o + 1] = textY;
+				charsData[o + 1] = -textY;
 				charsData[o + 2] = char.charIndex;
 				charsData[o + 3] = textIndex;
 				o += 4;
@@ -2606,7 +2608,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 					offsetX = -measurements.lineWidths[line];
 				}
 				charsData[o] = textX + offsetX;
-				charsData[o + 1] = textY + offsetY;
+				charsData[o + 1] = -(textY + offsetY);
 				charsData[o + 2] = char.charIndex;
 				charsData[o + 3] = textIndex;
 				o += 4;
@@ -2619,7 +2621,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (matrixDirty) saveMatrix();
 
 		txt[0] = x;
-		txt[1] = -y;
+		txt[1] = y;
 		txt[2] = _textSize / 42;
 		txt[3] = matrixIdx;
 		txt[4] = doFill && fillSet ? fillIdx : 0;
