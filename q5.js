@@ -460,8 +460,9 @@ Q5.modules.canvas = ($, q) => {
 				// the canvas can become detached from the DOM
 				// if the innerHTML of one of its parents is edited
 				// check if canvas is still attached to the DOM
-				let el = c;
-				while (el && el.parentElement != document.body) {
+				let el = c,
+					root = document.body || document.documentElement;
+				while (el && el.parentElement != root) {
 					el = el.parentElement;
 				}
 				if (!el) {
@@ -538,10 +539,8 @@ Q5.modules.canvas = ($, q) => {
 			q.height = h;
 		} else $.flexibleCanvas($._dau);
 
-		if (c.parentElement) {
-			if ($.displayMode && !c.displayMode) $.displayMode();
-			else $._adjustDisplay(true);
-		}
+		if ($.displayMode && !c.displayMode) $.displayMode();
+		else $._adjustDisplay(true);
 	};
 
 	$._setImageSize = (w, h) => {
@@ -590,12 +589,18 @@ Q5.modules.canvas = ($, q) => {
 			el ??= document.getElementsByTagName('main')[0];
 			if (!el) {
 				el = document.createElement('main');
-				document.body.append(el);
+				let root = document.body || document.documentElement;
+				root.appendChild(el);
 			}
 			c.parent(el);
+
+			if (!document.body) {
+				document.addEventListener('DOMContentLoaded', () => {
+					if (document.body) document.body.appendChild(el);
+				});
+			}
 		}
-		if (document.body) addCanvas();
-		else document.addEventListener('DOMContentLoaded', addCanvas);
+		addCanvas();
 	}
 
 	$.resizeCanvas = (w, h) => {
@@ -3154,8 +3159,10 @@ Q5.modules.fes = ($) => {
 	$._fes = async (e) => {
 		if (Q5.disableFriendlyErrors) return;
 
+		e._handledByFES = true;
+
 		let stackLines = e.stack?.split('\n');
-		if (!e.stack || stackLines.length <= 1) return;
+		if (!stackLines?.length) return;
 
 		let idx = 1;
 		let sep = '(';
@@ -3170,23 +3177,55 @@ Q5.modules.fes = ($) => {
 		let parts = errFile.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		parts[parts.length - 1] = parts.at(-1).split(')')[0];
-		let fileUrl = parts.slice(0, -2).join(':');
+		let fileUrl = e.file || parts.slice(0, -2).join(':');
 		let fileBase = fileUrl.split('/').at(-1);
 
 		try {
-			let res = await (await fetch(fileUrl)).text();
-			let lines = res.split('\n');
-			let errLine = lines[lineNum - 1].trim();
+			let res = await (await fetch(fileUrl)).text(),
+				lines = res.split('\n'),
+				errLine = lines[lineNum - 1]?.trim() ?? '',
+				bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)],
+				inIframe = window.self !== window.top,
+				prefix = `q5.js ${bug}`,
+				errorMsg = ` Error in ${fileBase} on line ${lineNum}:\n\n${errLine}`;
 
-			let bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)];
-
-			$.log(
-				'%cq5.js ' + bug + '%c Error in ' + fileBase + ' on line ' + lineNum + ':\n\n' + errLine,
-				'background: #b7ebff; color: #000;',
-				''
-			);
+			if (inIframe) $.log(prefix + errorMsg);
+			else {
+				$.log(`%c${prefix}%c${errorMsg}`, 'background: #b7ebff; color: #000;', '');
+			}
 		} catch (err) {}
 	};
+
+	if (typeof window !== 'undefined' && window.addEventListener) {
+		// get user sketch file path (full path)
+		let err = new Error(),
+			lines = err.stack?.split('\n') || '';
+		for (let line of lines) {
+			// This regex captures the full path or URL to the .js file
+			let match = line.match(/(https?:\/\/[^\s)]+\.js|\b\/[^\s)]+\.js)/);
+			if (match) {
+				let file = match[1];
+				if (!/q5|p5play/i.test(file)) {
+					$._sketchFile = file;
+					break;
+				}
+			}
+		}
+
+		if ($._sketchFile) {
+			window.addEventListener('error', (evt) => {
+				let e = evt.error;
+				if (evt.filename === $._sketchFile && !e?._handledByFES) {
+					e.file = evt.filename;
+					$._fes(e);
+				}
+			});
+			window.addEventListener('unhandledrejection', (evt) => {
+				let e = evt.reason;
+				if (e?.stack?.includes($._sketchFile) && !e?._handledByFES) $._fes(e);
+			});
+		}
+	}
 };
 
 if (typeof navigator != undefined && navigator.onLine) {

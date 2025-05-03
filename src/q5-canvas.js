@@ -64,8 +64,9 @@ Q5.modules.canvas = ($, q) => {
 				// the canvas can become detached from the DOM
 				// if the innerHTML of one of its parents is edited
 				// check if canvas is still attached to the DOM
-				let el = c;
-				while (el && el.parentElement != document.body) {
+				let el = c,
+					root = document.body || document.documentElement;
+				while (el && el.parentElement != root) {
 					el = el.parentElement;
 				}
 				if (!el) {
@@ -142,10 +143,8 @@ Q5.modules.canvas = ($, q) => {
 			q.height = h;
 		} else $.flexibleCanvas($._dau);
 
-		if (c.parentElement) {
-			if ($.displayMode && !c.displayMode) $.displayMode();
-			else $._adjustDisplay(true);
-		}
+		if ($.displayMode && !c.displayMode) $.displayMode();
+		else $._adjustDisplay(true);
 	};
 
 	$._setImageSize = (w, h) => {
@@ -194,12 +193,18 @@ Q5.modules.canvas = ($, q) => {
 			el ??= document.getElementsByTagName('main')[0];
 			if (!el) {
 				el = document.createElement('main');
-				document.body.append(el);
+				let root = document.body || document.documentElement;
+				root.appendChild(el);
 			}
 			c.parent(el);
+
+			if (!document.body) {
+				document.addEventListener('DOMContentLoaded', () => {
+					if (document.body) document.body.appendChild(el);
+				});
+			}
 		}
-		if (document.body) addCanvas();
-		else document.addEventListener('DOMContentLoaded', addCanvas);
+		addCanvas();
 	}
 
 	$.resizeCanvas = (w, h) => {
