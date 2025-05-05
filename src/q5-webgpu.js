@@ -2798,5 +2798,3 @@ Q5.WebGPU = async function (scope, parent) {
 	}
 	return new Q5(scope, parent, 'webgpu');
 };
-
-Q5.webgpu = Q5.WebGPU;
