@@ -75,6 +75,8 @@ main {
 	};
 
 	$.displayMode = (displayMode = 'normal', renderQuality = 'smooth', displayScale = 1) => {
+		if (Q5._server) return;
+
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}

@@ -32,6 +32,7 @@ Q5.modules.canvas = ($, q) => {
 	if (c) {
 		c.width = 200;
 		c.height = 200;
+		c.colorSpace = Q5.canvasOptions.colorSpace;
 		if (!$._isImage) {
 			c.renderer = $._renderer;
 			c[$._renderer] = true;
@@ -138,10 +139,8 @@ Q5.modules.canvas = ($, q) => {
 		c.width = Math.ceil(w * $._pixelDensity);
 		c.height = Math.ceil(h * $._pixelDensity);
 
-		if (!$._da) {
-			q.width = w;
-			q.height = h;
-		} else $.flexibleCanvas($._dau);
+		q.width = w;
+		q.height = h;
 
 		if ($.displayMode && !c.displayMode) $.displayMode();
 		else $._adjustDisplay(true);
@@ -221,14 +220,6 @@ Q5.modules.canvas = ($, q) => {
 		$._pixelDensity = v;
 		$._resizeCanvas(c.w, c.h);
 		return v;
-	};
-
-	$.flexibleCanvas = (unit = 400) => {
-		if (unit) {
-			$._da = c.width / (unit * $._pixelDensity);
-			q.width = $._dau = unit;
-			q.height = (c.h / c.w) * unit;
-		} else $._da = 0;
 	};
 
 	if (window && !$._isGraphics) {

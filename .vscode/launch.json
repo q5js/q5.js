@@ -2,6 +2,13 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"type": "node",
+			"request": "launch",
+			"name": "Run Tests (node)",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "${workspaceFolder}/node_modules/.bin/jest"
+		},
+		{
 			"request": "launch",
 			"name": "Run Tests (deno)",
 			"type": "node",
@@ -11,13 +18,6 @@
 			"runtimeExecutable": "${env:HOME}/.deno/bin/deno",
 			"runtimeArgs": ["test", "--unstable-node-globals", "--inspect-wait", "--allow-all"],
 			"attachSimplePort": 9229
-		},
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "Run Tests (node)",
-			"skipFiles": ["<node_internals>/**"],
-			"program": "${workspaceFolder}/node_modules/.bin/jest"
 		},
 		{
 			"type": "bun",

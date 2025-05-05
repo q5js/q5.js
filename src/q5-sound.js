@@ -95,7 +95,7 @@ Q5.Sound = class {
 	}
 
 	init() {
-		if (!this.buffer.byteLength) return;
+		if (!this.buffer.length) return;
 
 		this.gainNode = Q5.aud.createGain();
 		this.pannerNode = Q5.aud.createStereoPanner();

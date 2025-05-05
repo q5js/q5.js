@@ -27,7 +27,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
-			$._da && ((x0 *= $._da), (y0 *= $._da), (x1 *= $._da), (y1 *= $._da));
 			$.ctx.beginPath();
 			$.ctx.moveTo(x0, y0);
 			$.ctx.lineTo(x1, y1);
@@ -75,12 +74,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	$.arc = (x, y, w, h, start, stop, mode) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
 
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-		}
 		mode ??= $.PIE_OPEN;
 
 		if ($._ellipseMode == $.CENTER) {
@@ -102,12 +95,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-		}
 		if ($._ellipseMode == $.CENTER) {
 			ellipse(x, y, w, h);
 		} else if ($._ellipseMode == $.RADIUS) {
@@ -121,11 +108,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	$.circle = (x, y, d) => {
 		if ($._ellipseMode == $.CENTER) {
-			if ($._da) {
-				x *= $._da;
-				y *= $._da;
-				d *= $._da;
-			}
 			$.ctx.beginPath();
 			$.ctx.arc(x, y, Math.abs(d / 2), 0, TAU);
 			ink();
@@ -138,10 +120,6 @@ Q5.renderers.c2d.shapes = ($) => {
 				y = x.y;
 				x = x.x;
 			}
-			if ($._da) {
-				x *= $._da;
-				y *= $._da;
-			}
 			$.ctx.beginPath();
 			$.ctx.moveTo(x, y);
 			$.ctx.lineTo(x, y);
@@ -150,12 +128,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	function rect(x, y, w, h) {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-		}
 		$.ctx.beginPath();
 		$.ctx.rect(x, y, w, h);
 		ink();
@@ -167,16 +139,6 @@ Q5.renderers.c2d.shapes = ($) => {
 		}
 		if (tr === undefined) {
 			return roundedRect(x, y, w, h, tl, tl, tl, tl);
-		}
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-			tl *= $._da;
-			tr *= $._da;
-			bl *= $._da;
-			br *= $._da;
 		}
 		$.ctx.beginPath();
 		$.ctx.roundRect(x, y, w, h, [tl, tr, br, bl]);
@@ -217,10 +179,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.vertex = (x, y) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff = [];
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
@@ -231,25 +189,11 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
-		if ($._da) {
-			cp1x *= $._da;
-			cp1y *= $._da;
-			cp2x *= $._da;
-			cp2y *= $._da;
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff = [];
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
-		if ($._da) {
-			cp1x *= $._da;
-			cp1y *= $._da;
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff = [];
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
@@ -285,10 +229,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.curveVertex = (x, y) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff.push([x, y]);
 		if (curveBuff.length < 4) return;
 

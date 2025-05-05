@@ -75,16 +75,6 @@ Q5.renderers.c2d.image = ($, q) => {
 			dx -= dw * 0.5;
 			dy -= dh * 0.5;
 		}
-		if ($._da) {
-			dx *= $._da;
-			dy *= $._da;
-			dw *= $._da;
-			dh *= $._da;
-			sx *= $._da;
-			sy *= $._da;
-			sw *= $._da;
-			sh *= $._da;
-		}
 		let pd = img._pixelDensity || 1;
 		if (!sw) {
 			sw = drawable.width || drawable.videoWidth;

@@ -96,7 +96,6 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
-		if ($._da) n *= $._da;
 		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
 
@@ -135,13 +134,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	// DRAWING MATRIX
 
-	$.translate = (x, y) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
-		$.ctx.translate(x, y);
-	};
+	$.translate = (x, y) => $.ctx.translate(x, y);
 
 	$.rotate = (r) => {
 		if ($._angleMode) r = $.radians(r);

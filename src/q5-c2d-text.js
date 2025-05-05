@@ -135,7 +135,6 @@ Q5.renderers.c2d.text = ($, q) => {
 
 	$.textSize = (x) => {
 		if (x == undefined) return $._textSize;
-		if ($._da) x *= $._da;
 		$._textSize = x;
 		fontMod = true;
 		styleHash = -1;
@@ -163,7 +162,6 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (x == undefined) return leading || $._textSize * 1.25;
 		leadingSet = true;
 		if (x == leading) return leading;
-		if ($._da) x *= $._da;
 		leading = x;
 		leadDiff = x - $._textSize;
 		styleHash = -1;
@@ -219,10 +217,6 @@ Q5.renderers.c2d.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
 		let ctx = $.ctx;
 		let img, tX, tY;
 

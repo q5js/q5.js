@@ -428,6 +428,7 @@ Q5.modules.canvas = ($, q) => {
 	if (c) {
 		c.width = 200;
 		c.height = 200;
+		c.colorSpace = Q5.canvasOptions.colorSpace;
 		if (!$._isImage) {
 			c.renderer = $._renderer;
 			c[$._renderer] = true;
@@ -534,10 +535,8 @@ Q5.modules.canvas = ($, q) => {
 		c.width = Math.ceil(w * $._pixelDensity);
 		c.height = Math.ceil(h * $._pixelDensity);
 
-		if (!$._da) {
-			q.width = w;
-			q.height = h;
-		} else $.flexibleCanvas($._dau);
+		q.width = w;
+		q.height = h;
 
 		if ($.displayMode && !c.displayMode) $.displayMode();
 		else $._adjustDisplay(true);
@@ -617,14 +616,6 @@ Q5.modules.canvas = ($, q) => {
 		$._pixelDensity = v;
 		$._resizeCanvas(c.w, c.h);
 		return v;
-	};
-
-	$.flexibleCanvas = (unit = 400) => {
-		if (unit) {
-			$._da = c.width / (unit * $._pixelDensity);
-			q.width = $._dau = unit;
-			q.height = (c.h / c.w) * unit;
-		} else $._da = 0;
 	};
 
 	if (window && !$._isGraphics) {
@@ -819,7 +810,6 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
-		if ($._da) n *= $._da;
 		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
 
@@ -858,13 +848,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	// DRAWING MATRIX
 
-	$.translate = (x, y) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
-		$.ctx.translate(x, y);
-	};
+	$.translate = (x, y) => $.ctx.translate(x, y);
 
 	$.rotate = (r) => {
 		if ($._angleMode) r = $.radians(r);
@@ -982,7 +966,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	$.line = (x0, y0, x1, y1) => {
 		if ($._doStroke) {
-			$._da && ((x0 *= $._da), (y0 *= $._da), (x1 *= $._da), (y1 *= $._da));
 			$.ctx.beginPath();
 			$.ctx.moveTo(x0, y0);
 			$.ctx.lineTo(x1, y1);
@@ -1030,12 +1013,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	$.arc = (x, y, w, h, start, stop, mode) => {
 		if (start == stop) return $.ellipse(x, y, w, h);
 
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-		}
 		mode ??= $.PIE_OPEN;
 
 		if ($._ellipseMode == $.CENTER) {
@@ -1057,12 +1034,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	$.ellipse = (x, y, w, h) => {
 		h ??= w;
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-		}
 		if ($._ellipseMode == $.CENTER) {
 			ellipse(x, y, w, h);
 		} else if ($._ellipseMode == $.RADIUS) {
@@ -1076,11 +1047,6 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	$.circle = (x, y, d) => {
 		if ($._ellipseMode == $.CENTER) {
-			if ($._da) {
-				x *= $._da;
-				y *= $._da;
-				d *= $._da;
-			}
 			$.ctx.beginPath();
 			$.ctx.arc(x, y, Math.abs(d / 2), 0, TAU);
 			ink();
@@ -1093,10 +1059,6 @@ Q5.renderers.c2d.shapes = ($) => {
 				y = x.y;
 				x = x.x;
 			}
-			if ($._da) {
-				x *= $._da;
-				y *= $._da;
-			}
 			$.ctx.beginPath();
 			$.ctx.moveTo(x, y);
 			$.ctx.lineTo(x, y);
@@ -1105,12 +1067,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	function rect(x, y, w, h) {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-		}
 		$.ctx.beginPath();
 		$.ctx.rect(x, y, w, h);
 		ink();
@@ -1122,16 +1078,6 @@ Q5.renderers.c2d.shapes = ($) => {
 		}
 		if (tr === undefined) {
 			return roundedRect(x, y, w, h, tl, tl, tl, tl);
-		}
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-			w *= $._da;
-			h *= $._da;
-			tl *= $._da;
-			tr *= $._da;
-			bl *= $._da;
-			br *= $._da;
 		}
 		$.ctx.beginPath();
 		$.ctx.roundRect(x, y, w, h, [tl, tr, br, bl]);
@@ -1172,10 +1118,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.vertex = (x, y) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff = [];
 		if (firstVertex) {
 			$.ctx.moveTo(x, y);
@@ -1186,25 +1128,11 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.bezierVertex = (cp1x, cp1y, cp2x, cp2y, x, y) => {
-		if ($._da) {
-			cp1x *= $._da;
-			cp1y *= $._da;
-			cp2x *= $._da;
-			cp2y *= $._da;
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff = [];
 		$.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
 	};
 
 	$.quadraticVertex = (cp1x, cp1y, x, y) => {
-		if ($._da) {
-			cp1x *= $._da;
-			cp1y *= $._da;
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff = [];
 		$.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
 	};
@@ -1240,10 +1168,6 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.curveVertex = (x, y) => {
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
 		curveBuff.push([x, y]);
 		if (curveBuff.length < 4) return;
 
@@ -1416,16 +1340,6 @@ Q5.renderers.c2d.image = ($, q) => {
 		if ($._imageMode == 'center') {
 			dx -= dw * 0.5;
 			dy -= dh * 0.5;
-		}
-		if ($._da) {
-			dx *= $._da;
-			dy *= $._da;
-			dw *= $._da;
-			dh *= $._da;
-			sx *= $._da;
-			sy *= $._da;
-			sw *= $._da;
-			sh *= $._da;
 		}
 		let pd = img._pixelDensity || 1;
 		if (!sw) {
@@ -1976,7 +1890,6 @@ Q5.renderers.c2d.text = ($, q) => {
 
 	$.textSize = (x) => {
 		if (x == undefined) return $._textSize;
-		if ($._da) x *= $._da;
 		$._textSize = x;
 		fontMod = true;
 		styleHash = -1;
@@ -2004,7 +1917,6 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (x == undefined) return leading || $._textSize * 1.25;
 		leadingSet = true;
 		if (x == leading) return leading;
-		if ($._da) x *= $._da;
 		leading = x;
 		leadDiff = x - $._textSize;
 		styleHash = -1;
@@ -2060,10 +1972,6 @@ Q5.renderers.c2d.text = ($, q) => {
 	$.text = (str, x, y, w, h) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
-		if ($._da) {
-			x *= $._da;
-			y *= $._da;
-		}
 		let ctx = $.ctx;
 		let img, tX, tY;
 
@@ -2779,6 +2687,8 @@ main {
 	};
 
 	$.displayMode = (displayMode = 'normal', renderQuality = 'smooth', displayScale = 1) => {
+		if (Q5._server) return;
+
 		if (typeof displayScale == 'string') {
 			displayScale = parseFloat(displayScale.slice(1));
 		}
@@ -4358,7 +4268,7 @@ Q5.Sound = class {
 	}
 
 	init() {
-		if (!this.buffer.byteLength) return;
+		if (!this.buffer.length) return;
 
 		this.gainNode = Q5.aud.createGain();
 		this.pannerNode = Q5.aud.createStereoPanner();
@@ -7725,7 +7635,7 @@ Q5.initWebGPU = async () => {
 	if (!Q5.requestedGPU) {
 		let adapter = await navigator.gpu.requestAdapter();
 		if (!adapter) {
-			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, vulkan may need to be enabled.');
+			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, Vulkan may need to be enabled.');
 			return false;
 		}
 		Q5.device = await adapter.requestDevice();

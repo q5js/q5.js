@@ -755,6 +755,10 @@ function draw() {
 	 * Applies a transformation matrix.
 	 *
 	 * Accepts a 3x3 or 4x4 matrix as either an array or multiple arguments.
+	 * 
+	 * Note that in q5 WebGPU, the identity matrix (default)
+	 * has a negative y scale, so the y-axis is flipped to match
+	 * the Canvas2D renderer.
 	 * @param {number} a horizontal scaling
 	 * @param {number} b horizontal skewing
 	 * @param {number} c vertical skewing
@@ -879,20 +883,6 @@ square(0, 0, 50);
 	 * @returns {number} display density
 	 */
 	function displayDensity(): number;
-
-	/** ⬜️
-	 * Any position coordinates or dimensions you use will be scaled based
-	 * on the unit provided to this function.
-	 * 
-	 * Not available in q5 WebGPU.
-	 * @param {number} unit unit to scale by
-	 * @example
-createCanvas(200);
-flexibleCanvas(100);
-// rect will appear in the middle of the canvas
-rect(20, 20, 60, 60);
-	 */
-	function flexibleCanvas(unit: number): void;
 
 	/** ⬜️
 	 * Creates a graphics buffer.
@@ -3711,7 +3701,6 @@ function draw() {
 	image(logo, 0, 0, 200, 200);
 }
 	 * @example
-new Q5();
 createCanvas(200);
 
 // use with top level await in a module
