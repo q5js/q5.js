@@ -614,7 +614,9 @@ function updateNavigationActiveState() {
 async function displayContent() {
 	const hash = location.hash.slice(1);
 	if (!hash) {
-		document.querySelector('.section-link, .subsection-link')?.click();
+		// Find the first section ID (e.g., "coreSection")
+		const firstSectionId = Object.keys(sections)[0];
+		if (firstSectionId) await navigateTo(firstSectionId);
 		return;
 	}
 	const { sectionId, subsectionId } = findSectionAndSubsection(hash);
