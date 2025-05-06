@@ -127,6 +127,11 @@ class MiniEditor {
 
 			let useWebGPU = userCode.includes('Q5.WebGPU');
 
+			if (useWebGPU) {
+				this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
+				return;
+			}
+
 			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|(await\s+)*Q5\.WebGPU)\s*\([^)]*\);?/g;
 			userCode = userCode.replace(q5InstanceRegex, '');
 
