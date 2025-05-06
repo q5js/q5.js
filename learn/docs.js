@@ -1,10 +1,10 @@
-toggleNavButton.addEventListener('click', () => {
+toggleNavButton.addEventListener('pointerup', () => {
 	navbar.classList.toggle('navclose');
 	navbar.classList.toggle('navopen');
 });
 
 function winResized() {
-	if (window.innerWidth < 1000) {
+	if (window.matchMedia('(max-width: 999px)').matches) {
 		navbar.classList.replace('navopen', 'navclose');
 	} else {
 		navbar.classList.replace('navclose', 'navopen');
@@ -13,7 +13,7 @@ function winResized() {
 winResized();
 window.addEventListener('resize', winResized);
 
-themeToggle.addEventListener('click', () => {
+themeToggle.addEventListener('pointerup', () => {
 	setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
 });
 
@@ -280,6 +280,9 @@ function createSectionContainer(sectionId, section) {
 	toggle.addEventListener('click', (e) => {
 		e.preventDefault();
 		e.stopPropagation();
+	});
+
+	toggle.addEventListener('pointerup', (e) => {
 		toggle.classList.toggle('open');
 		toggle.classList.toggle('closed');
 		let subsectionsContainer = container.querySelector('.subsections-container');
@@ -294,6 +297,12 @@ function createSectionContainer(sectionId, section) {
 
 	link.addEventListener('click', (e) => {
 		e.preventDefault();
+	});
+
+	link.addEventListener('pointerup', (e) => {
+		if (window.innerWidth < 1000) {
+			navbar.classList.replace('navopen', 'navclose');
+		}
 		navigateTo(sectionId);
 	});
 
@@ -315,6 +324,12 @@ function createSubsectionsContainer(sectionId, subsections) {
 
 		link.addEventListener('click', (e) => {
 			e.preventDefault();
+		});
+
+		link.addEventListener('pointerup', (e) => {
+			if (window.innerWidth < 1000) {
+				navbar.classList.replace('navopen', 'navclose');
+			}
 			navigateTo(sectionId, subId);
 		});
 
@@ -331,7 +346,7 @@ function addCopyButtons() {
 		button.type = 'button';
 		button.innerText = '';
 
-		button.addEventListener('click', () => {
+		button.addEventListener('pointerup', () => {
 			navigator.clipboard.writeText(block.innerText).then(() => {
 				button.textContent = 'Copied!';
 				setTimeout(() => (button.textContent = ''), 2000);
@@ -405,7 +420,7 @@ function generateHeadings() {
 			button.type = 'button';
 			button.innerText = '';
 
-			button.addEventListener('click', () => {
+			button.addEventListener('pointerup', () => {
 				let url = `${location.origin}${location.pathname.slice(0, location.pathname.lastIndexOf('/') + 1)}#${id}`;
 				button.classList.add('copied');
 				navigator.clipboard.writeText(url).then(() => {
@@ -473,7 +488,7 @@ function populateContentArea() {
 		title.textContent = sections[nav.id].title;
 		button.append(title);
 
-		button.addEventListener('click', () => navigateTo(nav.id));
+		button.addEventListener('pointerup', () => navigateTo(nav.id));
 		navButtonsContainer.append(button);
 	}
 
@@ -610,9 +625,6 @@ async function displayContent() {
 window.addEventListener('scroll', updateStickyHeader, { passive: true });
 window.addEventListener('hashchange', displayContent);
 
-let searchInput = document.getElementById('listSearch');
-let searchResultsContainer = document.getElementById('searchResultsContainer');
-
 searchInput.addEventListener('input', () => {
 	let searchText = searchInput.value.toLowerCase();
 	if (searchText.length > 0) performSearch(searchText);
@@ -698,7 +710,7 @@ function performSearch(searchText) {
 
 			resultElement.innerHTML = `${titleHTML}${result.context ? ': ' + result.context : ''}`;
 
-			resultElement.addEventListener('click', () => {
+			resultElement.addEventListener('pointerup', () => {
 				searchResultsContainer.innerHTML = '';
 				let { sectionId, subsectionId } = findSectionAndSubsection(result.id);
 				navigateTo(sectionId, subsectionId);
@@ -778,7 +790,7 @@ function displayPromptMessage(message) {
 }
 
 searchInput.addEventListener('focus', () => {
-	searchResultsContainer.style.display = 'block';
+	searchResultsContainer.style.display = 'flex';
 });
 searchInput.addEventListener('blur', (event) => {
 	setTimeout(() => {
