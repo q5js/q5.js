@@ -127,7 +127,7 @@ class MiniEditor {
 
 			let useWebGPU = userCode.includes('Q5.WebGPU');
 
-			if (useWebGPU && !Q5.canUseWebGPU) {
+			if (useWebGPU && Q5.canUseWebGPU == false) {
 				this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
 				return;
 			}

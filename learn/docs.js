@@ -280,9 +280,6 @@ function createSectionContainer(sectionId, section) {
 	toggle.addEventListener('click', (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-	});
-
-	toggle.addEventListener('pointerup', (e) => {
 		toggle.classList.toggle('open');
 		toggle.classList.toggle('closed');
 		let subsectionsContainer = container.querySelector('.subsections-container');
@@ -297,9 +294,7 @@ function createSectionContainer(sectionId, section) {
 
 	link.addEventListener('click', (e) => {
 		e.preventDefault();
-	});
 
-	link.addEventListener('pointerup', (e) => {
 		if (window.innerWidth < 1000) {
 			navbar.classList.replace('navopen', 'navclose');
 		}
@@ -633,6 +628,16 @@ searchInput.addEventListener('input', () => {
 	else displayPromptMessage('Start typing to search the documentation');
 });
 
+searchInput.addEventListener('focus', () => {
+	searchResultsContainer.style.display = 'flex';
+});
+
+searchInput.addEventListener('blur', () => {
+	setTimeout(() => {
+		searchResultsContainer.style.display = 'none';
+	}, 200);
+});
+
 displayPromptMessage('Start typing to search the documentation');
 
 function performSearch(searchText) {
@@ -790,12 +795,3 @@ function displayPromptMessage(message) {
 	messageElement.textContent = message;
 	searchResultsContainer.append(messageElement);
 }
-
-searchInput.addEventListener('focus', () => {
-	searchResultsContainer.style.display = 'flex';
-});
-searchInput.addEventListener('blur', (event) => {
-	setTimeout(() => {
-		searchResultsContainer.style.display = 'none';
-	}, 200);
-});

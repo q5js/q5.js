@@ -173,18 +173,18 @@ Q5.modules.input = ($, q) => {
 	$._ontouchstart = (e) => {
 		$._startAudio();
 		q.touches = [...e.touches].map(getTouchInfo);
-		if (!$.touchStarted(e)) e.preventDefault();
+		if ($._definedTouchStarted && !$.touchStarted(e)) e.preventDefault();
 	};
 
 	$._ontouchmove = (e) => {
 		if (c && !c.visible) return;
 		q.touches = [...e.touches].map(getTouchInfo);
-		if (!$.touchMoved(e)) e.preventDefault();
+		if ($._definedTouchEnded && !$.touchMoved(e)) e.preventDefault();
 	};
 
 	$._ontouchend = (e) => {
 		q.touches = [...e.touches].map(getTouchInfo);
-		if (!$.touchEnded(e)) e.preventDefault();
+		if ($._definedTouchEnded && !$.touchEnded(e)) e.preventDefault();
 	};
 
 	if (window) {

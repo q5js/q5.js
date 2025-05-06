@@ -261,8 +261,6 @@ function Q5(scope, parent, renderer) {
 
 	let t = globalScope || $;
 
-	$._isTouchAware = t.touchStarted || t.touchMoved || t.touchEnded;
-
 	let userFns = [
 		'preload',
 		'setup',
@@ -283,7 +281,12 @@ function Q5(scope, parent, renderer) {
 		'windowResized'
 	];
 	// shim if undefined
-	for (let name of userFns) $[name] ??= () => {};
+	for (let name of userFns) {
+		if (t[name] || $[name]) {
+			$['_defined' + name[0].toUpperCase() + name.slice(1)] = true;
+		}
+		$[name] ??= () => {};
+	}
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];

@@ -2515,6 +2515,9 @@ function mouseReleased() {
 
 	/** 🖲️
 	 * Define this function to respond to mouse move events.
+	 * 
+	 * On touchscreen devices this function is not called
+	 * when the user drags their finger on the screen.
 	 * @example
 createCanvas(200);
 let gray = 95;
