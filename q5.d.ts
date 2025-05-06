@@ -2622,7 +2622,8 @@ function keyReleased() {
 	function keyReleased(): void;
 
 	/** 🖲️
-	 * Array of current touches, each touch being an object with
+	 * Array containing all current touch points within the
+	 * browser window. Each touch being an object with
 	 * id, x, and y properties.
 	 * @example
 function draw() {
@@ -2631,17 +2632,15 @@ function draw() {
 		circle(touch.x, touch.y, 100);
 	}
 }
-
-function touchStarted() {}
 	 */
 	let touches: any[];
 
 	/** 🖲️
-	 * Define this function to respond to touch down events.
+	 * Define this function to respond to touch down events
+	 * on the canvas.
 	 * 
-	 * By default this function will prevent the default behavior of
-	 * scrolling the page when the touch started inside the canvas.
-	 * Return true to allow the default behavior.
+	 * Return true to enable touch gestures like pinch-to-zoom
+	 * and scroll, which q5 disables on the canvas by default.
 	 * @example
 createCanvas(200);
 
@@ -2654,11 +2653,11 @@ function touchStarted() {
 	function touchStarted(): void;
 
 	/** 🖲️
-	 * Define this function to respond to touch down events.
+	 * Define this function to respond to touch down events
+	 * on the canvas.
 	 * 
-	 * By default this function will prevent the default behavior of
-	 * scrolling the page when the touch started inside the canvas.
-	 * Return true to allow the default behavior.
+	 * Return true to enable touch gestures like pinch-to-zoom
+	 * and scroll, which q5 disables on the canvas by default.
 	 * @example
 createCanvas(200);
 
@@ -2671,7 +2670,11 @@ function touchEnded() {
 	function touchEnded(): void;
 
 	/** 🖲️
-	 * Define this function to respond to touch move events.
+	 * Define this function to respond to touch move events
+	 * on the canvas.
+	 * 
+	 * Return true to enable touch gestures like pinch-to-zoom
+	 * and scroll, which q5 disables on the canvas by default.
 	 * @example
 createCanvas(200);
 let gray = 95;

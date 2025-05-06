@@ -281,12 +281,7 @@ function Q5(scope, parent, renderer) {
 		'windowResized'
 	];
 	// shim if undefined
-	for (let name of userFns) {
-		if (t[name] || $[name]) {
-			$['_defined' + name[0].toUpperCase() + name.slice(1)] = true;
-		}
-		$[name] ??= () => {};
-	}
+	for (let name of userFns) $[name] ??= () => {};
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
@@ -3329,21 +3324,22 @@ Q5.modules.input = ($, q) => {
 		};
 	}
 
+	$._updateTouches = (e) => {
+		if (c && !c.visible) return;
+		q.touches = [...e.touches].map(getTouchInfo);
+	};
+
 	$._ontouchstart = (e) => {
 		$._startAudio();
-		q.touches = [...e.touches].map(getTouchInfo);
-		if ($._definedTouchStarted && !$.touchStarted(e)) e.preventDefault();
+		if (!$.touchStarted(e)) e.preventDefault();
 	};
 
 	$._ontouchmove = (e) => {
-		if (c && !c.visible) return;
-		q.touches = [...e.touches].map(getTouchInfo);
-		if ($._definedTouchEnded && !$.touchMoved(e)) e.preventDefault();
+		if (!$.touchMoved(e)) e.preventDefault();
 	};
 
 	$._ontouchend = (e) => {
-		q.touches = [...e.touches].map(getTouchInfo);
-		if ($._definedTouchEnded && !$.touchEnded(e)) e.preventDefault();
+		if (!$.touchEnded(e)) e.preventDefault();
 	};
 
 	if (window) {
@@ -3353,10 +3349,11 @@ Q5.modules.input = ($, q) => {
 
 		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
 		l(pointer + 'move', (e) => $._onmousemove(e), false);
-		l('touchmove', (e) => $._ontouchmove(e));
 		l(pointer + 'up', (e) => $._onmouseup(e));
-		l('touchend', (e) => $._ontouchend(e));
-		l('touchcancel', (e) => $._ontouchend(e));
+		l('touchstart', (e) => $._updateTouches(e));
+		l('touchmove', (e) => $._updateTouches(e));
+		l('touchend', (e) => $._updateTouches(e));
+		l('touchcancel', (e) => $._updateTouches(e));
 
 		if (c) c.addEventListener('wheel', (e) => $._onwheel(e));
 
@@ -3364,6 +3361,9 @@ Q5.modules.input = ($, q) => {
 
 		l(pointer + 'down', (e) => $._onmousedown(e));
 		l('touchstart', (e) => $._ontouchstart(e));
+		l('touchmove', (e) => $._ontouchmove(e));
+		l('touchend', (e) => $._ontouchend(e));
+		l('touchcancel', (e) => $._ontouchend(e));
 		l('click', (e) => $._onclick(e));
 		l('dblclick', (e) => $._ondblclick(e));
 	}

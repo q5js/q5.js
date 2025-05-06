@@ -281,12 +281,7 @@ function Q5(scope, parent, renderer) {
 		'windowResized'
 	];
 	// shim if undefined
-	for (let name of userFns) {
-		if (t[name] || $[name]) {
-			$['_defined' + name[0].toUpperCase() + name.slice(1)] = true;
-		}
-		$[name] ??= () => {};
-	}
+	for (let name of userFns) $[name] ??= () => {};
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
