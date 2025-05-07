@@ -12,6 +12,7 @@ test
 p5-test
 package-lock.json
 .vscode
+.github
 index.html
 jsconfig.json
 CODE_OF_CONDUCT.md

@@ -4,13 +4,30 @@
 	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
 	"author": "quinton-ashley",
 	"contributors": [
+		"evanalulu",
 		"Tezumie",
+		"ormaq",
+		"Dukemz",
 		"LingDong-"
 	],
 	"license": "LGPL-3.0",
 	"homepage": "https://q5js.org/home",
 	"main": "q5-server.js",
 	"types": "q5.d.ts",
+	"funding": [
+		{
+			"type": "patreon",
+			"url": "https://www.patreon.com/q5play"
+		},
+		{
+			"type": "ko-fi",
+			"url": "https://ko-fi.com/q5play"
+		},
+		{
+			"type": "github",
+			"url": "https://github.com/sponsors/quinton-ashley"
+		}
+	],
 	"scripts": {
 		"bundle": "cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-shapes.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-color.js src/q5-display.js src/q5-dom.js src/q5-fes.js src/q5-input.js src/q5-math.js src/q5-record.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu.js > q5.js",
 		"min": "terser q5.js --compress ecma=2025 --mangle > q5.min.js",
