@@ -8,7 +8,7 @@
  */
 function Q5(scope, parent, renderer) {
 	let $ = this;
-	$._q5 = true;
+	$._isQ5 = $._q5 = true;
 	$._parent = parent;
 	if (renderer == 'webgpu-fallback') {
 		$._renderer = 'c2d';

@@ -8,7 +8,7 @@
  */
 function Q5(scope, parent, renderer) {
 	let $ = this;
-	$._q5 = true;
+	$._isQ5 = $._q5 = true;
 	$._parent = parent;
 	if (renderer == 'webgpu-fallback') {
 		$._renderer = 'c2d';
@@ -3194,7 +3194,7 @@ Q5.modules.input = ($, q) => {
 		if (!Q5.aud || Q5.aud?.state != 'running') $.userStartAudio();
 	};
 
-	$._updateMouse = (e) => {
+	$._updatePointer = (e) => {
 		if (e.changedTouches) return;
 
 		if (document.pointerLockElement) {
@@ -3221,46 +3221,47 @@ Q5.modules.input = ($, q) => {
 
 	let pressAmt = 0;
 
-	$._onmousedown = (e) => {
+	// remove mouse fn aliases in v3.1
+	$._onmousedown = $._onpointerdown = (e) => {
 		pressAmt++;
 		$._startAudio();
-		$._updateMouse(e);
+		$._updatePointer(e);
 		q.mouseIsPressed = true;
 		q.mouseButton = mouseBtns[e.button];
 		$.mousePressed(e);
 	};
 
-	$._onmousemove = (e) => {
+	$._onmousemove = $._onpointermove = (e) => {
 		if (c && !c.visible) return;
-		$._updateMouse(e);
+		$._updatePointer(e);
 		if ($.mouseIsPressed) $.mouseDragged(e);
 		else $.mouseMoved(e);
 	};
 
-	$._onmouseup = (e) => {
+	$._onmouseup = $._onpointerup = (e) => {
 		q.mouseIsPressed = false;
 		if (pressAmt > 0) pressAmt--;
 		else return;
-		$._updateMouse(e);
+		$._updatePointer(e);
 		$.mouseReleased(e);
 	};
 
 	$._onclick = (e) => {
-		$._updateMouse(e);
+		$._updatePointer(e);
 		q.mouseIsPressed = true;
 		$.mouseClicked(e);
 		q.mouseIsPressed = false;
 	};
 
 	$._ondblclick = (e) => {
-		$._updateMouse(e);
+		$._updatePointer(e);
 		q.mouseIsPressed = true;
 		$.doubleClicked(e);
 		q.mouseIsPressed = false;
 	};
 
 	$._onwheel = (e) => {
-		$._updateMouse(e);
+		$._updatePointer(e);
 		e.delta = e.deltaY;
 		let ret = $.mouseWheel(e);
 		if (($._isGlobal && !ret) || ret == false) {
@@ -3348,8 +3349,9 @@ Q5.modules.input = ($, q) => {
 		l('keyup', (e) => $._onkeyup(e), false);
 
 		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
-		l(pointer + 'move', (e) => $._onmousemove(e), false);
-		l(pointer + 'up', (e) => $._onmouseup(e));
+		l(pointer + 'move', (e) => $._onpointermove(e), false);
+		l(pointer + 'up', (e) => $._onpointerup(e));
+		l(pointer + 'cancel', (e) => $._onpointerup(e));
 		l('touchstart', (e) => $._updateTouches(e));
 		l('touchmove', (e) => $._updateTouches(e));
 		l('touchend', (e) => $._updateTouches(e));
@@ -3359,13 +3361,16 @@ Q5.modules.input = ($, q) => {
 
 		if (!$._isGlobal && c) l = c.addEventListener.bind(c);
 
-		l(pointer + 'down', (e) => $._onmousedown(e));
+		l(pointer + 'down', (e) => $._onpointerdown(e));
+		l('click', (e) => $._onclick(e));
+		l('dblclick', (e) => $._ondblclick(e));
+
+		if (c) l = c.addEventListener.bind(c);
+
 		l('touchstart', (e) => $._ontouchstart(e));
 		l('touchmove', (e) => $._ontouchmove(e));
 		l('touchend', (e) => $._ontouchend(e));
 		l('touchcancel', (e) => $._ontouchend(e));
-		l('click', (e) => $._onclick(e));
-		l('dblclick', (e) => $._ondblclick(e));
 	}
 };
 Q5.modules.math = ($, q) => {
