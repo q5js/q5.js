@@ -3603,26 +3603,6 @@ function mousePressed() {
 	// 🎞️ record
 
 	/** 🎞️
-	 * q5's built-in canvas recorder is powered by
-	 * [`MediaRecorder`](https://developer.mozilla.org/docs/Web/API/MediaRecorder/MediaRecorder), which prioritizes low-latency recording, so note
-	 * that consistent frame rates are not guaranteed.
-	 * 
-	 * Recording large canvases is an intensive process, so your
-	 * computer may not be able to do it in real time. If real time
-	 * interaction while recording is a priority, consider reducing
-	 * the canvas' size, frame rate, and/or recording bitrate.
-	 * 
-	 * I recommend recording at the high bitrates set by default
-	 * for the best video quality, then re-encoding the video at a
-	 * consistent frame rate and higher compression level using a tool
-	 * like ffmpeg or HandBrake.
-	 * 
-	 * HDR video encoding is not yet supported by any web browser.
-	 * For that and other advanced features, consider using
-	 * a screen capture tool like [OBS Studio](https://obsproject.com).
-	 */
-
-	/** 🎞️
 	 * Creates a recorder. Simply hit record to start recording!
 	 * 
 	 * The following properties can be set via the recorder UI or
@@ -3634,6 +3614,12 @@ function mousePressed() {
 	 * bitrate will increase the quality and file size of the recording.
 	 * - `captureAudio` is set to true by default. Set to false to disable
 	 * audio recording.
+	 * 
+	 * Note that recordings are done at a variable frame rate (VFR), which
+	 * makes the output video incompatible with some editing software.
+	 * For more info, see the q5 wiki page on
+	 * [Recording the Canvas](https://github.com/q5js/q5.js/wiki/Recording-the-Canvas).
+	 * 
 	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
 createCanvas(200);
