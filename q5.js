@@ -1531,6 +1531,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		img.ctx.drawImage(c, x, y, w * pd, h * pd, 0, 0, w, h);
 		img.width = w;
 		img.height = h;
+		if ($._webgpuInst) $._webgpuInst._makeDrawable(img);
 		return img;
 	};
 
@@ -6797,26 +6798,22 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$.loadImage = (src, cb) => {
 		let g = $._g.loadImage(src, () => {
-			$._extendImage(g);
+			$._makeDrawable(g);
 			if (cb) cb(g);
 		});
 		return g;
 	};
 
-	$._extendImage = (g) => {
+	$._makeDrawable = (g) => {
 		$._addTexture(g);
-		let _copy = g.copy;
-		g.copy = function () {
-			let copy = _copy();
-			$._addTexture(copy);
-			return copy;
-		};
-		g.modified = true;
+		g._webgpuInst = $;
 	};
 
 	$.createImage = (w, h, opt) => {
 		let g = $._g.createImage(w, h, opt);
-		$._extendImage(g);
+		$._makeDrawable(g);
+		// assume the user will draw to the image canvas
+		g.modified = true;
 		return g;
 	};
 
@@ -6835,7 +6832,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			$._addTexture(g, g._frameA);
 			$._addTexture(g, g._frameB);
 			g._beginRender();
-		} else $._extendImage(g);
+		} else {
+			$._makeDrawable(g);
+			// assume the user will draw to the graphics canvas
+			g.modified = true;
+		}
 		return g;
 	};
 
@@ -7516,7 +7517,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		}
 
 		let g = $._g.createTextImage(str, w, h);
-		$._extendImage(g);
+		$._makeDrawable(g);
 		return g;
 	};
 

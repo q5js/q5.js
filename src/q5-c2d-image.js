@@ -267,6 +267,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		img.ctx.drawImage(c, x, y, w * pd, h * pd, 0, 0, w, h);
 		img.width = w;
 		img.height = h;
+		if ($._webgpuInst) $._webgpuInst._makeDrawable(img);
 		return img;
 	};
 
