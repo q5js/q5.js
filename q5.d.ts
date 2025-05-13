@@ -3617,8 +3617,9 @@ function mousePressed() {
 	 * 
 	 * Note that recordings are done at a variable frame rate (VFR), which
 	 * makes the output video incompatible with some editing software.
-	 * For more info, see the q5 wiki page on
-	 * [Recording the Canvas](https://github.com/q5js/q5.js/wiki/Recording-the-Canvas).
+	 * For more info, see the
+	 * ["Recording the Canvas"](https://github.com/q5js/q5.js/wiki/Recording-the-Canvas).
+	 * wiki page.
 	 * 
 	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
@@ -4017,11 +4018,6 @@ function mousePressed() {
 	/** ⚡️
 	 * Custom shaders written in WGSL (WebGPU Shading Language) can be
 	 * used to create advanced visual effects in q5!
-	 * 
-	 * For more information on the vertex and fragment function
-	 * input parameters, data, and helper functions made available for use 
-	 * in your custom shader code, read the ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU)
-	 * wiki page.
 	 */
 
 	/** ⚡️
@@ -4029,6 +4025,12 @@ function mousePressed() {
 	 * 
 	 * Use this function to customize a copy of the
 	 * [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).
+	 * 
+	 * For more information on the vertex and fragment function
+	 * input parameters, data, and helper functions made available for use 
+	 * in your custom shader code, read the
+	 * ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU)
+	 * wiki page.
 	 * @param {string} code WGSL shader code excerpt
 	 * @returns {GPUShaderModule} a shader program
 	 * @example
