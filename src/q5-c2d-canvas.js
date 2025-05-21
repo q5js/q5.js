@@ -103,6 +103,12 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.noStroke = () => ($._doStroke = false);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
+	// polyfill for q5 WebGPU functions (used by q5play)
+	$._getFillIdx = () => $._fill;
+	$._setFillIdx = (v) => ($._fill = v);
+	$._getStrokeIdx = () => $._stroke;
+	$._setStrokeIdx = (v) => ($._stroke = v);
+
 	$._doShadow = false;
 	$._shadowOffsetX = $._shadowOffsetY = $._shadowBlur = 10;
 

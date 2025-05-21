@@ -161,6 +161,27 @@ Q5.renderers.c2d.shapes = ($) => {
 		return $.rect(x, y, s, s, tl, tr, br, bl);
 	};
 
+	$.capsule = (x1, y1, x2, y2, r) => {
+		const dx = x2 - x1,
+			dy = y2 - y1,
+			len = Math.hypot(dx, dy);
+
+		if (len === 0) return $.circle(x1, y1, r * 2);
+
+		const angle = Math.atan2(dy, dx),
+			px = (-dy / len) * r,
+			py = (dx / len) * r;
+
+		$.ctx.beginPath();
+		$.ctx.moveTo(x1 - px, y1 - py);
+		$.ctx.arc(x1, y1, r, angle - $.HALF_PI, angle + $.HALF_PI, true);
+		$.ctx.lineTo(x2 + px, y2 + py);
+		$.ctx.arc(x2, y2, r, angle + $.HALF_PI, angle - $.HALF_PI, true);
+		$.ctx.closePath();
+
+		ink();
+	};
+
 	$.beginShape = () => {
 		curveBuff = [];
 		$.ctx.beginPath();

@@ -815,6 +815,12 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.noStroke = () => ($._doStroke = false);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
+	// polyfill for q5 WebGPU functions (used by q5play)
+	$._getFillIdx = () => $._fill;
+	$._setFillIdx = (v) => ($._fill = v);
+	$._getStrokeIdx = () => $._stroke;
+	$._setStrokeIdx = (v) => ($._stroke = v);
+
 	$._doShadow = false;
 	$._shadowOffsetX = $._shadowOffsetY = $._shadowBlur = 10;
 
@@ -1096,6 +1102,27 @@ Q5.renderers.c2d.shapes = ($) => {
 
 	$.square = (x, y, s, tl, tr, br, bl) => {
 		return $.rect(x, y, s, s, tl, tr, br, bl);
+	};
+
+	$.capsule = (x1, y1, x2, y2, r) => {
+		const dx = x2 - x1,
+			dy = y2 - y1,
+			len = Math.hypot(dx, dy);
+
+		if (len === 0) return $.circle(x1, y1, r * 2);
+
+		const angle = Math.atan2(dy, dx),
+			px = (-dy / len) * r,
+			py = (dx / len) * r;
+
+		$.ctx.beginPath();
+		$.ctx.moveTo(x1 - px, y1 - py);
+		$.ctx.arc(x1, y1, r, angle - $.HALF_PI, angle + $.HALF_PI, true);
+		$.ctx.lineTo(x2 + px, y2 + py);
+		$.ctx.arc(x2, y2, r, angle + $.HALF_PI, angle - $.HALF_PI, true);
+		$.ctx.closePath();
+
+		ink();
 	};
 
 	$.beginShape = () => {
@@ -5145,7 +5172,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		globalAlpha = 1,
 		sw = 1, // stroke weight
 		hsw = 0.5, // half the stroke weight
-		scaledSW = 1;
+		scaledHSW = 0.5;
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
@@ -5168,10 +5195,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 	$.strokeWeight = (v) => {
 		if (v === undefined) return sw;
+		if (!v) {
+			doStroke = false;
+			return;
+		}
 		v = Math.abs(v);
 		sw = v;
-		scaledSW = v * _scale;
 		hsw = v / 2;
+		scaledHSW = hsw * _scale;
 	};
 
 	$._getFillIdx = () => fillIdx;
@@ -5254,7 +5285,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		y ??= x;
 
 		_scale = Math.max(Math.abs(x), Math.abs(y));
-		scaledSW = sw * _scale;
+		scaledHSW = sw * 0.5 * _scale;
 
 		let m = matrix;
 
@@ -5358,7 +5389,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			strokeIdx,
 			sw,
 			hsw,
-			scaledSW,
+			scaledHSW,
 			doFill,
 			doStroke,
 			fillSet,
@@ -5387,7 +5418,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			strokeIdx,
 			sw,
 			hsw,
-			scaledSW,
+			scaledHSW,
 			doFill,
 			doStroke,
 			fillSet,
@@ -5871,8 +5902,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let shapesVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
 		shapesVertIdx = 0;
-	const TAU = Math.PI * 2;
-	const HALF_PI = Math.PI / 2;
+	const TAU = Math.PI * 2,
+		HALF_PI = Math.PI / 2,
+		THREE_HALF_PI = Math.PI * 1.5;
 
 	let shapesVertBuffLayout = {
 		arrayStride: 16, // 4 floats * 4 bytes
@@ -6073,7 +6105,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if (doFill) {
 			ci = fillIdx;
 			// Corner arcs
-			addArc(l, t, rr, -rr, -HALF_PI, Math.PI, n, ci, ti); // top-left
+			addArc(l, t, rr, -rr, HALF_PI, Math.PI, n, ci, ti); // top-left
 			addArc(r, t, rr, -rr, HALF_PI, 0, n, ci, ti); // top-right
 			addArc(r, b, rr, -rr, 0, -HALF_PI, n, ci, ti); // bottom-right
 			addArc(l, b, rr, -rr, -HALF_PI, -Math.PI, n, ci, ti); // bottom-left
@@ -6125,43 +6157,67 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	// prettier-ignore
 	const getArcSegments = (d) =>
-		d < 4 ? 6 :
-		d < 6 ? 8 :
-		d < 10 ? 10 :
-		d < 16 ? 12 :
-		d < 20 ? 14 :
-		d < 22 ? 16 :
-		d < 24 ? 18 :
-		d < 28 ? 20 :
-		d < 34 ? 22 :
-		d < 42 ? 24 :
-		d < 48 ? 26 :
-		d < 56 ? 28 :
-		d < 64 ? 30 :
-		d < 72 ? 32 :
-		d < 84 ? 34 :
-		d < 96 ? 36 :
-		d < 98 ? 38 :
-		d < 113 ? 40 :
-		d < 149 ? 44 :
-		d < 199 ? 48 :
-		d < 261 ? 52 :
-		d < 353 ? 56 :
-		d < 461 ? 60 :
-		d < 585 ? 64 :
-		d < 1200 ? 70 :
-		d < 1800 ? 80 :
-		d < 2400 ? 90 :
+		d < 2 ? 6 :
+		d < 3 ? 8 :
+		d < 5 ? 10 :
+		d < 8 ? 12 :
+		d < 10 ? 14 :
+		d < 11 ? 16 :
+		d < 12 ? 18 :
+		d < 14 ? 20 :
+		d < 17 ? 22 :
+		d < 21 ? 24 :
+		d < 24 ? 26 :
+		d < 28 ? 28 :
+		d < 32 ? 30 :
+		d < 36 ? 32 :
+		d < 42 ? 34 :
+		d < 48 ? 36 :
+		d < 49 ? 38 :
+		d < 57 ? 40 :
+		d < 75 ? 44 :
+		d < 100 ? 48 :
+		d < 130 ? 52 :
+		d < 176 ? 56 :
+		d < 230 ? 60 :
+		d < 292 ? 64 :
+		d < 600 ? 70 :
+		d < 900 ? 80 :
+		d < 1200 ? 90 :
 		100;
 
 	let _ellipseMode = 'center';
 
 	$.ellipseMode = (x) => (_ellipseMode = x);
 
+	function applyEllipseMode(x, y, w, h) {
+		h ??= w;
+		let a, b;
+		if (_ellipseMode == $.CENTER) {
+			a = w / 2;
+			b = h / 2;
+		} else if (_ellipseMode == $.RADIUS) {
+			a = w;
+			b = h;
+		} else if (_ellipseMode == $.CORNER) {
+			x += w / 2;
+			y += h / 2;
+			a = w / 2;
+			b = h / 2;
+		} else if (_ellipseMode == $.CORNERS) {
+			x = (x + w) / 2;
+			y = (y + h) / 2;
+			a = (w - x) / 2;
+			b = (h - y) / 2;
+		}
+		return [x, y, a, b];
+	}
+
 	$.ellipse = (x, y, w, h) => {
-		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * _scale);
-		let a = w / 2;
-		let b = w == h ? a : h / 2;
+		let a, b;
+		[x, y, a, b] = applyEllipseMode(x, y, w, h);
+
+		let n = getArcSegments(Math.max(Math.abs(a), Math.abs(b)) * _scale);
 
 		if (matrixDirty) saveMatrix();
 		let ti = matrixIdx;
@@ -6196,27 +6252,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		// Calculate position based on ellipseMode
 		let a, b;
-		if (_ellipseMode == $.CENTER) {
-			a = w / 2;
-			b = h / 2;
-		} else if (_ellipseMode == $.RADIUS) {
-			a = w;
-			b = h;
-		} else if (_ellipseMode == $.CORNER) {
-			x += w / 2;
-			y += h / 2;
-			a = w / 2;
-			b = h / 2;
-		} else if (_ellipseMode == $.CORNERS) {
-			x = (x + w) / 2;
-			y = (y + h) / 2;
-			a = (w - x) / 2;
-			b = (h - y) / 2;
-		}
+		[x, y, a, b] = applyEllipseMode(x, y, w, h);
 
 		if (matrixDirty) saveMatrix();
 		let ti = matrixIdx;
-		let n = getArcSegments(Math.max(Math.abs(w), Math.abs(h)) * _scale);
+		let n = getArcSegments(Math.max(Math.abs(a), Math.abs(b)) * _scale);
 
 		// Draw fill
 		if (doFill) {
@@ -6238,13 +6278,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let ti = matrixIdx,
 			ci = strokeIdx;
 
-		if (scaledSW < 2) {
+		if (scaledHSW < 1) {
 			let [l, r, t, b] = calcBox(x, y, sw, sw, 'corner');
 			addRect(l, t, r, t, r, b, l, b, ci, ti);
 		} else {
-			let n = getArcSegments(scaledSW);
-			sw /= 2;
-			addArc(x, y, sw, sw, 0, TAU, n, ci, ti);
+			let n = getArcSegments(scaledHSW);
+			addArc(x, y, hsw, hsw, 0, TAU, n, ci, ti);
 		}
 	};
 
@@ -6274,8 +6313,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		addRect(x1 + px, y1 + py, x1 - px, y1 - py, x2 - px, y2 - py, x2 + px, y2 + py, ci, ti);
 
-		if (scaledSW > 2 && _strokeCap != 'square') {
-			let n = getArcSegments(scaledSW);
+		if (scaledHSW > 1 && _strokeCap != 'square') {
+			let n = getArcSegments(scaledHSW);
 			addArc(x1, y1, hsw, hsw, 0, TAU, n, ci, ti);
 			addArc(x2, y2, hsw, hsw, 0, TAU, n, ci, ti);
 		}
@@ -6443,7 +6482,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 
 		if (doStroke) {
-			let n = getArcSegments(scaledSW),
+			let n = getArcSegments(scaledHSW),
 				ti = matrixIdx,
 				ogStrokeCap = _strokeCap;
 			_strokeCap = 'square';
