@@ -63,6 +63,8 @@ Q5.renderers.c2d.image = ($, q) => {
 		return g;
 	};
 
+	$._imageMode = Q5.CORNER;
+
 	$.imageMode = (mode) => ($._imageMode = mode);
 
 	$.image = (img, dx, dy, dw, dh, sx = 0, sy = 0, sw, sh) => {

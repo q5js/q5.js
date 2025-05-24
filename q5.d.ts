@@ -4065,7 +4065,7 @@ function mousePressed() {
 	 * Creates a shader that q5 can use to draw shapes.
 	 * 
 	 * Affects the following functions:
-	 * `plane`, `triangle`, `quad`,
+	 * `triangle`, `quad`, `plane`,
 	 * `curve`, `bezier`, `beginShape`/`endShape`,
 	 * and `background` (unless an image is used).
 	 * 
