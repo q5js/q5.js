@@ -350,6 +350,20 @@ q.circle(100, 50, 20);
 		static errorTolerant: boolean;
 
 		/** ⭐️
+		 * The maximum number of rectangles that can be drawn in a single
+		 * draw call.
+		 * @default 200200
+		 */
+		static MAX_RECTS: number;
+
+		/** ⭐️
+		 * The maximum number of ellipses that can be drawn in a single
+		 * draw call.
+		 * @default 200200
+		 */
+		static MAX_ELLIPSES: number;
+
+		/** ⭐️
 		 * Modules added to this object will be added to new Q5 instances.
 		 */
 		static modules: {};
@@ -558,7 +572,7 @@ background(200);
 stroke('red');
 circle(50, 100, 80);
 
-strokeWeight(20);
+strokeWeight(12);
 circle(150, 100, 80);
 	 */
 	function strokeWeight(weight: number): void;
@@ -599,7 +613,6 @@ background(200);
 noFill();
 shadow('black');
 rect(64, 60, 80, 80);
-text('q5', 100, 100);
 	 * @example
 createCanvas(200);
 let logo = loadImage('/assets/p5play_logo.webp');
@@ -614,6 +627,8 @@ function setup() {
 
 	/** ⬜️
 	 * Disables the shadow effect.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @example
 createCanvas(200);
 background(200);
@@ -630,6 +645,9 @@ rect(104, 104, 80, 80);
 	 * Sets the shadow offset and blur radius.
 	 * 
 	 * When q5 starts, shadow offset is (10, 10) with a blur of 10.
+	 * 
+	 * Not available in q5 WebGPU.
+	 * 
 	 * @param {number} offsetX horizontal offset of the shadow
 	 * @param {number} offsetY vertical offset of the shadow, defaults to be the same as offsetX
 	 * @param {number} blur blur radius of the shadow, defaults to 0
@@ -1367,6 +1385,29 @@ stroke('lime');
 line(20, 20, 180, 80);
 	 */
 	function line(x1: number, y1: number, x2: number, y2: number): void;
+
+	/** 🧑‍🎨
+	 * Draws a capsule, which is pill shaped.
+	 * @param {number} x1 x-coordinate of the first point
+	 * @param {number} y1 y-coordinate of the first point
+	 * @param {number} x2 x-coordinate of the second point
+	 * @param {number} y2 y-coordinate of the second point
+	 * @param {number} r radius of the capsule semi-circle ends
+	 * @example
+createCanvas(200, 100);
+background(200);
+strokeWeight(5);
+capsule(40, 40, 160, 60, 10);
+	 * @example
+let q = await Q5.WebGPU();
+
+q.draw = () => {
+	background(0.8);
+	strokeWeight(10);
+	capsule(0, 0, mouseX, mouseY, 20);
+}
+	 */
+	function capsule(x1: number, y1: number, x2: number, y2: number, r: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a point on the canvas.
@@ -4022,6 +4063,11 @@ function mousePressed() {
 
 	/** ⚡️
 	 * Creates a shader that q5 can use to draw shapes.
+	 * 
+	 * Affects the following functions:
+	 * `plane`, `triangle`, `quad`,
+	 * `curve`, `bezier`, `beginShape`/`endShape`,
+	 * and `background` (unless an image is used).
 	 * 
 	 * Use this function to customize a copy of the
 	 * [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).

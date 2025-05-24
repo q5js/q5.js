@@ -33,8 +33,8 @@ struct Q5 {
 		frameLayout,
 		frameSampler,
 		frameBindGroup,
-		colorIndex = 1,
-		colorStackIndex = 8,
+		colorIndex = 2,
+		colorStackIndex = 12,
 		prevFramePL = 0,
 		framePL = 0;
 
@@ -52,6 +52,7 @@ struct Q5 {
 
 	// prettier-ignore
 	colorStack.set([
+		0, 0, 0, 0, // transparent
 		0, 0, 0, 1, // black
 		1, 1, 1, 1 // white
 	]);
@@ -273,12 +274,13 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		doStroke = true,
 		fillSet = false,
 		strokeSet = false,
-		strokeIdx = 0,
-		fillIdx = 1,
-		tintIdx = 1,
+		strokeIdx = 1,
+		fillIdx = 2,
+		tintIdx = 2,
 		globalAlpha = 1,
 		sw = 1, // stroke weight
-		hsw = 0.5, // half the stroke weight
+		hsw = 0.5, // half of the stroke weight
+		qsw = 0.25, // quarter of the stroke weight
 		scaledHSW = 0.5;
 
 	$.fill = (r, g, b, a) => {
@@ -309,6 +311,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		v = Math.abs(v);
 		sw = v;
 		hsw = v / 2;
+		qsw = v / 4;
 		scaledHSW = hsw * _scale;
 	};
 
@@ -667,7 +670,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			$.pop();
 		} else {
 			addColor(r, g, b, a);
-			addRect(-c.hw, c.hh, c.hw, c.hh, c.hw, -c.hh, -c.hw, -c.hh, colorIndex, 0);
+			let lx = -c.hw,
+				rx = c.hw,
+				ty = -c.hh,
+				by = c.hh;
+			addQuad(lx, ty, rx, ty, rx, by, lx, by, colorIndex, 0);
 		}
 	};
 
@@ -802,6 +809,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			}
 		}
 
+		// prepare to render text
+
 		if (charStack.length) {
 			// calculate total buffer size for text data
 			let totalTextSize = 0;
@@ -848,9 +857,33 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			});
 		}
 
+		// prepare to render rectangles
+
+		// prettier-ignore
+		Q5.device.queue.writeBuffer(
+			rectBuffer,
+			0,
+			rectStack.buffer,
+			rectStack.byteOffset,
+			rectStackIdx * 4
+		);
+
+		// prepare to render ellipses
+
+		// prettier-ignore
+		Q5.device.queue.writeBuffer(
+			ellipseBuffer,
+			0,
+			ellipseStack.buffer,
+			ellipseStack.byteOffset,
+			ellipseStackIdx * 4
+		);
+
 		let drawVertOffset = 0,
 			imageVertOffset = 0,
 			textCharOffset = 0,
+			rectIdx = 0,
+			ellipseIdx = 0,
 			curPipelineIndex = -1;
 
 		for (let i = 0; i < drawStack.length; i += 2) {
@@ -869,9 +902,25 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 				curPipelineIndex = drawStack[i];
 				pass.setPipeline($._pipelines[curPipelineIndex]);
+
+				if (curPipelineIndex == 5) {
+					pass.setIndexBuffer(rectIndexBuffer, 'uint16');
+					pass.setBindGroup(1, rectBindGroup);
+				} else if (curPipelineIndex == 6) {
+					pass.setIndexBuffer(ellipseIndexBuffer, 'uint16');
+					pass.setBindGroup(1, ellipseBindGroup);
+				}
 			}
 
-			if (curPipelineIndex == 4 || curPipelineIndex >= 4000) {
+			if (curPipelineIndex == 6) {
+				// draw an ellipse
+				pass.drawIndexed(18, v, 0, 0, ellipseIdx);
+				ellipseIdx += v;
+			} else if (curPipelineIndex == 5) {
+				// draw a rectangle
+				pass.drawIndexed(6, v, 0, 0, rectIdx);
+				rectIdx += v;
+			} else if (curPipelineIndex == 4 || curPipelineIndex >= 4000) {
 				// draw text
 				let o = drawStack[i + 2];
 				pass.setBindGroup(1, fontsArr[o].bindGroup);
@@ -933,8 +982,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		// clear the stacks for the next frame
 		drawStack.splice(0, drawStack.length);
-		colorIndex = 1;
-		colorStackIndex = 8;
+		colorIndex = 2;
+		colorStackIndex = 12;
 		matrices = [matrices[0]];
 		matricesIdxStack = [];
 
@@ -948,6 +997,10 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		vidFrames = 0;
 		charStack = [];
 		textStack = [];
+		rectStack = new Float32Array(Q5.MAX_RECTS * 16);
+		rectStackIdx = 0;
+		ellipseStack = new Float32Array(Q5.MAX_ELLIPSES * 16);
+		ellipseStackIdx = 0;
 
 		// destroy buffers
 		Q5.device.queue.onSubmittedWorkDone().then(() => {
@@ -1010,8 +1063,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let shapesVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
 		shapesVertIdx = 0;
 	const TAU = Math.PI * 2,
-		HALF_PI = Math.PI / 2,
-		THREE_HALF_PI = Math.PI * 1.5;
+		HALF_PI = Math.PI / 2;
 
 	let shapesVertBuffLayout = {
 		arrayStride: 16, // 4 floats * 4 bytes
@@ -1022,14 +1074,14 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		]
 	};
 
-	let pipelineLayout = Q5.device.createPipelineLayout({
+	let shapesPipelineLayout = Q5.device.createPipelineLayout({
 		label: 'shapesPipelineLayout',
 		bindGroupLayouts: $._bindGroupLayouts
 	});
 
 	$._pipelineConfigs[1] = {
 		label: 'shapesPipeline',
-		layout: pipelineLayout,
+		layout: shapesPipelineLayout,
 		vertex: {
 			module: shapesShader,
 			entryPoint: 'vertexMain',
@@ -1056,344 +1108,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		shapesVertIdx = i;
 	};
 
-	const addRect = (x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) => {
-		let v = shapesVertStack,
-			i = shapesVertIdx;
-
-		v[i++] = x1;
-		v[i++] = y1;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		v[i++] = x2;
-		v[i++] = y2;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		v[i++] = x4;
-		v[i++] = y4;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		v[i++] = x3;
-		v[i++] = y3;
-		v[i++] = ci;
-		v[i++] = ti;
-
-		shapesVertIdx = i;
-		drawStack.push(shapesPL, 4);
-	};
-
-	const addArc = (x, y, a, b, startAngle, endAngle, n, ci, ti) => {
-		let angleRange = endAngle - startAngle;
-		let angleIncrement = angleRange / n;
-		let t = startAngle;
-
-		let v = shapesVertStack,
-			i = shapesVertIdx;
-
-		for (let j = 0; j <= n; j++) {
-			// add center vertex
-			v[i++] = x;
-			v[i++] = y;
-			v[i++] = ci;
-			v[i++] = ti;
-
-			// calculate perimeter vertex
-			let vx = x + a * Math.cos(t);
-			let vy = y + b * Math.sin(t);
-
-			// add perimeter vertex
-			v[i++] = vx;
-			v[i++] = vy;
-			v[i++] = ci;
-			v[i++] = ti;
-
-			t += angleIncrement;
-		}
-
-		shapesVertIdx = i;
-		drawStack.push(shapesPL, (n + 1) * 2);
-	};
-
-	const addArcStroke = (x, y, outerA, outerB, innerA, innerB, startAngle, endAngle, n, ci, ti) => {
-		let angleRange = endAngle - startAngle;
-		let angleIncrement = angleRange / n;
-		let t = startAngle;
-
-		let v = shapesVertStack,
-			i = shapesVertIdx;
-
-		for (let j = 0; j <= n; j++) {
-			// Outer vertex
-			let vxOuter = x + outerA * Math.cos(t);
-			let vyOuter = y + outerB * Math.sin(t);
-
-			// Inner vertex
-			let vxInner = x + innerA * Math.cos(t);
-			let vyInner = y + innerB * Math.sin(t);
-
-			// Add vertices for triangle strip
-			v[i++] = vxOuter;
-			v[i++] = vyOuter;
-			v[i++] = ci;
-			v[i++] = ti;
-
-			v[i++] = vxInner;
-			v[i++] = vyInner;
-			v[i++] = ci;
-			v[i++] = ti;
-
-			t += angleIncrement;
-		}
-
-		shapesVertIdx = i;
-		drawStack.push(shapesPL, (n + 1) * 2);
-	};
-
-	let _rectMode = 'corner';
-
-	$.rectMode = (x) => (_rectMode = x);
-
-	$.rect = (x, y, w, h, rr = 0) => {
-		h ??= w;
-		let [l, r, t, b] = calcBox(x, y, w, h, _rectMode);
-		let ci, ti;
-		if (matrixDirty) saveMatrix();
-		ti = matrixIdx;
-
-		if (!rr) {
-			if (doFill) {
-				ci = fillIdx;
-				addRect(l, t, r, t, r, b, l, b, ci, ti);
-			}
-
-			if (doStroke) {
-				ci = strokeIdx;
-
-				// Calculate stroke positions
-				let lsw = l - hsw,
-					rsw = r + hsw,
-					tsw = t + hsw,
-					bsw = b - hsw,
-					lpsw = l + hsw,
-					rpsw = r - hsw,
-					tpsw = t - hsw,
-					bpsw = b + hsw;
-
-				addRect(lsw, tpsw, rsw, tpsw, rsw, tsw, lsw, tsw, ci, ti); // Top
-				addRect(lsw, bsw, rsw, bsw, rsw, bpsw, lsw, bpsw, ci, ti); // Bottom
-
-				// Adjust side strokes to avoid overlapping corners
-				tsw = t - hsw;
-				bsw = b + hsw;
-
-				addRect(lsw, tsw, lpsw, tsw, lpsw, bsw, lsw, bsw, ci, ti); // Left
-				addRect(rpsw, tsw, rsw, tsw, rsw, bsw, rpsw, bsw, ci, ti); // Right
-			}
-			return;
-		}
-
-		l += rr;
-		r -= rr;
-		t += rr;
-		b -= rr;
-
-		// Clamp radius
-		rr = Math.min(rr, Math.min(w, h) / 2);
-
-		let n = getArcSegments(rr * _scale);
-
-		let trr = t - rr,
-			brr = b + rr,
-			lrr = l - rr,
-			rrr = r + rr;
-
-		if (doFill) {
-			ci = fillIdx;
-			// Corner arcs
-			addArc(l, t, rr, -rr, HALF_PI, Math.PI, n, ci, ti); // top-left
-			addArc(r, t, rr, -rr, HALF_PI, 0, n, ci, ti); // top-right
-			addArc(r, b, rr, -rr, 0, -HALF_PI, n, ci, ti); // bottom-right
-			addArc(l, b, rr, -rr, -HALF_PI, -Math.PI, n, ci, ti); // bottom-left
-
-			addRect(l, trr, r, trr, r, brr, l, brr, ci, ti); // center
-			addRect(l, t, lrr, t, lrr, b, l, b, ci, ti); // Left
-			addRect(rrr, t, r, t, r, b, rrr, b, ci, ti); // Right
-		}
-
-		if (doStroke) {
-			ci = strokeIdx;
-
-			let outerA = rr + hsw,
-				outerB = rr + hsw,
-				innerA = rr - hsw,
-				innerB = rr - hsw;
-
-			// Corner arc strokes
-			addArcStroke(l, t, outerA, -outerB, innerA, -innerB, Math.PI, HALF_PI, n, ci, ti); // top-left
-			addArcStroke(r, t, outerA, -outerB, innerA, -innerB, HALF_PI, 0, n, ci, ti); // top-right
-			addArcStroke(r, b, outerA, -outerB, innerA, -innerB, 0, -HALF_PI, n, ci, ti); // bottom-right
-			addArcStroke(l, b, outerA, -outerB, innerA, -innerB, -HALF_PI, -Math.PI, n, ci, ti); // bottom-left
-
-			let lrrMin = lrr - hsw,
-				lrrMax = lrr + hsw,
-				rrrMin = rrr - hsw,
-				rrrMax = rrr + hsw,
-				trrMin = trr - hsw,
-				trrMax = trr + hsw,
-				brrMin = brr - hsw,
-				brrMax = brr + hsw;
-
-			// Side strokes - positioned outside
-			addRect(lrrMin, t, lrrMax, t, lrrMax, b, lrrMin, b, ci, ti); // Left
-			addRect(rrrMin, t, rrrMax, t, rrrMax, b, rrrMin, b, ci, ti); // Right
-			addRect(l, trrMin, r, trrMin, r, trrMax, l, trrMax, ci, ti); // Top
-			addRect(l, brrMin, r, brrMin, r, brrMax, l, brrMax, ci, ti); // Bottom
-		}
-	};
-
-	$.square = (x, y, s) => $.rect(x, y, s, s);
-
-	$.plane = (x, y, w, h) => {
-		h ??= w;
-		let [l, r, t, b] = calcBox(x, y, w, h, 'center');
-		if (matrixDirty) saveMatrix();
-		addRect(l, t, r, t, r, b, l, b, fillIdx, matrixIdx);
-	};
-
-	// prettier-ignore
-	const getArcSegments = (d) =>
-		d < 2 ? 6 :
-		d < 3 ? 8 :
-		d < 5 ? 10 :
-		d < 8 ? 12 :
-		d < 10 ? 14 :
-		d < 11 ? 16 :
-		d < 12 ? 18 :
-		d < 14 ? 20 :
-		d < 17 ? 22 :
-		d < 21 ? 24 :
-		d < 24 ? 26 :
-		d < 28 ? 28 :
-		d < 32 ? 30 :
-		d < 36 ? 32 :
-		d < 42 ? 34 :
-		d < 48 ? 36 :
-		d < 49 ? 38 :
-		d < 57 ? 40 :
-		d < 75 ? 44 :
-		d < 100 ? 48 :
-		d < 130 ? 52 :
-		d < 176 ? 56 :
-		d < 230 ? 60 :
-		d < 292 ? 64 :
-		d < 600 ? 70 :
-		d < 900 ? 80 :
-		d < 1200 ? 90 :
-		100;
-
-	let _ellipseMode = 'center';
-
-	$.ellipseMode = (x) => (_ellipseMode = x);
-
-	function applyEllipseMode(x, y, w, h) {
-		h ??= w;
-		let a, b;
-		if (_ellipseMode == $.CENTER) {
-			a = w / 2;
-			b = h / 2;
-		} else if (_ellipseMode == $.RADIUS) {
-			a = w;
-			b = h;
-		} else if (_ellipseMode == $.CORNER) {
-			x += w / 2;
-			y += h / 2;
-			a = w / 2;
-			b = h / 2;
-		} else if (_ellipseMode == $.CORNERS) {
-			x = (x + w) / 2;
-			y = (y + h) / 2;
-			a = (w - x) / 2;
-			b = (h - y) / 2;
-		}
-		return [x, y, a, b];
-	}
-
-	$.ellipse = (x, y, w, h) => {
-		let a, b;
-		[x, y, a, b] = applyEllipseMode(x, y, w, h);
-
-		let n = getArcSegments(Math.max(Math.abs(a), Math.abs(b)) * _scale);
-
-		if (matrixDirty) saveMatrix();
-		let ti = matrixIdx;
-
-		if (doFill) {
-			addArc(x, y, a, b, 0, TAU, n, fillIdx, ti);
-		}
-		if (doStroke) {
-			// Draw the stroke as a ring using triangle strips
-			addArcStroke(x, y, a + hsw, b + hsw, a - hsw, b - hsw, 0, TAU, n, strokeIdx, ti);
-		}
-	};
-
-	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
-
-	$.arc = (x, y, w, h, start, stop) => {
-		if (start === stop) return $.ellipse(x, y, w, h);
-
-		// Convert angles if needed
-		if ($._angleMode) {
-			start = $.radians(start);
-			stop = $.radians(stop);
-		}
-
-		// Normalize angles
-		start %= TAU;
-		stop %= TAU;
-		if (start < 0) start += TAU;
-		if (stop < 0) stop += TAU;
-		if (start > stop) stop += TAU;
-		if (start == stop) return $.ellipse(x, y, w, h);
-
-		// Calculate position based on ellipseMode
-		let a, b;
-		[x, y, a, b] = applyEllipseMode(x, y, w, h);
-
-		if (matrixDirty) saveMatrix();
-		let ti = matrixIdx;
-		let n = getArcSegments(Math.max(Math.abs(a), Math.abs(b)) * _scale);
-
-		// Draw fill
-		if (doFill) {
-			addArc(x, y, a, b, start, stop, n, fillIdx, ti);
-		}
-
-		// Draw stroke
-		if (doStroke) {
-			addArcStroke(x, y, a + hsw, b + hsw, a - hsw, b - hsw, start, stop, n, strokeIdx, ti);
-			if (_strokeCap == 'round') {
-				addArc(x + a * Math.cos(start), y + b * Math.sin(start), hsw, hsw, 0, TAU, n, strokeIdx, ti);
-				addArc(x + a * Math.cos(stop), y + b * Math.sin(stop), hsw, hsw, 0, TAU, n, strokeIdx, ti);
-			}
-		}
-	};
-
-	$.point = (x, y) => {
-		if (matrixDirty) saveMatrix();
-		let ti = matrixIdx,
-			ci = strokeIdx;
-
-		if (scaledHSW < 1) {
-			let [l, r, t, b] = calcBox(x, y, sw, sw, 'corner');
-			addRect(l, t, r, t, r, b, l, b, ci, ti);
-		} else {
-			let n = getArcSegments(scaledHSW);
-			addArc(x, y, hsw, hsw, 0, TAU, n, ci, ti);
-		}
-	};
-
 	let _strokeCap = 'round',
 		_strokeJoin = 'round';
 
@@ -1402,29 +1116,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$.lineMode = () => {
 		_strokeCap = 'square';
 		_strokeJoin = 'none';
-	};
-
-	$.line = (x1, y1, x2, y2) => {
-		if (matrixDirty) saveMatrix();
-		let ti = matrixIdx,
-			ci = strokeIdx;
-
-		// calculate the direction vector and length
-		let dx = x2 - x1,
-			dy = y2 - y1,
-			length = Math.hypot(dx, dy);
-
-		// calculate the perpendicular vector for line thickness
-		let px = -(dy / length) * hsw,
-			py = (dx / length) * hsw;
-
-		addRect(x1 + px, y1 + py, x1 - px, y1 - py, x2 - px, y2 - py, x2 + px, y2 + py, ci, ti);
-
-		if (scaledHSW > 1 && _strokeCap != 'square') {
-			let n = getArcSegments(scaledHSW);
-			addArc(x1, y1, hsw, hsw, 0, TAU, n, ci, ti);
-			addArc(x2, y2, hsw, hsw, 0, TAU, n, ci, ti);
-		}
 	};
 
 	let curveSegments = 20;
@@ -1589,23 +1280,18 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 
 		if (doStroke) {
-			let n = getArcSegments(scaledHSW),
-				ti = matrixIdx,
-				ogStrokeCap = _strokeCap;
-			_strokeCap = 'square';
 			// draw lines between vertices
 			for (let i = 0; i < shapeVertCount - 1; i++) {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
 				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
 
-				addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, strokeIdx, ti);
+				// addEllipse(sv[v1], sv[v1 + 1], qsw, qsw, 0, TAU, hsw, 0);
 			}
 			let v1 = (shapeVertCount - 1) * 4;
 			let v2 = 0;
 			if (close) $.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
-			addArc(sv[v1], sv[v1 + 1], hsw, hsw, 0, TAU, n, strokeIdx, ti);
-			_strokeCap = ogStrokeCap;
+			// addEllipse(sv[v1], sv[v1 + 1], qsw, qsw, 0, TAU, hsw, 0);
 		}
 
 		// reset for the next shape
@@ -1645,6 +1331,608 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		$.vertex(x3, y3);
 		$.vertex(x4, y4);
 		$.endShape(true);
+	};
+
+	function addQuad(x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) {
+		addVert(x1, y1, ci, ti); // v0
+		addVert(x2, y2, ci, ti); // v1
+		addVert(x4, y4, ci, ti); // v3
+		addVert(x3, y3, ci, ti); // v2
+		drawStack.push(shapesPL, 4);
+	}
+
+	$.plane = (x, y, w, h) => {
+		h ??= w;
+		let [l, r, t, b] = calcBox(x, y, w, h, 'center');
+		if (matrixDirty) saveMatrix();
+		addQuad(l, t, r, t, r, b, l, b, fillIdx, matrixIdx);
+	};
+
+	/* RECT */
+
+	let rectPL = 5;
+
+	$._rectShaderCode =
+		$._baseShaderCode +
+		/* wgsl */ `
+struct Rect {
+	center: vec2f,
+	extents: vec2f,
+	roundedRadius: f32,
+	strokeWeight: f32,
+	fillIndex: f32,
+	strokeIndex: f32,
+	matrixIndex: f32,
+	padding0: f32, // can't use vec3f for alignment
+	padding1: vec2f,
+	padding2: vec4f
+};
+
+struct VertexParams {
+	@builtin(vertex_index) vertIndex: u32,
+	@builtin(instance_index) instIndex: u32
+};
+
+struct FragParams {
+	@builtin(position) position: vec4f,
+	@location(0) local: vec2f,
+	@location(1) extents: vec2f,
+	@location(2) roundedRadius: f32,
+	@location(3) strokeWeight: f32,
+	@location(4) fill: vec4f,
+	@location(5) stroke: vec4f,
+	@location(6) blend: vec4f
+};
+
+@group(0) @binding(0) var<uniform> q: Q5;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
+
+@group(1) @binding(0) var<storage, read> rects: array<Rect>;
+
+const quad = array(
+	vec2f(-1.0, -1.0),
+	vec2f( 1.0, -1.0),
+	vec2f(-1.0,  1.0),
+	vec2f( 1.0,  1.0)
+);
+const transparent = vec4f(0.0);
+
+fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(matrixIndex)] * vert;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
+	return vert;
+}
+
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	let rect = rects[v.instIndex];
+
+	let halfStrokeSize = vec2f(rect.strokeWeight * 0.5);
+	let quadSize = rect.extents + halfStrokeSize;
+	let pos = (quad[v.vertIndex] * quadSize) + rect.center;
+
+	let local = pos - rect.center;
+
+	var f: FragParams;
+	f.position = transformVertex(pos, rect.matrixIndex);
+
+	f.local = local;
+	f.extents = rect.extents;
+	f.roundedRadius = rect.roundedRadius;
+	f.strokeWeight = rect.strokeWeight;
+
+	let fill = colors[i32(rect.fillIndex)];
+	let stroke = colors[i32(rect.strokeIndex)];
+	f.fill = fill;
+	f.stroke = stroke;
+
+	// Source-over blend: stroke over fill (pre-multiplied alpha)
+	if (fill.a != 0.0 && stroke.a != 1.0) {
+		let outAlpha = stroke.a + fill.a * (1.0 - stroke.a);
+		let outColor = stroke.rgb * stroke.a + fill.rgb * fill.a * (1.0 - stroke.a);
+		f.blend = vec4f(outColor / max(outAlpha, 1e-5), outAlpha);
+	}
+	return f;
+}
+
+fn sdRoundRect(p: vec2f, extents: vec2f, radius: f32) -> f32 {
+	let q = abs(p) - extents + vec2f(radius);
+	return length(max(q, vec2f(0.0))) - radius + min(max(q.x, q.y), 0.0);
+}
+
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let dist = select(
+		max(abs(f.local.x) - f.extents.x, abs(f.local.y) - f.extents.y), // sharp
+		sdRoundRect(f.local, f.extents, f.roundedRadius),                  // rounded
+		f.roundedRadius > 0.0
+	);
+
+	// fill only
+	if (f.fill.a != 0.0 && f.strokeWeight == 0.0) {
+		if (dist <= 0.0) {
+			return f.fill;
+		}
+		return transparent;
+	}
+
+	let halfStroke = f.strokeWeight * 0.5;
+	let inner = dist + halfStroke;
+
+	if (f.fill.a != 0.0) {
+		if (inner <= 0.0) {
+			return f.fill;
+		}
+		if (dist <= 0.0 && f.stroke.a != 1.0) {
+			return f.blend;
+		}
+	}
+
+	let outer = dist - halfStroke;
+
+	if (outer <= 0.0 && inner >= 0.0) {
+		return f.stroke;
+	}
+
+	return transparent;
+}
+	`;
+
+	let rectShader = Q5.device.createShaderModule({
+		label: 'rectShader',
+		code: $._rectShaderCode
+	});
+
+	let rectIndices = new Uint16Array([0, 1, 2, 2, 1, 3]);
+
+	let rectIndexBuffer = Q5.device.createBuffer({
+		size: rectIndices.byteLength,
+		usage: GPUBufferUsage.INDEX,
+		mappedAtCreation: true
+	});
+	new Uint16Array(rectIndexBuffer.getMappedRange()).set(rectIndices);
+	rectIndexBuffer.unmap();
+
+	let rectBindGroupLayout = Q5.device.createBindGroupLayout({
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.VERTEX,
+				buffer: { type: 'read-only-storage' }
+			}
+		]
+	});
+
+	let rectPipelineLayout = Q5.device.createPipelineLayout({
+		label: 'rectPipelineLayout',
+		bindGroupLayouts: [...$._bindGroupLayouts, rectBindGroupLayout]
+	});
+
+	$._pipelineConfigs[5] = {
+		label: 'rectPipeline',
+		layout: rectPipelineLayout,
+		vertex: {
+			module: rectShader,
+			entryPoint: 'vertexMain',
+			buffers: []
+		},
+		fragment: {
+			module: rectShader,
+			entryPoint: 'fragMain',
+			targets: [
+				{
+					format: 'bgra8unorm',
+					blend: $.blendConfigs['source-over']
+				}
+			]
+		},
+		primitive: { topology: 'triangle-list' },
+		multisample: { count: 4 }
+	};
+
+	$._pipelines[5] = Q5.device.createRenderPipeline($._pipelineConfigs[5]);
+
+	let rectStack = new Float32Array(Q5.MAX_RECTS * 16);
+	let rectStackIdx = 0;
+
+	let rectBuffer = Q5.device.createBuffer({
+		size: rectStack.byteLength,
+		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+	});
+
+	let rectBindGroup = Q5.device.createBindGroup({
+		layout: rectBindGroupLayout,
+		entries: [{ binding: 0, resource: { buffer: rectBuffer } }]
+	});
+
+	function addRect(x, y, hw, hh, roundedRadius, strokeW, fillRect) {
+		let s = rectStack,
+			i = rectStackIdx;
+
+		s[i] = x;
+		s[i + 1] = y;
+		s[i + 2] = hw;
+		s[i + 3] = hh;
+		s[i + 4] = roundedRadius;
+		s[i + 5] = strokeW;
+		s[i + 6] = fillRect;
+		s[i + 7] = strokeIdx;
+		s[i + 8] = matrixIdx;
+
+		rectStackIdx += 16;
+		drawStack.push(rectPL, 1);
+	}
+
+	let _rectMode = 'corner';
+
+	$.rectMode = (x) => (_rectMode = x);
+
+	function applyRectMode(x, y, w, h) {
+		let hw = w / 2,
+			hh = h / 2;
+		if (_rectMode != 'center') {
+			if (_rectMode == 'corner') {
+				x += hw;
+				y += hh;
+			} else if (_rectMode == 'radius') {
+				hw = w;
+				hh = h;
+			} else if (_rectMode == 'corners') {
+				hw = (x - w) / 2;
+				hh = (y - h) / 2;
+				x += hw;
+				y += hh;
+			}
+		}
+		return [x, y, hw, hh];
+	}
+
+	$.rect = (x, y, w, h, rr = 0) => {
+		if (matrixDirty) saveMatrix();
+
+		let hw, hh;
+		[x, y, hw, hh] = applyRectMode(x, y, w, h);
+
+		addRect(x, y, hw, hh, rr, doStroke ? sw : 0, doFill ? fillIdx : 0);
+	};
+
+	$.square = (x, y, s) => $.rect(x, y, s, s);
+
+	function addCapsule(x1, y1, x2, y2, r, strokeW, fillCapsule) {
+		let dx = x2 - x1,
+			dy = y2 - y1,
+			len = Math.hypot(dx, dy);
+
+		if (len === 0) return;
+
+		let angle = Math.atan2(dy, dx),
+			cx = (x1 + x2) / 2,
+			cy = (y1 + y2) / 2;
+
+		if ($._angleMode) angle *= $._RADTODEG;
+
+		$.pushMatrix();
+		$.translate(cx, cy);
+		$.rotate(angle);
+
+		if (matrixDirty) saveMatrix();
+
+		addRect(0, 0, len / 2 + r, r, r, strokeW, fillCapsule);
+
+		$.popMatrix();
+	}
+
+	$.capsule = (x1, y1, x2, y2, r) => {
+		addCapsule(x1, y1, x2, y2, r, doStroke ? sw : 0, doFill ? fillIdx : 0);
+	};
+
+	$.line = (x1, y1, x2, y2) => {
+		if (doStroke) addCapsule(x1, y1, x2, y2, qsw, hsw, 0);
+	};
+
+	/* ELLIPSE */
+
+	let ellipsePL = 6;
+
+	$._ellipseShaderCode =
+		$._baseShaderCode +
+		/* wgsl */ `
+struct Ellipse {
+	center: vec2f,
+	size: vec2f,
+	startAngle: f32,
+	endAngle: f32,
+	strokeWeight: f32,
+	fillIndex: f32,
+	strokeIndex: f32,
+	matrixIndex: f32,
+	padding0: vec2f,
+	padding1: vec4f
+};
+
+struct VertexParams {
+	@builtin(vertex_index) vertIndex: u32,
+	@builtin(instance_index) instIndex: u32
+};
+
+struct FragParams {
+	@builtin(position) position: vec4f,
+	@location(0) outerEdge: vec2f,
+	@location(1) fillEdge: vec2f,
+	@location(2) innerEdge: vec2f,
+	@location(3) strokeWeight: f32,
+	@location(4) fill: vec4f,
+	@location(5) stroke: vec4f,
+	@location(6) blend: vec4f
+};
+
+@group(0) @binding(0) var<uniform> q: Q5;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
+
+@group(1) @binding(0) var<storage, read> ellipses: array<Ellipse>;
+
+const PI = 3.141592653589793;
+const segments = 6.0;
+const expansion = 1.0 / cos(PI / segments);
+const antiAlias = 0.015625; // 1/64
+const transparent = vec4f(0.0);
+
+fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(matrixIndex)] * vert;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
+	return vert;
+}
+
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	let ellipse = ellipses[v.instIndex];
+	var pos = ellipse.center;
+	var local = vec2f(0.0);
+	let start = ellipse.startAngle;
+	let end = ellipse.endAngle;
+	let arc = end - start;
+	let halfStrokeSize = vec2f(ellipse.strokeWeight * 0.5);
+
+	let fanSize = (ellipse.size + halfStrokeSize) * expansion;
+
+	if (v.vertIndex != 0) {
+		let theta = start + (f32(v.vertIndex - 1) / segments) * arc;
+		local = vec2f(cos(theta), sin(theta));
+		pos = ellipse.center + local * fanSize;
+	}
+
+	let dist = pos - ellipse.center;
+
+	var f: FragParams;
+	f.position = transformVertex(pos, ellipse.matrixIndex);
+	f.outerEdge = dist / (ellipse.size + halfStrokeSize);
+	f.fillEdge = dist / ellipse.size;
+	f.innerEdge = dist / (ellipse.size - halfStrokeSize);
+	f.strokeWeight = ellipse.strokeWeight;
+
+	let fill = colors[i32(ellipse.fillIndex)];
+	let stroke = colors[i32(ellipse.strokeIndex)];
+	f.fill = fill;
+	f.stroke = stroke;
+
+	// Source-over blend: stroke over fill (pre-multiplied alpha)
+	if (fill.a != 0.0 && stroke.a != 1.0) {
+		let outAlpha = stroke.a + fill.a * (1.0 - stroke.a);
+		let outColor = stroke.rgb * stroke.a + fill.rgb * fill.a * (1.0 - stroke.a);
+		f.blend = vec4f(outColor / max(outAlpha, 1e-5), outAlpha);
+	}
+	return f;
+}
+
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let fillEdge = length(f.fillEdge);
+
+	// disable AA for very thin strokes
+	let aa = select(antiAlias, 0.0, f.strokeWeight <= 1.0);
+
+	if (f.fill.a != 0.0 && f.strokeWeight == 0.0) {
+		if (fillEdge > 1.0) {
+			return transparent;
+		}
+		let fillAlpha = 1.0 - smoothstep(1.0 - aa, 1.0, fillEdge);
+		return vec4f(f.fill.rgb, f.fill.a * fillAlpha);
+	}
+
+	let innerEdge = length(f.innerEdge);
+	
+	if (f.fill.a != 0.0 && fillEdge < 1.0) {
+		if (innerEdge < 1.0) {
+			return f.fill;
+		}
+		let tInner = smoothstep(1.0, 1.0 + aa, innerEdge);
+		let tOuter = smoothstep(1.0 - aa, 1.0, fillEdge);
+		if (f.stroke.a != 1.0) {
+			let fillBlend = mix(f.fill, f.blend, tInner);
+			return mix(fillBlend, f.stroke, tOuter);
+		} else {
+			let fillBlend = mix(f.fill, f.stroke, tInner);
+			return mix(fillBlend, f.stroke, tOuter);
+		}
+	}
+	
+	if (innerEdge < 1.0) {
+		return transparent;
+	}
+
+	let outerEdge = length(f.outerEdge);
+	let outerAlpha = 1.0 - smoothstep(1.0 - aa, 1.0, outerEdge);
+	let innerAlpha = smoothstep(1.0, 1.0 + aa, innerEdge);
+	let strokeAlpha = innerAlpha * outerAlpha;
+	return vec4f(f.stroke.rgb, f.stroke.a * strokeAlpha);
+}
+		`;
+
+	let ellipseShader = Q5.device.createShaderModule({
+		label: 'ellipseShader',
+		code: $._ellipseShaderCode
+	});
+
+	let fanIndices = new Uint16Array([0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 7]);
+
+	let ellipseIndexBuffer = Q5.device.createBuffer({
+		size: fanIndices.byteLength,
+		usage: GPUBufferUsage.INDEX,
+		mappedAtCreation: true
+	});
+	new Uint16Array(ellipseIndexBuffer.getMappedRange()).set(fanIndices);
+	ellipseIndexBuffer.unmap();
+
+	let ellipseBindGroupLayout = Q5.device.createBindGroupLayout({
+		entries: [
+			{
+				binding: 0,
+				visibility: GPUShaderStage.VERTEX,
+				buffer: { type: 'read-only-storage' }
+			}
+		]
+	});
+
+	let ellipsePipelineLayout = Q5.device.createPipelineLayout({
+		label: 'ellipsePipelineLayout',
+		bindGroupLayouts: [...$._bindGroupLayouts, ellipseBindGroupLayout]
+	});
+
+	$._pipelineConfigs[6] = {
+		label: 'ellipsePipeline',
+		layout: ellipsePipelineLayout,
+		vertex: {
+			module: ellipseShader,
+			entryPoint: 'vertexMain',
+			buffers: []
+		},
+		fragment: {
+			module: ellipseShader,
+			entryPoint: 'fragMain',
+			targets: [
+				{
+					format: 'bgra8unorm',
+					blend: $.blendConfigs['source-over']
+				}
+			]
+		},
+		primitive: { topology: 'triangle-list' },
+		multisample: { count: 4 }
+	};
+
+	$._pipelines[6] = Q5.device.createRenderPipeline($._pipelineConfigs[6]);
+
+	let ellipseStack = new Float32Array(Q5.MAX_ELLIPSES * 16);
+	let ellipseStackIdx = 0;
+
+	let ellipseBuffer = Q5.device.createBuffer({
+		size: ellipseStack.byteLength,
+		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+	});
+
+	let ellipseBindGroup = Q5.device.createBindGroup({
+		layout: ellipseBindGroupLayout,
+		entries: [{ binding: 0, resource: { buffer: ellipseBuffer } }]
+	});
+
+	function addEllipse(x, y, a, b, start, stop, strokeW, fillEllipse) {
+		let s = ellipseStack,
+			i = ellipseStackIdx;
+
+		s[i] = x;
+		s[i + 1] = y;
+		s[i + 2] = a;
+		s[i + 3] = b;
+		s[i + 4] = start;
+		s[i + 5] = stop;
+		s[i + 6] = strokeW;
+		s[i + 7] = fillEllipse ? fillIdx : 0;
+		s[i + 8] = strokeIdx;
+		s[i + 9] = matrixIdx;
+
+		ellipseStackIdx += 16;
+		drawStack.push(ellipsePL, 1);
+	}
+
+	let _ellipseMode = 'center';
+
+	$.ellipseMode = (x) => (_ellipseMode = x);
+
+	function applyEllipseMode(x, y, w, h) {
+		h ??= w;
+		let a, b;
+		if (_ellipseMode == 'center') {
+			a = w / 2;
+			b = h / 2;
+		} else if (_ellipseMode == 'radius') {
+			a = w;
+			b = h;
+		} else if (_ellipseMode == 'corner') {
+			x += w / 2;
+			y += h / 2;
+			a = w / 2;
+			b = h / 2;
+		} else if (_ellipseMode == 'corners') {
+			x = (x + w) / 2;
+			y = (y + h) / 2;
+			a = (w - x) / 2;
+			b = (h - y) / 2;
+		}
+		return [x, y, a, b];
+	}
+
+	$.ellipse = (x, y, w, h) => {
+		let a, b;
+		[x, y, a, b] = applyEllipseMode(x, y, w, h);
+
+		if (matrixDirty) saveMatrix();
+
+		addEllipse(x, y, a, b, 0, TAU, sw, doFill);
+	};
+
+	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
+
+	$.arc = (x, y, w, h, start, stop) => {
+		if (start === stop) return $.ellipse(x, y, w, h);
+
+		// Convert angles if needed
+		if ($._angleMode) {
+			start = $.radians(start);
+			stop = $.radians(stop);
+		}
+
+		// Normalize angles
+		start %= TAU;
+		stop %= TAU;
+		if (start < 0) start += TAU;
+		if (stop < 0) stop += TAU;
+		if (start > stop) stop += TAU;
+		if (start == stop) return $.ellipse(x, y, w, h);
+
+		// Calculate position based on ellipseMode
+		let a, b;
+		[x, y, a, b] = applyEllipseMode(x, y, w, h);
+
+		if (matrixDirty) saveMatrix();
+
+		addEllipse(x, y, a, b, start, stop, sw, doFill);
+	};
+
+	$.point = (x, y) => {
+		if (matrixDirty) saveMatrix();
+
+		if (scaledHSW < 1) {
+			addRect(x, y, hsw, hsw, 0, sw, 0);
+		} else {
+			// dimensions of the point needs to be set to half the stroke weight
+			addEllipse(x, y, hsw, hsw, 0, TAU, sw, 0);
+		}
 	};
 
 	/* IMAGE */
@@ -2781,6 +3069,9 @@ Q5.POSTERIZE = 5;
 Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
+
+Q5.MAX_RECTS = 200200;
+Q5.MAX_ELLIPSES = 200200;
 
 Q5.initWebGPU = async () => {
 	if (!navigator.gpu) {
