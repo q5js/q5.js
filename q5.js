@@ -6797,7 +6797,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		if (matrixDirty) saveMatrix();
 
-		addEllipse(x, y, a, b, 0, TAU, sw, doFill);
+		addEllipse(x, y, a, b, 0, TAU, doStroke ? sw : 0, doFill);
 	};
 
 	$.circle = (x, y, d) => $.ellipse(x, y, d, d);
@@ -6825,7 +6825,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		if (matrixDirty) saveMatrix();
 
-		addEllipse(x, y, a, b, start, stop, sw, doFill);
+		addEllipse(x, y, a, b, start, stop, doStroke ? sw : 0, doFill);
 	};
 
 	$.point = (x, y) => {
