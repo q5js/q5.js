@@ -1425,12 +1425,16 @@ point(125, 50);
 
 	/** 🧑‍🎨
 	 * Set the global composite operation for the canvas context.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {string} val composite operation
 	 */
 	function blendMode(val: string): void;
 
 	/** 🧑‍🎨
 	 * Set the line cap style to `ROUND`, `SQUARE`, or `PROJECT`.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {CanvasLineCap} val line cap style
 	 * @example
 createCanvas(200);
@@ -1450,6 +1454,8 @@ line(50, 150, 150, 150);
 
 	/** 🧑‍🎨
 	 * Set the line join style to `ROUND`, `BEVEL`, or `MITER`.
+	 * 
+	 * Not available in q5 WebGPU.
 	 * @param {CanvasLineJoin} val line join style
 	 * @example
 createCanvas(200);
@@ -3591,7 +3597,7 @@ function draw() {
 	 * Returns a promise if used in async `setup`.
 	 * 
 	 * @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
-	 * @param {boolean} [flipped] whether to mirror the video horizontally, true by default
+	 * @param {boolean} [flipped] whether to mirror the video vertically, true by default
 	 * @returns {HTMLVideoElement | Promise<HTMLVideoElement>} a new video element or promise
 	 * @example
 createCanvas(200);

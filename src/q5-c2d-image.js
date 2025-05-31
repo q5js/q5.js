@@ -98,7 +98,7 @@ Q5.renderers.c2d.image = ($, q) => {
 				tnt.fillStyle = $._tint;
 				tnt.fillRect(0, 0, img.width, img.height);
 
-				if (img.canvas.alpha) {
+				if (img?.canvas?.alpha) {
 					tnt.globalCompositeOperation = 'destination-in';
 					tnt.drawImage(drawable, 0, 0, img.width, img.height);
 				}

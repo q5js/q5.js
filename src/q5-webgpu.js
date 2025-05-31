@@ -1936,7 +1936,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$.point = (x, y) => {
 		if (matrixDirty) saveMatrix();
 
-		if (scaledHSW < 1) {
+		// if the point stroke size is a single pixel (or smaller), use a rectangle
+		if (scaledHSW <= 0.5) {
 			addRect(x, y, hsw, hsw, 0, sw, 0);
 		} else {
 			// dimensions of the point needs to be set to half the stroke weight
