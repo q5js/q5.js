@@ -3190,6 +3190,7 @@ Q5.modules.input = ($, q) => {
 	$.pmouseX = 0;
 	$.pmouseY = 0;
 	$.touches = [];
+	$.pointers = {};
 	$.mouseButton = '';
 	$.keyIsPressed = false;
 	$.mouseIsPressed = false;
@@ -3225,34 +3226,51 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._updatePointer = (e) => {
-		if (e.changedTouches) return;
+		let pid = e.pointerId;
+		$.pointers[pid] ??= { event: e };
+		let pointer = $.pointers[pid];
+		pointer.event = e;
 
-		if (document.pointerLockElement) {
-			// In pointer lock mode, update position based on movement
-			q.mouseX += e.movementX;
-			q.mouseY += e.movementY;
-		} else if (c) {
+		let x, y;
+		if (c) {
 			let rect = c.getBoundingClientRect();
 			let sx = c.scrollWidth / $.width || 1;
 			let sy = c.scrollHeight / $.height || 1;
-			q.mouseX = (e.clientX - rect.left) / sx;
-			q.mouseY = (e.clientY - rect.top) / sy;
+
+			x = (e.clientX - rect.left) / sx;
+			y = (e.clientY - rect.top) / sy;
 			if ($._webgpu) {
-				q.mouseX -= c.hw;
-				q.mouseY -= c.hh;
+				x -= c.hw;
+				y -= c.hh;
 			}
 		} else {
-			q.mouseX = e.clientX;
-			q.mouseY = e.clientY;
+			x = e.clientX;
+			y = e.clientY;
 		}
-		q.moveX = e.movementX;
-		q.moveY = e.movementY;
+
+		pointer.x = x;
+		pointer.y = y;
+
+		if (e.isPrimary || !e.pointerId) {
+			q.pmouseX = q.mouseX;
+			q.pmouseY = q.mouseY;
+
+			if (document.pointerLockElement) {
+				q.mouseX += e.movementX;
+				q.mouseY += e.movementY;
+			} else {
+				q.mouseX = x;
+				q.mouseY = y;
+			}
+
+			q.moveX = e.movementX;
+			q.moveY = e.movementY;
+		}
 	};
 
 	let pressAmt = 0;
 
-	// remove mouse fn aliases in v3.1
-	$._onmousedown = $._onpointerdown = (e) => {
+	$._onpointerdown = (e) => {
 		pressAmt++;
 		$._startAudio();
 		$._updatePointer(e);
@@ -3261,18 +3279,19 @@ Q5.modules.input = ($, q) => {
 		$.mousePressed(e);
 	};
 
-	$._onmousemove = $._onpointermove = (e) => {
+	$._onpointermove = (e) => {
 		if (c && !c.visible) return;
 		$._updatePointer(e);
 		if ($.mouseIsPressed) $.mouseDragged(e);
 		else $.mouseMoved(e);
 	};
 
-	$._onmouseup = $._onpointerup = (e) => {
+	$._onpointerup = (e) => {
 		q.mouseIsPressed = false;
 		if (pressAmt > 0) pressAmt--;
 		else return;
 		$._updatePointer(e);
+		delete $.pointers[e.pointerId];
 		$.mouseReleased(e);
 	};
 
@@ -3357,7 +3376,32 @@ Q5.modules.input = ($, q) => {
 
 	$._updateTouches = (e) => {
 		if (c && !c.visible) return;
-		q.touches = [...e.touches].map(getTouchInfo);
+
+		let touches = [...e.changedTouches].map(getTouchInfo);
+
+		for (let touch of touches) {
+			let existingTouch = $.touches.find((t) => t.id == touch.id);
+			if (existingTouch) {
+				existingTouch.x = touch.x;
+				existingTouch.y = touch.y;
+			} else {
+				$.touches.push(touch);
+			}
+		}
+
+		for (let i = $.touches.length - 1; i >= 0; i--) {
+			let touch = $.touches[i];
+			let found = false;
+			for (let j = 0; j < e.touches.length; j++) {
+				if (e.touches[j].identifier === touch.id) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				$.touches.splice(i, 1);
+			}
+		}
 	};
 
 	$._ontouchstart = (e) => {

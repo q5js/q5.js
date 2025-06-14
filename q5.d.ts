@@ -2671,7 +2671,7 @@ function keyReleased() {
 	/** 🖲️
 	 * Array containing all current touch points within the
 	 * browser window. Each touch being an object with
-	 * id, x, and y properties.
+	 * `id`, `x`, and `y` properties.
 	 * @example
 function draw() {
 	background(200);
@@ -2732,6 +2732,27 @@ function touchMoved() {
 }
 	 */
 	function touchMoved(): void;
+
+	/** 🖲️
+	 * Object containing all current pointers within the
+	 * browser window.
+	 * 
+	 * This includes mouse, touch, and pen pointers.
+	 * 
+	 * Each pointer is an object with 
+	 * `event`, `x`, and `y` properties.
+	 * The `event` property contains the original
+	 * [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent).
+	 * @example
+function draw() {
+	background(200);
+	for (let pointerID in pointers) {
+		let pointer = pointers[pointerID];
+		circle(pointer.x, pointer.y, 100);
+	}
+}
+	 */
+	let pointers: {};
 
 	/** 🖲️
 	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/docs/Web/CSS/cursor) or image.
