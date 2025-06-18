@@ -940,8 +940,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.popMatrix = () => $.ctx.restore();
 
 	$.push = () => {
-		$.ctx.save();
 		$.pushStyles();
+		$.ctx.save();
 	};
 	$.pop = () => {
 		$.ctx.restore();
