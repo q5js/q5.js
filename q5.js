@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.1
+ * @version 3.2
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -385,7 +385,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '3.1';
+Q5.version = Q5.VERSION = '3.2';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -852,7 +852,13 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	// DRAWING MATRIX
 
-	$.translate = (x, y) => $.ctx.translate(x, y);
+	$.translate = (x, y) => {
+		if (x.x) {
+			y = x.y;
+			x = x.x;
+		}
+		$.ctx.translate(x, y);
+	};
 
 	$.rotate = (r) => {
 		if ($._angleMode) r = $.radians(r);
@@ -910,6 +916,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		let styles = {};
 		for (let s of $._styleNames) styles[s] = $[s];
 		$._styles.push(styles);
+		if ($._fontMod) $._updateFont();
 	};
 
 	function popStyles() {
@@ -1792,11 +1799,11 @@ Q5.renderers.c2d.text = ($, q) => {
 		leadDiff = 3,
 		emphasis = 'normal',
 		weight = 'normal',
-		fontMod = false,
 		styleHash = 0,
 		styleHashes = [],
 		genTextImage = false,
 		cacheSize = 0;
+	$._fontMod = false;
 
 	let cache = ($._textCache = {});
 	$._textCacheMaxSize = 12000;
@@ -1912,14 +1919,14 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (x && typeof x != 'string') x = x.family;
 		if (!x || x == font) return font;
 		font = x;
-		fontMod = true;
+		$._fontMod = true;
 		styleHash = -1;
 	};
 
 	$.textSize = (x) => {
 		if (x == undefined) return $._textSize;
 		$._textSize = x;
-		fontMod = true;
+		$._fontMod = true;
 		styleHash = -1;
 		if (!leadingSet) {
 			leading = x * 1.25;
@@ -1930,14 +1937,14 @@ Q5.renderers.c2d.text = ($, q) => {
 	$.textStyle = (x) => {
 		if (!x) return emphasis;
 		emphasis = x;
-		fontMod = true;
+		$._fontMod = true;
 		styleHash = -1;
 	};
 
 	$.textWeight = (x) => {
 		if (!x) return weight;
 		weight = x;
-		fontMod = true;
+		$._fontMod = true;
 		styleHash = -1;
 	};
 
@@ -1957,21 +1964,21 @@ Q5.renderers.c2d.text = ($, q) => {
 		}
 	};
 
-	const updateFont = () => {
+	$._updateFont = () => {
 		$.ctx.font = `${emphasis} ${weight} ${$._textSize}px ${font}`;
-		fontMod = false;
+		$._fontMod = false;
 	};
 
 	$.textWidth = (str) => {
-		if (fontMod) updateFont();
+		if ($._fontMod) $._updateFont();
 		return $.ctx.measureText(str).width;
 	};
 	$.textAscent = (str) => {
-		if (fontMod) updateFont();
+		if ($._fontMod) $._updateFont();
 		return $.ctx.measureText(str).actualBoundingBoxAscent;
 	};
 	$.textDescent = (str) => {
-		if (fontMod) updateFont();
+		if ($._fontMod) $._updateFont();
 		return $.ctx.measureText(str).actualBoundingBoxDescent;
 	};
 
@@ -2003,7 +2010,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		let ctx = $.ctx;
 		let img, tX, tY;
 
-		if (fontMod) updateFont();
+		if ($._fontMod) $._updateFont();
 
 		if (genTextImage) {
 			if (styleHash == -1) updateStyleHash();

@@ -140,7 +140,13 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	// DRAWING MATRIX
 
-	$.translate = (x, y) => $.ctx.translate(x, y);
+	$.translate = (x, y) => {
+		if (x.x) {
+			y = x.y;
+			x = x.x;
+		}
+		$.ctx.translate(x, y);
+	};
 
 	$.rotate = (r) => {
 		if ($._angleMode) r = $.radians(r);
@@ -198,6 +204,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		let styles = {};
 		for (let s of $._styleNames) styles[s] = $[s];
 		$._styles.push(styles);
+		if ($._fontMod) $._updateFont();
 	};
 
 	function popStyles() {
