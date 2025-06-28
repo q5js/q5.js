@@ -727,11 +727,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	let transformsBuffer, colorsBuffer, shapesVertBuff, imgVertBuff, charBuffer, textBuffer;
 
 	$._render = () => {
-		let transformSize = matrices.length * MATRIX_SIZE * 4; // 4 bytes per float
-		if (!transformsBuffer || transformsBuffer.size < transformSize) {
+		let transformsSize = matrices.length * MATRIX_SIZE * 4; // 4 bytes per float
+		if (!transformsBuffer || transformsBuffer.size < transformsSize) {
 			if (transformsBuffer) transformsBuffer.destroy();
 			transformsBuffer = Q5.device.createBuffer({
-				size: Math.min((transformsBuffer?.size || 0) * 2 || transformSize, MAX_TRANSFORM_BUFFER_SIZE),
+				size: Math.min(transformsSize * 2, MAX_TRANSFORM_BUFFER_SIZE),
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 		}
@@ -742,7 +742,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		if (!colorsBuffer || colorsBuffer.size < colorsSize) {
 			if (colorsBuffer) colorsBuffer.destroy();
 			colorsBuffer = Q5.device.createBuffer({
-				size: (colorsBuffer?.size || 0) * 2 || colorsSize,
+				size: colorsSize * 2,
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 		}
@@ -786,7 +786,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		if (!shapesVertBuff || shapesVertBuff.size < shapesVertSize) {
 			if (shapesVertBuff) shapesVertBuff.destroy();
 			shapesVertBuff = Q5.device.createBuffer({
-				size: (shapesVertBuff?.size || 0) * 2 || shapesVertSize,
+				size: shapesVertSize * 2,
 				usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 			});
 		}
@@ -804,7 +804,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			if (!imgVertBuff || imgVertBuff.size < imgVertSize) {
 				if (imgVertBuff) imgVertBuff.destroy();
 				imgVertBuff = Q5.device.createBuffer({
-					size: (imgVertBuff?.size || 0) * 2 || imgVertSize,
+					size: imgVertSize * 2,
 					usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 				});
 			}
@@ -831,7 +831,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			if (!charBuffer || charBuffer.size < totalTextSize) {
 				if (charBuffer) charBuffer.destroy();
 				charBuffer = Q5.device.createBuffer({
-					size: (charBuffer?.size || 0) * 2 || totalTextSize,
+					size: totalTextSize * 2,
 					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				});
 			}
@@ -844,7 +844,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				if (textBuffer) textBuffer.destroy();
 				textBuffer = Q5.device.createBuffer({
 					label: 'textBuffer',
-					size: (textBuffer?.size || 0) * 2 || totalMetadataSize,
+					size: totalMetadataSize * 2,
 					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				});
 			}

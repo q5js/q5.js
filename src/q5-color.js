@@ -10,6 +10,7 @@ Q5.modules.color = ($, q) => {
 	$.colorMode = (mode, format, gamut) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
+		$._srgb = srgb;
 		format ??= mode == 'rgb' ? ($._c2d || srgb ? 255 : 1) : 1;
 		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
 		if (mode == 'oklch') {
@@ -81,6 +82,10 @@ Q5.modules.color = ($, q) => {
 					}
 				} else if ($._namedColors[c0]) {
 					[c0, c1, c2, c3] = $._namedColors[c0];
+					if ($._colorMode != 'rgb') {
+						C = $._srgb ? Q5.ColorRGB_8 : Q5.ColorRGB_P3_8;
+						return new C(c0, c1, c2, c3);
+					}
 				} else {
 					// css color string not parsed
 					let c = new C(0, 0, 0);

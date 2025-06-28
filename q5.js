@@ -2172,6 +2172,7 @@ Q5.modules.color = ($, q) => {
 	$.colorMode = (mode, format, gamut) => {
 		$._colorMode = mode;
 		let srgb = $.canvas.colorSpace == 'srgb' || gamut == 'srgb';
+		$._srgb = srgb;
 		format ??= mode == 'rgb' ? ($._c2d || srgb ? 255 : 1) : 1;
 		$._colorFormat = format == 'integer' || format == 255 ? 255 : 1;
 		if (mode == 'oklch') {
@@ -2243,6 +2244,10 @@ Q5.modules.color = ($, q) => {
 					}
 				} else if ($._namedColors[c0]) {
 					[c0, c1, c2, c3] = $._namedColors[c0];
+					if ($._colorMode != 'rgb') {
+						C = $._srgb ? Q5.ColorRGB_8 : Q5.ColorRGB_P3_8;
+						return new C(c0, c1, c2, c3);
+					}
 				} else {
 					// css color string not parsed
 					let c = new C(0, 0, 0);
@@ -5673,11 +5678,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	let transformsBuffer, colorsBuffer, shapesVertBuff, imgVertBuff, charBuffer, textBuffer;
 
 	$._render = () => {
-		let transformSize = matrices.length * MATRIX_SIZE * 4; // 4 bytes per float
-		if (!transformsBuffer || transformsBuffer.size < transformSize) {
+		let transformsSize = matrices.length * MATRIX_SIZE * 4; // 4 bytes per float
+		if (!transformsBuffer || transformsBuffer.size < transformsSize) {
 			if (transformsBuffer) transformsBuffer.destroy();
 			transformsBuffer = Q5.device.createBuffer({
-				size: Math.min((transformsBuffer?.size || 0) * 2 || transformSize, MAX_TRANSFORM_BUFFER_SIZE),
+				size: Math.min(transformsSize * 2, MAX_TRANSFORM_BUFFER_SIZE),
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 		}
@@ -5688,7 +5693,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		if (!colorsBuffer || colorsBuffer.size < colorsSize) {
 			if (colorsBuffer) colorsBuffer.destroy();
 			colorsBuffer = Q5.device.createBuffer({
-				size: (colorsBuffer?.size || 0) * 2 || colorsSize,
+				size: colorsSize * 2,
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 		}
@@ -5732,7 +5737,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		if (!shapesVertBuff || shapesVertBuff.size < shapesVertSize) {
 			if (shapesVertBuff) shapesVertBuff.destroy();
 			shapesVertBuff = Q5.device.createBuffer({
-				size: (shapesVertBuff?.size || 0) * 2 || shapesVertSize,
+				size: shapesVertSize * 2,
 				usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 			});
 		}
@@ -5750,7 +5755,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			if (!imgVertBuff || imgVertBuff.size < imgVertSize) {
 				if (imgVertBuff) imgVertBuff.destroy();
 				imgVertBuff = Q5.device.createBuffer({
-					size: (imgVertBuff?.size || 0) * 2 || imgVertSize,
+					size: imgVertSize * 2,
 					usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 				});
 			}
@@ -5777,7 +5782,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			if (!charBuffer || charBuffer.size < totalTextSize) {
 				if (charBuffer) charBuffer.destroy();
 				charBuffer = Q5.device.createBuffer({
-					size: (charBuffer?.size || 0) * 2 || totalTextSize,
+					size: totalTextSize * 2,
 					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				});
 			}
@@ -5790,7 +5795,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				if (textBuffer) textBuffer.destroy();
 				textBuffer = Q5.device.createBuffer({
 					label: 'textBuffer',
-					size: (textBuffer?.size || 0) * 2 || totalMetadataSize,
+					size: totalMetadataSize * 2,
 					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				});
 			}
