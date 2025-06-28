@@ -108,6 +108,6 @@ main {
 	$.fullscreen = (v) => {
 		if (v == undefined) return document.fullscreenElement;
 		if (v) document.body.requestFullscreen();
-		else document.body.exitFullscreen();
+		else document.exitFullscreen();
 	};
 };
