@@ -7885,7 +7885,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		txt[1] = y;
 		txt[2] = _textSize / 42;
 		txt[3] = matrixIdx;
-		txt[4] = doFill && fillSet ? fillIdx : 0;
+		txt[4] = doFill && fillSet ? fillIdx : 1;
 		txt[5] = strokeIdx;
 		txt[6] = doStroke && strokeSet ? sw : 0;
 		txt[7] = textEdge;
