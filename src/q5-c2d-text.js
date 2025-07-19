@@ -26,7 +26,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		} else {
 			let name = url.split('/').pop().split('.')[0].replace(' ', '');
 
-			f = new FontFace(name, `url(${url})`);
+			f = new FontFace(name, `url(${encodeURI(url)})`);
 			document.fonts.add(f);
 			f.promise = (async () => {
 				let err;
@@ -218,20 +218,21 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
 		let ctx = $.ctx;
-		let img, tX, tY;
+		let img, tX, tY, colorStyle;
 
 		if ($._fontMod) $._updateFont();
 
 		if (genTextImage) {
 			if (styleHash == -1) updateStyleHash();
+			colorStyle = $._fill + $._stroke + $._strokeWeight;
 
-			img = cache[str];
-			if (img) img = img[styleHash];
+			let cacheLevel1 = cache[str];
+			let cacheLevel2;
+			if (cacheLevel1) cacheLevel2 = cacheLevel1[styleHash];
 
-			if (img) {
-				if (img._fill == $._fill && img._stroke == $._stroke && img._strokeWeight == $._strokeWeight) {
-					return img;
-				} else img.clear();
+			if (cacheLevel2) {
+				img = cacheLevel2[colorStyle];
+				if (img) return img;
 			}
 		}
 
@@ -300,10 +301,6 @@ Q5.renderers.c2d.text = ($, q) => {
 				img.modified = true;
 			}
 
-			img._fill = $._fill;
-			img._stroke = $._stroke;
-			img._strokeWeight = $._strokeWeight;
-
 			ctx = img.ctx;
 
 			ctx.font = $.ctx.font;
@@ -332,7 +329,8 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		if (genTextImage) {
 			styleHashes.push(styleHash);
-			(cache[str] ??= {})[styleHash] = img;
+			(cache[str] ??= {})[styleHash] ??= {};
+			cache[str][styleHash][colorStyle] = img;
 
 			cacheSize++;
 			if (cacheSize > $._textCacheMaxSize) {
