@@ -263,7 +263,6 @@ function Q5(scope, parent, renderer) {
 
 	let userFns = [
 		'preload',
-		'setup',
 		'postProcess',
 		'mouseMoved',
 		'mousePressed',
@@ -301,9 +300,22 @@ function Q5(scope, parent, renderer) {
 		await Promise.all($._preloadPromises);
 		if ($._g) await Promise.all($._g._preloadPromises);
 
+		// Wait for user to define setup or draw using requestAnimationFrame
+		await new Promise((resolve) => {
+			function checkUserFns() {
+				if ($.setup || $.update || $.draw || t.setup || t.update || t.draw) {
+					resolve();
+				} else raf(checkUserFns);
+			}
+			checkUserFns();
+		});
+
 		if (t.setup?.constructor.name == 'AsyncFunction') {
 			$.usePromiseLoading();
 		}
+
+		$.setup ??= t.setup || (() => {});
+		wrapWithFES('setup');
 
 		for (let name of userFns) wrapWithFES(name);
 
