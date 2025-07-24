@@ -159,6 +159,7 @@ Q5.modules.canvas = ($, q) => {
 
 	$.defaultImageScale = (scale) => {
 		if (!scale) return $._defaultImageScale;
+		if ($._g) $._g.defaultImageScale = scale;
 		return ($._defaultImageScale = scale);
 	};
 	$.defaultImageScale(0.5);
