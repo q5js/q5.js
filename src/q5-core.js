@@ -297,10 +297,8 @@ function Q5(scope, parent, renderer) {
 	async function start() {
 		wrapWithFES('preload');
 		$.preload();
-		await Promise.all($._preloadPromises);
-		if ($._g) await Promise.all($._g._preloadPromises);
 
-		// Wait for user to define setup or draw using requestAnimationFrame
+		// wait for user to define setup, update, or draw
 		await new Promise((resolve) => {
 			function checkUserFns() {
 				if ($.setup || $.update || $.draw || t.setup || t.update || t.draw) {
@@ -309,6 +307,9 @@ function Q5(scope, parent, renderer) {
 			}
 			checkUserFns();
 		});
+
+		await Promise.all($._preloadPromises);
+		if ($._g) await Promise.all($._g._preloadPromises);
 
 		if (t.setup?.constructor.name == 'AsyncFunction') {
 			$.usePromiseLoading();
