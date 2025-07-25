@@ -68,9 +68,6 @@ Q5.modules.input = ($, q) => {
 		pointer.y = y;
 
 		if (e.isPrimary || !e.pointerId) {
-			q.pmouseX = q.mouseX;
-			q.pmouseY = q.mouseY;
-
 			if (document.pointerLockElement) {
 				q.mouseX += e.movementX;
 				q.mouseY += e.movementY;
