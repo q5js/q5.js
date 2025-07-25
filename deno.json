@@ -1,0 +1,37 @@
+{
+	"name": "@q5/q5",
+	"version": "3.2.8",
+	"license": "LGPL-3.0",
+	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
+	"author": "quinton-ashley",
+	"exports": "./q5-deno-server.js",
+	"types": "./q5.d.ts",
+	"tasks": {
+		"tests": "deno test --unstable-node-globals -A"
+	},
+	"imports": {
+		"@std/expect": "jsr:@std/expect",
+		"@gfx/canvas": "jsr:@gfx/canvas",
+		"@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom"
+	},
+	"publish": {
+		"exclude": [
+			".vscode",
+			"assets",
+			"dev",
+			"src",
+			"fonts",
+			"home",
+			"lang",
+			"learn",
+			"test",
+			".npmignore",
+			".prettierignore",
+			"CNAME",
+			"CODE_OF_CONDUCT.md",
+			"deno.lock",
+			"Icon?",
+			"package.json"
+		]
+	}
+}

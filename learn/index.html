@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>q5 : Learn</title>
+	<link rel="icon" href="/q5js_logo.webp">
+	<link rel="stylesheet" type="text/css" href="docs.css" />
+</head>
+
+<body class="dark">
+	<header>
+		<div class="header-container">
+			<button id="toggleNavButton"></button>
+			<a id="homeLink" href="../home">
+				<button id="homeButton">
+					<img class="logo" src="/assets/q5js_icon-light.png" alt="">
+					<img class="brand" src="/assets/q5js_brand-light.webp">
+				</button>
+			</a>
+			<div class="input-wrapper search-bar">
+				<span class="magnify-glass"></span>
+				<input autocomplete="off" type="text" id="searchInput" class="dialog-input" placeholder="Search">
+				<div id="searchResultsContainer" class="search-results">
+					<div class="search-result prompt-message">Start typing to search the documentation</div>
+				</div>
+			</div><button id="themeToggle" class="light-theme"></button>
+		</div>
+	</header>
+	<div class="allContent">
+		<nav id="navbar" class="navopen"></nav>
+		<main id="content" class="fade-in"></main>
+	</div>
+
+	<script src="/q5.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs/loader.min.js"></script>
+	<script src="mini-editor.js"></script>
+	<script src="/home/theme.js"></script>
+
+	<script src="docs.js"></script>
+</body>
+
+</html>

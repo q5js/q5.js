@@ -1,0 +1,13 @@
+dev/assets
+dev/experiments
+dev/wgsl
+dev/sketch.js
+dev/sketch-p5.js
+dev/test*
+node_modules
+package-lock.json
+jsconfig.json
+bun.lockb
+deno.lock
+p5-test
+test/*.png
