@@ -174,10 +174,8 @@ Q5.modules.canvas = ($, q) => {
 			el.append(c);
 
 			function parentResized() {
-				if ($.frameCount > 1) {
-					$._didResize = true;
-					$._adjustDisplay();
-				}
+				$._didResize = true;
+				$._adjustDisplay();
 			}
 			if (typeof ResizeObserver == 'function') {
 				if ($._ro) $._ro.disconnect();
