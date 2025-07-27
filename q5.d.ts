@@ -3848,6 +3848,30 @@ function mousePressed() {
 	function loadCSV(url: string): object[] | Promise<object[]>;
 
 	/** 🛠️
+	 * Loads an xml file from the specified url.
+	 * 
+	 * Returns a promise if used in async `setup`.
+	 * 
+	 * @param {string} url xml file
+	 * @returns {Element | Promise<Element>} an object containing the loaded XML in a property called `obj.DOM` or a promise
+	 * @example
+async function setup() {
+	createCanvas(200);
+	background(200);
+	textSize(32);
+
+	let myXML = await loadXML('/assets/animals.xml');
+
+	let mammals = myXML.getElementsByTagName('mammal');
+	let y = 64;
+	for (let mammal of mammals) {
+		text(mammal.textContent, 20, (y += 32));
+	}
+}
+	 */
+	function loadXML(url: string): object | Promise<Element>;
+
+	/** 🛠️
 	 * nf is short for number format. It formats a number
 	 * to a string with a specified number of digits.
 	 * @param {number} num number to format

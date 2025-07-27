@@ -4522,12 +4522,30 @@ Q5.modules.util = ($, q) => {
 					resolve(f);
 				});
 		});
+		$._preloadPromises.push(ret.promise);
+		if (!$._usePreload) return ret.promise;
 		return ret;
 	};
 
 	$.loadText = (url, cb) => $._loadFile(url, cb, 'text');
 	$.loadJSON = (url, cb) => $._loadFile(url, cb, 'json');
 	$.loadCSV = (url, cb) => $._loadFile(url, cb, 'csv');
+
+	$.loadXML = (url, cb) => {
+		let ret = {};
+		ret.promise = fetch(url)
+			.then((res) => res.text())
+			.then((text) => {
+				let xml = new DOMParser().parseFromString(text, 'application/xml');
+				ret.DOM = xml;
+				delete ret.promise;
+				if (cb) cb(xml);
+				return xml;
+			});
+		$._preloadPromises.push(ret.promise);
+		if (!$._usePreload) return ret.promise;
+		return ret;
+	};
 
 	const imgRegex = /(jpe?g|png|gif|webp|avif|svg)/i,
 		fontRegex = /(ttf|otf|woff2?|eot|json)/i,
@@ -4553,6 +4571,8 @@ Q5.modules.util = ($, q) => {
 				obj = $.loadFont(url);
 			} else if (audioRegex.test(ext)) {
 				obj = $.loadSound(url);
+			} else if (ext == 'xml') {
+				obj = $.loadXML(url);
 			} else {
 				obj = $.loadText(url);
 			}
