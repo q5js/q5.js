@@ -3212,6 +3212,9 @@ function draw() {
 	 * 
 	 * Use `loaded`, `paused`, and `ended` to check the sound's status.
 	 * 
+	 * The entire sound file must be loaded before playback can start,
+	 * to stream larger audio files use the `loadAudio` function instead.
+	 * 
 	 * For backwards compatibility with the p5.sound API, the functions 
 	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 	 * are also implemented, but their use is deprecated.
@@ -3843,6 +3846,30 @@ function mousePressed() {
 	 * @returns {object[] | Promise<object[]>} an array of objects containing the loaded CSV or a promise
 	 */
 	function loadCSV(url: string): object[] | Promise<object[]>;
+
+	/** 🛠️
+	 * Loads an xml file from the specified url.
+	 * 
+	 * Returns a promise if used in async `setup`.
+	 * 
+	 * @param {string} url xml file
+	 * @returns {Element | Promise<Element>} an object containing the loaded XML in a property called `obj.DOM` or a promise
+	 * @example
+async function setup() {
+	createCanvas(200);
+	background(200);
+	textSize(32);
+
+	let myXML = await loadXML('/assets/animals.xml');
+
+	let mammals = myXML.getElementsByTagName('mammal');
+	let y = 64;
+	for (let mammal of mammals) {
+		text(mammal.textContent, 20, (y += 32));
+	}
+}
+	 */
+	function loadXML(url: string): object | Promise<Element>;
 
 	/** 🛠️
 	 * nf is short for number format. It formats a number

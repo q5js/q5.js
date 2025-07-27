@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "3.2.8",
+	"version": "3.2.10",
 	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
 	"author": "quinton-ashley",
 	"contributors": [

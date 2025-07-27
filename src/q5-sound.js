@@ -29,7 +29,7 @@ Q5.modules.sound = ($, q) => {
 		a._isAudio = true;
 		a.crossOrigin = 'Anonymous';
 		a.promise = new Promise((resolve, reject) => {
-			a.addEventListener('canplaythrough', () => {
+			a.addEventListener('canplay', () => {
 				if (!a.loaded) {
 					a.loaded = true;
 					if (cb) cb(a);

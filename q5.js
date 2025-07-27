@@ -1642,6 +1642,7 @@ Q5.Image = class {
 			if (r[m]) r[m]($, $);
 		}
 		$._pixelDensity = opt.pixelDensity || 1;
+		$._defaultImageScale = q._defaultImageScale;
 		$.createCanvas(w, h, opt);
 		let scale = $._pixelDensity * q._defaultImageScale;
 		$.defaultWidth = w * scale;
@@ -3275,9 +3276,6 @@ Q5.modules.input = ($, q) => {
 		pointer.y = y;
 
 		if (e.isPrimary || !e.pointerId) {
-			q.pmouseX = q.mouseX;
-			q.pmouseY = q.mouseY;
-
 			if (document.pointerLockElement) {
 				q.mouseX += e.movementX;
 				q.mouseY += e.movementY;
@@ -4307,7 +4305,7 @@ Q5.modules.sound = ($, q) => {
 		a._isAudio = true;
 		a.crossOrigin = 'Anonymous';
 		a.promise = new Promise((resolve, reject) => {
-			a.addEventListener('canplaythrough', () => {
+			a.addEventListener('canplay', () => {
 				if (!a.loaded) {
 					a.loaded = true;
 					if (cb) cb(a);
@@ -4523,12 +4521,30 @@ Q5.modules.util = ($, q) => {
 					resolve(f);
 				});
 		});
+		$._preloadPromises.push(ret.promise);
+		if (!$._usePreload) return ret.promise;
 		return ret;
 	};
 
 	$.loadText = (url, cb) => $._loadFile(url, cb, 'text');
 	$.loadJSON = (url, cb) => $._loadFile(url, cb, 'json');
 	$.loadCSV = (url, cb) => $._loadFile(url, cb, 'csv');
+
+	$.loadXML = (url, cb) => {
+		let ret = {};
+		ret.promise = fetch(url)
+			.then((res) => res.text())
+			.then((text) => {
+				let xml = new DOMParser().parseFromString(text, 'application/xml');
+				ret.DOM = xml;
+				delete ret.promise;
+				if (cb) cb(xml);
+				return xml;
+			});
+		$._preloadPromises.push(ret.promise);
+		if (!$._usePreload) return ret.promise;
+		return ret;
+	};
 
 	const imgRegex = /(jpe?g|png|gif|webp|avif|svg)/i,
 		fontRegex = /(ttf|otf|woff2?|eot|json)/i,
@@ -4554,6 +4570,8 @@ Q5.modules.util = ($, q) => {
 				obj = $.loadFont(url);
 			} else if (audioRegex.test(ext)) {
 				obj = $.loadSound(url);
+			} else if (ext == 'xml') {
+				obj = $.loadXML(url);
 			} else {
 				obj = $.loadText(url);
 			}
