@@ -1643,6 +1643,7 @@ Q5.Image = class {
 			if (r[m]) r[m]($, $);
 		}
 		$._pixelDensity = opt.pixelDensity || 1;
+		$._defaultImageScale = q._defaultImageScale;
 		$.createCanvas(w, h, opt);
 		let scale = $._pixelDensity * q._defaultImageScale;
 		$.defaultWidth = w * scale;
@@ -3276,9 +3277,6 @@ Q5.modules.input = ($, q) => {
 		pointer.y = y;
 
 		if (e.isPrimary || !e.pointerId) {
-			q.pmouseX = q.mouseX;
-			q.pmouseY = q.mouseY;
-
 			if (document.pointerLockElement) {
 				q.mouseX += e.movementX;
 				q.mouseY += e.movementY;
@@ -4308,7 +4306,7 @@ Q5.modules.sound = ($, q) => {
 		a._isAudio = true;
 		a.crossOrigin = 'Anonymous';
 		a.promise = new Promise((resolve, reject) => {
-			a.addEventListener('canplaythrough', () => {
+			a.addEventListener('canplay', () => {
 				if (!a.loaded) {
 					a.loaded = true;
 					if (cb) cb(a);

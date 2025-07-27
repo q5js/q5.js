@@ -3212,6 +3212,9 @@ function draw() {
 	 * 
 	 * Use `loaded`, `paused`, and `ended` to check the sound's status.
 	 * 
+	 * The entire sound file must be loaded before playback can start,
+	 * to stream larger audio files use the `loadAudio` function instead.
+	 * 
 	 * For backwards compatibility with the p5.sound API, the functions 
 	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 	 * are also implemented, but their use is deprecated.
