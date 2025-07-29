@@ -1,4 +1,4 @@
-# <img src="https://q5js.org/q5js_logo.webp" height="64"> <img src="https://q5js.org/q5js_brand.webp" height="64">
+# <img src="https://q5js.org/q5js_logo.avif" height="64"> <img src="https://q5js.org/q5js_brand.avif" height="64">
 
 ## Visit [q5js.org](https://q5js.org)! 💫
 

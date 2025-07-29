@@ -39,7 +39,7 @@ function setup() {
 let logo;
 
 async function setup() {
-	logo = await loadImage('/q5js_logo.webp');
+	logo = await loadImage('/q5js_logo.avif');
 }
 
 function draw() {
@@ -58,7 +58,7 @@ function draw() {
 let logo;
 
 function preload() {
-	logo = loadImage('/q5js_logo.webp');
+	logo = loadImage('/q5js_logo.avif');
 }
 
 function draw() {
@@ -67,7 +67,7 @@ function draw() {
 	 * @example
 createCanvas(200, 100);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
 	background(logo);
@@ -291,7 +291,7 @@ createCanvas(200);
 
 usePromiseLoading();
 
-let logo = await loadImage('/q5js_logo.webp');
+let logo = await loadImage('/q5js_logo.avif');
 background(logo);
 	 */
 	function usePromiseLoading(val?: boolean): void;
@@ -1719,7 +1719,7 @@ curve(-100, -200, -50, 0, 50, 0, 100, -200);
 	 * @example
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
 	background(logo);
@@ -1728,7 +1728,7 @@ function draw() {
 let q = await Q5.WebGPU();
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 q.draw = () => {
 	background(logo);
@@ -1750,7 +1750,7 @@ q.draw = () => {
 	 * @example
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
 	image(logo, 0, 0, 200, 200);
@@ -1758,7 +1758,7 @@ function draw() {
 	 * @example
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
   image(logo, 0, 0, 200, 200, 256, 256, 512, 512);
@@ -1773,7 +1773,7 @@ function draw() {
 	 * @param {string} mode
 	 * @example
 createCanvas(200);
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
 	imageMode(CORNER);
@@ -1783,7 +1783,7 @@ function draw() {
 }
 	 * @example
 createCanvas(200);
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
 	imageMode(CENTER);
@@ -1793,7 +1793,7 @@ function draw() {
 }
 	 * @example
 createCanvas(200);
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
 	imageMode(CORNERS);
@@ -1826,7 +1826,7 @@ function draw() {
 	 * @example
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function setup() {
 	logo.resize(128, 128);
@@ -1892,7 +1892,7 @@ function setup() {
 	 * @example
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function setup() {
 	tint(255, 0, 0, 128);
@@ -1932,7 +1932,7 @@ function setup() {
 	 * @example
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function setup() {
 	logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
@@ -1969,7 +1969,7 @@ function draw() {
 	 * @example
 createCanvas(200);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function setup() {
 	let cropped = logo.get(256, 256, 512, 512);
@@ -2058,7 +2058,7 @@ updatePixels();
 	 * @param {number} [value] optional value, depends on filter type
 	 * @example
 createCanvas(200);
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 function setup() {
 	logo.filter(INVERT);
@@ -3758,7 +3758,7 @@ function mousePressed() {
 let logo;
 
 async function setup() {
-	logo = await load('/q5js_logo.webp');
+	logo = await load('/q5js_logo.avif');
 }
 
 function draw() {
@@ -4278,7 +4278,7 @@ q.draw = () => {
 let q = await Q5.WebGPU();
 imageMode(CENTER);
 
-let logo = loadImage('/q5js_logo.webp');
+let logo = loadImage('/q5js_logo.avif');
 
 let grate = createImageShader(`
 @fragment

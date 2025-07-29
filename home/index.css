@@ -182,20 +182,20 @@ a {
 
 .q5js_logo {
 	width: 128px;
-	background-image: url('/q5js_logo.webp');
+	background-image: url('/q5js_logo.avif');
 }
 
 .dark .q5js_logo {
-	background-image: url('/assets/q5js_logo-light.webp');
+	background-image: url('/assets/q5js_logo-light.avif');
 }
 
 .q5js_brand {
 	width: 256px;
-	background-image: url('/q5js_brand.webp');
+	background-image: url('/q5js_brand.avif');
 }
 
 .dark .q5js_brand {
-	background-image: url('/assets/q5js_brand-light.webp');
+	background-image: url('/assets/q5js_brand-light.avif');
 }
 
 .nav-fixed #topNav .img {

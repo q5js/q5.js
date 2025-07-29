@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.2
+ * @version 3.3
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -298,15 +298,31 @@ function Q5(scope, parent, renderer) {
 		wrapWithFES('preload');
 		$.preload();
 
-		// wait for user to define setup, update, or draw
-		await new Promise((resolve) => {
-			function checkUserFns() {
-				if ($.setup || $.update || $.draw || t.setup || t.update || t.draw) {
-					resolve();
-				} else raf(checkUserFns);
-			}
-			checkUserFns();
-		});
+		// wait for the user to define setup, update, or draw
+		await Promise.race([
+			new Promise((resolve) => {
+				function checkUserFns() {
+					if ($.setup || $.update || $.draw || t.setup || t.update || t.draw) {
+						resolve();
+					} else if (!$._setupDone) {
+						// render during loading
+						if ($._render) {
+							$._beginRender();
+							$._render();
+							$._finishRender();
+						}
+						raf(checkUserFns);
+					}
+				}
+				checkUserFns();
+			}),
+			new Promise((resolve) => {
+				setTimeout(() => {
+					// if not loading
+					if (!$._preloadPromises.length) resolve();
+				}, 500);
+			})
+		]);
 
 		await Promise.all($._preloadPromises);
 		if ($._g) await Promise.all($._g._preloadPromises);
@@ -398,7 +414,7 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-Q5.version = Q5.VERSION = '3.2';
+Q5.version = Q5.VERSION = '3.3';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
