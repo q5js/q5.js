@@ -159,7 +159,7 @@ Q5.modules.canvas = ($, q) => {
 
 	$.defaultImageScale = (scale) => {
 		if (!scale) return $._defaultImageScale;
-		if ($._g) $._g.defaultImageScale = scale;
+		if ($._g) $._g._defaultImageScale = scale;
 		return ($._defaultImageScale = scale);
 	};
 	$.defaultImageScale(0.5);
@@ -218,6 +218,7 @@ Q5.modules.canvas = ($, q) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
 		$._resizeCanvas(c.w, c.h);
+		if ($._g) $._g.pixelDensity(v);
 		return v;
 	};
 
