@@ -331,9 +331,9 @@ Q5.Image = class {
 			if (r[m]) r[m]($, $);
 		}
 		$._pixelDensity = opt.pixelDensity || 1;
-		$._defaultImageScale = q._defaultImageScale;
+		$._defaultImageScale = opt.defaultImageScale || q._defaultImageScale;
 		$.createCanvas(w, h, opt);
-		let scale = $._pixelDensity * q._defaultImageScale;
+		let scale = $._pixelDensity * $._defaultImageScale;
 		$.defaultWidth = w * scale;
 		$.defaultHeight = h * scale;
 		delete $.createCanvas;

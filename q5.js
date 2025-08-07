@@ -582,7 +582,7 @@ Q5.modules.canvas = ($, q) => {
 
 	$.defaultImageScale = (scale) => {
 		if (!scale) return $._defaultImageScale;
-		if ($._g) $._g.defaultImageScale = scale;
+		if ($._g) $._g._defaultImageScale = scale;
 		return ($._defaultImageScale = scale);
 	};
 	$.defaultImageScale(0.5);
@@ -641,6 +641,7 @@ Q5.modules.canvas = ($, q) => {
 		if (!v || v == $._pixelDensity) return $._pixelDensity;
 		$._pixelDensity = v;
 		$._resizeCanvas(c.w, c.h);
+		if ($._g) $._g.pixelDensity(v);
 		return v;
 	};
 
@@ -1657,9 +1658,9 @@ Q5.Image = class {
 			if (r[m]) r[m]($, $);
 		}
 		$._pixelDensity = opt.pixelDensity || 1;
-		$._defaultImageScale = q._defaultImageScale;
+		$._defaultImageScale = opt.defaultImageScale || q._defaultImageScale;
 		$.createCanvas(w, h, opt);
-		let scale = $._pixelDensity * q._defaultImageScale;
+		let scale = $._pixelDensity * $._defaultImageScale;
 		$.defaultWidth = w * scale;
 		$.defaultHeight = h * scale;
 		delete $.createCanvas;
@@ -2037,7 +2038,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
 		let ctx = $.ctx;
-		let img, tX, tY, colorStyle;
+		let img, colorStyle;
 
 		if ($._fontMod) $._updateFont();
 
@@ -2078,6 +2079,8 @@ Q5.renderers.c2d.text = ($, q) => {
 			lines = wrapped;
 		}
 
+		let tX, tY;
+
 		if (!genTextImage) {
 			tX = x;
 			tY = y;
@@ -2107,7 +2110,8 @@ Q5.renderers.c2d.text = ($, q) => {
 					imgH = Math.ceil(leading * lines.length + descent);
 
 				img = $.createImage.call($, imgW, imgH, {
-					pixelDensity: $._pixelDensity
+					pixelDensity: $._pixelDensity,
+					defaultImageScale: 1 / $._pixelDensity
 				});
 
 				img._ascent = ascent;
