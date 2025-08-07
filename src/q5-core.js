@@ -277,6 +277,7 @@ function Q5(scope, parent, renderer) {
 		'touchStarted',
 		'touchMoved',
 		'touchEnded',
+		'windowBlurred',
 		'windowResized'
 	];
 	// shim if undefined
