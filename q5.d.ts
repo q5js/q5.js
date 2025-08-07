@@ -1,7 +1,7 @@
 /**
  * q5.d.ts
  * 
- * TypeScript definitions for q5.js for use with IDEs like VSCode
+ * TypeScript definitions for q5.js to use with IDEs like VSCode
  * for autocompletion, hover over documentation, and type checking.
  */
 declare global {

@@ -218,7 +218,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
 		let ctx = $.ctx;
-		let img, tX, tY, colorStyle;
+		let img, colorStyle;
 
 		if ($._fontMod) $._updateFont();
 
@@ -259,6 +259,8 @@ Q5.renderers.c2d.text = ($, q) => {
 			lines = wrapped;
 		}
 
+		let tX, tY;
+
 		if (!genTextImage) {
 			tX = x;
 			tY = y;
@@ -288,7 +290,8 @@ Q5.renderers.c2d.text = ($, q) => {
 					imgH = Math.ceil(leading * lines.length + descent);
 
 				img = $.createImage.call($, imgW, imgH, {
-					pixelDensity: $._pixelDensity
+					pixelDensity: $._pixelDensity,
+					defaultImageScale: 1 / $._pixelDensity
 				});
 
 				img._ascent = ascent;
