@@ -34,6 +34,7 @@ Q5.modules.input = ($, q) => {
 
 	let keysHeld = {};
 	let mouseBtns = [Q5.LEFT, Q5.CENTER, Q5.RIGHT];
+	let pressedMouseButtons = new Set();
 
 	let c = $.canvas;
 
@@ -42,7 +43,7 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._updatePointer = (e) => {
-		let pid = e.pointerId;
+		let pid = e.pointerId ?? 0;
 		$.pointers[pid] ??= { event: e };
 		let pointer = $.pointers[pid];
 		pointer.event = e;
@@ -81,14 +82,14 @@ Q5.modules.input = ($, q) => {
 		}
 	};
 
-	let pressAmt = 0;
-
 	$._onpointerdown = (e) => {
-		pressAmt++;
 		$._startAudio();
 		$._updatePointer(e);
 		q.mouseIsPressed = true;
-		q.mouseButton = mouseBtns[e.button];
+		q.mouseButton = mouseBtns[e.button] ?? Q5.LEFT;
+		pressedMouseButtons.add(e.button);
+
+		try { c?.setPointerCapture?.(e.pointerId); } catch { }
 		$.mousePressed(e);
 	};
 
@@ -100,19 +101,23 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._onpointerup = (e) => {
+		pressedMouseButtons.delete(e.button);
 		q.mouseIsPressed = false;
-		if (pressAmt > 0) pressAmt--;
-		else return;
+
 		$._updatePointer(e);
+		if (pressedMouseButtons.size === 0) {
+			try { c?.releasePointerCapture?.(e.pointerId); } catch { }
+		}
 		delete $.pointers[e.pointerId];
 		$.mouseReleased(e);
 	};
 
 	$._onclick = (e) => {
 		$._updatePointer(e);
+		const originalMouseIsPressed = q.mouseIsPressed;
 		q.mouseIsPressed = true;
 		$.mouseClicked(e);
-		q.mouseIsPressed = false;
+		q.mouseIsPressed = originalMouseIsPressed;
 	};
 
 	$._ondblclick = (e) => {
@@ -126,7 +131,7 @@ Q5.modules.input = ($, q) => {
 		$._updatePointer(e);
 		e.delta = e.deltaY;
 		let ret = $.mouseWheel(e);
-		if (($._isGlobal && !ret) || ret == false) {
+		if (ret === false) {
 			e.preventDefault();
 		}
 	};
@@ -140,13 +145,13 @@ Q5.modules.input = ($, q) => {
 		if (x !== undefined) {
 			name += ' ' + x + ' ' + y;
 		}
-		$.canvas.style.cursor = name + pfx;
+		if (c) c.style.cursor = name + pfx;
 	};
 
-	$.noCursor = () => ($.canvas.style.cursor = 'none');
+	$.noCursor = () => { if (c) c.style.cursor = 'none' };
 
 	$.pointerLock = (unadjustedMovement = false) => {
-		document.body?.requestPointerLock({ unadjustedMovement });
+		c?.requestPointerLock({ unadjustedMovement });
 	};
 
 	$._onkeydown = (e) => {
@@ -202,19 +207,8 @@ Q5.modules.input = ($, q) => {
 			}
 		}
 
-		for (let i = $.touches.length - 1; i >= 0; i--) {
-			let touch = $.touches[i];
-			let found = false;
-			for (let j = 0; j < e.touches.length; j++) {
-				if (e.touches[j].identifier === touch.id) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				$.touches.splice(i, 1);
-			}
-		}
+		const activeTouchIds = new Set([...e.touches].map(t => t.identifier));
+		$.touches = $.touches.filter(t => activeTouchIds.has(t.id));
 	};
 
 	$._ontouchstart = (e) => {
@@ -230,33 +224,58 @@ Q5.modules.input = ($, q) => {
 		if (!$.touchEnded(e)) e.preventDefault();
 	};
 
-	if (window) {
-		let l = window.addEventListener;
-		l('keydown', (e) => $._onkeydown(e), false);
-		l('keyup', (e) => $._onkeyup(e), false);
+	$._onwindowblur = (e) => {
+		if (!$.windowBlurred(e)) e.preventDefault();
+	}
 
-		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
-		l(pointer + 'move', (e) => $._onpointermove(e), false);
-		l(pointer + 'up', (e) => $._onpointerup(e));
-		l(pointer + 'cancel', (e) => $._onpointerup(e));
-		l('touchstart', (e) => $._updateTouches(e));
-		l('touchmove', (e) => $._updateTouches(e));
-		l('touchend', (e) => $._updateTouches(e));
-		l('touchcancel', (e) => $._updateTouches(e));
+	$.resetInput = () => {
+		if (c) $._resetDownState();
+	}
+	$._resetDownState = () => {
+		q.keyIsPressed = false;
+		q.mouseIsPressed = false;
+		q.key = '';
+		q.keyCode = 0;
+		keysHeld = {};
+		pressedMouseButtons.clear();
+		$.pointers = {};
+		$.touches = [];
+		$.mouseButton = '';
+	}
 
-		if (c) c.addEventListener('wheel', (e) => $._onwheel(e));
+	if (typeof window !== 'undefined') {
+		window.addEventListener('keydown', (e) => $._onkeydown(e), false);
+		window.addEventListener('keyup', (e) => $._onkeyup(e), false);
+		window.addEventListener('blur', (e) => $._onwindowblur(e), false);
 
-		if (!$._isGlobal && c) l = c.addEventListener.bind(c);
+		const t = (!$._isGlobal && c) ? c : window;
 
-		l(pointer + 'down', (e) => $._onpointerdown(e));
-		l('click', (e) => $._onclick(e));
-		l('dblclick', (e) => $._ondblclick(e));
+		const pointerMoveEvent = window.PointerEvent ? 'pointermove' : 'mousemove';
+		t.addEventListener(pointerMoveEvent, (e) => $._onpointermove(e), false);
 
-		if (c) l = c.addEventListener.bind(c);
+		t.addEventListener('mousedown', (e) => $._onpointerdown(e), false);
+		t.addEventListener('mouseup', (e) => $._onpointerup(e), false);
+		if (window.PointerEvent) {
+			t.addEventListener('pointercancel', (e) => $._onpointerup(e));
+		}
 
-		l('touchstart', (e) => $._ontouchstart(e));
-		l('touchmove', (e) => $._ontouchmove(e));
-		l('touchend', (e) => $._ontouchend(e));
-		l('touchcancel', (e) => $._ontouchend(e));
+		t.addEventListener('click', (e) => $._onclick(e));
+		t.addEventListener('dblclick', (e) => $._ondblclick(e));
+		t.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			q.mouseButton = Q5.RIGHT;
+			$._onclick(e);
+		});
+
+		const touchStart = (e) => { $._updateTouches(e); $._ontouchstart(e); };
+		const touchMove = (e) => { $._updateTouches(e); $._ontouchmove(e); };
+		const touchEnd = (e) => { $._updateTouches(e); $._ontouchend(e); };
+
+		t.addEventListener('touchstart', touchStart);
+		t.addEventListener('touchmove', touchMove);
+		t.addEventListener('touchend', touchEnd);
+		t.addEventListener('touchcancel', touchEnd);
+
+		if (c) c.addEventListener('wheel', (e) => $._onwheel(e), { passive: false });
 	}
 };
