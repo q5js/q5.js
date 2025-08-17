@@ -56,6 +56,8 @@
 		"p5xjs"
 	],
 	"devDependencies": {
+		"typescript": "^5.9.2",
+		"@types/bun": "^1.2.20",
 		"jest-cli": "^29.7.0",
 		"jsdom": "^25.0.1",
 		"skia-canvas": "^1.0.2",
