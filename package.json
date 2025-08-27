@@ -1,67 +1,67 @@
 {
-	"name": "q5",
-	"version": "3.3.2",
-	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
-	"author": "quinton-ashley",
-	"contributors": [
-		"evanalulu",
-		"Tezumie",
-		"ormaq",
-		"Dukemz",
-		"LingDong-"
-	],
-	"license": "LGPL-3.0",
-	"homepage": "https://q5js.org/home",
-	"main": "q5-server.js",
-	"types": "q5.d.ts",
-	"funding": [
-		{
-			"type": "patreon",
-			"url": "https://www.patreon.com/q5play"
-		},
-		{
-			"type": "ko-fi",
-			"url": "https://ko-fi.com/q5play"
-		},
-		{
-			"type": "github",
-			"url": "https://github.com/sponsors/quinton-ashley"
-		}
-	],
-	"scripts": {
-		"bundle": "bun build-types && cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-shapes.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-color.js src/q5-display.js src/q5-dom.js src/q5-fes.js src/q5-input.js src/q5-math.js src/q5-record.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu.js > q5.js",
-		"min": "terser q5.js --compress ecma=2025 --mangle > q5.min.js",
-		"dist": "bun bundle && bun min",
-		"dist-p5play": "bun dist && cp q5.js ../../web/p5play-web/v3/q5.js && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
-		"build-types": "bun types/build-types.ts",
-		"tests": "jest test",
-		"v": "npm version patch --force",
-		"V": "npm version minor --force",
-		"version": "git add -A",
-		"postversion": "git push"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/q5js/q5.js.git"
-	},
-	"bugs": {
-		"url": "https://github.com/q5js/q5.js/issues"
-	},
-	"keywords": [
-		"q5.js",
-		"q5js",
-		"q5xjs",
-		"p5",
-		"p5js",
-		"p5.js",
-		"p5xjs"
-	],
-	"devDependencies": {
-		"typescript": "^5.9.2",
-		"@types/bun": "^1.2.20",
-		"jest-cli": "^29.7.0",
-		"jsdom": "^25.0.1",
-		"skia-canvas": "^1.0.2",
-		"json2csv": "^6.0.0-alpha.2"
-	}
+    "name": "q5",
+    "version": "3.3.2",
+    "description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
+    "author": "quinton-ashley",
+    "contributors": [
+        "evanalulu",
+        "Tezumie",
+        "ormaq",
+        "Dukemz",
+        "LingDong-"
+    ],
+    "license": "LGPL-3.0",
+    "homepage": "https://q5js.org/home",
+    "main": "q5-server.js",
+    "types": "q5.d.ts",
+    "funding": [
+        {
+            "type": "patreon",
+            "url": "https://www.patreon.com/q5play"
+        },
+        {
+            "type": "ko-fi",
+            "url": "https://ko-fi.com/q5play"
+        },
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/quinton-ashley"
+        }
+    ],
+    "scripts": {
+        "bundle": "bun build-types && cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-shapes.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-color.js src/q5-display.js src/q5-dom.js src/q5-fes.js src/q5-input.js src/q5-math.js src/q5-record.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu.js > q5.js",
+        "min": "terser q5.js --compress ecma=2025 --mangle > q5.min.js",
+        "dist": "bun bundle && bun min",
+        "dist-p5play": "bun dist && cp q5.js ../../web/p5play-web/v3/q5.js && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
+        "build-types": "bun types_build/build-types.ts",
+        "tests": "jest test",
+        "v": "npm version patch --force",
+        "V": "npm version minor --force",
+        "version": "git add -A",
+        "postversion": "git push"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/q5js/q5.js.git"
+    },
+    "bugs": {
+        "url": "https://github.com/q5js/q5.js/issues"
+    },
+    "keywords": [
+        "q5.js",
+        "q5js",
+        "q5xjs",
+        "p5",
+        "p5js",
+        "p5.js",
+        "p5xjs"
+    ],
+    "devDependencies": {
+        "typescript": "^5.9.2",
+        "@types/bun": "^1.2.20",
+        "jest-cli": "^29.7.0",
+        "jsdom": "^25.0.1",
+        "skia-canvas": "^1.0.2",
+        "json2csv": "^6.0.0-alpha.2"
+    }
 }
