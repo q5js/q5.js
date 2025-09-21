@@ -541,6 +541,8 @@ Q5.modules.canvas = ($, q) => {
 		let g = new Q5('graphics', undefined, opt.renderer || ($._webgpuFallback ? 'webgpu-fallback' : $._renderer));
 		opt.alpha ??= true;
 		opt.colorSpace ??= $.canvas.colorSpace;
+		opt.pixelDensity ??= $._pixelDensity;
+		g._defaultImageScale = $._defaultImageScale;
 		g.createCanvas.call($, w, h, opt);
 		let scale = g._pixelDensity * $._defaultImageScale;
 		g.defaultWidth = w * scale;
@@ -597,8 +599,10 @@ Q5.modules.canvas = ($, q) => {
 			el.append(c);
 
 			function parentResized() {
-				$._didResize = true;
-				$._adjustDisplay();
+				if ($.frameCount > 1) {
+					$._didResize = true;
+					$._adjustDisplay();
+				}
 			}
 			if (typeof ResizeObserver == 'function') {
 				if ($._ro) $._ro.disconnect();

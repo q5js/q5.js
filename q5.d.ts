@@ -2904,20 +2904,6 @@ q.draw = () => {
 		}
 	}
 };
-	 * @example
-let q = await Q5.WebGPU();
-frameRate(30);
-
-q.draw = () => {
-	let zoom = mouseY / 2000;
-	let t = millis() * 0.002;
-	for (let x = -50; x < 50; x++) {
-		for (let y = -50; y < 50; y++) {
-			stroke(noise(t, x * zoom, y * zoom));
-			point(x, y, 1);
-		}
-	}
-};
 	 */
 	function noise(x?: number, y?: number, z?: number): number;
 
