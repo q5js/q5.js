@@ -50,9 +50,13 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$.createCanvas = function (w, h, options) {
-		if (typeof w == 'object') {
+		if (isNaN(w) || (typeof w == 'string' && !w.includes(':'))) {
 			options = w;
 			w = null;
+		}
+		if (typeof h != 'number') {
+			options = h;
+			h = null;
 		}
 		options ??= arguments[3];
 		if (typeof options == 'string') options = { renderer: options };
@@ -109,6 +113,8 @@ Q5.modules.canvas = ($, q) => {
 		let rend = $._createCanvas(c.w, c.h, opt);
 
 		if ($._addEventMethods) $._addEventMethods(c);
+
+		$.canvas.ready = true;
 
 		return rend;
 	};
@@ -310,7 +316,7 @@ Q5.HUE_ROTATE = 13;
 
 Q5.C2D = Q5.P2D = Q5.P2DHDR = 'c2d';
 Q5.WEBGL = 'webgl';
-Q5.WEBGPU = 'webgpu';
+Q5.GPU = Q5.WEBGPU = 'webgpu';
 
 Q5.canvasOptions = {
 	alpha: false,

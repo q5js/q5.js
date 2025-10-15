@@ -125,7 +125,7 @@ class MiniEditor {
 		try {
 			let userCode = this.editor.getValue();
 
-			let useWebGPU = userCode.includes('Q5.WebGPU');
+			let useWebGPU = userCode.includes('GPU');
 
 			if (useWebGPU && Q5.canUseWebGPU == false) {
 				this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
@@ -143,6 +143,7 @@ class MiniEditor {
 					const isAsync = match.includes('async');
 					return `q.${f} = ${isAsync ? 'async ' : ''}function(`;
 				});
+				userCode = userCode.replace(`Q5.${f}`, `q.${f}`);
 			}
 
 			const func = new Function(

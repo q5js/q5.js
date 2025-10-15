@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.3
+ * @version 3.4
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -10,6 +10,12 @@ function Q5(scope, parent, renderer) {
 	let $ = this;
 	$._isQ5 = $._q5 = true;
 	$._parent = parent;
+
+	let readyResolve;
+	$.ready = new Promise((res) => {
+		readyResolve = res;
+	});
+
 	if (renderer == 'webgpu-fallback') {
 		$._renderer = 'c2d';
 		$._webgpu = $._webgpuFallback = true;
@@ -21,7 +27,7 @@ function Q5(scope, parent, renderer) {
 	let autoLoaded = scope == 'auto';
 	scope ??= 'global';
 	if (scope == 'auto') {
-		if (!(window.setup || window.update || window.draw)) return;
+		if (!(window.setup || window.update || Q5.update || window.draw || Q5.draw)) return;
 		scope = 'global';
 	}
 	let globalScope;
@@ -282,6 +288,18 @@ function Q5(scope, parent, renderer) {
 	// shim if undefined
 	for (let name of userFns) $[name] ??= () => {};
 
+	if ($._isGlobal) {
+		for (let name of ['setup', 'update', 'draw', ...userFns]) {
+			if (Q5[name]) $[name] = Q5[name];
+			else {
+				Object.defineProperty(Q5, name, {
+					get: () => $[name],
+					set: (fn) => ($[name] = fn)
+				});
+			}
+		}
+	}
+
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
 		$[name] = (event) => {
@@ -295,6 +313,10 @@ function Q5(scope, parent, renderer) {
 	}
 
 	async function start() {
+		await runHooks('presetup');
+
+		readyResolve();
+
 		wrapWithFES('preload');
 		$.preload();
 
@@ -306,7 +328,7 @@ function Q5(scope, parent, renderer) {
 						resolve();
 					} else if (!$._setupDone) {
 						// render during loading
-						if ($._render) {
+						if ($.canvas?.ready && $._render) {
 							$._beginRender();
 							$._render();
 							$._finishRender();
@@ -338,7 +360,6 @@ function Q5(scope, parent, renderer) {
 
 		$.draw ??= t.draw || (() => {});
 
-		await runHooks('presetup');
 		millisStart = performance.now();
 		await $.setup();
 		$._setupDone = true;
@@ -402,19 +423,27 @@ Q5.prototype.registerMethod = (m, fn) => {
 Q5.preloadMethods = {};
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
 
-if (Q5._server) global.p5 ??= global.Q5 = Q5;
-
-if (typeof window == 'object') window.p5 ??= window.Q5 = Q5;
-else global.window = 0;
-
 function createCanvas(w, h, opt) {
-	if (!Q5._hasGlobal) {
+	if (Q5._hasGlobal) return;
+
+	if (w == 'webgpu' || h == 'webgpu' || opt == 'webgpu' || opt?.renderer == 'webgpu') {
+		return Q5.WebGPU().then((q) => q.createCanvas(w, h, opt));
+	} else {
 		let q = new Q5();
-		q.createCanvas(w, h, opt);
+		let c = q.createCanvas(w, h, opt);
+		return q.ready.then(() => c);
 	}
 }
 
-Q5.version = Q5.VERSION = '3.3';
+if (Q5._server) global.p5 ??= global.Q5 = Q5;
+
+if (typeof window == 'object') {
+	window.p5 ??= window.Q5 = Q5;
+	window.createCanvas = createCanvas;
+	window.GPU = window.WEBGPU = 'webgpu';
+} else global.window = 0;
+
+Q5.version = Q5.VERSION = '3.4';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -473,9 +502,13 @@ Q5.modules.canvas = ($, q) => {
 	};
 
 	$.createCanvas = function (w, h, options) {
-		if (typeof w == 'object') {
+		if (isNaN(w) || (typeof w == 'string' && !w.includes(':'))) {
 			options = w;
 			w = null;
+		}
+		if (typeof h != 'number') {
+			options = h;
+			h = null;
 		}
 		options ??= arguments[3];
 		if (typeof options == 'string') options = { renderer: options };
@@ -532,6 +565,8 @@ Q5.modules.canvas = ($, q) => {
 		let rend = $._createCanvas(c.w, c.h, opt);
 
 		if ($._addEventMethods) $._addEventMethods(c);
+
+		$.canvas.ready = true;
 
 		return rend;
 	};
@@ -733,7 +768,7 @@ Q5.HUE_ROTATE = 13;
 
 Q5.C2D = Q5.P2D = Q5.P2DHDR = 'c2d';
 Q5.WEBGL = 'webgl';
-Q5.WEBGPU = 'webgpu';
+Q5.GPU = Q5.WEBGPU = 'webgpu';
 
 Q5.canvasOptions = {
 	alpha: false,
@@ -8110,8 +8145,11 @@ Q5.initWebGPU = async () => {
 
 Q5.WebGPU = async function (scope, parent) {
 	if (!scope || scope == 'global') Q5._hasGlobal = true;
+	let q;
 	if (!(await Q5.initWebGPU())) {
-		return new Q5(scope, parent, 'webgpu-fallback');
+		q = new Q5(scope, parent, 'webgpu-fallback');
 	}
-	return new Q5(scope, parent, 'webgpu');
+	q = new Q5(scope, parent, 'webgpu');
+	await q.ready;
+	return q;
 };
