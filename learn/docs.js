@@ -246,8 +246,14 @@ ${js}
 	return sections;
 }
 
+// get args from url
+let urlParams = new URLSearchParams(window.location.search);
+let queryString = urlParams.toString() ? '?' + urlParams.toString() : '';
+
 (async () => {
-	let data = await fetch('../q5.d.ts').then((res) => res.text());
+	let isClassic = urlParams.has('classic');
+	let dtsFile = isClassic ? 'q5_classic.d.ts' : '../q5.d.ts';
+	let data = await fetch(dtsFile).then((res) => res.text());
 	markdownText = convertTSDefToMarkdown(data);
 	parseMarkdownIntoSections(markdownText);
 	populateNavigation();
@@ -494,7 +500,7 @@ function populateContentArea() {
 	contentArea.append(spacer);
 
 	if (currentLoadedSectionId != currentSectionId) {
-		history.pushState(null, '', `#${currentSectionId}`);
+		history.pushState(null, '', `${queryString}#${currentSectionId}`);
 	}
 	currentLoadedSectionId = currentSectionId;
 }
@@ -587,7 +593,7 @@ async function navigateTo(sectionId, subsectionId) {
 	}
 
 	let targetId = subsectionId || sectionId;
-	history.pushState(null, '', `#${targetId}`);
+	history.pushState(null, '', `${queryString}#${targetId}`);
 	scrollToElement(document.getElementById(targetId));
 }
 
@@ -607,7 +613,7 @@ function updateNavigationActiveState() {
 }
 
 async function displayContent() {
-	const hash = location.hash.slice(1);
+	const hash = location.hash.slice(1).split('?')[0]; // Remove query params from hash
 	if (!hash) {
 		// Find the first section ID (e.g., "coreSection")
 		const firstSectionId = Object.keys(sections)[0];
