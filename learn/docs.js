@@ -251,8 +251,8 @@ let urlParams = new URLSearchParams(window.location.search);
 let queryString = urlParams.toString() ? '?' + urlParams.toString() : '';
 
 (async () => {
-	let isClassic = urlParams.has('classic');
-	let dtsFile = isClassic ? 'q5_classic.d.ts' : '../q5.d.ts';
+	let isClassic = urlParams.has('webgpu');
+	let dtsFile = isClassic ? 'q5_webgpu.d.ts' : '../q5.d.ts';
 	let data = await fetch(dtsFile).then((res) => res.text());
 	markdownText = convertTSDefToMarkdown(data);
 	parseMarkdownIntoSections(markdownText);

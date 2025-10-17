@@ -3090,6 +3090,7 @@ Q5.initWebGPU = async () => {
 		return false;
 	}
 	if (!Q5.requestedGPU) {
+		Q5.requestedGPU = true;
 		let adapter = await navigator.gpu.requestAdapter();
 		if (!adapter) {
 			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, Vulkan may need to be enabled.');

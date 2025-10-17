@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.4
+ * @version 3.5
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -426,12 +426,14 @@ Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
 function createCanvas(w, h, opt) {
 	if (Q5._hasGlobal) return;
 
-	if (w == 'webgpu' || h == 'webgpu' || opt == 'webgpu' || opt?.renderer == 'webgpu') {
-		return Q5.WebGPU().then((q) => q.createCanvas(w, h, opt));
-	} else {
+	let useC2D = w == 'c2d' || h == 'c2d' || opt == 'c2d' || opt?.renderer == 'c2d' || !Q5._esm;
+
+	if (useC2D) {
 		let q = new Q5();
 		let c = q.createCanvas(w, h, opt);
 		return q.ready.then(() => c);
+	} else {
+		return Q5.WebGPU().then((q) => q.createCanvas(w, h, opt));
 	}
 }
 
@@ -440,14 +442,21 @@ if (Q5._server) global.p5 ??= global.Q5 = Q5;
 if (typeof window == 'object') {
 	window.p5 ??= window.Q5 = Q5;
 	window.createCanvas = createCanvas;
-	window.GPU = window.WEBGPU = 'webgpu';
+	window.C2D = 'c2d';
+	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.4';
+Q5.version = Q5.VERSION = '3.5';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
-		if (!Q5._hasGlobal) new Q5('auto');
+		if (!Q5._hasGlobal) {
+			if (Q5.setup || Q5.update || Q5.draw) {
+				Q5.WebGPU();
+			} else {
+				new Q5('auto');
+			}
+		}
 	});
 }
 Q5.modules.canvas = ($, q) => {
@@ -2286,6 +2295,7 @@ Q5.modules.color = ($, q) => {
 		pink: [255, 192, 203],
 		purple: [128, 0, 128],
 		red: [255, 0, 0],
+		silver: [192, 192, 192],
 		skyblue: [135, 206, 235],
 		tan: [210, 180, 140],
 		turquoise: [64, 224, 208],
@@ -8128,6 +8138,7 @@ Q5.initWebGPU = async () => {
 		return false;
 	}
 	if (!Q5.requestedGPU) {
+		Q5.requestedGPU = true;
 		let adapter = await navigator.gpu.requestAdapter();
 		if (!adapter) {
 			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, Vulkan may need to be enabled.');

@@ -125,7 +125,8 @@ class MiniEditor {
 		try {
 			let userCode = this.editor.getValue();
 
-			let useWebGPU = userCode.includes('GPU');
+			let useWebGPU =
+				userCode.includes('= function') || userCode.includes('await createCanvas') || /webgpu/i.test(userCode);
 
 			if (useWebGPU && Q5.canUseWebGPU == false) {
 				this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
