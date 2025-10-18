@@ -1,3 +1,8 @@
+Q5.MAX_TRANSFORMS = 1000;
+Q5.MAX_RECTS = 10000;
+Q5.MAX_ELLIPSES = 1000;
+// Q5.online = false;
+
 toggleNavButton.addEventListener('pointerup', () => {
 	navbar.classList.toggle('navclose');
 	navbar.classList.toggle('navopen');

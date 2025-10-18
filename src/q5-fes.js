@@ -17,6 +17,7 @@ Q5.modules.fes = ($) => {
 
 		let errFile = stackLines[idx].split(sep).at(-1);
 		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
+		errFile = errFile.split(')')[0];
 		let parts = errFile.split(':');
 		let lineNum = parseInt(parts.at(-2));
 		parts[parts.length - 1] = parts.at(-1).split(')')[0];
@@ -69,21 +70,21 @@ Q5.modules.fes = ($) => {
 			});
 		}
 	}
-};
 
-if (typeof navigator != undefined && navigator.onLine) {
-	async function checkLatestVersion() {
-		try {
-			let response = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
-			if (!response.ok) return;
-			let data = await response.json();
-			let l = data.tags.latest;
-			l = l.slice(0, l.lastIndexOf('.'));
-			if (l != Q5.version) {
-				console.warn(`q5.js v${l} is now available! Consider updating from v${Q5.version}.`);
-			}
-		} catch (e) {}
+	if (Q5.online != false && typeof navigator != undefined && navigator.onLine) {
+		async function checkLatestVersion() {
+			try {
+				let response = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
+				if (!response.ok) return;
+				let data = await response.json();
+				let l = data.tags.latest;
+				l = l.slice(0, l.lastIndexOf('.'));
+				if (l != Q5.version) {
+					console.warn(`q5.js v${l} is now available! Consider updating from v${Q5.version}.`);
+				}
+			} catch (e) {}
+		}
+
+		checkLatestVersion();
 	}
-
-	checkLatestVersion();
-}
+};

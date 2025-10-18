@@ -259,8 +259,8 @@ Q5.modules.dom = ($, q) => {
 		el.type = 'range';
 		el.min = min;
 		el.max = max;
-		el.value = value;
 		el.step = step;
+		el.value = value;
 		el.val = () => parseFloat(el.value);
 		return el;
 	};

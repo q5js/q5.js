@@ -458,10 +458,6 @@ createCanvas(200);
 createCanvas(200, 100);
 circle(100, 50, 80);
 	 * @example
-await Q5.WebGPU();
-createCanvas(200, 100);
-circle(0, 0, 80);
-	 * @example
 createCanvas(200, 200, { alpha: true });
 
 function draw() {
@@ -971,15 +967,15 @@ function draw() {
 	c.g = (c.g + 1) % 256;
 }
 	 * @example
-let q = await Q5.WebGPU();
+createCanvas(200);
 
-//           (r, g, b,   a)
-let c = color(0, 1, 1, 0.2);
+//           (r,   g,   b,  a)
+let c = color(0, 255, 255, 50);
 
-q.draw = () => {
+function draw() {
 	fill(c);
 	circle(mouseX, mouseY, 50);
-};
+}
 	 */
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
 
@@ -1274,12 +1270,10 @@ circle(25, 12.5, 16);
 createCanvas(200, 100);
 background('crimson');
 	 * @example
-let q = await Q5.WebGPU();
-
-q.draw = () => {
-	background(0.5, 0.4);
+function draw() {
+	background(128, 110);
 	circle(mouseX, mouseY, 20);
-};
+}
 	 */
 	function background(filler: Color | Q5.Image): void;
 
@@ -1395,12 +1389,10 @@ background(200);
 strokeWeight(5);
 capsule(40, 40, 160, 60, 10);
 	 * @example
-let q = await Q5.WebGPU();
-
-q.draw = () => {
-	background(0.8);
+function draw() {
+	background(200);
 	strokeWeight(10);
-	capsule(0, 0, mouseX, mouseY, 20);
+	capsule(100, 100, mouseX, mouseY, 20);
 }
 	 */
 	function capsule(x1: number, y1: number, x2: number, y2: number, r: number): void;
@@ -1553,15 +1545,6 @@ ellipse(50, 25, 150, 75);
 	 * 
 	 * Only takes effect in q5 WebGPU.
 	 * @param {number} val curve detail level, default is 20
-	 * @example
-await Q5.WebGPU();
-
-curveDetail(4);
-
-strokeWeight(10);
-stroke(0, 1, 1);
-noFill();
-curve(-100, -200, -50, 0, 50, 0, 100, -200);
 	 */
 	function curveDetail(val: number): void;
 
@@ -1719,15 +1702,6 @@ let logo = loadImage('/q5js_logo.avif');
 function draw() {
 	background(logo);
 }
-	 * @example
-let q = await Q5.WebGPU();
-createCanvas(200);
-
-let logo = loadImage('/q5js_logo.avif');
-
-q.draw = () => {
-	background(logo);
-};
 	 */
 	function loadImage(url: string): Q5.Image | Promise<Q5.Image>;
 
@@ -2212,13 +2186,12 @@ textFont('serif');
 textSize(32);
 text('Hello, world!', 15, 90);
 	 * @example
-let q = await Q5.WebGPU();
 createCanvas(200);
-background(0.8);
+background(200);
 
 textFont('monospace');
 
-q.setup = () => {
+function setup() {
   text('Hello, world!', -65, 0);
 }
 	 */
@@ -2385,23 +2358,21 @@ function draw() {
 	 * @param {number} x x-coordinate where the image should be placed
 	 * @param {number} y y-coordinate where the image should be placed
 	 * @example
-let q = await Q5.WebGPU();
 createCanvas(200);
-background(0.8);
+background(200);
 textSize(96);
 textAlign(CENTER, CENTER);
 
-textImage('🐶', 0, 0);
+textImage('🐶', 100,100);
 	 * @example
-let q = await Q5.WebGPU();
 createCanvas(200);
 
 loadFont('/assets/Robotica.ttf');
 
-q.setup = () => {
-	background(0.8);
+function setup() {
+	background(200);
 	textSize(66);
-	textImage('Hello!', -100, 100);
+	textImage('Hello!', 0, 0);
 };
 	 */
 	function textImage(img: Q5.Image | String, x: number, y: number): void;
@@ -2896,19 +2867,6 @@ function draw() {
 		circle(x, 100, n * 40);
 	}
 }
-	 * @example
-let q = await Q5.WebGPU();
-
-q.draw = () => {
-	noStroke();
-	let t = millis() * 0.002;
-	for (let x = -100; x < 100; x += 5) {
-		for (let y = -100; y < 100; y += 5) {
-			fill(noise(t, (mouseX + x) * .05, y * .05));
-			square(x, y, 5);
-		}
-	}
-};
 	 */
 	function noise(x?: number, y?: number, z?: number): number;
 
@@ -3764,17 +3722,6 @@ await load('/assets/Robotica.ttf');
 background(255);
 textSize(24);
 text('Hello, world!', 16, 100);
-	 * @example
-let q = await Q5.WebGPU();
-createCanvas(200);
-
-let [jump, retro] = await load(
-		'/assets/jump.wav', '/assets/retro.flac'
-	);
-
-q.mousePressed = () => {
-	mouseButton == 'left' ? jump.play() : retro.play();
-};
 	 */
 	function load(...urls: string[]): Promise<any[]>;
 

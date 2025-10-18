@@ -33,6 +33,8 @@ struct Q5 {
 		frameLayout,
 		frameSampler,
 		frameBindGroup,
+		frameBindGroupA,
+		frameBindGroupB,
 		colorIndex = 2,
 		colorStackIndex = 12,
 		prevFramePL = 0,
@@ -190,6 +192,25 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		// Create a pipeline for rendering frames
 		$._pipelines[0] = Q5.device.createRenderPipeline($._pipelineConfigs[0]);
+
+		// Create persistent bind groups for both frame buffers
+		frameBindGroupA = Q5.device.createBindGroup({
+			layout: frameLayout,
+			entries: [
+				{ binding: 0, resource: { buffer: uniformBuffer } },
+				{ binding: 1, resource: frameSampler },
+				{ binding: 2, resource: frameA.createView() }
+			]
+		});
+
+		frameBindGroupB = Q5.device.createBindGroup({
+			layout: frameLayout,
+			entries: [
+				{ binding: 0, resource: { buffer: uniformBuffer } },
+				{ binding: 1, resource: frameSampler },
+				{ binding: 2, resource: frameB.createView() }
+			]
+		});
 	};
 
 	$._createCanvas = (w, h, opt) => {
@@ -570,6 +591,9 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$.popStyles();
 	};
 
+	// Reusable array for calcBox to avoid GC
+	let boxCache = [0, 0, 0, 0];
+
 	const calcBox = (x, y, w, h, mode) => {
 		// left, right, top, bottom
 		let l, r, t, b;
@@ -593,7 +617,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			b = h;
 		}
 
-		return [l, r, t, b];
+		boxCache[0] = l;
+		boxCache[1] = r;
+		boxCache[2] = t;
+		boxCache[3] = b;
+		return boxCache;
 	};
 
 	// prettier-ignore
@@ -687,10 +715,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 
 	$._beginRender = () => {
-		// swap the frame textures
+		// swap the frame textures and bind groups
 		const temp = frameA;
 		frameA = frameB;
 		frameB = temp;
+
+		const tempBindGroup = frameBindGroupA;
+		frameBindGroupA = frameBindGroupB;
+		frameBindGroupB = tempBindGroup;
 
 		encoder = Q5.device.createCommandEncoder();
 
@@ -707,14 +739,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			]
 		});
 
-		frameBindGroup = Q5.device.createBindGroup({
-			layout: frameLayout,
-			entries: [
-				{ binding: 0, resource: { buffer: uniformBuffer } },
-				{ binding: 1, resource: frameSampler },
-				{ binding: 2, resource: frameB.createView() }
-			]
-		});
+		// Use pre-created bind group instead of creating new one
+		frameBindGroup = frameBindGroupB;
 
 		if (!shouldClear) {
 			pass.setPipeline($._pipelines[prevFramePL]);
@@ -725,6 +751,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	};
 
 	let transformsBuffer, colorsBuffer, shapesVertBuff, imgVertBuff, charBuffer, textBuffer;
+	let mainBindGroup, lastTransformsBuffer, lastColorsBuffer;
 
 	$._render = () => {
 		let transformsSize = matrices.length * MATRIX_SIZE * 4; // 4 bytes per float
@@ -749,32 +776,36 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		Q5.device.queue.writeBuffer(colorsBuffer, 0, colorStack.subarray(0, colorStackIndex));
 
-		$._uniforms = [
-			$.width,
-			$.height,
-			$.halfWidth,
-			$.halfHeight,
-			$._pixelDensity,
-			$.frameCount,
-			performance.now(),
-			$.deltaTime,
-			$.mouseX,
-			$.mouseY,
-			$.mouseIsPressed ? 1 : 0,
-			$.keyCode,
-			$.keyIsPressed ? 1 : 0
-		];
+		// Reuse uniform array instead of creating new one each frame
+		$._uniforms[0] = $.width;
+		$._uniforms[1] = $.height;
+		$._uniforms[2] = $.halfWidth;
+		$._uniforms[3] = $.halfHeight;
+		$._uniforms[4] = $._pixelDensity;
+		$._uniforms[5] = $.frameCount;
+		$._uniforms[6] = performance.now();
+		$._uniforms[7] = $.deltaTime;
+		$._uniforms[8] = $.mouseX;
+		$._uniforms[9] = $.mouseY;
+		$._uniforms[10] = $.mouseIsPressed ? 1 : 0;
+		$._uniforms[11] = $.keyCode;
+		$._uniforms[12] = $.keyIsPressed ? 1 : 0;
 
-		Q5.device.queue.writeBuffer(uniformBuffer, 0, new Float32Array($._uniforms));
+		Q5.device.queue.writeBuffer(uniformBuffer, 0, $._uniforms);
 
-		let mainBindGroup = Q5.device.createBindGroup({
-			layout: mainLayout,
-			entries: [
-				{ binding: 0, resource: { buffer: uniformBuffer } },
-				{ binding: 1, resource: { buffer: transformsBuffer } },
-				{ binding: 2, resource: { buffer: colorsBuffer } }
-			]
-		});
+		// Only recreate bind group if buffers changed
+		if (!mainBindGroup || lastTransformsBuffer !== transformsBuffer || lastColorsBuffer !== colorsBuffer) {
+			mainBindGroup = Q5.device.createBindGroup({
+				layout: mainLayout,
+				entries: [
+					{ binding: 0, resource: { buffer: uniformBuffer } },
+					{ binding: 1, resource: { buffer: transformsBuffer } },
+					{ binding: 2, resource: { buffer: colorsBuffer } }
+				]
+			});
+			lastTransformsBuffer = transformsBuffer;
+			lastColorsBuffer = colorsBuffer;
+		}
 
 		pass.setBindGroup(0, mainBindGroup);
 
@@ -822,11 +853,13 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		// prepare to render text
 
 		if (charStack.length) {
-			// Calculate total buffer size for text data
-			let totalTextSize = 0;
+			// Flatten char data into reusable buffer instead of creating new array
+			let charOffset = 0;
 			for (let charsData of charStack) {
-				totalTextSize += charsData.length * 4;
+				charDataBuffer.set(charsData, charOffset);
+				charOffset += charsData.length;
 			}
+			let totalTextSize = charOffset * 4;
 
 			if (!charBuffer || charBuffer.size < totalTextSize) {
 				if (charBuffer) charBuffer.destroy();
@@ -836,10 +869,16 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				});
 			}
 
-			Q5.device.queue.writeBuffer(charBuffer, 0, new Float32Array(charStack.flat()));
+			Q5.device.queue.writeBuffer(charBuffer, 0, charDataBuffer.buffer, 0, totalTextSize);
 
-			// Calculate total buffer size for metadata
-			let totalMetadataSize = textStack.length * 8 * 4;
+			// Flatten text metadata into reusable buffer
+			let textOffset = 0;
+			for (let textData of textStack) {
+				textDataBuffer.set(textData, textOffset);
+				textOffset += textData.length;
+			}
+			let totalMetadataSize = textOffset * 4;
+
 			if (!textBuffer || textBuffer.size < totalMetadataSize) {
 				if (textBuffer) textBuffer.destroy();
 				textBuffer = Q5.device.createBuffer({
@@ -849,7 +888,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				});
 			}
 
-			Q5.device.queue.writeBuffer(textBuffer, 0, new Float32Array(textStack.flat()));
+			Q5.device.queue.writeBuffer(textBuffer, 0, textDataBuffer.buffer, 0, totalMetadataSize);
 
 			// create a single bind group for the text buffer and metadata buffer
 			$._textBindGroup = Q5.device.createBindGroup({
@@ -967,14 +1006,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			]
 		});
 
-		frameBindGroup = Q5.device.createBindGroup({
-			layout: frameLayout,
-			entries: [
-				{ binding: 0, resource: { buffer: uniformBuffer } },
-				{ binding: 1, resource: frameSampler },
-				{ binding: 2, resource: frameA.createView() }
-			]
-		});
+		// Use pre-created bind group instead of creating new one
+		frameBindGroup = frameBindGroupA;
 
 		pass.setPipeline($._pipelines[framePL]);
 		pass.setBindGroup(0, frameBindGroup);
@@ -986,11 +1019,11 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$._pass = pass = encoder = null;
 
 		// clear the stacks for the next frame
-		drawStack.splice(0, drawStack.length);
+		drawStack.length = 0; // faster than splice for clearing
 		colorIndex = 2;
 		colorStackIndex = 12;
-		matrices = [matrices[0]];
-		matricesIdxStack = [];
+		matrices.length = 1; // keep first matrix, clear rest
+		matricesIdxStack.length = 0;
 
 		// frameA can now be saved when saveCanvas is run
 		$._texture = frameA;
@@ -998,13 +1031,15 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		// reset
 		shapesVertIdx = 0;
 		imgVertIdx = 0;
-		$._textureBindGroups.splice(tIdx, vidFrames);
+		// Remove video frames without creating new array
+		if (vidFrames > 0) {
+			$._textureBindGroups.length = tIdx;
+		}
 		vidFrames = 0;
-		charStack = [];
-		textStack = [];
-		rectStack = new Float32Array(Q5.MAX_RECTS * 16);
+		charStack.length = 0;
+		textStack.length = 0;
+		// Don't create new typed arrays - just reset index
 		rectStackIdx = 0;
-		ellipseStack = new Float32Array(Q5.MAX_ELLIPSES * 16);
 		ellipseStackIdx = 0;
 
 		// destroy buffers
@@ -1576,6 +1611,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$.rectMode = (x) => (_rectMode = x);
 	$._getRectMode = () => _rectMode;
 
+	// Reusable array for rect mode calculations
+	let rectModeCache = [0, 0, 0, 0];
+
 	function applyRectMode(x, y, w, h) {
 		let hw = w / 2,
 			hh = h / 2;
@@ -1593,7 +1631,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				y += hh;
 			}
 		}
-		return [x, y, hw, hh];
+		rectModeCache[0] = x;
+		rectModeCache[1] = y;
+		rectModeCache[2] = hw;
+		rectModeCache[3] = hh;
+		return rectModeCache;
 	}
 
 	$.rect = (x, y, w, h, rr = 0) => {
@@ -1871,6 +1913,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$.ellipseMode = (x) => (_ellipseMode = x);
 	$._getEllipseMode = () => _ellipseMode;
 
+	// Reusable array for ellipse mode calculations
+	let ellipseModeCache = [0, 0, 0, 0];
+
 	function applyEllipseMode(x, y, w, h) {
 		h ??= w;
 		let a, b;
@@ -1891,7 +1936,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			a = (w - x) / 2;
 			b = (h - y) / 2;
 		}
-		return [x, y, a, b];
+		ellipseModeCache[0] = x;
+		ellipseModeCache[1] = y;
+		ellipseModeCache[2] = a;
+		ellipseModeCache[3] = b;
+		return ellipseModeCache;
 	}
 
 	$.ellipse = (x, y, w, h) => {
@@ -2288,6 +2337,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$.imageMode = (x) => (_imageMode = x);
 	$._getImageMode = () => _imageMode;
 
+	// Reusable uniform buffer array to avoid GC
+	$._uniforms = new Float32Array(13);
+
 	const addImgVert = (x, y, u, v, ci, ti, ia) => {
 		let s = imgVertStack,
 			i = imgVertIdx;
@@ -2302,6 +2354,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
+		if (!img) return;
 		let isVideo;
 		if (img._texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
@@ -2716,7 +2769,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$._loadDefaultFont = (fontName, cb) => {
 		fonts[fontName] = null;
 		let url = `https://q5js.org/fonts/${fontName}-msdf.json`;
-		if (!navigator.onLine) {
+		if (Q5.online == false || !navigator.onLine) {
 			url = `/node_modules/q5/builtinFonts/${fontName}-msdf.json`;
 		}
 		return $.loadFont(url, cb);
@@ -2789,13 +2842,20 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	let charStack = [],
 		textStack = [];
 
+	// Reusable array for line widths to avoid GC
+	let lineWidthsCache = new Array(100);
+
+	// Reusable buffers for text data to avoid creating new arrays
+	let charDataBuffer = new Float32Array(100000); // reusable buffer for char data
+	let textDataBuffer = new Float32Array(10000); // reusable buffer for text metadata
+
 	let measureText = (font, text, charCallback) => {
 		let maxWidth = 0,
 			offsetX = 0,
 			offsetY = 0,
 			line = 0,
 			printedCharCount = 0,
-			lineWidths = [],
+			lineWidths = lineWidthsCache, // reuse array
 			nextCharCode = text.charCodeAt(0);
 
 		for (let i = 0; i < text.length; ++i) {
@@ -2826,12 +2886,14 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 					printedCharCount++;
 			}
 		}
-		lineWidths.push(offsetX);
+		lineWidths[line] = offsetX;
 		maxWidth = Math.max(maxWidth, offsetX);
+		let lineCount = line + 1;
 		return {
 			width: maxWidth,
-			height: lineWidths.length * font.lineHeight * leadPercent,
+			height: lineCount * font.lineHeight * leadPercent,
 			lineWidths,
+			lineCount,
 			printedCharCount
 		};
 	};
