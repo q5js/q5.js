@@ -12,7 +12,7 @@ Q5.modules.util = ($, q) => {
 					return res.text();
 				})
 				.then((f) => {
-					if (type == 'csv') f = $.CSV.parse(f);
+					if (type == 'csv') f = Q5.CSV.parse(f);
 					if (typeof f == 'string') ret.text = f;
 					else Object.assign(ret, f);
 					delete ret.promise;
@@ -118,21 +118,6 @@ Q5.modules.util = ($, q) => {
 		} else saveFile(a);
 	};
 
-	$.CSV = {};
-	$.CSV.parse = (csv, sep = ',', lineSep = '\n') => {
-		if (!csv.length) return [];
-		let a = [],
-			lns = csv.split(lineSep),
-			headers = lns[0].split(sep).map((h) => h.replaceAll('"', ''));
-		for (let i = 1; i < lns.length; i++) {
-			let o = {},
-				ln = lns[i].split(sep);
-			headers.forEach((h, i) => (o[h] = JSON.parse(ln[i])));
-			a.push(o);
-		}
-		return a;
-	};
-
 	if ($.canvas && !Q5._createServerCanvas) {
 		$.canvas.save = $.saveCanvas = $.save;
 	}
@@ -168,4 +153,19 @@ Q5.modules.util = ($, q) => {
 		}
 		return a;
 	};
+};
+
+Q5.CSV = {};
+Q5.CSV.parse = (csv, sep = ',', lineSep = '\n') => {
+	if (!csv.length) return [];
+	let a = [],
+		lns = csv.split(lineSep),
+		headers = lns[0].split(sep).map((h) => h.replaceAll('"', ''));
+	for (let i = 1; i < lns.length; i++) {
+		let o = {},
+			ln = lns[i].split(sep);
+		headers.forEach((h, i) => (o[h] = JSON.parse(ln[i])));
+		a.push(o);
+	}
+	return a;
 };

@@ -2684,8 +2684,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		// chars and kernings can be stored as csv strings, making the file
 		// size smaller, but they need to be parsed into arrays of objects
 		if (typeof atlas.chars == 'string') {
-			atlas.chars = $.CSV.parse(atlas.chars, ' ');
-			atlas.kernings = $.CSV.parse(atlas.kernings, ' ');
+			atlas.chars = Q5.CSV.parse(atlas.chars, ' ');
+			atlas.kernings = Q5.CSV.parse(atlas.kernings, ' ');
 		}
 
 		let charCount = atlas.chars.length;
@@ -2902,8 +2902,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (!$._font) {
 			// if the default font hasn't been loaded yet, try to load it
 			if ($._font !== null) $.textFont('sans-serif');
-			return;
+			if (_textSize >= 1) return $.textImage(str, x, y, w, h);
 		}
+
+		if (_textSize < 1) return;
 
 		let type = typeof str;
 		if (type != 'string') {
