@@ -7,7 +7,7 @@
 - lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
 - beginner friendly [documentation](/learn) 📚
 - compatible with popular p5 addons 🧩
-- no dependencies, ~110kb minified 📦
+- no dependencies, ~125kb minified 📦
 - free to use under the LGPL (just like p5.js) 🆓
 
 # 1-1

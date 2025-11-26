@@ -483,8 +483,18 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		if (args.length == 1) m = args[0];
 		else m = args;
 
-		if (m.length == 9) {
-			// convert 3x3 matrix to 4x4 matrix
+		if (m.length <= 6) {
+			const a = m[0],
+				b = m[1],
+				c = m[2],
+				d = m[3],
+				e = m[4] || 0,
+				f = m[5] || 0;
+			// Convert Canvas2D [a,b,c,d,e,f] (column-major 3x3: [a,b,0, c,d,0, e,f,1])
+			m = [a, b, 0, c, d, 0, e, f, 1];
+		}
+		if (m.length <= 9) {
+			// convert 3x3 matrix to 4x4 layout used internally
 			m = [m[0], m[1], 0, m[2], m[3], m[4], 0, m[5], 0, 0, 1, 0, m[6], m[7], 0, m[8]];
 		} else if (m.length != 16) {
 			throw new Error('Matrix must be a 3x3 or 4x4 array.');
@@ -1647,7 +1657,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		addRect(x, y, hw, hh, rr, doStroke ? sw : 0, doFill ? fillIdx : 0);
 	};
 
-	$.square = (x, y, s) => $.rect(x, y, s, s);
+	$.square = (x, y, s, rr) => $.rect(x, y, s, s, rr);
 
 	function addCapsule(x1, y1, x2, y2, r, strokeW, fillCapsule) {
 		let dx = x2 - x1,
@@ -2289,9 +2299,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.loadImage = (src, cb) => {
-		let g = $._g.loadImage(src, () => {
-			$._makeDrawable(g);
-			if (cb) cb(g);
+		let g = $._g.loadImage(src, (img) => {
+			$._makeDrawable(img);
+			if (cb) cb(img);
 		});
 		return g;
 	};
@@ -2658,18 +2668,27 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 	let fontsArr = [];
 	let fonts = {};
+	let fontSet;
 
-	async function createFont(fontJsonUrl, fontName, cb) {
-		let res = await fetch(fontJsonUrl);
-		if (res.status == 404) return '';
+	async function createFont(url, fontName, cb) {
+		let baseUrl = url.substring(0, url.lastIndexOf('-'));
 
-		let atlas = await res.json();
-
-		let slashIdx = fontJsonUrl.lastIndexOf('/');
-		let baseUrl = slashIdx != -1 ? fontJsonUrl.substring(0, slashIdx + 1) : '';
-		// load font image
-		res = await fetch(baseUrl + atlas.pages[0]);
-		let img = await createImageBitmap(await res.blob());
+		// load atlas and image in parallel
+		let atlas, img;
+		try {
+			[atlas, img] = await Promise.all([
+				fetch(url).then((res) => {
+					if (res.status == 404) throw new Error('404');
+					return res.json();
+				}),
+				fetch(baseUrl + '.png')
+					.then((res) => res.blob())
+					.then((blob) => createImageBitmap(blob))
+			]);
+		} catch (error) {
+			console.error('Error loading font:', error);
+			return '';
+		}
 
 		// convert image to texture
 		let imgSize = [img.width, img.height, 1];
@@ -2737,42 +2756,52 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			}
 		}
 
-		$._font = new MsdfFont(fontBindGroup, atlas.common.lineHeight, chars, kernings);
-
-		$._font.index = fontsArr.length;
-		fontsArr.push($._font);
-		fonts[fontName] = $._font;
+		let _font = new MsdfFont(fontBindGroup, atlas.common.lineHeight, chars, kernings);
+		_font.index = fontsArr.length;
+		fontsArr.push(_font);
+		fonts[fontName] = _font;
+		$._font = _font;
 
 		if (cb) cb(fontName);
+		return { family: fontName };
 	}
 
-	$.loadFont = (url, cb) => {
+	$.loadFont = (url = 'sans-serif', cb) => {
+		fontSet = true;
 		if (url.startsWith('https://fonts.googleapis.com/css')) {
 			return $._g.loadFont(url, cb);
 		}
 
 		let ext = url.slice(url.lastIndexOf('.') + 1);
-		if (url == ext) return $._loadDefaultFont(url, cb);
+
+		// if not a url, assume it's one of q5's MSDF fonts
+		if (url == ext) {
+			let fontName = url;
+			fonts[fontName] = null;
+			url = `https://q5js.org/fonts/${fontName}-msdf.json`;
+			if (Q5.online == false || !navigator.onLine) {
+				url = `/node_modules/q5/builtinFonts/${fontName}-msdf.json`;
+			}
+			ext = 'json';
+		}
+
 		if (ext != 'json') return $._g.loadFont(url, cb);
+
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
 		let f = { family: fontName };
 		f.promise = createFont(url, fontName, () => {
 			delete f.promise;
+			delete f.then;
+			if (f._usedAwait) f = { family: fontName };
 			if (cb) cb(f);
 		});
-		$._preloadPromises.push(f.promise);
+		$._loaders.push(f.promise);
 
-		if (!$._usePreload) return f.promise;
+		f.then = (resolve, reject) => {
+			f._usedAwait = true;
+			return f.promise.then(resolve, reject);
+		};
 		return f;
-	};
-
-	$._loadDefaultFont = (fontName, cb) => {
-		fonts[fontName] = null;
-		let url = `https://q5js.org/fonts/${fontName}-msdf.json`;
-		if (Q5.online == false || !navigator.onLine) {
-			url = `/node_modules/q5/builtinFonts/${fontName}-msdf.json`;
-		}
-		return $.loadFont(url, cb);
 	};
 
 	let _textSize = 18,
@@ -2783,12 +2812,16 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		leadDiff = 4.5,
 		leadPercent = 1.25;
 
+	let categories = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'];
+
 	$.textFont = (fontName) => {
 		if (!fontName) return $._font;
+		fontSet = true;
 		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;
-		else if (font === undefined) return $._loadDefaultFont(fontName);
+		// if it's a font category or not a WebGPU font, set the Canvas2D font
+		else if (categories[fontName] || font === undefined) $._g.textFont(fontName);
 	};
 
 	$.textSize = (size) => {
@@ -2846,8 +2879,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	let lineWidthsCache = new Array(100);
 
 	// Reusable buffers for text data to avoid creating new arrays
-	let charDataBuffer = new Float32Array(100000); // reusable buffer for char data
-	let textDataBuffer = new Float32Array(10000); // reusable buffer for text metadata
+	let charDataBuffer = new Float32Array(Q5.MAX_CHARS * 4); // reusable buffer for char data
+	let textDataBuffer = new Float32Array(Q5.MAX_TEXTS * 8); // reusable buffer for text metadata
 
 	let measureText = (font, text, charCallback) => {
 		let maxWidth = 0,
@@ -2899,18 +2932,21 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.text = (str, x, y, w, h) => {
-		if (!$._font) {
-			// if the default font hasn't been loaded yet, try to load it
-			if ($._font !== null) $.textFont('sans-serif');
-			if (_textSize >= 1) return $.textImage(str, x, y, w, h);
-		}
-
 		if (_textSize < 1) return;
 
 		let type = typeof str;
 		if (type != 'string') {
 			if (type == 'object') str = str.toString();
 			else str = str + '';
+		}
+
+		// if not using an MSDF font
+		if (!$._font) {
+			// if no font is set, lazy load the default MSDF font
+			if (!fontSet) $.loadFont();
+			// use Canvas2D text rendering
+			let img = $.createTextImage(str, w, h);
+			return $.textImage(img, x, y);
 		}
 
 		if (str.length > w) {
@@ -3147,6 +3183,8 @@ Q5.BLUR = 8;
 Q5.MAX_TRANSFORMS = 1e7;
 Q5.MAX_RECTS = 200200;
 Q5.MAX_ELLIPSES = 200200;
+Q5.MAX_CHARS = 100000;
+Q5.MAX_TEXTS = 10000;
 
 Q5.initWebGPU = async () => {
 	if (!navigator.gpu) {

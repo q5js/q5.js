@@ -13,11 +13,10 @@ Q5.renderers.c2d.image = ($, q) => {
 	let imgData = null,
 		pixels = null;
 
-	$.createImage = (w, h, opt) => {
-		opt ??= {};
-		opt.alpha ??= true;
-		opt.colorSpace ??= c.colorSpace || Q5.canvasOptions.colorSpace;
-		return new Q5.Image($, w, h, opt);
+	$.createImage = (w, h, opt = {}) => {
+		opt.colorSpace ??= $.canvas.colorSpace;
+		opt.defaultImageScale ??= $._defaultImageScale;
+		return new Q5.Image(w, h, opt);
 	};
 
 	$.loadImage = function (url, cb, opt) {
@@ -31,7 +30,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		if (typeof last == 'object') {
 			opt = last;
 			cb = null;
-		} else opt = null;
+		} else opt = undefined;
 
 		let g = $.createImage(1, 1, opt);
 		let pd = g._pixelDensity;
@@ -41,6 +40,10 @@ Q5.renderers.c2d.image = ($, q) => {
 
 		g.promise = new Promise((resolve, reject) => {
 			img.onload = () => {
+				delete g.promise;
+				delete g.then;
+				if (g._usedAwait) g = $.createImage(1, 1, opt);
+
 				img._pixelDensity = pd;
 				g.defaultWidth = img.width * $._defaultImageScale;
 				g.defaultHeight = img.height * $._defaultImageScale;
@@ -50,16 +53,19 @@ Q5.renderers.c2d.image = ($, q) => {
 
 				g.ctx.drawImage(img, 0, 0);
 				if (cb) cb(g);
-				delete g.promise;
 				resolve(g);
 			};
 			img.onerror = reject;
 		});
-		$._preloadPromises.push(g.promise);
+		$._loaders.push(g.promise);
+
+		// then only runs when the user awaits the instance
+		g.then = (resolve, reject) => {
+			g._usedAwait = true;
+			return g.promise.then(resolve, reject);
+		};
 
 		g.src = img.src = url;
-
-		if (!$._usePreload) return g.promise;
 		return g;
 	};
 
@@ -320,7 +326,9 @@ Q5.renderers.c2d.image = ($, q) => {
 };
 
 Q5.Image = class {
-	constructor(q, w, h, opt = {}) {
+	constructor(w, h, opt = {}) {
+		opt.alpha ??= true;
+		opt.colorSpace ??= Q5.canvasOptions.colorSpace;
 		let $ = this;
 		$._isImage = true;
 		$.canvas = $.ctx = $.drawingContext = null;
@@ -331,7 +339,7 @@ Q5.Image = class {
 			if (r[m]) r[m]($, $);
 		}
 		$._pixelDensity = opt.pixelDensity || 1;
-		$._defaultImageScale = opt.defaultImageScale || q._defaultImageScale;
+		$._defaultImageScale = opt.defaultImageScale || 2;
 		$.createCanvas(w, h, opt);
 		let scale = $._pixelDensity * $._defaultImageScale;
 		$.defaultWidth = w * scale;

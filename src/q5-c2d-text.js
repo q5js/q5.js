@@ -10,13 +10,11 @@ Q5.renderers.c2d.text = ($, q) => {
 		emphasis = 'normal',
 		weight = 'normal',
 		styleHash = 0,
-		styleHashes = [],
 		genTextImage = false,
 		cacheSize = 0;
 	$._fontMod = false;
 
 	let cache = ($._textCache = {});
-	$._textCacheMaxSize = 12000;
 
 	$.loadFont = (url, cb) => {
 		let f;
@@ -26,25 +24,29 @@ Q5.renderers.c2d.text = ($, q) => {
 		} else {
 			let name = url.split('/').pop().split('.')[0].replace(' ', '');
 
-			f = new FontFace(name, `url(${encodeURI(url)})`);
-			document.fonts.add(f);
-			f.promise = (async () => {
-				let err;
-				try {
-					await f.load();
-				} catch (e) {
-					err = e;
-				}
-				delete f.promise;
-				if (err) throw err;
-				if (cb) cb(f);
-				return f;
-			})();
-		}
+			f = { family: name };
+			let ff = new FontFace(name, `url(${encodeURI(url)})`);
+			document.fonts.add(ff);
 
-		$._preloadPromises.push(f.promise);
+			f.promise = new Promise((resolve, reject) => {
+				ff.load()
+					.then(() => {
+						delete f.promise;
+						delete f.then;
+						if (cb) cb(ff);
+						resolve(ff);
+					})
+					.catch((err) => {
+						reject(err);
+					});
+			});
+		}
+		$._loaders.push(f.promise);
 		$.textFont(f.family);
-		if (!$._usePreload) return f.promise;
+		f.then = (resolve, reject) => {
+			f._usedAwait = true;
+			return f.promise.then(resolve, reject);
+		};
 		return f;
 	};
 
@@ -112,8 +114,13 @@ Q5.renderers.c2d.text = ($, q) => {
 					}
 				}
 
+				if (f._usedAwait) {
+					f = { family: fontFamily };
+				}
+
 				f.faces = loadedFaces;
 				delete f.promise;
+				delete f.then;
 				if (cb) cb(f);
 				return f;
 			} catch (e) {
@@ -218,7 +225,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
 		let ctx = $.ctx;
-		let img, colorStyle;
+		let img, colorStyle, styleCache, colorCache, recycling;
 
 		if ($._fontMod) $._updateFont();
 
@@ -226,14 +233,23 @@ Q5.renderers.c2d.text = ($, q) => {
 			if (styleHash == -1) updateStyleHash();
 			colorStyle = $._fill + $._stroke + $._strokeWeight;
 
-			let cacheLevel1 = cache[str];
-			let cacheLevel2;
-			if (cacheLevel1) cacheLevel2 = cacheLevel1[styleHash];
+			styleCache = cache[str];
+			if (styleCache) colorCache = styleCache[styleHash];
+			else styleCache = cache[str] = {};
 
-			if (cacheLevel2) {
-				img = cacheLevel2[colorStyle];
+			if (colorCache) {
+				img = colorCache[colorStyle];
 				if (img) return img;
-			}
+
+				if (colorCache.size >= 4) {
+					for (let recycleKey in colorCache) {
+						img = colorCache[recycleKey];
+						delete colorCache[recycleKey];
+						break;
+					}
+					recycling = true;
+				}
+			} else colorCache = styleCache[styleHash] = {};
 		}
 
 		if (str.indexOf('\n') == -1) lines[0] = str;
@@ -301,6 +317,8 @@ Q5.renderers.c2d.text = ($, q) => {
 				img._bottom = img._top + ascent + leading * (lines.length - 1);
 				img._leading = leading;
 			} else {
+				let cnv = img.canvas;
+				img.ctx.clearRect(0, 0, cnv.width, cnv.height);
 				img.modified = true;
 			}
 
@@ -331,19 +349,33 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 
 		if (genTextImage) {
-			styleHashes.push(styleHash);
-			(cache[str] ??= {})[styleHash] ??= {};
-			cache[str][styleHash][colorStyle] = img;
+			colorCache[colorStyle] = img;
 
-			cacheSize++;
-			if (cacheSize > $._textCacheMaxSize) {
-				let half = Math.ceil(cacheSize / 2);
-				let hashes = styleHashes.splice(0, half);
-				for (let s in cache) {
-					s = cache[s];
-					for (let h of hashes) delete s[h];
+			if (!recycling) {
+				if (!colorCache.size) {
+					Object.defineProperty(colorCache, 'size', {
+						writable: true,
+						enumerable: false
+					});
+					colorCache.size = 0;
 				}
-				cacheSize -= half;
+				colorCache.size++;
+				cacheSize++;
+			}
+
+			if (cacheSize > Q5.MAX_TEXT_IMAGES) {
+				for (const str in cache) {
+					styleCache = cache[str];
+					for (const hash in styleCache) {
+						colorCache = styleCache[hash];
+						for (let c in colorCache) {
+							let _img = colorCache[c];
+							if (_img._texture) _img._texture.destroy();
+							delete colorCache[c];
+						}
+					}
+				}
+				cacheSize = 0;
 			}
 			return img;
 		}
@@ -371,3 +403,4 @@ Q5.renderers.c2d.text = ($, q) => {
 };
 
 Q5.fonts = [];
+Q5.MAX_TEXT_IMAGES = 5000;

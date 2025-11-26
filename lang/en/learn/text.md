@@ -15,47 +15,49 @@ parameters and can optionally be constrained.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 background('silver');
 
 textSize(32);
 text('Hello, world!', -88, 10);
-````
+```
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 textSize(20);
 
-let info = "q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.";
+let info =
+	'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.';
 
 text(info, -88, -70, 20, 6);
 //
 //
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 background('silver');
 
 textSize(32);
 text('Hello, world!', 12, 60);
-````
+```
 
-````js
+```js
 createCanvas(200);
 background(200);
 textSize(20);
 
-let info = "q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.";
+let info =
+	'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.';
 
 text(info, 12, 30, 20, 6);
 //
 //
-````
+```
 
 ## loadFont
 
@@ -72,11 +74,9 @@ The second example loads
 If no fonts are loaded, the default sans-serif font is used.
 
 In q5 WebGPU, only fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
-with the file ending "-msdf.json" can be used to render text with 
+with the file ending "-msdf.json" can be used to render text with
 the `text` function. Fonts in other formats can be used with the
 [`textImage`](https://q5js.org/learn/#textImage) function.
-
-Returns a promise if used in async `setup`.
 
 ```
 @param {string} url URL of the font to load
@@ -85,59 +85,55 @@ Returns a promise if used in async `setup`.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 56);
 
 loadFont('/assets/Robotica.ttf');
 
-Q5.draw = function () {
-  fill('skyblue');
-  textSize(64);
-  textImage('Hello!', -98, 24);
-}
-````
+q5.draw = function () {
+	fill('skyblue');
+	textSize(64);
+	textImage('Hello!', -98, 24);
+};
+```
 
-````js
+```js
 await createCanvas(200, 74);
 
-loadFont(
-  'fonts.googleapis.com/css2?family=Pacifico'
-);
+loadFont('fonts.googleapis.com/css2?family=Pacifico');
 
-Q5.draw = function () {
-  fill('hotpink');
-  textSize(68);
-  textImage('Hello!', -98, 31);
-}
-````
+q5.draw = function () {
+	fill('hotpink');
+	textSize(68);
+	textImage('Hello!', -98, 31);
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 56);
 
 loadFont('/assets/Robotica.ttf');
 
 function setup() {
-  fill('skyblue');
-  textSize(64);
-  text('Hello!', 2, 54);
+	fill('skyblue');
+	textSize(64);
+	text('Hello!', 2, 54);
 }
-````
+```
 
-````js
+```js
 createCanvas(200, 74);
 
-loadFont(
-  'fonts.googleapis.com/css2?family=Pacifico'
-);
+loadFont('fonts.googleapis.com/css2?family=Pacifico');
 
 function setup() {
-  fill('hotpink');
-  textSize(68);
-  text('Hello!', 2, 68);
+	fill('hotpink');
+	textSize(68);
+	text('Hello!', 2, 68);
 }
-````
+```
 
 ## textFont
 
@@ -152,32 +148,32 @@ By default, the font is set to the [CSS font family](https://developer.mozilla.o
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 160);
 background(0.8);
 
 textFont('serif');
 
-Q5.draw = function () {
+q5.draw = function () {
 	textSize(32);
 	text('Hello, world!', -96, 10);
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 
 textFont('monospace');
 
-Q5.draw = function () {
-  text('Hello, world!', -68, 10);
-}
-````
+q5.draw = function () {
+	text('Hello, world!', -68, 10);
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 160);
 background(200);
 
@@ -185,18 +181,17 @@ textFont('serif');
 
 textSize(32);
 text('Hello, world!', 15, 90);
-````
+```
 
-````js
+```js
 createCanvas(200);
 background(200);
 
 textFont('monospace');
 
-function setup() {
-  text('Hello, world!', -65, 0);
-}
-````
+textSize(24);
+text('Hello, world!', 15, 90);
+```
 
 ## textSize
 
@@ -209,25 +204,25 @@ Sets or gets the current font size. If no argument is provided, returns the curr
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 
 	textSize(abs(mouseX));
 	text('A', -90, 90);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 
 	textSize(abs(mouseX));
 	text('A', 10, 190);
 }
-````
+```
 
 ## textLeading
 
@@ -240,19 +235,19 @@ Sets or gets the current line height. If no argument is provided, returns the cu
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 
 	textSize(abs(mouseX));
 	text('A', -90, 90);
 	rect(-90, 90, 5, -textLeading());
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 
@@ -260,7 +255,7 @@ function draw() {
 	text('A', 10, 190);
 	rect(10, 190, 5, -textLeading());
 }
-````
+```
 
 ## textStyle
 
@@ -272,7 +267,7 @@ Sets the current text style.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 
@@ -280,11 +275,11 @@ textStyle(ITALIC);
 
 textSize(32);
 text('Hello, world!', -88, 6);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 background(200);
 
@@ -292,7 +287,7 @@ textStyle(ITALIC);
 
 textSize(32);
 text('Hello, world!', 12, 106);
-````
+```
 
 ## textAlign
 
@@ -305,25 +300,25 @@ Sets the horizontal and vertical alignment of text.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 textSize(32);
 
 textAlign(CENTER, MIDDLE);
 text('Hello, world!', 0, 0);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 background(200);
 textSize(32);
 
 textAlign(CENTER, MIDDLE);
 text('Hello, world!', 100, 100);
-````
+```
 
 ## textWeight
 
@@ -345,7 +340,7 @@ Sets the text weight.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 textSize(32);
@@ -353,11 +348,11 @@ textAlign(CENTER, MIDDLE);
 
 textWeight(100);
 text('Hello, world!', 0, 0);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 background(200);
 textSize(32);
@@ -365,7 +360,7 @@ textAlign(CENTER, MIDDLE);
 
 textWeight(100);
 text('Hello, world!', 100, 100);
-````
+```
 
 ## textWidth
 
@@ -378,19 +373,19 @@ Calculates and returns the width of a given string of text.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 
 	textSize(abs(mouseX));
 	rect(-90, 90, textWidth('A'), -textLeading());
 	text('A', -90, 90);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 
@@ -398,7 +393,7 @@ function draw() {
 	rect(10, 190, textWidth('A'), -textLeading());
 	text('A', 10, 190);
 }
-````
+```
 
 ## textAscent
 
@@ -411,19 +406,19 @@ Calculates and returns the ascent (the distance from the baseline to the top of 
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 
 	textSize(abs(mouseX));
 	rect(-90, 90, textWidth('A'), -textAscent());
 	text('A', -90, 90);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 
@@ -431,7 +426,7 @@ function draw() {
 	rect(10, 190, textWidth('A'), -textAscent());
 	text('A', 10, 190);
 }
-````
+```
 
 ## textDescent
 
@@ -444,25 +439,25 @@ Calculates and returns the descent (the distance from the baseline to the bottom
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
-	background(0.8);
-	textSize(64);
+background(0.8);
+textSize(64);
 
-	rect(-100, 0, 200, textDescent('q5'));
-	text('q5', -90, 0);
-````
+rect(-100, 0, 200, textDescent('q5'));
+text('q5', -90, 0);
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
-	background(200);
-	textSize(64);
+background(200);
+textSize(64);
 
-	rect(0, 100, 200, textDescent('q5'));
-	text('q5', 10, 100);
-````
+rect(0, 100, 200, textDescent('q5'));
+text('q5', 10, 100);
+```
 
 ## createTextImage
 
@@ -477,21 +472,21 @@ Creates an image from a string of text.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 textSize(96);
 
 let img = createTextImage('🐶');
 img.filter(INVERT);
 
-Q5.draw = function () {
-  image(img, -45, -90);
-}
-````
+q5.draw = function () {
+	image(img, -45, -90);
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 textSize(96);
 
@@ -499,22 +494,22 @@ let img = createTextImage('🐶');
 img.filter(INVERT);
 
 function draw() {
-  image(img, 55, 10);
+	image(img, 55, 10);
 }
-````
+```
 
 ## textImage
 
 Renders an image generated from text onto the canvas.
 
-If the first parameter is a string, an image of the text will be 
+If the first parameter is a string, an image of the text will be
 created and cached automatically.
 
 The positioning of the image is affected by the current text
 alignment and baseline settings.
 
-In q5 WebGPU, this function is the only way to draw multi-colored 
-text, like emojis, and to use fonts that aren't in MSDF format. 
+In q5 WebGPU, this function is the only way to draw multi-colored
+text, like emojis, and to use fonts that aren't in MSDF format.
 Using this function to draw text that changes every frame has
 a very high performance cost.
 
@@ -526,16 +521,16 @@ a very high performance cost.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 textSize(96);
 textAlign(CENTER, CENTER);
 
 textImage('🐶', 0, 0);
-````
+```
 
-````js
+```js
 await createCanvas(200);
 
 await load('/assets/Robotica.ttf');
@@ -543,20 +538,20 @@ await load('/assets/Robotica.ttf');
 background(0.8);
 textSize(66);
 textImage('Hello!', -100, -100);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 background(200);
 textSize(96);
 textAlign(CENTER, CENTER);
 
-textImage('🐶', 100,100);
-````
+textImage('🐶', 100, 100);
+```
 
-````js
+```js
 createCanvas(200);
 
 loadFont('/assets/Robotica.ttf');
@@ -565,8 +560,8 @@ function setup() {
 	background(200);
 	textSize(66);
 	textImage('Hello!', 0, 0);
-};
-````
+}
+```
 
 ## nf
 
@@ -583,23 +578,23 @@ optionally adding padding with zeros.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 background(0.8);
 
 textSize(32);
 text(nf(PI, 4, 5), -90, 10);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 background(200);
 
 textSize(32);
 text(nf(PI, 4, 5), 10, 60);
-````
+```
 
 ## NORMAL
 
@@ -640,4 +635,3 @@ Align text to the bottom.
 ## BASELINE
 
 Align text to the baseline (alphabetic).
-

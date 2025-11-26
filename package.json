@@ -34,6 +34,7 @@
 		"dist": "bun bundle && bun min",
 		"dist-p5play": "bun dist && cp q5.js ../../web/p5play-web/v3/q5.js && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
 		"tests": "jest test",
+		"types": "node lang/types.js",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
 		"version": "git add -A",

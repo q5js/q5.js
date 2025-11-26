@@ -267,29 +267,38 @@ Q5.modules.dom = ($, q) => {
 
 	$.createSpan = (content) => $.createEl('span', content);
 
+	function initVideo(el) {
+		el.width ||= el.videoWidth;
+		el.height ||= el.videoHeight;
+		el.defaultWidth = el.width * $._defaultImageScale;
+		el.defaultHeight = el.height * $._defaultImageScale;
+		el.ready = true;
+	}
+
 	$.createVideo = (src) => {
 		let el = $.createEl('video');
 		el.crossOrigin = 'anonymous';
 
-		el._load = () => {
-			el.width ||= el.videoWidth;
-			el.height ||= el.videoHeight;
-			el.defaultWidth = el.width * $._defaultImageScale;
-			el.defaultHeight = el.height * $._defaultImageScale;
-			el.ready = true;
-		};
-
 		if (src) {
 			el.promise = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
-					el._load();
+					delete el.promise;
+					delete el.then;
+					if (el._usedAwait) {
+						el = $.createEl('video');
+						el.crossOrigin = 'anonymous';
+						el.src = src;
+					}
+					initVideo(el);
 					resolve(el);
 				});
 				el.src = src;
 			});
-			$._preloadPromises.push(el.promise);
-
-			if (!$._usePreload) return el.promise;
+			$._loaders.push(el.promise);
+			el.then = (resolve, reject) => {
+				el._usedAwait = true;
+				return el.promise.then(resolve, reject);
+			};
 		}
 		return el;
 	};
@@ -304,18 +313,22 @@ Q5.modules.dom = ($, q) => {
 		constraints.video.facingMode ??= 'user';
 
 		let vid = $.createVideo();
-		vid.playsinline = vid.autoplay = true;
-		if (flipped) {
-			vid.flipped = true;
-			vid.style.transform = 'scale(-1, 1)';
+
+		function extendVideo(vid) {
+			vid.playsinline = vid.autoplay = true;
+			if (flipped) {
+				vid.flipped = true;
+				vid.style.transform = 'scale(-1, 1)';
+			}
+			vid.loadPixels = () => {
+				let g = $.createGraphics(vid.videoWidth, vid.videoHeight, { renderer: 'c2d' });
+				g.image(vid, 0, 0);
+				g.loadPixels();
+				vid.pixels = g.pixels;
+				g.remove();
+			};
 		}
-		vid.loadPixels = () => {
-			let g = $.createGraphics(vid.videoWidth, vid.videoHeight, { renderer: 'c2d' });
-			g.image(vid, 0, 0);
-			g.loadPixels();
-			vid.pixels = g.pixels;
-			g.remove();
-		};
+
 		vid.promise = (async () => {
 			let stream;
 			try {
@@ -324,16 +337,26 @@ Q5.modules.dom = ($, q) => {
 				throw e;
 			}
 
+			delete vid.promise;
+			delete vid.then;
+			if (vid._usedAwait) {
+				vid = $.createVideo();
+			}
+			extendVideo(vid);
+
 			vid.srcObject = stream;
 			await new Promise((resolve) => vid.addEventListener('loadeddata', resolve));
 
-			vid._load();
+			initVideo(vid);
 			if (cb) cb(vid);
 			return vid;
 		})();
-		$._preloadPromises.push(vid.promise);
+		$._loaders.push(vid.promise);
 
-		if (!$._usePreload) return vid.promise;
+		vid.then = (resolve, reject) => {
+			vid._usedAwait = true;
+			return vid.promise.then(resolve, reject);
+		};
 		return vid;
 	};
 

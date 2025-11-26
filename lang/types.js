@@ -18,17 +18,18 @@ function parseMarkdownFile(filePath) {
 
 	let i = 0;
 
-	// First line should be the section header
-	if (lines[0].startsWith('# ')) {
-		result.sectionName = lines[0].substring(2).trim();
-		i = 1;
+	// Find the first top-level section header (# ...) anywhere near the top
+	const headerIndex = lines.findIndex((l) => l.trim().startsWith('# '));
+	if (headerIndex !== -1) {
+		result.sectionName = lines[headerIndex].trim().substring(2).trim();
+		i = headerIndex + 1;
 
 		// Skip empty lines
 		while (i < lines.length && lines[i].trim() === '') i++;
 
 		// Collect section description until we hit the first ## header
 		const descLines = [];
-		while (i < lines.length && !lines[i].startsWith('## ')) {
+		while (i < lines.length && !lines[i].trim().startsWith('## ')) {
 			descLines.push(lines[i]);
 			i++;
 		}
@@ -39,8 +40,8 @@ function parseMarkdownFile(filePath) {
 	const classNames = new Set();
 	for (let j = i; j < lines.length; j++) {
 		const line = lines[j];
-		if (line.startsWith('## ') && line.includes('.')) {
-			const className = line.substring(3).split('.')[0].trim();
+		if (line.trim().startsWith('## ') && line.includes('.')) {
+			const className = line.trim().substring(3).split('.')[0].trim();
 			classNames.add(className);
 		}
 	}
@@ -56,7 +57,7 @@ function parseMarkdownFile(filePath) {
 		const line = lines[i];
 
 		// Check for function/class/member header
-		if (line.startsWith('## ')) {
+		if (line.trim().startsWith('## ')) {
 			// Save previous entry if exists
 			if (currentEntry) {
 				entries.push(currentEntry);
@@ -97,9 +98,9 @@ function parseMarkdownFile(filePath) {
 			const descLines = [];
 			while (
 				i < lines.length &&
-				!lines[i].startsWith('## ') &&
-				!lines[i].startsWith('### ') &&
-				!lines[i].startsWith('```')
+				!lines[i].trim().startsWith('## ') &&
+				!lines[i].trim().startsWith('### ') &&
+				!lines[i].trim().startsWith('```')
 			) {
 				descLines.push(lines[i]);
 				i++;
@@ -130,25 +131,25 @@ function parseMarkdownFile(filePath) {
 		}
 
 		// Check for example type headers
-		if (line.startsWith('### webgpu')) {
+		if (line.trim().startsWith('### webgpu')) {
 			currentExampleType = 'webgpu';
 			i++;
 			continue;
 		}
 
-		if (line.startsWith('### c2d')) {
+		if (line.trim().startsWith('### c2d')) {
 			currentExampleType = 'c2d';
 			i++;
 			continue;
 		}
 
 		// Check for code blocks with language (examples)
-		if (line.startsWith('````js') || line.startsWith('````javascript')) {
+		if (line.trim().startsWith('```js') || line.trim().startsWith('```javascript')) {
 			i++;
 			codeBlockContent = [];
 
-			// Collect code until closing ````
-			while (i < lines.length && !lines[i].startsWith('````')) {
+			// Collect code until closing ```
+			while (i < lines.length && !lines[i].startsWith('```')) {
 				codeBlockContent.push(lines[i]);
 				i++;
 			}
@@ -301,7 +302,7 @@ function generateJSDoc(func, emoji, includeExamples = true, exampleType = 'c2d',
 			examples.forEach((example) => {
 				lines.push(`${indent} * @example`);
 				example.split('\n').forEach((line) => {
-					lines.push(`${indent}${line}`);
+					lines.push(`${indent} * ${line}`);
 				});
 			});
 		}
@@ -327,20 +328,14 @@ function generateDeclaration(funcName, baseSignatures) {
 /**
  * Builds a complete .d.ts file
  */
-function buildDtsFile(markdownFiles, baseDtsPath, outputPath, includeExamples = true, exampleType = 'c2d') {
-	console.log(`\n📝 Building ${path.basename(outputPath)}...`);
-
+function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true, exampleType = 'c2d') {
 	const emojiMappings = extractEmojiMappings(baseDtsPath);
 	const baseSignatures = extractBaseSignatures(baseDtsPath);
 
-	const sections = {};
-
-	// Parse all markdown files
-	for (const mdFile of markdownFiles) {
-		const parsed = parseMarkdownFile(mdFile);
-		if (parsed.sectionName) {
-			sections[parsed.sectionName] = parsed;
-		}
+	// Exclude certain sections for specific output types
+	if (exampleType === 'c2d') {
+		// Shaders are WebGPU-only; exclude from Canvas2D type definitions
+		if (sections['shaders']) delete sections['shaders'];
 	}
 
 	// Build the output content
@@ -359,14 +354,16 @@ function buildDtsFile(markdownFiles, baseDtsPath, outputPath, includeExamples = 
 		output.push('');
 		output.push(`\t// ${emoji} ${sectionName}`);
 
-		// Add section description if available (as comment)
-		if (section.sectionDescription && !includeExamples) {
-			const descLines = section.sectionDescription.split('\n').filter((l) => l.trim());
+		// Add section description if available (as block comment)
+		if (section.sectionDescription) {
+			const descLines = section.sectionDescription.split('\n');
 			if (descLines.length > 0) {
 				output.push('');
+				output.push('\t/**');
 				descLines.forEach((line) => {
-					output.push(`\t// ${line}`);
+					output.push(`\t * ${line}`);
 				});
+				output.push('\t */');
 			}
 		}
 
@@ -423,33 +420,66 @@ function buildDtsFile(markdownFiles, baseDtsPath, outputPath, includeExamples = 
  * Main function
  */
 function main() {
-	const learnDir = __dirname;
-	const langDir = path.join(__dirname, '..', 'lang', 'en', 'learn');
-	const baseDtsPath = path.join(langDir, 'en.d.ts');
+	// support a language code argument (two-letter), default to 'en'
+	// usage: node types.js [lang] or node types.js --lang=fr
+	const argv = process.argv.slice(2);
+	let lang = 'en';
+	for (const a of argv) {
+		if (a === '-h' || a === '--help') {
+			console.log('Usage: types.js [lang]  OR  types.js --lang=<two-letter-code>\nDefault: en');
+			process.exit(0);
+		}
+		if (a.startsWith('--lang=')) {
+			lang = a.split('=')[1] || lang;
+		} else if (!a.startsWith('-')) {
+			// positional arg: language code
+			lang = a;
+		}
+	}
 
-	console.log('🏗️  q5.js Documentation Builder\n');
-	console.log('Source:', langDir);
-	console.log('Base file:', baseDtsPath);
-	console.log('Output:', learnDir);
+	// sanitize to two-letter lowercase code
+	lang = (lang || 'en').toLowerCase().slice(0, 2);
 
-	// Find all markdown files
-	const files = fs.readdirSync(langDir);
-	const markdownFiles = files.filter((f) => f.endsWith('.md')).map((f) => path.join(langDir, f));
+	const rootDir = path.join(__dirname, '..');
+	const defsDir = path.join(__dirname, '..', 'defs');
+	const learnDir = path.join(__dirname, '..', 'lang', lang, 'learn');
+	const baseDtsPath = path.join(learnDir, `${lang}.d.ts`);
 
-	console.log(`\nFound ${markdownFiles.length} markdown files`);
+	// Find all markdown files and parse them once
+	const files = fs.readdirSync(learnDir);
+	let markdownFiles = files.filter((f) => f.endsWith('.md')).map((f) => path.join(learnDir, f));
+
+	// Parse each markdown file once and build a sections map
+	const sections = {};
+	for (const mdFile of markdownFiles) {
+		const parsed = parseMarkdownFile(mdFile);
+		if (parsed.sectionName) sections[parsed.sectionName] = parsed;
+	}
 
 	if (!fs.existsSync(baseDtsPath)) {
 		console.error('❌ Base file en.d.ts not found!');
 		process.exit(1);
 	}
 
+	console.log(`📘 Building type definitions for language: ${lang}`);
+
+	let langSuffix = lang == 'en' ? '' : `_${lang}`;
+
 	// Build q5.d.ts with WebGPU examples
-	buildDtsFile(markdownFiles, baseDtsPath, path.join(langDir, 'q5.d.ts'), true, 'webgpu');
+	// let dir = lang == 'en' ? rootDir : defsDir;
+	let dir = defsDir;
+	let file = path.join(dir, `q5${langSuffix}.d.ts`);
+	buildDtsFile(sections, baseDtsPath, file, true, 'webgpu');
 
 	// Build q5_c2d.d.ts with C2D examples
-	buildDtsFile(markdownFiles, baseDtsPath, path.join(langDir, 'q5_c2d.d.ts'), true, 'c2d');
+	file = path.join(defsDir, `q5-c2d${langSuffix}.d.ts`);
+	buildDtsFile(sections, baseDtsPath, file, true, 'c2d');
 
-	console.log('\n✨ Build complete!');
+	// copy c2d d.ts to root
+	// if (lang === 'en') {
+	// 	const destFile = path.join(rootDir, `q5.d.ts`);
+	// 	fs.copyFileSync(file, destFile);
+	// }
 }
 
 if (require.main === module) {

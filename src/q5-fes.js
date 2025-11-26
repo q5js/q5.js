@@ -71,12 +71,12 @@ Q5.modules.fes = ($) => {
 		}
 	}
 
-	if (Q5.online != false && typeof navigator != undefined && navigator.onLine) {
+	if ($._isGlobal && Q5.online != false && typeof navigator != undefined && navigator.onLine) {
 		async function checkLatestVersion() {
 			try {
-				let response = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
-				if (!response.ok) return;
-				let data = await response.json();
+				let res = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
+				if (!res.ok) return;
+				let data = await res.json();
 				let l = data.tags.latest;
 				l = l.slice(0, l.lastIndexOf('.'));
 				if (l != Q5.version) {

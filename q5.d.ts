@@ -270,32 +270,6 @@ function draw() {
 	 */
 	var deltaTime: number;
 
-	/** ⭐️
-	 * By default, q5 supports the p5.js v1 
-	 * [preload](https://q5js.org/learn/#preload)
-	 * system, which uses
-	 * [`Promise.all`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
-	 * behind the scenes to load assets in parallel.
-	 * 
-	 * To match p5.js v2 behavior, q5 automatically makes
-	 * load* functions, such as `loadImage`, return promises
-	 * in `setup` if it's defined as an async function.
-	 * 
-	 * This function can be used at any point in your sketch
-	 * to make load* functions return promises or not. Yet, consider 
-	 * using [`load`](https://q5js.org/learn/#load) instead.
-	 * 
-	 * @param {boolean} [val] Whether load* functions should return promises or not. If this parameter is undefined the value is set to true.
-	 * @example
-createCanvas(200);
-
-usePromiseLoading();
-
-let logo = await loadImage('/q5js_logo.avif');
-background(logo);
-	 */
-	function usePromiseLoading(val?: boolean): void;
-
 	class Q5 {
 		/** ⭐️
 		 * Creates an instance of Q5.

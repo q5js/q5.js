@@ -9,10 +9,10 @@ programmatically.
 
 - `format` is set to "H.264" by default.
 - `bitrate` is a number in megabits per second (mbps). Its default
-value is determined by the height of the canvas. Increasing the
-bitrate will increase the quality and file size of the recording.
+  value is determined by the height of the canvas. Increasing the
+  bitrate will increase the quality and file size of the recording.
 - `captureAudio` is set to true by default. Set to false to disable
-audio recording.
+  audio recording.
 
 Note that recordings are done at a variable frame rate (VFR), which
 makes the output video incompatible with some editing software.
@@ -26,20 +26,20 @@ wiki page.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let rec = createRecorder();
 rec.bitrate = 10;
 
-Q5.draw = function () {
+q5.draw = function () {
 	circle(mouseX, jit(halfHeight), 10);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let rec = createRecorder();
@@ -48,7 +48,7 @@ rec.bitrate = 10;
 function draw() {
 	circle(mouseX, random(height), 10);
 }
-````
+```
 
 ## record
 
@@ -74,20 +74,20 @@ Saves the current recording as a video file.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	square(mouseX, jit(100), 10);
-}
+};
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	if (!recording) record();
 	else saveRecording('squares');
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	square(mouseX, random(200), 10);
 }
@@ -96,9 +96,8 @@ function mousePressed() {
 	if (!recording) record();
 	else saveRecording('squares');
 }
-````
+```
 
 ## recording
 
 True if the canvas is currently being recorded.
-

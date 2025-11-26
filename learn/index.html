@@ -20,12 +20,37 @@
 				</button>
 			</a>
 			<div class="input-wrapper search-bar">
-				<span class="magnify-glass"></span>
+				<span class="magnify-glass"></span>
 				<input autocomplete="off" type="text" id="searchInput" class="dialog-input" placeholder="Search">
 				<div id="searchResultsContainer" class="search-results">
 					<div class="search-result prompt-message">Start typing to search the documentation</div>
 				</div>
-			</div><button id="themeToggle" class="light-theme"></button>
+			</div>
+			<div class="selectors-container">
+				<div class="select-wrapper code-select">
+					<label for="codeModeSelect" class="code-label"></label>
+					<select id="codeModeSelect" class="code-mode" title="Select renderer">
+						<option value="webgpu">WebGPU</option>
+						<option value="c2d">Canvas2D</option>
+					</select>
+				</div>
+				<div class="select-wrapper lang-select">
+					<label for="langSelect" class="lang-label"></label>
+					<select id="langSelect" title="Select language">
+						<option value="en">English</option>
+						<option value="es">Español</option>
+					</select>
+				</div>
+				<div class="select-wrapper theme-select">
+					<label for="themeSelect" class="theme-label"></label>
+					<select id="themeSelect" title="Select theme">
+						<option value="light">Light</option>
+						<option value="dark">Dark</option>
+					</select>
+				</div>
+			</div>
+			<button id="settingsToggle" class="settings-toggle" aria-controls="selectorsContainer" aria-expanded="false"
+				title="Settings"></button>
 		</div>
 	</header>
 	<div class="allContent">

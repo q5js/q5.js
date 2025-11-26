@@ -144,7 +144,7 @@ class MiniEditor {
 					const isAsync = match.includes('async');
 					return `q.${f} = ${isAsync ? 'async ' : ''}function(`;
 				});
-				userCode = userCode.replace(`Q5.${f}`, `q.${f}`);
+				userCode = userCode.replace(`q5.${f}`, `q.${f}`);
 			}
 
 			const func = new Function(

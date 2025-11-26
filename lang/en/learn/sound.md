@@ -10,8 +10,8 @@ For audio filtering, synthesis, and analysis, consider using
 
 Loads audio data from a file and returns a `Q5.Sound` object.
 
-Use functions like `play`, `pause`, and `stop` to 
-control playback. Note that sounds can only be played after the 
+Use functions like `play`, `pause`, and `stop` to
+control playback. Note that sounds can only be played after the
 first user interaction with the page!
 
 Set `volume` to a value between 0 (silent) and 1 (full volume).
@@ -23,11 +23,9 @@ Use `loaded`, `paused`, and `ended` to check the sound's status.
 The entire sound file must be loaded before playback can start,
 to stream larger audio files use the `loadAudio` function instead.
 
-For backwards compatibility with the p5.sound API, the functions 
+For backwards compatibility with the p5.sound API, the functions
 `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
 are also implemented, but their use is deprecated.
-
-Returns a promise if used in async `setup`.
 
 ```
 @param {string} url sound file
@@ -36,20 +34,20 @@ Returns a promise if used in async `setup`.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let sound = loadSound('/assets/jump.wav');
 sound.volume = 0.3;
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	sound.play();
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let sound = loadSound('/assets/jump.wav');
@@ -58,7 +56,7 @@ sound.volume = 0.3;
 function mousePressed() {
 	sound.play();
 }
-````
+```
 
 ## loadAudio
 
@@ -66,10 +64,8 @@ Loads audio data from a file and returns an [HTMLAudioElement](https://developer
 
 Audio is considered loaded when the [canplaythrough event](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event) is fired.
 
-Note that audio can only be played after the first user 
+Note that audio can only be played after the first user
 interaction with the page!
-
-Returns a promise if used in async `setup`.
 
 ```
 @param url audio file
@@ -78,20 +74,20 @@ Returns a promise if used in async `setup`.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let audio = loadAudio('/assets/retro.flac');
 audio.volume = 0.4;
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	audio.play();
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let audio = loadAudio('/assets/retro.flac');
@@ -100,7 +96,7 @@ audio.volume = 0.4;
 function mousePressed() {
 	audio.play();
 }
-````
+```
 
 ## getAudioContext
 
@@ -167,4 +163,3 @@ Stops the sound, resetting its playback position
 to the beginning.
 
 Removes all playback instances.
-

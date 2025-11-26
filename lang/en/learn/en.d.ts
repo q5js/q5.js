@@ -1,37 +1,11 @@
 declare global {
 	// ⭐️ core
 
+	function createCanvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): HTMLCanvasElement;
+
 	function draw(): void;
 
-	function setup(): void;
-
-	function preload(): void;
-
-	var frameCount: number;
-
-	function noLoop(): void;
-
-	function redraw(n?: number): void;
-
-	function loop(): void;
-
-	function frameRate(hertz?: number): number;
-
-	function getTargetFrameRate(): number;
-
-	function getFPS(): number;
-
 	function log(message: any): void;
-
-	function postProcess(): void;
-
-	var windowWidth: number;
-
-	var windowHeight: number;
-
-	var deltaTime: number;
-
-	function usePromiseLoading(val?: boolean): void;
 
 	class Q5 {
 		constructor(scope?: string | Function, parent?: HTMLElement);
@@ -58,7 +32,11 @@ declare global {
 
 		static registerAddon(addon: Function): void; //-
 
+		update(): void; //-
+
 		draw(): void; //-
+
+		drawFrame(): void; //-
 
 		setup(): void; //-
 
@@ -74,181 +52,27 @@ declare global {
 		}
 	}
 
-	// ⬜️ canvas
-
-	function createCanvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): HTMLCanvasElement;
-
-	var canvas: HTMLCanvasElement;
-
-	function clear(): void;
-
-	function fill(color: Color): void;
-
-	function stroke(color: Color): void;
-
-	function noFill(): void;
-
-	function noStroke(): void;
-
-	function strokeWeight(weight: number): void;
-
-	function opacity(alpha: number): void;
-
-	function shadow(color: string | Color): void;
-
-	function noShadow(): void;
-
-	function shadowBox(offsetX: number, offsetY: number, blur: number): void;
-
-	var width: number;
-
-	var height: number;
-
-	var halfWidth: number;
-
-	var halfHeight: number;
-
-	function translate(x: number, y: number): void;
-
-	function rotate(angle: number): void;
-
-	function scale(x: number, y?: number): void;
-
-	function shearX(angle: number): void;
-
-	function shearY(angle: number): void;
-
-	function applyMatrix(a: number, b: number, c: number, d: number, e: number, f: number): void;
-
-	function resetMatrix(): void;
-
-	function pushMatrix(): void;
-
-	function popMatrix(): void;
-
-	function pushStyles(): void;
-
-	function popStyles(): void;
-
-	function push(): void;
-
-	function pop(): void;
-
-	function resizeCanvas(w: number, h: number): void;
-
-	function pixelDensity(v: number): number;
-
-	function displayDensity(): number;
-
-	function createGraphics(w: number, h: number, opt?: any): Q5;
-
-	var ctx: CanvasRenderingContext2D;
-
-	var drawingContext: CanvasRenderingContext2D;
-
-	// 🎨 color
-
-	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
-
-	function colorMode(mode: 'rgb' | 'oklch', format: 1 | 255, gamut: 'srgb' | 'display-p3'): void;
-
-	const RGB: 'rgb';
-
-	const OKLCH: 'oklch';
-
-	const HSL: 'hsl';
-
-	const HSB: 'hsb';
-
-	const SRGB: 'srgb';
-
-	const DISPLAY_P3: 'display-p3';
-
-	class Color {
-		constructor(c0: number, c1: number, c2: number, c3: number);
-
-		equals(other: Color): boolean;
-
-		isSameColor(other: Color): boolean;
-
-		toString(): string;
-
-		levels: number[];
-	}
-
-	// 💻 display
-
-	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
-
-	function fullscreen(v?: boolean): void;
-
-	const MAXED: 'maxed';
-
-	const SMOOTH: 'smooth';
-
-	const PIXELATED: 'pixelated';
+	const q5: typeof Q5;
 
 	// 🧑‍🎨 shapes
-
-	function background(filler: Color | Q5.Image): void;
-
-	function rect(x: number, y: number, w: number, h?: number, tl?: number, tr?: number, br?: number, bl?: number): void;
-
-	function square(x: number, y: number, size: number, tl?: number, tr?: number, br?: number, bl?: number): void;
 
 	function circle(x: number, y: number, diameter: number): void;
 
 	function ellipse(x: number, y: number, width: number, height?: number): void;
 
-	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number): void;
+	function rect(x: number, y: number, w: number, h?: number, tl?: number, tr?: number, br?: number, bl?: number): void;
+
+	function square(x: number, y: number, size: number, tl?: number, tr?: number, br?: number, bl?: number): void;
+
+	function point(x: number, y: number): void;
 
 	function line(x1: number, y1: number, x2: number, y2: number): void;
 
 	function capsule(x1: number, y1: number, x2: number, y2: number, r: number): void;
 
-	function point(x: number, y: number): void;
-
-	function blendMode(val: string): void;
-
-	function strokeCap(val: CanvasLineCap): void;
-
-	function strokeJoin(val: CanvasLineJoin): void;
-
 	function rectMode(mode: string): void;
 
 	function ellipseMode(mode: string): void;
-
-	function curve(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
-
-	function curveDetail(val: number): void;
-
-	function beginShape(): void;
-
-	function endShape(): void;
-
-	function beginContour(): void;
-
-	function endContour(): void;
-
-	function vertex(x: number, y: number): void;
-
-	function bezierVertex(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
-
-	function quadraticVertex(cp1x: number, cp1y: number, x: number, y: number): void;
-
-	function bezier(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
-
-	function triangle(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
-
-	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
-
-	function erase(fillAlpha?: number, strokeAlpha?: number): void;
-
-	function noErase(): void;
-
-	function inFill(x: number, y: number): boolean;
-
-	function inStroke(x: number, y: number): boolean;
 
 	const CORNER: 'corner';
 
@@ -256,9 +80,13 @@ declare global {
 
 	const CORNERS: 'corners';
 
+	function triangle(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
+
+	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+
 	// 🌆 image
 
-	function loadImage(url: string): Q5.Image | Promise<Q5.Image>;
+	function loadImage(url: string): Q5.Image & PromiseLike<Q5.Image>;
 
 	function image(
 		img: Q5.Image | HTMLVideoElement,
@@ -324,11 +152,13 @@ declare global {
 
 	function createImage(w: number, h: number, opt?: any): Q5.Image;
 
-	// ✍️ text
+	function createGraphics(w: number, h: number, opt?: any): Q5;
+
+	// 📘 text
 
 	function text(str: string, x: number, y: number, wrapWidth?: number, lineLimit?: number): void;
 
-	function loadFont(url: string): FontFace | Promise<FontFace>;
+	function loadFont(url: string): FontFace & PromiseLike<FontFace>;
 
 	function textFont(fontName: string): void;
 
@@ -426,6 +256,156 @@ declare global {
 
 	function pointerLock(unadjustedMovement: boolean): void;
 
+	// 🎨 color
+
+	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
+
+	function colorMode(mode: 'rgb' | 'oklch', format: 1 | 255, gamut: 'srgb' | 'display-p3'): void;
+
+	const RGB: 'rgb';
+
+	const OKLCH: 'oklch';
+
+	const HSL: 'hsl';
+
+	const HSB: 'hsb';
+
+	const SRGB: 'srgb';
+
+	const DISPLAY_P3: 'display-p3';
+
+	function background(filler: Color | Q5.Image): void;
+
+	class Color {
+		constructor(c0: number, c1: number, c2: number, c3: number);
+
+		equals(other: Color): boolean;
+
+		isSameColor(other: Color): boolean;
+
+		toString(): string;
+
+		levels: number[];
+	}
+
+	// 💅 styles
+
+	function fill(color: Color): void;
+
+	function stroke(color: Color): void;
+
+	function noFill(): void;
+
+	function noStroke(): void;
+
+	function strokeWeight(weight: number): void;
+
+	function opacity(alpha: number): void;
+
+	function shadow(color: string | Color): void;
+
+	function noShadow(): void;
+
+	function shadowBox(offsetX: number, offsetY: number, blur: number): void;
+
+	function blendMode(val: string): void;
+
+	function strokeCap(val: CanvasLineCap): void;
+
+	function strokeJoin(val: CanvasLineJoin): void;
+
+	function erase(fillAlpha?: number, strokeAlpha?: number): void;
+
+	function noErase(): void;
+
+	function pushStyles(): void;
+
+	function popStyles(): void;
+
+	function clear(): void;
+
+	function inFill(x: number, y: number): boolean;
+
+	function inStroke(x: number, y: number): boolean;
+
+	// 🦋 transforms
+
+	function translate(x: number, y: number): void;
+
+	function rotate(angle: number): void;
+
+	function scale(x: number, y?: number): void;
+
+	function shearX(angle: number): void;
+
+	function shearY(angle: number): void;
+
+	function applyMatrix(a: number, b: number, c: number, d: number, e: number, f: number): void;
+
+	function resetMatrix(): void;
+
+	function pushMatrix(): void;
+
+	function popMatrix(): void;
+
+	function push(): void;
+
+	function pop(): void;
+
+	// 💻 display
+
+	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
+
+	const MAXED: 'maxed';
+
+	const SMOOTH: 'smooth';
+
+	const PIXELATED: 'pixelated';
+
+	function fullscreen(v?: boolean): void;
+
+	var windowWidth: number;
+
+	var windowHeight: number;
+
+	var width: number;
+
+	var height: number;
+
+	var halfWidth: number;
+
+	var halfHeight: number;
+
+	var canvas: HTMLCanvasElement;
+
+	function resizeCanvas(w: number, h: number): void;
+
+	var frameCount: number;
+
+	function noLoop(): void;
+
+	function redraw(n?: number): void;
+
+	function loop(): void;
+
+	function frameRate(hertz?: number): number;
+
+	function getTargetFrameRate(): number;
+
+	function getFPS(): number;
+
+	function postProcess(): void;
+
+	function pixelDensity(v: number): number;
+
+	function displayDensity(): number;
+
+	var deltaTime: number;
+
+	var ctx: CanvasRenderingContext2D;
+
+	var drawingContext: CanvasRenderingContext2D;
+
 	// 🧮 math
 
 	function random(low?: number | any[], high?: number): number | any;
@@ -500,10 +480,9 @@ declare global {
 
 	// 🔊 sound
 
+	function loadSound(url: string): Sound & PromiseLike<Sound>;
 
-	function loadSound(url: string): Sound | Promise<Sound>;
-
-	function loadAudio(url: string): HTMLAudioElement | Promise<HTMLAudioElement>;
+	function loadAudio(url: string): HTMLAudioElement & PromiseLike<HTMLAudioElement>;
 
 	function getAudioContext(): AudioContext | void;
 
@@ -555,9 +534,9 @@ declare global {
 
 	function createSlider(min: number, max: number, value?: number, step?: number): HTMLInputElement;
 
-	function createVideo(src: string): HTMLVideoElement | Promise<HTMLVideoElement>;
+	function createVideo(src: string): HTMLVideoElement & PromiseLike<HTMLVideoElement>;
 
-	function createCapture(type?: string, flipped?: boolean): HTMLVideoElement | Promise<HTMLVideoElement>;
+	function createCapture(type?: string, flipped?: boolean): HTMLVideoElement & PromiseLike<HTMLVideoElement>;
 
 	function findElement(selector: string): HTMLElement;
 
@@ -583,13 +562,13 @@ declare global {
 
 	function save(data?: object, fileName?: string): void;
 
-	function loadText(url: string): object | Promise<object>;
+	function loadText(url: string): object & PromiseLike<string>;
 
-	function loadJSON(url: string): any | Promise<any>;
+	function loadJSON(url: string): any & PromiseLike<any>;
 
-	function loadCSV(url: string): object[] | Promise<object[]>;
+	function loadCSV(url: string): object[] & PromiseLike<object[]>;
 
-	function loadXML(url: string): object | Promise<Element>;
+	function loadXML(url: string): object & PromiseLike<Element>;
 
 	function nf(num: number, digits: number): string;
 
@@ -662,6 +641,30 @@ declare global {
 
 		static fromAngle(angle: number, length?: number): Vector;
 	}
+
+	// 🖌️ shaping
+
+	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number): void;
+
+	function curve(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+
+	function curveDetail(val: number): void;
+
+	function beginShape(): void;
+
+	function endShape(): void;
+
+	function beginContour(): void;
+
+	function endContour(): void;
+
+	function vertex(x: number, y: number): void;
+
+	function bezierVertex(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
+
+	function quadraticVertex(cp1x: number, cp1y: number, x: number, y: number): void;
+
+	function bezier(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
 	// ⚡️ shaders
 

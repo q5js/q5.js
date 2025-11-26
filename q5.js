@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.5
+ * @version 3.6
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -79,15 +79,19 @@ function Q5(scope, parent, renderer) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
-	$._preloadPromises = [];
-	$._usePreload = true;
-	$.usePromiseLoading = (v = true) => ($._usePreload = !v);
-	$.usePreloadSystem = (v = true) => ($._usePreload = v);
-	$.isPreloadSupported = () => $._usePreload;
+	$._loaders = [];
+	$.loadAll = () => {
+		let loaders = $._loaders;
+		if ($._g) loaders = loaders.concat($._g._loaders);
+		return Promise.all(loaders);
+	};
+
+	$.isPreloadSupported = () => true;
+	$.disablePreload = () => ($._disablePreload = true);
 
 	const resolvers = [];
 	$._incrementPreload = () => {
-		$._preloadPromises.push(new Promise((resolve) => resolvers.push(resolve)));
+		$._loaders.push(new Promise((resolve) => resolvers.push(resolve)));
 	};
 	$._decrementPreload = () => {
 		if (resolvers.length) resolvers.pop()();
@@ -289,7 +293,7 @@ function Q5(scope, parent, renderer) {
 	for (let name of userFns) $[name] ??= () => {};
 
 	if ($._isGlobal) {
-		for (let name of ['setup', 'update', 'draw', ...userFns]) {
+		for (let name of ['setup', 'update', 'draw', 'drawFrame', ...userFns]) {
 			if (Q5[name]) $[name] = Q5[name];
 			else {
 				Object.defineProperty(Q5, name, {
@@ -341,16 +345,13 @@ function Q5(scope, parent, renderer) {
 			new Promise((resolve) => {
 				setTimeout(() => {
 					// if not loading
-					if (!$._preloadPromises.length) resolve();
+					if (!$._loaders.length) resolve();
 				}, 500);
 			})
 		]);
 
-		await Promise.all($._preloadPromises);
-		if ($._g) await Promise.all($._g._preloadPromises);
-
-		if (t.setup?.constructor.name == 'AsyncFunction') {
-			$.usePromiseLoading();
+		if (!$._disablePreload) {
+			await $.loadAll();
 		}
 
 		$.setup ??= t.setup || (() => {});
@@ -374,7 +375,7 @@ function Q5(scope, parent, renderer) {
 
 	Q5.instances.push($);
 
-	if (autoLoaded) start();
+	if (autoLoaded || Q5._esm) start();
 	else setTimeout(start, 32);
 }
 
@@ -437,16 +438,16 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-if (Q5._server) global.p5 ??= global.Q5 = Q5;
+if (Q5._server) global.p5 ??= global.q5 = global.Q5 = Q5;
 
 if (typeof window == 'object') {
-	window.p5 ??= window.Q5 = Q5;
+	window.p5 ??= window.q5 = window.Q5 = Q5;
 	window.createCanvas = createCanvas;
 	window.C2D = 'c2d';
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.5';
+Q5.version = Q5.VERSION = '3.6';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -1388,11 +1389,10 @@ Q5.renderers.c2d.image = ($, q) => {
 	let imgData = null,
 		pixels = null;
 
-	$.createImage = (w, h, opt) => {
-		opt ??= {};
-		opt.alpha ??= true;
-		opt.colorSpace ??= c.colorSpace || Q5.canvasOptions.colorSpace;
-		return new Q5.Image($, w, h, opt);
+	$.createImage = (w, h, opt = {}) => {
+		opt.colorSpace ??= $.canvas.colorSpace;
+		opt.defaultImageScale ??= $._defaultImageScale;
+		return new Q5.Image(w, h, opt);
 	};
 
 	$.loadImage = function (url, cb, opt) {
@@ -1406,7 +1406,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		if (typeof last == 'object') {
 			opt = last;
 			cb = null;
-		} else opt = null;
+		} else opt = undefined;
 
 		let g = $.createImage(1, 1, opt);
 		let pd = g._pixelDensity;
@@ -1416,6 +1416,10 @@ Q5.renderers.c2d.image = ($, q) => {
 
 		g.promise = new Promise((resolve, reject) => {
 			img.onload = () => {
+				delete g.promise;
+				delete g.then;
+				if (g._usedAwait) g = $.createImage(1, 1, opt);
+
 				img._pixelDensity = pd;
 				g.defaultWidth = img.width * $._defaultImageScale;
 				g.defaultHeight = img.height * $._defaultImageScale;
@@ -1425,16 +1429,19 @@ Q5.renderers.c2d.image = ($, q) => {
 
 				g.ctx.drawImage(img, 0, 0);
 				if (cb) cb(g);
-				delete g.promise;
 				resolve(g);
 			};
 			img.onerror = reject;
 		});
-		$._preloadPromises.push(g.promise);
+		$._loaders.push(g.promise);
+
+		// then only runs when the user awaits the instance
+		g.then = (resolve, reject) => {
+			g._usedAwait = true;
+			return g.promise.then(resolve, reject);
+		};
 
 		g.src = img.src = url;
-
-		if (!$._usePreload) return g.promise;
 		return g;
 	};
 
@@ -1695,7 +1702,9 @@ Q5.renderers.c2d.image = ($, q) => {
 };
 
 Q5.Image = class {
-	constructor(q, w, h, opt = {}) {
+	constructor(w, h, opt = {}) {
+		opt.alpha ??= true;
+		opt.colorSpace ??= Q5.canvasOptions.colorSpace;
 		let $ = this;
 		$._isImage = true;
 		$.canvas = $.ctx = $.drawingContext = null;
@@ -1706,7 +1715,7 @@ Q5.Image = class {
 			if (r[m]) r[m]($, $);
 		}
 		$._pixelDensity = opt.pixelDensity || 1;
-		$._defaultImageScale = opt.defaultImageScale || q._defaultImageScale;
+		$._defaultImageScale = opt.defaultImageScale || 2;
 		$.createCanvas(w, h, opt);
 		let scale = $._pixelDensity * $._defaultImageScale;
 		$.defaultWidth = w * scale;
@@ -1878,13 +1887,11 @@ Q5.renderers.c2d.text = ($, q) => {
 		emphasis = 'normal',
 		weight = 'normal',
 		styleHash = 0,
-		styleHashes = [],
 		genTextImage = false,
 		cacheSize = 0;
 	$._fontMod = false;
 
 	let cache = ($._textCache = {});
-	$._textCacheMaxSize = 12000;
 
 	$.loadFont = (url, cb) => {
 		let f;
@@ -1894,25 +1901,29 @@ Q5.renderers.c2d.text = ($, q) => {
 		} else {
 			let name = url.split('/').pop().split('.')[0].replace(' ', '');
 
-			f = new FontFace(name, `url(${encodeURI(url)})`);
-			document.fonts.add(f);
-			f.promise = (async () => {
-				let err;
-				try {
-					await f.load();
-				} catch (e) {
-					err = e;
-				}
-				delete f.promise;
-				if (err) throw err;
-				if (cb) cb(f);
-				return f;
-			})();
-		}
+			f = { family: name };
+			let ff = new FontFace(name, `url(${encodeURI(url)})`);
+			document.fonts.add(ff);
 
-		$._preloadPromises.push(f.promise);
+			f.promise = new Promise((resolve, reject) => {
+				ff.load()
+					.then(() => {
+						delete f.promise;
+						delete f.then;
+						if (cb) cb(ff);
+						resolve(ff);
+					})
+					.catch((err) => {
+						reject(err);
+					});
+			});
+		}
+		$._loaders.push(f.promise);
 		$.textFont(f.family);
-		if (!$._usePreload) return f.promise;
+		f.then = (resolve, reject) => {
+			f._usedAwait = true;
+			return f.promise.then(resolve, reject);
+		};
 		return f;
 	};
 
@@ -1980,8 +1991,13 @@ Q5.renderers.c2d.text = ($, q) => {
 					}
 				}
 
+				if (f._usedAwait) {
+					f = { family: fontFamily };
+				}
+
 				f.faces = loadedFaces;
 				delete f.promise;
+				delete f.then;
 				if (cb) cb(f);
 				return f;
 			} catch (e) {
@@ -2086,7 +2102,7 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (str === undefined || (!$._doFill && !$._doStroke)) return;
 		str = str.toString();
 		let ctx = $.ctx;
-		let img, colorStyle;
+		let img, colorStyle, styleCache, colorCache, recycling;
 
 		if ($._fontMod) $._updateFont();
 
@@ -2094,14 +2110,23 @@ Q5.renderers.c2d.text = ($, q) => {
 			if (styleHash == -1) updateStyleHash();
 			colorStyle = $._fill + $._stroke + $._strokeWeight;
 
-			let cacheLevel1 = cache[str];
-			let cacheLevel2;
-			if (cacheLevel1) cacheLevel2 = cacheLevel1[styleHash];
+			styleCache = cache[str];
+			if (styleCache) colorCache = styleCache[styleHash];
+			else styleCache = cache[str] = {};
 
-			if (cacheLevel2) {
-				img = cacheLevel2[colorStyle];
+			if (colorCache) {
+				img = colorCache[colorStyle];
 				if (img) return img;
-			}
+
+				if (colorCache.size >= 4) {
+					for (let recycleKey in colorCache) {
+						img = colorCache[recycleKey];
+						delete colorCache[recycleKey];
+						break;
+					}
+					recycling = true;
+				}
+			} else colorCache = styleCache[styleHash] = {};
 		}
 
 		if (str.indexOf('\n') == -1) lines[0] = str;
@@ -2169,6 +2194,8 @@ Q5.renderers.c2d.text = ($, q) => {
 				img._bottom = img._top + ascent + leading * (lines.length - 1);
 				img._leading = leading;
 			} else {
+				let cnv = img.canvas;
+				img.ctx.clearRect(0, 0, cnv.width, cnv.height);
 				img.modified = true;
 			}
 
@@ -2199,19 +2226,33 @@ Q5.renderers.c2d.text = ($, q) => {
 		if (!$._fillSet) ctx.fillStyle = ogFill;
 
 		if (genTextImage) {
-			styleHashes.push(styleHash);
-			(cache[str] ??= {})[styleHash] ??= {};
-			cache[str][styleHash][colorStyle] = img;
+			colorCache[colorStyle] = img;
 
-			cacheSize++;
-			if (cacheSize > $._textCacheMaxSize) {
-				let half = Math.ceil(cacheSize / 2);
-				let hashes = styleHashes.splice(0, half);
-				for (let s in cache) {
-					s = cache[s];
-					for (let h of hashes) delete s[h];
+			if (!recycling) {
+				if (!colorCache.size) {
+					Object.defineProperty(colorCache, 'size', {
+						writable: true,
+						enumerable: false
+					});
+					colorCache.size = 0;
 				}
-				cacheSize -= half;
+				colorCache.size++;
+				cacheSize++;
+			}
+
+			if (cacheSize > Q5.MAX_TEXT_IMAGES) {
+				for (const str in cache) {
+					styleCache = cache[str];
+					for (const hash in styleCache) {
+						colorCache = styleCache[hash];
+						for (let c in colorCache) {
+							let _img = colorCache[c];
+							if (_img._texture) _img._texture.destroy();
+							delete colorCache[c];
+						}
+					}
+				}
+				cacheSize = 0;
 			}
 			return img;
 		}
@@ -2239,6 +2280,7 @@ Q5.renderers.c2d.text = ($, q) => {
 };
 
 Q5.fonts = [];
+Q5.MAX_TEXT_IMAGES = 5000;
 Q5.modules.color = ($, q) => {
 	$.RGB = $.RGBA = $.RGBHDR = $._colorMode = 'rgb';
 	$.HSL = 'hsl';
@@ -3112,29 +3154,38 @@ Q5.modules.dom = ($, q) => {
 
 	$.createSpan = (content) => $.createEl('span', content);
 
+	function initVideo(el) {
+		el.width ||= el.videoWidth;
+		el.height ||= el.videoHeight;
+		el.defaultWidth = el.width * $._defaultImageScale;
+		el.defaultHeight = el.height * $._defaultImageScale;
+		el.ready = true;
+	}
+
 	$.createVideo = (src) => {
 		let el = $.createEl('video');
 		el.crossOrigin = 'anonymous';
 
-		el._load = () => {
-			el.width ||= el.videoWidth;
-			el.height ||= el.videoHeight;
-			el.defaultWidth = el.width * $._defaultImageScale;
-			el.defaultHeight = el.height * $._defaultImageScale;
-			el.ready = true;
-		};
-
 		if (src) {
 			el.promise = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
-					el._load();
+					delete el.promise;
+					delete el.then;
+					if (el._usedAwait) {
+						el = $.createEl('video');
+						el.crossOrigin = 'anonymous';
+						el.src = src;
+					}
+					initVideo(el);
 					resolve(el);
 				});
 				el.src = src;
 			});
-			$._preloadPromises.push(el.promise);
-
-			if (!$._usePreload) return el.promise;
+			$._loaders.push(el.promise);
+			el.then = (resolve, reject) => {
+				el._usedAwait = true;
+				return el.promise.then(resolve, reject);
+			};
 		}
 		return el;
 	};
@@ -3149,18 +3200,22 @@ Q5.modules.dom = ($, q) => {
 		constraints.video.facingMode ??= 'user';
 
 		let vid = $.createVideo();
-		vid.playsinline = vid.autoplay = true;
-		if (flipped) {
-			vid.flipped = true;
-			vid.style.transform = 'scale(-1, 1)';
+
+		function extendVideo(vid) {
+			vid.playsinline = vid.autoplay = true;
+			if (flipped) {
+				vid.flipped = true;
+				vid.style.transform = 'scale(-1, 1)';
+			}
+			vid.loadPixels = () => {
+				let g = $.createGraphics(vid.videoWidth, vid.videoHeight, { renderer: 'c2d' });
+				g.image(vid, 0, 0);
+				g.loadPixels();
+				vid.pixels = g.pixels;
+				g.remove();
+			};
 		}
-		vid.loadPixels = () => {
-			let g = $.createGraphics(vid.videoWidth, vid.videoHeight, { renderer: 'c2d' });
-			g.image(vid, 0, 0);
-			g.loadPixels();
-			vid.pixels = g.pixels;
-			g.remove();
-		};
+
 		vid.promise = (async () => {
 			let stream;
 			try {
@@ -3169,16 +3224,26 @@ Q5.modules.dom = ($, q) => {
 				throw e;
 			}
 
+			delete vid.promise;
+			delete vid.then;
+			if (vid._usedAwait) {
+				vid = $.createVideo();
+			}
+			extendVideo(vid);
+
 			vid.srcObject = stream;
 			await new Promise((resolve) => vid.addEventListener('loadeddata', resolve));
 
-			vid._load();
+			initVideo(vid);
 			if (cb) cb(vid);
 			return vid;
 		})();
-		$._preloadPromises.push(vid.promise);
+		$._loaders.push(vid.promise);
 
-		if (!$._usePreload) return vid.promise;
+		vid.then = (resolve, reject) => {
+			vid._usedAwait = true;
+			return vid.promise.then(resolve, reject);
+		};
 		return vid;
 	};
 
@@ -3258,12 +3323,12 @@ Q5.modules.fes = ($) => {
 		}
 	}
 
-	if (Q5.online != false && typeof navigator != undefined && navigator.onLine) {
+	if ($._isGlobal && Q5.online != false && typeof navigator != undefined && navigator.onLine) {
 		async function checkLatestVersion() {
 			try {
-				let response = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
-				if (!response.ok) return;
-				let data = await response.json();
+				let res = await fetch('https://data.jsdelivr.com/v1/package/npm/q5');
+				if (!res.ok) return;
+				let data = await res.json();
 				let l = data.tags.latest;
 				l = l.slice(0, l.lastIndexOf('.'));
 				if (l != Q5.version) {
@@ -4352,6 +4417,11 @@ Q5.modules.sound = ($, q) => {
 		sounds.push(s);
 
 		s.promise = (async () => {
+			if (s._usedAwait) {
+				sounds.splice(sounds.indexOf(s), 1);
+				s = new Q5.Sound();
+				sounds.push(s);
+			}
 			let err;
 			try {
 				await s.load(url);
@@ -4359,13 +4429,17 @@ Q5.modules.sound = ($, q) => {
 				err = e;
 			}
 			delete s.promise;
+			delete s.then;
 			if (err) throw err;
 			if (cb) cb(s);
 			return s;
 		})();
-		$._preloadPromises.push(s.promise);
+		$._loaders.push(s.promise);
 
-		if (!$._usePreload) return s.promise;
+		s.then = (resolve, reject) => {
+			s._usedAwait = true;
+			return s.promise.then(resolve, reject);
+		};
 		return s;
 	};
 
@@ -4374,19 +4448,30 @@ Q5.modules.sound = ($, q) => {
 		a._isAudio = true;
 		a.crossOrigin = 'Anonymous';
 		a.promise = new Promise((resolve, reject) => {
-			a.addEventListener('canplay', () => {
+			function loaded() {
 				if (!a.loaded) {
+					delete a.promise;
+					delete a.then;
+					if (a._usedAwait) {
+						a = new Audio(url);
+						a._isAudio = true;
+						a.crossOrigin = 'Anonymous';
+					}
 					a.loaded = true;
 					if (cb) cb(a);
 					resolve(a);
 				}
-			});
-			a.addEventListener('suspend', resolve);
+			}
+			a.addEventListener('canplay', loaded);
+			a.addEventListener('suspend', loaded);
 			a.addEventListener('error', reject);
 		});
-		$._preloadPromises.push(a.promise);
+		$._loaders.push(a.promise);
 
-		if (!$._usePreload) return a.promise;
+		a.then = (resolve, reject) => {
+			a._usedAwait = true;
+			return a.promise.then(resolve, reject);
+		};
 		return a;
 	};
 
@@ -4571,27 +4656,30 @@ Q5.Sound = class {
 Q5.modules.util = ($, q) => {
 	$._loadFile = (url, cb, type) => {
 		let ret = {};
-		ret.promise = new Promise((resolve, reject) => {
-			fetch(url)
-				.then((res) => {
-					if (!res.ok) {
-						reject('error loading file');
-						return null;
-					}
-					if (type == 'json') return res.json();
-					return res.text();
-				})
-				.then((f) => {
-					if (type == 'csv') f = Q5.CSV.parse(f);
-					if (typeof f == 'string') ret.text = f;
-					else Object.assign(ret, f);
-					delete ret.promise;
-					if (cb) cb(f);
-					resolve(f);
-				});
-		});
-		$._preloadPromises.push(ret.promise);
-		if (!$._usePreload) return ret.promise;
+		ret.promise = fetch(url)
+			.then((res) => {
+				if (!res.ok) {
+					reject('error loading file');
+					return null;
+				}
+				return type == 'json' ? res.json() : res.text();
+			})
+			.then((f) => {
+				if (type == 'csv') f = Q5.CSV.parse(f);
+
+				if (typeof f == 'string') ret.text = f;
+				else Object.assign(ret, f);
+
+				delete ret.promise;
+				delete ret.then;
+				if (cb) cb(f);
+				return f;
+			});
+		$._loaders.push(ret.promise);
+
+		ret.then = (resolve, reject) => {
+			return ret.promise.then(resolve, reject);
+		};
 		return ret;
 	};
 
@@ -4607,11 +4695,15 @@ Q5.modules.util = ($, q) => {
 				let xml = new DOMParser().parseFromString(text, 'application/xml');
 				ret.DOM = xml;
 				delete ret.promise;
+				delete ret.then;
 				if (cb) cb(xml);
 				return xml;
 			});
-		$._preloadPromises.push(ret.promise);
-		if (!$._usePreload) return ret.promise;
+		$._loaders.push(ret.promise);
+
+		ret.then = (resolve, reject) => {
+			return ret.promise.then(resolve, reject);
+		};
 		return ret;
 	};
 
@@ -4623,7 +4715,7 @@ Q5.modules.util = ($, q) => {
 	$.load = function (...urls) {
 		if (Array.isArray(urls[0])) urls = urls[0];
 
-		let promises = [];
+		let thenables = [];
 
 		for (let url of urls) {
 			let ext = url.split('.').pop().toLowerCase();
@@ -4644,11 +4736,11 @@ Q5.modules.util = ($, q) => {
 			} else {
 				obj = $.loadText(url);
 			}
-			promises.push($._usePreload ? obj.promise : obj);
+			thenables.push(obj);
 		}
 
-		if (urls.length == 1) return promises[0];
-		return Promise.all(promises);
+		if (urls.length == 1) return thenables[0];
+		return Promise.all(thenables);
 	};
 
 	async function saveFile(data, name, ext) {
@@ -5532,8 +5624,18 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		if (args.length == 1) m = args[0];
 		else m = args;
 
-		if (m.length == 9) {
-			// convert 3x3 matrix to 4x4 matrix
+		if (m.length <= 6) {
+			const a = m[0],
+				b = m[1],
+				c = m[2],
+				d = m[3],
+				e = m[4] || 0,
+				f = m[5] || 0;
+			// Convert Canvas2D [a,b,c,d,e,f] (column-major 3x3: [a,b,0, c,d,0, e,f,1])
+			m = [a, b, 0, c, d, 0, e, f, 1];
+		}
+		if (m.length <= 9) {
+			// convert 3x3 matrix to 4x4 layout used internally
 			m = [m[0], m[1], 0, m[2], m[3], m[4], 0, m[5], 0, 0, 1, 0, m[6], m[7], 0, m[8]];
 		} else if (m.length != 16) {
 			throw new Error('Matrix must be a 3x3 or 4x4 array.');
@@ -6696,7 +6798,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		addRect(x, y, hw, hh, rr, doStroke ? sw : 0, doFill ? fillIdx : 0);
 	};
 
-	$.square = (x, y, s) => $.rect(x, y, s, s);
+	$.square = (x, y, s, rr) => $.rect(x, y, s, s, rr);
 
 	function addCapsule(x1, y1, x2, y2, r, strokeW, fillCapsule) {
 		let dx = x2 - x1,
@@ -7338,9 +7440,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.loadImage = (src, cb) => {
-		let g = $._g.loadImage(src, () => {
-			$._makeDrawable(g);
-			if (cb) cb(g);
+		let g = $._g.loadImage(src, (img) => {
+			$._makeDrawable(img);
+			if (cb) cb(img);
 		});
 		return g;
 	};
@@ -7707,18 +7809,27 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 	let fontsArr = [];
 	let fonts = {};
+	let fontSet;
 
-	async function createFont(fontJsonUrl, fontName, cb) {
-		let res = await fetch(fontJsonUrl);
-		if (res.status == 404) return '';
+	async function createFont(url, fontName, cb) {
+		let baseUrl = url.substring(0, url.lastIndexOf('-'));
 
-		let atlas = await res.json();
-
-		let slashIdx = fontJsonUrl.lastIndexOf('/');
-		let baseUrl = slashIdx != -1 ? fontJsonUrl.substring(0, slashIdx + 1) : '';
-		// load font image
-		res = await fetch(baseUrl + atlas.pages[0]);
-		let img = await createImageBitmap(await res.blob());
+		// load atlas and image in parallel
+		let atlas, img;
+		try {
+			[atlas, img] = await Promise.all([
+				fetch(url).then((res) => {
+					if (res.status == 404) throw new Error('404');
+					return res.json();
+				}),
+				fetch(baseUrl + '.png')
+					.then((res) => res.blob())
+					.then((blob) => createImageBitmap(blob))
+			]);
+		} catch (error) {
+			console.error('Error loading font:', error);
+			return '';
+		}
 
 		// convert image to texture
 		let imgSize = [img.width, img.height, 1];
@@ -7786,42 +7897,52 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			}
 		}
 
-		$._font = new MsdfFont(fontBindGroup, atlas.common.lineHeight, chars, kernings);
-
-		$._font.index = fontsArr.length;
-		fontsArr.push($._font);
-		fonts[fontName] = $._font;
+		let _font = new MsdfFont(fontBindGroup, atlas.common.lineHeight, chars, kernings);
+		_font.index = fontsArr.length;
+		fontsArr.push(_font);
+		fonts[fontName] = _font;
+		$._font = _font;
 
 		if (cb) cb(fontName);
+		return { family: fontName };
 	}
 
-	$.loadFont = (url, cb) => {
+	$.loadFont = (url = 'sans-serif', cb) => {
+		fontSet = true;
 		if (url.startsWith('https://fonts.googleapis.com/css')) {
 			return $._g.loadFont(url, cb);
 		}
 
 		let ext = url.slice(url.lastIndexOf('.') + 1);
-		if (url == ext) return $._loadDefaultFont(url, cb);
+
+		// if not a url, assume it's one of q5's MSDF fonts
+		if (url == ext) {
+			let fontName = url;
+			fonts[fontName] = null;
+			url = `https://q5js.org/fonts/${fontName}-msdf.json`;
+			if (Q5.online == false || !navigator.onLine) {
+				url = `/node_modules/q5/builtinFonts/${fontName}-msdf.json`;
+			}
+			ext = 'json';
+		}
+
 		if (ext != 'json') return $._g.loadFont(url, cb);
+
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
 		let f = { family: fontName };
 		f.promise = createFont(url, fontName, () => {
 			delete f.promise;
+			delete f.then;
+			if (f._usedAwait) f = { family: fontName };
 			if (cb) cb(f);
 		});
-		$._preloadPromises.push(f.promise);
+		$._loaders.push(f.promise);
 
-		if (!$._usePreload) return f.promise;
+		f.then = (resolve, reject) => {
+			f._usedAwait = true;
+			return f.promise.then(resolve, reject);
+		};
 		return f;
-	};
-
-	$._loadDefaultFont = (fontName, cb) => {
-		fonts[fontName] = null;
-		let url = `https://q5js.org/fonts/${fontName}-msdf.json`;
-		if (Q5.online == false || !navigator.onLine) {
-			url = `/node_modules/q5/builtinFonts/${fontName}-msdf.json`;
-		}
-		return $.loadFont(url, cb);
 	};
 
 	let _textSize = 18,
@@ -7832,12 +7953,16 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		leadDiff = 4.5,
 		leadPercent = 1.25;
 
+	let categories = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'];
+
 	$.textFont = (fontName) => {
 		if (!fontName) return $._font;
+		fontSet = true;
 		if (typeof fontName != 'string') fontName = fontName.family;
 		let font = fonts[fontName];
 		if (font) $._font = font;
-		else if (font === undefined) return $._loadDefaultFont(fontName);
+		// if it's a font category or not a WebGPU font, set the Canvas2D font
+		else if (categories[fontName] || font === undefined) $._g.textFont(fontName);
 	};
 
 	$.textSize = (size) => {
@@ -7895,8 +8020,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	let lineWidthsCache = new Array(100);
 
 	// Reusable buffers for text data to avoid creating new arrays
-	let charDataBuffer = new Float32Array(100000); // reusable buffer for char data
-	let textDataBuffer = new Float32Array(10000); // reusable buffer for text metadata
+	let charDataBuffer = new Float32Array(Q5.MAX_CHARS * 4); // reusable buffer for char data
+	let textDataBuffer = new Float32Array(Q5.MAX_TEXTS * 8); // reusable buffer for text metadata
 
 	let measureText = (font, text, charCallback) => {
 		let maxWidth = 0,
@@ -7948,18 +8073,21 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.text = (str, x, y, w, h) => {
-		if (!$._font) {
-			// if the default font hasn't been loaded yet, try to load it
-			if ($._font !== null) $.textFont('sans-serif');
-			if (_textSize >= 1) return $.textImage(str, x, y, w, h);
-		}
-
 		if (_textSize < 1) return;
 
 		let type = typeof str;
 		if (type != 'string') {
 			if (type == 'object') str = str.toString();
 			else str = str + '';
+		}
+
+		// if not using an MSDF font
+		if (!$._font) {
+			// if no font is set, lazy load the default MSDF font
+			if (!fontSet) $.loadFont();
+			// use Canvas2D text rendering
+			let img = $.createTextImage(str, w, h);
+			return $.textImage(img, x, y);
 		}
 
 		if (str.length > w) {
@@ -8196,6 +8324,8 @@ Q5.BLUR = 8;
 Q5.MAX_TRANSFORMS = 1e7;
 Q5.MAX_RECTS = 200200;
 Q5.MAX_ELLIPSES = 200200;
+Q5.MAX_CHARS = 100000;
+Q5.MAX_TEXTS = 10000;
 
 Q5.initWebGPU = async () => {
 	if (!navigator.gpu) {

@@ -17,25 +17,25 @@ Generates a random value.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 frameRate(5);
 
-Q5.draw = function () {
+q5.draw = function () {
 	circle(0, 0, random(200));
-}
-````
+};
+```
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	circle(random(-100, 100), random(-100, 100), 10);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 background(200);
 frameRate(5);
@@ -43,13 +43,13 @@ frameRate(5);
 function draw() {
 	circle(100, 100, random(20, 200));
 }
-````
+```
 
-````js
+```js
 function draw() {
 	circle(random(200), random(200), 10);
 }
-````
+```
 
 ## jit
 
@@ -66,36 +66,36 @@ Equivalent to `random(-amount, amount)`.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	circle(mouseX + jit(3), mouseY + jit(3), 5);
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
-Q5.draw = function () {
+q5.draw = function () {
 	circle(jit(50), 0, random(50));
 };
-````
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	circle(mouseX + jit(3), mouseY + jit(3), 5);
 }
-````
+```
 
-````js
+```js
 let q = await Q5.WebGPU();
 createCanvas(200, 100);
 
 q.draw = () => {
 	circle(jit(50), 0, random(50));
 };
-````
+```
 
 ## noise
 
@@ -112,49 +112,49 @@ Uses [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise) by default.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	let n = noise(frameCount * 0.01);
 	circle(0, 0, n * 200);
-}
-````
+};
+```
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	let t = (frameCount + mouseX) * 0.02;
 	for (let x = -5; x < 220; x += 10) {
 		let n = noise(t, x * 0.1);
 		circle(x - 100, 0, n * 40);
 	}
-}
-````
+};
+```
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	noStroke();
 	let t = millis() * 0.002;
 	for (let x = -100; x < 100; x += 5) {
 		for (let y = -100; y < 100; y += 5) {
-			fill(noise(t, (mouseX + x) * .05, y * .05));
+			fill(noise(t, (mouseX + x) * 0.05, y * 0.05));
 			square(x, y, 5);
 		}
 	}
 };
-````
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	let n = noise(frameCount * 0.01);
 	circle(100, 100, n * 200);
 }
-````
+```
 
-````js
+```js
 function draw() {
 	background(200);
 	let t = (frameCount + mouseX) * 0.02;
@@ -163,7 +163,7 @@ function draw() {
 		circle(x, 100, n * 40);
 	}
 }
-````
+```
 
 ## dist
 
@@ -181,19 +181,19 @@ This function also accepts two objects with `x` and `y` properties.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	line(0, 0, mouseX, mouseY);
 
 	let d = dist(0, 0, mouseX, mouseY);
 	text(round(d), -80, -80);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	circle(100, 100, 20);
@@ -202,7 +202,7 @@ function draw() {
 	let d = dist(100, 100, mouseX, mouseY);
 	text(round(d), 20, 20);
 }
-````
+```
 
 ## map
 
@@ -306,21 +306,21 @@ Rounds a number.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 background(0.8);
 textSize(32);
 text(round(PI, 5), -90, 10);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 background(200);
 textSize(32);
 text(round(PI, 5), 10, 60);
-````
+```
 
 ## ceil
 
@@ -333,21 +333,21 @@ Rounds a number up.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 background(0.8);
 textSize(32);
 text(ceil(PI), -90, 10);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 background(200);
 textSize(32);
 text(ceil(PI), 10, 60);
-````
+```
 
 ## floor
 
@@ -360,21 +360,21 @@ Rounds a number down.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 background(0.8);
 textSize(32);
 text(floor(-PI), -90, 10);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 background(200);
 textSize(32);
 text(floor(-PI), 10, 60);
-````
+```
 
 ## min
 
@@ -387,19 +387,19 @@ Returns the smallest value in a sequence of numbers.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(min(mouseX, 100));
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(min(mouseX, 100));
 }
-````
+```
 
 ## max
 
@@ -412,25 +412,25 @@ Returns the largest value in a sequence of numbers.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(max(mouseX, 100));
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(max(mouseX, 100));
 }
-````
+```
 
 ## pow
 
 Calculates the value of a base raised to a power.
 
-For example, `pow(2, 3)` calculates 2 * 2 * 2 which is 8.
+For example, `pow(2, 3)` calculates 2 _ 2 _ 2 which is 8.
 
 ```
 @param {number} base base
@@ -543,12 +543,12 @@ Approximately 3.14159.
 
 ## TWO_PI
 
-2 * PI.
+2 \* PI.
 Approximately 6.28319.
 
 ## TAU
 
-2 * PI.
+2 \* PI.
 Approximately 6.28319.
 
 ## HALF_PI
@@ -560,4 +560,3 @@ Approximately 1.5708.
 
 A quarter of PI.
 Approximately 0.7854.
-

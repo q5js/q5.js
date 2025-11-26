@@ -14,23 +14,23 @@ Current X position of the mouse.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	textSize(64);
 	text(round(mouseX), -50, 20);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	textSize(64);
 	text(round(mouseX), 50, 120);
 }
-````
+```
 
 ## mouseY
 
@@ -38,21 +38,21 @@ Current Y position of the mouse.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	circle(0, mouseY, 100);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	circle(100, mouseY, 100);
 }
-````
+```
 
 ## pmouseX
 
@@ -70,23 +70,23 @@ The default value is an empty string.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	textSize(64);
 	text(mouseButton, -80, 20);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	textSize(64);
 	text(mouseButton, 20, 120);
 }
-````
+```
 
 ## mouseIsPressed
 
@@ -94,21 +94,21 @@ True if the mouse is currently pressed, false otherwise.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	if (mouseIsPressed) background(0.4);
 	else background(0.8);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	if (mouseIsPressed) background(100);
 	else background(200);
 }
-````
+```
 
 ## mousePressed
 
@@ -116,19 +116,19 @@ Define this function to respond to mouse down events.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	background(gray);
 	gray = (gray + 0.1) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let gray = 95;
 
@@ -136,7 +136,7 @@ function mousePressed() {
 	background(gray % 256);
 	gray += 40;
 }
-````
+```
 
 ## mouseReleased
 
@@ -144,19 +144,19 @@ Define this function to respond to mouse up events.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.mouseReleased = function () {
+q5.mouseReleased = function () {
 	background(gray);
 	gray = (gray + 0.1) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let gray = 95;
 
@@ -164,7 +164,7 @@ function mouseReleased() {
 	background(gray % 256);
 	gray += 40;
 }
-````
+```
 
 ## mouseMoved
 
@@ -175,19 +175,19 @@ when the user drags their finger on the screen.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.mouseMoved = function () {
+q5.mouseMoved = function () {
 	background(gray);
 	gray = (gray + 0.005) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let gray = 95;
 
@@ -195,7 +195,7 @@ function mouseMoved() {
 	background(gray % 256);
 	gray++;
 }
-````
+```
 
 ## mouseDragged
 
@@ -206,19 +206,19 @@ while a mouse button is pressed.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.mouseDragged = function () {
+q5.mouseDragged = function () {
 	background(gray);
 	gray = (gray + 0.005) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let gray = 95;
 
@@ -226,7 +226,7 @@ function mouseDragged() {
 	background(gray % 256);
 	gray++;
 }
-````
+```
 
 ## doubleClicked
 
@@ -234,19 +234,19 @@ Define this function to respond to mouse double click events.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.doubleClicked = function () {
+q5.doubleClicked = function () {
 	background(gray);
 	gray = (gray + 0.1) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let gray = 95;
 
@@ -254,7 +254,7 @@ function doubleClicked() {
 	background(gray % 256);
 	gray += 40;
 }
-````
+```
 
 ## key
 
@@ -262,23 +262,23 @@ The name of the last key pressed.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	textSize(64);
 	text(key, -80, 20);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	textSize(64);
 	text(key, 20, 120);
 }
-````
+```
 
 ## keyIsPressed
 
@@ -286,25 +286,25 @@ True if a key is currently pressed, false otherwise.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	if (keyIsPressed) background(0.4);
 	else background(0.8);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	if (keyIsPressed) background(100);
 	else background(200);
 }
-````
+```
 
 ## keyIsDown
 
-Returns true if the user is pressing the specified key, false 
+Returns true if the user is pressing the specified key, false
 otherwise. Accepts case-insensitive key names.
 
 ```
@@ -314,27 +314,27 @@ otherwise. Accepts case-insensitive key names.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
-	
+
 	if (keyIsDown('f') && keyIsDown('j')) {
 		rect(-50, -50, 100, 100);
 	}
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
-	
+
 	if (keyIsDown('f') && keyIsDown('j')) {
 		rect(50, 50, 100, 100);
 	}
 }
-````
+```
 
 ## keyPressed
 
@@ -342,19 +342,19 @@ Define this function to respond to key down events.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.keyPressed = function () {
+q5.keyPressed = function () {
 	background(gray);
 	gray = (gray + 0.1) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let gray = 95;
@@ -362,7 +362,7 @@ function keyPressed() {
 	background(gray % 256);
 	gray += 40;
 }
-````
+```
 
 ## keyReleased
 
@@ -370,19 +370,19 @@ Define this function to respond to key up events.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.keyReleased = function () {
+q5.keyReleased = function () {
 	background(gray);
 	gray = (gray + 0.1) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let gray = 95;
@@ -390,7 +390,7 @@ function keyReleased() {
 	background(gray % 256);
 	gray += 40;
 }
-````
+```
 
 ## touches
 
@@ -400,25 +400,25 @@ browser window. Each touch being an object with
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	for (let touch of touches) {
 		circle(touch.x, touch.y, 100);
 	}
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	for (let touch of touches) {
 		circle(touch.x, touch.y, 100);
 	}
 }
-````
+```
 
 ## touchStarted
 
@@ -430,19 +430,19 @@ and scroll, which q5 disables on the canvas by default.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.touchStarted = function () {
+q5.touchStarted = function () {
 	background(gray);
 	gray = (gray + 0.1) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let gray = 95;
@@ -450,7 +450,7 @@ function touchStarted() {
 	background(gray % 256);
 	gray += 40;
 }
-````
+```
 
 ## touchEnded
 
@@ -462,19 +462,19 @@ and scroll, which q5 disables on the canvas by default.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.touchEnded = function () {
+q5.touchEnded = function () {
 	background(gray);
 	gray = (gray + 0.1) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let gray = 95;
@@ -482,7 +482,7 @@ function touchEnded() {
 	background(gray % 256);
 	gray += 40;
 }
-````
+```
 
 ## touchMoved
 
@@ -494,19 +494,19 @@ and scroll, which q5 disables on the canvas by default.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let gray = 0.4;
 
-Q5.touchMoved = function () {
+q5.touchMoved = function () {
 	background(gray);
 	gray = (gray + 0.005) % 1;
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let gray = 95;
 
@@ -514,7 +514,7 @@ function touchMoved() {
 	background(gray % 256);
 	gray++;
 }
-````
+```
 
 ## pointers
 
@@ -523,26 +523,26 @@ browser window.
 
 This includes mouse, touch, and pen pointers.
 
-Each pointer is an object with 
+Each pointer is an object with
 `event`, `x`, and `y` properties.
 The `event` property contains the original
 [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent).
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	for (let pointerID in pointers) {
 		let pointer = pointers[pointerID];
 		circle(pointer.x, pointer.y, 100);
 	}
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	for (let pointerID in pointers) {
@@ -550,7 +550,7 @@ function draw() {
 		circle(pointer.x, pointer.y, 100);
 	}
 }
-````
+```
 
 ## cursor
 
@@ -566,17 +566,17 @@ specify the active point of the cursor.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 cursor('pointer');
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 cursor('pointer');
-````
+```
 
 ## noCursor
 
@@ -584,17 +584,17 @@ Hides the cursor within the bounds of the canvas.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 noCursor();
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 noCursor();
-````
+```
 
 ## mouseWheel
 
@@ -607,22 +607,22 @@ Return true to allow the default behavior of scrolling the page.
 
 ### webgpu
 
-````js
-let x = y = 100;
-Q5.draw = function () {
+```js
+let x = (y = 0);
+q5.draw = function () {
 	circle(x, y, 10);
-}
-function mouseWheel(e) {
+};
+q5.mouseWheel = function (e) {
 	x += e.deltaX;
 	y += e.deltaY;
 	return false;
-}
-````
+};
+```
 
 ### c2d
 
-````js
-let x = y = 100;
+```js
+let x = (y = 100);
 function draw() {
 	circle(x, y, 10);
 }
@@ -631,7 +631,7 @@ function mouseWheel(e) {
 	y += e.deltaY;
 	return false;
 }
-````
+```
 
 ## pointerLock
 
@@ -648,25 +648,25 @@ To exit pointer lock mode, call `document.exitPointerLock()`.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
-	circle(mouseX / 10 - 100, mouseY / 10 - 100, 10);
-}
+```js
+q5.draw = function () {
+	circle(mouseX / 10, mouseY / 10, 10);
+};
 
-Q5.doubleClicked = function () {
+q5.doubleClicked = function () {
 	if (!document.pointerLockElement) {
 		pointerLock();
 	} else {
 		document.exitPointerLock();
 	}
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
-	circle(mouseX / 10,  mouseY / 10, 10);
+	circle(mouseX / 10 + 100, mouseY / 10 + 100, 10);
 }
 
 function doubleClicked() {
@@ -676,5 +676,4 @@ function doubleClicked() {
 		document.exitPointerLock();
 	}
 }
-````
-
+```

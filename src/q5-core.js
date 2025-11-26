@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.5
+ * @version 3.6
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -79,15 +79,19 @@ function Q5(scope, parent, renderer) {
 		$.deviceOrientation = window.screen?.orientation?.type;
 	}
 
-	$._preloadPromises = [];
-	$._usePreload = true;
-	$.usePromiseLoading = (v = true) => ($._usePreload = !v);
-	$.usePreloadSystem = (v = true) => ($._usePreload = v);
-	$.isPreloadSupported = () => $._usePreload;
+	$._loaders = [];
+	$.loadAll = () => {
+		let loaders = $._loaders;
+		if ($._g) loaders = loaders.concat($._g._loaders);
+		return Promise.all(loaders);
+	};
+
+	$.isPreloadSupported = () => true;
+	$.disablePreload = () => ($._disablePreload = true);
 
 	const resolvers = [];
 	$._incrementPreload = () => {
-		$._preloadPromises.push(new Promise((resolve) => resolvers.push(resolve)));
+		$._loaders.push(new Promise((resolve) => resolvers.push(resolve)));
 	};
 	$._decrementPreload = () => {
 		if (resolvers.length) resolvers.pop()();
@@ -289,7 +293,7 @@ function Q5(scope, parent, renderer) {
 	for (let name of userFns) $[name] ??= () => {};
 
 	if ($._isGlobal) {
-		for (let name of ['setup', 'update', 'draw', ...userFns]) {
+		for (let name of ['setup', 'update', 'draw', 'drawFrame', ...userFns]) {
 			if (Q5[name]) $[name] = Q5[name];
 			else {
 				Object.defineProperty(Q5, name, {
@@ -341,16 +345,13 @@ function Q5(scope, parent, renderer) {
 			new Promise((resolve) => {
 				setTimeout(() => {
 					// if not loading
-					if (!$._preloadPromises.length) resolve();
+					if (!$._loaders.length) resolve();
 				}, 500);
 			})
 		]);
 
-		await Promise.all($._preloadPromises);
-		if ($._g) await Promise.all($._g._preloadPromises);
-
-		if (t.setup?.constructor.name == 'AsyncFunction') {
-			$.usePromiseLoading();
+		if (!$._disablePreload) {
+			await $.loadAll();
 		}
 
 		$.setup ??= t.setup || (() => {});
@@ -374,7 +375,7 @@ function Q5(scope, parent, renderer) {
 
 	Q5.instances.push($);
 
-	if (autoLoaded) start();
+	if (autoLoaded || Q5._esm) start();
 	else setTimeout(start, 32);
 }
 
@@ -437,16 +438,16 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-if (Q5._server) global.p5 ??= global.Q5 = Q5;
+if (Q5._server) global.p5 ??= global.q5 = global.Q5 = Q5;
 
 if (typeof window == 'object') {
-	window.p5 ??= window.Q5 = Q5;
+	window.p5 ??= window.q5 = window.Q5 = Q5;
 	window.createCanvas = createCanvas;
 	window.C2D = 'c2d';
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.5';
+Q5.version = Q5.VERSION = '3.6';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

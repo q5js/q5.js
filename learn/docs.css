@@ -334,12 +334,12 @@ header {
 	position: relative;
 }
 
-.magnify-glass::before {
+.magnify-glass {
 	font-family: "codicon";
-	content: "";
 	color: var(--blue3);
 	font-size: 20px;
 	margin-right: 12px;
+	user-select: none;
 }
 
 .dialog-input::placeholder {
@@ -372,22 +372,120 @@ header {
 	width: 200px;
 }
 
-#themeToggle {
+/* theme select is handled by the shared .select-wrapper styles */
+
+/* renderer select wrapper */
+.select-wrapper {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	border-radius: 16px;
+}
+
+.selectors-container {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.settings-toggle {
+	display: none;
+	background: transparent;
+	border: none;
+	color: var(--blue3);
+	font-size: 20px;
+	padding: 8px;
+	border-radius: 12px;
+	cursor: pointer;
+}
+
+.settings-toggle:hover {
+	color: var(--accent);
+}
+
+.select-wrapper label {
+	display: inline-flex;
+	align-items: center;
+	color: var(--blue3);
+}
+
+.select-wrapper label {
+	font-family: "codicon";
+	font-size: 24px;
+	vertical-align: middle;
+	margin: 2px 0;
+}
+
+.select-wrapper select {
 	background-color: transparent;
 	border: none;
 	cursor: pointer;
 	color: var(--blue3);
+	font-size: 18px;
+	padding: 0;
+	border-radius: 8px;
+	max-width: 0;
+	opacity: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	transition: max-width 220ms cubic-bezier(.2, .9, .2, 1), opacity 180ms ease-in-out, padding 160ms ease-in-out;
 }
 
-#themeToggle:hover {
-	border: none !important;
-	color: var(--accent);
+.select-wrapper:hover,
+.select-wrapper:focus-within {
+	padding: 3px 8px;
+	background-color: var(--blue2);
 }
 
-#themeToggle::before {
-	font-family: "codicon";
-	content: "";
-	font-size: 21px;
+.select-wrapper:hover select,
+.select-wrapper:focus-within select {
+	max-width: 220px;
+	opacity: 1;
+	padding: 6px 10px;
+}
+
+/* Mobile: hide selectors behind settings gear */
+@media (max-width: 999px) {
+	.selectors-container {
+		display: none;
+		position: absolute;
+		right: 16px;
+		top: 56px;
+		background: var(--blue0);
+		padding: 8px;
+		border-radius: 12px;
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+		flex-direction: column;
+		gap: 8px;
+		z-index: 1200;
+	}
+
+	.selectors-container.open {
+		display: flex;
+	}
+
+	.settings-toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: 8px;
+	}
+
+	.selectors-container .select-wrapper {
+		width: auto;
+		justify-content: space-between;
+		padding: 6px 8px;
+		min-width: 0;
+	}
+
+	/* inside the mobile popover, ensure selects are fully visible (not collapsed) */
+	.selectors-container .select-wrapper select {
+		max-width: none;
+		opacity: 1;
+		overflow: visible;
+		white-space: normal;
+		padding: 6px 10px;
+	}
 }
 
 .highlight {
@@ -453,26 +551,13 @@ header {
 	border: 2px solid var(--blue1);
 }
 
-::-webkit-scrollbar-track {
-	background: var(--background);
-}
-
-::-webkit-scrollbar-thumb {
-	background: var(--hover);
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: var(--hover);
-}
-
 ::-webkit-scrollbar {
-	width: auto;
-	height: auto;
+	width: 0;
+	height: 0;
 }
 
 * {
-	scrollbar-width: auto;
-	scrollbar-color: var(--hover) var(--background);
+	scrollbar-width: 0;
 }
 
 .allContent {
@@ -508,8 +593,8 @@ header {
 	font-size: 24px;
 }
 
-#homeButton:hover {
-	color: var(--accent);
+#homeButton:hover img {
+	box-shadow: 0px 0px 16px var(--blue3);
 }
 
 .logo {
@@ -1189,6 +1274,10 @@ pre[class*="language-"] code {
 }
 
 @media (max-width: 600px) {
+	.brand {
+		display: none;
+	}
+
 	.params {
 		max-width: 200px;
 	}
@@ -1202,7 +1291,6 @@ pre[class*="language-"] code {
 
 @media (max-width: 500px) {
 
-	.brand,
 	.heading-container .emoji {
 		display: none;
 	}

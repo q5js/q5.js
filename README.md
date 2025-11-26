@@ -7,7 +7,7 @@
 - lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
 - beginner friendly [documentation](https://q5js.org/learn) 📚
 - compatible with popular addons, including [p5.sound][], [ml5.js][], and [p5play][] 🎮
-- no dependencies, ~100kb minified 📦
+- no dependencies, ~125kb minified 📦
 - free to use under the LGPL (just like p5.js) 🆓
 
 q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners. 🤝

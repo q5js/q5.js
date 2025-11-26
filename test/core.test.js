@@ -83,9 +83,6 @@ function q5CoreTest(resolve) {
 	// Test redraw
 	expect(() => q.redraw()).not.toThrow();
 
-	// Test usePromiseLoading
-	expect(() => q.usePromiseLoading(true)).not.toThrow();
-
 	// Test Q5 static properties
 	expect(Q5.disableFriendlyErrors).toBeFalsy();
 	expect(Q5.errorTolerant).toBeFalsy();

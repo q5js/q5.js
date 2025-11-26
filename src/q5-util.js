@@ -1,27 +1,30 @@
 Q5.modules.util = ($, q) => {
 	$._loadFile = (url, cb, type) => {
 		let ret = {};
-		ret.promise = new Promise((resolve, reject) => {
-			fetch(url)
-				.then((res) => {
-					if (!res.ok) {
-						reject('error loading file');
-						return null;
-					}
-					if (type == 'json') return res.json();
-					return res.text();
-				})
-				.then((f) => {
-					if (type == 'csv') f = Q5.CSV.parse(f);
-					if (typeof f == 'string') ret.text = f;
-					else Object.assign(ret, f);
-					delete ret.promise;
-					if (cb) cb(f);
-					resolve(f);
-				});
-		});
-		$._preloadPromises.push(ret.promise);
-		if (!$._usePreload) return ret.promise;
+		ret.promise = fetch(url)
+			.then((res) => {
+				if (!res.ok) {
+					reject('error loading file');
+					return null;
+				}
+				return type == 'json' ? res.json() : res.text();
+			})
+			.then((f) => {
+				if (type == 'csv') f = Q5.CSV.parse(f);
+
+				if (typeof f == 'string') ret.text = f;
+				else Object.assign(ret, f);
+
+				delete ret.promise;
+				delete ret.then;
+				if (cb) cb(f);
+				return f;
+			});
+		$._loaders.push(ret.promise);
+
+		ret.then = (resolve, reject) => {
+			return ret.promise.then(resolve, reject);
+		};
 		return ret;
 	};
 
@@ -37,11 +40,15 @@ Q5.modules.util = ($, q) => {
 				let xml = new DOMParser().parseFromString(text, 'application/xml');
 				ret.DOM = xml;
 				delete ret.promise;
+				delete ret.then;
 				if (cb) cb(xml);
 				return xml;
 			});
-		$._preloadPromises.push(ret.promise);
-		if (!$._usePreload) return ret.promise;
+		$._loaders.push(ret.promise);
+
+		ret.then = (resolve, reject) => {
+			return ret.promise.then(resolve, reject);
+		};
 		return ret;
 	};
 
@@ -53,7 +60,7 @@ Q5.modules.util = ($, q) => {
 	$.load = function (...urls) {
 		if (Array.isArray(urls[0])) urls = urls[0];
 
-		let promises = [];
+		let thenables = [];
 
 		for (let url of urls) {
 			let ext = url.split('.').pop().toLowerCase();
@@ -74,11 +81,11 @@ Q5.modules.util = ($, q) => {
 			} else {
 				obj = $.loadText(url);
 			}
-			promises.push($._usePreload ? obj.promise : obj);
+			thenables.push(obj);
 		}
 
-		if (urls.length == 1) return promises[0];
-		return Promise.all(promises);
+		if (urls.length == 1) return thenables[0];
+		return Promise.all(thenables);
 	};
 
 	async function saveFile(data, name, ext) {

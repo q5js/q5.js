@@ -5,7 +5,7 @@
 Creates a new `Color` object, which is primarily useful for storing
 a color that your sketch will reuse or modify later.
 
-With the default RGB color mode, colors have `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha` components. The default color 
+With the default RGB color mode, colors have `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha` components. The default color
 format is integer, so set components to values between 0 and 255.
 
 In q5 WebGPU, the default color mode is RGB in float format, so
@@ -34,7 +34,7 @@ Here are some examples of valid use:
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 rect(-100, -100, 100, 200);
 
@@ -44,35 +44,35 @@ fill(bottle);
 stroke(bottle);
 strokeWeight(30);
 circle(0, 0, 155);
-````
+```
 
-````js
+```js
 await createCanvas(200);
 //          (gray, alpha)
 let c = color(0.8, 0.2);
 
-Q5.draw = function () {
+q5.draw = function () {
 	background(c);
 	circle(mouseX, mouseY, 50);
 	c.g = (c.g + 0.005) % 1;
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
 //           (r, g, b,   a)
 let c = color(0, 1, 1, 0.2);
 
-Q5.draw = function () {
+q5.draw = function () {
 	fill(c);
 	circle(mouseX, mouseY, 50);
 };
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 rect(0, 0, 100, 200);
 
@@ -82,9 +82,9 @@ fill(bottle);
 stroke(bottle);
 strokeWeight(30);
 circle(100, 100, 155);
-````
+```
 
-````js
+```js
 createCanvas(200);
 //          (gray, alpha)
 let c = color(200, 50);
@@ -94,9 +94,9 @@ function draw() {
 	circle(mouseX, mouseY, 50);
 	c.g = (c.g + 1) % 256;
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 //           (r,   g,   b,  a)
@@ -106,7 +106,7 @@ function draw() {
 	fill(c);
 	circle(mouseX, mouseY, 50);
 }
-````
+```
 
 ## colorMode
 
@@ -127,7 +127,7 @@ Color gamut is 'display-p3' by default, if the device supports HDR.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 colorMode(RGB, 1);
@@ -137,9 +137,9 @@ fill(0, 1, 0);
 rect(-34, -100, 67, 200);
 fill(0, 0, 1);
 rect(33, -100, 67, 200);
-````
+```
 
-````js
+```js
 await createCanvas(200);
 
 colorMode(OKLCH);
@@ -147,13 +147,13 @@ colorMode(OKLCH);
 fill(0.25, 0.15, 0);
 rect(-100, -100, 100, 200);
 
-fill(0.75, 0.15, 0)
+fill(0.75, 0.15, 0);
 rect(0, -100, 100, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 colorMode(RGB, 1);
@@ -163,9 +163,9 @@ fill(0, 1, 0);
 rect(66, 0, 67, 200);
 fill(0, 0, 1);
 rect(133, 0, 67, 200);
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 colorMode(OKLCH);
@@ -173,9 +173,9 @@ colorMode(OKLCH);
 fill(0.25, 0.15, 0);
 rect(0, 0, 100, 200);
 
-fill(0.75, 0.15, 0)
+fill(0.75, 0.15, 0);
 rect(100, 0, 100, 200);
-````
+```
 
 ## RGB
 
@@ -188,23 +188,23 @@ legacy integer 0-255 format.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 colorMode(RGB);
 
 background(1, 0, 0);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 colorMode(RGB);
 
 background(255, 0, 0);
-````
+```
 
 ## OKLCH
 
@@ -233,41 +233,41 @@ in-gamut colors.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 colorMode(OKLCH);
 
 background(0.64, 0.3, 30);
-````
+```
 
-````js
+```js
 await createCanvas(200);
 colorMode(OKLCH);
 
-Q5.draw = function () {
+q5.draw = function () {
 	background(0.7, 0.16, frameCount % 360);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 colorMode(OKLCH);
 
 background(0.64, 0.3, 30);
-````
+```
 
-````js
+```js
 createCanvas(200);
 colorMode(OKLCH);
 
 function draw() {
 	background(0.7, 0.16, frameCount % 360);
 }
-````
+```
 
 ## HSL
 
@@ -292,49 +292,49 @@ using the "display-p3" color space.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 colorMode(HSL);
 
 background(0, 100, 50);
-````
+```
 
-````js
+```js
 await createCanvas(200, 220);
 noStroke();
 
 colorMode(HSL);
 for (let h = 0; h < 360; h += 10) {
-  for (let l = 0; l <= 100; l += 10) {
-    fill(h, 100, l);
-    rect(h * (11/20), l * 2, 6, 20);
-  }
+	for (let l = 0; l <= 100; l += 10) {
+		fill(h, 100, l);
+		rect(h * (11 / 20), l * 2, 6, 20);
+	}
 }
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 colorMode(HSL);
 
 background(0, 100, 50);
-````
+```
 
-````js
+```js
 createCanvas(200, 220);
 noStroke();
 
 colorMode(HSL);
 for (let h = 0; h < 360; h += 10) {
-  for (let l = 0; l <= 100; l += 10) {
-    fill(h, 100, l);
-    rect(h * (11/20), l * 2, 6, 20);
-  }
+	for (let l = 0; l <= 100; l += 10) {
+		fill(h, 100, l);
+		rect(h * (11 / 20), l * 2, 6, 20);
+	}
 }
-````
+```
 
 ## HSB
 
@@ -353,49 +353,49 @@ to 100 and saturation to 0.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 colorMode(HSB);
 
 background(0, 100, 100);
-````
+```
 
-````js
+```js
 await createCanvas(200, 220);
 noStroke();
 
 colorMode(HSB);
 for (let h = 0; h < 360; h += 10) {
-  for (let b = 0; b <= 100; b += 10) {
-    fill(h, 100, b);
-    rect(h * (11/20), b * 2, 6, 20);
-  }
+	for (let b = 0; b <= 100; b += 10) {
+		fill(h, 100, b);
+		rect(h * (11 / 20) - 100, l * 2 - 110, 6, 20);
+	}
 }
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 colorMode(HSB);
 
 background(0, 100, 100);
-````
+```
 
-````js
+```js
 createCanvas(200, 220);
 noStroke();
 
 colorMode(HSB);
 for (let h = 0; h < 360; h += 10) {
-  for (let b = 0; b <= 100; b += 10) {
-    fill(h, 100, b);
-    rect(h * (11/20), b * 2, 6, 20);
-  }
+	for (let b = 0; b <= 100; b += 10) {
+		fill(h, 100, b);
+		rect(h * (11 / 20), b * 2, 6, 20);
+	}
 }
-````
+```
 
 ## SRGB
 
@@ -407,23 +407,23 @@ an SDR display.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 colorMode(RGB, 1, SRGB);
 
 background(1, 0, 0);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 colorMode(RGB, 255, SRGB);
 
 background(255, 0, 0);
-````
+```
 
 ## DISPLAY_P3
 
@@ -436,23 +436,63 @@ fully saturated and bright in the following example.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 colorMode(RGB, 1, DISPLAY_P3);
 
 background(1, 0, 0);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 colorMode(RGB, 255, DISPLAY_P3);
 
 background(255, 0, 0);
-````
+```
+
+## background
+
+Draws over the entire canvas with a color or image.
+
+Like the [`color`](https://q5js.org/learn/#color) function,
+this function can accept colors in a wide range of formats:
+CSS color string, grayscale value, and color component values.
+
+```
+@param {Color | Q5.Image} filler a color or image to draw
+```
+
+### webgpu
+
+```js
+await createCanvas(200, 100);
+background('crimson');
+```
+
+```js
+q5.draw = function () {
+	background(0.5, 0.2);
+	circle(mouseX, mouseY, 20);
+};
+```
+
+### c2d
+
+```js
+createCanvas(200, 100);
+background('crimson');
+```
+
+```js
+function draw() {
+	background(128, 32);
+	circle(mouseX, mouseY, 20);
+}
+```
 
 ## Color.constructor
 
@@ -481,4 +521,3 @@ Produces a CSS color string representation.
 ## Color.levels
 
 An array of the color's components.
-

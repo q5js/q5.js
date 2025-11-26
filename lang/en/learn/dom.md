@@ -11,6 +11,7 @@ an alias.
 Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
 
 Use [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener) to respond to events such as:
+
 - "click": when the element is clicked
 - "mouseover": when the mouse hovers over the element
 - "mouseout": when the mouse stops hovering over the element
@@ -19,7 +20,7 @@ Use [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/
 q5 adds some extra functionality to the elements it creates:
 
 - the `position` function makes it easy to place the element
-relative to the canvas
+  relative to the canvas
 - the `size` function sets the width and height of the element
 - alternatively, use the element's `x`, `y`, `width`, and `height` properties
 
@@ -31,7 +32,7 @@ relative to the canvas
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let el = createEl('div', '*');
@@ -41,11 +42,11 @@ el.style.fontSize = '136px';
 el.style.textAlign = 'center';
 el.style.backgroundColor = 'blue';
 el.style.color = 'white';
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let el = createEl('div', '*');
@@ -55,7 +56,7 @@ el.style.fontSize = '136px';
 el.style.textAlign = 'center';
 el.style.backgroundColor = 'blue';
 el.style.color = 'white';
-````
+```
 
 ## createA
 
@@ -69,7 +70,7 @@ Creates a link element.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let link = createA('https://q5js.org', 'q5.js');
@@ -79,11 +80,11 @@ link.style.fontSize = '80px';
 link.addEventListener('mouseover', () => {
 	background('cyan');
 });
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let link = createA('https://q5js.org', 'q5.js');
@@ -93,7 +94,7 @@ link.style.fontSize = '80px';
 link.addEventListener('mouseover', () => {
 	background('cyan');
 });
-````
+```
 
 ## createButton
 
@@ -105,7 +106,7 @@ Creates a button element.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 let btn = createButton('Click me!');
@@ -113,11 +114,11 @@ let btn = createButton('Click me!');
 btn.addEventListener('click', () => {
 	background(random(0.4, 1));
 });
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 let btn = createButton('Click me!');
@@ -125,7 +126,7 @@ let btn = createButton('Click me!');
 btn.addEventListener('click', () => {
 	background(random(100, 255));
 });
-````
+```
 
 ## createCheckbox
 
@@ -142,7 +143,7 @@ The `label` property is the text label element next to the checkbox.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 let box = createCheckbox('Check me!');
@@ -152,11 +153,11 @@ box.addEventListener('input', () => {
 	if (box.checked) background('lime');
 	else background('black');
 });
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 let box = createCheckbox('Check me!');
@@ -166,7 +167,7 @@ box.addEventListener('input', () => {
 	if (box.checked) background('lime');
 	else background('black');
 });
-````
+```
 
 ## createColorPicker
 
@@ -180,20 +181,20 @@ Use the `value` property to get or set the color value.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
 let picker = createColorPicker();
 picker.value = '#fd7575';
 
-Q5.draw = function () {
+q5.draw = function () {
 	background(picker.value);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
 let picker = createColorPicker();
@@ -202,7 +203,7 @@ picker.value = '#fd7575';
 function draw() {
 	background(picker.value);
 }
-````
+```
 
 ## createImg
 
@@ -214,23 +215,19 @@ Creates an image element.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
-let img = createImg('/assets/p5play_logo.webp')
-	.position(0, 0)
-	.size(100, 100);
-````
+let img = createImg('/assets/p5play_logo.webp').position(0, 0).size(100, 100);
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
-let img = createImg('/assets/p5play_logo.webp')
-	.position(0, 0)
-	.size(100, 100);
-````
+let img = createImg('/assets/p5play_logo.webp').position(0, 0).size(100, 100);
+```
 
 ## createInput
 
@@ -250,7 +247,7 @@ See MDN's [input documentation](https://developer.mozilla.org/docs/Web/HTML/Elem
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 textSize(64);
 
@@ -262,11 +259,11 @@ input.addEventListener('input', () => {
 	background('orange');
 	text(input.value, -90, 30);
 });
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 textSize(64);
 
@@ -278,7 +275,7 @@ input.addEventListener('input', () => {
 	background('orange');
 	text(input.value, 10, 70);
 });
-````
+```
 
 ## createP
 
@@ -290,23 +287,23 @@ Creates a paragraph element.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 50);
 background('coral');
 
 let p = createP('Hello, world!');
 p.style.color = 'pink';
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 50);
 background('coral');
 
 let p = createP('Hello, world!');
 p.style.color = 'pink';
-````
+```
 
 ## createRadio
 
@@ -323,35 +320,31 @@ Use the `value` property to get or set the value of the selected radio button.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
-let radio = createRadio()
-	.option('square', '1')
-	.option('circle', '2');
+let radio = createRadio().option('square', '1').option('circle', '2');
 
-Q5.draw = function () {
+q5.draw = function () {
 	background(200);
 	if (radio.value == '1') square(-25, -25, 50);
 	if (radio.value == '2') circle(0, 0, 50);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
-let radio = createRadio()
-	.option('square', '1')
-	.option('circle', '2');
+let radio = createRadio().option('square', '1').option('circle', '2');
 
 function draw() {
 	background(200);
 	if (radio.value == '1') square(75, 25, 50);
 	if (radio.value == '2') circle(100, 50, 50);
 }
-````
+```
 
 ## createSelect
 
@@ -364,8 +357,8 @@ Set `multiple` to `true` to allow multiple options to be selected.
 
 Use the `value` property to get or set the selected option value.
 
-Use the `selected` property get the labels of the selected 
-options or set the selected options by label. Can be a single 
+Use the `selected` property get the labels of the selected
+options or set the selected options by label. Can be a single
 string or an array of strings.
 
 ```
@@ -374,31 +367,27 @@ string or an array of strings.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 
-let sel = createSelect('Select a color')
-	.option('Red', '#f55')
-	.option('Green', '#5f5');
+let sel = createSelect('Select a color').option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
 	background(sel.value);
 });
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200, 100);
 
-let sel = createSelect('Select a color')
-	.option('Red', '#f55')
-	.option('Green', '#5f5');
+let sel = createSelect('Select a color').option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
 	background(sel.value);
 });
-````
+```
 
 ## createSlider
 
@@ -417,43 +406,37 @@ Use the `val` function to get the slider's value as a number.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
-let slider = createSlider(0, 1, 0.5, 0.1)
-	.position(10, 10)
-	.size(180);
+let slider = createSlider(0, 1, 0.5, 0.1).position(10, 10).size(180);
 
-Q5.draw = function () {
+q5.draw = function () {
 	background(slider.val());
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
-let slider = createSlider(0, 255)
-	.position(10, 10)
-	.size(180);
+let slider = createSlider(0, 255).position(10, 10).size(180);
 
 function draw() {
 	background(slider.val());
 }
-````
+```
 
 ## createVideo
 
 Creates a video element.
 
-Note that videos must be muted to autoplay and the `play` and 
+Note that videos must be muted to autoplay and the `play` and
 `pause` functions can only be run after a user interaction.
 
 The video element can be hidden and its content can be
 displayed on the canvas using the `image` function.
-
-Returns a promise if used in async `setup`.
 
 ```
 @param {string} src url of the video
@@ -462,42 +445,42 @@ Returns a promise if used in async `setup`.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(0);
 
 let vid = createVideo('/assets/apollo4.mp4');
 vid.size(200, 150);
 vid.autoplay = vid.muted = vid.loop = true;
 vid.controls = true;
-````
+```
 
-````js
+```js
 await createCanvas(200, 150);
 let vid = createVideo('/assets/apollo4.mp4');
 vid.hide();
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	vid.currentTime = 0;
 	vid.play();
-}
-Q5.draw = function () {
+};
+q5.draw = function () {
 	image(vid, -100, -75, 200, 150);
 	// filter(HUE_ROTATE, 90);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(0);
 
 let vid = createVideo('/assets/apollo4.mp4');
 vid.size(200, 150);
 vid.autoplay = vid.muted = vid.loop = true;
 vid.controls = true;
-````
+```
 
-````js
+```js
 createCanvas(200, 150);
 let vid = createVideo('/assets/apollo4.mp4');
 vid.hide();
@@ -510,7 +493,7 @@ function draw() {
 	image(vid, 0, 0, 200, 150);
 	filter(HUE_ROTATE, 90);
 }
-````
+```
 
 ## createCapture
 
@@ -519,15 +502,13 @@ Creates a capture from a connected camera, such as a webcam.
 The capture video element can be hidden and its content can be
 displayed on the canvas using the `image` function.
 
-Can preload to ensure the capture is ready to use when your 
+Can preload to ensure the capture is ready to use when your
 sketch starts.
 
-Requests the highest video resolution from the user facing camera 	
-by default. The first parameter to this function can be used to 
+Requests the highest video resolution from the user facing camera
+by default. The first parameter to this function can be used to
 specify the constraints for the capture. See [`getUserMedia`](https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia)
 for more info.
-
-Returns a promise if used in async `setup`.
 
 ```
 @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
@@ -537,46 +518,46 @@ Returns a promise if used in async `setup`.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	let cap = createCapture(VIDEO);
 	cap.size(200, 112.5);
 	canvas.remove();
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
 let cap;
-Q5.mousePressed = function () {
-  cap = createCapture(VIDEO);
-  cap.hide();
-}
+q5.mousePressed = function () {
+	cap = createCapture(VIDEO);
+	cap.hide();
+};
 
-Q5.draw = function () {
-  let y = (frameCount % 200) - 100;
-  image(cap, -100, y, 200, 200);
-}
-````
+q5.draw = function () {
+	let y = (frameCount % 200) - 100;
+	image(cap, -100, y, 200, 200);
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	let cap = createCapture({
 		video: { width: 640, height: 480 }
 	});
 	cap.size(200, 150);
 	canvas.remove();
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 function mousePressed() {
@@ -584,24 +565,24 @@ function mousePressed() {
 	cap.size(200, 112.5);
 	canvas.remove();
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 let cap;
 function mousePressed() {
-  cap = createCapture(VIDEO);
-  cap.hide();
+	cap = createCapture(VIDEO);
+	cap.hide();
 }
 
 function draw() {
-  let y = frameCount % height;
-  image(cap, 0, y, 200, 200);
+	let y = frameCount % height;
+	image(cap, 0, y, 200, 200);
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 function mousePressed() {
@@ -611,7 +592,7 @@ function mousePressed() {
 	cap.size(200, 150);
 	canvas.remove();
 }
-````
+```
 
 ## findElement
 
@@ -630,4 +611,3 @@ Finds all elements in the DOM that match the given [CSS selector](https://develo
 @param {string} selector
 @returns {HTMLElement[]} elements
 ```
-

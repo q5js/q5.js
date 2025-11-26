@@ -4,8 +4,6 @@
 
 Loads an image from a URL and optionally runs a callback function.
 
-Returns a promise if used in async `setup`.
-
 ```
 @param {string} url url of the image to load
 @returns {Q5.Image | Promise<Q5.Image>} image or promise
@@ -13,19 +11,19 @@ Returns a promise if used in async `setup`.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
 
-Q5.draw = function () {
+q5.draw = function () {
 	background(logo);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
@@ -33,7 +31,7 @@ let logo = loadImage('/q5js_logo.avif');
 function draw() {
 	background(logo);
 }
-````
+```
 
 ## image
 
@@ -53,29 +51,29 @@ Draws an image or video frame to the canvas.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
 
-Q5.draw = function () {
+q5.draw = function () {
 	image(logo, -100, -100, 200, 200);
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
 
-Q5.draw = function () {
-  image(logo, -100, -100, 200, 200, 256, 256, 512, 512);
-}
-````
+q5.draw = function () {
+	image(logo, -100, -100, 200, 200, 256, 256, 512, 512);
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
@@ -83,17 +81,17 @@ let logo = loadImage('/q5js_logo.avif');
 function draw() {
 	image(logo, 0, 0, 200, 200);
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
 
 function draw() {
-  image(logo, 0, 0, 200, 200, 256, 256, 512, 512);
+	image(logo, 0, 0, 200, 200, 256, 256, 512, 512);
 }
-````
+```
 
 ## imageMode
 
@@ -107,45 +105,45 @@ Changes how inputs to `image` are interpreted.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
-Q5.draw = function () {
+q5.draw = function () {
 	imageMode(CORNER);
 
 	//   ( img,  x,  y,   w,   h)
 	image(logo, -50, -50, 100, 100);
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
-Q5.draw = function () {
+q5.draw = function () {
 	imageMode(CENTER);
 
 	//   ( img,  cX,  cY,   w,   h)
 	image(logo, 0, 0, 100, 100);
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
-Q5.draw = function () {
+q5.draw = function () {
 	imageMode(CORNERS);
 
 	//   ( img, x1, y1,  x2,  y2)
 	image(logo, -50, -50, 50, 50);
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
@@ -155,9 +153,9 @@ function draw() {
 	//   ( img,  x,  y,   w,   h)
 	image(logo, 50, 50, 100, 100);
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
@@ -167,9 +165,9 @@ function draw() {
 	//   ( img,  cX,  cY,   w,   h)
 	image(logo, 100, 100, 100, 100);
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
@@ -179,7 +177,7 @@ function draw() {
 	//   ( img, x1, y1,  x2,  y2)
 	image(logo, 50, 50, 100, 100);
 }
-````
+```
 
 ## defaultImageScale
 
@@ -209,18 +207,18 @@ Resizes the image.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
 logo.resize(128, 128);
 image(logo, -100, -100, 200, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
@@ -229,14 +227,14 @@ function setup() {
 	logo.resize(128, 128);
 	image(logo, 0, 0, 200, 200);
 }
-````
+```
 
 ## trim
 
 Returns a trimmed image, cropping out transparent pixels from the edges.
 
 ```
-@returns {Image}
+@returns {Q5.Image}
 ```
 
 ## smooth
@@ -247,15 +245,15 @@ function only has an effect if `noSmooth` has been called.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let icon = await load('/q5js_icon.png');
 image(icon, -100, -100, 200, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let icon = loadImage('/q5js_icon.png');
@@ -263,7 +261,7 @@ let icon = loadImage('/q5js_icon.png');
 function setup() {
 	image(icon, 0, 0, 200, 200);
 }
-````
+```
 
 ## noSmooth
 
@@ -271,18 +269,18 @@ Disables smooth image rendering for a pixelated look.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let icon = await load('/q5js_icon.png');
 
 noSmooth();
 image(icon, -100, -100, 200, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let icon = loadImage('/q5js_icon.png');
@@ -291,13 +289,13 @@ function setup() {
 	noSmooth();
 	image(icon, 0, 0, 200, 200);
 }
-````
+```
 
 ## tint
 
 Applies a tint (color overlay) to the drawing.
 
-The alpha value of the tint color determines the 
+The alpha value of the tint color determines the
 strength of the tint. To change an image's opacity,
 use the `opacity` function.
 
@@ -305,11 +303,11 @@ Tinting affects all subsequent images drawn. The tint
 color is applied to images using the "multiply" blend mode.
 
 Since the tinting process is performance intensive, each time
-an image is tinted, q5 caches the result. `image` will draw the 
+an image is tinted, q5 caches the result. `image` will draw the
 cached tinted image unless the tint color has changed or the
 image being tinted was edited.
 
-If you need to draw an image multiple times each frame with 
+If you need to draw an image multiple times each frame with
 different tints, consider making copies of the image and tinting
 each copy separately.
 
@@ -319,18 +317,18 @@ each copy separately.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
 tint(1, 0, 0, 0.5);
 image(logo, -100, -100, 200, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
@@ -339,7 +337,7 @@ function setup() {
 	tint(255, 0, 0, 128);
 	image(logo, 0, 0, 200, 200);
 }
-````
+```
 
 ## noTint
 
@@ -379,18 +377,18 @@ Can be used to create a detail inset, aka a magnifying glass effect.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
 logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
 image(logo, -100, -100, 200, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
@@ -399,7 +397,7 @@ function setup() {
 	logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
 	image(logo, 0, 0, 200, 200);
 }
-````
+```
 
 ## get
 
@@ -423,42 +421,42 @@ before using this function to get current color data.
 
 ### webgpu
 
-````js
-Q5.draw = function () {
+```js
+q5.draw = function () {
 	background(0.8);
 	noStroke();
 	circle(0, 0, frameCount % 200);
 
 	loadPixels();
-  let col = get(mouseX, mouseY);
-  text(col, mouseX, mouseY);
-}
-````
+	let col = get(mouseX, mouseY);
+	text(col, mouseX, mouseY);
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
 let cropped = logo.get(256, 256, 512, 512);
 image(cropped, -100, -100, 200, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 function draw() {
 	background(200);
 	noStroke();
 	circle(100, 100, frameCount % 200);
 
 	loadPixels();
-  let col = get(mouseX, mouseY);
-  text(col, mouseX, mouseY);
+	let col = get(mouseX, mouseY);
+	text(col, mouseX, mouseY);
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
@@ -467,13 +465,13 @@ function setup() {
 	let cropped = logo.get(256, 256, 512, 512);
 	image(cropped, 0, 0, 200, 200);
 }
-````
+```
 
 ## set
 
 Sets a pixel's color in the image or canvas.
 
-Or if a canvas or image is provided, it's drawn on top of the 
+Or if a canvas or image is provided, it's drawn on top of the
 destination image or canvas, ignoring its tint setting.
 
 Run `updatePixels` to apply the changes.
@@ -486,19 +484,19 @@ Run `updatePixels` to apply the changes.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let c = color('lime');
 
-Q5.draw = function () {
+q5.draw = function () {
 	set(random(-100, 100), random(-100, 100), c);
 	updatePixels();
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let c = color('lime');
 
@@ -506,7 +504,7 @@ function draw() {
 	set(random(200), random(200), c);
 	updatePixels();
 }
-````
+```
 
 ## pixels
 
@@ -530,35 +528,35 @@ to a random 0-255 value.
 
 ### webgpu
 
-````js
+```js
 frameRate(5);
 let icon = loadImage('/q5js_icon.png');
 
-Q5.draw = function () {
-  icon.loadPixels();
-  for (let i = 0; i < icon.pixels.length; i += 16) {
-    icon.pixels[i + 1] = random(1);
-  }
-  icon.updatePixels();
-  background(icon);
-}
-````
+q5.draw = function () {
+	icon.loadPixels();
+	for (let i = 0; i < icon.pixels.length; i += 16) {
+		icon.pixels[i + 1] = random(1);
+	}
+	icon.updatePixels();
+	background(icon);
+};
+```
 
 ### c2d
 
-````js
+```js
 frameRate(5);
 let icon = loadImage('/q5js_icon.png');
 
 function draw() {
-  icon.loadPixels();
-  for (let i = 0; i < icon.pixels.length; i += 16) {
-    icon.pixels[i + 1] = random(255);
-  }
-  icon.updatePixels();
-  background(icon);
+	icon.loadPixels();
+	for (let i = 0; i < icon.pixels.length; i += 16) {
+		icon.pixels[i + 1] = random(255);
+	}
+	icon.updatePixels();
+	background(icon);
 }
-````
+```
 
 ## updatePixels
 
@@ -566,7 +564,7 @@ Applies changes in the `pixels` array to the canvas or image.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 for (let x = -100; x < 100; x += 5) {
@@ -575,11 +573,11 @@ for (let x = -100; x < 100; x += 5) {
 	}
 }
 updatePixels();
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 
 for (let x = 0; x < 200; x += 5) {
@@ -588,7 +586,7 @@ for (let x = 0; x < 200; x += 5) {
 	}
 }
 updatePixels();
-````
+```
 
 ## filter
 
@@ -606,16 +604,16 @@ https://developer.mozilla.org/docs/Web/CSS/filter
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 let logo = await load('/q5js_logo.avif');
 logo.filter(INVERT);
 image(logo, -100, -100, 200, 200);
-````
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
@@ -623,7 +621,7 @@ function setup() {
 	logo.filter(INVERT);
 	image(logo, 0, 0, 200, 200);
 }
-````
+```
 
 ## THRESHOLD
 
@@ -668,3 +666,16 @@ Creates a new image.
 @returns {Q5.Image}
 ```
 
+## createGraphics
+
+Creates a graphics buffer.
+
+Disabled by default in q5 WebGPU.
+See issue [#104](https://github.com/q5js/q5.js/issues/104) for details.
+
+```
+@param {number} w width
+@param {number} h height
+@param {object} [opt] options
+@returns {Q5} a new Q5 graphics buffer
+```

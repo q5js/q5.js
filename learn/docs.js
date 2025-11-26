@@ -18,9 +18,8 @@ function winResized() {
 winResized();
 window.addEventListener('resize', winResized);
 
-themeToggle.addEventListener('pointerup', () => {
-	setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
-});
+// theme select control replaces previous toggle button
+// `setTheme` is provided by /home/theme.js
 
 function stripParams(params) {
 	return params
@@ -34,16 +33,20 @@ function convertTSDefToMarkdown(data) {
 
 	let markdownCode = '';
 
-	let lines = data.split('\n').slice(7, -4),
-		insideJSDoc = false,
-		insideParams = false,
-		insideProps = false,
-		insideExample = false,
-		hasExample = false,
-		jsDocBuffer = '',
-		inClassDef = false,
-		currentClassName = '',
-		curEmoji = '';
+	// Start parsing from the first section comment (e.g. `// 🔥 core`) so sections
+	// like "core" are not accidentally sliced off by fixed offsets.
+	const allLines = data.split('\n');
+	const firstSectionIdx = allLines.findIndex((l) => l.trim().startsWith('// '));
+	const lines = allLines.slice(firstSectionIdx >= 0 ? firstSectionIdx : 0);
+	(insideJSDoc = false),
+		(insideParams = false),
+		(insideProps = false),
+		(insideExample = false),
+		(hasExample = false),
+		(jsDocBuffer = ''),
+		(inClassDef = false),
+		(currentClassName = ''),
+		(curEmoji = '');
 
 	for (let line of lines) {
 		if (!insideExample) line = line.trim();
@@ -173,17 +176,36 @@ function convertTSDefToMarkdown(data) {
 	return markdownCode;
 }
 
+// Strip JSDoc asterisks and common indent from ```js code blocks
+// so code injected into the mini editors is clean and properly left-aligned.
+function cleanJSDocExamples(markdownCode) {
+	return markdownCode.replace(/```js([\s\S]*?)```/g, (match, code) => {
+		code = code.trim();
+		let lines = code.split('\n');
+		// Remove leading optional JSDoc asterisk and one following space from each line
+		lines = lines.map((l) => l.replace(/^\s*\*\s?/, ''));
+
+		return '```js\n' + lines.join('\n') + '\n```';
+	});
+}
+
 let sections = {};
+// Current section state (must be declared before loader functions)
+let currentSectionId = '';
+let currentLoadedSectionId = '';
+
+// Current section state (must be declared before loader functions)
+// (declared earlier)
 
 function parseMarkdownIntoSections(markdownText) {
+	// Clear existing sections before parsing new content
+	sections = {};
+
 	let codeBlockCount = 0;
-	// make script tags
-	markdownText = markdownText.replace(/```js([\s\S]*?)```/g, (match) => {
-		let js = match.slice(5, -3);
-		return `
-<script id="ex${codeBlockCount++}" type="mini">
-${js}
-</script>`;
+	// make script tags (use captured group to extract the JS content)
+	markdownText = markdownText.replace(/```js([\s\S]*?)```/g, (match, js) => {
+		js = js.replace(/^\n+|\n+$/g, '');
+		return `\n<script id="ex${codeBlockCount++}" type="mini">\n${js}\n</script>`;
 	});
 
 	let lines = markdownText.split('\n'),
@@ -255,15 +277,102 @@ ${js}
 let urlParams = new URLSearchParams(window.location.search);
 let queryString = urlParams.toString() ? '?' + urlParams.toString() : '';
 
-(async () => {
-	let isClassic = urlParams.has('webgpu');
-	let dtsFile = isClassic ? 'q5_webgpu.d.ts' : '../q5.d.ts';
-	let data = await fetch(dtsFile).then((res) => res.text());
+// Renderer mode defaults to WebGPU when `webgpu` flag exists
+let isWebGPU = urlParams.has('webgpu');
+// Language selection (two-letter code). Default is English `en`.
+let lang = urlParams.get('lang') || 'en';
+
+async function loadDtsAndRender(useWebGPU) {
+	const prevSection = currentSectionId;
+	// Build file name according to renderer + language. English (en) is default and has no suffix.
+	const baseName = useWebGPU ? 'q5' : 'q5-c2d';
+	const langSuffix = lang && lang !== 'en' ? `_${lang}` : '';
+
+	// TODO: enable when WebGPU becomes the default
+	// const dir = lang == 'en' && useWebGPU ? '/' : `/defs/`;
+
+	const dir = `/defs/`;
+	const dtsFile = `${dir}${baseName}${langSuffix}.d.ts`;
+	// load the d.ts file for the requested renderer + language
+	const data = await fetch(dtsFile).then((res) => res.text());
 	markdownText = convertTSDefToMarkdown(data);
-	parseMarkdownIntoSections(markdownText);
+	// Clean JSDoc example blocks (remove leading '*' and common indent)
+	markdownText = cleanJSDocExamples(markdownText);
+	sections = parseMarkdownIntoSections(markdownText);
 	populateNavigation();
-	displayContent();
-})();
+
+	// update URL param and local queryString
+	if (useWebGPU) urlParams.set('webgpu', '1');
+	else urlParams.delete('webgpu');
+	// always include language param
+	urlParams.set('lang', lang);
+	queryString = urlParams.toString() ? '?' + urlParams.toString() : '';
+
+	// Update the browser URL with the new query string
+	const newUrl = `${location.pathname}${queryString}${location.hash}`;
+	history.replaceState(null, '', newUrl);
+
+	// update code select (if present) to reflect active renderer
+	const codeModeSelectEl = document.getElementById('codeModeSelect');
+	if (codeModeSelectEl) codeModeSelectEl.value = useWebGPU ? 'webgpu' : 'c2d';
+
+	// Force content reload by resetting currentLoadedSectionId
+	currentLoadedSectionId = '';
+
+	// If we had a section selected previously, try to restore it in the new data.
+	if (prevSection && sections[prevSection]) {
+		await navigateTo(prevSection);
+	} else {
+		// fall back to displayContent (handles hash and default)
+		await displayContent();
+	}
+}
+
+// wire up code toggle button
+const codeModeSelect = document.getElementById('codeModeSelect');
+if (codeModeSelect) {
+	codeModeSelect.value = isWebGPU ? 'webgpu' : 'c2d';
+	codeModeSelect.addEventListener('change', async (e) => {
+		isWebGPU = e.target.value === 'webgpu';
+		await loadDtsAndRender(isWebGPU);
+	});
+}
+
+const langSelect = document.getElementById('langSelect');
+if (langSelect) {
+	langSelect.value = lang;
+	langSelect.addEventListener('change', async (e) => {
+		lang = e.target.value;
+		await loadDtsAndRender(isWebGPU);
+	});
+}
+
+const themeSelect = document.getElementById('themeSelect');
+if (themeSelect) {
+	// keep in sync with existing theme state
+	const themeVal = localStorage.getItem('theme') || (document.body.classList.contains('dark') ? 'dark' : 'light');
+	themeSelect.value = themeVal;
+	themeSelect.addEventListener('change', (e) => setTheme(e.target.value));
+}
+
+// Settings toggle for mobile: show/hide selectors container
+const settingsToggle = document.getElementById('settingsToggle');
+const selectorsContainer = document.querySelector('.selectors-container');
+if (settingsToggle && selectorsContainer) {
+	settingsToggle.addEventListener('pointerup', (e) => {
+		selectorsContainer.classList.toggle('open');
+		const open = selectorsContainer.classList.contains('open');
+		settingsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+	});
+
+	// close selectors if window is resized to desktop
+	window.addEventListener('resize', () => {
+		if (window.innerWidth > 999) selectorsContainer.classList.remove('open');
+	});
+}
+
+// initial load
+loadDtsAndRender(isWebGPU);
 
 function populateNavigation() {
 	let navbar = document.getElementById('navbar');
@@ -343,33 +452,6 @@ function createSubsectionsContainer(sectionId, subsections) {
 	}
 
 	return container;
-}
-
-function addCopyButtons() {
-	document.querySelectorAll('pre code').forEach((block) => {
-		let button = document.createElement('button');
-		button.className = 'copy-button';
-		button.type = 'button';
-		button.innerText = '';
-
-		button.addEventListener('pointerup', () => {
-			navigator.clipboard.writeText(block.innerText).then(() => {
-				button.textContent = 'Copied!';
-				setTimeout(() => (button.textContent = ''), 2000);
-			});
-		});
-
-		let pre = block.parentNode;
-		if (pre.parentNode.classList.contains('code-block-wrapper')) {
-			return;
-		}
-
-		let wrapper = document.createElement('div');
-		wrapper.className = 'code-block-wrapper';
-		pre.parentNode.replaceChild(wrapper, pre);
-		wrapper.append(pre);
-		wrapper.append(button);
-	});
 }
 
 function generateHeadings() {
@@ -452,7 +534,7 @@ async function executeDataScripts() {
 
 let contentArea = document.getElementById('content');
 
-function populateContentArea() {
+async function populateContentArea() {
 	contentArea.classList.remove('fade-in');
 	contentArea.classList.add('fade-out');
 	let sectionIds = Object.keys(sections);
@@ -463,15 +545,30 @@ function populateContentArea() {
 
 	contentArea.innerHTML = '';
 
-	let section = sections[currentSectionId];
-	let htmlContent = `<div id="${currentSectionId}">${marked.marked(section.content)}</div>`;
+	const section = sections[currentSectionId];
 
-	for (let subId in section.subsections) {
-		let subsection = section.subsections[subId];
-		htmlContent += `<div id="${subId}">${marked.marked(subsection.content)}</div>`;
+	// Render main section immediately
+	const mainDiv = document.createElement('div');
+	mainDiv.id = currentSectionId;
+	mainDiv.innerHTML = marked.marked(section.content);
+	contentArea.append(mainDiv);
+
+	// Render each documented item (subsection) one at a time to avoid blocking
+	const subsectionEntries = Object.entries(section.subsections || {});
+	for (const [subId, subsection] of subsectionEntries) {
+		// yield to the browser so UI can update
+		await new Promise((resolve) => requestAnimationFrame(resolve));
+
+		const subDiv = document.createElement('div');
+		subDiv.id = subId;
+		subDiv.innerHTML = marked.marked(subsection.content);
+		contentArea.append(subDiv);
+
+		// Mini editors will be initialized later by `executeDataScripts`
+		// to avoid initializing the same scripts multiple times.
 	}
-	contentArea.insertAdjacentHTML('beforeend', htmlContent);
 
+	// Nav buttons and spacer
 	let navButtonsContainer = document.createElement('div');
 	navButtonsContainer.className = 'nav-buttons-container';
 
@@ -520,15 +617,13 @@ function finalizeFormatting() {
 	contentArea.classList.add('fade-in');
 }
 
-let currentSectionId = '';
-let currentLoadedSectionId = '';
+// `currentSectionId` and `currentLoadedSectionId` are declared earlier
 
 async function updateMainContent(sectionId) {
 	scrollBehavior = 'instant';
 	currentSectionId = sectionId;
 
-	populateContentArea();
-	addCopyButtons();
+	await populateContentArea();
 	generateHeadings();
 	await executeDataScripts();
 	finalizeFormatting();

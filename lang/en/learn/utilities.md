@@ -7,7 +7,7 @@ Loads a file or multiple files.
 File type is determined by file extension. q5 supports loading
 text, json, csv, font, audio, and image files.
 
-To load many files, it may be easier to use load* functions,
+To load many files, it may be easier to use load\* functions,
 like `loadImage`, with q5's preload system.
 
 ```
@@ -17,17 +17,17 @@ like `loadImage`, with q5's preload system.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
-Q5.draw = function () {
+q5.draw = function () {
 	image(logo, -100, -100, 200, 200);
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
 // use with top level await in a module
@@ -36,21 +36,19 @@ await load('/assets/Robotica.ttf');
 background(1);
 textSize(24);
 text('Hello, world!', 16, 100);
-````
+```
 
-````js
+```js
 await createCanvas(200);
 
-let [jump, retro] = await load(
-		'/assets/jump.wav', '/assets/retro.flac'
-	);
+let [jump, retro] = await load('/assets/jump.wav', '/assets/retro.flac');
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	mouseButton == 'left' ? jump.play() : retro.play();
 };
-````
+```
 
-````js
+```js
 await createCanvas(200);
 background(200);
 textSize(32);
@@ -61,11 +59,11 @@ let y = 64;
 for (let mammal of mammals) {
 	text(mammal.textContent, 20, (y += 32));
 }
-````
+```
 
 ### c2d
 
-````js
+```js
 let logo;
 
 async function setup() {
@@ -75,9 +73,9 @@ async function setup() {
 function draw() {
 	image(logo, 0, 0, 200, 200);
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 // use with top level await in a module
@@ -86,7 +84,7 @@ await load('/assets/Robotica.ttf');
 background(255);
 textSize(24);
 text('Hello, world!', 16, 100);
-````
+```
 
 ## save
 
@@ -104,31 +102,31 @@ an image file named "untitled.png".
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200);
 background(0.8);
 circle(0, 0, 50);
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	save('circle.png');
-}
-````
+};
+```
 
-````js
+```js
 await createCanvas(200);
 
 textSize(180);
 let bolt = createTextImage('⚡️');
 image(bolt, -84, -156);
 
-Q5.mousePressed = function () {
+q5.mousePressed = function () {
 	save(bolt, 'bolt.png');
-}
-````
+};
+```
 
 ### c2d
 
-````js
+```js
 createCanvas(200);
 background(200);
 circle(100, 100, 50);
@@ -136,9 +134,9 @@ circle(100, 100, 50);
 function mousePressed() {
 	save('circle.png');
 }
-````
+```
 
-````js
+```js
 createCanvas(200);
 
 textSize(180);
@@ -148,35 +146,29 @@ image(bolt, 16, -56);
 function mousePressed() {
 	save(bolt, 'bolt.png');
 }
-````
+```
 
 ## loadText
 
 Loads a text file from the specified url.
 
-Returns a promise if used in async `setup`.
-
 ```
 @param {string} url text file
-@returns {object | Promise} an object containing the loaded text in the property `obj.text` or a promise
+@returns {object | Promise<string>} an object containing the loaded text in the property `obj.text` or a promise
 ```
 
 ## loadJSON
 
 Loads a JSON file from the specified url.
 
-Returns a promise if used in async `setup`.
-
 ```
 @param {string} url JSON file
-@returns {any | Promise} an object or array containing the loaded JSON or a promise
+@returns {any | Promise<any>} an object or array containing the loaded JSON or a promise
 ```
 
 ## loadCSV
 
 Loads a CSV file from the specified url.
-
-Returns a promise if used in async `setup`.
 
 ```
 @param {string} url CSV file
@@ -187,8 +179,6 @@ Returns a promise if used in async `setup`.
 
 Loads an xml file from the specified url.
 
-Returns a promise if used in async `setup`.
-
 ```
 @param {string} url xml file
 @returns {Element | Promise<Element>} an object containing the loaded XML in a property called `obj.DOM` or a promise
@@ -196,7 +186,7 @@ Returns a promise if used in async `setup`.
 
 ### c2d
 
-````js
+```js
 async function setup() {
 	createCanvas(200);
 	background(200);
@@ -210,7 +200,7 @@ async function setup() {
 		text(mammal.textContent, 20, (y += 32));
 	}
 }
-````
+```
 
 ## nf
 
@@ -225,13 +215,13 @@ to a string with a specified number of digits.
 
 ### webgpu
 
-````js
+```js
 await createCanvas(200, 100);
 background(0.8);
 
 textSize(32);
 text(nf(PI, 4, 5), -90, 10);
-````
+```
 
 ## shuffle
 
@@ -312,4 +302,3 @@ Returns the current second.
 ```
 @returns {number} current second
 ```
-

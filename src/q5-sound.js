@@ -7,6 +7,11 @@ Q5.modules.sound = ($, q) => {
 		sounds.push(s);
 
 		s.promise = (async () => {
+			if (s._usedAwait) {
+				sounds.splice(sounds.indexOf(s), 1);
+				s = new Q5.Sound();
+				sounds.push(s);
+			}
 			let err;
 			try {
 				await s.load(url);
@@ -14,13 +19,17 @@ Q5.modules.sound = ($, q) => {
 				err = e;
 			}
 			delete s.promise;
+			delete s.then;
 			if (err) throw err;
 			if (cb) cb(s);
 			return s;
 		})();
-		$._preloadPromises.push(s.promise);
+		$._loaders.push(s.promise);
 
-		if (!$._usePreload) return s.promise;
+		s.then = (resolve, reject) => {
+			s._usedAwait = true;
+			return s.promise.then(resolve, reject);
+		};
 		return s;
 	};
 
@@ -29,19 +38,30 @@ Q5.modules.sound = ($, q) => {
 		a._isAudio = true;
 		a.crossOrigin = 'Anonymous';
 		a.promise = new Promise((resolve, reject) => {
-			a.addEventListener('canplay', () => {
+			function loaded() {
 				if (!a.loaded) {
+					delete a.promise;
+					delete a.then;
+					if (a._usedAwait) {
+						a = new Audio(url);
+						a._isAudio = true;
+						a.crossOrigin = 'Anonymous';
+					}
 					a.loaded = true;
 					if (cb) cb(a);
 					resolve(a);
 				}
-			});
-			a.addEventListener('suspend', resolve);
+			}
+			a.addEventListener('canplay', loaded);
+			a.addEventListener('suspend', loaded);
 			a.addEventListener('error', reject);
 		});
-		$._preloadPromises.push(a.promise);
+		$._loaders.push(a.promise);
 
-		if (!$._usePreload) return a.promise;
+		a.then = (resolve, reject) => {
+			a._usedAwait = true;
+			return a.promise.then(resolve, reject);
+		};
 		return a;
 	};
 
