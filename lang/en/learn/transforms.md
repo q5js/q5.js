@@ -26,7 +26,7 @@ q5.draw = function () {
 function draw() {
 	background(200);
 
-	translate(100, 100);
+	translate(150, 150);
 	circle(0, 0, 80);
 }
 ```
@@ -84,7 +84,7 @@ the drawing context will be scaled uniformly.
 q5.draw = function () {
 	background(0.8);
 
-	scale(8);
+	scale(mouseX / 10);
 	circle(0, 0, 20);
 };
 ```
@@ -95,8 +95,8 @@ q5.draw = function () {
 function draw() {
 	background(200);
 
-	scale(4);
-	circle(0, 0, 80);
+	scale(mouseX / 10);
+	circle(0, 0, 20);
 }
 ```
 
@@ -115,7 +115,7 @@ q5.draw = function () {
 	background(0.8);
 
 	translate(-75, -40);
-	shearX(QUARTER_PI);
+	shearX(mouseX / 100);
 	square(0, 0, 80);
 };
 ```
@@ -127,7 +127,7 @@ function draw() {
 	background(200);
 
 	translate(25, 60);
-	shearX(QUARTER_PI);
+	shearX(mouseX / 100);
 	square(0, 0, 80);
 }
 ```
@@ -147,7 +147,7 @@ q5.draw = function () {
 	background(0.8);
 
 	translate(-75, -40);
-	shearY(QUARTER_PI);
+	shearY(mouseX / 100);
 	square(0, 0, 80);
 };
 ```
@@ -159,7 +159,7 @@ function draw() {
 	background(200);
 
 	translate(25, 60);
-	shearY(QUARTER_PI);
+	shearY(mouseX / 100);
 	square(0, 0, 80);
 }
 ```
@@ -247,10 +247,12 @@ Saves the current transformation matrix.
 ```js
 await createCanvas(200);
 background(0.8);
+
 pushMatrix();
 rotate(QUARTER_PI);
 ellipse(0, 0, 120, 40);
 popMatrix();
+
 ellipse(0, 0, 120, 40);
 ```
 
@@ -260,10 +262,12 @@ ellipse(0, 0, 120, 40);
 createCanvas(200);
 background(200);
 translate(100, 100);
+
 pushMatrix();
 rotate(QUARTER_PI);
 ellipse(0, 0, 120, 40);
 popMatrix();
+
 ellipse(0, 0, 120, 40);
 ```
 
@@ -276,10 +280,12 @@ Restores the previously saved transformation matrix.
 ```js
 await createCanvas(200);
 background(0.8);
+
 pushMatrix();
 rotate(QUARTER_PI);
 ellipse(0, 0, 120, 40);
 popMatrix();
+
 ellipse(0, 0, 120, 40);
 ```
 
@@ -289,10 +295,12 @@ ellipse(0, 0, 120, 40);
 createCanvas(200);
 background(200);
 translate(100, 100);
+
 pushMatrix();
 rotate(QUARTER_PI);
 ellipse(0, 0, 120, 40);
 popMatrix();
+
 ellipse(0, 0, 120, 40);
 ```
 
@@ -331,3 +339,31 @@ square(0, 0, 50);
 ## pop
 
 Restores the previously saved drawing style settings and transformations.
+
+### webgpu
+
+```js
+await createCanvas(200);
+
+push();
+fill('blue');
+translate(50, 50);
+circle(0, 0, 80);
+pop();
+
+square(0, 0, 50);
+```
+
+### c2d
+
+```js
+createCanvas(200);
+
+push();
+fill('blue');
+translate(100, 100);
+circle(0, 0, 80);
+pop();
+
+square(0, 0, 50);
+```

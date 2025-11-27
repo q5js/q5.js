@@ -6,7 +6,7 @@ Loads an image from a URL and optionally runs a callback function.
 
 ```
 @param {string} url url of the image to load
-@returns {Q5.Image | Promise<Q5.Image>} image or promise
+@returns {Q5.Image & PromiseLike<Q5.Image>} image
 ```
 
 ### webgpu

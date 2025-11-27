@@ -80,7 +80,7 @@ the `text` function. Fonts in other formats can be used with the
 
 ```
 @param {string} url URL of the font to load
-@returns {FontFace | Promise<FontFace>} font or promise
+@returns {FontFace & PromiseLike<FontFace>} font
 ```
 
 ### webgpu

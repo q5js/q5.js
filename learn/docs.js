@@ -1,3 +1,11 @@
+/**
+ * q5/lang/build.js
+ *
+ * AI was used to generate parts of this script.
+ */
+
+// reduce WebGPU memory usage since each learn pages
+// creates many Q5 instances
 Q5.MAX_TRANSFORMS = 1000;
 Q5.MAX_RECTS = 10000;
 Q5.MAX_ELLIPSES = 1000;
@@ -48,7 +56,25 @@ function convertTSDefToMarkdown(data) {
 		(currentClassName = ''),
 		(curEmoji = '');
 
-	for (let line of lines) {
+	// track when we are skipping over a namespace/interface block
+	let skippingBlock = false;
+	let skipDepth = 0;
+
+	for (let i = 0; i < lines.length; i++) {
+		let line = lines[i];
+		// if we're currently skipping a namespace/interface block, consume
+		// lines until the block's braces are balanced again
+		if (skippingBlock) {
+			if (!insideExample) line = line.trim();
+			const opens = (line.match(/{/g) || []).length;
+			const closes = (line.match(/}/g) || []).length;
+			skipDepth += opens - closes;
+			if (skipDepth <= 0) {
+				skippingBlock = false;
+				skipDepth = 0;
+			}
+			continue;
+		}
 		if (!insideExample) line = line.trim();
 
 		if (line.startsWith('/**')) {
@@ -111,8 +137,13 @@ function convertTSDefToMarkdown(data) {
 			curEmoji = sectionTitle.slice(0, sectionTitle.indexOf(' '));
 			markdownCode += `# ${sectionTitle}\n\n`;
 		} else if (line.startsWith('class ')) {
+			// Start of a class definition. Do not treat a 'class' token inside
+			// another class as a nested class declaration — nested types inside
+			// classes are represented in .d.ts as properties (e.g. `static Image: { ... }`)
+			// which are handled elsewhere. So always treat 'class' as a top-level
+			// class beginning and update currentClassName.
 			let classMatch = line.match(/class\s+(\w+)/);
-			currentClassName = classMatch[1];
+			currentClassName = classMatch ? classMatch[1] : '';
 			inClassDef = true;
 		} else if (inClassDef && line.startsWith('constructor')) {
 			let params = stripParams(line.slice(12, -2));
@@ -141,6 +172,21 @@ function convertTSDefToMarkdown(data) {
 				jsDocBuffer = '';
 				hasExample = false;
 			}
+		} else if (
+			/^\s*static\s+\w+\s*:\s*\{/.test(line) ||
+			(/^\s*static\s+\w+\s*:\s*$/.test(line) && i + 1 < lines.length && lines[i + 1].trim().startsWith('{'))
+		) {
+			// Skip nested static type blocks inside classes e.g. `static Image: { ... }`.
+			// If the brace is on the next line, we detect it and begin skipping.
+			const opens = (line.match(/{/g) || []).length || (lines[i + 1] && lines[i + 1].trim().startsWith('{') ? 1 : 0);
+			const closes = (line.match(/}/g) || []).length;
+			skipDepth = opens - closes;
+			skippingBlock = true;
+			if (skipDepth <= 0) {
+				skippingBlock = false;
+				skipDepth = 0;
+			}
+			continue;
 		} else if (line.includes(':')) {
 			let l = line.split(':');
 			let varName = l[0].split(' ').at(-1).trim();
@@ -158,6 +204,19 @@ function convertTSDefToMarkdown(data) {
 			jsDocBuffer = '';
 			hasExample = false;
 		} else if (line.startsWith('namespace') || line.startsWith('interface')) {
+			// skip entire namespace/interface blocks (including their inner contents)
+			// compute initial brace depth on this line and begin skipping
+			const opens = (line.match(/{/g) || []).length;
+			const closes = (line.match(/}/g) || []).length;
+			skipDepth = opens - closes;
+			// if there are no braces on this line we still want to start skipping
+			// until we encounter the matching closing brace
+			skippingBlock = true;
+			// if the block opened and closed on the same line (unlikely), end skipping
+			if (skipDepth <= 0) {
+				skippingBlock = false;
+				skipDepth = 0;
+			}
 			continue;
 		} else if (line !== '}' && !line.includes(':')) {
 			markdownCode += line + '\n';
@@ -265,12 +324,20 @@ function parseMarkdownIntoSections(markdownText) {
 
 // get args from url
 let urlParams = new URLSearchParams(window.location.search);
-let queryString = urlParams.toString() ? '?' + urlParams.toString() : '';
+// Build a queryString but render any renderer flags as key-only (no '=')
+let rawQSInit = urlParams.toString();
+rawQSInit = rawQSInit.replace(/(?:^|&)(webgpu)(?:=[^&]*)?(?=$|&)/g, '$1');
+rawQSInit = rawQSInit.replace(/(?:^|&)(c2d)(?:=[^&]*)?(?=$|&)/g, '$1');
+let queryString = rawQSInit ? '?' + rawQSInit : '';
 
-// Renderer mode defaults to WebGPU when `webgpu` flag exists
-let isWebGPU = urlParams.has('webgpu');
-// Language selection (two-letter code). Default is English `en`.
-let lang = urlParams.get('lang') || 'en';
+// Renderer mode is read from the explicit `renderer` url param
+// Allowed values: 'webgpu' or 'c2d' (defaults to 'c2d')
+// Detection: prefer explicit flags `?webgpu` or `?c2d` in the URL.
+// If none are present, default to c2d (isWebGPU=false).
+let isWebGPU = urlParams.has('webgpu') ? true : urlParams.has('c2d') ? false : false;
+// Language selection is saved in localStorage. Fallback to any URL param
+// for backward compatibility, then default to English `en`.
+let lang = localStorage.getItem('lang') || urlParams.get('lang') || 'en';
 
 async function loadDtsAndRender(useWebGPU) {
 	const prevSection = currentSectionId;
@@ -291,12 +358,22 @@ async function loadDtsAndRender(useWebGPU) {
 	sections = parseMarkdownIntoSections(markdownText);
 	populateNavigation();
 
-	// update URL param and local queryString
-	if (useWebGPU) urlParams.set('webgpu', '1');
-	else urlParams.delete('webgpu');
-	// always include language param
-	urlParams.set('lang', lang);
-	queryString = urlParams.toString() ? '?' + urlParams.toString() : '';
+	// always write an explicit renderer flag using `?webgpu` or `?c2d`
+	if (useWebGPU) {
+		urlParams.set('webgpu', '');
+		urlParams.delete('c2d');
+	} else {
+		urlParams.set('c2d', '');
+		urlParams.delete('webgpu');
+	}
+	// persist language to localStorage; do NOT write language into the URL
+	localStorage.setItem('lang', lang);
+	// Serialize params but keep renderer flags as key-only (no '=')
+	let rawQS = urlParams.toString();
+	// Remove any `=...` for the renderer flags so they become key-only like `webgpu` or `c2d`.
+	rawQS = rawQS.replace(/(?:^|&)(webgpu)(?:=[^&]*)?(?=$|&)/g, '$1');
+	rawQS = rawQS.replace(/(?:^|&)(c2d)(?:=[^&]*)?(?=$|&)/g, '$1');
+	queryString = rawQS ? '?' + rawQS : '';
 
 	// Update the browser URL with the new query string
 	const newUrl = `${location.pathname}${queryString}${location.hash}`;
@@ -333,6 +410,8 @@ if (langSelect) {
 	langSelect.value = lang;
 	langSelect.addEventListener('change', async (e) => {
 		lang = e.target.value;
+		// Persist language choice to localStorage and reload docs
+		localStorage.setItem('lang', lang);
 		await loadDtsAndRender(isWebGPU);
 	});
 }
@@ -640,11 +719,18 @@ function updateStickyHeader() {
 
 	if (closestWrapper === prevStickyWrapper) return;
 
+	// Remove sticky from previous wrapper (if any). If no closest wrapper
+	// was found, ensure previous sticky is cleared and bail out safely.
 	prevStickyWrapper?.classList.remove('sticky');
+	if (!closestWrapper) {
+		prevStickyWrapper = null;
+		return;
+	}
+
 	closestWrapper.classList.add('sticky');
 	prevStickyWrapper = closestWrapper;
 
-	const subsectionId = closestWrapper.parentElement.id;
+	const subsectionId = closestWrapper.parentElement?.id || '';
 	for (const link of document.querySelectorAll('.subsection-link')) {
 		link.classList.toggle('active', link.getAttribute('href').slice(1) === subsectionId);
 	}

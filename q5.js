@@ -401,14 +401,14 @@ Q5.hooks = {
 	remove: []
 };
 
-Q5.addHook = (name, fn) => Q5.hooks[name].push(fn);
+Q5.addHook = (lifecycle, fn) => Q5.hooks[lifecycle].push(fn);
 
 // p5 v2 compat
 Q5.registerAddon = (addon) => {
 	let lifecycles = {};
 	addon(Q5, Q5.prototype, lifecycles);
-	for (let name in lifecycles) {
-		Q5.hooks[name].push(lifecycles[name]);
+	for (let l in lifecycles) {
+		Q5.hooks[l].push(lifecycles[l]);
 	}
 };
 
@@ -2317,6 +2317,7 @@ Q5.modules.color = ($, q) => {
 		black: [0, 0, 0],
 		blue: [0, 0, 255],
 		brown: [165, 42, 42],
+		coral: [255, 127, 80],
 		crimson: [220, 20, 60],
 		cyan: [0, 255, 255],
 		darkviolet: [148, 0, 211],
@@ -6776,10 +6777,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				hw = w;
 				hh = h;
 			} else if (_rectMode == 'corners') {
-				hw = (x - w) / 2;
-				hh = (y - h) / 2;
-				x += hw;
-				y += hh;
+				hw = Math.abs((w - x) / 2);
+				hh = Math.abs((h - y) / 2);
+				x = (x + w) / 2;
+				y = (y + h) / 2;
 			}
 		}
 		rectModeCache[0] = x;
@@ -7084,8 +7085,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		} else if (_ellipseMode == 'corners') {
 			x = (x + w) / 2;
 			y = (y + h) / 2;
-			a = (w - x) / 2;
-			b = (h - y) / 2;
+			a = w - x;
+			b = h - y;
 		}
 		ellipseModeCache[0] = x;
 		ellipseModeCache[1] = y;
@@ -8079,7 +8080,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (type != 'string') {
 			if (type == 'object') str = str.toString();
 			else str = str + '';
-		}
+		} else if (!str.length) return;
 
 		// if not using an MSDF font
 		if (!$._font) {

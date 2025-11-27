@@ -444,19 +444,6 @@ to do so at the end of the `draw` function, such as when using
 addons like p5play that auto-draw to the canvas after the `draw`
 function is run.
 
-### webgpu
-
-```js
-q5.draw = function () {
-	background(0.8);
-	circle((frameCount % 200) - 100, 0, 80);
-};
-
-Q5.postProcess = function () {
-	// filter(INVERT);
-};
-```
-
 ### c2d
 
 ```js
@@ -584,20 +571,3 @@ function draw() {
 
 The 2D rendering context for the canvas, if using the Canvas2D
 renderer.
-
-## Q5.constructor
-
-Creates an [instance](https://github.com/q5js/q5.js/wiki/Instance-Mode) of Q5.
-
-```
-@param {string | Function} [scope]
-@param {HTMLElement} [parent] element that the canvas will be placed inside
-```
-
-### c2d
-
-```js
-let q = new Q5('namespace');
-q.createCanvas(200, 100);
-q.circle(100, 50, 20);
-```

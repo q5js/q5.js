@@ -29,7 +29,7 @@ are also implemented, but their use is deprecated.
 
 ```
 @param {string} url sound file
-@returns {Sound | Promise<Sound>} a new `Sound` object or promise
+@returns {Sound & PromiseLike<Sound>} a new `Sound` object
 ```
 
 ### webgpu
@@ -67,10 +67,9 @@ Audio is considered loaded when the [canplaythrough event](https://developer.moz
 Note that audio can only be played after the first user
 interaction with the page!
 
-```
+````
 @param url audio file
-@returns {HTMLAudioElement | Promise<HTMLAudioElement>} an HTMLAudioElement or promise
-```
+@returns {HTMLAudioElement & PromiseLike<HTMLAudioElement>} an HTMLAudioElement
 
 ### webgpu
 
@@ -83,7 +82,7 @@ audio.volume = 0.4;
 q5.mousePressed = function () {
 	audio.play();
 };
-```
+````
 
 ### c2d
 

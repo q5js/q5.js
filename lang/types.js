@@ -1,4 +1,8 @@
-#!/usr/bin/env node
+/**
+ * q5/lang/types.js
+ *
+ * AI was used to generate this entire script.
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -332,6 +336,57 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 	const emojiMappings = extractEmojiMappings(baseDtsPath);
 	const baseSignatures = extractBaseSignatures(baseDtsPath);
 
+	// Read the entire base file and extract top-level declarations (inside `declare global { ... }`).
+	const baseContent = fs.readFileSync(baseDtsPath, 'utf8');
+	const globalMatch = baseContent.match(/declare global\s*{([\s\S]*?)}\s*export\s*{\s*}/m);
+	let baseGlobalBlock = '';
+	if (globalMatch) baseGlobalBlock = globalMatch[1];
+
+	// Parse top-level declarations from the base global block. We keep class/namespace blocks and single-line
+	// declarations for functions/vars/constants. This ensures we copy any signatures that don't exist in
+	// the parsed markdown-derived sections.
+	const baseDecls = [];
+	if (baseGlobalBlock) {
+		const blines = baseGlobalBlock.split('\n');
+		for (let i = 0; i < blines.length; i++) {
+			let line = blines[i];
+			if (!line || !line.trim()) continue;
+			const t = line.trim();
+
+			// skip top-level comments
+			if (t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')) continue;
+
+			// class or namespace blocks (multi-line)
+			let classMatch = t.match(/^class\s+(\w+)\s*\{/);
+			let nsMatch = t.match(/^namespace\s+(\w+)\s*\{/);
+			if (classMatch || nsMatch) {
+				const name = (classMatch || nsMatch)[1];
+				let block = [t];
+				// count braces to find end of block
+				let braceCount = (t.match(/{/g) || []).length - (t.match(/}/g) || []).length;
+				while (braceCount > 0 && ++i < blines.length) {
+					const ln = blines[i];
+					block.push(ln);
+					braceCount += (ln.match(/{/g) || []).length - (ln.match(/}/g) || []).length;
+				}
+				baseDecls.push({ name, text: block.join('\n') });
+				continue;
+			}
+
+			// single-line declarations: function / var/let/const
+			let funcMatch = t.match(/^function\s+(\w+)\s*\(/);
+			let varMatch = t.match(/^(?:var|let|const)\s+(\w+)\s*[:=]/);
+			if (funcMatch) {
+				baseDecls.push({ name: funcMatch[1], text: t });
+				continue;
+			}
+			if (varMatch) {
+				baseDecls.push({ name: varMatch[1], text: t });
+				continue;
+			}
+		}
+	}
+
 	// Exclude certain sections for specific output types
 	if (exampleType === 'c2d') {
 		// Shaders are WebGPU-only; exclude from Canvas2D type definitions
@@ -340,7 +395,58 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 
 	// Build the output content
 	const output = [];
-	output.push('declare global {');
+	// helper to append a line while avoiding duplicate blank lines
+	const push = (ln) => {
+		if (ln === '') {
+			if (output.length === 0 || output[output.length - 1] !== '') output.push('');
+		} else {
+			output.push(ln);
+		}
+	};
+	push('declare global {');
+
+	// Determine which names are already included via markdown-derived sections
+	const existingNames = new Set();
+	for (const s of Object.values(sections)) {
+		for (const f of s.functions) {
+			existingNames.add(f.name);
+			if (f.isClass && f.members) {
+				for (const m of f.members) existingNames.add(`${f.name}.${m.name}`);
+			}
+		}
+	}
+
+	// Partition the baseGlobalBlock into blocks by section comment so we can
+	// place missing declarations into their correct section instead of dumping
+	// them at the top of the file.
+	const baseSectionBlocks = {};
+	if (baseGlobalBlock) {
+		let currentSec = null;
+		const blines = baseGlobalBlock.split('\n');
+		for (let i = 0; i < blines.length; i++) {
+			const line = blines[i];
+			const m = line.match(/^\s*\/\/\s*([^\w\s]+)\s+([a-z]+)\s*$/);
+			if (m) {
+				currentSec = m[2];
+				baseSectionBlocks[currentSec] = baseSectionBlocks[currentSec] || [];
+				continue;
+			}
+
+			if (currentSec) baseSectionBlocks[currentSec].push(line);
+		}
+
+		// annotate each baseDecl with which section it belongs to (best-effort)
+		for (const d of baseDecls) {
+			d._section = null;
+			for (const [sec, lines] of Object.entries(baseSectionBlocks)) {
+				const txt = lines.join('\n');
+				if (txt.indexOf(d.name) !== -1) {
+					d._section = sec;
+					break;
+				}
+			}
+		}
+	}
 
 	// Sort sections to match the order in base file
 	const sectionOrder = Object.keys(emojiMappings).map((section) => section);
@@ -351,14 +457,14 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 		const section = sections[sectionName];
 		const emoji = emojiMappings[sectionName];
 
-		output.push('');
+		push('');
 		output.push(`\t// ${emoji} ${sectionName}`);
 
 		// Add section description if available (as block comment)
 		if (section.sectionDescription) {
 			const descLines = section.sectionDescription.split('\n');
 			if (descLines.length > 0) {
-				output.push('');
+				push('');
 				output.push('\t/**');
 				descLines.forEach((line) => {
 					output.push(`\t * ${line}`);
@@ -367,7 +473,7 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 			}
 		}
 
-		output.push('');
+		push('');
 
 		// Add functions and classes
 		for (const func of section.functions) {
@@ -382,9 +488,25 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 						output.push(generateJSDoc(member, emoji, includeExamples, exampleType, '\t\t'));
 
 						// Try to find signature in base file
-						const memberSig = baseSignatures[`${func.name}.${member.name}`];
+						const memberKey = `${func.name}.${member.name}`;
+						let memberSig = baseSignatures[memberKey];
+
+						// If we don't have an exact member signature in baseSignatures,
+						// look inside any class declaration block we parsed from the base .d.ts
+						// (this can contain static property declarations like "static MAX_TRANSFORMS: number;")
+						if (!memberSig) {
+							const baseClassDecl = baseDecls.find((d) => d.name === func.name && d.text.trim().startsWith('class'));
+							if (baseClassDecl) {
+								const re = new RegExp(`(^|\\n)\\s*(?:static\\s+)?(?:${member.name})\\b[^\\n]*`, 'i');
+								const m = baseClassDecl.text.match(re);
+								if (m) memberSig = m[0].trim();
+							}
+						}
+
 						if (memberSig) {
-							output.push(`\t\t${memberSig}`);
+							// Ensure the signature line ends with a semicolon
+							const sigLine = memberSig.trim().replace(/;?\s*$/, ';');
+							output.push(`\t\t${sigLine}`);
 						} else {
 							// Generate based on member type
 							if (member.name === 'constructor') {
@@ -396,6 +518,67 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 					}
 				}
 
+				// Merge in any class members found only in the base .d.ts (preserve their JSDoc)
+				const baseClassDecl = baseDecls.find((d) => d.name === func.name && d.text.startsWith('class'));
+				if (baseClassDecl) {
+					const existingMemberNames = new Set((func.members || []).map((m) => m.name));
+					const inner = baseClassDecl.text.split('\n').slice(1, -1); // inside class
+					let chunk = [];
+					const commitChunk = () => {
+						if (chunk.length === 0) return;
+						// find signature line (first non-comment line)
+						const sigLine = chunk.find((l) => l.trim() && !l.trim().startsWith('*') && !l.trim().startsWith('/'));
+						if (!sigLine) {
+							chunk = [];
+							return;
+						}
+						let m = sigLine.trim().match(/^(?:static\s+)?(\w+)\b/);
+						if (!m) {
+							chunk = [];
+							return;
+						}
+						const mname = m[1];
+						if (!existingMemberNames.has(mname)) {
+							// compute minimal indent for chunk lines to preserve relative formatting
+							const nonEmpty = chunk.filter((l) => l.trim());
+							let minIndent = null;
+							nonEmpty.forEach((l) => {
+								const mm = l.match(/^\s*/);
+								if (mm) {
+									const len = mm[0].length;
+									if (minIndent === null || len < minIndent) minIndent = len;
+								}
+							});
+							if (minIndent === null) minIndent = 0;
+
+							chunk.forEach((ln, idx) => {
+								if (!ln || !ln.trim()) {
+									push('');
+									return;
+								}
+								const content = ln.trimStart();
+								if (idx === 0) {
+									output.push('\t\t' + content);
+								} else {
+									// inner lines should be indented one level deeper than the header
+									output.push('\t\t\t' + content);
+								}
+							});
+							push('');
+						}
+						chunk = [];
+					};
+					for (let li = 0; li < inner.length; li++) {
+						const ln = inner[li];
+						if (!ln.trim()) {
+							commitChunk();
+						} else {
+							chunk.push(ln);
+						}
+					}
+					commitChunk();
+				}
+
 				output.push('\t}');
 			} else {
 				// Regular function or variable
@@ -403,7 +586,82 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 				output.push(generateDeclaration(func.name, baseSignatures));
 			}
 
-			output.push('');
+			push('');
+		}
+
+		// append any missing declarations from the base .d.ts that belong to this section
+		// Note: baseDecls may include `namespace Foo` blocks even when a `class Foo` exists
+		// in the markdown-derived sections. We should include namespace blocks if they are
+		// not already present in the output. existingNames only tracks names, so a class
+		// with the same name would previously prevent adding the namespace. Fix that by
+		// allowing namespace blocks through when the actual `namespace <name>` text is
+		// still missing from the generated output.
+		const missingInSection = baseDecls.filter((d) => {
+			if (d._section !== sectionName) return false;
+
+			// If this base declaration is a namespace, include it if the output does
+			// not already contain the namespace declaration for this name.
+			const isNamespace = d.text.trim().startsWith('namespace');
+			if (isNamespace) {
+				const namespaceHeader = `namespace ${d.name}`;
+				const alreadyHasNamespace = output.some((ln) => typeof ln === 'string' && ln.indexOf(namespaceHeader) !== -1);
+				return !alreadyHasNamespace;
+			}
+
+			// otherwise, include only when it is actually missing by name
+			return !existingNames.has(d.name);
+		});
+		if (missingInSection.length > 0) {
+			// ensure single blank line before additions
+			push('');
+
+			for (const d of missingInSection) {
+				const lines = d.text.split('\n');
+
+				// If this is a class/namespace, render with our consistent formatting
+				if (d.text.trim().startsWith('class') || d.text.trim().startsWith('namespace')) {
+					const header = lines[0].trim();
+					// write header with one tab
+					push('\t' + header);
+					// inner lines
+					const inner = lines.slice(1, -1);
+					for (const ln of inner) {
+						if (!ln || !ln.trim()) {
+							push('');
+						} else {
+							const t = ln.trim();
+							if (t.startsWith('*')) push('\t\t ' + t);
+							else push('\t\t' + t);
+						}
+					}
+					// closing brace
+					push('\t}');
+					push('');
+					continue;
+				}
+
+				// Normal non-class block: normalize indentation
+				const nonEmpty = lines.filter((l) => l.trim());
+				let minIndent = null;
+				nonEmpty.forEach((l) => {
+					const m = l.match(/^\s*/);
+					if (m) {
+						const len = m[0].length;
+						if (minIndent === null || len < minIndent) minIndent = len;
+					}
+				});
+				if (minIndent === null) minIndent = 0;
+
+				for (const ln of lines) {
+					if (!ln || !ln.trim()) {
+						push('');
+						continue;
+					}
+					const normalized = ln.slice(minIndent);
+					push('\t' + normalized);
+				}
+				push('');
+			}
 		}
 	}
 
@@ -411,6 +669,40 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 	output.push('');
 	output.push('export {};');
 	output.push('');
+
+	// Normalize indentation for blocks: for every opening-brace line, ensure
+	// all lines up to the corresponding immediate closing brace are indented
+	// at least one level deeper than the opener.
+	for (let i = 0; i < output.length; i++) {
+		const cur = output[i];
+		if (!cur) continue;
+		if (!cur.trim().endsWith('{')) continue;
+
+		// find matching immediate closing brace (first '}' after this opener)
+		let closeIndex = -1;
+		for (let k = i + 1; k < output.length; k++) {
+			if (output[k]) {
+				const t = output[k].trim();
+				// match a closing brace line: '}' or '};' or '},' etc.
+				if (/^}\s*[;,]?$/.test(t)) {
+					closeIndex = k;
+					break;
+				}
+			}
+		}
+		if (closeIndex === -1) continue;
+
+		const openerIndent = cur.match(/^\s*/)[0];
+		const targetIndent = openerIndent + '\t';
+
+		for (let j = i + 1; j < closeIndex; j++) {
+			if (!output[j]) continue;
+			const lineIndent = output[j].match(/^\s*/)[0];
+			if (lineIndent.length <= openerIndent.length) {
+				output[j] = targetIndent + output[j].trimStart();
+			}
+		}
+	}
 
 	fs.writeFileSync(outputPath, output.join('\n'));
 	console.log(`✅ Generated ${path.basename(outputPath)}`);
@@ -476,10 +768,10 @@ function main() {
 	buildDtsFile(sections, baseDtsPath, file, true, 'c2d');
 
 	// copy c2d d.ts to root
-	// if (lang === 'en') {
-	// 	const destFile = path.join(rootDir, `q5.d.ts`);
-	// 	fs.copyFileSync(file, destFile);
-	// }
+	if (lang === 'en') {
+		const destFile = path.join(rootDir, `q5.d.ts`);
+		fs.copyFileSync(file, destFile);
+	}
 }
 
 if (require.main === module) {

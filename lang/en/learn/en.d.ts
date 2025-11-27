@@ -7,62 +7,15 @@ declare global {
 
 	function log(message: any): void;
 
-	class Q5 {
-		constructor(scope?: string | Function, parent?: HTMLElement);
-
-		static disableFriendlyErrors: boolean;
-
-		static canvasOptions: {};
-
-		static supportsHDR: boolean;
-
-		static errorTolerant: boolean;
-
-		static MAX_RECTS: number;
-
-		static MAX_ELLIPSES: number;
-
-		static modules: {};
-
-		static Image: {
-			new (w: number, h: number, opt?: any): Q5.Image;
-		};
-
-		static WebGPU(): Q5;
-
-		static registerAddon(addon: Function): void; //-
-
-		update(): void; //-
-
-		draw(): void; //-
-
-		drawFrame(): void; //-
-
-		setup(): void; //-
-
-		preload(): void; //-
-
-		postProcess(): void; //-
-	}
-
-	namespace Q5 {
-		interface Image {
-			width: number; //-
-			height: number; //-
-		}
-	}
-
-	const q5: typeof Q5;
-
 	// 🧑‍🎨 shapes
 
 	function circle(x: number, y: number, diameter: number): void;
 
 	function ellipse(x: number, y: number, width: number, height?: number): void;
 
-	function rect(x: number, y: number, w: number, h?: number, tl?: number, tr?: number, br?: number, bl?: number): void;
+	function rect(x: number, y: number, w: number, h?: number, rounded?: number): void;
 
-	function square(x: number, y: number, size: number, tl?: number, tr?: number, br?: number, bl?: number): void;
+	function square(x: number, y: number, size: number, rounded?: number): void;
 
 	function point(x: number, y: number): void;
 
@@ -79,10 +32,6 @@ declare global {
 	const RADIUS: 'radius';
 
 	const CORNERS: 'corners';
-
-	function triangle(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
-
-	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
 	// 🌆 image
 
@@ -558,7 +507,7 @@ declare global {
 
 	// 🛠️ utilities
 
-	function load(...urls: string[]): Promise<any[]>;
+	function load(...urls: string[]): PromiseLike<any[]>;
 
 	function save(data?: object, fileName?: string): void;
 
@@ -666,6 +615,10 @@ declare global {
 
 	function bezier(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
+	function triangle(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
+
+	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+
 	// ⚡️ shaders
 
 	function createShader(code: string): GPUShaderModule;
@@ -693,6 +646,59 @@ declare global {
 	function createVideoShader(code: string): GPUShaderModule;
 
 	function createTextShader(code: string): GPUShaderModule;
+
+	// ⚙️ advanced
+
+	class Q5 {
+		constructor(scope?: string | Function, parent?: HTMLElement);
+
+		static disableFriendlyErrors: boolean;
+
+		static errorTolerant: boolean;
+
+		static supportsHDR: boolean;
+
+		static canvasOptions: object;
+
+		static MAX_RECTS: number;
+
+		static MAX_ELLIPSES: number;
+
+		static MAX_TRANSFORMS: number;
+
+		static MAX_CHARS: number;
+
+		static MAX_TEXTS: number;
+
+		static WebGPU(): Q5;
+
+		static addHook(lifecycle: string, fn: Function): void;
+
+		static registerAddon(addon: Function): void;
+
+		static modules: object;
+
+		draw(): void;
+
+		postProcess(): void;
+
+		update(): void; //-
+
+		drawFrame(): void; //-
+
+		static Image: {
+			new (w: number, h: number, opt?: any): Q5.Image;
+		};
+	}
+
+	namespace Q5 {
+		interface Image {
+			width: number;
+			height: number;
+		}
+	}
+
+	const q5: typeof Q5;
 }
 
 export {};

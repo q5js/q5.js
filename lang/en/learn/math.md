@@ -389,7 +389,8 @@ Returns the smallest value in a sequence of numbers.
 
 ```js
 q5.draw = function () {
-	background(min(mouseX, 100));
+	background(min(-mouseX / 100, 0.5));
+	circle(min(mouseX, 0), 0, 80);
 };
 ```
 
@@ -398,6 +399,7 @@ q5.draw = function () {
 ```js
 function draw() {
 	background(min(mouseX, 100));
+	circle(min(mouseX, 100), 0, 80);
 }
 ```
 
@@ -414,7 +416,8 @@ Returns the largest value in a sequence of numbers.
 
 ```js
 q5.draw = function () {
-	background(max(mouseX, 100));
+	background(max(-mouseX / 100, 0.5));
+	circle(max(mouseX, 0), 0, 80);
 };
 ```
 
@@ -423,6 +426,7 @@ q5.draw = function () {
 ```js
 function draw() {
 	background(max(mouseX, 100));
+	circle(max(mouseX, 100), 0, 80);
 }
 ```
 

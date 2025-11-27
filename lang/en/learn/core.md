@@ -43,7 +43,7 @@ circle(0, 0, 80);
 
 ## draw
 
-The draw function is run 60 times per second by default.
+The q5 draw function is run 60 times per second by default.
 
 ### webgpu
 
@@ -65,17 +65,19 @@ function draw() {
 
 ## log
 
-Logs a message to the JavaScript console. Alias for the standard
-[`console.log`](https://developer.mozilla.org/docs/Web/API/console/log_static) function.
+Logs a message to the JavaScript console.
 
-If you're ever curious about what your code is doing use `log()`!
-
-You can open web developer tools in most browsers by using the
-keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
+To view the console, open your browser's web developer tools
+via the keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
 then click the "Console" tab.
 
+This is an alias for the standard
+[`console.log`](https://developer.mozilla.org/docs/Web/API/console/log_static) function.
+
+When you're curious about what your code is doing, use `log()`!
+
 ```
-@param {*} message message to log
+@param {*} message
 ```
 
 ### webgpu
@@ -90,8 +92,8 @@ q5.draw = function () {
 ### c2d
 
 ```js
-q5.draw = function () {
+function draw() {
 	circle(mouseX, mouseY, 80);
 	log('The mouse is at:', mouseX, mouseY);
-};
+}
 ```

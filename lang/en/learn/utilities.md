@@ -7,9 +7,6 @@ Loads a file or multiple files.
 File type is determined by file extension. q5 supports loading
 text, json, csv, font, audio, and image files.
 
-To load many files, it may be easier to use load\* functions,
-like `loadImage`, with q5's preload system.
-
 ```
 @param {...string} urls
 @returns {Promise<any[]>} a promise that resolves with objects
@@ -20,7 +17,7 @@ like `loadImage`, with q5's preload system.
 ```js
 await createCanvas(200);
 
-let logo = await load('/q5js_logo.avif');
+let logo = load('/q5js_logo.avif');
 
 q5.draw = function () {
 	image(logo, -100, -100, 200, 200);
@@ -29,13 +26,12 @@ q5.draw = function () {
 
 ```js
 await createCanvas(200);
+background(0.8);
 
-// use with top level await in a module
 await load('/assets/Robotica.ttf');
 
-background(1);
-textSize(24);
-text('Hello, world!', 16, 100);
+textSize(28);
+text('Hello, world!', -97, 100);
 ```
 
 ```js
@@ -50,40 +46,26 @@ q5.mousePressed = function () {
 
 ```js
 await createCanvas(200);
-background(200);
+background(0.8);
 textSize(32);
 
 let myXML = await load('/assets/animals.xml');
 let mammals = myXML.getElementsByTagName('mammal');
-let y = 64;
+let y = -100;
 for (let mammal of mammals) {
-	text(mammal.textContent, 20, (y += 32));
+	text(mammal.textContent, -100, (y += 32));
 }
 ```
 
 ### c2d
 
 ```js
-let logo;
-
-async function setup() {
-	logo = await load('/q5js_logo.avif');
-}
+createCanvas(200);
+let logo = load('/q5js_logo.avif');
 
 function draw() {
 	image(logo, 0, 0, 200, 200);
 }
-```
-
-```js
-createCanvas(200);
-
-// use with top level await in a module
-await load('/assets/Robotica.ttf');
-
-background(255);
-textSize(24);
-text('Hello, world!', 16, 100);
 ```
 
 ## save
@@ -114,10 +96,10 @@ q5.mousePressed = function () {
 
 ```js
 await createCanvas(200);
-
+background(0.8);
+text('save me?', -90, 0);
 textSize(180);
 let bolt = createTextImage('⚡️');
-image(bolt, -84, -156);
 
 q5.mousePressed = function () {
 	save(bolt, 'bolt.png');
@@ -154,7 +136,7 @@ Loads a text file from the specified url.
 
 ```
 @param {string} url text file
-@returns {object | Promise<string>} an object containing the loaded text in the property `obj.text` or a promise
+@returns {object & PromiseLike<string>} an object containing the loaded text in the property `obj.text` or a promise
 ```
 
 ## loadJSON
@@ -163,7 +145,7 @@ Loads a JSON file from the specified url.
 
 ```
 @param {string} url JSON file
-@returns {any | Promise<any>} an object or array containing the loaded JSON or a promise
+@returns {any & PromiseLike<any>} an object or array containing the loaded JSON or a promise
 ```
 
 ## loadCSV
@@ -172,7 +154,7 @@ Loads a CSV file from the specified url.
 
 ```
 @param {string} url CSV file
-@returns {object[] | Promise<object[]>} an array of objects containing the loaded CSV or a promise
+@returns {object[] & PromiseLike<object[]>} an array of objects containing the loaded CSV or a promise
 ```
 
 ## loadXML
@@ -181,7 +163,7 @@ Loads an xml file from the specified url.
 
 ```
 @param {string} url xml file
-@returns {Element | Promise<Element>} an object containing the loaded XML in a property called `obj.DOM` or a promise
+@returns {Element & PromiseLike<Element>} an object containing the loaded XML in a property called `obj.DOM` or a promise
 ```
 
 ### c2d

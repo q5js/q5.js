@@ -77,8 +77,40 @@ class MiniEditor {
 				});
 
 				if (!typeDefs) {
-					let res = await fetch('/q5.d.ts');
-					typeDefs = await res.text();
+					// Use the generated defs file to keep learn pages in sync
+					// with the docs and strip any namespace/interface blocks
+					// so the mini-editor doesn't expose internal namespace
+					// interfaces (like `Q5.Image`) on hover/autocomplete.
+					let res = await fetch('/defs/q5.d.ts');
+					let raw = await res.text();
+
+					// strip namespace/interface blocks by scanning lines and
+					// skipping any block that begins with 'namespace' or
+					// 'interface'
+					const lines = raw.split('\n');
+					const out = [];
+					let skipDepth = 0;
+					for (let l of lines) {
+						const t = l.trimStart();
+						if (skipDepth === 0 && (t.startsWith('namespace ') || t.startsWith('interface '))) {
+							// enter skip mode, count braces on this line
+							skipDepth += (l.match(/{/g) || []).length || 1;
+							skipDepth -= (l.match(/}/g) || []).length;
+							continue;
+						}
+
+						if (skipDepth > 0) {
+							// count braces and potentially exit skip mode
+							skipDepth += (l.match(/{/g) || []).length;
+							skipDepth -= (l.match(/}/g) || []).length;
+							if (skipDepth <= 0) skipDepth = 0;
+							continue;
+						}
+
+						out.push(l);
+					}
+
+					typeDefs = out.join('\n');
 				}
 
 				monaco.languages.typescript.javascriptDefaults.addExtraLib(typeDefs, '/q5.d.ts');

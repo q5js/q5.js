@@ -1,3 +1,9 @@
+/**
+ * q5/lang/build.js
+ *
+ * AI was used to generate parts of this script.
+ */
+
 const log = console.log;
 const fs = require('fs/promises');
 const path = require('path');

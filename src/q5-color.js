@@ -34,6 +34,7 @@ Q5.modules.color = ($, q) => {
 		black: [0, 0, 0],
 		blue: [0, 0, 255],
 		brown: [165, 42, 42],
+		coral: [255, 127, 80],
 		crimson: [220, 20, 60],
 		cyan: [0, 255, 255],
 		darkviolet: [148, 0, 211],

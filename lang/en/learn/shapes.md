@@ -58,10 +58,7 @@ Draws a rectangle or a rounded rectangle.
 @param {number} y y-coordinate
 @param {number} w width of the rectangle
 @param {number} [h] height of the rectangle
-@param {number} [tl] top-left radius
-@param {number} [tr] top-right radius
-@param {number} [br] bottom-right radius
-@param {number} [bl] bottom-left radius
+@param {number} [rounded] radius for all corners
 ```
 
 ### webgpu
@@ -72,7 +69,7 @@ background(0.8);
 
 rect(-70, -80, 40, 60);
 rect(-20, -30, 40, 60, 10);
-rect(30, 20, 40, 60, 30, 2, 8, 20);
+rect(30, 20, 40, 60, 30);
 ```
 
 ### c2d
@@ -94,10 +91,7 @@ Draws a square or a rounded square.
 @param {number} x x-coordinate
 @param {number} y y-coordinate
 @param {number} size size of the sides of the square
-@param {number} [tl] top-left radius
-@param {number} [tr] top-right radius
-@param {number} [br] bottom-right radius
-@param {number} [bl] bottom-left radius
+@param {number} [rounded] radius for all corners
 ```
 
 ### webgpu
@@ -108,7 +102,7 @@ background(0.8);
 
 square(-70, -70, 40);
 square(-20, -20, 40, 10);
-square(30, 30, 40, 30, 2, 8, 20);
+square(30, 30, 40, 30);
 ```
 
 ### c2d
@@ -180,23 +174,6 @@ stroke('lime');
 line(20, 20, 180, 80);
 ```
 
-### c2d
-
-```js
-createCanvas(200, 100);
-background(200);
-strokeWeight(5);
-capsule(40, 40, 160, 60, 10);
-```
-
-```js
-function draw() {
-	background(200);
-	strokeWeight(10);
-	capsule(100, 100, mouseX, mouseY, 20);
-}
-```
-
 ## capsule
 
 Draws a capsule.
@@ -221,9 +198,28 @@ capsule(-60, -10, 60, 10, 10);
 ```js
 q5.draw = function () {
 	background(0.8);
+	fill('cyan');
 	strokeWeight(10);
 	capsule(0, 0, mouseX, mouseY, 20);
 };
+```
+
+### c2d
+
+```js
+createCanvas(200, 100);
+background(200);
+strokeWeight(5);
+capsule(40, 40, 160, 60, 10);
+```
+
+```js
+function draw() {
+	background(200);
+	fill('cyan');
+	strokeWeight(10);
+	capsule(100, 100, mouseX, mouseY, 20);
+}
 ```
 
 ## rectMode

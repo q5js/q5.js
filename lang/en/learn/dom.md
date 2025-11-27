@@ -218,7 +218,8 @@ Creates an image element.
 ```js
 await createCanvas(200, 100);
 
-let img = createImg('/assets/p5play_logo.webp').position(0, 0).size(100, 100);
+let img = createImg('/assets/p5play_logo.webp');
+img.position(0, 0).size(100, 100);
 ```
 
 ### c2d
@@ -226,7 +227,8 @@ let img = createImg('/assets/p5play_logo.webp').position(0, 0).size(100, 100);
 ```js
 createCanvas(200, 100);
 
-let img = createImg('/assets/p5play_logo.webp').position(0, 0).size(100, 100);
+let img = createImg('/assets/p5play_logo.webp');
+img.position(0, 0).size(100, 100);
 ```
 
 ## createInput
@@ -321,28 +323,30 @@ Use the `value` property to get or set the value of the selected radio button.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await createCanvas(200, 160);
 
-let radio = createRadio().option('square', '1').option('circle', '2');
+let radio = createRadio();
+radio.option('square', '1').option('circle', '2');
 
 q5.draw = function () {
-	background(200);
-	if (radio.value == '1') square(-25, -25, 50);
-	if (radio.value == '2') circle(0, 0, 50);
+	background(0.8);
+	if (radio.value == '1') square(-40, -40, 80);
+	if (radio.value == '2') circle(0, 0, 80);
 };
 ```
 
 ### c2d
 
 ```js
-createCanvas(200, 100);
+createCanvas(200, 160);
 
-let radio = createRadio().option('square', '1').option('circle', '2');
+let radio = createRadio();
+radio.option('square', '1').option('circle', '2');
 
 function draw() {
 	background(200);
-	if (radio.value == '1') square(75, 25, 50);
-	if (radio.value == '2') circle(100, 50, 50);
+	if (radio.value == '1') square(75, 25, 80);
+	if (radio.value == '2') circle(100, 50, 80);
 }
 ```
 
@@ -370,7 +374,8 @@ string or an array of strings.
 ```js
 await createCanvas(200, 100);
 
-let sel = createSelect('Select a color').option('Red', '#f55').option('Green', '#5f5');
+let sel = createSelect('Select a color');
+sel.option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
 	background(sel.value);
@@ -382,7 +387,8 @@ sel.addEventListener('change', () => {
 ```js
 createCanvas(200, 100);
 
-let sel = createSelect('Select a color').option('Red', '#f55').option('Green', '#5f5');
+let sel = createSelect('Select a color');
+sel.option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
 	background(sel.value);
@@ -409,7 +415,8 @@ Use the `val` function to get the slider's value as a number.
 ```js
 await createCanvas(200);
 
-let slider = createSlider(0, 1, 0.5, 0.1).position(10, 10).size(180);
+let slider = createSlider(0, 1, 0.5, 0.1);
+slider.position(10, 10).size(180);
 
 q5.draw = function () {
 	background(slider.val());
@@ -421,7 +428,8 @@ q5.draw = function () {
 ```js
 createCanvas(200);
 
-let slider = createSlider(0, 255).position(10, 10).size(180);
+let slider = createSlider(0, 255);
+slider.position(10, 10).size(180);
 
 function draw() {
 	background(slider.val());
@@ -440,13 +448,13 @@ displayed on the canvas using the `image` function.
 
 ```
 @param {string} src url of the video
-@returns {HTMLVideoElement | Promise<HTMLVideoElement>} a new video element or promise
+@returns {HTMLVideoElement & PromiseLike<HTMLVideoElement>} a new video element
 ```
 
 ### webgpu
 
 ```js
-await createCanvas(0);
+await createCanvas(1);
 
 let vid = createVideo('/assets/apollo4.mp4');
 vid.size(200, 150);
@@ -472,7 +480,7 @@ q5.draw = function () {
 ### c2d
 
 ```js
-createCanvas(0);
+createCanvas(1);
 
 let vid = createVideo('/assets/apollo4.mp4');
 vid.size(200, 150);
@@ -513,14 +521,12 @@ for more info.
 ```
 @param {string} [type] type of capture, can be only `VIDEO` or only `AUDIO`, the default is to use both video and audio
 @param {boolean} [flipped] whether to mirror the video vertically, true by default
-@returns {HTMLVideoElement | Promise<HTMLVideoElement>} a new video element or promise
+@returns {HTMLVideoElement & PromiseLike<HTMLVideoElement>} a new video element
 ```
 
 ### webgpu
 
 ```js
-await createCanvas(200);
-
 q5.mousePressed = function () {
 	let cap = createCapture(VIDEO);
 	cap.size(200, 112.5);
@@ -529,8 +535,6 @@ q5.mousePressed = function () {
 ```
 
 ```js
-await createCanvas(200);
-
 let cap;
 q5.mousePressed = function () {
 	cap = createCapture(VIDEO);
@@ -544,8 +548,6 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
-
 q5.mousePressed = function () {
 	let cap = createCapture({
 		video: { width: 640, height: 480 }
@@ -558,8 +560,6 @@ q5.mousePressed = function () {
 ### c2d
 
 ```js
-createCanvas(200);
-
 function mousePressed() {
 	let cap = createCapture(VIDEO);
 	cap.size(200, 112.5);
@@ -568,8 +568,6 @@ function mousePressed() {
 ```
 
 ```js
-createCanvas(200);
-
 let cap;
 function mousePressed() {
 	cap = createCapture(VIDEO);
@@ -583,8 +581,6 @@ function draw() {
 ```
 
 ```js
-createCanvas(200);
-
 function mousePressed() {
 	let cap = createCapture({
 		video: { width: 640, height: 480 }

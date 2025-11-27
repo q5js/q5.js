@@ -401,14 +401,14 @@ Q5.hooks = {
 	remove: []
 };
 
-Q5.addHook = (name, fn) => Q5.hooks[name].push(fn);
+Q5.addHook = (lifecycle, fn) => Q5.hooks[lifecycle].push(fn);
 
 // p5 v2 compat
 Q5.registerAddon = (addon) => {
 	let lifecycles = {};
 	addon(Q5, Q5.prototype, lifecycles);
-	for (let name in lifecycles) {
-		Q5.hooks[name].push(lifecycles[name]);
+	for (let l in lifecycles) {
+		Q5.hooks[l].push(lifecycles[l]);
 	}
 };
 
