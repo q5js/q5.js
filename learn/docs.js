@@ -126,22 +126,17 @@ function convertTSDefToMarkdown(data) {
 			jsDocBuffer = '';
 			continue;
 		} else if (line.includes('(')) {
-			let funcMatch = line.match(/(\w+)\s*\((.*)\)\s*:\s*(\w+)/);
+			// capture a function/method name, its params, and any return/type (allow complex types)
+			let funcMatch = line.match(/(\w+)\s*\(([^)]*)\)\s*:\s*([^;]+)/);
 			if (funcMatch) {
 				let [_, funcName, funcParams, funcType] = funcMatch;
 				if (!line.startsWith('function ')) {
-					if (!line.startsWith('static')) {
-						funcName = currentClassName.toLowerCase() + '.' + funcName;
-					} else {
-						if (!hasExample) {
-							jsDocBuffer = '';
-							continue;
-						}
-						funcName = currentClassName + '.' + funcName;
-					}
+					const isStatic = line.startsWith('static');
+					if (!isStatic) funcName = currentClassName.toLowerCase() + '.' + funcName;
+					else funcName = currentClassName + '.' + funcName; // keep class capitalization for static members
 				}
 				funcParams = stripParams(funcParams);
-				let funcHeader = `## ${curEmoji} ${funcName}(${funcParams}) &lt;${funcType}&gt;\n\n`;
+				let funcHeader = `## ${curEmoji} ${funcName}(${funcParams}) &lt;${funcType.trim()}&gt;\n\n`;
 				markdownCode += funcHeader + jsDocBuffer + '\n\n';
 				jsDocBuffer = '';
 				hasExample = false;
@@ -152,17 +147,12 @@ function convertTSDefToMarkdown(data) {
 
 			// if var is a class property
 			if (!line.match(/^(var|let|const)/)) {
-				if (!line.startsWith('static')) {
-					varName = currentClassName.toLowerCase() + '.' + varName;
-				} else {
-					if (!hasExample) {
-						jsDocBuffer = '';
-						continue;
-					}
-					varName = currentClassName + '.' + varName;
-				}
+				const isStatic = line.startsWith('static');
+				if (!isStatic) varName = currentClassName.toLowerCase() + '.' + varName;
+				else varName = currentClassName + '.' + varName; // preserve capitalization for static
 			}
-			let type = l[1].slice(1, -1);
+			// support complex types (may contain ':' characters) - rejoin and trim ';'
+			let type = l.slice(1).join(':').trim().replace(/;$/, '');
 			let varHeader = `## ${curEmoji} ${varName} &lt;${type}&gt;\n\n`;
 			markdownCode += varHeader + jsDocBuffer + '\n\n';
 			jsDocBuffer = '';
