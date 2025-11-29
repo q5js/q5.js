@@ -438,10 +438,14 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-if (Q5._server) global.p5 ??= global.q5 = global.Q5 = Q5;
+if (Q5._server) {
+	global.q5 = global.Q5 = Q5;
+	global.p5 ??= Q5;
+}
 
 if (typeof window == 'object') {
-	window.p5 ??= window.q5 = window.Q5 = Q5;
+	window.q5 = window.Q5 = Q5;
+	window.p5 ??= Q5;
 	window.createCanvas = createCanvas;
 	window.C2D = 'c2d';
 	window.WEBGPU = 'webgpu';
@@ -4844,8 +4848,13 @@ Q5.Vector = class {
 		this.z = z || 0;
 		this._isVector = true;
 		this._$ = $ || window;
-		this._cn = null;
-		this._cnsq = null;
+
+		// managed by the user to avoid redundant calculations
+		this._useCache = false;
+		this._mag = 0;
+		this._magCached = false;
+		this._direction = 0;
+		this._directionCached = false;
 	}
 
 	set(x, y, z) {
@@ -4865,11 +4874,6 @@ Q5.Vector = class {
 			return { x, y, z: z || 0 };
 		}
 		return { x: x, y: x, z: x };
-	}
-
-	_calcNorm() {
-		this._cnsq = this.x * this.x + this.y * this.y + this.z * this.z;
-		this._cn = Math.sqrt(this._cnsq);
 	}
 
 	add() {
@@ -4915,14 +4919,71 @@ Q5.Vector = class {
 		return this;
 	}
 
+	_calcMag() {
+		const x = this.x,
+			y = this.y,
+			z = this.z;
+		this._mag = Math.sqrt(x * x + y * y + z * z);
+		this._magCached = this._useCache;
+	}
+
 	mag() {
-		this._calcNorm();
-		return this._cn;
+		if (!this._magCached) this._calcMag();
+		return this._mag;
 	}
 
 	magSq() {
-		this._calcNorm();
-		return this._cnsq;
+		if (this._magCached) return this._mag * this._mag;
+		const x = this.x,
+			y = this.y,
+			z = this.z;
+		return x * x + y * y + z * z;
+	}
+	setMag(m) {
+		if (!this._magCached) this._calcMag();
+		let n = this._mag;
+		if (n == 0) {
+			const dir = this.direction();
+			this.x = m * this._$.cos(dir);
+			this.y = m * this._$.sin(dir);
+		} else {
+			let t = m / n;
+			this.x *= t;
+			this.y *= t;
+			this.z *= t;
+		}
+		this._mag = m;
+		this._magCached = this._useCache;
+		return this;
+	}
+
+	direction() {
+		if (!this._directionCached) {
+			const x = this.x,
+				y = this.y;
+			if (x || y) this._direction = this._$.atan2(this.y, this.x);
+			this._directionCached = this._useCache;
+		}
+		return this._direction;
+	}
+
+	setDirection(ang) {
+		let mag = this.mag();
+		if (mag) {
+			this.x = mag * this._$.cos(ang);
+			this.y = mag * this._$.sin(ang);
+		}
+		this._direction = ang;
+		this._directionCached = this._useCache;
+		return this;
+	}
+
+	heading() {
+		return this.direction();
+	}
+
+	setHeading(ang) {
+		return this.setDirection(ang);
 	}
 
 	dot() {
@@ -4950,52 +5011,29 @@ Q5.Vector = class {
 	}
 
 	normalize() {
-		this._calcNorm();
-		let n = this._cn;
+		if (!this._magCached) this._calcMag();
+		let n = this._mag;
 		if (n != 0) {
 			this.x /= n;
 			this.y /= n;
 			this.z /= n;
 		}
-		this._cn = 1;
-		this._cnsq = 1;
+		this._mag = 1;
+		this._magCached = this._useCache;
 		return this;
 	}
 
 	limit(m) {
-		this._calcNorm();
-		let n = this._cn;
+		if (!this._magCached) this._calcMag();
+		let n = this._mag;
 		if (n > m) {
 			let t = m / n;
 			this.x *= t;
 			this.y *= t;
 			this.z *= t;
-			this._cn = m;
-			this._cnsq = m * m;
+			this._mag = m;
+			this._magCached = this._useCache;
 		}
-		return this;
-	}
-
-	setMag(m) {
-		this._calcNorm();
-		let n = this._cn;
-		let t = m / n;
-		this.x *= t;
-		this.y *= t;
-		this.z *= t;
-		this._cn = m;
-		this._cnsq = m * m;
-		return this;
-	}
-
-	heading() {
-		return this._$.atan2(this.y, this.x);
-	}
-
-	setHeading(ang) {
-		let mag = this.mag();
-		this.x = mag * this._$.cos(ang);
-		this.y = mag * this._$.sin(ang);
 		return this;
 	}
 
@@ -5082,8 +5120,8 @@ Q5.Vector = class {
 
 	fromAngle(th, l) {
 		if (l === undefined) l = 1;
-		this._cn = l;
-		this._cnsq = l * l;
+		this._mag = l;
+		this._magCached = this._useCache;
 		this.x = l * this._$.cos(th);
 		this.y = l * this._$.sin(th);
 		this.z = 0;
@@ -5092,8 +5130,8 @@ Q5.Vector = class {
 
 	fromAngles(th, ph, l) {
 		if (l === undefined) l = 1;
-		this._cn = l;
-		this._cnsq = l * l;
+		this._mag = l;
+		this._magCached = this._useCache;
 		const cosph = this._$.cos(ph);
 		const sinph = this._$.sin(ph);
 		const costh = this._$.cos(th);
@@ -5105,12 +5143,14 @@ Q5.Vector = class {
 	}
 
 	random2D() {
-		this._cn = this._cnsq = 1;
+		this._mag = 1;
+		this._magCached = this._useCache;
 		return this.fromAngle(Math.random() * Math.PI * 2);
 	}
 
 	random3D() {
-		this._cn = this._cnsq = 1;
+		this._mag = 1;
+		this._magCached = this._useCache;
 		return this.fromAngles(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
 	}
 
@@ -5128,7 +5168,7 @@ Q5.Vector.equals = (v, u, epsilon) => v.equals(u, epsilon);
 Q5.Vector.lerp = (v, u, amt) => v.copy().lerp(u, amt);
 Q5.Vector.slerp = (v, u, amt) => v.copy().slerp(u, amt);
 Q5.Vector.limit = (v, m) => v.copy().limit(m);
-Q5.Vector.heading = (v) => this._$.atan2(v.y, v.x);
+Q5.Vector.direction = (v) => this._$.atan2(v.y, v.x);
 Q5.Vector.magSq = (v) => v.x * v.x + v.y * v.y + v.z * v.z;
 Q5.Vector.mag = (v) => Math.sqrt(Q5.Vector.magSq(v));
 Q5.Vector.mult = (v, u) => v.copy().mult(u);

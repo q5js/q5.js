@@ -438,10 +438,14 @@ function createCanvas(w, h, opt) {
 	}
 }
 
-if (Q5._server) global.p5 ??= global.q5 = global.Q5 = Q5;
+if (Q5._server) {
+	global.q5 = global.Q5 = Q5;
+	global.p5 ??= Q5;
+}
 
 if (typeof window == 'object') {
-	window.p5 ??= window.q5 = window.Q5 = Q5;
+	window.q5 = window.Q5 = Q5;
+	window.p5 ??= Q5;
 	window.createCanvas = createCanvas;
 	window.C2D = 'c2d';
 	window.WEBGPU = 'webgpu';
