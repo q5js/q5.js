@@ -365,12 +365,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 	transforms.set(matrices[0]);
 
-	$.resetMatrix = () => {
-		matrix = matrices[0].slice();
-		matrixIdx = 0;
-	};
-	$.resetMatrix();
-
 	$.translate = (x, y) => {
 		if (!x && !y) return;
 		let m = matrix;
@@ -424,7 +418,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		y ??= x;
 
 		_scale = Math.max(Math.abs(x), Math.abs(y));
-		scaledHSW = sw * 0.5 * _scale;
+		scaledHSW = hsw * _scale;
 
 		let m = matrix;
 
@@ -513,10 +507,13 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrixDirty = false;
 	};
 
+	let scaleStack = [];
+
 	// push the current matrix index onto the stack
 	$.pushMatrix = () => {
 		if (matrixDirty) saveMatrix();
 		matricesIdxStack.push(matrixIdx);
+		scaleStack.push(_scale);
 	};
 
 	$.popMatrix = () => {
@@ -528,7 +525,17 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrix = matrices[idx].slice();
 		matrixIdx = idx;
 		matrixDirty = false;
+		_scale = scaleStack.pop();
+		scaledHSW = hsw * _scale;
 	};
+
+	$.resetMatrix = () => {
+		matrix = matrices[0].slice();
+		matrixIdx = 0;
+		_scale = 1;
+		scaledHSW = hsw;
+	};
+	$.resetMatrix();
 
 	let styles = [];
 
@@ -538,6 +545,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			strokeIdx,
 			sw,
 			hsw,
+			_scale,
 			scaledHSW,
 			doFill,
 			doStroke,
@@ -567,6 +575,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			strokeIdx,
 			sw,
 			hsw,
+			_scale,
 			scaledHSW,
 			doFill,
 			doStroke,
