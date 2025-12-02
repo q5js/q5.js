@@ -5484,7 +5484,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		sw = 1, // stroke weight
 		hsw = 0.5, // half of the stroke weight
 		qsw = 0.25, // quarter of the stroke weight
-		scaledHSW = 0.5;
+		hswScaled = 0.5;
 
 	$.fill = (r, g, b, a) => {
 		addColor(r, g, b, a);
@@ -5515,9 +5515,17 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		sw = v;
 		hsw = v / 2;
 		qsw = v / 4;
-		scaledHSW = hsw * _scale;
+		hswScaled = hsw * _scale;
 	};
 
+	// Advanced methods for high performance
+	// fill and stroke changes. Used by q5play!
+	$._getStrokeWeight = () => {
+		return [sw, hsw, qsw, hswScaled];
+	};
+	$._setStrokeWeight = (strokeData) => {
+		[sw, hsw, qsw, hswScaled] = strokeData;
+	};
 	$._getFillIdx = () => fillIdx;
 	$._setFillIdx = (v) => (fillIdx = v);
 	$._doFill = () => (doFill = true);
@@ -5600,7 +5608,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		y ??= x;
 
 		_scale = Math.max(Math.abs(x), Math.abs(y));
-		scaledHSW = hsw * _scale;
+		hswScaled = hsw * _scale;
 
 		let m = matrix;
 
@@ -5708,14 +5716,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrixIdx = idx;
 		matrixDirty = false;
 		_scale = scaleStack.pop();
-		scaledHSW = hsw * _scale;
+		hswScaled = hsw * _scale;
 	};
 
 	$.resetMatrix = () => {
 		matrix = matrices[0].slice();
 		matrixIdx = 0;
 		_scale = 1;
-		scaledHSW = hsw;
+		hswScaled = hsw;
 	};
 	$.resetMatrix();
 
@@ -5728,7 +5736,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			sw,
 			hsw,
 			_scale,
-			scaledHSW,
+			hswScaled,
 			doFill,
 			doStroke,
 			fillSet,
@@ -5758,7 +5766,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			sw,
 			hsw,
 			_scale,
-			scaledHSW,
+			hswScaled,
 			doFill,
 			doStroke,
 			fillSet,
@@ -6526,13 +6534,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				let v1 = i * 4;
 				let v2 = (i + 1) * 4;
 				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
-
-				// addEllipse(sv[v1], sv[v1 + 1], qsw, qsw, 0, TAU, hsw, 0);
 			}
 			let v1 = (shapeVertCount - 1) * 4;
 			let v2 = 0;
 			if (close) $.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
-			// addEllipse(sv[v1], sv[v1 + 1], qsw, qsw, 0, TAU, hsw, 0);
 		}
 
 		// reset for the next shape
@@ -7185,7 +7190,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if (matrixDirty) saveMatrix();
 
 		// if the point stroke size is a single pixel (or smaller), use a rectangle
-		if (scaledHSW <= 0.5) {
+		if (hswScaled <= 0.5) {
 			addRect(x, y, hsw, hsw, 0, sw, 0);
 		} else {
 			// dimensions of the point needs to be set to half the stroke weight
