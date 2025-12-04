@@ -184,6 +184,18 @@ async function setup() {
 }
 ```
 
+## loadAll
+
+Wait for any assets that started loading to finish loading. By default q5 runs this before looping draw (which is called preloading), but it can be used even after draw starts looping.
+
+```
+@returns {PromiseLike<any[]>} a promise that resolves with loaded objects
+```
+
+## disablePreload
+
+Disables the automatic preloading of assets before draw starts looping. This allows draw to start immediately, and assets can be lazy loaded or `loadAll()` can be used to wait for assets to finish loading later.
+
 ## nf
 
 nf is short for number format. It formats a number

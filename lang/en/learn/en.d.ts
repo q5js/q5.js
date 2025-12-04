@@ -519,6 +519,10 @@ declare global {
 
 	function loadXML(url: string): object & PromiseLike<Element>;
 
+	function loadAll(): PromiseLike<any[]>;
+
+	function disablePreload(): void;
+
 	function nf(num: number, digits: number): string;
 
 	function shuffle(arr: any[]): any[];

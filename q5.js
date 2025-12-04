@@ -81,8 +81,12 @@ function Q5(scope, parent, renderer) {
 
 	$._loaders = [];
 	$.loadAll = () => {
-		let loaders = $._loaders;
-		if ($._g) loaders = loaders.concat($._g._loaders);
+		let loaders = [...$._loaders];
+		$._loaders = [];
+		if ($._g) {
+			loaders = loaders.concat($._g._loaders);
+			$._g._loaders = [];
+		}
 		return Promise.all(loaders);
 	};
 
