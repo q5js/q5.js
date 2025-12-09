@@ -31,7 +31,6 @@ Q5.renderers.c2d.text = ($, q) => {
 			f.promise = new Promise((resolve, reject) => {
 				ff.load()
 					.then(() => {
-						delete f.promise;
 						delete f.then;
 						if (cb) cb(ff);
 						resolve(ff);
@@ -119,7 +118,6 @@ Q5.renderers.c2d.text = ($, q) => {
 				}
 
 				f.faces = loadedFaces;
-				delete f.promise;
 				delete f.then;
 				if (cb) cb(f);
 				return f;

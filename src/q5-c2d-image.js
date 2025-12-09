@@ -40,7 +40,6 @@ Q5.renderers.c2d.image = ($, q) => {
 
 		g.promise = new Promise((resolve, reject) => {
 			img.onload = () => {
-				delete g.promise;
 				delete g.then;
 				if (g._usedAwait) g = $.createImage(1, 1, opt);
 

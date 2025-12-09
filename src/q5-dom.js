@@ -282,7 +282,6 @@ Q5.modules.dom = ($, q) => {
 		if (src) {
 			el.promise = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
-					delete el.promise;
 					delete el.then;
 					if (el._usedAwait) {
 						el = $.createEl('video');
@@ -337,7 +336,6 @@ Q5.modules.dom = ($, q) => {
 				throw e;
 			}
 
-			delete vid.promise;
 			delete vid.then;
 			if (vid._usedAwait) {
 				vid = $.createVideo();

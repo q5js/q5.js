@@ -276,7 +276,6 @@ function Q5(scope, parent, renderer) {
 	let t = globalScope || $;
 
 	let userFns = [
-		'preload',
 		'postProcess',
 		'mouseMoved',
 		'mousePressed',
@@ -291,13 +290,18 @@ function Q5(scope, parent, renderer) {
 		'touchStarted',
 		'touchMoved',
 		'touchEnded',
-		'windowResized'
+		'windowResized',
+		'preload'
 	];
 	// shim if undefined
 	for (let name of userFns) $[name] ??= () => {};
 
+	userFns.pop();
+
+	let allUserFns = ['update', 'draw', 'drawFrame', ...userFns];
+
 	if ($._isGlobal) {
-		for (let name of ['setup', 'update', 'draw', 'drawFrame', ...userFns]) {
+		for (let name of allUserFns) {
 			if (Q5[name]) $[name] = Q5[name];
 			else {
 				Object.defineProperty(Q5, name, {
@@ -460,7 +464,7 @@ Q5.version = Q5.VERSION = '3.6';
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
 		if (!Q5._hasGlobal) {
-			if (Q5.setup || Q5.update || Q5.draw) {
+			if (Q5.update || Q5.draw) {
 				Q5.WebGPU();
 			} else {
 				new Q5('auto');

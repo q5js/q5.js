@@ -559,6 +559,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			doStroke,
 			fillSet,
 			strokeSet,
+			globalAlpha,
 			tintIdx,
 			_textSize,
 			_textAlign,
@@ -589,6 +590,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			doStroke,
 			fillSet,
 			strokeSet,
+			globalAlpha,
 			tintIdx,
 			_textSize,
 			_textAlign,
@@ -2804,7 +2806,6 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
 		let f = { family: fontName };
 		f.promise = createFont(url, fontName, () => {
-			delete f.promise;
 			delete f.then;
 			if (f._usedAwait) f = { family: fontName };
 			if (cb) cb(f);

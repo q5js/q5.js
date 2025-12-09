@@ -15,7 +15,6 @@ Q5.modules.util = ($, q) => {
 				if (typeof f == 'string') ret.text = f;
 				else Object.assign(ret, f);
 
-				delete ret.promise;
 				delete ret.then;
 				if (cb) cb(f);
 				return f;
@@ -39,7 +38,6 @@ Q5.modules.util = ($, q) => {
 			.then((text) => {
 				let xml = new DOMParser().parseFromString(text, 'application/xml');
 				ret.DOM = xml;
-				delete ret.promise;
 				delete ret.then;
 				if (cb) cb(xml);
 				return xml;

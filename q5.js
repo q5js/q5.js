@@ -276,7 +276,6 @@ function Q5(scope, parent, renderer) {
 	let t = globalScope || $;
 
 	let userFns = [
-		'preload',
 		'postProcess',
 		'mouseMoved',
 		'mousePressed',
@@ -291,13 +290,18 @@ function Q5(scope, parent, renderer) {
 		'touchStarted',
 		'touchMoved',
 		'touchEnded',
-		'windowResized'
+		'windowResized',
+		'preload'
 	];
 	// shim if undefined
 	for (let name of userFns) $[name] ??= () => {};
 
+	userFns.pop();
+
+	let allUserFns = ['update', 'draw', 'drawFrame', ...userFns];
+
 	if ($._isGlobal) {
-		for (let name of ['setup', 'update', 'draw', 'drawFrame', ...userFns]) {
+		for (let name of allUserFns) {
 			if (Q5[name]) $[name] = Q5[name];
 			else {
 				Object.defineProperty(Q5, name, {
@@ -460,7 +464,7 @@ Q5.version = Q5.VERSION = '3.6';
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
 		if (!Q5._hasGlobal) {
-			if (Q5.setup || Q5.update || Q5.draw) {
+			if (Q5.update || Q5.draw) {
 				Q5.WebGPU();
 			} else {
 				new Q5('auto');
@@ -1424,7 +1428,6 @@ Q5.renderers.c2d.image = ($, q) => {
 
 		g.promise = new Promise((resolve, reject) => {
 			img.onload = () => {
-				delete g.promise;
 				delete g.then;
 				if (g._usedAwait) g = $.createImage(1, 1, opt);
 
@@ -1916,7 +1919,6 @@ Q5.renderers.c2d.text = ($, q) => {
 			f.promise = new Promise((resolve, reject) => {
 				ff.load()
 					.then(() => {
-						delete f.promise;
 						delete f.then;
 						if (cb) cb(ff);
 						resolve(ff);
@@ -2004,7 +2006,6 @@ Q5.renderers.c2d.text = ($, q) => {
 				}
 
 				f.faces = loadedFaces;
-				delete f.promise;
 				delete f.then;
 				if (cb) cb(f);
 				return f;
@@ -3178,7 +3179,6 @@ Q5.modules.dom = ($, q) => {
 		if (src) {
 			el.promise = new Promise((resolve) => {
 				el.addEventListener('loadeddata', () => {
-					delete el.promise;
 					delete el.then;
 					if (el._usedAwait) {
 						el = $.createEl('video');
@@ -3233,7 +3233,6 @@ Q5.modules.dom = ($, q) => {
 				throw e;
 			}
 
-			delete vid.promise;
 			delete vid.then;
 			if (vid._usedAwait) {
 				vid = $.createVideo();
@@ -4437,7 +4436,6 @@ Q5.modules.sound = ($, q) => {
 			} catch (e) {
 				err = e;
 			}
-			delete s.promise;
 			delete s.then;
 			if (err) throw err;
 			if (cb) cb(s);
@@ -4459,7 +4457,6 @@ Q5.modules.sound = ($, q) => {
 		a.promise = new Promise((resolve, reject) => {
 			function loaded() {
 				if (!a.loaded) {
-					delete a.promise;
 					delete a.then;
 					if (a._usedAwait) {
 						a = new Audio(url);
@@ -4679,7 +4676,6 @@ Q5.modules.util = ($, q) => {
 				if (typeof f == 'string') ret.text = f;
 				else Object.assign(ret, f);
 
-				delete ret.promise;
 				delete ret.then;
 				if (cb) cb(f);
 				return f;
@@ -4703,7 +4699,6 @@ Q5.modules.util = ($, q) => {
 			.then((text) => {
 				let xml = new DOMParser().parseFromString(text, 'application/xml');
 				ret.DOM = xml;
-				delete ret.promise;
 				delete ret.then;
 				if (cb) cb(xml);
 				return xml;
@@ -5745,6 +5740,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			doStroke,
 			fillSet,
 			strokeSet,
+			globalAlpha,
 			tintIdx,
 			_textSize,
 			_textAlign,
@@ -5775,6 +5771,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			doStroke,
 			fillSet,
 			strokeSet,
+			globalAlpha,
 			tintIdx,
 			_textSize,
 			_textAlign,
@@ -7990,7 +7987,6 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		let fontName = url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-'));
 		let f = { family: fontName };
 		f.promise = createFont(url, fontName, () => {
-			delete f.promise;
 			delete f.then;
 			if (f._usedAwait) f = { family: fontName };
 			if (cb) cb(f);

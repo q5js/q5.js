@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0" />
-	<title>q5.js testing</title>
+	<title>q5.js mjs testing</title>
 	<link rel="icon" href="/q5js_logo.avif" />
 	<style>
 		html,
@@ -19,40 +19,30 @@
 <body>
 	<main></main>
 
-	<!-- <script src="https://q5js.org/q5.js"></script> -->
+	<!-- <script type="module" src="https://q5js.org/q5.js"></script> -->
 	<!-- <script src="https://www.unpkg.com/q5@3.0.6/q5.js"></script> -->
 
-	<script src="/src/q5-core.js"></script>
-	<script src="/src/q5-canvas.js"></script>
-	<script src="/src/q5-c2d-canvas.js"></script>
-	<script src="/src/q5-c2d-shapes.js"></script>
-	<script src="/src/q5-c2d-image.js"></script>
-	<script src="/src/q5-c2d-text.js"></script>
-	<script src="/src/q5-color.js"></script>
-	<script src="/src/q5-dom.js"></script>
-	<script src="/src/q5-fes.js"></script>
-	<script src="/src/q5-display.js"></script>
-	<script src="/src/q5-input.js"></script>
-	<script src="/src/q5-math.js"></script>
-	<script src="/src/q5-record.js"></script>
-	<script src="/src/q5-sound.js"></script>
-	<script src="/src/q5-util.js"></script>
-	<script src="/src/q5-vector.js"></script>
-	<script src="/src/q5-webgpu.js"></script>
+	<script type="module">
+		import '/src/q5-core.js';
+		import '/src/q5-canvas.js';
+		import '/src/q5-c2d-canvas.js';
+		import '/src/q5-c2d-shapes.js';
+		import '/src/q5-c2d-image.js';
+		import '/src/q5-c2d-text.js';
+		import '/src/q5-color.js';
+		import '/src/q5-display.js';
+		import '/src/q5-dom.js';
+		import '/src/q5-fes.js';
+		import '/src/q5-input.js';
+		import '/src/q5-math.js';
+		import '/src/q5-record.js';
+		import '/src/q5-sound.js';
+		import '/src/q5-util.js';
+		import '/src/q5-vector.js';
+		import '/src/q5-webgpu.js';
+	</script>
 
-	<!-- <script src="https://cdn.jsdelivr.net/npm/p5.sound@0.1.0/dist/p5.sound.js"></script> -->
-
-	<!-- <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script> -->
-
-	<!-- <script src="https://p5play.org/v3/planck.min.js"></script>
-	<script src="https://p5play.org/v3/p5play.js"></script> -->
-
-	<!-- <script src="/src/q5-dom.js"></script> -->
-	<!-- <script src="/src/q5-2d-soft-filters.js"></script> -->
-	<!-- <script src="/src/q5-noisier.js"></script> -->
-	<!-- <script src="/src/q5-sensors.js"></script> -->
-
-	<script src="sketch.js"></script>
+	<script type="module" src="sketch.js" data-sketch></script>
 </body>
 
 </html>

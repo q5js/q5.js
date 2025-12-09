@@ -18,7 +18,6 @@ Q5.modules.sound = ($, q) => {
 			} catch (e) {
 				err = e;
 			}
-			delete s.promise;
 			delete s.then;
 			if (err) throw err;
 			if (cb) cb(s);
@@ -40,7 +39,6 @@ Q5.modules.sound = ($, q) => {
 		a.promise = new Promise((resolve, reject) => {
 			function loaded() {
 				if (!a.loaded) {
-					delete a.promise;
 					delete a.then;
 					if (a._usedAwait) {
 						a = new Audio(url);
