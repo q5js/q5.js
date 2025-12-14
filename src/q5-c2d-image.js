@@ -298,7 +298,7 @@ Q5.renderers.c2d.image = ($, q) => {
 			b = val.b,
 			a = val.a;
 
-		if (($._colorFormat || $._owner._colorFormat) == 1) {
+		if (($._colorFormat || $._owner?._colorFormat) == 1) {
 			r *= 255;
 			g *= 255;
 			b *= 255;
