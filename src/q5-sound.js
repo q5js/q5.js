@@ -138,32 +138,47 @@ Q5.Sound = class {
 		source.start(0, source._offset, source._duration);
 
 		this.sources.add(source);
-		source.onended = () => {
-			if (!this.paused) {
-				this.ended = true;
-				if (this._onended) this._onended();
-				this.sources.delete(source);
-			}
-		};
+
+		source.promise = new Promise((resolve) => {
+			source.onended = () => {
+				if (!this.paused) {
+					this.ended = true;
+					if (this._onended) this._onended();
+					this.sources.delete(source);
+					resolve();
+				}
+			};
+		});
+
+		return source;
 	}
 
 	play(time = 0, duration) {
 		if (!this.loaded) return;
 
+		let source;
+
 		if (!this.paused) {
-			this._newSource(time, duration);
+			source = this._newSource(time, duration);
 		} else {
 			let timings = [];
 			for (let source of this.sources) {
-				timings.push(source._offset, source._duration);
+				timings.push({ offset: source._offset, duration: source._duration });
 				this.sources.delete(source);
 			}
-			for (let i = 0; i < timings.length; i += 2) {
-				this._newSource(timings[i], timings[i + 1]);
+			timings.sort((a, b) => {
+				let durA = a.duration ?? this.buffer.duration - a.offset;
+				let durB = b.duration ?? this.buffer.duration - b.offset;
+				return durA - durB;
+			});
+			for (let t of timings) {
+				source = this._newSource(t.offset, t.duration);
 			}
 		}
 
 		this.paused = this.ended = false;
+
+		return source.promise;
 	}
 
 	pause() {

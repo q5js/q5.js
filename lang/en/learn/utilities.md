@@ -7,6 +7,8 @@ Loads a file or multiple files.
 File type is determined by file extension. q5 supports loading
 text, json, csv, font, audio, and image files.
 
+By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for assets to load.
+
 ```
 @param {...string} urls
 @returns {Promise<any[]>} a promise that resolves with objects
@@ -134,53 +136,59 @@ function mousePressed() {
 
 Loads a text file from the specified url.
 
+Using `await` to get the loaded text as a string is recommended.
+
 ```
 @param {string} url text file
-@returns {object & PromiseLike<string>} an object containing the loaded text in the property `obj.text` or a promise
+@returns {object & PromiseLike<string>} an object containing the loaded text in the property `obj.text` or use `await` to get the text string directly
 ```
 
 ## loadJSON
 
 Loads a JSON file from the specified url.
 
+Using `await` to get the loaded JSON object or array is recommended.
+
 ```
 @param {string} url JSON file
-@returns {any & PromiseLike<any>} an object or array containing the loaded JSON or a promise
+@returns {any & PromiseLike<any>} an object or array containing the loaded JSON
 ```
 
 ## loadCSV
 
 Loads a CSV file from the specified url.
 
+Using `await` to get the loaded CSV as an array of objects is recommended.
+
 ```
 @param {string} url CSV file
-@returns {object[] & PromiseLike<object[]>} an array of objects containing the loaded CSV or a promise
+@returns {object[] & PromiseLike<object[]>} an array of objects containing the loaded CSV
 ```
 
 ## loadXML
 
 Loads an xml file from the specified url.
 
+Using `await` to get the loaded XML Element is recommended.
+
 ```
 @param {string} url xml file
-@returns {Element & PromiseLike<Element>} an object containing the loaded XML in a property called `obj.DOM` or a promise
+@returns {Element & PromiseLike<Element>} an object containing the loaded XML Element in a property called `obj.DOM` or use await to get the XML Element directly
 ```
 
-### c2d
+### webgpu
 
 ```js
-async function setup() {
-	createCanvas(200);
-	background(200);
-	textSize(32);
+await createCanvas(200);
+background(200);
+textSize(32);
 
-	let myXML = await loadXML('/assets/animals.xml');
+let animals = await loadXML('/assets/animals.xml');
 
-	let mammals = myXML.getElementsByTagName('mammal');
-	let y = 64;
-	for (let mammal of mammals) {
-		text(mammal.textContent, 20, (y += 32));
-	}
+let mammals = animals.getElementsByTagName('mammal');
+let y = 64;
+for (let mammal of mammals) {
+	text(mammal.textContent, 20, (y += 32));
 }
 ```
 

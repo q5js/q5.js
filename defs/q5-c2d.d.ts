@@ -259,7 +259,9 @@ declare global {
 	// 🌆 image
 
 	/** 🌆
-	 * Loads an image from a URL and optionally runs a callback function.
+	 * Loads an image from a URL.
+	 * 
+	 * By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for an image to load.
 	 * @param {string} url url of the image to load
 	 * @returns {Q5.Image & PromiseLike<Q5.Image>} image
 	 * @example
@@ -488,6 +490,8 @@ declare global {
 	 * 
 	 * If you make changes to the canvas or image, you must call `loadPixels`
 	 * before using this function to get current color data.
+	 * 
+	 * Not applicable to WebGPU canvases.
 	 * @param {number} x
 	 * @param {number} y
 	 * @param {number} [w] width of the area, default is 1
@@ -516,12 +520,14 @@ declare global {
 	function get(x: number, y: number, w?: number, h?: number): Q5.Image | number[];
 
 	/** 🌆
-	 * Sets a pixel's color in the image or canvas.
+	 * Sets a pixel's color in the image or canvas. Color mode must be RGB.
 	 * 
 	 * Or if a canvas or image is provided, it's drawn on top of the
 	 * destination image or canvas, ignoring its tint setting.
 	 * 
 	 * Run `updatePixels` to apply the changes.
+	 * 
+	 * Not applicable to WebGPU canvases.
 	 * @param {number} x
 	 * @param {number} y
 	 * @param {any} val color, canvas, or image
@@ -539,14 +545,14 @@ declare global {
 	/** 🌆
 	 * Array of pixel color data from a canvas or image.
 	 * 
+	 * Empty by default, populate by running `loadPixels`.
+	 * 
 	 * Each pixel is represented by four consecutive values in the array,
 	 * corresponding to its red, green, blue, and alpha channels.
 	 * 
 	 * The top left pixel's data is at the beginning of the array
 	 * and the bottom right pixel's data is at the end, going from
 	 * left to right and top to bottom.
-	 * 
-	 * Use `loadPixels` to load current pixel data from a canvas or image.
 	 */
 	var pixels: number[];
 
@@ -554,7 +560,9 @@ declare global {
 	 * Loads pixel data into `pixels` from the canvas or image.
 	 * 
 	 * The example below sets some pixels' green channel
-	 * to a random 0-255 value.
+	 * to a random value.
+	 * 
+	 * Not applicable to WebGPU canvases.
 	 * @example
 	 * frameRate(5);
 	 * let icon = loadImage('/q5js_icon.png');
@@ -572,6 +580,8 @@ declare global {
 
 	/** 🌆
 	 * Applies changes in the `pixels` array to the canvas or image.
+	 * 
+	 * Not applicable to WebGPU canvases.
 	 * @example
 	 * createCanvas(200);
 	 * 
@@ -591,6 +601,8 @@ declare global {
 	 * 
 	 * A CSS filter string can also be used.
 	 * https://developer.mozilla.org/docs/Web/CSS/filter
+	 * 
+	 * Not applicable to WebGPU canvases.
 	 * @param {string} type filter type or a CSS filter string
 	 * @param {number} [value] optional value, depends on filter type
 	 * @example
@@ -675,7 +687,9 @@ declare global {
 	// 📘 text
 
 	/** 📘
-	 * Renders text to the screen. Text can be positioned with the x and y
+	 * Renders text on the canvas.
+	 * 
+	 * Text can be positioned with the x and y
 	 * parameters and can optionally be constrained.
 	 * @param {string} str string of text to display
 	 * @param {number} x x-coordinate of the text's position
@@ -715,10 +729,10 @@ declare global {
 	 * 
 	 * If no fonts are loaded, the default sans-serif font is used.
 	 * 
-	 * In q5 WebGPU, only fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
-	 * with the file ending "-msdf.json" can be used to render text with
-	 * the `text` function. Fonts in other formats can be used with the
-	 * [`textImage`](https://q5js.org/learn/#textImage) function.
+	 * In q5 WebGPU, fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
+	 * with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
+	 * 
+	 * By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for a font to load.
 	 * @param {string} url URL of the font to load
 	 * @returns {FontFace & PromiseLike<FontFace>} font
 	 * @example
@@ -1019,6 +1033,10 @@ declare global {
 	// 🖲 input
 
 	/**
+	 * q5's input handling is very basic.
+	 * 
+	 * For better input handling, including game controller support, consider using the [p5play](https://p5play.org/) addon with q5.
+	 * 
 	 * Note that input responses inside `draw` can be delayed by
 	 * up to one frame cycle: from the exact moment an input event occurs
 	 * to the next time a frame is drawn.
@@ -2832,15 +2850,15 @@ declare global {
 	// 🔊 sound
 
 	/**
-	 * q5.js includes low latency sound playback and basic mixing powered
-	 * by WebAudio.
+	 * q5 includes low latency sound playback and basic mixing capabilities
+	 * powered by WebAudio.
 	 * 
-	 * For audio filtering, synthesis, and analysis, consider using
-	 * [p5.sound](https://p5js.org/reference/p5.sound/).
+	 * For audio filtering, synthesis, and analysis, consider using the
+	 * [p5.sound](https://p5js.org/reference/p5.sound/) addon with q5.
 	 */
 
 	/** 🔊
-	 * Loads audio data from a file and returns a `Q5.Sound` object.
+	 * Loads audio data from a file and returns a `Sound` object.
 	 * 
 	 * Use functions like `play`, `pause`, and `stop` to
 	 * control playback. Note that sounds can only be played after the
@@ -2852,14 +2870,9 @@ declare global {
 	 * 
 	 * Use `loaded`, `paused`, and `ended` to check the sound's status.
 	 * 
-	 * The entire sound file must be loaded before playback can start,
-	 * to stream larger audio files use the `loadAudio` function instead.
-	 * 
-	 * For backwards compatibility with the p5.sound API, the functions
-	 * `setVolume`, `setLoop`, `setPan`, `isLoaded`, and `isPlaying`
-	 * are also implemented, but their use is deprecated.
+	 * The entire sound file must be loaded before playback can start, use `await` to wait for a sound to load. To stream larger audio files use the `loadAudio` function instead.
 	 * @param {string} url sound file
-	 * @returns {Sound & PromiseLike<Sound>} a new `Sound` object
+	 * @returns {Sound & PromiseLike<Sound>} sound
 	 * @example
 	 * createCanvas(200);
 	 * 
@@ -2949,6 +2962,9 @@ declare global {
 		 * 
 		 * If this function is run when the sound is paused,
 		 * all playback instances will be resumed.
+		 * 
+		 * Use `await` to wait for the sound to finish playing.
+		 * @returns {Promise<void>} a promise that resolves when the sound finishes playing
 		 */
 		play(): void;
 
@@ -3365,6 +3381,8 @@ declare global {
 	 * 
 	 * File type is determined by file extension. q5 supports loading
 	 * text, json, csv, font, audio, and image files.
+	 * 
+	 * By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for assets to load.
 	 * @param {...string} urls
 	 * @returns {Promise<any[]>} a promise that resolves with objects
 	 * @example
@@ -3409,43 +3427,37 @@ declare global {
 
 	/** 🛠
 	 * Loads a text file from the specified url.
+	 * 
+	 * Using `await` to get the loaded text as a string is recommended.
 	 * @param {string} url text file
-	 * @returns {object & PromiseLike<string>} an object containing the loaded text in the property `obj.text` or a promise
+	 * @returns {object & PromiseLike<string>} an object containing the loaded text in the property `obj.text` or use `await` to get the text string directly
 	 */
 	function loadText(url: string): object & PromiseLike<string>;
 
 	/** 🛠
 	 * Loads a JSON file from the specified url.
+	 * 
+	 * Using `await` to get the loaded JSON object or array is recommended.
 	 * @param {string} url JSON file
-	 * @returns {any & PromiseLike<any>} an object or array containing the loaded JSON or a promise
+	 * @returns {any & PromiseLike<any>} an object or array containing the loaded JSON
 	 */
 	function loadJSON(url: string): any & PromiseLike<any>;
 
 	/** 🛠
 	 * Loads a CSV file from the specified url.
+	 * 
+	 * Using `await` to get the loaded CSV as an array of objects is recommended.
 	 * @param {string} url CSV file
-	 * @returns {object[] & PromiseLike<object[]>} an array of objects containing the loaded CSV or a promise
+	 * @returns {object[] & PromiseLike<object[]>} an array of objects containing the loaded CSV
 	 */
 	function loadCSV(url: string): object[] & PromiseLike<object[]>;
 
 	/** 🛠
 	 * Loads an xml file from the specified url.
+	 * 
+	 * Using `await` to get the loaded XML Element is recommended.
 	 * @param {string} url xml file
-	 * @returns {Element & PromiseLike<Element>} an object containing the loaded XML in a property called `obj.DOM` or a promise
-	 * @example
-	 * async function setup() {
-	 * 	createCanvas(200);
-	 * 	background(200);
-	 * 	textSize(32);
-	 * 
-	 * 	let myXML = await loadXML('/assets/animals.xml');
-	 * 
-	 * 	let mammals = myXML.getElementsByTagName('mammal');
-	 * 	let y = 64;
-	 * 	for (let mammal of mammals) {
-	 * 		text(mammal.textContent, 20, (y += 32));
-	 * 	}
-	 * }
+	 * @returns {Element & PromiseLike<Element>} an object containing the loaded XML Element in a property called `obj.DOM` or use await to get the XML Element directly
 	 */
 	function loadXML(url: string): object & PromiseLike<Element>;
 

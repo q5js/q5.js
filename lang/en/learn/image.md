@@ -2,7 +2,9 @@
 
 ## loadImage
 
-Loads an image from a URL and optionally runs a callback function.
+Loads an image from a URL.
+
+By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for an image to load.
 
 ```
 @param {string} url url of the image to load
@@ -19,6 +21,13 @@ let logo = loadImage('/q5js_logo.avif');
 q5.draw = function () {
 	background(logo);
 };
+```
+
+```js
+await createCanvas(200);
+
+let logo = await loadImage('/q5js_logo.avif');
+background(logo);
 ```
 
 ### c2d
@@ -411,6 +420,8 @@ has never been run, it's run by this function.
 If you make changes to the canvas or image, you must call `loadPixels`
 before using this function to get current color data.
 
+Not applicable to WebGPU canvases.
+
 ```
 @param {number} x
 @param {number} y
@@ -420,18 +431,6 @@ before using this function to get current color data.
 ```
 
 ### webgpu
-
-```js
-q5.draw = function () {
-	background(0.8);
-	noStroke();
-	circle(0, 0, frameCount % 200);
-
-	loadPixels();
-	let col = get(mouseX, mouseY);
-	text(col, mouseX, mouseY);
-};
-```
 
 ```js
 await createCanvas(200);
@@ -469,12 +468,14 @@ function setup() {
 
 ## set
 
-Sets a pixel's color in the image or canvas.
+Sets a pixel's color in the image or canvas. Color mode must be RGB.
 
 Or if a canvas or image is provided, it's drawn on top of the
 destination image or canvas, ignoring its tint setting.
 
 Run `updatePixels` to apply the changes.
+
+Not applicable to WebGPU canvases.
 
 ```
 @param {number} x
@@ -486,11 +487,15 @@ Run `updatePixels` to apply the changes.
 
 ```js
 await createCanvas(200);
+
 let c = color('lime');
+let img = createImage(50, 50);
 
 q5.draw = function () {
-	set(random(-100, 100), random(-100, 100), c);
-	updatePixels();
+	img.set(random(50), random(50), c);
+	img.updatePixels();
+
+	background(img);
 };
 ```
 
@@ -510,6 +515,8 @@ function draw() {
 
 Array of pixel color data from a canvas or image.
 
+Empty by default, populate by running `loadPixels`.
+
 Each pixel is represented by four consecutive values in the array,
 corresponding to its red, green, blue, and alpha channels.
 
@@ -517,14 +524,14 @@ The top left pixel's data is at the beginning of the array
 and the bottom right pixel's data is at the end, going from
 left to right and top to bottom.
 
-Use `loadPixels` to load current pixel data from a canvas or image.
-
 ## loadPixels
 
 Loads pixel data into `pixels` from the canvas or image.
 
 The example below sets some pixels' green channel
-to a random 0-255 value.
+to a random value.
+
+Not applicable to WebGPU canvases.
 
 ### webgpu
 
@@ -562,17 +569,23 @@ function draw() {
 
 Applies changes in the `pixels` array to the canvas or image.
 
+Not applicable to WebGPU canvases.
+
 ### webgpu
 
 ```js
 await createCanvas(200);
+let c = color('pink');
 
-for (let x = -100; x < 100; x += 5) {
-	for (let y = -100; y < 100; y += 5) {
-		set(x, y, color('pink'));
+let img = createImage(50, 50);
+for (let x = 0; x < 50; x += 3) {
+	for (let y = 0; y < 50; y += 3) {
+		img.set(x, y, c);
 	}
 }
-updatePixels();
+img.updatePixels();
+
+background(img);
 ```
 
 ### c2d
@@ -596,6 +609,8 @@ See the documentation for q5's filter constants below for more info.
 
 A CSS filter string can also be used.
 https://developer.mozilla.org/docs/Web/CSS/filter
+
+Not applicable to WebGPU canvases.
 
 ```
 @param {string} type filter type or a CSS filter string

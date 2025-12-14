@@ -2324,7 +2324,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$._makeDrawable = (g) => {
 		$._addTexture(g);
-		g._webgpuInst = $;
+		g._owner = $;
 	};
 
 	$.createImage = (w, h, opt) => {

@@ -274,7 +274,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		img.ctx.drawImage(c, x, y, w * pd, h * pd, 0, 0, w, h);
 		img.width = w;
 		img.height = h;
-		if ($._webgpuInst) $._webgpuInst._makeDrawable(img);
+		if ($._owner._makeDrawable) $._owner._makeDrawable(img);
 		return img;
 	};
 
@@ -289,15 +289,29 @@ Q5.renderers.c2d.image = ($, q) => {
 			$._tint = old;
 			return;
 		}
+
 		if (!pixels) $.loadPixels();
-		let mod = $._pixelDensity || 1;
+
+		let mod = $._pixelDensity || 1,
+			r = val.r,
+			g = val.g,
+			b = val.b,
+			a = val.a;
+
+		if (($._colorFormat || $._owner._colorFormat) == 1) {
+			r *= 255;
+			g *= 255;
+			b *= 255;
+			a *= 255;
+		}
+
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
 				let idx = 4 * ((y * mod + i) * c.width + x * mod + j);
-				pixels[idx] = val.r;
-				pixels[idx + 1] = val.g;
-				pixels[idx + 2] = val.b;
-				pixels[idx + 3] = val.a;
+				pixels[idx] = r;
+				pixels[idx + 1] = g;
+				pixels[idx + 2] = b;
+				pixels[idx + 3] = a;
 			}
 		}
 	};

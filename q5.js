@@ -1662,7 +1662,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		img.ctx.drawImage(c, x, y, w * pd, h * pd, 0, 0, w, h);
 		img.width = w;
 		img.height = h;
-		if ($._webgpuInst) $._webgpuInst._makeDrawable(img);
+		if ($._owner._makeDrawable) $._owner._makeDrawable(img);
 		return img;
 	};
 
@@ -1677,15 +1677,29 @@ Q5.renderers.c2d.image = ($, q) => {
 			$._tint = old;
 			return;
 		}
+
 		if (!pixels) $.loadPixels();
-		let mod = $._pixelDensity || 1;
+
+		let mod = $._pixelDensity || 1,
+			r = val.r,
+			g = val.g,
+			b = val.b,
+			a = val.a;
+
+		if (($._colorFormat || $._owner._colorFormat) == 1) {
+			r *= 255;
+			g *= 255;
+			b *= 255;
+			a *= 255;
+		}
+
 		for (let i = 0; i < mod; i++) {
 			for (let j = 0; j < mod; j++) {
 				let idx = 4 * ((y * mod + i) * c.width + x * mod + j);
-				pixels[idx] = val.r;
-				pixels[idx + 1] = val.g;
-				pixels[idx + 2] = val.b;
-				pixels[idx + 3] = val.a;
+				pixels[idx] = r;
+				pixels[idx + 1] = g;
+				pixels[idx + 2] = b;
+				pixels[idx + 3] = a;
 			}
 		}
 	};
@@ -4556,32 +4570,47 @@ Q5.Sound = class {
 		source.start(0, source._offset, source._duration);
 
 		this.sources.add(source);
-		source.onended = () => {
-			if (!this.paused) {
-				this.ended = true;
-				if (this._onended) this._onended();
-				this.sources.delete(source);
-			}
-		};
+
+		source.promise = new Promise((resolve) => {
+			source.onended = () => {
+				if (!this.paused) {
+					this.ended = true;
+					if (this._onended) this._onended();
+					this.sources.delete(source);
+					resolve();
+				}
+			};
+		});
+
+		return source;
 	}
 
 	play(time = 0, duration) {
 		if (!this.loaded) return;
 
+		let source;
+
 		if (!this.paused) {
-			this._newSource(time, duration);
+			source = this._newSource(time, duration);
 		} else {
 			let timings = [];
 			for (let source of this.sources) {
-				timings.push(source._offset, source._duration);
+				timings.push({ offset: source._offset, duration: source._duration });
 				this.sources.delete(source);
 			}
-			for (let i = 0; i < timings.length; i += 2) {
-				this._newSource(timings[i], timings[i + 1]);
+			timings.sort((a, b) => {
+				let durA = a.duration ?? this.buffer.duration - a.offset;
+				let durB = b.duration ?? this.buffer.duration - b.offset;
+				return durA - durB;
+			});
+			for (let t of timings) {
+				source = this._newSource(t.offset, t.duration);
 			}
 		}
 
 		this.paused = this.ended = false;
+
+		return source.promise;
 	}
 
 	pause() {
@@ -7505,7 +7534,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	$._makeDrawable = (g) => {
 		$._addTexture(g);
-		g._webgpuInst = $;
+		g._owner = $;
 	};
 
 	$.createImage = (w, h, opt) => {

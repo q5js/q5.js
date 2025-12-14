@@ -2,7 +2,9 @@
 
 ## text
 
-Renders text to the screen. Text can be positioned with the x and y
+Renders text on the canvas.
+
+Text can be positioned with the x and y
 parameters and can optionally be constrained.
 
 ```
@@ -73,10 +75,10 @@ The second example loads
 
 If no fonts are loaded, the default sans-serif font is used.
 
-In q5 WebGPU, only fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
-with the file ending "-msdf.json" can be used to render text with
-the `text` function. Fonts in other formats can be used with the
-[`textImage`](https://q5js.org/learn/#textImage) function.
+In q5 WebGPU, fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
+with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
+
+By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for a font to load.
 
 ```
 @param {string} url URL of the font to load
@@ -88,13 +90,11 @@ the `text` function. Fonts in other formats can be used with the
 ```js
 await createCanvas(200, 56);
 
-loadFont('/assets/Robotica.ttf');
+await loadFont('/assets/Robotica.ttf');
 
-q5.draw = function () {
-	fill('skyblue');
-	textSize(64);
-	textImage('Hello!', -98, 24);
-};
+fill('skyblue');
+textSize(64);
+textImage('Hello!', -98, 24);
 ```
 
 ```js
@@ -107,6 +107,16 @@ q5.draw = function () {
 	textSize(68);
 	textImage('Hello!', -98, 31);
 };
+```
+
+```js
+await createCanvas(200, 74);
+
+await loadFont('sans-serif'); // msdf
+
+fill('white');
+textSize(68);
+textImage('Hello!', -98, 31);
 ```
 
 ### c2d
