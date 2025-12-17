@@ -274,7 +274,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		img.ctx.drawImage(c, x, y, w * pd, h * pd, 0, 0, w, h);
 		img.width = w;
 		img.height = h;
-		if ($._owner._makeDrawable) $._owner._makeDrawable(img);
+		if ($?._owner._makeDrawable) $._owner._makeDrawable(img);
 		return img;
 	};
 
