@@ -1,6 +1,6 @@
 # core
 
-Bienvenidx a la documentación de q5! 🤩
+Bienvenido a la documentación de q5! 🤩
 
 ¿Primera vez programando? Revisa la [guía para principiantes de q5].
 
