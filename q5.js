@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.6
+ * @version 3.7
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -275,32 +275,13 @@ function Q5(scope, parent, renderer) {
 
 	let t = globalScope || $;
 
-	let userFns = [
-		'postProcess',
-		'mouseMoved',
-		'mousePressed',
-		'mouseReleased',
-		'mouseDragged',
-		'mouseClicked',
-		'doubleClicked',
-		'mouseWheel',
-		'keyPressed',
-		'keyReleased',
-		'keyTyped',
-		'touchStarted',
-		'touchMoved',
-		'touchEnded',
-		'windowResized',
-		'preload'
-	];
+	let userFns = Q5._userFns.slice(0, 15);
 	// shim if undefined
 	for (let name of userFns) $[name] ??= () => {};
 
-	userFns.pop();
-
-	let allUserFns = ['update', 'draw', 'drawFrame', ...userFns];
-
 	if ($._isGlobal) {
+		let allUserFns = Q5._userFns.slice(0, 17);
+
 		for (let name of allUserFns) {
 			if (Q5[name]) $[name] = Q5[name];
 			else {
@@ -314,6 +295,9 @@ function Q5(scope, parent, renderer) {
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
+		if (fn == undefined) {
+			log('hi');
+		}
 		$[name] = (event) => {
 			try {
 				return fn(event);
@@ -329,8 +313,10 @@ function Q5(scope, parent, renderer) {
 
 		readyResolve();
 
-		wrapWithFES('preload');
-		$.preload();
+		if ($.preload) {
+			wrapWithFES('preload');
+			$.preload();
+		}
 
 		// wait for the user to define setup, update, or draw
 		await Promise.race([
@@ -400,6 +386,26 @@ Q5._friendlyError = (msg, func) => {
 };
 Q5._validateParameters = () => true;
 
+Q5._userFns = [
+	'postProcess',
+	'mouseMoved',
+	'mousePressed',
+	'mouseReleased',
+	'mouseDragged',
+	'mouseClicked',
+	'doubleClicked',
+	'mouseWheel',
+	'keyPressed',
+	'keyReleased',
+	'keyTyped',
+	'touchStarted',
+	'touchMoved',
+	'touchEnded',
+	'windowResized',
+	'update',
+	'draw'
+];
+
 Q5.hooks = {
 	init: [],
 	presetup: [],
@@ -459,7 +465,7 @@ if (typeof window == 'object') {
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.6';
+Q5.version = Q5.VERSION = '3.7';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -6857,6 +6863,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			if (_rectMode == 'corner') {
 				x += hw;
 				y += hh;
+				hw = Math.abs(hw);
+				hh = Math.abs(hh);
 			} else if (_rectMode == 'radius') {
 				hw = w;
 				hh = h;
@@ -8050,6 +8058,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textSize = (size) => {
+		if (!$._font) $._g.textSize(size);
 		if (size == undefined) return _textSize;
 		_textSize = size;
 		if (!leadingSet) {
@@ -8086,6 +8095,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textLeading = (lineHeight) => {
+		if (!$._font) return $._g.textLeading(lineHeight);
+		if (!lineHeight) return leading;
 		$._font.lineHeight = leading = lineHeight;
 		leadDiff = leading - _textSize;
 		leadPercent = leading / _textSize;
@@ -8095,6 +8106,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$.textAlign = (horiz, vert) => {
 		_textAlign = horiz;
 		if (vert) _textBaseline = vert;
+	};
+
+	$.textStyle = (style) => {
+		// stub
 	};
 
 	let charStack = [],
@@ -8174,6 +8189,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			return $.textImage(img, x, y);
 		}
 
+		let hasNewline;
+
 		if (str.length > w) {
 			let wrapped = [];
 			let i = 0;
@@ -8189,21 +8206,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 				i = end + 1;
 			}
 			str = wrapped.join('\n');
+			hasNewline = true;
 		}
 
-		let spaces = 0, // whitespace char count, not literal spaces
-			hasNewline;
-		for (let i = 0; i < str.length; i++) {
-			let c = str[i];
-			switch (c) {
-				case '\n':
-					hasNewline = true;
-				case '\r':
-				case '\t':
-				case ' ':
-					spaces++;
-			}
-		}
+		hasNewline ??= str.includes('\n');
 
 		let charsData = [];
 
@@ -8226,7 +8232,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			else if (tb == 'center') y -= _textSize * 0.5;
 			else if (tb == 'bottom') y -= leading;
 		} else {
-			// measure the text to get the line widths before setting
+			// measure the text to get the line height before setting
 			// the x position to properly align the text
 			measurements = measureText($._font, str);
 
@@ -8269,8 +8275,27 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textWidth = (str) => {
-		if (!$._font) return 0;
-		return measureText($._font, str).width;
+		if (!$._font) {
+			$._g.textSize(_textSize);
+			return $._g.textWidth(str);
+		}
+		return (measureText($._font, str).width * _textSize) / 42;
+	};
+
+	$.textAscent = (str) => {
+		if (!$._font) {
+			$._g.textSize(_textSize);
+			return $._g.textAscent(str);
+		}
+		return leading - leadDiff;
+	};
+
+	$.textDescent = (str) => {
+		if (!$._font) {
+			$._g.textSize(_textSize);
+			return $._g.textDescent(str);
+		}
+		return leadDiff;
 	};
 
 	$.createTextImage = (str, w, h) => {
@@ -8442,4 +8467,78 @@ Q5.WebGPU = async function (scope, parent) {
 	q = new Q5(scope, parent, 'webgpu');
 	await q.ready;
 	return q;
+};
+Q5.addHook('presetup', ($) => {
+	let libMap;
+
+	if (Q5.lang == 'es') {
+		libMap = {
+			// core
+			createCanvas: 'crearLienzo',
+			// color
+			background: 'fondo',
+			// display
+			windowWidth: 'anchoVentana',
+			windowHeight: 'altoVentana',
+			frameCount: 'cuadroActual',
+			noLoop: 'pausar',
+			redraw: 'redibujar',
+			loop: 'reanudar',
+			frameRate: 'frecuenciaRefresco',
+			getTargetFrameRate: 'frecuenciaIdeal',
+			getFPS: 'frecuenciaMaxima',
+			deltaTime: 'ultimoTiempo',
+			// shape
+			circle: 'círculo'
+		};
+	} else return;
+
+	for (let name in libMap) {
+		const translatedName = libMap[name];
+		$[translatedName] = $[name];
+	}
+});
+
+Object.defineProperty(Q5, 'lang', {
+	get: () => Q5._lang || 'en',
+	set: (val) => {
+		Q5._lang = val;
+
+		let userFnsMap;
+
+		if (val == 'es') {
+			if (typeof window == 'object') {
+				window.crearLienzo = createCanvas;
+			}
+
+			userFnsMap = {
+				update: 'actualizar',
+				draw: 'dibujar',
+				postProcess: 'retocarDibujo'
+			};
+		} else return;
+
+		for (let name in userFnsMap) {
+			const translatedName = userFnsMap[name];
+			Object.defineProperty(Q5, translatedName, {
+				get: () => Q5[name],
+				set: (fn) => (Q5[name] = fn)
+			});
+		}
+
+		Q5._userFnsMap = userFnsMap;
+		Q5._userFns.push(...Object.values(userFnsMap));
+	}
+});
+
+Q5.modules.lang = ($) => {
+	let userFnsMap = Q5._userFnsMap;
+
+	for (let name in userFnsMap) {
+		const translatedName = userFnsMap[name];
+		Object.defineProperty($, translatedName, {
+			get: () => $[name],
+			set: (fn) => ($[name] = fn)
+		});
+	}
 };

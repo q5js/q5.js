@@ -1647,6 +1647,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			if (_rectMode == 'corner') {
 				x += hw;
 				y += hh;
+				hw = Math.abs(hw);
+				hh = Math.abs(hh);
 			} else if (_rectMode == 'radius') {
 				hw = w;
 				hh = h;
@@ -2840,6 +2842,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textSize = (size) => {
+		if (!$._font) $._g.textSize(size);
 		if (size == undefined) return _textSize;
 		_textSize = size;
 		if (!leadingSet) {
@@ -2876,6 +2879,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textLeading = (lineHeight) => {
+		if (!$._font) return $._g.textLeading(lineHeight);
+		if (!lineHeight) return leading;
 		$._font.lineHeight = leading = lineHeight;
 		leadDiff = leading - _textSize;
 		leadPercent = leading / _textSize;
@@ -2885,6 +2890,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	$.textAlign = (horiz, vert) => {
 		_textAlign = horiz;
 		if (vert) _textBaseline = vert;
+	};
+
+	$.textStyle = (style) => {
+		// stub
 	};
 
 	let charStack = [],
@@ -2964,6 +2973,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			return $.textImage(img, x, y);
 		}
 
+		let hasNewline;
+
 		if (str.length > w) {
 			let wrapped = [];
 			let i = 0;
@@ -2979,21 +2990,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 				i = end + 1;
 			}
 			str = wrapped.join('\n');
+			hasNewline = true;
 		}
 
-		let spaces = 0, // whitespace char count, not literal spaces
-			hasNewline;
-		for (let i = 0; i < str.length; i++) {
-			let c = str[i];
-			switch (c) {
-				case '\n':
-					hasNewline = true;
-				case '\r':
-				case '\t':
-				case ' ':
-					spaces++;
-			}
-		}
+		hasNewline ??= str.includes('\n');
 
 		let charsData = [];
 
@@ -3016,7 +3016,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			else if (tb == 'center') y -= _textSize * 0.5;
 			else if (tb == 'bottom') y -= leading;
 		} else {
-			// measure the text to get the line widths before setting
+			// measure the text to get the line height before setting
 			// the x position to properly align the text
 			measurements = measureText($._font, str);
 
@@ -3059,8 +3059,27 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textWidth = (str) => {
-		if (!$._font) return 0;
-		return measureText($._font, str).width;
+		if (!$._font) {
+			$._g.textSize(_textSize);
+			return $._g.textWidth(str);
+		}
+		return (measureText($._font, str).width * _textSize) / 42;
+	};
+
+	$.textAscent = (str) => {
+		if (!$._font) {
+			$._g.textSize(_textSize);
+			return $._g.textAscent(str);
+		}
+		return leading - leadDiff;
+	};
+
+	$.textDescent = (str) => {
+		if (!$._font) {
+			$._g.textSize(_textSize);
+			return $._g.textDescent(str);
+		}
+		return leadDiff;
 	};
 
 	$.createTextImage = (str, w, h) => {

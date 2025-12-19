@@ -20,7 +20,7 @@ Note that in this example, the circle is located at position [0, 0], the origin 
 @param {number} [w] width or side lengths of the canvas
 @param {number} [h] height of the canvas
 @param {object} [opt] [options](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes)
-@returns {HTMLCanvasElement} created canvas element
+@returns {Promise<HTMLCanvasElement>} created canvas element
 ```
 
 ### webgpu

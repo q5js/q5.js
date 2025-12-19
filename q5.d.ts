@@ -21,14 +21,14 @@ declare global {
 	 * @param {number} [w] width or side lengths of the canvas
 	 * @param {number} [h] height of the canvas
 	 * @param {object} [opt] [options](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes)
-	 * @returns {HTMLCanvasElement} created canvas element
+	 * @returns {Promise<HTMLCanvasElement>} created canvas element
 	 * @example
 	 * // Canvas2D
 	 * createCanvas(200, 100);
 	 * background('silver');
 	 * circle(0, 0, 80);
 	 */
-	function createCanvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): HTMLCanvasElement;
+	function createCanvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
 
 	/** ⭐
 	 * The q5 draw function is run 60 times per second by default.
@@ -814,6 +814,8 @@ declare global {
 
 	/** 📘
 	 * Sets the current text style.
+	 * 
+	 * Not applicable to WebGPU when using MSDF fonts.
 	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style font style
 	 * @example
 	 * createCanvas(200);

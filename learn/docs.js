@@ -4,6 +4,8 @@
  * AI was used to generate parts of this script.
  */
 
+// import { MiniEditor } from './mini-editor_esm.js';
+
 // reduce WebGPU memory usage since each learn pages
 // creates many Q5 instances
 Q5.MAX_TRANSFORMS = 1000;
@@ -46,15 +48,15 @@ function convertTSDefToMarkdown(data) {
 	const allLines = data.split('\n');
 	const firstSectionIdx = allLines.findIndex((l) => l.trim().startsWith('// '));
 	const lines = allLines.slice(firstSectionIdx >= 0 ? firstSectionIdx : 0);
-	(insideJSDoc = false),
-		(insideParams = false),
-		(insideProps = false),
-		(insideExample = false),
-		(hasExample = false),
-		(jsDocBuffer = ''),
-		(inClassDef = false),
-		(currentClassName = ''),
-		(curEmoji = '');
+	let insideJSDoc = false,
+		insideParams = false,
+		insideProps = false,
+		insideExample = false,
+		hasExample = false,
+		jsDocBuffer = '',
+		inClassDef = false,
+		currentClassName = '',
+		curEmoji = '';
 
 	// track when we are skipping over a namespace/interface block
 	let skippingBlock = false;
@@ -339,11 +341,13 @@ let isWebGPU = urlParams.has('webgpu') ? true : urlParams.has('c2d') ? false : f
 // for backward compatibility, then default to English `en`.
 let lang = localStorage.getItem('lang') || urlParams.get('lang') || 'en';
 
+Q5.lang = lang;
+
 async function loadDtsAndRender(useWebGPU) {
 	const prevSection = currentSectionId;
 	// Build file name according to renderer + language. English (en) is default and has no suffix.
 	const baseName = useWebGPU ? 'q5' : 'q5-c2d';
-	const langSuffix = lang && lang !== 'en' ? `_${lang}` : '';
+	const langSuffix = lang && lang !== 'en' ? `-${lang}` : '';
 
 	// TODO: enable when WebGPU becomes the default
 	// const dir = lang == 'en' && useWebGPU ? '/' : `/defs/`;
@@ -352,7 +356,7 @@ async function loadDtsAndRender(useWebGPU) {
 	const dtsFile = `${dir}${baseName}${langSuffix}.d.ts`;
 	// load the d.ts file for the requested renderer + language
 	const data = await fetch(dtsFile).then((res) => res.text());
-	markdownText = convertTSDefToMarkdown(data);
+	let markdownText = convertTSDefToMarkdown(data);
 	// Clean JSDoc example blocks (remove leading '*' and common indent)
 	markdownText = cleanJSDocExamples(markdownText);
 	sections = parseMarkdownIntoSections(markdownText);

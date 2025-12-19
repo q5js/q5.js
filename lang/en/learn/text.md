@@ -271,6 +271,8 @@ function draw() {
 
 Sets the current text style.
 
+Not applicable to WebGPU when using MSDF fonts.
+
 ```
 @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style font style
 ```
@@ -547,7 +549,7 @@ await load('/assets/Robotica.ttf');
 
 background(0.8);
 textSize(66);
-textImage('Hello!', -100, -100);
+textImage('Hello!', -100, 100);
 ```
 
 ### c2d

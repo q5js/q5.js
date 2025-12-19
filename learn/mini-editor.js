@@ -1,4 +1,5 @@
-let typeDefs = '';
+let typeDefs = '',
+	langTypeDefs = '';
 
 class MiniEditor {
 	constructor(scriptEl) {
@@ -53,7 +54,7 @@ class MiniEditor {
 	async initializeEditor() {
 		return new Promise((resolve) => {
 			require.config({
-				paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs' }
+				paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs' }
 			});
 
 			require(['vs/editor/editor.main'], async () => {
@@ -63,7 +64,7 @@ class MiniEditor {
 					folding: false,
 					renderLineHighlight: 'none',
 					theme: 'vs-dark',
-					fontSize: 14,
+					fontSize: 16,
 					lineNumbersMinChars: 2,
 					glyphMargin: false,
 					minimap: { enabled: false },
@@ -77,43 +78,20 @@ class MiniEditor {
 				});
 
 				if (!typeDefs) {
-					// Use the generated defs file to keep learn pages in sync
-					// with the docs and strip any namespace/interface blocks
-					// so the mini-editor doesn't expose internal namespace
-					// interfaces (like `Q5.Image`) on hover/autocomplete.
 					let res = await fetch('/defs/q5.d.ts');
-					let raw = await res.text();
-
-					// strip namespace/interface blocks by scanning lines and
-					// skipping any block that begins with 'namespace' or
-					// 'interface'
-					const lines = raw.split('\n');
-					const out = [];
-					let skipDepth = 0;
-					for (let l of lines) {
-						const t = l.trimStart();
-						if (skipDepth === 0 && (t.startsWith('namespace ') || t.startsWith('interface '))) {
-							// enter skip mode, count braces on this line
-							skipDepth += (l.match(/{/g) || []).length || 1;
-							skipDepth -= (l.match(/}/g) || []).length;
-							continue;
-						}
-
-						if (skipDepth > 0) {
-							// count braces and potentially exit skip mode
-							skipDepth += (l.match(/{/g) || []).length;
-							skipDepth -= (l.match(/}/g) || []).length;
-							if (skipDepth <= 0) skipDepth = 0;
-							continue;
-						}
-
-						out.push(l);
-					}
-
-					typeDefs = out.join('\n');
+					typeDefs = await res.text();
 				}
 
-				monaco.languages.typescript.javascriptDefaults.addExtraLib(typeDefs, '/q5.d.ts');
+				monaco.languages.typescript.javascriptDefaults.addExtraLib(typeDefs, '/defs/q5.d.ts');
+
+				if (Q5._lang != 'en') {
+					if (!langTypeDefs) {
+						let res = await fetch(`/defs/q5-${Q5._lang}.d.ts`);
+						langTypeDefs = await res.text();
+					}
+
+					monaco.languages.typescript.javascriptDefaults.addExtraLib(langTypeDefs, `/defs/q5-${Q5._lang}.d.ts`);
+				}
 
 				this.editorReady = true;
 
@@ -129,40 +107,27 @@ class MiniEditor {
 		}
 		this.isRunning = true;
 
-		this.outputEl.innerHTML = '';
+		if (this.errorDecorations) {
+			this.errorDecorations = this.editor.deltaDecorations(this.errorDecorations, []);
+		}
 
-		const q5FunctionNames = [
-			'preload',
-			'setup',
-			'update',
-			'draw',
-			'drawFrame',
-			'postProcess',
-			'doubleClicked',
-			'keyPressed',
-			'keyReleased',
-			'keyTyped',
-			'mouseMoved',
-			'mouseDragged',
-			'mousePressed',
-			'mouseReleased',
-			'mouseClicked',
-			'mouseWheel',
-			'touchStarted',
-			'touchMoved',
-			'touchEnded',
-			'windowResized'
-		];
+		this.outputEl.innerHTML = '';
 
 		try {
 			let userCode = this.editor.getValue();
 
 			let useWebGPU =
-				userCode.includes('= function') || userCode.includes('await createCanvas') || /webgpu/i.test(userCode);
+				userCode.includes('= function') ||
+				userCode.includes('\nawait') ||
+				userCode.includes('await createCanvas') || // safeguard
+				/webgpu/i.test(userCode);
 
-			if (useWebGPU && Q5.canUseWebGPU == false) {
-				this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
-				return;
+			if (useWebGPU) {
+				if (Q5.canUseWebGPU == false) {
+					this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
+					return;
+				}
+				Q5._esm = true;
 			}
 
 			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|(await\s+)*Q5\.WebGPU)\s*\([^)]*\);?/g;
@@ -170,35 +135,70 @@ class MiniEditor {
 
 			let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : 'c2d');
 
-			for (let f of q5FunctionNames) {
+			for (let f of Q5._userFns) {
 				const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');
+				userCode = userCode.replace(`q5.${f}`, `q.${f}`);
 				userCode = userCode.replace(regex, (match) => {
 					const isAsync = match.includes('async');
 					return `q.${f} = ${isAsync ? 'async ' : ''}function(`;
 				});
-				userCode = userCode.replace(`q5.${f}`, `q.${f}`);
 			}
 
 			const func = new Function(
 				'q',
 				`
-(async () => {
+//# sourceURL=${this.container.id}.js
+return (async () => {
 	with (q) {
-		${userCode}
+	
+${userCode}
+	
 	}
-})();`
+})();
+`
 			);
 
-			func(q);
+			func(q).catch((e) => {
+				console.error('Error executing user code:', e);
+				this.handleError(e);
+			});
 
 			this.q5Instance = q;
 		} catch (e) {
 			console.error('Error executing user code:', e);
+			this.handleError(e);
 		}
 	}
 
+	handleError(e) {
+		let lineNo = null;
+		if (e.stack) {
+			const match = e.stack.match(new RegExp(`\${this.container.id}\\\\.js:(\\\\d+)`));
+			if (match) {
+				lineNo = parseInt(match[1]) - 3;
+			}
+		}
+
+		if (lineNo) {
+			this.errorDecorations = this.editor.deltaDecorations(this.errorDecorations || [], [
+				{
+					range: new monaco.Range(lineNo, 1, lineNo, 1),
+					options: {
+						isWholeLine: true,
+						className: 'mie-error-line',
+						hoverMessage: { value: 'Error: ' + e.message }
+					}
+				}
+			]);
+		}
+
+		this.outputEl.innerHTML += `<div style="color: #ff6b6b; font-family: monospace; margin-top: 10px; border-top: 1px solid #444; padding-top: 10px;">${
+			e.message
+		}${lineNo ? ' (Line ' + lineNo + ')' : ''}</div>`;
+	}
+
 	resizeEditor() {
-		this.editorEl.style.height = this.initialCode.split('\n').length * 22 + 'px';
+		this.editorEl.style.height = this.initialCode.split('\n').length * 25 + 'px';
 		this.editor.layout();
 	}
 }

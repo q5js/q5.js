@@ -755,7 +755,7 @@ function main() {
 
 	console.log(`📘 Building type definitions for language: ${lang}`);
 
-	let langSuffix = lang == 'en' ? '' : `_${lang}`;
+	let langSuffix = lang == 'en' ? '' : `-${lang}`;
 
 	// Build q5.d.ts with WebGPU examples
 	// let dir = lang == 'en' ? rootDir : defsDir;
@@ -763,7 +763,7 @@ function main() {
 	let file = path.join(dir, `q5${langSuffix}.d.ts`);
 	buildDtsFile(sections, baseDtsPath, file, true, 'webgpu');
 
-	// Build q5_c2d.d.ts with C2D examples
+	// Build q5-c2d.d.ts with C2D examples
 	file = path.join(defsDir, `q5-c2d${langSuffix}.d.ts`);
 	buildDtsFile(sections, baseDtsPath, file, true, 'c2d');
 

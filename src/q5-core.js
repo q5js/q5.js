@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.6
+ * @version 3.7
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -275,32 +275,13 @@ function Q5(scope, parent, renderer) {
 
 	let t = globalScope || $;
 
-	let userFns = [
-		'postProcess',
-		'mouseMoved',
-		'mousePressed',
-		'mouseReleased',
-		'mouseDragged',
-		'mouseClicked',
-		'doubleClicked',
-		'mouseWheel',
-		'keyPressed',
-		'keyReleased',
-		'keyTyped',
-		'touchStarted',
-		'touchMoved',
-		'touchEnded',
-		'windowResized',
-		'preload'
-	];
+	let userFns = Q5._userFns.slice(0, 15);
 	// shim if undefined
 	for (let name of userFns) $[name] ??= () => {};
 
-	userFns.pop();
-
-	let allUserFns = ['update', 'draw', 'drawFrame', ...userFns];
-
 	if ($._isGlobal) {
+		let allUserFns = Q5._userFns.slice(0, 17);
+
 		for (let name of allUserFns) {
 			if (Q5[name]) $[name] = Q5[name];
 			else {
@@ -314,6 +295,9 @@ function Q5(scope, parent, renderer) {
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
+		if (fn == undefined) {
+			log('hi');
+		}
 		$[name] = (event) => {
 			try {
 				return fn(event);
@@ -329,8 +313,10 @@ function Q5(scope, parent, renderer) {
 
 		readyResolve();
 
-		wrapWithFES('preload');
-		$.preload();
+		if ($.preload) {
+			wrapWithFES('preload');
+			$.preload();
+		}
 
 		// wait for the user to define setup, update, or draw
 		await Promise.race([
@@ -400,6 +386,26 @@ Q5._friendlyError = (msg, func) => {
 };
 Q5._validateParameters = () => true;
 
+Q5._userFns = [
+	'postProcess',
+	'mouseMoved',
+	'mousePressed',
+	'mouseReleased',
+	'mouseDragged',
+	'mouseClicked',
+	'doubleClicked',
+	'mouseWheel',
+	'keyPressed',
+	'keyReleased',
+	'keyTyped',
+	'touchStarted',
+	'touchMoved',
+	'touchEnded',
+	'windowResized',
+	'update',
+	'draw'
+];
+
 Q5.hooks = {
 	init: [],
 	presetup: [],
@@ -459,7 +465,7 @@ if (typeof window == 'object') {
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.6';
+Q5.version = Q5.VERSION = '3.7';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
