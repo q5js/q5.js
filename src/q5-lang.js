@@ -28,7 +28,7 @@ postProcess -> es:retocarDibujo
 `;
 
 const parseLangs = function (data, lang) {
-	const map = {};
+	let map = {};
 	for (let l of data.split('\n')) {
 		let i = l.indexOf(' ' + lang + ':');
 		if (i > 0 && l[0] != '#') {
@@ -41,6 +41,8 @@ const parseLangs = function (data, lang) {
 Object.defineProperty(Q5, 'lang', {
 	get: () => Q5._lang || 'en',
 	set: (val) => {
+		if (val == Q5._lang) return;
+
 		Q5._lang = val;
 
 		if (val == 'en') {
@@ -50,16 +52,17 @@ Object.defineProperty(Q5, 'lang', {
 			return;
 		}
 
-		const libMap = parseLangs(libLangs, val);
+		let libMap = parseLangs(libLangs, val);
 
-		if (libMap.createCanvas && typeof window == 'object') {
+		if (typeof window == 'object') {
 			window[libMap.createCanvas] = createCanvas;
 		}
 
-		const userFnsMap = parseLangs(userLangs, val);
+		let userFnsMap = parseLangs(userLangs, val);
 
 		for (let name in userFnsMap) {
-			const translatedName = userFnsMap[name];
+			let translatedName = userFnsMap[name];
+			if (Q5.hasOwnProperty(translatedName)) continue;
 			Object.defineProperty(Q5, translatedName, {
 				get: () => Q5[name],
 				set: (fn) => (Q5[name] = fn)
@@ -76,19 +79,25 @@ Q5.modules.lang = ($) => {
 	let userFnsMap = Q5._userFnsMap;
 
 	for (let name in userFnsMap) {
-		const translatedName = userFnsMap[name];
+		let translatedName = userFnsMap[name];
 		Object.defineProperty($, translatedName, {
 			get: () => $[name],
 			set: (fn) => ($[name] = fn)
 		});
 	}
+
+	let libMap = Q5._libMap;
+
+	if (libMap?.createCanvas) {
+		$[libMap.createCanvas] = $.createCanvas;
+	}
 };
 
 Q5.addHook('presetup', ($) => {
-	const libMap = Q5._libMap;
+	let libMap = Q5._libMap;
 
 	for (let name in libMap) {
-		const translatedName = libMap[name];
+		let translatedName = libMap[name];
 		$[translatedName] = $[name];
 	}
 });

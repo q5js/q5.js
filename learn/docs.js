@@ -341,13 +341,13 @@ let isWebGPU = urlParams.has('webgpu') ? true : urlParams.has('c2d') ? false : f
 // for backward compatibility, then default to English `en`.
 let lang = localStorage.getItem('lang') || urlParams.get('lang') || 'en';
 
-Q5.lang = lang;
-
 async function loadDtsAndRender(useWebGPU) {
 	const prevSection = currentSectionId;
 	// Build file name according to renderer + language. English (en) is default and has no suffix.
 	const baseName = useWebGPU ? 'q5' : 'q5-c2d';
 	const langSuffix = lang && lang !== 'en' ? `-${lang}` : '';
+
+	Q5.lang = lang;
 
 	// TODO: enable when WebGPU becomes the default
 	// const dir = lang == 'en' && useWebGPU ? '/' : `/defs/`;
