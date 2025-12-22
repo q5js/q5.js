@@ -4,13 +4,12 @@
  * AI was used to generate parts of this script.
  */
 
-// import { MiniEditor } from './mini-editor_esm.js';
-
-// reduce WebGPU memory usage since each learn pages
-// creates many Q5 instances
+// reduce WebGPU memory usage per Q5 instance
+// since these pages use a lot of them
 Q5.MAX_TRANSFORMS = 1000;
 Q5.MAX_RECTS = 10000;
 Q5.MAX_ELLIPSES = 1000;
+
 // Q5.online = false;
 
 toggleNavButton.addEventListener('pointerup', () => {

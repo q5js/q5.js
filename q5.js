@@ -8508,8 +8508,10 @@ const parseLangs = function (data, lang) {
 	return map;
 };
 
+Q5._lang = 'en';
+
 Object.defineProperty(Q5, 'lang', {
-	get: () => Q5._lang || 'en',
+	get: () => Q5._lang,
 	set: (val) => {
 		if (val == Q5._lang) return;
 
