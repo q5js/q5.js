@@ -295,9 +295,6 @@ function Q5(scope, parent, renderer) {
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
-		if (fn == undefined) {
-			log('hi');
-		}
 		$[name] = (event) => {
 			try {
 				return fn(event);
@@ -313,7 +310,7 @@ function Q5(scope, parent, renderer) {
 
 		readyResolve();
 
-		if ($.preload) {
+		if (t.preload || $.preload) {
 			wrapWithFES('preload');
 			$.preload();
 		}
