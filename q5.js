@@ -8843,7 +8843,7 @@ Q5.addHook('predraw', (q) => {
 	let libMap = Q5._libMap;
 
 	// update mouse
-	if (libMap.mouseX) {
+	if (libMap?.mouseX) {
 		q[libMap.mouseX] = q.mouseX;
 		q[libMap.mouseY] = q.mouseY;
 		q[libMap.mouseIsPressed] = q.mouseIsPressed;
