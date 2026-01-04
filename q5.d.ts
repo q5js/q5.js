@@ -729,9 +729,6 @@ declare global {
 	 * 
 	 * If no fonts are loaded, the default sans-serif font is used.
 	 * 
-	 * In q5 WebGPU, fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
-	 * with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
-	 * 
 	 * By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for a font to load.
 	 * @param {string} url URL of the font to load
 	 * @returns {FontFace & PromiseLike<FontFace>} font
@@ -1392,14 +1389,14 @@ declare global {
 	 * Creates a new `Color` object, which is primarily useful for storing
 	 * a color that your sketch will reuse or modify later.
 	 * 
-	 * With the default RGB color mode, colors have `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha` components. The default color
-	 * format is integer, so set components to values between 0 and 255.
+	 * With the default color mode, RGB, colors have `r`/`red`, `g`/`green`,
+	 * `b`/`blue`, and `a`/`alpha` components.
 	 * 
-	 * In q5 WebGPU, the default color mode is RGB in float format, so
-	 * set color components to values between 0 and 1.
-	 * 
-	 * The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background) functions
-	 * accept the same wide range of color representations as this function.
+	 * The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background)
+	 * functions accept the same wide range of color representations as this function.
+	 *
+	 * The default color format is "integer",
+	 * so set components to values between 0 and 255.
 	 * 
 	 * Here are some examples of valid use:
 	 * 
@@ -1452,11 +1449,9 @@ declare global {
 	 * Sets the color mode for the sketch, which changes how colors are
 	 * interpreted and displayed.
 	 * 
-	 * The default color mode is RGB in legacy integer format.
-	 * 
-	 * In WebGPU, the default is RGB in float format (best performance).
-	 * 
 	 * Color gamut is 'display-p3' by default, if the device supports HDR.
+	 *
+	 * The default color mode is RGB in legacy integer format.
 	 * @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} mode color mode
 	 * @param {1 | 255} format color format (1 for float, 255 for integer)
 	 * @param {'srgb' | 'display-p3'} [gamut] color gamut
@@ -1983,13 +1978,6 @@ declare global {
 	 * 
 	 * #### webgpu
 	 * @example
-	 * await createCanvas(200, { alpha: true });
-	 * 
-	 * q5.draw = function () {
-	 * 	clear();
-	 * 	circle((frameCount % 200) - 100, 0, 80);
-	 * };
-	 * @example
 	 * createCanvas(200, 200, { alpha: true });
 	 * 
 	 * function draw() {
@@ -2099,11 +2087,7 @@ declare global {
 	/** 🦋
 	 * Applies a transformation matrix.
 	 * 
-	 * Accepts a 3x3 or 4x4 matrix as either an array or multiple arguments.
-	 * 
-	 * Note that in q5 WebGPU, the identity matrix (default)
-	 * has a negative y scale to flip the y-axis to match
-	 * the Canvas2D renderer.
+	 * Accepts a 3x3 matrix as either an array or multiple arguments.
 	 * @param {number} a
 	 * @param {number} b
 	 * @param {number} c

@@ -76,6 +76,8 @@ function parseMarkdownFile(filePath) {
 					name: memberName,
 					fullName: fullName,
 					description: '',
+					webgpuDescription: '',
+					c2dDescription: '',
 					params: [],
 					webgpuExamples: [],
 					c2dExamples: [],
@@ -88,6 +90,8 @@ function parseMarkdownFile(filePath) {
 					name: fullName,
 					fullName: fullName,
 					description: '',
+					webgpuDescription: '',
+					c2dDescription: '',
 					params: [],
 					webgpuExamples: [],
 					c2dExamples: [],
@@ -96,6 +100,7 @@ function parseMarkdownFile(filePath) {
 				};
 			}
 
+			currentExampleType = null;
 			i++;
 
 			// Collect description
@@ -171,6 +176,14 @@ function parseMarkdownFile(filePath) {
 			continue;
 		}
 
+		if (currentEntry && currentExampleType) {
+			if (currentExampleType === 'webgpu') {
+				currentEntry.webgpuDescription += line + '\n';
+			} else if (currentExampleType === 'c2d') {
+				currentEntry.c2dDescription += line + '\n';
+			}
+		}
+
 		i++;
 	}
 
@@ -203,6 +216,8 @@ function parseMarkdownFile(filePath) {
 				name: className,
 				fullName: className,
 				description: constructor ? constructor.description : '',
+				webgpuDescription: constructor ? constructor.webgpuDescription : '',
+				c2dDescription: constructor ? constructor.c2dDescription : '',
 				params: constructor ? constructor.params : [],
 				webgpuExamples: [],
 				c2dExamples: [],
@@ -289,6 +304,23 @@ function generateJSDoc(func, emoji, includeExamples = true, exampleType = 'c2d',
 
 	if (func.description) {
 		const descLines = func.description.split('\n');
+		descLines.forEach((line) => {
+			lines.push(`${indent} * ${line}`);
+		});
+	}
+
+	let specificDesc = '';
+	if (exampleType === 'webgpu' && func.webgpuDescription) {
+		specificDesc = func.webgpuDescription.trim();
+	} else if (exampleType === 'c2d' && func.c2dDescription) {
+		specificDesc = func.c2dDescription.trim();
+	}
+
+	if (specificDesc) {
+		if (func.description) {
+			lines.push(`${indent} *`);
+		}
+		const descLines = specificDesc.split('\n');
 		descLines.forEach((line) => {
 			lines.push(`${indent} * ${line}`);
 		});
@@ -440,7 +472,7 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 			d._section = null;
 			for (const [sec, lines] of Object.entries(baseSectionBlocks)) {
 				const txt = lines.join('\n');
-				if (txt.indexOf(d.name) !== -1) {
+				if (txt.indexOf(d.text) !== -1) {
 					d._section = sec;
 					break;
 				}

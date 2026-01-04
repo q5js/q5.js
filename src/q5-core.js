@@ -280,7 +280,7 @@ function Q5(scope, parent, renderer) {
 	for (let name of userFns) $[name] ??= () => {};
 
 	if ($._isGlobal) {
-		let allUserFns = Q5._userFns.slice(0, 17);
+		let allUserFns = Q5._userFns.slice(0, 19);
 
 		for (let name of allUserFns) {
 			if (Q5[name]) $[name] = Q5[name];
@@ -399,6 +399,8 @@ Q5._userFns = [
 	'touchMoved',
 	'touchEnded',
 	'windowResized',
+	'preload',
+	'setup',
 	'update',
 	'draw'
 ];

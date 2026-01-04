@@ -280,7 +280,7 @@ function Q5(scope, parent, renderer) {
 	for (let name of userFns) $[name] ??= () => {};
 
 	if ($._isGlobal) {
-		let allUserFns = Q5._userFns.slice(0, 17);
+		let allUserFns = Q5._userFns.slice(0, 19);
 
 		for (let name of allUserFns) {
 			if (Q5[name]) $[name] = Q5[name];
@@ -399,6 +399,8 @@ Q5._userFns = [
 	'touchMoved',
 	'touchEnded',
 	'windowResized',
+	'preload',
+	'setup',
 	'update',
 	'draw'
 ];
@@ -8468,30 +8470,296 @@ Q5.WebGPU = async function (scope, parent) {
 const libLangs = `
 # core
 createCanvas -> es:crearLienzo ja:キャンバスを作成する
+log -> es:log
 
 # color
 background -> es:fondo ja:背景
+fill -> es:relleno
+stroke -> es:trazo
+noFill -> es:sinRelleno
+noStroke -> es:sinTrazo
+color -> es:color
+colorMode -> es:modoColor
 
 # display
 windowWidth -> es:anchoVentana
 windowHeight -> es:altoVentana
+width -> es:ancho
+height -> es:alto
 frameCount ->  es:cuadroActual
 noLoop -> es:pausar
 redraw -> es:redibujar
 loop -> es:reanudar
 frameRate -> es:frecuenciaRefresco
-getTargetFrameRate -> es:frecuenciaIdeal
-getFPS -> es:frecuenciaMaxima
-deltaTime -> es:ultimoTiempo
+getTargetFrameRate -> es:obtenerTasaFotogramasObjetivo
+getFPS -> es:obtenerFPS
+deltaTime -> es:deltaTiempo
+pixelDensity -> es:densidadPíxeles
+displayDensity -> es:densidadVisualización
+fullscreen -> es:pantallaCompleta
+displayMode -> es:modoVisualización
+halfWidth -> es:medioAncho
+halfHeight -> es:medioAlto
+canvas -> es:lienzo
+resizeCanvas -> es:redimensionarLienzo
+drawingContext -> es:contextoDibujo
 
 # shape
 circle -> es:círculo
+ellipse -> es:elipse
+rect -> es:rect
+square -> es:cuadrado
+point -> es:punto
+line -> es:línea
+capsule -> es:cápsula
+rectMode -> es:modoRect
+ellipseMode -> es:modoEliptico
+arc -> es:arco
+curve -> es:curva
+beginShape -> es:empezarForma
+endShape -> es:terminarForma
+vertex -> es:vértice
+bezier -> es:bezier
+triangle -> es:triángulo
+quad -> es:quad
+curveDetail -> es:detalleCurva
+beginContour -> es:empezarContorno
+endContour -> es:terminarContorno
+bezierVertex -> es:vérticeBezier
+quadraticVertex -> es:vérticeCuadrático
+
+# image
+loadImage -> es:cargarImagen
+image -> es:imagen
+imageMode -> es:modoImagen
+noTint -> es:noTeñir
+tint -> es:teñir
+filter -> es:filtro
+createImage -> es:crearImagen
+createGraphics -> es:crearGráficos
+defaultImageScale -> es:escalaImagenPorDefecto
+resize -> es:redimensionar
+trim -> es:recortar
+smooth -> es:suavizar
+noSmooth -> es:noSuavizar
+mask -> es:enmascarar
+copy -> es:copiar
+inset -> es:insertado
+get -> es:obtener
+set -> es:establecer
+pixels -> es:píxeles
+loadPixels -> es:cargarPíxeles
+updatePixels -> es:actualizarPíxeles
+
+# text
+text -> es:texto
+loadFont -> es:cargarFuente
+textFont -> es:fuenteTexto
+textSize -> es:tamañoTexto
+textLeading -> es:interlineado
+textStyle -> es:estiloTexto
+textAlign -> es:alineaciónTexto
+textWidth -> es:anchoTexto
+textWeight -> es:pesoTexto
+textAscent -> es:ascensoTexto
+textDescent -> es:descensoTexto
+createTextImage -> es:crearImagenTexto
+textImage -> es:imagenTexto
+nf -> es:nf
+
+# input
+mouseX -> es:ratónX
+mouseY -> es:ratónY
+pmouseX -> es:pRatónX
+pmouseY -> es:pRatónY
+mouseIsPressed -> es:ratónPresionado
+mouseButton -> es:botónRatón
+key -> es:tecla
+keyIsPressed -> es:teclaPresionada
+keyIsDown -> es:teclaEstaPresionada
+touches -> es:toques
+pointers -> es:punteros
+cursor -> es:cursor
+noCursor -> es:sinCursor
+pointerLock -> es:bloqueoPuntero
+
+# style
+strokeWeight -> es:grosorTrazo
+opacity -> es:opacidad
+shadow -> es:sombra
+noShadow -> es:sinSombra
+shadowBox -> es:cajaSombra
+blendMode -> es:modoMezcla
+strokeCap -> es:terminaciónTrazo
+strokeJoin -> es:uniónTrazo
+erase -> es:borrar
+noErase -> es:noBorrar
+clear -> es:limpiar
+pushStyles -> es:guardarEstilos
+popStyles -> es:recuperarEstilos
+inFill -> es:enRelleno
+inStroke -> es:enTrazo
+
+# transform
+translate -> es:trasladar
+rotate -> es:rotar
+scale -> es:escalar
+shearX -> es:cizallarX
+shearY -> es:cizallarY
+applyMatrix -> es:aplicarMatriz
+resetMatrix -> es:reiniciarMatriz
+push -> es:guardar
+pop -> es:recuperar
+pushMatrix -> es:guardarMatriz
+popMatrix -> es:recuperarMatriz
+
+# math
+random -> es:aleatorio
+noise -> es:ruido
+dist -> es:dist
+map -> es:mapa
+angleMode -> es:modoÁngulo
+radians -> es:radianes
+degrees -> es:grados
+lerp -> es:interpolar
+constrain -> es:constreñir
+norm -> es:norm
+abs -> es:abs
+round -> es:redondear
+ceil -> es:techo
+floor -> es:piso
+min -> es:min
+max -> es:max
+pow -> es:pot
+sq -> es:cuad
+sqrt -> es:raiz
+exp -> es:exp
+randomSeed -> es:semillaAleatoria
+randomGaussian -> es:aleatorioGaussiano
+noiseMode -> es:modoRuido
+noiseSeed -> es:semillaRuido
+noiseDetail -> es:detalleRuido
+jit -> es:flu
+randomGenerator -> es:generadorAleatorio
+randomExponential -> es:aleatorioExponencial
+
+# sound
+loadSound -> es:cargarSonido
+loadAudio -> es:cargarAudio
+getAudioContext -> es:obtenerContextoAudio
+userStartAudio -> es:iniciarAudioUsuario
+
+# dom
+createElement -> es:crearElemento
+createA -> es:crearA
+createButton -> es:crearBotón
+createCheckbox -> es:crearCasilla
+createColorPicker -> es:crearSelectorColor
+createImg -> es:crearImg
+createInput -> es:crearEntrada
+createP -> es:crearP
+createRadio -> es:crearOpciónes
+createSelect -> es:crearSelección
+createSlider -> es:crearDeslizador
+createVideo -> es:crearVideo
+createCapture -> es:crearCaptura
+findElement -> es:encontrarElemento
+findElements -> es:encontrarElementos
+
+# record
+createRecorder -> es:crearGrabadora
+record -> es:grabar
+pauseRecording -> es:pausarGrabación
+deleteRecording -> es:borrarGrabación
+saveRecording -> es:guardarGrabación
+recording -> es:grabando
+
+# io
+load -> es:cargar
+save -> es:guardar
+loadJSON -> es:cargarJSON
+loadStrings -> es:cargarTexto
+year -> es:año
+day -> es:día
+hour -> es:hora
+minute -> es:minuto
+second -> es:segundo
+loadCSV -> es:cargarCSV
+loadXML -> es:cargarXML
+loadAll -> es:cargarTodo
+disablePreload -> es:deshabilitarPrecarga
+shuffle -> es:barajar
+storeItem -> es:guardarItem
+getItem -> es:obtenerItem
+removeItem -> es:eliminarItem
+clearStorage -> es:limpiarAlmacenamiento
+
+# shaders
+createShader -> es:crearShader
+plane -> es:plano
+shader -> es:shader
+resetShader -> es:reiniciarShader
+resetFrameShader -> es:reiniciarShaderFotograma
+resetImageShader -> es:reiniciarShaderImagen
+resetVideoShader -> es:reiniciarShaderVideo
+resetTextShader -> es:reiniciarShaderTexto
+resetShaders -> es:reiniciarShaders
+createFrameShader -> es:crearShaderFotograma
+createImageShader -> es:crearShaderImagen
+createVideoShader -> es:crearShaderVideo
+createTextShader -> es:crearShaderTexto
+
+# constants
+CORNER -> es:ESQUINA
+RADIUS -> es:RADIO
+CORNERS -> es:ESQUINAS
+THRESHOLD -> es:UMBRAL
+GRAY -> es:GRIS
+OPAQUE -> es:OPACO
+INVERT -> es:INVERTIR
+POSTERIZE -> es:POSTERIZAR
+DILATE -> es:DILATAR
+ERODE -> es:EROSIONAR
+BLUR -> es:DESENFOCAR
+NORMAL -> es:NORMAL
+ITALIC -> es:CURSIVA
+BOLD -> es:NEGRILLA
+BOLDITALIC -> es:NEGRILLA_CURSIVA
+LEFT -> es:IZQUIERDA
+CENTER -> es:CENTRO
+RIGHT -> es:DERECHA
+TOP -> es:ARRIBA
+BOTTOM -> es:ABAJO
+BASELINE -> es:LINEA_BASE
+RGB -> es:RGB
+OKLCH -> es:OKLCH
+HSL -> es:HSL
+HSB -> es:HSB
+SRGB -> es:SRGB
+DISPLAY_P3 -> es:DISPLAY_P3
+MAXED -> es:MAXIMIZADO
+SMOOTH -> es:SUAVE
+PIXELATED -> es:PIXELADO
+TWO_PI -> es:DOS_PI
+HALF_PI -> es:MEDIO_PI
+QUARTER_PI -> es:CUARTO_PI
 `;
 
 const userLangs = `
 update -> es:actualizar
 draw -> es:dibujar
-postProcess -> es:retocarDibujo
+postProcess -> es:postProcesar
+mousePressed -> es:alPresionarRatón
+mouseReleased -> es:alSoltarRatón
+mouseMoved -> es:alMoverRatón
+mouseDragged -> es:alArrastrarRatón
+doubleClicked -> es:dobleClic
+keyPressed -> es:alPresionarTecla
+keyReleased -> es:alSoltarTecla
+touchStarted -> es:alEmpezarToque
+touchEnded -> es:alTerminarToque
+touchMoved -> es:alMoverToque
+mouseWheel -> es:ruedaRatón
 `;
 
 const parseLangs = function (data, lang) {
@@ -8562,11 +8830,22 @@ Q5.modules.lang = ($) => {
 	}
 };
 
-Q5.addHook('presetup', ($) => {
+Q5.addHook('init', (q) => {
 	let libMap = Q5._libMap;
 
 	for (let name in libMap) {
 		let translatedName = libMap[name];
-		$[translatedName] = $[name];
+		q[translatedName] = q[name];
+	}
+});
+
+Q5.addHook('predraw', (q) => {
+	let libMap = Q5._libMap;
+
+	// update mouse
+	if (libMap.mouseX) {
+		q[libMap.mouseX] = q.mouseX;
+		q[libMap.mouseY] = q.mouseY;
+		q[libMap.mouseIsPressed] = q.mouseIsPressed;
 	}
 });

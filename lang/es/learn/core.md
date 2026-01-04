@@ -2,7 +2,7 @@
 
 Bienvenido a la documentación de q5! 🤩
 
-¿Primera vez programando? Revisa la [guía para principiantes de q5].
+¿Primera vez programando? Revisa la [guía para principiantes de q5](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief).
 
 En estas páginas de "Aprender" puedes experimentar editando los mini ejemplos. ¡Diviértete! 😎
 
@@ -31,6 +31,15 @@ fondo('silver');
 círculo(0, 0, 80);
 ```
 
+### c2d
+
+```js
+// Canvas2D
+crearLienzo(200, 100);
+fondo('silver');
+círculo(0, 0, 80);
+```
+
 ## dibujar
 
 Función a declarar. Se ejecutará 60 veces por segundo de forma predeterminada. Tiene comportamiento de bucle, lo que permite hacer animaciones cuadro a cuadro.
@@ -40,8 +49,17 @@ Función a declarar. Se ejecutará 60 veces por segundo de forma predeterminada.
 ```js
 q5.dibujar = function () {
 	fondo('silver');
-	círculo(mouseX, mouseY, 80);
+	círculo(ratónX, ratónY, 80);
 };
+```
+
+### c2d
+
+```js
+function dibujar() {
+	fondo('silver');
+	círculo(ratónX, ratónY, 80);
+}
 ```
 
 ## log
@@ -58,7 +76,16 @@ Para acceder a las herramientas del navegador (DevTools) generalmente es con cli
 
 ```js
 q5.dibujar = function () {
-	círculo(mouseX, mouseY, 80);
-	log('The mouse is at:', mouseX, mouseY);
+	círculo(ratónX, ratónY, 80);
+	log('El ratón está en:', ratónX, ratónY);
 };
+```
+
+### c2d
+
+```js
+function dibujar() {
+	círculo(ratónX, ratónY, 80);
+	log('El ratón está en:', ratónX, ratónY);
+}
 ```

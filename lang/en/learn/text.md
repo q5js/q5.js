@@ -75,9 +75,6 @@ The second example loads
 
 If no fonts are loaded, the default sans-serif font is used.
 
-In q5 WebGPU, fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
-with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
-
 By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for a font to load.
 
 ```
@@ -86,6 +83,9 @@ By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to 
 ```
 
 ### webgpu
+
+In q5 WebGPU, fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
+with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
 
 ```js
 await createCanvas(200, 56);

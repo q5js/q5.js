@@ -143,7 +143,7 @@ function convertTSDefToMarkdown(data) {
 			// classes are represented in .d.ts as properties (e.g. `static Image: { ... }`)
 			// which are handled elsewhere. So always treat 'class' as a top-level
 			// class beginning and update currentClassName.
-			let classMatch = line.match(/class\s+(\w+)/);
+			let classMatch = line.match(/class\s+([a-zA-Z0-9_\u00C0-\u00FF]+)/);
 			currentClassName = classMatch ? classMatch[1] : '';
 			inClassDef = true;
 		} else if (inClassDef && line.startsWith('constructor')) {
@@ -159,7 +159,7 @@ function convertTSDefToMarkdown(data) {
 			continue;
 		} else if (line.includes('(')) {
 			// capture a function/method name, its params, and any return/type (allow complex types)
-			let funcMatch = line.match(/(\w+)\s*\(([^)]*)\)\s*:\s*([^;]+)/);
+			let funcMatch = line.match(/([a-zA-Z0-9_\u00C0-\u00FF]+)\s*\(([^)]*)\)\s*:\s*([^;]+)/);
 			if (funcMatch) {
 				let [_, funcName, funcParams, funcType] = funcMatch;
 				if (!line.startsWith('function ')) {
@@ -174,8 +174,10 @@ function convertTSDefToMarkdown(data) {
 				hasExample = false;
 			}
 		} else if (
-			/^\s*static\s+\w+\s*:\s*\{/.test(line) ||
-			(/^\s*static\s+\w+\s*:\s*$/.test(line) && i + 1 < lines.length && lines[i + 1].trim().startsWith('{'))
+			/^\s*static\s+[a-zA-Z0-9_\u00C0-\u00FF]+\s*:\s*\{/.test(line) ||
+			(/^\s*static\s+[a-zA-Z0-9_\u00C0-\u00FF]+\s*:\s*$/.test(line) &&
+				i + 1 < lines.length &&
+				lines[i + 1].trim().startsWith('{'))
 		) {
 			// Skip nested static type blocks inside classes e.g. `static Image: { ... }`.
 			// If the brace is on the next line, we detect it and begin skipping.

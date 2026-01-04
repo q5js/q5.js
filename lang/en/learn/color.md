@@ -5,24 +5,11 @@
 Creates a new `Color` object, which is primarily useful for storing
 a color that your sketch will reuse or modify later.
 
-With the default RGB color mode, colors have `r`/`red`, `g`/`green`, `b`/`blue`, and `a`/`alpha` components. The default color
-format is integer, so set components to values between 0 and 255.
+With the default color mode, RGB, colors have `r`/`red`, `g`/`green`,
+`b`/`blue`, and `a`/`alpha` components.
 
-In q5 WebGPU, the default color mode is RGB in float format, so
-set color components to values between 0 and 1.
-
-The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background) functions
-accept the same wide range of color representations as this function.
-
-Here are some examples of valid use:
-
-- `color(255)` (grayscale)
-- `color(255, 200)` (grayscale, alpha)
-- `color(255, 0, 0)` (r, g, b)
-- `color(255, 0, 0, 10)` (r, g, b, a)
-- `color('red')` (colorName)
-- `color('#ff0000')` (hexColor)
-- `color([255, 0, 0])` (colorComponents)
+The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background)
+functions accept the same wide range of color representations as this function.
 
 ```
 @param {string | number | Color | number[]} c0 color or first color component
@@ -33,6 +20,19 @@ Here are some examples of valid use:
 ```
 
 ### webgpu
+
+The default color format is "float", so
+set color components to values between 0 and 1.
+
+Here are some examples of valid use:
+
+- `color(1)` (grayscale)
+- `color(1, 0.8)` (grayscale, alpha)
+- `color(1, 0, 0)` (r, g, b)
+- `color(1, 0, 0, 0.1)` (r, g, b, a)
+- `color('red')` (colorName)
+- `color('#ff0000')` (hexColor)
+- `color([1, 0, 0])` (colorComponents)
 
 ```js
 await createCanvas(200);
@@ -71,6 +71,19 @@ q5.draw = function () {
 ```
 
 ### c2d
+
+The default color format is "integer",
+so set components to values between 0 and 255.
+
+Here are some examples of valid use:
+
+- `color(255)` (grayscale)
+- `color(255, 200)` (grayscale, alpha)
+- `color(255, 0, 0)` (r, g, b)
+- `color(255, 0, 0, 10)` (r, g, b, a)
+- `color('red')` (colorName)
+- `color('#ff0000')` (hexColor)
+- `color([255, 0, 0])` (colorComponents)
 
 ```js
 createCanvas(200);
@@ -113,10 +126,6 @@ function draw() {
 Sets the color mode for the sketch, which changes how colors are
 interpreted and displayed.
 
-The default color mode is RGB in legacy integer format.
-
-In WebGPU, the default is RGB in float format (best performance).
-
 Color gamut is 'display-p3' by default, if the device supports HDR.
 
 ```
@@ -126,6 +135,8 @@ Color gamut is 'display-p3' by default, if the device supports HDR.
 ```
 
 ### webgpu
+
+The default color mode is RGB in float format.
 
 ```js
 await createCanvas(200);
@@ -152,6 +163,8 @@ rect(0, -100, 100, 200);
 ```
 
 ### c2d
+
+The default color mode is RGB in legacy integer format.
 
 ```js
 createCanvas(200);
