@@ -18,7 +18,7 @@ Crea un nuevo objeto Vector.
 await crearLienzo(200);
 fondo(0.8);
 
-let v = crearVector(100, 100);
+let v = crearVector(0, 0);
 círculo(v.x, v.y, 50);
 ```
 

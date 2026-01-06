@@ -10,6 +10,16 @@ Constructs a new Vector object.
 @param {number} [z] optional. The z component of the vector
 ```
 
+### webgpu
+
+```js
+await createCanvas(200);
+background(0.8);
+
+let v = createVector(0, 0);
+circle(v.x, v.y, 50);
+```
+
 ## Vector.x
 
 The x component of the vector.
@@ -183,4 +193,3 @@ Linearly interpolates between this vector and another vector, including the magn
 @param {number} amt amount of interpolation; a number between 0.0 (close to the current vector) and 1.0 (close to the target vector)
 @returns {Vector} this vector after spherical interpolation
 ```
-

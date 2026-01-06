@@ -275,6 +275,9 @@ PIXELATED -> es:PIXELADO
 TWO_PI -> es:DOS_PI
 HALF_PI -> es:MEDIO_PI
 QUARTER_PI -> es:CUARTO_PI
+
+# vector
+createVector -> es:crearVector
 `;
 
 const userLangs = `
@@ -293,6 +296,45 @@ touchEnded -> es:alTerminarToque
 touchMoved -> es:alMoverToque
 mouseWheel -> es:ruedaRatón
 `;
+
+const classLangs = {
+	Vector: `
+add -> es:sumar
+sub -> es:restar
+mult -> es:multiplicar
+div -> es:dividir
+mag -> es:magnitud
+magSq -> es:magnitudCuad
+dist -> es:distancia
+normalize -> es:normalizar
+limit -> es:limitar
+setMag -> es:establecerMagnitud
+heading -> es:rumbo
+rotate -> es:rotar
+lerp -> es:interpolar
+array -> es:arreglo
+copy -> es:copiar
+dot -> es:punto
+cross -> es:cruz
+angleBetween -> es:anguloEntre
+reflect -> es:reflejar
+`,
+	Sound: `
+load -> es:cargar
+play -> es:reproducir
+stop -> es:parar
+pause -> es:pausar
+loop -> es:bucle
+setVolume -> es:establecerVolumen
+setPan -> es:establecerPan
+setLoop -> es:establecerBucle
+isLoaded -> es:estaCargado
+isPlaying -> es:estaReproduciendo
+isPaused -> es:estaPausado
+isLooping -> es:estaEnBucle
+onended -> es:alTerminar
+`
+};
 
 const parseLangs = function (data, lang) {
 	let map = {};
@@ -334,6 +376,25 @@ Object.defineProperty(Q5, 'lang', {
 				get: () => Q5[name],
 				set: (fn) => (Q5[name] = fn)
 			});
+		}
+
+		for (let className in classLangs) {
+			if (Q5[className]) {
+				let map = parseLangs(classLangs[className], val);
+				let proto = Q5[className].prototype;
+				for (let name in map) {
+					let translatedName = map[name];
+					if (proto.hasOwnProperty(translatedName)) continue;
+					Object.defineProperty(proto, translatedName, {
+						get: function () {
+							return this[name];
+						},
+						set: function (v) {
+							this[name] = v;
+						}
+					});
+				}
+			}
 		}
 
 		Q5._libMap = m;

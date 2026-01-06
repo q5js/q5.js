@@ -3506,7 +3506,7 @@ declare global {
 	 * await crearLienzo(200);
 	 * fondo(0.8);
 	 * 
-	 * let v = crearVector(100, 100);
+	 * let v = crearVector(0, 0);
 	 * círculo(v.x, v.y, 50);
 	 */
 	function crearVector(): void;
@@ -4149,6 +4149,11 @@ declare global {
 
 	// ⚙ advanced
 
+	/** ⚙
+	 * Alias para `Q5`.
+	 */
+	const q5: typeof Q5;
+
 	class Q5 {
 
 		/** ⚙
@@ -4157,6 +4162,124 @@ declare global {
 		 * @param {HTMLElement} [contenedor] elemento HTML dentro del cual se colocará el lienzo
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
+
+		/** ⚙
+		 * Desactiva los mensajes de error amigables de q5.
+		 */
+		disableFriendlyErrors(): void;
+
+		/** ⚙
+		 * Establecer en verdadero para mantener el bucle de dibujo después de un error.
+		 */
+		errorTolerant(): void;
+
+		/** ⚙
+		 * Verdadero si el dispositivo soporta HDR (el espacio de color display-p3).
+		 */
+		supportsHDR(): void;
+
+		/** ⚙
+		 * Establece los atributos de contexto de lienzo predeterminados utilizados para
+		 * lienzos recién creados y gráficos internos. Estas opciones son sobrescritas por
+		 * cualquier opción por lienzo que pases a `crearLienzo`.
+		 */
+		canvasOptions(): void;
+
+		/** ⚙
+		 * Un límite de asignación de memoria WebGPU.
+		 * 
+		 * El número máximo de matrices de transformación
+		 * que se pueden usar en una sola llamada de dibujo.
+		 */
+		MAX_TRANSFORMS(): void;
+
+		/** ⚙
+		 * Un límite de asignación de memoria WebGPU.
+		 * 
+		 * El número máximo de rectángulos
+		 * (llamadas a `rect`, `cuadrado`, `cápsula`)
+		 * que se pueden dibujar en una sola llamada de dibujo.
+		 */
+		static MAX_RECTS: number;
+
+		/** ⚙
+		 * Un límite de asignación de memoria WebGPU.
+		 * 
+		 * El número máximo de elipses
+		 * (llamadas a `elipse`, `círculo`, y `arco`)
+		 * que se pueden dibujar en una sola llamada de dibujo.
+		 */
+		MAX_ELLIPSES(): void;
+
+		/** ⚙
+		 * Un límite de asignación de memoria WebGPU.
+		 * 
+		 * El número máximo de caracteres de texto
+		 * que se pueden dibujar en una sola llamada de dibujo.
+		 */
+		MAX_CHARS(): void;
+
+		/** ⚙
+		 * Un límite de asignación de memoria WebGPU.
+		 * 
+		 * El número máximo de llamadas separadas a `texto`
+		 * que se pueden dibujar en una sola llamada de dibujo.
+		 */
+		MAX_TEXTS(): void;
+
+		/** ⚙
+		 * Crea una nueva instancia de Q5 que usa el [renderizador WebGPU de q5](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer).
+		 * @example
+		 * let q = await Q5.WebGPU('namespace');
+		 * q.crearLienzo(200, 100);
+		 * 
+		 * q.dibujar = () => {
+		 * 	q.fondo(0.8);
+		 * 	q.círculo(q.ratónX, 0, 80);
+		 * };
+		 */
+		static WebGPU(): Q5;
+
+		/** ⚙
+		 * Los addons pueden aumentar q5 con nueva funcionalidad agregando hooks,
+		 * funciones que se ejecutan en fases específicas del ciclo de vida de q5.
+		 * 
+		 * Dentro de la función, `this` se refiere a la instancia de Q5.
+		 * @param {string} lifecycle init, presetup, postsetup, predraw, postdraw, o remove
+		 * @param {Function} fn La función que se ejecutará en la fase del ciclo de vida especificada.
+		 */
+		addHook(): void;
+
+		/** ⚙
+		 * Forma compatible con p5.js v2 de registrar un addon con q5.
+		 * @param {Function} addon Una función que recibe `Q5`, `Q5.prototype`, y un objeto `lifecycles`.
+		 */
+		registerAddon(): void;
+
+		/** ⚙
+		 * Un objeto que contiene los módulos de q5, funciones que se ejecutan cuando q5 carga.
+		 * 
+		 * Cada función recibe dos parámetros de entrada:
+		 * 
+		 * - la instancia de q5
+		 * - un proxy para editar la instancia de q5 y las propiedades correspondientes del ámbito global
+		 */
+		modules(): void;
+
+		/** ⚙
+		 * La función de dibujo de q5 se ejecuta 60 veces por segundo por defecto.
+		 */
+		draw(): void;
+
+		/** ⚙
+		 * Se ejecuta después de cada llamada a la función `dibujar` y procesos de addons de q5 post-dibujo, si los hay.
+		 * 
+		 * Útil para agregar efectos de post-procesamiento cuando no es posible
+		 * hacerlo al final de la función `dibujar`, como cuando se usan
+		 * addons como p5play que dibujan automáticamente al lienzo después de que
+		 * la función `dibujar` se ejecuta.
+		 */
+		postProcess(): void;
 		static deshabilitarErroresAmigables: boolean;
 
 		static toleranteErrores: boolean;
@@ -4165,8 +4288,6 @@ declare global {
 
 		static opcionesLienzo: object;
 
-		static MAX_RECTS: number;
-
 		static MAX_ELIPSES: number;
 
 		static MAX_TRANSFORMACIONES: number;
@@ -4174,8 +4295,6 @@ declare global {
 		static MAX_CARACTERES: number;
 
 		static MAX_TEXTOS: number;
-
-		static WebGPU(): Q5;
 
 		static agregarHook(cicloVida: string, fn: Function): void;
 
@@ -4203,8 +4322,6 @@ declare global {
 			alto: number;
 		}
 	}
-
-	const q5: typeof Q5;
 
 }
 

@@ -22,7 +22,21 @@ async function setMonacoEditorTheme(themeName) {
 }
 
 let jsCustomTokenizer = {
-	tokenizer: { root: [[/[a-zA-Z_$][\w$]*(?=\()/, 'functionName']] }
+	tokenizer: {
+		root: [
+			[/[$_A-Za-z\u00C0-\u024F][$_0-9A-Za-z\u00C0-\u024F\u0300-\u036F][\w$]*(?=\()/, 'functionName'],
+			[
+				/[$_A-Za-z\u00C0-\u024F][$_0-9A-Za-z\u00C0-\u024F\u0300-\u036F]*/,
+				{
+					cases: {
+						'@typeKeywords': 'keyword',
+						'@keywords': 'keyword',
+						'@default': 'identifier'
+					}
+				}
+			]
+		]
+	}
 };
 
 async function modifyTokenizer(languageId, customRules) {

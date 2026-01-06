@@ -3510,6 +3510,12 @@ declare global {
 		 * @param {number} x x component of the vector
 		 * @param {number} y y component of the vector
 		 * @param {number} [z] optional. The z component of the vector
+		 * @example
+		 * await createCanvas(200);
+		 * background(0.8);
+		 * 
+		 * let v = createVector(0, 0);
+		 * circle(v.x, v.y, 50);
 		 */
 		constructor(x: number, y: number, z?: number);
 
