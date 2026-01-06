@@ -118,8 +118,10 @@ class MiniEditor {
 
 			let useWebGPU =
 				userCode.includes('= function') ||
+				userCode.startsWith('await') ||
 				userCode.includes('\nawait') ||
 				userCode.includes('await createCanvas') || // safeguard
+				userCode.includes('await createLienzo') ||
 				/webgpu/i.test(userCode);
 
 			if (useWebGPU) {

@@ -1,6 +1,6 @@
 # core
 
-Bienvenido a la documentación de q5! 🤩
+Bienvenido al contenido de q5! 🤩
 
 ¿Primera vez programando? Revisa la [guía para principiantes de q5](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief).
 

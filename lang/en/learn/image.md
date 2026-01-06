@@ -515,7 +515,7 @@ function draw() {
 
 Array of pixel color data from a canvas or image.
 
-Empty by default, populate by running `loadPixels`.
+Empty by default, get the data by running `loadPixels`.
 
 Each pixel is represented by four consecutive values in the array,
 corresponding to its red, green, blue, and alpha channels.

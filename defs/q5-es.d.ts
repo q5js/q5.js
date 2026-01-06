@@ -3,7 +3,7 @@ declare global {
 	// ⭐ core
 
 	/**
-	 * Bienvenido a la documentación de q5! 🤩
+	 * Bienvenido al contenido de q5! 🤩
 	 * 
 	 * ¿Primera vez programando? Revisa la [guía para principiantes de q5](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief).
 	 * 
@@ -522,7 +522,7 @@ declare global {
 	/** 🌆
 	 * Array de datos de color de píxeles de un lienzo o imagen.
 	 * 
-	 * Vacío por defecto, poblar ejecutando `cargarPíxeles`.
+	 * Vacío por defecto, obtener el dato ejecutando `cargarPíxeles`.
 	 * 
 	 * Cada píxel está representado por cuatro valores consecutivos en el array,
 	 * correspondientes a sus canales rojo, verde, azul y alfa.
@@ -1367,6 +1367,257 @@ declare global {
 	// 🎨 color
 
 	/** 🎨
+	 * Crea un nuevo objeto `Color`, el cual es útil principalmente para almacenar
+	 * un color que tu sketch reutilizará o modificará más tarde.
+	 * 
+	 * Con el modo de color por defecto, RGB, los colores tienen componentes `r`/`red` (rojo), `g`/`green` (verde),
+	 * `b`/`blue` (azul), y `a`/`alpha` (alfa).
+	 * 
+	 * Las funciones [`relleno`](https://q5js.org/learn/#fill), [`trazo`](https://q5js.org/learn/#stroke), y [`fondo`](https://q5js.org/learn/#background)
+	 * aceptan la misma amplia gama de representaciones de color que esta función.
+	 *
+	 * El formato de color por defecto es "flotante" ("float"), así que
+	 * establece los componentes de color a valores entre 0 y 1.
+	 * 
+	 * Aquí hay algunos ejemplos de uso válido:
+	 * 
+	 * - `color(1)` (escala de grises)
+	 * - `color(1, 0.8)` (escala de grises, alfa)
+	 * - `color(1, 0, 0)` (r, g, b)
+	 * - `color(1, 0, 0, 0.1)` (r, g, b, a)
+	 * - `color('red')` (nombre de color)
+	 * - `color('#ff0000')` (color hex)
+	 * - `color([1, 0, 0])` (componentes de color)
+	 * @param {string | number | Color | number[]} c0 color o primer componente de color
+	 * @param {number} [c1] segundo componente de color
+	 * @param {number} [c2] tercer componente de color
+	 * @param {number} [c3] cuarto componente de color (alfa)
+	 * @returns {Color} un nuevo objeto `Color`
+	 * @example
+	 * await crearLienzo(200);
+	 * rect(-100, -100, 100, 200);
+	 * 
+	 * //                ( r,   g,   b,   a)
+	 * let botella = color(0.35, 0.39, 1, 0.4);
+	 * relleno(botella);
+	 * trazo(botella);
+	 * grosorTrazo(30);
+	 * círculo(0, 0, 155);
+	 * @example
+	 * await crearLienzo(200);
+	 * //          (gris, alfa)
+	 * let c = color(0.8, 0.2);
+	 * 
+	 * q5.dibujar = function () {
+	 * 	fondo(c);
+	 * 	círculo(ratónX, ratónY, 50);
+	 * 	c.g = (c.g + 0.005) % 1;
+	 * };
+	 * @example
+	 * await crearLienzo(200);
+	 * 
+	 * //           (r, g, b,   a)
+	 * let c = color(0, 1, 1, 0.2);
+	 * 
+	 * q5.dibujar = function () {
+	 * 	relleno(c);
+	 * 	círculo(ratónX, ratónY, 50);
+	 * };
+	 */
+	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
+
+	/** 🎨
+	 * Establece el modo de color para el sketch, lo cual cambia cómo se
+	 * interpretan y muestran los colores.
+	 * 
+	 * La gama de color es 'display-p3' por defecto, si el dispositivo soporta HDR.
+	 *
+	 * El modo de color por defecto es RGB en formato flotante.
+	 * @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} modo modo de color
+	 * @param {1 | 255} formato formato de color (1 para flotante, 255 para entero)
+	 * @param {'srgb' | 'display-p3'} [gama] gama de color
+	 * @example
+	 * await crearLienzo(200);
+	 * 
+	 * modoColor(RGB, 1);
+	 * relleno(1, 0, 0);
+	 * rect(-100, -100, 66, 200);
+	 * relleno(0, 1, 0);
+	 * rect(-34, -100, 67, 200);
+	 * relleno(0, 0, 1);
+	 * rect(33, -100, 67, 200);
+	 * @example
+	 * await crearLienzo(200);
+	 * 
+	 * modoColor(OKLCH);
+	 * 
+	 * relleno(0.25, 0.15, 0);
+	 * rect(-100, -100, 100, 200);
+	 * 
+	 * relleno(0.75, 0.15, 0);
+	 * rect(0, -100, 100, 200);
+	 */
+	function modoColor(modo: 'rgb' | 'oklch', formato: 1 | 255, gama: 'srgb' | 'display-p3'): void;
+
+	/** 🎨
+	 * Los colores RGB tienen componentes `r`/`red` (rojo), `g`/`green` (verde), `b`/`blue` (azul),
+	 * y `a`/`alpha` (alfa).
+	 * 
+	 * Por defecto cuando un lienzo está usando el espacio de color HDR "display-p3",
+	 * los colores rgb son mapeados a la gama completa P3, incluso cuando usan el
+	 * formato entero legado 0-255.
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * 
+	 * modoColor(RGB);
+	 * 
+	 * fondo(1, 0, 0);
+	 */
+	const RGB: 'rgb';
+
+	/** 🎨
+	 * Los colores OKLCH tienen componentes `l`/`lightness` (luminosidad), `c`/`chroma` (croma),
+	 * `h`/`hue` (tono), y `a`/`alpha` (alfa). Es más intuitivo para los humanos
+	 * trabajar con color en estos términos que con RGB.
+	 * 
+	 * OKLCH es perceptualmente uniforme, lo que significa que los colores con la
+	 * misma luminosidad y croma (colorido) parecerán tener
+	 * igual luminancia, independientemente del tono.
+	 * 
+	 * OKLCH puede representar con precisión todos los colores visibles para el
+	 * ojo humano, a diferencia de muchos otros espacios de color que están limitados
+	 * a una gama. Los valores máximos de luminosidad y croma que
+	 * corresponden a los límites de la gama sRGB o P3 varían dependiendo del
+	 * tono. Los colores que están fuera de la gama serán recortados al
+	 * color dentro de la gama más cercano.
+	 * 
+	 * Usa el [selector de color OKLCH](https://oklch.com) para encontrar
+	 * colores dentro de la gama.
+	 * 
+	 * - `lightness`: 0 a 1
+	 * - `chroma`: 0 a ~0.4
+	 * - `hue`: 0 a 360
+	 * - `alpha`: 0 a 1
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * 
+	 * modoColor(OKLCH);
+	 * 
+	 * fondo(0.64, 0.3, 30);
+	 * @example
+	 * await crearLienzo(200);
+	 * modoColor(OKLCH);
+	 * 
+	 * q5.dibujar = function () {
+	 * 	fondo(0.7, 0.16, cuadroActual % 360);
+	 * };
+	 */
+	const OKLCH: 'oklch';
+
+	/** 🎨
+	 * Los colores HSL tienen componentes `h`/`hue` (tono), `s`/`saturation` (saturación),
+	 * `l`/`lightness` (luminosidad), y `a`/`alpha` (alfa).
+	 * 
+	 * HSL fue creado en la década de 1970 para aproximar la percepción humana
+	 * del color, intercambiando precisión por cálculos más simples. No es
+	 * perceptualmente uniforme, por lo que colores con la misma luminosidad
+	 * pueden parecer más oscuros o más claros, dependiendo de su tono
+	 * y saturación. Sin embargo, los valores de luminosidad y saturación que
+	 * corresponden a los límites de la gama siempre son 100, independientemente del
+	 * tono. Esto puede hacer que HSL sea más fácil de trabajar que OKLCH.
+	 * 
+	 * Los colores HSL son mapeados a la gama completa P3 cuando
+	 * se usa el espacio de color "display-p3".
+	 * 
+	 * - `hue`: 0 a 360
+	 * - `saturation`: 0 a 100
+	 * - `lightness`: 0 a 100
+	 * - `alpha`: 0 a 1
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * 
+	 * modoColor(HSL);
+	 * 
+	 * fondo(0, 100, 50);
+	 * @example
+	 * await crearLienzo(200, 220);
+	 * sinTrazo();
+	 * 
+	 * modoColor(HSL);
+	 * for (let h = 0; h < 360; h += 10) {
+	 * 	for (let l = 0; l <= 100; l += 10) {
+	 * 		relleno(h, 100, l);
+	 * 		rect(h * (11 / 20) - 100, l * 2 - 110, 6, 20);
+	 * 	}
+	 * }
+	 */
+	const HSL: 'hsl';
+
+	/** 🎨
+	 * Los colores HSB tienen componentes `h`/`hue` (tono), `s`/`saturation` (saturación),
+	 * `b`/`brightness` (brillo) (también conocido como `v`/`value` (valor)), y `a`/`alpha` (alfa).
+	 * 
+	 * HSB es similar a HSL, pero en lugar de luminosidad
+	 * (negro a blanco), usa brillo (negro a
+	 * color completo). Para producir blanco, establece el brillo
+	 * a 100 y la saturación a 0.
+	 * 
+	 * - `hue`: 0 a 360
+	 * - `saturation`: 0 a 100
+	 * - `brightness`: 0 a 100
+	 * - `alpha`: 0 a 1
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * 
+	 * modoColor(HSB);
+	 * 
+	 * fondo(0, 100, 100);
+	 * @example
+	 * await crearLienzo(200, 220);
+	 * sinTrazo();
+	 * 
+	 * modoColor(HSB);
+	 * for (let h = 0; h < 360; h += 10) {
+	 * 	for (let b = 0; b <= 100; b += 10) {
+	 * 		relleno(h, 100, b);
+	 * 		rect(h * (11 / 20) - 100, b * 2 - 110, 6, 20);
+	 * 	}
+	 * }
+	 */
+	const HSB: 'hsb';
+
+	/** 🎨
+	 * Limita la gama de color al espacio de color sRGB.
+	 * 
+	 * Si tu pantalla es capaz de HDR, nota que el rojo completo aparece
+	 * menos saturado y oscuro en este ejemplo, como lo haría en
+	 * una pantalla SDR.
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * 
+	 * modoColor(RGB, 1, SRGB);
+	 * 
+	 * fondo(1, 0, 0);
+	 */
+	const SRGB: 'srgb';
+
+	/** 🎨
+	 * Expande la gama de color al espacio de color P3.
+	 * 
+	 * Esta es la gama de color por defecto en dispositivos que soportan HDR.
+	 * 
+	 * Si tu pantalla es capaz de HDR, nota que el rojo completo aparece
+	 * totalmente saturado y brillante en el siguiente ejemplo.
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * 
+	 * modoColor(RGB, 1, DISPLAY_P3);
+	 * 
+	 * fondo(1, 0, 0);
+	 */
+	const DISPLAY_P3: 'display-p3';
+
+	/** 🎨
 	 * Dibuja sobre todo el lienzo con un color o una imagen.
 	 * 
 	 * Al igual que la función [`color`](https://q5js.org/learn/#color),
@@ -1379,36 +1630,43 @@ declare global {
 	 * @example
 	 * q5.dibujar = function () {
 	 * 	fondo(0.5, 0.2);
-	 * 	círculo(mouseX, mouseY, 20);
+	 * 	círculo(ratónX, ratónY, 20);
 	 * };
 	 */
 	function fondo(relleno: Color | Q5.Imagen): void;
 
-	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
-
-	function modoColor(modo: 'rgb' | 'oklch', formato: 1 | 255, gama: 'srgb' | 'display-p3'): void;
-
-	const RGB: 'rgb';
-
-	const OKLCH: 'oklch';
-
-	const HSL: 'hsl';
-
-	const HSB: 'hsb';
-
-	const SRGB: 'srgb';
-
-	const DISPLAY_P3: 'display-p3';
-
 	class Color {
+
+		/** 🎨
+		 * Este constructor acepta estrictamente 4 números, que son los componentes del color.
+		 * 
+		 * Usa la función `color` para mayor flexibilidad, ejecuta
+		 * este constructor internamente.
+		 * 
+		 * `Color` no es realmente una clase en si misma, es una referencia a una
+		 * clase de color Q5 basada en el modo de color, formato y gama.
+		 */
 		constructor(c0: number, c1: number, c2: number, c3: number);
 
+		/** 🎨
+		 * Comprueba si este color es exactamente igual a otro color.
+		 */
 		igual(otro: Color): boolean;
 
+		/** 🎨
+		 * Comprueba si el color es el mismo que otro color,
+		 * ignorando sus valores alfa.
+		 */
 		esMismoColor(otro: Color): boolean;
 
+		/** 🎨
+		 * Produce una representación de cadena de color CSS.
+		 */
 		toString(): string;
 
+		/** 🎨
+		 * Un array de los componentes del color.
+		 */
 		niveles: number[];
 	}
 
@@ -1803,128 +2061,338 @@ declare global {
 	 * @example
 	 * await crearLienzo(200);
 	 * 
-	 * guardar();
+	 * apilar();
 	 * relleno('blue');
 	 * trasladar(50, 50);
 	 * círculo(0, 0, 80);
-	 * recuperar();
+	 * desapilar();
 	 * 
 	 * cuadrado(0, 0, 50);
 	 */
-	function guardar(datos?: object, nombreArchivo?: string): void;
+	function apilar(): void;
 
 	/** 🦋
 	 * Restaura la configuración de estilo de dibujo y transformaciones guardadas previamente.
 	 * @example
 	 * await crearLienzo(200);
 	 * 
-	 * guardar();
+	 * apilar();
 	 * relleno('blue');
 	 * trasladar(50, 50);
 	 * círculo(0, 0, 80);
-	 * recuperar();
+	 * desapilar();
 	 * 
 	 * cuadrado(0, 0, 50);
 	 */
+	function desapilar(): void;
+
 	function recuperar(): void;
 
 	// 💻 display
 
 	/** 💻
-	 * El ancho de la ventana (cantidad de píxeles). Atajo para `window.innerWidth`.
+	 * Personaliza cómo se presenta tu lienzo.
+	 * @param {string} modo NORMAL, CENTRO, o MAXIMIZADO
+	 * @param {string} calidadRenderizado SUAVE o PIXELADO
+	 * @param {number} escala también se puede dar como una cadena (por ejemplo "x2")
+	 * @example
+	 * await crearLienzo(50, 25);
+	 * 
+	 * modoVisualización(CENTRO, PIXELADO, 4);
+	 * 
+	 * círculo(0, 0, 16);
+	 */
+	function modoVisualización(): void;
+
+	/** 💻
+	 * Una configuración de `modoVisualización`.
+	 * 
+	 * El lienzo se escalará para llenar el elemento padre,
+	 * con bandas negras si es necesario para preservar su relación de aspecto.
+	 */
+	const MAXIMIZADO: 'maxed';
+
+	/** 💻
+	 * Una calidad de renderizado de `modoVisualización`.
+	 * 
+	 * Se usa escalado suave si el lienzo se escala.
+	 */
+	const SUAVE: 'smooth';
+
+	/** 💻
+	 * Una calidad de renderizado de `modoVisualización`.
+	 * 
+	 * Los píxeles se renderizan como cuadrados nítidos si el lienzo se escala.
+	 */
+	const PIXELADO: 'pixelated';
+
+	/** 💻
+	 * Habilita o deshabilita el modo de pantalla completa.
+	 * @param {boolean} [v] booleano indicando si habilitar o deshabilitar el modo de pantalla completa
+	 */
+	function pantallaCompleta(v?: boolean): void;
+
+	/** 💻
+	 * El ancho de la ventana.
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	tamañoTexto(64);
+	 * 	alineaciónTexto(CENTRO, CENTRO);
+	 * 	texto(anchoVentana, 0, 0);
+	 * };
 	 */
 	var anchoVentana: number;
 
 	/** 💻
-	 * El alto de la ventana (cantidad de píxeles). Atajo para `window.innerHeight`.
+	 * El alto de la ventana.
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	tamañoTexto(64);
+	 * 	alineaciónTexto(CENTRO, CENTRO);
+	 * 	texto(altoVentana, 0, 0);
+	 * };
 	 */
 	var altoVentana: number;
 
 	/** 💻
-	 * Número del cuadro actual, es decir, la cantidad de cuadros que se han dibujado desde que se inició el sketch.
+	 * El ancho del lienzo.
+	 * @example
+	 * await crearLienzo(200, 120);
+	 * círculo(0, 0, ancho);
+	 */
+	var ancho: number;
+
+	/** 💻
+	 * El alto del lienzo.
+	 * @example
+	 * await crearLienzo(200, 80);
+	 * círculo(0, 0, alto);
+	 */
+	var alto: number;
+
+	/** 💻
+	 * La mitad del ancho del lienzo.
+	 * @example
+	 * await crearLienzo(200, 80);
+	 * círculo(0, 0, medioAncho);
+	 */
+	var medioAncho: number;
+
+	/** 💻
+	 * La mitad del alto del lienzo.
+	 * @example
+	 * await crearLienzo(200, 80);
+	 * círculo(0, 0, medioAlto);
+	 */
+	var medioAlto: number;
+
+	/** 💻
+	 * El elemento lienzo asociado con la instancia Q5.
+	 * 
+	 * Si no se crea un lienzo explícitamente con `crearLienzo()`, pero se define una función q5 como `dibujar` o `alPresionarRatón`, se creará automáticamente un lienzo por defecto de tamaño 200x200.
+	 */
+	var lienzo: HTMLCanvasElement;
+
+	/** 💻
+	 * Redimensiona el lienzo al ancho y alto especificados.
+	 * @param {number} w ancho del lienzo
+	 * @param {number} h alto del lienzo
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * 
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * };
+	 * 
+	 * q5.alPresionarRatón = function () {
+	 * 	redimensionarLienzo(200, 200);
+	 * };
+	 */
+	function redimensionarLienzo(w: number, h: number): void;
+
+	/** 💻
+	 * El número de cuadros que se han mostrado desde que comenzó el programa.
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	tamañoTexto(64);
+	 * 	texto(cuadroActual, -92, 20);
+	 * };
 	 */
 	var cuadroActual: number;
 
 	/** 💻
 	 * Detiene el bucle de dibujo.
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	círculo(cuadroActual * 5 - 100, 0, 80);
+	 * 	pausar();
+	 * };
 	 */
 	function pausar(): void;
 
 	/** 💻
-	 * Dibuja el lienzo `n` veces. Si no recibe parametro, se dibuja una sola vez. Útil para controlar animaciones con el bucle pausado.
-	 * @param {number} [n] cantidad de veces que se volverá a dibujar el lienzo, por defecto es 1
+	 * Redibuja el lienzo n veces. Si no se proporciona ningún parámetro de entrada,
+	 * llama a la función de dibujo una vez.
+	 * 
+	 * Esta es una función asíncrona.
+	 * @param {number} [n] número de veces para redibujar el lienzo, por defecto es 1
+	 * @example
+	 * await crearLienzo(200);
+	 * pausar();
+	 * 
+	 * q5.dibujar = function () {
+	 * 	círculo(cuadroActual * 5 - 100, 0, 80);
+	 * };
+	 * q5.alPresionarRatón = function () {
+	 * 	redibujar(10);
+	 * };
 	 */
 	function redibujar(n?: number): void;
 
 	/** 💻
-	 * Vuelve a activar el bucle de dibujo en caso de que estuviera pausado.
+	 * Inicia el bucle de dibujo de nuevo si estaba detenido.
+	 * @example
+	 * await crearLienzo(200);
+	 * pausar();
+	 * 
+	 * q5.dibujar = function () {
+	 * 	círculo(cuadroActual * 5 - 100, 0, 80);
+	 * };
+	 * q5.alPresionarRatón = function () {
+	 * 	reanudar();
+	 * };
 	 */
 	function reanudar(): void;
 
 	/** 💻
-	 * Si recibe un parámetro, establece la cantidad ideal de cuadros que se intentarán dibujar por cada segundo (es decir, la tasa de refresco, la frecuencia del bucle).
+	 * Establece la frecuencia de fotogramas objetivo u obtiene una aproximación de la
+	 * frecuencia de fotogramas actual del sketch.
 	 * 
-	 * Retorna la frecuencia real alcanzada durante el último segundo de ejecución. Incluso si nunca se modifica explícitamente la frecuencia, el valor real suele fluctuar entre el ideal y 0. Para un mejor análisis del rendimiento usar las herramientas del navegador (DevTools).
-	 * @param `hz` {number} [frecuencia] cantidad ideal de cuadros a dibujar en un segundo, por defecto es 60
-	 * @returns {number} frecuencia real del bucle en el último segundo
+	 * Incluso cuando el sketch se está ejecutando a una frecuencia de fotogramas consistente,
+	 * el valor actual de la frecuencia de fotogramas fluctuará. Usa las herramientas de desarrollador
+	 * de tu navegador web para un análisis de rendimiento más preciso.
+	 * @param {number} [hertz] frecuencia de fotogramas objetivo, por defecto es 60
+	 * @returns {number} frecuencia de fotogramas actual
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 
+	 * 	if (ratónPresionado) frecuenciaRefresco(10);
+	 * 	else frecuenciaRefresco(60);
+	 * 
+	 * 	círculo((cuadroActual % 200) - 100, 0, 80);
+	 * };
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	tamañoTexto(64);
+	 * 	texto(redondear(frecuenciaRefresco()), -35, 20);
+	 * };
 	 */
 	function frecuenciaRefresco(hertz?: number): number;
 
 	/** 💻
-	 * Retorna la cantidad ideal de cuadros que se intentan dibujar por segundo.
-	 */
-	function frecuenciaIdeal(): void;
-
-	/** 💻
-	 * Retorna la cantidad maxima de cuadros que se podrían estar dibujando en cada segundo.
+	 * La frecuencia de fotogramas deseada del sketch.
+	 * @returns {number} frecuencia de fotogramas objetivo
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	tamañoTexto(64);
 	 * 
-	 * Es un valor teórico que depende del estado del dispositivo. Para un mejor análisis del rendimiento usar las herramientas del navegador (DevTools).
-	 * @returns {number} cantidad máxima teorica de cuadros por segundo
+	 * 	texto(obtenerTasaFotogramasObjetivo(), -35, 20);
+	 * };
 	 */
-	function frecuenciaMaxima(): void;
-
-	/** 💻
-	 * Funcion a declarar. Se ejecuta después de cada llamada a `dibujar` y de los `hooks de dibujo`, pero antes de dibujar realmente el lienzo.
-	 * 
-	 * Útil para agregar efectos finales cuando es difícil hacerlo en la función de dibujo. Por ejemplo, al usar extensiones como p5play que dibujan capas superpuestas al lienzo.
-	 */
-	function retocarDibujo(): void;
-
-	/** 💻
-	 * Milisegundos que han pasado desde el último cuadro dibujado. Con la frecuencia por defecto a 60 hz, el tiempo aproximado es 16.6 ms o mas.
-	 * 
-	 * Útil para mantener las animaciones sincronizadas con precisión, sobretodo si existen momentos en que la ejecución se ralentiza por sobrecarga del dispositivo. En casos en que la frecuencia real del bucle sea considerablemente mas baja, es recomendable reducir la frecuencia ideal.
-	 */
-	function ultimoTiempo(): void;
-
-	const MAXIMIZADO: 'maxed';
-
-	const SUAVE: 'smooth';
-
-	const PIXELADO: 'pixelated';
-
-	function pantallaCompleta(v?: boolean): void;
-
-	var ancho: number;
-
-	var alto: number;
-
-	var medioAncho: number;
-
-	var medioAlto: number;
-
-	var lienzo: HTMLCanvasElement;
-
-	function redimensionarLienzo(w: number, h: number): void;
-
 	function obtenerTasaFotogramasObjetivo(): number;
 
+	/** 💻
+	 * Obtiene los FPS actuales, en términos de cuántos fotogramas podrían generarse
+	 * en un segundo, lo cual puede ser más alto que la frecuencia de fotogramas objetivo.
+	 * 
+	 * Usa las herramientas de desarrollador de tu navegador web para un análisis
+	 * de rendimiento más profundo.
+	 * @returns {number} fotogramas por segundo
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	frecuenciaRefresco(1);
+	 * 	tamañoTexto(64);
+	 * 
+	 * 	texto(obtenerFPS(), -92, 20);
+	 * };
+	 */
 	function obtenerFPS(): number;
 
+	/** 💻
+	 * Se ejecuta después de cada llamada a la función `dibujar` y procesos de addons de q5 post-dibujo, si los hay.
+	 * 
+	 * Útil para añadir efectos de post-procesamiento cuando no es posible
+	 * hacerlo al final de la función `dibujar`, como cuando se usan
+	 * addons como p5play que auto-dibujan al lienzo después de que
+	 * la función `dibujar` se ejecuta.
+	 */
 	function postProcesar(): void;
 
+	/** 💻
+	 * Establece la densidad de píxeles del lienzo.
+	 * @param {number} v valor de densidad de píxeles
+	 * @returns {number} densidad de píxeles
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * fondo(0.8);
+	 * densidadPíxeles(1);
+	 * círculo(0, 0, 80);
+	 */
+	function densidadPíxeles(): void;
+
+	/** 💻
+	 * Devuelve la densidad de visualización actual.
+	 * 
+	 * En la mayoría de pantallas modernas, este valor será 2 o 3.
+	 * @returns {number} densidad de visualización
+	 * @example
+	 * await crearLienzo(200, 100);
+	 * fondo(0.8);
+	 * tamañoTexto(64);
+	 * texto(densidadVisualización(), -90, 6);
+	 */
+	function densidadVisualización(): void;
+
+	/** 💻
+	 * El tiempo pasado desde que se dibujó el último fotograma.
+	 * 
+	 * Con la frecuencia de fotogramas por defecto de 60, el tiempo delta será
+	 * aproximadamente 16.6
+	 * 
+	 * Se puede usar para mantener movimientos atados al tiempo real si el sketch
+	 * a menudo cae por debajo de la frecuencia de fotogramas objetivo. Aunque si las frecuencias
+	 * de fotogramas son consistentemente bajas, considera reducir la frecuencia
+	 * de fotogramas objetivo.
+	 * @example
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	texto(deltaTiempo, -90, 6);
+	 * };
+	 * @example
+	 * let x = -100;
+	 * q5.dibujar = function () {
+	 * 	fondo(0.8);
+	 * 	// simular caídas de frecuencia de fotogramas
+	 * 	frecuenciaRefresco(aleatorio(30, 60));
+	 * 
+	 * 	x += deltaTiempo * 0.2;
+	 * 	if (x > 100) x = -100;
+	 * 	círculo(x, 0, 20);
+	 * };
+	 */
 	var deltaTiempo: number;
 
+	/** 💻
+	 * El contexto de renderizado 2D para el lienzo, si se usa el renderizador
+	 * Canvas2D.
+	 */
 	var contextoDibujo: CanvasRenderingContext2D;
 
 	// 🧮 math
@@ -3043,63 +3511,234 @@ declare global {
 	 */
 	function crearVector(): void;
 
-	/** ↗
-	 * Una clase para describir un vector bidimensional o tridimensional, específicamente un vector euclidiano (también conocido como geométrico). Un vector es una entidad que tiene tanto magnitud como dirección. El tipo de datos almacena los componentes del vector (x, y para 2D, y z para 3D). La magnitud y dirección se pueden acceder a través de los métodos `mag()` y `heading()`.
-	 * @param {number} [x] componente x del vector
-	 * @param {number} [y] componente y del vector
-	 * @param {number} [z] componente z del vector
-	 * @param {number} [w] componente w del vector
-	 * @returns {Vector} este vector
-	 * @returns {Vector} copia del vector
-	 * @param {number | Vector} x componente x del vector o Vector a sumar
-	 * @param {number} [y] componente y del vector
-	 * @param {number} [z] componente z del vector
-	 * @returns {Vector} este vector
-	 * @param {number | Vector} x componente x del vector o Vector a restar
-	 * @param {number} [y] componente y del vector
-	 * @param {number} [z] componente z del vector
-	 * @returns {Vector} este vector
-	 * @param {number} n escalar por el cual multiplicar
-	 * @returns {Vector} este vector
-	 * @param {number} n escalar por el cual dividir
-	 * @returns {Vector} este vector
-	 * @returns {number} magnitud del vector
-	 * @returns {number} magnitud del vector al cuadrado
-	 * @param {Vector} v vector con el cual hacer producto punto
-	 * @returns {number} producto punto
-	 * @param {Vector} v vector con el cual hacer producto cruz
-	 * @returns {Vector} producto cruz
-	 * @param {Vector} v vector al cual calcular distancia
-	 * @returns {number} distancia
-	 * @returns {Vector} este vector
-	 * @param {number} max magnitud máxima
-	 * @returns {Vector} este vector
-	 * @param {number} len nueva longitud para este vector
-	 * @returns {Vector} este vector
-	 * @returns {number} el ángulo de rotación
-	 * @param {number} ángulo ángulo de rotación
-	 * @returns {Vector} este vector
-	 * @param {Vector} v el vector x, y, z
-	 * @returns {number} el ángulo entre
-	 * @param {Vector} v el vector x, y, z
-	 * @param {number} amt la cantidad de interpolación; 0.0 es el vector antiguo, 1.0 es el nuevo vector, 0.5 está a mitad de camino
-	 * @returns {Vector} este vector
-	 * @param {Vector} superficieNormal el vector normal a la superficie
-	 * @returns {Vector} este vector
-	 * @returns {number[]} array de flotantes
-	 * @param {Vector} v el vector a comparar
-	 * @returns {boolean} verdadero si los vectores son iguales
-	 * @param {number} ángulo el ángulo deseado
-	 * @param {number} [longitud] longitud del nuevo vector (por defecto a 1)
-	 * @returns {Vector} nuevo objeto Vector
-	 * @returns {Vector} nuevo objeto Vector
-	 * @returns {Vector} nuevo objeto Vector
-	 */
 	class Vector {
 
-		// 🖌 shaping
+		/** ↗
+		 * Una clase para describir un vector bidimensional o tridimensional, específicamente un vector euclidiano (también conocido como geométrico). Un vector es una entidad que tiene tanto magnitud como dirección. El tipo de datos almacena los componentes del vector (x, y para 2D, y z para 3D). La magnitud y dirección se pueden acceder a través de los métodos `mag()` y `heading()`.
+		 */
+		constructor(x: number, y: number, z?: number);
 
-		/** 🖌
+		/** ↗
+		 * El componente x del vector.
+		 */
+		x: number;
+
+		/** ↗
+		 * El componente y del vector.
+		 */
+		y: number;
+
+		/** ↗
+		 * El componente z del vector.
+		 */
+		z: number;
+
+		/** ↗
+		 * El componente w del vector.
+		 */
+		w(): void;
+
+		/** ↗
+		 * Establece los componentes x, y, y z del vector.
+		 * @param {number} [x] componente x del vector
+		 * @param {number} [y] componente y del vector
+		 * @param {number} [z] componente z del vector
+		 * @param {number} [w] componente w del vector
+		 * @returns {Vector} este vector
+		 */
+		set(): void;
+
+		/** ↗
+		 * Devuelve una copia del vector.
+		 * @returns {Vector} copia del vector
+		 */
+		copy(): void;
+
+		/** ↗
+		 * Suma x, y, y z componentes a un vector, suma un vector a otro, o suma dos vectores independientes.
+		 * @param {number | Vector} x componente x del vector o Vector a sumar
+		 * @param {number} [y] componente y del vector
+		 * @param {number} [z] componente z del vector
+		 * @returns {Vector} este vector
+		 */
+		add(): void;
+
+		/** ↗
+		 * Resta x, y, y z componentes de un vector, resta un vector de otro, o resta dos vectores independientes.
+		 * @param {number | Vector} x componente x del vector o Vector a restar
+		 * @param {number} [y] componente y del vector
+		 * @param {number} [z] componente z del vector
+		 * @returns {Vector} este vector
+		 */
+		sub(): void;
+
+		/** ↗
+		 * Multiplica el vector por un escalar.
+		 * @param {number} n escalar por el cual multiplicar
+		 * @returns {Vector} este vector
+		 */
+		mult(n: number | Vector): Vector;
+
+		/** ↗
+		 * Divide el vector por un escalar.
+		 * @param {number} n escalar por el cual dividir
+		 * @returns {Vector} este vector
+		 */
+		div(n: number | Vector): Vector;
+
+		/** ↗
+		 * Calcula la magnitud (longitud) del vector y devuelve el resultado como un flotante (esto es simplemente la ecuación `sqrt(x*x + y*y + z*z)`).
+		 * @returns {number} magnitud del vector
+		 */
+		mag(): number;
+
+		/** ↗
+		 * Calcula la magnitud (longitud) del vector al cuadrado y devuelve el resultado como un flotante (esto es simplemente la ecuación `x*x + y*y + z*z`).
+		 * @returns {number} magnitud del vector al cuadrado
+		 */
+		magSq(): void;
+
+		/** ↗
+		 * Calcula el producto punto de dos vectores.
+		 * @param {Vector} v vector con el cual hacer producto punto
+		 * @returns {number} producto punto
+		 */
+		dot(): void;
+
+		/** ↗
+		 * Calcula el producto cruz de dos vectores.
+		 * @param {Vector} v vector con el cual hacer producto cruz
+		 * @returns {Vector} producto cruz
+		 */
+		cross(): void;
+
+		/** ↗
+		 * Calcula la distancia euclidiana entre dos puntos (considerando un punto como un objeto vector).
+		 * @param {Vector} v vector al cual calcular distancia
+		 * @returns {number} distancia
+		 */
+		dist(v: Vector): number;
+
+		/** ↗
+		 * Normaliza el vector a longitud 1 (hace que sea un vector unitario).
+		 * @returns {Vector} este vector
+		 */
+		normalize(): void;
+
+		/** ↗
+		 * Limita la magnitud de este vector al valor usado para el parámetro `max`.
+		 * @param {number} max magnitud máxima
+		 * @returns {Vector} este vector
+		 */
+		limit(): void;
+
+		/** ↗
+		 * Establece la magnitud de este vector al valor usado para el parámetro `len`.
+		 * @param {number} len nueva longitud para este vector
+		 * @returns {Vector} este vector
+		 */
+		setMag(): void;
+
+		/** ↗
+		 * Calcula el ángulo de rotación para este vector (solo vectores 2D).
+		 * @returns {number} el ángulo de rotación
+		 */
+		heading(): void;
+
+		/** ↗
+		 * Rota el vector por un ángulo (solo vectores 2D), la magnitud permanece igual.
+		 * @param {number} ángulo ángulo de rotación
+		 * @returns {Vector} este vector
+		 */
+		rotate(): void;
+
+		/** ↗
+		 * Calcula y devuelve el ángulo entre dos vectores.
+		 * @param {Vector} v el vector x, y, z
+		 * @returns {number} el ángulo entre
+		 */
+		angleBetween(): void;
+
+		/** ↗
+		 * Interpola linealmente el vector a otro vector.
+		 * @param {Vector} v el vector x, y, z
+		 * @param {number} amt la cantidad de interpolación; 0.0 es el vector antiguo, 1.0 es el nuevo vector, 0.5 está a mitad de camino
+		 * @returns {Vector} este vector
+		 */
+		lerp(v: Vector, amt: number): Vector;
+
+		/** ↗
+		 * Refleja el vector entrante sobre una normal al muro.
+		 * @param {Vector} superficieNormal el vector normal a la superficie
+		 * @returns {Vector} este vector
+		 */
+		reflect(): void;
+
+		/** ↗
+		 * Devuelve una representación de este vector como un array de flotantes.
+		 * @returns {number[]} array de flotantes
+		 */
+		array(): void;
+
+		/** ↗
+		 * Comprueba si los componentes x, y, y z del vector son iguales a los componentes x, y, y z de otro vector.
+		 * @param {Vector} v el vector a comparar
+		 * @returns {boolean} verdadero si los vectores son iguales
+		 */
+		equals(): void;
+
+		/** ↗
+		 * Hace un nuevo vector 2D desde un ángulo de longitud 1.
+		 * @param {number} ángulo el ángulo deseado
+		 * @param {number} [longitud] longitud del nuevo vector (por defecto a 1)
+		 * @returns {Vector} nuevo objeto Vector
+		 */
+		fromAngle(): void;
+
+		/** ↗
+		 * Hace un nuevo vector 2D aleatorio con una magnitud de 1.
+		 * @returns {Vector} nuevo objeto Vector
+		 */
+		random2D(): void;
+
+		/** ↗
+		 * Hace un nuevo vector 3D aleatorio con una magnitud de 1.
+		 * @returns {Vector} nuevo objeto Vector
+		 */
+		random3D(): void;
+		sumar(v: Vector): Vector;
+
+		restar(v: Vector): Vector;
+
+		normalizar(): Vector;
+
+		establecerMag(len: number): Vector;
+
+		punto(v: Vector): number;
+
+		cruz(v: Vector): Vector;
+
+		copiar(): Vector;
+
+		establecer(x: number, y: number, z?: number): void;
+
+		limitar(max: number): Vector;
+
+		rumbo(): number;
+
+		establecerRumbo(angulo: number): Vector;
+
+		rotar(angulo: number): Vector;
+
+		slerp(v: Vector, amt: number): Vector;
+
+		static desdeÁngulo(angulo: number, longitud?: number): Vector;
+
+	}
+
+	// 🖌 shaping
+
+	/** 🖌
 	 * Dibuja un arco, que es una sección de una elipse.
 	 * 
 	 * `modoEliptico` afecta cómo se dibuja el arco.
@@ -3118,9 +3757,9 @@ declare global {
 	 * 
 	 * arco(0, 0, 160, 160, 0.8, -0.8);
 	 */
-		function arco(x: number, y: number, w: number, h: number, inicio: number, fin: number, modo?: number): void;
+	function arco(x: number, y: number, w: number, h: number, inicio: number, fin: number, modo?: number): void;
 
-		/** 🖌
+	/** 🖌
 	 * Dibuja una curva.
 	 * @example
 	 * await crearLienzo(200, 100);
@@ -3128,9 +3767,9 @@ declare global {
 	 * 
 	 * curva(-100, -200, -50, 0, 50, 0, 100, -200);
 	 */
-		function curva(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+	function curva(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
-		/** 🖌
+	/** 🖌
 	 * Establece la cantidad de segmentos de línea recta usados para hacer una curva.
 	 * 
 	 * Solo tiene efecto en q5 WebGPU.
@@ -3144,40 +3783,40 @@ declare global {
 	 * trazo(0, 1, 1);
 	 * curva(-100, -200, -50, 0, 50, 0, 100, -200);
 	 */
-		function detalleCurva(val: number): void;
+	function detalleCurva(val: number): void;
 
-		/** 🖌
+	/** 🖌
 	 * Comienza a almacenar vértices para una forma convexa.
 	 */
-		function empezarForma(): void;
+	function empezarForma(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Termina de almacenar vértices para una forma convexa.
 	 */
-		function terminarForma(): void;
+	function terminarForma(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Comienza a almacenar vértices para un contorno.
 	 * 
 	 * No disponible en q5 WebGPU.
 	 */
-		function empezarContorno(): void;
+	function empezarContorno(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Termina de almacenar vértices para un contorno.
 	 * 
 	 * No disponible en q5 WebGPU.
 	 */
-		function terminarContorno(): void;
+	function terminarContorno(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Especifica un vértice en una forma.
 	 * @param {number} x coordenada-x
 	 * @param {number} y coordenada-y
 	 */
-		function vértice(): void;
+	function vértice(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Especifica un vértice Bezier en una forma.
 	 * @param {number} cp1x coordenada-x del primer punto de control
 	 * @param {number} cp1y coordenada-y del primer punto de control
@@ -3186,18 +3825,18 @@ declare global {
 	 * @param {number} x coordenada-x del punto de anclaje
 	 * @param {number} y coordenada-y del punto de anclaje
 	 */
-		function vérticeBezier(): void;
+	function vérticeBezier(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Especifica un vértice Bezier cuadrático en una forma.
 	 * @param {number} cp1x coordenada-x del punto de control
 	 * @param {number} cp1y coordenada-y del punto de control
 	 * @param {number} x coordenada-x del punto de anclaje
 	 * @param {number} y coordenada-y del punto de anclaje
 	 */
-		function vérticeCuadrático(): void;
+	function vérticeCuadrático(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Dibuja una curva Bezier.
 	 * @param {number} x1 coordenada-x del primer punto de anclaje
 	 * @param {number} y1 coordenada-y del primer punto de anclaje
@@ -3208,9 +3847,9 @@ declare global {
 	 * @param {number} x4 coordenada-x del segundo punto de anclaje
 	 * @param {number} y4 coordenada-y del segundo punto de anclaje
 	 */
-		function bezier(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+	function bezier(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
-		/** 🖌
+	/** 🖌
 	 * Dibuja un triángulo.
 	 * @param {number} x1 coordenada-x del primer vértice
 	 * @param {number} y1 coordenada-y del primer vértice
@@ -3219,9 +3858,9 @@ declare global {
 	 * @param {number} x3 coordenada-x del tercer vértice
 	 * @param {number} y3 coordenada-y del tercer vértice
 	 */
-		function triángulo(): void;
+	function triángulo(): void;
 
-		/** 🖌
+	/** 🖌
 	 * Dibuja un cuadrilátero.
 	 * @param {number} x1 coordenada-x del primer vértice
 	 * @param {number} y1 coordenada-y del primer vértice
@@ -3232,16 +3871,16 @@ declare global {
 	 * @param {number} x4 coordenada-x del cuarto vértice
 	 * @param {number} y4 coordenada-y del cuarto vértice
 	 */
-		function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
-		// ⚡ shaders
+	// ⚡ shaders
 
-		/**
+	/**
 	 * ¡Shaders personalizados escritos en WGSL (WebGPU Shading Language) pueden ser
 	 * usados para crear efectos visuales avanzados en q5!
 	 */
 
-		/** ⚡
+	/** ⚡
 	 * Crea un shader que q5 puede usar para dibujar formas.
 	 * 
 	 * Afecta a las siguientes funciones:
@@ -3295,9 +3934,9 @@ declare global {
 	 * 	triángulo(-50, -50, 0, 50, 50, -50);
 	 * };
 	 */
-		function crearShader(codigo: string): GPUShaderModule;
+	function crearShader(codigo: string): GPUShaderModule;
 
-		/** ⚡
+	/** ⚡
 	 * Un plano es un rectángulo centrado sin trazo.
 	 * @param {number} x centro x
 	 * @param {number} y centro y
@@ -3307,15 +3946,15 @@ declare global {
 	 * await crearLienzo(200);
 	 * plano(0, 0, 100);
 	 */
-		function plano(x: number, y: number, w: number, h?: number): void;
+	function plano(x: number, y: number, w: number, h?: number): void;
 
-		/** ⚡
+	/** ⚡
 	 * Aplica un shader.
 	 * @param {GPUShaderModule} moduloShader un programa shader
 	 */
-		function shader(moduloShader: GPUShaderModule): void;
+	function shader(moduloShader: GPUShaderModule): void;
 
-		/** ⚡
+	/** ⚡
 	 * Hace que q5 use el shader de formas por defecto.
 	 * @example
 	 * await crearLienzo(200);
@@ -3335,34 +3974,34 @@ declare global {
 	 * 	triángulo(-50, -50, 0, 50, 50, -50);
 	 * };
 	 */
-		function reiniciarShader(): void;
+	function reiniciarShader(): void;
 
-		/** ⚡
+	/** ⚡
 	 * Hace que q5 use el shader de fotograma por defecto.
 	 */
-		function reiniciarShaderFotograma(): void;
+	function reiniciarShaderFotograma(): void;
 
-		/** ⚡
+	/** ⚡
 	 * Hace que q5 use el shader de imagen por defecto.
 	 */
-		function reiniciarShaderImagen(): void;
+	function reiniciarShaderImagen(): void;
 
-		/** ⚡
+	/** ⚡
 	 * Hace que q5 use el shader de video por defecto.
 	 */
-		function reiniciarShaderVideo(): void;
+	function reiniciarShaderVideo(): void;
 
-		/** ⚡
+	/** ⚡
 	 * Hace que q5 use el shader de texto por defecto.
 	 */
-		function reiniciarShaderTexto(): void;
+	function reiniciarShaderTexto(): void;
 
-		/** ⚡
+	/** ⚡
 	 * Hace que q5 use todos los shaders por defecto.
 	 */
-		function reiniciarShaders(): void;
+	function reiniciarShaders(): void;
 
-		/** ⚡
+	/** ⚡
 	 * Crea un shader que q5 puede usar para dibujar fotogramas.
 	 * 
 	 * `crearLienzo` debe ejecutarse antes de usar esta función.
@@ -3388,9 +4027,9 @@ declare global {
 	 * 	ratónPresionado ? reiniciarShaders() : shader(boxy);
 	 * };
 	 */
-		function crearShaderFotograma(codigo: string): GPUShaderModule;
+	function crearShaderFotograma(codigo: string): GPUShaderModule;
 
-		/** ⚡
+	/** ⚡
 	 * Crea un shader que q5 puede usar para dibujar imágenes.
 	 * 
 	 * Usa esta función para personalizar una copia del
@@ -3417,9 +4056,9 @@ declare global {
 	 * 	imagen(logo, 0, 0, 180, 180);
 	 * };
 	 */
-		function crearShaderImagen(codigo: string): GPUShaderModule;
+	function crearShaderImagen(codigo: string): GPUShaderModule;
 
-		/** ⚡
+	/** ⚡
 	 * Crea un shader que q5 puede usar para dibujar fotogramas de video.
 	 * 
 	 * Usa esta función para personalizar una copia del
@@ -3462,9 +4101,9 @@ declare global {
 	 * 	imagen(vid, -100, 150, 200, 150);
 	 * };
 	 */
-		function crearShaderVideo(codigo: string): GPUShaderModule;
+	function crearShaderVideo(codigo: string): GPUShaderModule;
 
-		/** ⚡
+	/** ⚡
 	 * Crea un shader que q5 puede usar para dibujar texto.
 	 * 
 	 * Usa esta función para personalizar una copia del
@@ -3506,54 +4145,54 @@ declare global {
 	 * 	texto('Hello, World!', 0, 0);
 	 * };
 	 */
-		function crearShaderTexto(codigo: string): GPUShaderModule;
+	function crearShaderTexto(codigo: string): GPUShaderModule;
 
-		// ⚙ advanced
+	// ⚙ advanced
 
-		class Q5 {
+	class Q5 {
 
-			/** ⚙
+		/** ⚙
 		 * Funcion constructora. Crea una instancia de Q5.
 		 * @param {string | Function} [ambito]
 		 * @param {HTMLElement} [contenedor] elemento HTML dentro del cual se colocará el lienzo
 		 */
-			constructor(scope?: string | Function, parent?: HTMLElement);
-			static deshabilitarErroresAmigables: boolean;
+		constructor(scope?: string | Function, parent?: HTMLElement);
+		static deshabilitarErroresAmigables: boolean;
 
-			static toleranteErrores: boolean;
+		static toleranteErrores: boolean;
 
-			static soportaHDR: boolean;
+		static soportaHDR: boolean;
 
-			static opcionesLienzo: object;
+		static opcionesLienzo: object;
 
-			static MAX_RECTS: number;
+		static MAX_RECTS: number;
 
-			static MAX_ELIPSES: number;
+		static MAX_ELIPSES: number;
 
-			static MAX_TRANSFORMACIONES: number;
+		static MAX_TRANSFORMACIONES: number;
 
-			static MAX_CARACTERES: number;
+		static MAX_CARACTERES: number;
 
-			static MAX_TEXTOS: number;
+		static MAX_TEXTOS: number;
 
-			static WebGPU(): Q5;
+		static WebGPU(): Q5;
 
-			static agregarHook(cicloVida: string, fn: Function): void;
+		static agregarHook(cicloVida: string, fn: Function): void;
 
-			static registrarAddon(addon: Function): void;
+		static registrarAddon(addon: Function): void;
 
-			static modulos: object;
+		static modulos: object;
 
-			dibujar(): void;
+		dibujar(): void;
 
-			postProcesar(): void;
+		postProcesar(): void;
 
-			actualizar(): void; //-
+		actualizar(): void; //-
 
-			dibujarFotograma(): void; //-
+		dibujarFotograma(): void; //-
 
-			static Imagen: {
-				new (w: number, h: number, opt?: any): Q5.Imagen;
+		static Imagen: {
+			new (w: number, h: number, opt?: any): Q5.Imagen;
 			};
 
 	}

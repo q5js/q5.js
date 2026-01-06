@@ -190,7 +190,13 @@ Q5.renderers.c2d.image = ($, q) => {
 			$.ctx.clearRect(0, 0, c.width, c.height);
 			$.ctx.drawImage(o, 0, 0, c.width, c.height);
 
-			$.modified = $._retint = true;
+			$._retint = true;
+
+			if ($._owner?._makeDrawable) {
+				$._texture.destroy();
+				delete $._texture;
+				$._owner._makeDrawable($);
+			}
 		};
 	}
 
@@ -359,6 +365,26 @@ Q5.Image = class {
 		$.defaultHeight = h * scale;
 		delete $.createCanvas;
 		$._loop = false;
+
+		let libMap = Q5._libMap;
+		let imgFns = [
+			'copy',
+			'filter',
+			'get',
+			'set',
+			'resize',
+			'mask',
+			'trim',
+			'inset',
+			'pixels',
+			'loadPixels',
+			'updatePixels',
+			'smooth',
+			'noSmooth'
+		];
+		for (let name of imgFns) {
+			if (libMap[name]) $[libMap[name]] = $[name];
+		}
 	}
 	get w() {
 		return this.width;

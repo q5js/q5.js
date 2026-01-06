@@ -515,7 +515,7 @@ function dibujar() {
 
 Array de datos de color de píxeles de un lienzo o imagen.
 
-Vacío por defecto, poblar ejecutando `cargarPíxeles`.
+Vacío por defecto, obtener el dato ejecutando `cargarPíxeles`.
 
 Cada píxel está representado por cuatro valores consecutivos en el array,
 correspondientes a sus canales rojo, verde, azul y alfa.

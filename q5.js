@@ -619,8 +619,6 @@ Q5.modules.canvas = ($, q) => {
 
 		c.w = w = Math.ceil(w);
 		c.h = h = Math.ceil(h);
-		q.halfWidth = c.hw = w / 2;
-		q.halfHeight = c.hh = h / 2;
 
 		// changes the actual size of the canvas
 		c.width = Math.ceil(w * $._pixelDensity);
@@ -628,6 +626,17 @@ Q5.modules.canvas = ($, q) => {
 
 		q.width = w;
 		q.height = h;
+		q.halfWidth = c.hw = w / 2;
+		q.halfHeight = c.hh = h / 2;
+
+		let m = Q5._libMap;
+
+		if (m.width) {
+			q[m.width] = w;
+			q[m.height] = h;
+			q[m.halfWidth] = q.halfWidth;
+			q[m.halfHeight] = q.halfHeight;
+		}
 
 		if ($.displayMode && !c.displayMode) $.displayMode();
 		else $._adjustDisplay(true);
@@ -1583,7 +1592,13 @@ Q5.renderers.c2d.image = ($, q) => {
 			$.ctx.clearRect(0, 0, c.width, c.height);
 			$.ctx.drawImage(o, 0, 0, c.width, c.height);
 
-			$.modified = $._retint = true;
+			$._retint = true;
+
+			if ($._owner?._makeDrawable) {
+				$._texture.destroy();
+				delete $._texture;
+				$._owner._makeDrawable($);
+			}
 		};
 	}
 
@@ -1752,6 +1767,26 @@ Q5.Image = class {
 		$.defaultHeight = h * scale;
 		delete $.createCanvas;
 		$._loop = false;
+
+		let libMap = Q5._libMap;
+		let imgFns = [
+			'copy',
+			'filter',
+			'get',
+			'set',
+			'resize',
+			'mask',
+			'trim',
+			'inset',
+			'pixels',
+			'loadPixels',
+			'updatePixels',
+			'smooth',
+			'noSmooth'
+		];
+		for (let name of imgFns) {
+			if (libMap[name]) $[libMap[name]] = $[name];
+		}
 	}
 	get w() {
 		return this.width;
@@ -8608,8 +8643,8 @@ shearX -> es:cizallarX
 shearY -> es:cizallarY
 applyMatrix -> es:aplicarMatriz
 resetMatrix -> es:reiniciarMatriz
-push -> es:guardar
-pop -> es:recuperar
+push -> es:apilar
+pop -> es:desapilar
 pushMatrix -> es:guardarMatriz
 popMatrix -> es:recuperarMatriz
 
@@ -8731,6 +8766,7 @@ RIGHT -> es:DERECHA
 TOP -> es:ARRIBA
 BOTTOM -> es:ABAJO
 BASELINE -> es:LINEA_BASE
+MIDDLE -> es:MEDIO
 RGB -> es:RGB
 OKLCH -> es:OKLCH
 HSL -> es:HSL
@@ -8773,8 +8809,6 @@ const parseLangs = function (data, lang) {
 	return map;
 };
 
-Q5._lang = 'en';
-
 Object.defineProperty(Q5, 'lang', {
 	get: () => Q5._lang,
 	set: (val) => {
@@ -8784,15 +8818,15 @@ Object.defineProperty(Q5, 'lang', {
 
 		if (val == 'en') {
 			// reset to English only user functions
-			Q5._userFns = Q5._userFns.slice(0, 17);
+			Q5._userFns = Q5._userFns.slice(0, 19);
 			Q5._libMap = Q5._userFnsMap = {};
 			return;
 		}
 
-		let libMap = parseLangs(libLangs, val);
+		let m = parseLangs(libLangs, val);
 
 		if (typeof window == 'object') {
-			window[libMap.createCanvas] = createCanvas;
+			window[m.createCanvas] = createCanvas;
 		}
 
 		let userFnsMap = parseLangs(userLangs, val);
@@ -8806,11 +8840,13 @@ Object.defineProperty(Q5, 'lang', {
 			});
 		}
 
-		Q5._libMap = libMap;
+		Q5._libMap = m;
 		Q5._userFnsMap = userFnsMap;
 		Q5._userFns.push(...Object.values(userFnsMap));
 	}
 });
+
+Q5.lang = 'en';
 
 Q5.modules.lang = ($) => {
 	let userFnsMap = Q5._userFnsMap;
@@ -8823,29 +8859,36 @@ Q5.modules.lang = ($) => {
 		});
 	}
 
-	let libMap = Q5._libMap;
+	let m = Q5._libMap;
 
-	if (libMap?.createCanvas) {
-		$[libMap.createCanvas] = $.createCanvas;
+	if (m.createCanvas) {
+		$[m.createCanvas] = $.createCanvas;
 	}
 };
 
 Q5.addHook('init', (q) => {
-	let libMap = Q5._libMap;
+	let m = Q5._libMap;
 
-	for (let name in libMap) {
-		let translatedName = libMap[name];
+	for (let name in m) {
+		let translatedName = m[name];
 		q[translatedName] = q[name];
 	}
 });
 
 Q5.addHook('predraw', (q) => {
-	let libMap = Q5._libMap;
+	let m = Q5._libMap;
 
-	// update mouse
-	if (libMap?.mouseX) {
-		q[libMap.mouseX] = q.mouseX;
-		q[libMap.mouseY] = q.mouseY;
-		q[libMap.mouseIsPressed] = q.mouseIsPressed;
-	}
+	if (!m.mouseX) return;
+
+	q[m.frameCount] = q.frameCount;
+
+	// update user input
+	q[m.mouseX] = q.mouseX;
+	q[m.mouseY] = q.mouseY;
+	q[m.mouseIsPressed] = q.mouseIsPressed;
+	q[m.mouseButton] = q.mouseButton;
+	q[m.key] = q.key;
+	q[m.keyIsPressed] = q.keyIsPressed;
+	q[m.touches] = q.touches;
+	q[m.pointers] = q.pointers;
 });

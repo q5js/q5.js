@@ -545,7 +545,7 @@ declare global {
 	/** 🌆
 	 * Array of pixel color data from a canvas or image.
 	 * 
-	 * Empty by default, populate by running `loadPixels`.
+	 * Empty by default, get the data by running `loadPixels`.
 	 * 
 	 * Each pixel is represented by four consecutive values in the array,
 	 * corresponding to its red, green, blue, and alpha channels.
@@ -676,13 +676,6 @@ declare global {
 	 * @returns {Q5} a new Q5 graphics buffer
 	 */
 	function createGraphics(w: number, h: number, opt?: any): Q5;
-
-	namespace Q5 {
-		interface Image {
-			width: number;
-			height: number;
-		}
-	}
 
 	// 📘 text
 
@@ -3952,6 +3945,13 @@ declare global {
 			new (w: number, h: number, opt?: any): Q5.Image;
 			};
 
+	}
+
+	namespace Q5 {
+		interface Image {
+			width: number;
+			height: number;
+		}
 	}
 
 }

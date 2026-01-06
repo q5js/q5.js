@@ -304,7 +304,7 @@ recuperarMatriz();
 elipse(0, 0, 120, 40);
 ```
 
-## guardar
+## apilar
 
 Guarda la configuración de estilo de dibujo y transformaciones actuales.
 
@@ -313,11 +313,11 @@ Guarda la configuración de estilo de dibujo y transformaciones actuales.
 ```js
 await crearLienzo(200);
 
-guardar();
+apilar();
 relleno('blue');
 trasladar(50, 50);
 círculo(0, 0, 80);
-recuperar();
+desapilar();
 
 cuadrado(0, 0, 50);
 ```
@@ -327,16 +327,16 @@ cuadrado(0, 0, 50);
 ```js
 crearLienzo(200);
 
-guardar();
+apilar();
 relleno('blue');
 trasladar(100, 100);
 círculo(0, 0, 80);
-recuperar();
+desapilar();
 
 cuadrado(0, 0, 50);
 ```
 
-## recuperar
+## desapilar
 
 Restaura la configuración de estilo de dibujo y transformaciones guardadas previamente.
 
@@ -345,11 +345,11 @@ Restaura la configuración de estilo de dibujo y transformaciones guardadas prev
 ```js
 await crearLienzo(200);
 
-guardar();
+apilar();
 relleno('blue');
 trasladar(50, 50);
 círculo(0, 0, 80);
-recuperar();
+desapilar();
 
 cuadrado(0, 0, 50);
 ```
@@ -359,11 +359,11 @@ cuadrado(0, 0, 50);
 ```js
 crearLienzo(200);
 
-guardar();
+apilar();
 relleno('blue');
 trasladar(100, 100);
 círculo(0, 0, 80);
-recuperar();
+desapilar();
 
 cuadrado(0, 0, 50);
 ```

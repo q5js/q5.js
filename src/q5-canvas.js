@@ -140,8 +140,6 @@ Q5.modules.canvas = ($, q) => {
 
 		c.w = w = Math.ceil(w);
 		c.h = h = Math.ceil(h);
-		q.halfWidth = c.hw = w / 2;
-		q.halfHeight = c.hh = h / 2;
 
 		// changes the actual size of the canvas
 		c.width = Math.ceil(w * $._pixelDensity);
@@ -149,6 +147,17 @@ Q5.modules.canvas = ($, q) => {
 
 		q.width = w;
 		q.height = h;
+		q.halfWidth = c.hw = w / 2;
+		q.halfHeight = c.hh = h / 2;
+
+		let m = Q5._libMap;
+
+		if (m.width) {
+			q[m.width] = w;
+			q[m.height] = h;
+			q[m.halfWidth] = q.halfWidth;
+			q[m.halfHeight] = q.halfHeight;
+		}
 
 		if ($.displayMode && !c.displayMode) $.displayMode();
 		else $._adjustDisplay(true);

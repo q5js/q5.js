@@ -22,27 +22,27 @@ let v = crearVector(100, 100);
 círculo(v.x, v.y, 50);
 ```
 
-## Vector
+## Vector.constructor
 
 Una clase para describir un vector bidimensional o tridimensional, específicamente un vector euclidiano (también conocido como geométrico). Un vector es una entidad que tiene tanto magnitud como dirección. El tipo de datos almacena los componentes del vector (x, y para 2D, y z para 3D). La magnitud y dirección se pueden acceder a través de los métodos `mag()` y `heading()`.
 
-### x
+## Vector.x
 
 El componente x del vector.
 
-### y
+## Vector.y
 
 El componente y del vector.
 
-### z
+## Vector.z
 
 El componente z del vector.
 
-### w
+## Vector.w
 
 El componente w del vector.
 
-### establecer
+## Vector.set
 
 Establece los componentes x, y, y z del vector.
 
@@ -54,7 +54,7 @@ Establece los componentes x, y, y z del vector.
 @returns {Vector} este vector
 ```
 
-### copiar
+## Vector.copy
 
 Devuelve una copia del vector.
 
@@ -62,7 +62,7 @@ Devuelve una copia del vector.
 @returns {Vector} copia del vector
 ```
 
-### sumar
+## Vector.add
 
 Suma x, y, y z componentes a un vector, suma un vector a otro, o suma dos vectores independientes.
 
@@ -73,7 +73,7 @@ Suma x, y, y z componentes a un vector, suma un vector a otro, o suma dos vector
 @returns {Vector} este vector
 ```
 
-### restar
+## Vector.sub
 
 Resta x, y, y z componentes de un vector, resta un vector de otro, o resta dos vectores independientes.
 
@@ -84,7 +84,7 @@ Resta x, y, y z componentes de un vector, resta un vector de otro, o resta dos v
 @returns {Vector} este vector
 ```
 
-### mult
+## Vector.mult
 
 Multiplica el vector por un escalar.
 
@@ -93,7 +93,7 @@ Multiplica el vector por un escalar.
 @returns {Vector} este vector
 ```
 
-### div
+## Vector.div
 
 Divide el vector por un escalar.
 
@@ -102,7 +102,7 @@ Divide el vector por un escalar.
 @returns {Vector} este vector
 ```
 
-### mag
+## Vector.mag
 
 Calcula la magnitud (longitud) del vector y devuelve el resultado como un flotante (esto es simplemente la ecuación `sqrt(x*x + y*y + z*z)`).
 
@@ -110,7 +110,7 @@ Calcula la magnitud (longitud) del vector y devuelve el resultado como un flotan
 @returns {number} magnitud del vector
 ```
 
-### magSq
+## Vector.magSq
 
 Calcula la magnitud (longitud) del vector al cuadrado y devuelve el resultado como un flotante (esto es simplemente la ecuación `x*x + y*y + z*z`).
 
@@ -118,7 +118,7 @@ Calcula la magnitud (longitud) del vector al cuadrado y devuelve el resultado co
 @returns {number} magnitud del vector al cuadrado
 ```
 
-### punto
+## Vector.dot
 
 Calcula el producto punto de dos vectores.
 
@@ -127,7 +127,7 @@ Calcula el producto punto de dos vectores.
 @returns {number} producto punto
 ```
 
-### cruz
+## Vector.cross
 
 Calcula el producto cruz de dos vectores.
 
@@ -136,7 +136,7 @@ Calcula el producto cruz de dos vectores.
 @returns {Vector} producto cruz
 ```
 
-### dist
+## Vector.dist
 
 Calcula la distancia euclidiana entre dos puntos (considerando un punto como un objeto vector).
 
@@ -145,7 +145,7 @@ Calcula la distancia euclidiana entre dos puntos (considerando un punto como un 
 @returns {number} distancia
 ```
 
-### normalizar
+## Vector.normalize
 
 Normaliza el vector a longitud 1 (hace que sea un vector unitario).
 
@@ -153,7 +153,7 @@ Normaliza el vector a longitud 1 (hace que sea un vector unitario).
 @returns {Vector} este vector
 ```
 
-### limitar
+## Vector.limit
 
 Limita la magnitud de este vector al valor usado para el parámetro `max`.
 
@@ -162,7 +162,7 @@ Limita la magnitud de este vector al valor usado para el parámetro `max`.
 @returns {Vector} este vector
 ```
 
-### establecerMag
+## Vector.setMag
 
 Establece la magnitud de este vector al valor usado para el parámetro `len`.
 
@@ -171,7 +171,7 @@ Establece la magnitud de este vector al valor usado para el parámetro `len`.
 @returns {Vector} este vector
 ```
 
-### rumbo
+## Vector.heading
 
 Calcula el ángulo de rotación para este vector (solo vectores 2D).
 
@@ -179,7 +179,7 @@ Calcula el ángulo de rotación para este vector (solo vectores 2D).
 @returns {number} el ángulo de rotación
 ```
 
-### rotar
+## Vector.rotate
 
 Rota el vector por un ángulo (solo vectores 2D), la magnitud permanece igual.
 
@@ -188,7 +188,7 @@ Rota el vector por un ángulo (solo vectores 2D), la magnitud permanece igual.
 @returns {Vector} este vector
 ```
 
-### ánguloEntre
+## Vector.angleBetween
 
 Calcula y devuelve el ángulo entre dos vectores.
 
@@ -197,7 +197,7 @@ Calcula y devuelve el ángulo entre dos vectores.
 @returns {number} el ángulo entre
 ```
 
-### lerp
+## Vector.lerp
 
 Interpola linealmente el vector a otro vector.
 
@@ -207,7 +207,7 @@ Interpola linealmente el vector a otro vector.
 @returns {Vector} este vector
 ```
 
-### reflejar
+## Vector.reflect
 
 Refleja el vector entrante sobre una normal al muro.
 
@@ -216,7 +216,7 @@ Refleja el vector entrante sobre una normal al muro.
 @returns {Vector} este vector
 ```
 
-### array
+## Vector.array
 
 Devuelve una representación de este vector como un array de flotantes.
 
@@ -224,7 +224,7 @@ Devuelve una representación de este vector como un array de flotantes.
 @returns {number[]} array de flotantes
 ```
 
-### igual
+## Vector.equals
 
 Comprueba si los componentes x, y, y z del vector son iguales a los componentes x, y, y z de otro vector.
 
@@ -233,7 +233,7 @@ Comprueba si los componentes x, y, y z del vector son iguales a los componentes 
 @returns {boolean} verdadero si los vectores son iguales
 ```
 
-### desdeÁngulo
+## Vector.fromAngle
 
 Hace un nuevo vector 2D desde un ángulo de longitud 1.
 
@@ -243,7 +243,7 @@ Hace un nuevo vector 2D desde un ángulo de longitud 1.
 @returns {Vector} nuevo objeto Vector
 ```
 
-### aleatorio2D
+## Vector.random2D
 
 Hace un nuevo vector 2D aleatorio con una magnitud de 1.
 
@@ -251,7 +251,7 @@ Hace un nuevo vector 2D aleatorio con una magnitud de 1.
 @returns {Vector} nuevo objeto Vector
 ```
 
-### aleatorio3D
+## Vector.random3D
 
 Hace un nuevo vector 3D aleatorio con una magnitud de 1.
 
