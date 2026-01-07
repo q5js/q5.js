@@ -1,4 +1,4 @@
-# core
+# núcleo
 
 Bienvenido al contenido de q5! 🤩
 

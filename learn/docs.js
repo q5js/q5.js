@@ -794,7 +794,7 @@ function updateNavigationActiveState() {
 }
 
 async function displayContent() {
-	const hash = location.hash.slice(1).split('?')[0]; // Remove query params from hash
+	const hash = decodeURIComponent(location.hash.slice(1).split('?')[0]); // Remove query params from hash
 	if (!hash) {
 		// Find the first section ID (e.g., "coreSection")
 		const firstSectionId = Object.keys(sections)[0];

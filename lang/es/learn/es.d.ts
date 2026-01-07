@@ -650,6 +650,10 @@ declare global {
 	class Q5 {
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
+		static versión: string;
+
+		static lang: string;
+
 		static deshabilitarErroresAmigables: boolean;
 
 		static toleranteErrores: boolean;
@@ -681,8 +685,6 @@ declare global {
 		postProcesar(): void;
 
 		actualizar(): void; //-
-
-		dibujarFotograma(): void; //-
 
 		static Imagen: {
 			new (w: number, h: number, opt?: any): Q5.Imagen;

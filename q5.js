@@ -8503,9 +8503,11 @@ Q5.WebGPU = async function (scope, parent) {
 	await q.ready;
 	return q;
 };
+const supportedLangs = ['es'];
+
 const libLangs = `
 # core
-createCanvas -> es:crearLienzo ja:キャンバスを作成する
+createCanvas -> es:crearLienzo
 log -> es:log
 
 # color
@@ -8803,6 +8805,18 @@ mouseWheel -> es:ruedaRatón
 `;
 
 const classLangs = {
+	Q5: `
+Image -> es:Imagen
+version -> es:versión
+disableFriendlyErrors -> es:deshabilitarErroresAmigables
+errorTolerant -> es:toleranteErrores
+supportsHDR -> es:soportaHDR
+canvasOptions -> es:opcionesLienzo
+MAX_ELLIPSES -> es:MAX_ELIPSES
+MAX_TRANSFORMS -> es:MAX_TRANSFORMACIONES
+MAX_CHARS -> es:MAX_CARACTERES
+MAX_TEXTS -> es:MAX_TEXTOS
+`,
 	Vector: `
 add -> es:sumar
 sub -> es:restar
@@ -8866,31 +8880,14 @@ Object.defineProperty(Q5, 'lang', {
 			return;
 		}
 
-		let m = parseLangs(libLangs, val);
-
-		if (typeof window == 'object') {
-			window[m.createCanvas] = createCanvas;
-		}
-
-		let userFnsMap = parseLangs(userLangs, val);
-
-		for (let name in userFnsMap) {
-			let translatedName = userFnsMap[name];
-			if (Q5.hasOwnProperty(translatedName)) continue;
-			Object.defineProperty(Q5, translatedName, {
-				get: () => Q5[name],
-				set: (fn) => (Q5[name] = fn)
-			});
-		}
-
 		for (let className in classLangs) {
-			if (Q5[className]) {
+			let target = className == 'Q5' ? Q5 : Q5[className] ? Q5[className].prototype : null;
+			if (target) {
 				let map = parseLangs(classLangs[className], val);
-				let proto = Q5[className].prototype;
 				for (let name in map) {
 					let translatedName = map[name];
-					if (proto.hasOwnProperty(translatedName)) continue;
-					Object.defineProperty(proto, translatedName, {
+					if (target.hasOwnProperty(translatedName)) continue;
+					Object.defineProperty(target, translatedName, {
 						get: function () {
 							return this[name];
 						},
@@ -8902,13 +8899,37 @@ Object.defineProperty(Q5, 'lang', {
 			}
 		}
 
-		Q5._libMap = m;
-		Q5._userFnsMap = userFnsMap;
-		Q5._userFns.push(...Object.values(userFnsMap));
+		Q5._libMap = parseLangs(libLangs, val);
+		Q5._userFnsMap = parseLangs(userLangs, val);
+		Q5._userFns.push(...Object.values(Q5._userFnsMap));
 	}
 });
 
 Q5.lang = 'en';
+
+for (let l of supportedLangs) {
+	if (typeof window == 'object') {
+		let m = parseLangs(libLangs.slice(0, libLangs.indexOf('\n', 8)), l);
+		window[m.createCanvas] = function () {
+			Q5.lang = l;
+			return createCanvas(...arguments);
+		};
+	}
+
+	let userFnsMap = parseLangs(userLangs, l);
+
+	for (let name in userFnsMap) {
+		let translatedName = userFnsMap[name];
+		if (Q5.hasOwnProperty(translatedName)) continue;
+		Object.defineProperty(Q5, translatedName, {
+			get: () => Q5[name],
+			set: (fn) => {
+				Q5.lang = l;
+				Q5[name] = fn;
+			}
+		});
+	}
+}
 
 Q5.modules.lang = ($) => {
 	let userFnsMap = Q5._userFnsMap;
@@ -8942,15 +8963,18 @@ Q5.addHook('predraw', (q) => {
 
 	if (!m.mouseX) return;
 
-	q[m.frameCount] = q.frameCount;
+	let props = [
+		'frameCount',
+		'mouseX',
+		'mouseY',
+		'mouseIsPressed',
+		'mouseButton',
+		'key',
+		'keyIsPressed',
+		'touches',
+		'pointers'
+	];
 
-	// update user input
-	q[m.mouseX] = q.mouseX;
-	q[m.mouseY] = q.mouseY;
-	q[m.mouseIsPressed] = q.mouseIsPressed;
-	q[m.mouseButton] = q.mouseButton;
-	q[m.key] = q.key;
-	q[m.keyIsPressed] = q.keyIsPressed;
-	q[m.touches] = q.touches;
-	q[m.pointers] = q.pointers;
+	// sync properties
+	for (let p of props) q[m[p]] = q[p];
 });

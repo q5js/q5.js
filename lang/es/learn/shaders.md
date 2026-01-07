@@ -1,4 +1,4 @@
-# shaders
+# sombreadores
 
 ¡Shaders personalizados escritos en WGSL (WebGPU Shading Language) pueden ser
 usados para crear efectos visuales avanzados en q5!

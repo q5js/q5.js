@@ -1,4 +1,4 @@
-# record
+# grabación
 
 ## crearGrabadora
 

@@ -1,6 +1,6 @@
 declare global {
 
-	// ⭐ core
+	// ⭐ núcleo
 
 	/**
 	 * Bienvenido al contenido de q5! 🤩
@@ -52,7 +52,7 @@ declare global {
 	 */
 	function log(mensaje: any): void;
 
-	// 🧑‍🎨 shapes
+	// 🧑‍🎨 formas
 
 	/** 🧑‍🎨
 	 * Dibuja un círculo en la posición (x, y) con el diámetro especificado.
@@ -63,7 +63,7 @@ declare global {
 	 * crearLienzo(200, 100);
 	 * círculo(100, 50, 80);
 	 */
-	function círculo(): void;
+	function círculo(x: number, y: number, diámetro: number): void;
 
 	/** 🧑‍🎨
 	 * Dibuja una elipse.
@@ -135,7 +135,7 @@ declare global {
 	 * trazo('lime');
 	 * línea(20, 20, 180, 80);
 	 */
-	function línea(): void;
+	function línea(x1: number, y1: number, x2: number, y2: number): void;
 
 	/** 🧑‍🎨
 	 * Dibuja una cápsula.
@@ -157,7 +157,7 @@ declare global {
 	 * 	cápsula(100, 100, ratónX, ratónY, 20);
 	 * }
 	 */
-	function cápsula(): void;
+	function cápsula(x1: number, y1: number, x2: number, y2: number, r: number): void;
 
 	/** 🧑‍🎨
 	 * Establecer a `ESQUINA` (por defecto), `CENTRO`, `RADIO`, o `ESQUINAS`.
@@ -248,7 +248,7 @@ declare global {
 	 */
 	const ESQUINAS: 'corners';
 
-	// 🌆 image
+	// 🌆 imagen
 
 	/** 🌆
 	 * Carga una imagen desde una URL.
@@ -430,7 +430,7 @@ declare global {
 	 * 	imagen(logo, 0, 0, 200, 200);
 	 * }
 	 */
-	function teñir(): void;
+	function teñir(color: string | number): void;
 
 	/** 🌆
 	 * Las imágenes dibujadas después de ejecutar esta función no serán teñidas.
@@ -546,7 +546,7 @@ declare global {
 	 * y los datos del píxel inferior derecho están al final, yendo de
 	 * izquierda a derecha y de arriba a abajo.
 	 */
-	function píxeles(): void;
+	var píxeles: number[];
 
 	/** 🌆
 	 * Carga datos de píxeles en `píxeles` desde el lienzo o imagen.
@@ -667,9 +667,9 @@ declare global {
 	 * @param {object} [opt] opciones
 	 * @returns {Q5} un nuevo búfer de gráficos Q5
 	 */
-	function crearGráficos(): void;
+	function crearGráficos(w: number, h: number, opt?: any): Q5;
 
-	// 📘 text
+	// 📘 texto
 
 	/** 📘
 	 * Renderiza texto en el lienzo.
@@ -777,7 +777,7 @@ declare global {
 	 * 	texto('A', 10, 190);
 	 * }
 	 */
-	function tamañoTexto(): void;
+	function tamañoTexto(tamaño?: number): number | void;
 
 	/** 📘
 	 * Establece u obtiene la altura de línea actual. Si no se proporciona argumento, devuelve la altura de línea actual.
@@ -822,7 +822,7 @@ declare global {
 	 * alineaciónTexto(CENTRO, MEDIO);
 	 * texto('Hello, world!', 100, 100);
 	 */
-	function alineaciónTexto(): void;
+	function alineaciónTexto(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
 
 	/** 📘
 	 * Establece el peso del texto.
@@ -1014,7 +1014,7 @@ declare global {
 	 */
 	const LINEA_BASE: 'alphabetic';
 
-	// 🖲 input
+	// 🖲 entrada
 
 	/**
 	 * El manejo de entrada de q5 es muy básico.
@@ -1039,7 +1039,7 @@ declare global {
 	 * 	texto(redondear(ratónX), 50, 120);
 	 * }
 	 */
-	function ratónX(): void;
+	let ratónX: number;
 
 	/** 🖲
 	 * Posición Y actual del ratón.
@@ -1049,17 +1049,17 @@ declare global {
 	 * 	círculo(100, ratónY, 100);
 	 * }
 	 */
-	function ratónY(): void;
+	let ratónY: number;
 
 	/** 🖲
 	 * Posición X previa del ratón.
 	 */
-	function pRatónX(): void;
+	let pRatónX: number;
 
 	/** 🖲
 	 * Posición Y previa del ratón.
 	 */
-	function pRatónY(): void;
+	let pRatónY: number;
 
 	/** 🖲
 	 * El botón actual siendo presionado: 'left', 'right', 'center').
@@ -1072,7 +1072,7 @@ declare global {
 	 * 	texto(botónRatón, 20, 120);
 	 * }
 	 */
-	function botónRatón(): void;
+	let botónRatón: string;
 
 	/** 🖲
 	 * Verdadero si el ratón está actualmente presionado, falso de lo contrario.
@@ -1082,7 +1082,7 @@ declare global {
 	 * 	else fondo(200);
 	 * }
 	 */
-	function ratónPresionado(): void;
+	let ratónPresionado: boolean;
 
 	/** 🖲
 	 * Define esta función para responder a eventos de presionar el ratón.
@@ -1343,7 +1343,7 @@ declare global {
 	 * 	return false;
 	 * }
 	 */
-	function ruedaRatón(): void;
+	function ruedaRatón(evento: any): void;
 
 	/** 🖲
 	 * Solicita que el puntero se bloquee al cuerpo del documento, ocultando
@@ -1674,7 +1674,7 @@ declare global {
 		niveles: number[];
 	}
 
-	// 💅 styles
+	// 💅 estilos
 
 	/** 💅
 	 * Establece el color de relleno. El defecto es blanco.
@@ -1881,7 +1881,7 @@ declare global {
 	 * terminaciónTrazo(PROJECT);
 	 * línea(50, 150, 150, 150);
 	 */
-	function terminaciónTrazo(): void;
+	function terminaciónTrazo(val: CanvasLineCap): void;
 
 	/** 💅
 	 * Establece el estilo de unión de línea a `ROUND`, `BEVEL`, o `MITER`.
@@ -1902,7 +1902,7 @@ declare global {
 	 * uniónTrazo(MITER);
 	 * triángulo(50, 130, 150, 180, 50, 180);
 	 */
-	function uniónTrazo(): void;
+	function uniónTrazo(val: CanvasLineJoin): void;
 
 	/** 💅
 	 * Establece el lienzo en modo borrar, donde las formas borrarán lo que está
@@ -1991,7 +1991,7 @@ declare global {
 	 */
 	function enTrazo(x: number, y: number): boolean;
 
-	// 🦋 transforms
+	// 🦋 transformaciones
 
 	/** 🦋
 	 * Traslada el origen del contexto de dibujo.
@@ -2169,7 +2169,7 @@ declare global {
 
 	function recuperar(): void;
 
-	// 💻 display
+	// 💻 visualización
 
 	/** 💻
 	 * Personaliza cómo se presenta tu lienzo.
@@ -2183,7 +2183,7 @@ declare global {
 	 * 
 	 * círculo(25, 12.5, 16);
 	 */
-	function modoVisualización(): void;
+	function modoVisualización(modo: string, calidadRender: string, escala: string | number): void;
 
 	/** 💻
 	 * Una configuración de `modoVisualización`.
@@ -2423,7 +2423,7 @@ declare global {
 	 * densidadPíxeles(1);
 	 * círculo(100, 50, 80);
 	 */
-	function densidadPíxeles(): void;
+	function densidadPíxeles(v: number): number;
 
 	/** 💻
 	 * Devuelve la densidad de visualización actual.
@@ -2436,7 +2436,7 @@ declare global {
 	 * tamañoTexto(64);
 	 * texto(densidadVisualización(), 10, 20);
 	 */
-	function densidadVisualización(): void;
+	function densidadVisualización(): number;
 
 	/** 💻
 	 * El tiempo pasado desde que se dibujó el último fotograma.
@@ -2472,7 +2472,7 @@ declare global {
 	 */
 	var contextoDibujo: CanvasRenderingContext2D;
 
-	// 🧮 math
+	// 🧮 matemáticas
 
 	/** 🧮
 	 * Genera un valor aleatorio.
@@ -2583,7 +2583,7 @@ declare global {
 	 * Establece el modo para interpretar y dibujar ángulos. Puede ser 'degrees' (grados) o 'radians' (radianes).
 	 * @param {'degrees' | 'radians'} modo modo a establecer para la interpretación de ángulos
 	 */
-	function modoÁngulo(): void;
+	function modoÁngulo(modo: 'degrees' | 'radians'): void;
 
 	/** 🧮
 	 * Convierte grados a radianes.
@@ -2615,7 +2615,7 @@ declare global {
 	 * @param {number} alto límite superior
 	 * @returns {number} valor restringido
 	 */
-	function constreñir(): void;
+	function constreñir(n: number, bajo: number, alto: number): number;
 
 	/** 🧮
 	 * Normaliza un número de otro rango en un valor entre 0 y 1.
@@ -2817,7 +2817,7 @@ declare global {
 	 */
 	const CUARTO_PI: number;
 
-	// 🔊 sound
+	// 🔊 sonido
 
 	/**
 	 * q5 incluye reproducción de sonido de baja latencia y capacidades básicas de mezcla
@@ -3026,7 +3026,7 @@ declare global {
 	 * 	fondo(aleatorio(100, 255));
 	 * });
 	 */
-	function crearBotón(): void;
+	function crearBotón(contenido?: string): HTMLButtonElement;
 
 	/** 📑
 	 * Crea un elemento de casilla de verificación (checkbox).
@@ -3135,7 +3135,7 @@ declare global {
 	 * 	if (radio.value == '2') círculo(100, 50, 80);
 	 * }
 	 */
-	function crearOpciónes(): void;
+	function crearOpciónes(nombreGrupo?: string): HTMLDivElement;
 
 	/** 📑
 	 * Crea un elemento de selección (select).
@@ -3161,7 +3161,7 @@ declare global {
 	 * 	fondo(sel.value);
 	 * });
 	 */
-	function crearSelección(): void;
+	function crearSelección(placeholder?: string): HTMLSelectElement;
 
 	/** 📑
 	 * Crea un elemento deslizador (slider).
@@ -3276,7 +3276,7 @@ declare global {
 	 */
 	function encontrarElementos(selector: string): HTMLElement[];
 
-	// 🎞 record
+	// 🎞 grabación
 
 	/** 🎞
 	 * Crea una grabadora. ¡Simplemente presiona grabar para empezar a grabar!
@@ -3338,14 +3338,14 @@ declare global {
 	 * 	else guardarGrabación('squares');
 	 * }
 	 */
-	function guardarGrabación(): void;
+	function guardarGrabación(nombreArchivo: string): void;
 
 	/** 🎞
 	 * Verdadero si el lienzo está siendo grabado actualmente.
 	 */
 	var grabando: boolean;
 
-	// 🛠 utilities
+	// 🛠 utilidades
 
 	/** 🛠
 	 * Carga un archivo o múltiples archivos.
@@ -3489,13 +3489,13 @@ declare global {
 	 * Devuelve el año actual.
 	 * @returns {number} año actual
 	 */
-	function año(): void;
+	function año(): number;
 
 	/** 🛠
 	 * Devuelve el día actual del mes.
 	 * @returns {number} día actual
 	 */
-	function día(): void;
+	function día(): number;
 
 	/** 🛠
 	 * Devuelve la hora actual.
@@ -3752,7 +3752,7 @@ declare global {
 
 	}
 
-	// 🖌 shaping
+	// 🖌 modelado
 
 	/** 🖌
 	 * Dibuja un arco, que es una sección de una elipse.
@@ -3820,7 +3820,7 @@ declare global {
 	 * @param {number} x coordenada-x
 	 * @param {number} y coordenada-y
 	 */
-	function vértice(): void;
+	function vértice(x: number, y: number): void;
 
 	/** 🖌
 	 * Especifica un vértice Bezier en una forma.
@@ -3831,7 +3831,7 @@ declare global {
 	 * @param {number} x coordenada-x del punto de anclaje
 	 * @param {number} y coordenada-y del punto de anclaje
 	 */
-	function vérticeBezier(): void;
+	function vérticeBezier(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
 
 	/** 🖌
 	 * Especifica un vértice Bezier cuadrático en una forma.
@@ -3840,7 +3840,7 @@ declare global {
 	 * @param {number} x coordenada-x del punto de anclaje
 	 * @param {number} y coordenada-y del punto de anclaje
 	 */
-	function vérticeCuadrático(): void;
+	function vérticeCuadrático(cp1x: number, cp1y: number, x: number, y: number): void;
 
 	/** 🖌
 	 * Dibuja una curva Bezier.
@@ -3864,7 +3864,7 @@ declare global {
 	 * @param {number} x3 coordenada-x del tercer vértice
 	 * @param {number} y3 coordenada-y del tercer vértice
 	 */
-	function triángulo(): void;
+	function triángulo(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
 
 	/** 🖌
 	 * Dibuja un cuadrilátero.
@@ -3879,7 +3879,7 @@ declare global {
 	 */
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
-	// ⚙ advanced
+	// ⚙ avanzado
 
 	/** ⚙
 	 * Alias para `Q5`.
@@ -3900,26 +3900,41 @@ declare global {
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
 		/** ⚙
+		 * La versión menor actual de q5.
+		 * @returns {string} la versión de q5
+		 */
+		version(): void;
+
+		/** ⚙
+		 * Establece un código de idioma distinto de 'en' (inglés) para usar q5 en otro idioma.
+		 * 
+		 * Idiomas actualmente soportados:
+		 * 
+		 * - 'es' (Español)
+		 */
+		static lang: string;
+
+		/** ⚙
 		 * Desactiva los mensajes de error amigables de q5.
 		 */
-		disableFriendlyErrors(): void;
+		static deshabilitarErroresAmigables: boolean;
 
 		/** ⚙
 		 * Establecer en verdadero para mantener el bucle de dibujo después de un error.
 		 */
-		errorTolerant(): void;
+		static toleranteErrores: boolean;
 
 		/** ⚙
 		 * Verdadero si el dispositivo soporta HDR (el espacio de color display-p3).
 		 */
-		supportsHDR(): void;
+		static soportaHDR: boolean;
 
 		/** ⚙
 		 * Establece los atributos de contexto de lienzo predeterminados utilizados para
 		 * lienzos recién creados y gráficos internos. Estas opciones son sobrescritas por
 		 * cualquier opción por lienzo que pases a `crearLienzo`.
 		 */
-		canvasOptions(): void;
+		static opcionesLienzo: object;
 
 		/** ⚙
 		 * Un límite de asignación de memoria WebGPU.
@@ -3927,7 +3942,7 @@ declare global {
 		 * El número máximo de matrices de transformación
 		 * que se pueden usar en una sola llamada de dibujo.
 		 */
-		MAX_TRANSFORMS(): void;
+		static MAX_TRANSFORMACIONES: number;
 
 		/** ⚙
 		 * Un límite de asignación de memoria WebGPU.
@@ -3945,7 +3960,7 @@ declare global {
 		 * (llamadas a `elipse`, `círculo`, y `arco`)
 		 * que se pueden dibujar en una sola llamada de dibujo.
 		 */
-		MAX_ELLIPSES(): void;
+		static MAX_ELIPSES: number;
 
 		/** ⚙
 		 * Un límite de asignación de memoria WebGPU.
@@ -3953,7 +3968,7 @@ declare global {
 		 * El número máximo de caracteres de texto
 		 * que se pueden dibujar en una sola llamada de dibujo.
 		 */
-		MAX_CHARS(): void;
+		static MAX_CARACTERES: number;
 
 		/** ⚙
 		 * Un límite de asignación de memoria WebGPU.
@@ -3961,7 +3976,7 @@ declare global {
 		 * El número máximo de llamadas separadas a `texto`
 		 * que se pueden dibujar en una sola llamada de dibujo.
 		 */
-		MAX_TEXTS(): void;
+		static MAX_TEXTOS: number;
 
 		/** ⚙
 		 * Crea una nueva instancia de Q5 que usa el [renderizador WebGPU de q5](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer).
@@ -3973,7 +3988,7 @@ declare global {
 		 * funciones que se ejecutan en fases específicas del ciclo de vida de q5.
 		 * 
 		 * Dentro de la función, `this` se refiere a la instancia de Q5.
-		 * @param {string} lifecycle init, presetup, postsetup, predraw, postdraw, o remove
+		 * @param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', o 'remove'
 		 * @param {Function} fn La función que se ejecutará en la fase del ciclo de vida especificada.
 		 */
 		addHook(): void;
@@ -3992,12 +4007,12 @@ declare global {
 		 * - la instancia de q5
 		 * - un proxy para editar la instancia de q5 y las propiedades correspondientes del ámbito global
 		 */
-		modules(): void;
+		static modulos: object;
 
 		/** ⚙
 		 * La función de dibujo de q5 se ejecuta 60 veces por segundo por defecto.
 		 */
-		draw(): void;
+		dibujar(): void;
 
 		/** ⚙
 		 * Se ejecuta después de cada llamada a la función `dibujar` y procesos de addons de q5 post-dibujo, si los hay.
@@ -4007,36 +4022,14 @@ declare global {
 		 * addons como p5play que dibujan automáticamente al lienzo después de que
 		 * la función `dibujar` se ejecuta.
 		 */
-		postProcess(): void;
-		static deshabilitarErroresAmigables: boolean;
-
-		static toleranteErrores: boolean;
-
-		static soportaHDR: boolean;
-
-		static opcionesLienzo: object;
-
-		static MAX_ELIPSES: number;
-
-		static MAX_TRANSFORMACIONES: number;
-
-		static MAX_CARACTERES: number;
-
-		static MAX_TEXTOS: number;
+		postProcesar(): void;
+		static versión: string;
 
 		static agregarHook(cicloVida: string, fn: Function): void;
 
 		static registrarAddon(addon: Function): void;
 
-		static modulos: object;
-
-		dibujar(): void;
-
-		postProcesar(): void;
-
 		actualizar(): void; //-
-
-		dibujarFotograma(): void; //-
 
 		static Imagen: {
 			new (w: number, h: number, opt?: any): Q5.Imagen;

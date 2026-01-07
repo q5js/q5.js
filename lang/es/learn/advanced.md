@@ -1,4 +1,4 @@
-# advanced
+# avanzado
 
 ## Q5.constructor
 
@@ -19,7 +19,37 @@ q.crearLienzo(200, 100);
 q.círculo(100, 50, 20);
 ```
 
-## Q5.disableFriendlyErrors
+## Q5.version
+
+La versión menor actual de q5.
+
+```
+@returns {string} la versión de q5
+```
+
+### webgpu
+
+```js
+await crearLienzo(200);
+fondo(0.8);
+tamañoTexto(64);
+alineaciónTexto(CENTRO, CENTRO);
+texto('v' + Q5.version, 0, 0);
+```
+
+## Q5.lang
+
+Establece un código de idioma distinto de 'en' (inglés) para usar q5 en otro idioma.
+
+Idiomas actualmente soportados:
+
+- 'es' (Español)
+
+```
+@default 'en'
+```
+
+## Q5.deshabilitarErroresAmigables
 
 Desactiva los mensajes de error amigables de q5.
 
@@ -27,7 +57,7 @@ Desactiva los mensajes de error amigables de q5.
 @default false
 ```
 
-## Q5.errorTolerant
+## Q5.toleranteErrores
 
 Establecer en verdadero para mantener el bucle de dibujo después de un error.
 
@@ -35,11 +65,11 @@ Establecer en verdadero para mantener el bucle de dibujo después de un error.
 @default false
 ```
 
-## Q5.supportsHDR
+## Q5.soportaHDR
 
 Verdadero si el dispositivo soporta HDR (el espacio de color display-p3).
 
-## Q5.canvasOptions
+## Q5.opcionesLienzo
 
 Establece los atributos de contexto de lienzo predeterminados utilizados para
 lienzos recién creados y gráficos internos. Estas opciones son sobrescritas por
@@ -49,7 +79,7 @@ cualquier opción por lienzo que pases a `crearLienzo`.
 @default { alpha: false, colorSpace: 'display-p3' }
 ```
 
-## Q5.MAX_TRANSFORMS
+## Q5.MAX_TRANSFORMACIONES
 
 Un límite de asignación de memoria WebGPU.
 
@@ -72,7 +102,7 @@ que se pueden dibujar en una sola llamada de dibujo.
 @default 200200
 ```
 
-## Q5.MAX_ELLIPSES
+## Q5.MAX_ELIPSES
 
 Un límite de asignación de memoria WebGPU.
 
@@ -84,7 +114,7 @@ que se pueden dibujar en una sola llamada de dibujo.
 @default 200200
 ```
 
-## Q5.MAX_CHARS
+## Q5.MAX_CARACTERES
 
 Un límite de asignación de memoria WebGPU.
 
@@ -95,7 +125,7 @@ que se pueden dibujar en una sola llamada de dibujo.
 @default 100000
 ```
 
-## Q5.MAX_TEXTS
+## Q5.MAX_TEXTOS
 
 Un límite de asignación de memoria WebGPU.
 
@@ -130,16 +160,20 @@ funciones que se ejecutan en fases específicas del ciclo de vida de q5.
 Dentro de la función, `this` se refiere a la instancia de Q5.
 
 ```
-@param {string} lifecycle init, presetup, postsetup, predraw, postdraw, o remove
+@param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', o 'remove'
 @param {Function} fn La función que se ejecutará en la fase del ciclo de vida especificada.
 ```
 
+### webgpu
+
 ```js
-Q5.addHook('presetup', function () {
-	this.fondo('pink');
+Q5.addHook('predraw', function () {
+	this.fondo('cyan');
 });
 
-crearLienzo(200);
+q5.dibujar = function () {
+	círculo(ratónX, ratónY, 80);
+};
 ```
 
 ## Q5.registerAddon
@@ -150,19 +184,21 @@ Forma compatible con p5.js v2 de registrar un addon con q5.
 @param {Function} addon Una función que recibe `Q5`, `Q5.prototype`, y un objeto `lifecycles`.
 ```
 
+### webgpu
+
 ```js
 // addon.js
 Q5.registerAddon((Q5, proto, lifecycles) => {
-	lifecycles.presetup = function () {
+	lifecycles.predraw = function () {
 		this.fondo('pink');
 	};
 });
 
 // sketch.js
-crearLienzo(200);
+await crearLienzo(200);
 ```
 
-## Q5.modules
+## Q5.modulos
 
 Un objeto que contiene los módulos de q5, funciones que se ejecutan cuando q5 carga.
 
@@ -171,11 +207,11 @@ Cada función recibe dos parámetros de entrada:
 - la instancia de q5
 - un proxy para editar la instancia de q5 y las propiedades correspondientes del ámbito global
 
-## Q5.draw
+## Q5.dibujar
 
 La función de dibujo de q5 se ejecuta 60 veces por segundo por defecto.
 
-## Q5.postProcess
+## Q5.postProcesar
 
 Se ejecuta después de cada llamada a la función `dibujar` y procesos de addons de q5 post-dibujo, si los hay.
 

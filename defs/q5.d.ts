@@ -4094,6 +4094,27 @@ declare global {
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
 		/** ⚙
+		 * The current minor version of q5.
+		 * @returns {string} the q5 version
+		 * @example
+		 * await createCanvas(200);
+		 * background(0.8);
+		 * textSize(64);
+		 * textAlign(CENTER, CENTER);
+		 * text('v' + Q5.version, 0, 0);
+		 */
+		static version: string;
+
+		/** ⚙
+		 * Set to a language code other than 'en' (English) to use q5 in an additional language.
+		 * 
+		 * Currently supported languages:
+		 * 
+		 * - 'es' (Spanish)
+		 */
+		static lang: string;
+
+		/** ⚙
 		 * Turn off q5's friendly error messages.
 		 */
 		static disableFriendlyErrors: boolean;
@@ -4175,14 +4196,32 @@ declare global {
 		 * functions to be run at specific phases in the q5 lifecycle.
 		 * 
 		 * Inside the function, `this` refers to the Q5 instance.
-		 * @param {string} lifecycle init, presetup, postsetup, predraw, postdraw, or remove
+		 * @param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', or 'remove'
 		 * @param {Function} fn The function to be run at the specified lifecycle phase.
+		 * @example
+		 * Q5.addHook('predraw', function () {
+		 * 	this.background('cyan');
+		 * });
+		 * 
+		 * q5.draw = function () {
+		 * 	circle(mouseX, mouseY, 80);
+		 * };
 		 */
 		static addHook(lifecycle: string, fn: Function): void;
 
 		/** ⚙
 		 * p5.js v2 compatible way to register an addon with q5.
 		 * @param {Function} addon A function that receives `Q5`, `Q5.prototype`, and a `lifecycles` object.
+		 * @example
+		 * // addon.js
+		 * Q5.registerAddon((Q5, proto, lifecycles) => {
+		 * 	lifecycles.predraw = function () {
+		 * 		this.background('pink');
+		 * 	};
+		 * });
+		 * 
+		 * // sketch.js
+		 * await createCanvas(200);
 		 */
 		static registerAddon(addon: Function): void;
 

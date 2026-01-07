@@ -3829,6 +3829,21 @@ declare global {
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
 		/** ⚙
+		 * The current minor version of q5.
+		 * @returns {string} the q5 version
+		 */
+		static version: string;
+
+		/** ⚙
+		 * Set to a language code other than 'en' (English) to use q5 in an additional language.
+		 * 
+		 * Currently supported languages:
+		 * 
+		 * - 'es' (Spanish)
+		 */
+		static lang: string;
+
+		/** ⚙
 		 * Turn off q5's friendly error messages.
 		 */
 		static disableFriendlyErrors: boolean;
@@ -3902,7 +3917,7 @@ declare global {
 		 * functions to be run at specific phases in the q5 lifecycle.
 		 * 
 		 * Inside the function, `this` refers to the Q5 instance.
-		 * @param {string} lifecycle init, presetup, postsetup, predraw, postdraw, or remove
+		 * @param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', or 'remove'
 		 * @param {Function} fn The function to be run at the specified lifecycle phase.
 		 */
 		static addHook(lifecycle: string, fn: Function): void;

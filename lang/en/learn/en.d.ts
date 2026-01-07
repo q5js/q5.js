@@ -656,6 +656,10 @@ declare global {
 	class Q5 {
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
+		static version: string;
+
+		static lang: string;
+
 		static disableFriendlyErrors: boolean;
 
 		static errorTolerant: boolean;

@@ -1,4 +1,4 @@
-# math
+# matemáticas
 
 ## aleatorio
 

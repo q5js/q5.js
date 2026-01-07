@@ -1,4 +1,4 @@
-# input
+# entrada
 
 El manejo de entrada de q5 es muy básico.
 

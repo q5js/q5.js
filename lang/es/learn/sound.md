@@ -1,4 +1,4 @@
-# sound
+# sonido
 
 q5 incluye reproducción de sonido de baja latencia y capacidades básicas de mezcla
 impulsadas por WebAudio.

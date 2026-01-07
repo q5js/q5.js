@@ -255,7 +255,7 @@ function extractEmojiMappings(baseDtsPath) {
 	const mappings = {};
 
 	for (const line of lines) {
-		const match = line.match(/^\s*\/\/\s+([^\w\s]+)\s+([a-z]+)\s*$/);
+		const match = line.match(/^\s*\/\/\s+([^\w\s]+)\s+([\w\u00A0-\uFFFFu00A0-\uFFFF]+)\s*$/);
 		if (match) {
 			const emoji = match[1].replace(/\uFE0F/g, '');
 			const section = match[2];
@@ -279,9 +279,9 @@ function extractBaseSignatures(baseDtsPath) {
 		const line = lines[i];
 
 		// Look for function declarations
-		const funcMatch = line.match(/^\s*function\s+(\w+)\s*\([^)]*\)/);
-		const varMatch = line.match(/^\s*(?:var|let|const)\s+(\w+)\s*:/);
-		const classMatch = line.match(/^\s*class\s+(\w+)/);
+		const funcMatch = line.match(/^\s*function\s+([\w\u00A0-\uFFFF]+)\s*\([^)]*\)/);
+		const varMatch = line.match(/^\s*(?:var|let|const)\s+([\w\u00A0-\uFFFF]+)\s*:/);
+		const classMatch = line.match(/^\s*class\s+([\w\u00A0-\uFFFF]+)/);
 
 		if (funcMatch || varMatch || classMatch) {
 			const name = (funcMatch || varMatch || classMatch)[1];
@@ -489,8 +489,10 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 		const section = sections[sectionName];
 		const emoji = emojiMappings[sectionName];
 
+		const displaySectionName = section.sectionName || sectionName;
+
 		push('');
-		output.push(`\t// ${emoji} ${sectionName}`);
+		output.push(`\t// ${emoji} ${displaySectionName}`);
 
 		// Add section description if available (as block comment)
 		if (section.sectionDescription) {
@@ -564,7 +566,7 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 							chunk = [];
 							return;
 						}
-						let m = sigLine.trim().match(/^(?:static\s+)?(\w+)\b/);
+						let m = sigLine.trim().match(/^(?:static\s+)?([\w\u00A0-\uFFFF]+)\b/);
 						if (!m) {
 							chunk = [];
 							return;
@@ -740,27 +742,7 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 	console.log(`✅ Generated ${path.basename(outputPath)}`);
 }
 
-/**
- * Main function
- */
-function main() {
-	// support a language code argument (two-letter), default to 'en'
-	// usage: node types.js [lang] or node types.js --lang=fr
-	const argv = process.argv.slice(2);
-	let lang = 'en';
-	for (const a of argv) {
-		if (a === '-h' || a === '--help') {
-			console.log('Usage: types.js [lang]  OR  types.js --lang=<two-letter-code>\nDefault: en');
-			process.exit(0);
-		}
-		if (a.startsWith('--lang=')) {
-			lang = a.split('=')[1] || lang;
-		} else if (!a.startsWith('-')) {
-			// positional arg: language code
-			lang = a;
-		}
-	}
-
+function buildLang(lang) {
 	// sanitize to two-letter lowercase code
 	lang = (lang || 'en').toLowerCase().slice(0, 2);
 
@@ -768,6 +750,11 @@ function main() {
 	const defsDir = path.join(__dirname, '..', 'defs');
 	const learnDir = path.join(__dirname, '..', 'lang', lang, 'learn');
 	const baseDtsPath = path.join(learnDir, `${lang}.d.ts`);
+
+	if (!fs.existsSync(learnDir)) {
+		console.error(`❌ Language directory not found: ${learnDir}`);
+		return;
+	}
 
 	// Find all markdown files and parse them once
 	const files = fs.readdirSync(learnDir);
@@ -777,12 +764,13 @@ function main() {
 	const sections = {};
 	for (const mdFile of markdownFiles) {
 		const parsed = parseMarkdownFile(mdFile);
-		if (parsed.sectionName) sections[parsed.sectionName] = parsed;
+		const key = path.basename(mdFile, '.md');
+		sections[key] = parsed;
 	}
 
 	if (!fs.existsSync(baseDtsPath)) {
-		console.error('❌ Base file en.d.ts not found!');
-		process.exit(1);
+		console.error(`❌ Base file ${lang}.d.ts not found!`);
+		return;
 	}
 
 	console.log(`📘 Building type definitions for language: ${lang}`);
@@ -803,6 +791,33 @@ function main() {
 	if (lang === 'en') {
 		const destFile = path.join(rootDir, `q5.d.ts`);
 		fs.copyFileSync(file, destFile);
+	}
+}
+
+/**
+ * Main function
+ */
+function main() {
+	// support a language code argument (two-letter), default to 'en' & 'es'
+	// usage: node types.js [lang] or node types.js --lang=fr
+	const argv = process.argv.slice(2);
+	let langs = ['en', 'es'];
+
+	for (const a of argv) {
+		if (a === '-h' || a === '--help') {
+			console.log('Usage: types.js [lang]  OR  types.js --lang=<two-letter-code>\nDefault: en, es');
+			process.exit(0);
+		}
+		if (a.startsWith('--lang=')) {
+			langs = [a.split('=')[1]];
+		} else if (!a.startsWith('-')) {
+			// positional arg: language code
+			langs = [a];
+		}
+	}
+
+	for (const lang of langs) {
+		buildLang(lang);
 	}
 }
 

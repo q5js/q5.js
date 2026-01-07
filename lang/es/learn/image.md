@@ -1,4 +1,4 @@
-# image
+# imagen
 
 ## cargarImagen
 
