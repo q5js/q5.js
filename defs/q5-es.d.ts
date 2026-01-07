@@ -2952,7 +2952,7 @@ declare global {
 	 * @example
 	 * await crearLienzo(200, 100);
 	 * 
-	 * let btn = crearBotón('Click me!');
+	 * let btn = crearBotón('¡Clic aqui!');
 	 * 
 	 * btn.addEventListener('click', () => {
 	 * 	fondo(aleatorio(0.4, 1));
@@ -2971,7 +2971,7 @@ declare global {
 	 * @example
 	 * await crearLienzo(200, 100);
 	 * 
-	 * let casilla = crearCasilla('Check me!');
+	 * let casilla = crearCasilla('¡Marca aquí!');
 	 * casilla.label.style.color = 'lime';
 	 * 
 	 * casilla.addEventListener('input', () => {
@@ -2989,11 +2989,11 @@ declare global {
 	 * @example
 	 * await crearLienzo(200, 100);
 	 * 
-	 * let selector = crearSelectorColor();
-	 * selector.value = '#fd7575';
+	 * let selección = crearSelectorColor();
+	 * selección.value = '#fd7575';
 	 * 
 	 * q5.dibujar = function () {
-	 * 	fondo(selector.value);
+	 * 	fondo(selección.value);
 	 * };
 	 */
 	function crearSelectorColor(valor?: string): HTMLInputElement;
@@ -3025,7 +3025,7 @@ declare global {
 	 * tamañoTexto(64);
 	 * 
 	 * let entrada = crearEntrada();
-	 * entrada.placeholder = 'Type here!';
+	 * entrada.placeholder = '¡Teclea aquí!';
 	 * entrada.size(200, 32);
 	 * 
 	 * entrada.addEventListener('input', () => {
@@ -3042,7 +3042,7 @@ declare global {
 	 * await crearLienzo(200, 50);
 	 * fondo('coral');
 	 * 
-	 * let p = crearP('Hello, world!');
+	 * let p = crearP('¡Hola, mundo!');
 	 * p.style.color = 'pink';
 	 */
 	function crearP(contenido?: string): HTMLParagraphElement;
@@ -3059,7 +3059,7 @@ declare global {
 	 * await crearLienzo(200, 160);
 	 * 
 	 * let radio = crearOpciónes();
-	 * radio.option('square', '1').option('circle', '2');
+	 * radio.option('cuadrado', '1').option('círculo', '2');
 	 * 
 	 * q5.dibujar = function () {
 	 * 	fondo(0.8);
@@ -3086,7 +3086,7 @@ declare global {
 	 * @example
 	 * await crearLienzo(200, 100);
 	 * 
-	 * let sel = crearSelección('Select a color');
+	 * let sel = crearSelección('Seleccionar un opcion');
 	 * sel.option('Red', '#f55').option('Green', '#5f5');
 	 * 
 	 * sel.addEventListener('change', () => {

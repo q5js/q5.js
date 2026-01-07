@@ -3093,7 +3093,7 @@ declare global {
 	 * @example
 	 * await createCanvas(200, 100);
 	 * 
-	 * let sel = createSelect('Select a color');
+	 * let sel = createSelect('Select an option');
 	 * sel.option('Red', '#f55').option('Green', '#5f5');
 	 * 
 	 * sel.addEventListener('change', () => {

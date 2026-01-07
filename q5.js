@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.7
+ * @version 3.8
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -464,7 +464,7 @@ if (typeof window == 'object') {
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.7';
+Q5.version = Q5.VERSION = '3.8';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

@@ -109,7 +109,7 @@ Crea un elemento de botón.
 ```js
 await crearLienzo(200, 100);
 
-let btn = crearBotón('Click me!');
+let btn = crearBotón('¡Clic aqui!');
 
 btn.addEventListener('click', () => {
 	fondo(aleatorio(0.4, 1));
@@ -121,7 +121,7 @@ btn.addEventListener('click', () => {
 ```js
 crearLienzo(200, 100);
 
-let btn = crearBotón('Click me!');
+let btn = crearBotón('¡Click aqui!');
 
 btn.addEventListener('click', () => {
 	fondo(aleatorio(100, 255));
@@ -146,7 +146,7 @@ La propiedad `label` es el elemento de etiqueta de texto junto a la casilla.
 ```js
 await crearLienzo(200, 100);
 
-let casilla = crearCasilla('Check me!');
+let casilla = crearCasilla('¡Marca aquí!');
 casilla.label.style.color = 'lime';
 
 casilla.addEventListener('input', () => {
@@ -160,7 +160,7 @@ casilla.addEventListener('input', () => {
 ```js
 crearLienzo(200, 100);
 
-let casilla = crearCasilla('Check me!');
+let casilla = crearCasilla('¡Marca aquí!');
 casilla.label.style.color = 'lime';
 
 casilla.addEventListener('input', () => {
@@ -184,11 +184,11 @@ Usa la propiedad `value` para obtener o establecer el valor del color.
 ```js
 await crearLienzo(200, 100);
 
-let selector = crearSelectorColor();
-selector.value = '#fd7575';
+let selección = crearSelectorColor();
+selección.value = '#fd7575';
 
 q5.dibujar = function () {
-	fondo(selector.value);
+	fondo(selección.value);
 };
 ```
 
@@ -197,11 +197,11 @@ q5.dibujar = function () {
 ```js
 crearLienzo(200, 100);
 
-let selector = crearSelectorColor();
-selector.value = '#fd7575';
+let selección = crearSelectorColor();
+selección.value = '#fd7575';
 
 function dibujar() {
-	fondo(selector.value);
+	fondo(selección.value);
 }
 ```
 
@@ -254,7 +254,7 @@ await crearLienzo(200, 100);
 tamañoTexto(64);
 
 let entrada = crearEntrada();
-entrada.placeholder = 'Type here!';
+entrada.placeholder = '¡Teclea aquí!';
 entrada.size(200, 32);
 
 entrada.addEventListener('input', () => {
@@ -270,7 +270,7 @@ crearLienzo(200, 100);
 tamañoTexto(64);
 
 let entrada = crearEntrada();
-entrada.placeholder = 'Type here!';
+entrada.placeholder = '¡Teclea aquí!';
 entrada.size(200, 32);
 
 entrada.addEventListener('input', () => {
@@ -293,7 +293,7 @@ Crea un elemento de párrafo.
 await crearLienzo(200, 50);
 fondo('coral');
 
-let p = crearP('Hello, world!');
+let p = crearP('¡Hola, mundo!');
 p.style.color = 'pink';
 ```
 
@@ -303,7 +303,7 @@ p.style.color = 'pink';
 crearLienzo(200, 50);
 fondo('coral');
 
-let p = crearP('Hello, world!');
+let p = crearP('¡Hola, mundo!');
 p.style.color = 'pink';
 ```
 
@@ -326,7 +326,7 @@ Usa la propiedad `value` para obtener o establecer el valor del botón de radio 
 await crearLienzo(200, 160);
 
 let radio = crearOpciónes();
-radio.option('square', '1').option('circle', '2');
+radio.option('cuadrado', '1').option('círculo', '2');
 
 q5.dibujar = function () {
 	fondo(0.8);
@@ -341,7 +341,7 @@ q5.dibujar = function () {
 crearLienzo(200, 160);
 
 let radio = crearOpciónes();
-radio.option('square', '1').option('circle', '2');
+radio.option('cuadrado', '1').option('círculo', '2');
 
 function dibujar() {
 	fondo(200);
@@ -374,7 +374,7 @@ cadena o un array de cadenas.
 ```js
 await crearLienzo(200, 100);
 
-let sel = crearSelección('Select a color');
+let sel = crearSelección('Seleccionar un opcion');
 sel.option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
@@ -387,7 +387,7 @@ sel.addEventListener('change', () => {
 ```js
 crearLienzo(200, 100);
 
-let sel = crearSelección('Select a color');
+let sel = crearSelección('Seleccionar un opcion');
 sel.option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
