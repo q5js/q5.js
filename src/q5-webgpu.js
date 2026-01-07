@@ -325,10 +325,10 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 	$.strokeWeight = (v) => {
 		if (v === undefined) return sw;
-		if (!v) {
-			doStroke = false;
-			return;
-		}
+
+		if (!v) return (doStroke = false);
+		else doStroke = true;
+
 		v = Math.abs(v);
 		sw = v;
 		hsw = v / 2;

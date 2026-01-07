@@ -96,6 +96,7 @@ Q5.renderers.c2d.canvas = ($, q) => {
 
 	$.strokeWeight = (n) => {
 		if (!n) $._doStroke = false;
+		else $._doStroke = true;
 		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
 
