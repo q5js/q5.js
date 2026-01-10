@@ -173,7 +173,7 @@ function Q5(scope, parent, renderer) {
 	};
 	$.remove = async () => {
 		$.noLoop();
-		$.canvas.remove();
+		if ($.canvas.remove) $.canvas.remove();
 		await runHooks('remove');
 	};
 

@@ -2340,14 +2340,18 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let _createGraphics = $.createGraphics;
 
 	$.createGraphics = (w, h, opt = {}) => {
-		if (!Q5.experimental) {
-			throw new Error(
-				'createGraphics is disabled by default in q5 WebGPU. See issue https://github.com/q5js/q5.js/issues/104 for details.'
-			);
-		}
 		if (typeof opt == 'string') opt = { renderer: opt };
 		opt.renderer ??= 'c2d';
 		let g = _createGraphics(w, h, opt);
+
+		g.noLoop();
+
+		let _loop = g.loop;
+		g.loop = () => {
+			if (Q5.experimental) return _loop();
+			console.error('Looping graphics in q5 WebGPU is disabled. See issue https://github.com/q5js/q5.js/issues/104');
+		};
+
 		if (g.canvas.webgpu) {
 			$._addTexture(g, g._frameA);
 			$._addTexture(g, g._frameB);
