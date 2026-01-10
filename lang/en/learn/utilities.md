@@ -17,7 +17,7 @@ By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to 
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = load('/q5js_logo.avif');
 
@@ -27,7 +27,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 await load('/assets/Robotica.ttf');
@@ -37,7 +37,7 @@ text('Hello, world!', -97, 100);
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let [jump, retro] = await load('/assets/jump.wav', '/assets/retro.flac');
 
@@ -47,7 +47,7 @@ q5.mousePressed = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 textSize(32);
 
@@ -87,7 +87,7 @@ an image file named "untitled.png".
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 circle(0, 0, 50);
 
@@ -97,7 +97,7 @@ q5.mousePressed = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 text('save me?', -90, 0);
 textSize(180);
@@ -179,7 +179,7 @@ Using `await` to get the loaded XML Element is recommended.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(200);
 textSize(32);
 
@@ -218,7 +218,7 @@ to a string with a specified number of digits.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 
 textSize(32);

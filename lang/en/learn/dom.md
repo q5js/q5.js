@@ -33,7 +33,7 @@ q5 adds some extra functionality to the elements it creates:
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let el = createEl('div', '*');
 el.position(50, 50);
@@ -71,7 +71,7 @@ Creates a link element.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let link = createA('https://q5js.org', 'q5.js');
 link.position(16, 42);
@@ -107,7 +107,7 @@ Creates a button element.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 let btn = createButton('Click me!');
 
@@ -144,7 +144,7 @@ The `label` property is the text label element next to the checkbox.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 let box = createCheckbox('Check me!');
 box.label.style.color = 'lime';
@@ -182,7 +182,7 @@ Use the `value` property to get or set the color value.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 let picker = createColorPicker();
 picker.value = '#fd7575';
@@ -216,7 +216,7 @@ Creates an image element.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 let img = createImg('/assets/p5play_logo.webp');
 img.position(0, 0).size(100, 100);
@@ -250,7 +250,7 @@ See MDN's [input documentation](https://developer.mozilla.org/docs/Web/HTML/Elem
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 textSize(64);
 
 let input = createInput();
@@ -290,7 +290,7 @@ Creates a paragraph element.
 ### webgpu
 
 ```js
-await createCanvas(200, 50);
+await Canvas(200, 50);
 background('coral');
 
 let p = createP('Hello, world!');
@@ -323,7 +323,7 @@ Use the `value` property to get or set the value of the selected radio button.
 ### webgpu
 
 ```js
-await createCanvas(200, 160);
+await Canvas(200, 160);
 
 let radio = createRadio();
 radio.option('square', '1').option('circle', '2');
@@ -372,7 +372,7 @@ string or an array of strings.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 let sel = createSelect('Select an option');
 sel.option('Red', '#f55').option('Green', '#5f5');
@@ -413,7 +413,7 @@ Use the `val` function to get the slider's value as a number.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let slider = createSlider(0, 1, 0.5, 0.1);
 slider.position(10, 10).size(180);
@@ -454,7 +454,7 @@ displayed on the canvas using the `image` function.
 ### webgpu
 
 ```js
-await createCanvas(1);
+await Canvas(1);
 
 let vid = createVideo('/assets/apollo4.mp4');
 vid.size(200, 150);
@@ -463,7 +463,7 @@ vid.controls = true;
 ```
 
 ```js
-await createCanvas(200, 150);
+await Canvas(200, 150);
 let vid = createVideo('/assets/apollo4.mp4');
 vid.hide();
 

@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.8
+ * @version 3.9
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -437,7 +437,7 @@ Q5.prototype.registerMethod = (m, fn) => {
 Q5.preloadMethods = {};
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
 
-function createCanvas(w, h, opt) {
+function Canvas(w, h, opt) {
 	if (Q5._hasGlobal) return;
 
 	let useC2D = w == 'c2d' || h == 'c2d' || opt == 'c2d' || opt?.renderer == 'c2d' || !Q5._esm;
@@ -451,6 +451,10 @@ function createCanvas(w, h, opt) {
 	}
 }
 
+function createCanvas(w, h, opt) {
+	return Canvas(w, h, opt);
+}
+
 if (Q5._server) {
 	global.q5 = global.Q5 = Q5;
 	global.p5 ??= Q5;
@@ -459,12 +463,12 @@ if (Q5._server) {
 if (typeof window == 'object') {
 	window.q5 = window.Q5 = Q5;
 	window.p5 ??= Q5;
-	window.createCanvas = createCanvas;
+	window.createCanvas = window.Canvas = Canvas;
 	window.C2D = 'c2d';
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.8';
+Q5.version = Q5.VERSION = '3.9';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {
@@ -528,7 +532,7 @@ Q5.modules.canvas = ($, q) => {
 		}
 	};
 
-	$.createCanvas = function (w, h, options) {
+	$.Canvas = function (w, h, options) {
 		if (isNaN(w) || (typeof w == 'string' && !w.includes(':'))) {
 			options = w;
 			w = null;
@@ -597,6 +601,8 @@ Q5.modules.canvas = ($, q) => {
 
 		return rend;
 	};
+
+	$.createCanvas = $.Canvas;
 
 	$.createGraphics = function (w, h, opt = {}) {
 		if (typeof opt == 'string') opt = { renderer: opt };
@@ -8511,6 +8517,7 @@ const supportedLangs = ['es'];
 
 const libLangs = `
 # core
+Canvas -> es:Lienzo
 createCanvas -> es:crearLienzo
 log -> es:log
 
@@ -8914,9 +8921,9 @@ Q5.lang = 'en';
 for (let l of supportedLangs) {
 	if (typeof window == 'object') {
 		let m = parseLangs(libLangs.slice(0, libLangs.indexOf('\n', 8)), l);
-		window[m.createCanvas] = function () {
+		window[m.createCanvas] = window[m.Canvas] = function () {
 			Q5.lang = l;
-			return createCanvas(...arguments);
+			return window.Canvas(...arguments);
 		};
 	}
 
@@ -8948,9 +8955,7 @@ Q5.modules.lang = ($) => {
 
 	let m = Q5._libMap;
 
-	if (m.createCanvas) {
-		$[m.createCanvas] = $.createCanvas;
-	}
+	if (m.Canvas) $[m.createCanvas] = $[m.Canvas] = $.Canvas;
 };
 
 Q5.addHook('init', (q) => {

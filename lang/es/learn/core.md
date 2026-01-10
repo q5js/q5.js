@@ -6,7 +6,7 @@ Bienvenido al contenido de q5! 🤩
 
 En estas páginas de "Aprender" puedes experimentar editando los mini ejemplos. ¡Diviértete! 😎
 
-## crearLienzo
+## Lienzo
 
 Crea un elemento de lienzo, una sección de la pantalla donde tu programa
 puede dibujar.
@@ -26,7 +26,7 @@ Ten en cuenta que en este ejemplo, el círculo se encuentra en la posición [0, 
 
 ```js
 // WebGPU
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo('silver');
 círculo(0, 0, 80);
 ```

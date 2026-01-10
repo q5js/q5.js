@@ -13,7 +13,7 @@ Dibuja un círculo en la posición (x, y) con el diámetro especificado.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 círculo(0, 0, 80);
 ```
 
@@ -38,7 +38,7 @@ Dibuja una elipse.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 elipse(0, 0, 160, 80);
 ```
 
@@ -64,7 +64,7 @@ Dibuja un rectángulo o un rectángulo redondeado.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 rect(-70, -80, 40, 60);
@@ -97,7 +97,7 @@ Dibuja un cuadrado o un cuadrado redondeado.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 cuadrado(-70, -70, 40);
@@ -128,7 +128,7 @@ Dibuja un punto en el lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 trazo('white');
 punto(-25, 0);
 
@@ -161,7 +161,7 @@ Dibuja una línea en el lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 trazo('lime');
 línea(-80, -30, 80, 30);
 ```
@@ -189,7 +189,7 @@ Dibuja una cápsula.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 grosorTrazo(5);
 cápsula(-60, -10, 60, 10, 10);
@@ -236,7 +236,7 @@ Cambia cómo se interpretan las primeras cuatro entradas para
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoRect(ESQUINA);
 
@@ -245,7 +245,7 @@ rect(-50, -25, 100, 50);
 ```
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoRect(CENTRO);
 
@@ -254,7 +254,7 @@ rect(0, 0, 100, 50);
 ```
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoRect(RADIO);
 
@@ -263,7 +263,7 @@ rect(0, 0, 50, 25);
 ```
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoRect(ESQUINAS);
 
@@ -323,7 +323,7 @@ Cambia cómo se interpretan las primeras cuatro entradas para
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoEliptico(CENTRO);
 
@@ -332,7 +332,7 @@ elipse(0, 0, 100, 50);
 ```
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoEliptico(RADIO);
 
@@ -341,7 +341,7 @@ elipse(0, 0, 50, 25);
 ```
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoEliptico(ESQUINA);
 
@@ -350,7 +350,7 @@ elipse(-50, -25, 100, 50);
 ```
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 modoEliptico(ESQUINAS);
 

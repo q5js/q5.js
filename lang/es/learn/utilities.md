@@ -17,7 +17,7 @@ Por defecto, los recursos se cargan en paralelo antes de que q5 ejecute `dibujar
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = cargar('/q5js_logo.avif');
 
@@ -27,7 +27,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 await cargar('/assets/Robotica.ttf');
@@ -37,7 +37,7 @@ texto('Hello, world!', -97, 100);
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let [salto, retro] = await cargar('/assets/jump.wav', '/assets/retro.flac');
 
@@ -47,7 +47,7 @@ q5.alPresionarRatón = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 tamañoTexto(32);
 
@@ -87,7 +87,7 @@ un archivo de imagen llamado "untitled.png".
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 círculo(0, 0, 50);
 
@@ -97,7 +97,7 @@ q5.alPresionarRatón = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 texto('save me?', -90, 0);
 tamañoTexto(180);
@@ -179,7 +179,7 @@ Se recomienda usar `await` para obtener el Elemento XML cargado.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(200);
 tamañoTexto(32);
 
@@ -218,7 +218,7 @@ a una cadena con un número especificado de dígitos.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 
 tamañoTexto(32);

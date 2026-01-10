@@ -26,7 +26,7 @@ Para más información, mira la página wiki
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let grab = crearGrabadora();
 grab.bitrate = 10;

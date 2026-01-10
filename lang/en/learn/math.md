@@ -18,7 +18,7 @@ Generates a random value.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 frameRate(5);
 
@@ -73,7 +73,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 q5.draw = function () {
 	circle(jit(50), 0, random(50));
@@ -307,7 +307,7 @@ Rounds a number.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 textSize(32);
 text(round(PI, 5), -90, 10);
@@ -334,7 +334,7 @@ Rounds a number up.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 textSize(32);
 text(ceil(PI), -90, 10);
@@ -361,7 +361,7 @@ Rounds a number down.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 textSize(32);
 text(floor(-PI), -90, 10);

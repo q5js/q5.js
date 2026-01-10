@@ -23,11 +23,11 @@ declare global {
 	 * @return {Promise<HTMLCanvasElement>} una promesa que se resuelve con el elemento canvas creado
 	 * @example
 	 * // WebGPU
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo('silver');
 	 * círculo(0, 0, 80);
 	 */
-	function crearLienzo(ancho?: number, alto?: number, opciones?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
+	function Lienzo(ancho?: number, alto?: number, opciones?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
 
 	/** ⭐
 	 * Función a declarar. Se ejecutará 60 veces por segundo de forma predeterminada. Tiene comportamiento de bucle, lo que permite hacer animaciones cuadro a cuadro.
@@ -60,7 +60,7 @@ declare global {
 	 * @param {number} y posición y del centro del círculo
 	 * @param {number} diámetro del círculo
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * círculo(0, 0, 80);
 	 */
 	function círculo(x: number, y: number, diámetro: number): void;
@@ -72,7 +72,7 @@ declare global {
 	 * @param {number} ancho ancho de la elipse
 	 * @param {number} [alto] alto de la elipse
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * elipse(0, 0, 160, 80);
 	 */
 	function elipse(x: number, y: number, ancho: number, alto?: number): void;
@@ -85,7 +85,7 @@ declare global {
 	 * @param {number} [h] alto del rectángulo
 	 * @param {number} [redondeado] radio para todas las esquinas
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * rect(-70, -80, 40, 60);
@@ -101,7 +101,7 @@ declare global {
 	 * @param {number} tamaño tamaño de los lados del cuadrado
 	 * @param {number} [redondeado] radio para todas las esquinas
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * cuadrado(-70, -70, 40);
@@ -115,7 +115,7 @@ declare global {
 	 * @param {number} x posición x
 	 * @param {number} y posición y
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * trazo('white');
 	 * punto(-25, 0);
 	 * 
@@ -131,7 +131,7 @@ declare global {
 	 * @param {number} x2 posición x del segundo punto
 	 * @param {number} y2 posición y del segundo punto
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * trazo('lime');
 	 * línea(-80, -30, 80, 30);
 	 */
@@ -145,7 +145,7 @@ declare global {
 	 * @param {number} y2 posición y del segundo punto
 	 * @param {number} r radio de los extremos semicirculares de la cápsula
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * grosorTrazo(5);
 	 * cápsula(-60, -10, 60, 10, 10);
@@ -166,28 +166,28 @@ declare global {
 	 * `rect` y `cuadrado`.
 	 * @param {string} modo
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoRect(ESQUINA);
 	 * 
 	 * //  ( x,  y,   w,  h)
 	 * rect(-50, -25, 100, 50);
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoRect(CENTRO);
 	 * 
 	 * //  ( cX, cY,   w,  h)
 	 * rect(0, 0, 100, 50);
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoRect(RADIO);
 	 * 
 	 * //  ( cX, cY, rX, rY)
 	 * rect(0, 0, 50, 25);
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoRect(ESQUINAS);
 	 * 
@@ -203,28 +203,28 @@ declare global {
 	 * `elipse`, `círculo`, y `arco`.
 	 * @param {string} modo
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoEliptico(CENTRO);
 	 * 
 	 * //     (  x,  y,   w,  h)
 	 * elipse(0, 0, 100, 50);
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoEliptico(RADIO);
 	 * 
 	 * //     (  x,  y, rX, rY)
 	 * elipse(0, 0, 50, 25);
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoEliptico(ESQUINA);
 	 * 
 	 * //     (lX, tY,   w,  h)
 	 * elipse(-50, -25, 100, 50);
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * modoEliptico(ESQUINAS);
 	 * 
@@ -257,7 +257,7 @@ declare global {
 	 * @param {string} url url de la imagen a cargar
 	 * @returns {Q5.Image & PromiseLike<Q5.Image>} imagen
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = cargarImagen('/q5js_logo.avif');
 	 * 
@@ -265,7 +265,7 @@ declare global {
 	 * 	fondo(logo);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = await cargarImagen('/q5js_logo.avif');
 	 * fondo(logo);
@@ -284,7 +284,7 @@ declare global {
 	 * @param {number} [sw] ancho de la subsección de la imagen fuente
 	 * @param {number} [sh] alto de la subsección de la imagen fuente
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = cargarImagen('/q5js_logo.avif');
 	 * 
@@ -292,7 +292,7 @@ declare global {
 	 * 	imagen(logo, -100, -100, 200, 200);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = cargarImagen('/q5js_logo.avif');
 	 * 
@@ -308,7 +308,7 @@ declare global {
 	 * Cambia cómo se interpretan las entradas a `imagen`.
 	 * @param {string} modo
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let logo = cargarImagen('/q5js_logo.avif');
 	 * 
 	 * q5.dibujar = function () {
@@ -318,7 +318,7 @@ declare global {
 	 * 	imagen(logo, -50, -50, 100, 100);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let logo = cargarImagen('/q5js_logo.avif');
 	 * 
 	 * q5.dibujar = function () {
@@ -328,7 +328,7 @@ declare global {
 	 * 	imagen(logo, 0, 0, 100, 100);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let logo = cargarImagen('/q5js_logo.avif');
 	 * 
 	 * q5.dibujar = function () {
@@ -360,7 +360,7 @@ declare global {
 	 * @param {number} w nuevo ancho
 	 * @param {number} h nuevo alto
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = await cargar('/q5js_logo.avif');
 	 * 
@@ -380,7 +380,7 @@ declare global {
 	 * su tamaño real. Esta es la configuración por defecto, así que ejecutar esta
 	 * función solo tiene efecto si se ha llamado a `noSuavizar`.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let icono = await cargar('/q5js_icon.png');
 	 * imagen(icono, -100, -100, 200, 200);
 	 */
@@ -389,7 +389,7 @@ declare global {
 	/** 🌆
 	 * Deshabilita el renderizado suave de imágenes para un aspecto pixelado.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let icono = await cargar('/q5js_icon.png');
 	 * 
@@ -418,7 +418,7 @@ declare global {
 	 * cada copia por separado.
 	 * @param {string | number} color color de tinte
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = await cargar('/q5js_logo.avif');
 	 * 
@@ -456,7 +456,7 @@ declare global {
 	 * @param {number} dw ancho de la región destino
 	 * @param {number} dh alto de la región destino
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = await cargar('/q5js_logo.avif');
 	 * 
@@ -483,7 +483,7 @@ declare global {
 	 * @param {number} [h] alto del área, por defecto es 1
 	 * @returns {Q5.Image | number[]}
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = await cargar('/q5js_logo.avif');
 	 * 
@@ -505,7 +505,7 @@ declare global {
 	 * @param {number} y
 	 * @param {any} val color, lienzo, o imagen
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let c = color('lime');
 	 * let img = crearImagen(50, 50);
@@ -560,7 +560,7 @@ declare global {
 	 * 
 	 * No aplicable a lienzos WebGPU.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let c = color('pink');
 	 * 
 	 * let img = crearImagen(50, 50);
@@ -587,7 +587,7 @@ declare global {
 	 * @param {string} tipo tipo de filtro o una cadena de filtro CSS
 	 * @param {number} [valor] valor opcional, depende del tipo de filtro
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let logo = await cargar('/q5js_logo.avif');
 	 * logo.filtro(INVERTIR);
 	 * imagen(logo, -100, -100, 200, 200);
@@ -668,13 +668,13 @@ declare global {
 	 * @param {number} [anchoEnvoltura] ancho máximo de línea en caracteres
 	 * @param {number} [limiteLineas] número máximo de líneas
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo('silver');
 	 * 
 	 * tamañoTexto(32);
 	 * texto('Hello, world!', -88, 10);
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * tamañoTexto(20);
 	 * 
@@ -707,7 +707,7 @@ declare global {
 	 * @param {string} url URL de la fuente a cargar
 	 * @returns {FontFace & PromiseLike<FontFace>} fuente
 	 * @example
-	 * await crearLienzo(200, 56);
+	 * await Lienzo(200, 56);
 	 * 
 	 * await cargarFuente('/assets/Robotica.ttf');
 	 * 
@@ -715,7 +715,7 @@ declare global {
 	 * tamañoTexto(64);
 	 * imagenTexto('Hello!', -98, 24);
 	 * @example
-	 * await crearLienzo(200, 74);
+	 * await Lienzo(200, 74);
 	 * 
 	 * cargarFuente('fonts.googleapis.com/css2?family=Pacifico');
 	 * 
@@ -725,7 +725,7 @@ declare global {
 	 * 	imagenTexto('Hello!', -98, 31);
 	 * };
 	 * @example
-	 * await crearLienzo(200, 74);
+	 * await Lienzo(200, 74);
 	 * 
 	 * await cargarFuente('sans-serif'); // msdf
 	 * 
@@ -742,7 +742,7 @@ declare global {
 	 * "sans-serif" o la última fuente cargada.
 	 * @param {string} nombreFuente nombre de la familia de fuentes o un objeto FontFace
 	 * @example
-	 * await crearLienzo(200, 160);
+	 * await Lienzo(200, 160);
 	 * fondo(0.8);
 	 * 
 	 * fuenteTexto('serif');
@@ -752,7 +752,7 @@ declare global {
 	 * 	texto('Hello, world!', -96, 10);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * fuenteTexto('monospace');
@@ -798,7 +798,7 @@ declare global {
 	 * No aplicable a WebGPU cuando se usan fuentes MSDF.
 	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} estilo estilo de fuente
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * estiloTexto(CURSIVA);
@@ -813,7 +813,7 @@ declare global {
 	 * @param {'left' | 'center' | 'right'} horiz alineación horizontal
 	 * @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] alineación vertical
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * tamañoTexto(32);
 	 * 
@@ -836,7 +836,7 @@ declare global {
 	 * - 900: negro/pesado
 	 * @param {number | string} peso peso de la fuente
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * tamañoTexto(32);
 	 * alineaciónTexto(CENTRO, MEDIO);
@@ -881,7 +881,7 @@ declare global {
 	 * @param {string} str cadena a medir
 	 * @returns {number} descenso del texto en píxeles
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * tamañoTexto(64);
 	 * 
@@ -897,7 +897,7 @@ declare global {
 	 * @param {number} [limiteLineas] número máximo de líneas
 	 * @returns {Q5.Image} un objeto de imagen representando el texto renderizado
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * tamañoTexto(96);
 	 * 
 	 * let img = crearImagenTexto('🐶');
@@ -926,14 +926,14 @@ declare global {
 	 * @param {number} x coordenada-x donde se debe colocar la imagen
 	 * @param {number} y coordenada-y donde se debe colocar la imagen
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * tamañoTexto(96);
 	 * alineaciónTexto(CENTRO, CENTRO);
 	 * 
 	 * imagenTexto('🐶', 0, 0);
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * await cargar('/assets/Robotica.ttf');
 	 * 
@@ -952,7 +952,7 @@ declare global {
 	 * @param {number} r número de dígitos que aparecen después del punto decimal
 	 * @returns {string} una representación de cadena del número, formateada en consecuencia
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * 
 	 * tamañoTexto(32);
@@ -1083,7 +1083,7 @@ declare global {
 	/** 🖲
 	 * Define esta función para responder a eventos de presionar el ratón.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alPresionarRatón = function () {
@@ -1096,7 +1096,7 @@ declare global {
 	/** 🖲
 	 * Define esta función para responder a eventos de soltar el ratón.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alSoltarRatón = function () {
@@ -1112,7 +1112,7 @@ declare global {
 	 * En dispositivos con pantalla táctil esta función no se llama
 	 * cuando el usuario arrastra su dedo en la pantalla.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alMoverRatón = function () {
@@ -1128,7 +1128,7 @@ declare global {
 	 * Arrastrar el ratón se define como mover el ratón
 	 * mientras un botón del ratón está presionado.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alArrastrarRatón = function () {
@@ -1141,7 +1141,7 @@ declare global {
 	/** 🖲
 	 * Define esta función para responder a eventos de doble clic del ratón.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.dobleClic = function () {
@@ -1191,7 +1191,7 @@ declare global {
 	/** 🖲
 	 * Define esta función para responder a eventos de presionar tecla.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alPresionarTecla = function () {
@@ -1204,7 +1204,7 @@ declare global {
 	/** 🖲
 	 * Define esta función para responder a eventos de soltar tecla.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alSoltarTecla = function () {
@@ -1235,7 +1235,7 @@ declare global {
 	 * Devuelve true para habilitar gestos táctiles como pellizcar para hacer zoom
 	 * y desplazarse, que q5 deshabilita en el lienzo por defecto.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alEmpezarToque = function () {
@@ -1252,7 +1252,7 @@ declare global {
 	 * Devuelve true para habilitar gestos táctiles como pellizcar para hacer zoom
 	 * y desplazarse, que q5 deshabilita en el lienzo por defecto.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alTerminarToque = function () {
@@ -1269,7 +1269,7 @@ declare global {
 	 * Devuelve true para habilitar gestos táctiles como pellizcar para hacer zoom
 	 * y desplazarse, que q5 deshabilita en el lienzo por defecto.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * let gris = 0.4;
 	 * 
 	 * q5.alMoverToque = function () {
@@ -1308,7 +1308,7 @@ declare global {
 	 * @param {number} [x] coordenada x del punto del cursor
 	 * @param {number} [y] coordenada y del punto del cursor
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * cursor('pointer');
 	 */
 	function cursor(nombre: string, x?: number, y?: number): void;
@@ -1316,7 +1316,7 @@ declare global {
 	/** 🖲
 	 * Oculta el cursor dentro de los límites del lienzo.
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * sinCursor();
 	 */
 	function sinCursor(): void;
@@ -1394,7 +1394,7 @@ declare global {
 	 * @param {number} [c3] cuarto componente de color (alfa)
 	 * @returns {Color} un nuevo objeto `Color`
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * rect(-100, -100, 100, 200);
 	 * 
 	 * //                ( r,   g,   b,   a)
@@ -1404,7 +1404,7 @@ declare global {
 	 * grosorTrazo(30);
 	 * círculo(0, 0, 155);
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * //          (gris, alfa)
 	 * let c = color(0.8, 0.2);
 	 * 
@@ -1414,7 +1414,7 @@ declare global {
 	 * 	c.g = (c.g + 0.005) % 1;
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * //           (r, g, b,   a)
 	 * let c = color(0, 1, 1, 0.2);
@@ -1437,7 +1437,7 @@ declare global {
 	 * @param {1 | 255} formato formato de color (1 para flotante, 255 para entero)
 	 * @param {'srgb' | 'display-p3'} [gama] gama de color
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * modoColor(RGB, 1);
 	 * relleno(1, 0, 0);
@@ -1447,7 +1447,7 @@ declare global {
 	 * relleno(0, 0, 1);
 	 * rect(33, -100, 67, 200);
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * modoColor(OKLCH);
 	 * 
@@ -1467,7 +1467,7 @@ declare global {
 	 * los colores rgb son mapeados a la gama completa P3, incluso cuando usan el
 	 * formato entero legado 0-255.
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * modoColor(RGB);
 	 * 
@@ -1499,13 +1499,13 @@ declare global {
 	 * - `hue`: 0 a 360
 	 * - `alpha`: 0 a 1
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * modoColor(OKLCH);
 	 * 
 	 * fondo(0.64, 0.3, 30);
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * modoColor(OKLCH);
 	 * 
 	 * q5.dibujar = function () {
@@ -1534,13 +1534,13 @@ declare global {
 	 * - `lightness`: 0 a 100
 	 * - `alpha`: 0 a 1
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * modoColor(HSL);
 	 * 
 	 * fondo(0, 100, 50);
 	 * @example
-	 * await crearLienzo(200, 220);
+	 * await Lienzo(200, 220);
 	 * sinTrazo();
 	 * 
 	 * modoColor(HSL);
@@ -1567,13 +1567,13 @@ declare global {
 	 * - `brightness`: 0 a 100
 	 * - `alpha`: 0 a 1
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * modoColor(HSB);
 	 * 
 	 * fondo(0, 100, 100);
 	 * @example
-	 * await crearLienzo(200, 220);
+	 * await Lienzo(200, 220);
 	 * sinTrazo();
 	 * 
 	 * modoColor(HSB);
@@ -1593,7 +1593,7 @@ declare global {
 	 * menos saturado y oscuro en este ejemplo, como lo haría en
 	 * una pantalla SDR.
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * modoColor(RGB, 1, SRGB);
 	 * 
@@ -1609,7 +1609,7 @@ declare global {
 	 * Si tu pantalla es capaz de HDR, nota que el rojo completo aparece
 	 * totalmente saturado y brillante en el siguiente ejemplo.
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * modoColor(RGB, 1, DISPLAY_P3);
 	 * 
@@ -1625,7 +1625,7 @@ declare global {
 	 * cadena de color CSS, valor de escala de grises y valores de componentes de color.
 	 * @param {Color | Q5.Image} relleno un color o una imagen para dibujar
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo('crimson');
 	 * @example
 	 * q5.dibujar = function () {
@@ -1680,7 +1680,7 @@ declare global {
 	 * un objeto `Color`, valor de escala de grises, o valores de componentes de color.
 	 * @param {Color} color color de relleno
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * relleno('red');
@@ -1699,7 +1699,7 @@ declare global {
 	 * un objeto `Color`, valor de escala de grises, o valores de componentes de color.
 	 * @param {Color} color color de trazo
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * relleno(0.14);
 	 * 
@@ -1714,7 +1714,7 @@ declare global {
 	/** 💅
 	 * Después de llamar a esta función, el dibujo no será rellenado.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * sinRelleno();
@@ -1729,7 +1729,7 @@ declare global {
 	/** 💅
 	 * Después de llamar a esta función, el dibujo no tendrá un trazo (contorno).
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * relleno(0.14);
 	 * trazo('red');
@@ -1744,7 +1744,7 @@ declare global {
 	 * Establece el tamaño del trazo usado para líneas y el borde alrededor de dibujos.
 	 * @param {number} grosor tamaño del trazo en píxeles
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * trazo('red');
 	 * círculo(-50, 0, 80);
@@ -1760,7 +1760,7 @@ declare global {
 	 * En q5 WebGPU esta función solo afecta a imágenes.
 	 * @param {number} alfa nivel de opacidad, variando de 0 a 1
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * opacidad(1);
@@ -1853,7 +1853,7 @@ declare global {
 	 * modo de rectángulo, modo de elipse, tamaño de texto, alineación de texto, línea base de texto, y
 	 * configuración de sombra.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * guardarEstilos();
@@ -1868,7 +1868,7 @@ declare global {
 	/** 💅
 	 * Restaura la configuración de estilo de dibujo guardada previamente.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * guardarEstilos();
@@ -2015,7 +2015,7 @@ declare global {
 	 * q5 ejecuta esta función antes de cada vez que se ejecuta la función `dibujar`,
 	 * para que las transformaciones no se trasladen al siguiente fotograma.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * trasladar(50, 50);
@@ -2029,7 +2029,7 @@ declare global {
 	/** 🦋
 	 * Guarda la matriz de transformación actual.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * guardarMatriz();
@@ -2044,7 +2044,7 @@ declare global {
 	/** 🦋
 	 * Restaura la matriz de transformación guardada previamente.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * guardarMatriz();
@@ -2059,7 +2059,7 @@ declare global {
 	/** 🦋
 	 * Guarda la configuración de estilo de dibujo y transformaciones actuales.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * apilar();
 	 * relleno('blue');
@@ -2074,7 +2074,7 @@ declare global {
 	/** 🦋
 	 * Restaura la configuración de estilo de dibujo y transformaciones guardadas previamente.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * apilar();
 	 * relleno('blue');
@@ -2096,7 +2096,7 @@ declare global {
 	 * @param {string} calidadRenderizado SUAVE o PIXELADO
 	 * @param {number} escala también se puede dar como una cadena (por ejemplo "x2")
 	 * @example
-	 * await crearLienzo(50, 25);
+	 * await Lienzo(50, 25);
 	 * 
 	 * modoVisualización(CENTRO, PIXELADO, 4);
 	 * 
@@ -2159,7 +2159,7 @@ declare global {
 	/** 💻
 	 * El ancho del lienzo.
 	 * @example
-	 * await crearLienzo(200, 120);
+	 * await Lienzo(200, 120);
 	 * círculo(0, 0, ancho);
 	 */
 	var ancho: number;
@@ -2167,7 +2167,7 @@ declare global {
 	/** 💻
 	 * El alto del lienzo.
 	 * @example
-	 * await crearLienzo(200, 80);
+	 * await Lienzo(200, 80);
 	 * círculo(0, 0, alto);
 	 */
 	var alto: number;
@@ -2175,7 +2175,7 @@ declare global {
 	/** 💻
 	 * La mitad del ancho del lienzo.
 	 * @example
-	 * await crearLienzo(200, 80);
+	 * await Lienzo(200, 80);
 	 * círculo(0, 0, medioAncho);
 	 */
 	var medioAncho: number;
@@ -2183,7 +2183,7 @@ declare global {
 	/** 💻
 	 * La mitad del alto del lienzo.
 	 * @example
-	 * await crearLienzo(200, 80);
+	 * await Lienzo(200, 80);
 	 * círculo(0, 0, medioAlto);
 	 */
 	var medioAlto: number;
@@ -2200,7 +2200,7 @@ declare global {
 	 * @param {number} w ancho del lienzo
 	 * @param {number} h alto del lienzo
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * q5.dibujar = function () {
 	 * 	fondo(0.8);
@@ -2240,7 +2240,7 @@ declare global {
 	 * Esta es una función asíncrona.
 	 * @param {number} [n] número de veces para redibujar el lienzo, por defecto es 1
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * pausar();
 	 * 
 	 * q5.dibujar = function () {
@@ -2255,7 +2255,7 @@ declare global {
 	/** 💻
 	 * Inicia el bucle de dibujo de nuevo si estaba detenido.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * pausar();
 	 * 
 	 * q5.dibujar = function () {
@@ -2340,7 +2340,7 @@ declare global {
 	 * @param {number} v valor de densidad de píxeles
 	 * @returns {number} densidad de píxeles
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * densidadPíxeles(1);
 	 * círculo(0, 0, 80);
@@ -2353,7 +2353,7 @@ declare global {
 	 * En la mayoría de pantallas modernas, este valor será 2 o 3.
 	 * @returns {number} densidad de visualización
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * tamañoTexto(64);
 	 * texto(densidadVisualización(), -90, 6);
@@ -2408,7 +2408,7 @@ declare global {
 	 * @param {number} [alto] límite superior (exclusivo)
 	 * @returns {number | any} un número o elemento aleatorio
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * frecuenciaRefresco(5);
 	 * 
@@ -2435,7 +2435,7 @@ declare global {
 	 * 	círculo(ratónX + flu(3), ratónY + flu(3), 5);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * q5.dibujar = function () {
 	 * 	círculo(flu(50), 0, aleatorio(50));
@@ -2578,7 +2578,7 @@ declare global {
 	 * @param {number} [d] número de lugares decimales a redondear
 	 * @returns {number} número redondeado
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * tamañoTexto(32);
 	 * texto(redondear(PI, 5), -90, 10);
@@ -2590,7 +2590,7 @@ declare global {
 	 * @param {number} n un número
 	 * @returns {number} número redondeado
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * tamañoTexto(32);
 	 * texto(techo(PI), -90, 10);
@@ -2602,7 +2602,7 @@ declare global {
 	 * @param {number} n un número
 	 * @returns {number} número redondeado
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * tamañoTexto(32);
 	 * texto(piso(-PI), -90, 10);
@@ -2776,7 +2776,7 @@ declare global {
 	 * @param {string} url archivo de sonido
 	 * @returns {Sonido & PromiseLike<Sonido>} sonido
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let sonido = cargarSonido('/assets/jump.wav');
 	 * sonido.volumen = 0.3;
@@ -2797,7 +2797,7 @@ declare global {
 	 * @param url archivo de audio
 	 * @returns {HTMLAudioElement & PromiseLike<HTMLAudioElement>} un HTMLAudioElement
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let audio = cargarAudio('/assets/retro.flac');
 	 * audio.volume = 0.4;
@@ -2916,7 +2916,7 @@ declare global {
 	 * @param {string} [contenido] contenido del elemento
 	 * @returns {HTMLElement} elemento
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let el = crearElemento('div', '*');
 	 * el.position(50, 50);
@@ -2934,7 +2934,7 @@ declare global {
 	 * @param {string} [texto] contenido de texto
 	 * @param {boolean} [nuevaPestaña] si abrir el enlace en una nueva pestaña
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let enlace = crearA('https://q5js.org', 'q5.js');
 	 * enlace.position(16, 42);
@@ -2950,7 +2950,7 @@ declare global {
 	 * Crea un elemento de botón.
 	 * @param {string} [contenido] contenido de texto
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * let btn = crearBotón('¡Clic aqui!');
 	 * 
@@ -2969,7 +2969,7 @@ declare global {
 	 * @param {string} [etiqueta] etiqueta de texto colocada junto a la casilla
 	 * @param {boolean} [marcado] estado inicial
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * let casilla = crearCasilla('¡Marca aquí!');
 	 * casilla.label.style.color = 'lime';
@@ -2987,7 +2987,7 @@ declare global {
 	 * Usa la propiedad `value` para obtener o establecer el valor del color.
 	 * @param {string} [valor] valor de color inicial
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * let selección = crearSelectorColor();
 	 * selección.value = '#fd7575';
@@ -3002,7 +3002,7 @@ declare global {
 	 * Crea un elemento de imagen.
 	 * @param {string} src url de la imagen
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * let img = crearImg('/assets/p5play_logo.webp');
 	 * img.position(0, 0).size(100, 100);
@@ -3021,7 +3021,7 @@ declare global {
 	 * @param {string} [valor] valor inicial
 	 * @param {string} [tipo] tipo de entrada de texto, puede ser 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * tamañoTexto(64);
 	 * 
 	 * let entrada = crearEntrada();
@@ -3039,7 +3039,7 @@ declare global {
 	 * Crea un elemento de párrafo.
 	 * @param {string} [contenido] contenido de texto
 	 * @example
-	 * await crearLienzo(200, 50);
+	 * await Lienzo(200, 50);
 	 * fondo('coral');
 	 * 
 	 * let p = crearP('¡Hola, mundo!');
@@ -3056,7 +3056,7 @@ declare global {
 	 * Usa la propiedad `value` para obtener o establecer el valor del botón de radio seleccionado.
 	 * @param {string} [nombreGrupo]
 	 * @example
-	 * await crearLienzo(200, 160);
+	 * await Lienzo(200, 160);
 	 * 
 	 * let radio = crearOpciónes();
 	 * radio.option('cuadrado', '1').option('círculo', '2');
@@ -3084,7 +3084,7 @@ declare global {
 	 * cadena o un array de cadenas.
 	 * @param {string} [placeholder] texto opcional que aparece antes de que se seleccione una opción
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * 
 	 * let sel = crearSelección('Seleccionar un opcion');
 	 * sel.option('Red', '#f55').option('Green', '#5f5');
@@ -3106,7 +3106,7 @@ declare global {
 	 * @param {number} [valor] valor inicial
 	 * @param {number} [paso] tamaño del paso
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let deslizador = crearDeslizador(0, 1, 0.5, 0.1);
 	 * deslizador.position(10, 10).size(180);
@@ -3128,14 +3128,14 @@ declare global {
 	 * @param {string} src url del video
 	 * @returns {HTMLVideoElement & PromiseLike<HTMLVideoElement>} un nuevo elemento de video
 	 * @example
-	 * await crearLienzo(1);
+	 * await Lienzo(1);
 	 * 
 	 * let vid = crearVideo('/assets/apollo4.mp4');
 	 * vid.size(200, 150);
 	 * vid.autoplay = vid.muted = vid.loop = true;
 	 * vid.controls = true;
 	 * @example
-	 * await crearLienzo(200, 150);
+	 * await Lienzo(200, 150);
 	 * let vid = crearVideo('/assets/apollo4.mp4');
 	 * vid.hide();
 	 * 
@@ -3229,7 +3229,7 @@ declare global {
 	 * ["Recording the Canvas"](https://github.com/q5js/q5.js/wiki/Recording-the-Canvas).
 	 * @returns {HTMLElement} una grabadora, elemento DOM de q5
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let grab = crearGrabadora();
 	 * grab.bitrate = 10;
@@ -3289,7 +3289,7 @@ declare global {
 	 * @param {...string} urls
 	 * @returns {Promise<any[]>} una promesa que se resuelve con objetos
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let logo = cargar('/q5js_logo.avif');
 	 * 
@@ -3297,7 +3297,7 @@ declare global {
 	 * 	imagen(logo, -100, -100, 200, 200);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * await cargar('/assets/Robotica.ttf');
@@ -3305,7 +3305,7 @@ declare global {
 	 * tamañoTexto(28);
 	 * texto('Hello, world!', -97, 100);
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let [salto, retro] = await cargar('/assets/jump.wav', '/assets/retro.flac');
 	 * 
@@ -3313,7 +3313,7 @@ declare global {
 	 * 	botónRatón == 'left' ? salto.reproducir() : retro.reproducir();
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * tamañoTexto(32);
 	 * 
@@ -3336,7 +3336,7 @@ declare global {
 	 * @param {object} [datos] lienzo, imagen, u objeto JS
 	 * @param {string} [nombreArchivo] nombre de archivo para guardar como
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * círculo(0, 0, 50);
 	 * 
@@ -3344,7 +3344,7 @@ declare global {
 	 * 	guardar('circle.png');
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * texto('save me?', -90, 0);
 	 * tamañoTexto(180);
@@ -3390,7 +3390,7 @@ declare global {
 	 * @param {string} url archivo xml
 	 * @returns {Element & PromiseLike<Element>} un objeto conteniendo el Elemento XML cargado en una propiedad llamada `obj.DOM` o usa await para obtener el Elemento XML directamente
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(200);
 	 * tamañoTexto(32);
 	 * 
@@ -3422,7 +3422,7 @@ declare global {
 	 * @param {number} digitos número de dígitos a formatear
 	 * @returns {string} número formateado
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * 
 	 * tamañoTexto(32);
@@ -3503,7 +3503,7 @@ declare global {
 	 * @param {number} [w] componente w del vector
 	 * @returns {Vector} nuevo objeto Vector
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * let v = crearVector(0, 0);
@@ -3752,7 +3752,7 @@ declare global {
 	 * @param {number} fin ángulo para terminar el arco
 	 * @param {number} [modo] configuración de estilo de forma y trazo, por defecto es `PIE_OPEN` para una forma de pastel con un trazo no cerrado, puede ser `PIE`, `CHORD`, o `CHORD_OPEN`
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * fondo(0.8);
 	 * 
 	 * arco(0, 0, 160, 160, 0.8, -0.8);
@@ -3762,7 +3762,7 @@ declare global {
 	/** 🖌
 	 * Dibuja una curva.
 	 * @example
-	 * await crearLienzo(200, 100);
+	 * await Lienzo(200, 100);
 	 * fondo(0.8);
 	 * 
 	 * curva(-100, -200, -50, 0, 50, 0, 100, -200);
@@ -3775,7 +3775,7 @@ declare global {
 	 * Solo tiene efecto en q5 WebGPU.
 	 * @param {number} val nivel de detalle de la curva, por defecto es 20
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * detalleCurva(4);
 	 * 
@@ -3898,7 +3898,7 @@ declare global {
 	 * @param {string} codigo extracto de código shader WGSL
 	 * @returns {GPUShaderModule} un programa shader
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let wobble = crearShader(`
 	 * @vertex
@@ -3920,7 +3920,7 @@ declare global {
 	 * 	plano(0, 0, 100);
 	 * };
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let stripes = crearShader(`
 	 * @fragment
@@ -3943,7 +3943,7 @@ declare global {
 	 * @param {number} w ancho o longitud del lado
 	 * @param {number} [h] alto
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * plano(0, 0, 100);
 	 */
 	function plano(x: number, y: number, w: number, h?: number): void;
@@ -3957,7 +3957,7 @@ declare global {
 	/** ⚡
 	 * Hace que q5 use el shader de formas por defecto.
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let stripes = crearShader(`
 	 * @fragment
@@ -4009,7 +4009,7 @@ declare global {
 	 * Usa esta función para personalizar una copia del
 	 * [shader de fotograma por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * 
 	 * let boxy = crearShaderFotograma(`
 	 * @fragment
@@ -4037,7 +4037,7 @@ declare global {
 	 * @param {string} codigo extracto de código shader WGSL
 	 * @returns {GPUShaderModule} un programa shader
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * modoImagen(CENTER);
 	 * 
 	 * let logo = cargarImagen('/q5js_logo.avif');
@@ -4066,7 +4066,7 @@ declare global {
 	 * @param {string} codigo extracto de código shader WGSL
 	 * @returns {GPUShaderModule} un programa shader
 	 * @example
-	 * await crearLienzo(200, 600);
+	 * await Lienzo(200, 600);
 	 * 
 	 * let vid = crearVideo('/assets/apollo4.mp4');
 	 * vid.hide();
@@ -4111,7 +4111,7 @@ declare global {
 	 * @param {string} codigo extracto de código shader WGSL
 	 * @returns {GPUShaderModule} un programa shader
 	 * @example
-	 * await crearLienzo(200);
+	 * await Lienzo(200);
 	 * alineaciónTexto(CENTER, CENTER);
 	 * 
 	 * let spin = crearShaderTexto(`
@@ -4167,7 +4167,7 @@ declare global {
 		 * La versión menor actual de q5.
 		 * @returns {string} la versión de q5
 		 * @example
-		 * await crearLienzo(200);
+		 * await Lienzo(200);
 		 * fondo(0.8);
 		 * tamañoTexto(64);
 		 * alineaciónTexto(CENTRO, CENTRO);
@@ -4291,7 +4291,7 @@ declare global {
 		 * });
 		 * 
 		 * // sketch.js
-		 * await crearLienzo(200);
+		 * await Lienzo(200);
 		 */
 		registerAddon(): void;
 

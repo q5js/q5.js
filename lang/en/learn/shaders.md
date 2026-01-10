@@ -29,7 +29,7 @@ wiki page.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let wobble = createShader(`
 @vertex
@@ -53,7 +53,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let stripes = createShader(`
 @fragment
@@ -82,7 +82,7 @@ A plane is a centered rectangle with no stroke.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 plane(0, 0, 100);
 ```
 
@@ -101,7 +101,7 @@ Make q5 use the default shapes shader.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let stripes = createShader(`
 @fragment
@@ -151,7 +151,7 @@ Use this function to customize a copy of the
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let boxy = createFrameShader(`
 @fragment
@@ -185,7 +185,7 @@ Use this function to customize a copy of the
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 imageMode(CENTER);
 
 let logo = loadImage('/q5js_logo.avif');
@@ -220,7 +220,7 @@ Use this function to customize a copy of the
 ### webgpu
 
 ```js
-await createCanvas(200, 600);
+await Canvas(200, 600);
 
 let vid = createVideo('/assets/apollo4.mp4');
 vid.hide();
@@ -271,7 +271,7 @@ Use this function to customize a copy of the
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 textAlign(CENTER, CENTER);
 
 let spin = createTextShader(`

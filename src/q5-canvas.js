@@ -49,7 +49,7 @@ Q5.modules.canvas = ($, q) => {
 		}
 	};
 
-	$.createCanvas = function (w, h, options) {
+	$.Canvas = function (w, h, options) {
 		if (isNaN(w) || (typeof w == 'string' && !w.includes(':'))) {
 			options = w;
 			w = null;
@@ -118,6 +118,8 @@ Q5.modules.canvas = ($, q) => {
 
 		return rend;
 	};
+
+	$.createCanvas = $.Canvas;
 
 	$.createGraphics = function (w, h, opt = {}) {
 		if (typeof opt == 'string') opt = { renderer: opt };

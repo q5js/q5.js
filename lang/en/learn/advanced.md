@@ -4,7 +4,7 @@
 
 Creates an [instance](https://github.com/q5js/q5.js/wiki/Instance-Mode) of Q5.
 
-Used by the global `createCanvas` function.
+Used by the global `Canvas` function.
 
 ```
 @param {string | Function} [scope]
@@ -32,7 +32,7 @@ The current minor version of q5.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 textSize(64);
 textAlign(CENTER, CENTER);
@@ -75,7 +75,7 @@ True if the device supports HDR (the display-p3 colorspace).
 
 Sets the default canvas context attributes used for newly created
 canvases and internal graphics. These options are overwritten by any
-per-canvas options you pass to `createCanvas`.
+per-canvas options you pass to `Canvas`.
 
 ```
 @default { alpha: false, colorSpace: 'display-p3' }
@@ -146,7 +146,7 @@ Creates a new Q5 instance that uses [q5's WebGPU renderer](https://github.com/q5
 
 ```js
 let q = await Q5.WebGPU('namespace');
-q.createCanvas(200, 100);
+q.Canvas(200, 100);
 
 q.draw = () => {
 	q.background(0.8);
@@ -197,7 +197,7 @@ Q5.registerAddon((Q5, proto, lifecycles) => {
 });
 
 // sketch.js
-await createCanvas(200);
+await Canvas(200);
 ```
 
 ## Q5.modules

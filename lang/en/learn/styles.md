@@ -15,7 +15,7 @@ a `Color` object, grayscale value, or color component values.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 fill('red');
@@ -53,7 +53,7 @@ a `Color` object, grayscale value, or color component values.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 fill(0.14);
 
@@ -85,7 +85,7 @@ After calling this function, drawing will not be filled.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 noFill();
@@ -117,7 +117,7 @@ After calling this function, drawing will not have a stroke (outline).
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 fill(0.14);
 stroke('red');
@@ -151,7 +151,7 @@ Sets the size of the stroke used for lines and the border around drawings.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 stroke('red');
 circle(-50, 0, 80);
@@ -185,7 +185,7 @@ In q5 WebGPU this function only affects images.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 opacity(1);
@@ -399,7 +399,7 @@ shadow settings.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 pushStyles();
@@ -431,7 +431,7 @@ Restores the previously saved drawing style settings.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 pushStyles();
@@ -465,7 +465,7 @@ Note that the canvas can only be seen through if it has an alpha channel.
 #### webgpu
 
 ```js
-await createCanvas(200, { alpha: true });
+await Canvas(200, { alpha: true });
 
 q5.draw = function () {
 	clear();

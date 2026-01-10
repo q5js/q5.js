@@ -30,7 +30,7 @@ The entire sound file must be loaded before playback can start, use `await` to w
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let sound = loadSound('/assets/jump.wav');
 sound.volume = 0.3;
@@ -69,7 +69,7 @@ interaction with the page!
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let audio = loadAudio('/assets/retro.flac');
 audio.volume = 0.4;

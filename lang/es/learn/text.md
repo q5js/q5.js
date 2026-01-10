@@ -18,7 +18,7 @@ y opcionalmente se puede restringir.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo('silver');
 
 tamañoTexto(32);
@@ -26,7 +26,7 @@ texto('Hello, world!', -88, 10);
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 tamañoTexto(20);
 
@@ -88,7 +88,7 @@ En q5 WebGPU, las fuentes en [formato MSDF](https://github.com/q5js/q5.js/wiki/q
 con el archivo terminando en "-msdf.json" se pueden usar para renderizado de texto de alto rendimiento. Haz la tuya usando el [convertidor de fuentes MSDF](https://msdf-bmfont.donmccurdy.com/).
 
 ```js
-await crearLienzo(200, 56);
+await Lienzo(200, 56);
 
 await cargarFuente('/assets/Robotica.ttf');
 
@@ -98,7 +98,7 @@ imagenTexto('Hello!', -98, 24);
 ```
 
 ```js
-await crearLienzo(200, 74);
+await Lienzo(200, 74);
 
 cargarFuente('fonts.googleapis.com/css2?family=Pacifico');
 
@@ -110,7 +110,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200, 74);
+await Lienzo(200, 74);
 
 await cargarFuente('sans-serif'); // msdf
 
@@ -159,7 +159,7 @@ Por defecto, la fuente se establece a la [familia de fuentes CSS](https://develo
 ### webgpu
 
 ```js
-await crearLienzo(200, 160);
+await Lienzo(200, 160);
 fondo(0.8);
 
 fuenteTexto('serif');
@@ -171,7 +171,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 fuenteTexto('monospace');
@@ -280,7 +280,7 @@ No aplicable a WebGPU cuando se usan fuentes MSDF.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 estiloTexto(CURSIVA);
@@ -313,7 +313,7 @@ Establece la alineación horizontal y vertical del texto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 tamañoTexto(32);
 
@@ -353,7 +353,7 @@ Establece el peso del texto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 tamañoTexto(32);
 alineaciónTexto(CENTRO, MEDIO);
@@ -452,7 +452,7 @@ Calcula y devuelve el descenso (la distancia desde la línea base hasta la parte
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 tamañoTexto(64);
 
@@ -485,7 +485,7 @@ Crea una imagen a partir de una cadena de texto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 tamañoTexto(96);
 
 let img = crearImagenTexto('🐶');
@@ -534,7 +534,7 @@ un costo de rendimiento muy alto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 tamañoTexto(96);
 alineaciónTexto(CENTRO, CENTRO);
@@ -543,7 +543,7 @@ imagenTexto('🐶', 0, 0);
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 await cargar('/assets/Robotica.ttf');
 
@@ -591,7 +591,7 @@ opcionalmente añadiendo relleno con ceros.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 
 tamañoTexto(32);

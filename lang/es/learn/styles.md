@@ -15,7 +15,7 @@ un objeto `Color`, valor de escala de grises, o valores de componentes de color.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 relleno('red');
@@ -53,7 +53,7 @@ un objeto `Color`, valor de escala de grises, o valores de componentes de color.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 relleno(0.14);
 
@@ -85,7 +85,7 @@ Después de llamar a esta función, el dibujo no será rellenado.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 sinRelleno();
@@ -117,7 +117,7 @@ Después de llamar a esta función, el dibujo no tendrá un trazo (contorno).
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 relleno(0.14);
 trazo('red');
@@ -151,7 +151,7 @@ Establece el tamaño del trazo usado para líneas y el borde alrededor de dibujo
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 trazo('red');
 círculo(-50, 0, 80);
@@ -185,7 +185,7 @@ En q5 WebGPU esta función solo afecta a imágenes.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 opacidad(1);
@@ -399,7 +399,7 @@ configuración de sombra.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 guardarEstilos();
@@ -431,7 +431,7 @@ Restaura la configuración de estilo de dibujo guardada previamente.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 guardarEstilos();
@@ -465,7 +465,7 @@ Ten en cuenta que el lienzo solo se puede ver a través si tiene un canal alfa.
 #### webgpu
 
 ```js
-await crearLienzo(200, { alpha: true });
+await Lienzo(200, { alpha: true });
 
 q5.dibujar = function () {
 	limpiar();

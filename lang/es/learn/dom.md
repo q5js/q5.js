@@ -33,7 +33,7 @@ q5 añade alguna funcionalidad extra a los elementos que crea:
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let el = crearElemento('div', '*');
 el.position(50, 50);
@@ -71,7 +71,7 @@ Crea un elemento de enlace.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let enlace = crearA('https://q5js.org', 'q5.js');
 enlace.position(16, 42);
@@ -107,7 +107,7 @@ Crea un elemento de botón.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 let btn = crearBotón('¡Clic aqui!');
 
@@ -144,7 +144,7 @@ La propiedad `label` es el elemento de etiqueta de texto junto a la casilla.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 let casilla = crearCasilla('¡Marca aquí!');
 casilla.label.style.color = 'lime';
@@ -182,7 +182,7 @@ Usa la propiedad `value` para obtener o establecer el valor del color.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 let selección = crearSelectorColor();
 selección.value = '#fd7575';
@@ -216,7 +216,7 @@ Crea un elemento de imagen.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 let img = crearImg('/assets/p5play_logo.webp');
 img.position(0, 0).size(100, 100);
@@ -250,7 +250,7 @@ Mira la [documentación de input](https://developer.mozilla.org/docs/Web/HTML/El
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 tamañoTexto(64);
 
 let entrada = crearEntrada();
@@ -290,7 +290,7 @@ Crea un elemento de párrafo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 50);
+await Lienzo(200, 50);
 fondo('coral');
 
 let p = crearP('¡Hola, mundo!');
@@ -323,7 +323,7 @@ Usa la propiedad `value` para obtener o establecer el valor del botón de radio 
 ### webgpu
 
 ```js
-await crearLienzo(200, 160);
+await Lienzo(200, 160);
 
 let radio = crearOpciónes();
 radio.option('cuadrado', '1').option('círculo', '2');
@@ -372,7 +372,7 @@ cadena o un array de cadenas.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 let sel = crearSelección('Seleccionar un opcion');
 sel.option('Red', '#f55').option('Green', '#5f5');
@@ -413,7 +413,7 @@ Usa la función `val` para obtener el valor del deslizador como un número.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let deslizador = crearDeslizador(0, 1, 0.5, 0.1);
 deslizador.position(10, 10).size(180);
@@ -454,7 +454,7 @@ mostrarse en el lienzo usando la función `imagen`.
 ### webgpu
 
 ```js
-await crearLienzo(1);
+await Lienzo(1);
 
 let vid = crearVideo('/assets/apollo4.mp4');
 vid.size(200, 150);
@@ -463,7 +463,7 @@ vid.controls = true;
 ```
 
 ```js
-await crearLienzo(200, 150);
+await Lienzo(200, 150);
 let vid = crearVideo('/assets/apollo4.mp4');
 vid.hide();
 

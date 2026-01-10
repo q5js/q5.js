@@ -27,7 +27,7 @@ wiki page.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let rec = createRecorder();
 rec.bitrate = 10;

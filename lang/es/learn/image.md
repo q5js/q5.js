@@ -14,7 +14,7 @@ Por defecto, los recursos se cargan en paralelo antes de que q5 ejecute `dibujar
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = cargarImagen('/q5js_logo.avif');
 
@@ -24,7 +24,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = await cargarImagen('/q5js_logo.avif');
 fondo(logo);
@@ -61,7 +61,7 @@ Dibuja una imagen o fotograma de video en el lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = cargarImagen('/q5js_logo.avif');
 
@@ -71,7 +71,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = cargarImagen('/q5js_logo.avif');
 
@@ -115,7 +115,7 @@ Cambia cómo se interpretan las entradas a `imagen`.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let logo = cargarImagen('/q5js_logo.avif');
 
 q5.dibujar = function () {
@@ -127,7 +127,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let logo = cargarImagen('/q5js_logo.avif');
 
 q5.dibujar = function () {
@@ -139,7 +139,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let logo = cargarImagen('/q5js_logo.avif');
 
 q5.dibujar = function () {
@@ -217,7 +217,7 @@ Redimensiona la imagen.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = await cargar('/q5js_logo.avif');
 
@@ -255,7 +255,7 @@ función solo tiene efecto si se ha llamado a `noSuavizar`.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let icono = await cargar('/q5js_icon.png');
 imagen(icono, -100, -100, 200, 200);
 ```
@@ -279,7 +279,7 @@ Deshabilita el renderizado suave de imágenes para un aspecto pixelado.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let icono = await cargar('/q5js_icon.png');
 
@@ -327,7 +327,7 @@ cada copia por separado.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = await cargar('/q5js_logo.avif');
 
@@ -387,7 +387,7 @@ Se puede usar para crear un detalle insertado, también conocido como efecto de 
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = await cargar('/q5js_logo.avif');
 
@@ -433,7 +433,7 @@ No aplicable a lienzos WebGPU.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let logo = await cargar('/q5js_logo.avif');
 
@@ -486,7 +486,7 @@ No aplicable a lienzos WebGPU.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let c = color('lime');
 let img = crearImagen(50, 50);
@@ -574,7 +574,7 @@ No aplicable a lienzos WebGPU.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let c = color('pink');
 
 let img = crearImagen(50, 50);
@@ -620,7 +620,7 @@ No aplicable a lienzos WebGPU.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let logo = await cargar('/q5js_logo.avif');
 logo.filtro(INVERTIR);
 imagen(logo, -100, -100, 200, 200);

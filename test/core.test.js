@@ -17,7 +17,7 @@ function q5CoreTest(resolve) {
 
 	let q = new Q5('instance');
 
-	q.createCanvas(200, 200);
+	q.Canvas(200, 200);
 	expect(q.canvas).toBeTruthy();
 
 	// Test frameRate and getTargetFrameRate

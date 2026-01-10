@@ -215,7 +215,7 @@ para que las transformaciones no se trasladen al siguiente fotograma.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 trasladar(50, 50);
@@ -245,7 +245,7 @@ Guarda la matriz de transformación actual.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 guardarMatriz();
@@ -278,7 +278,7 @@ Restaura la matriz de transformación guardada previamente.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 guardarMatriz();
@@ -311,7 +311,7 @@ Guarda la configuración de estilo de dibujo y transformaciones actuales.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 apilar();
 relleno('blue');
@@ -343,7 +343,7 @@ Restaura la configuración de estilo de dibujo y transformaciones guardadas prev
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 apilar();
 relleno('blue');

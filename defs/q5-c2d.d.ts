@@ -28,7 +28,7 @@ declare global {
 	 * background('silver');
 	 * circle(0, 0, 80);
 	 */
-	function createCanvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
+	function Canvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
 
 	/** ⭐
 	 * The q5 draw function is run 60 times per second by default.
@@ -3818,7 +3818,7 @@ declare global {
 		/** ⚙
 		 * Creates an [instance](https://github.com/q5js/q5.js/wiki/Instance-Mode) of Q5.
 		 * 
-		 * Used by the global `createCanvas` function.
+		 * Used by the global `Canvas` function.
 		 * @param {string | Function} [scope]
 		 * @param {HTMLElement} [parent] element that the canvas will be placed inside
 		 * @example
@@ -3861,7 +3861,7 @@ declare global {
 		/** ⚙
 		 * Sets the default canvas context attributes used for newly created
 		 * canvases and internal graphics. These options are overwritten by any
-		 * per-canvas options you pass to `createCanvas`.
+		 * per-canvas options you pass to `Canvas`.
 		 */
 		static canvasOptions: object;
 

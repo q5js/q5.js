@@ -1,7 +1,7 @@
 declare global {
 	// ⭐️ core
 
-	function crearLienzo(ancho?: number, alto?: number, opciones?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
+	function Lienzo(ancho?: number, alto?: number, opciones?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
 
 	function dibujar(): void;
 

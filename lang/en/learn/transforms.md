@@ -215,7 +215,7 @@ so that transformations don't carry over to the next frame.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 translate(50, 50);
@@ -245,7 +245,7 @@ Saves the current transformation matrix.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 pushMatrix();
@@ -278,7 +278,7 @@ Restores the previously saved transformation matrix.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 pushMatrix();
@@ -311,7 +311,7 @@ Saves the current drawing style settings and transformations.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 push();
 fill('blue');
@@ -343,7 +343,7 @@ Restores the previously saved drawing style settings and transformations.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 push();
 fill('blue');

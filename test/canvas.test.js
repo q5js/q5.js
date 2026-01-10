@@ -6,8 +6,8 @@ test('q5-canvas-behavior', () => {
 	const q = new Q5('instance');
 	q.noLoop();
 
-	// createCanvas sets up canvas and dimensions
-	const canvas = q.createCanvas(32, 24);
+	// Canvas sets up canvas and dimensions
+	const canvas = q.Canvas(32, 24);
 	expect(q.canvas).toBe(canvas);
 	expect(q.width).toBe(32);
 	expect(q.height).toBe(24);

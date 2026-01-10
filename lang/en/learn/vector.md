@@ -13,7 +13,7 @@ Constructs a new Vector object.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 let v = createVector(0, 0);

@@ -27,7 +27,7 @@ declare global {
 	 * fondo('silver');
 	 * círculo(0, 0, 80);
 	 */
-	function crearLienzo(ancho?: number, alto?: number, opciones?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
+	function Lienzo(ancho?: number, alto?: number, opciones?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
 
 	/** ⭐
 	 * Función a declarar. Se ejecutará 60 veces por segundo de forma predeterminada. Tiene comportamiento de bucle, lo que permite hacer animaciones cuadro a cuadro.

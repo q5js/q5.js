@@ -13,7 +13,7 @@ Draws a circle.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 circle(0, 0, 80);
 ```
 
@@ -38,7 +38,7 @@ Draws an ellipse.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 ellipse(0, 0, 160, 80);
 ```
 
@@ -64,7 +64,7 @@ Draws a rectangle or a rounded rectangle.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 rect(-70, -80, 40, 60);
@@ -97,7 +97,7 @@ Draws a square or a rounded square.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 square(-70, -70, 40);
@@ -128,7 +128,7 @@ Draws a point on the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 stroke('white');
 point(-25, 0);
 
@@ -161,7 +161,7 @@ Draws a line on the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 stroke('lime');
 line(-80, -30, 80, 30);
 ```
@@ -189,7 +189,7 @@ Draws a capsule.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 strokeWeight(5);
 capsule(-60, -10, 60, 10, 10);
@@ -236,7 +236,7 @@ Changes how the first four inputs to
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 rectMode(CORNER);
 
@@ -245,7 +245,7 @@ rect(-50, -25, 100, 50);
 ```
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 rectMode(CENTER);
 
@@ -254,7 +254,7 @@ rect(0, 0, 100, 50);
 ```
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 rectMode(RADIUS);
 
@@ -263,7 +263,7 @@ rect(0, 0, 50, 25);
 ```
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 rectMode(CORNERS);
 
@@ -323,7 +323,7 @@ Changes how the first four inputs to
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 ellipseMode(CENTER);
 
@@ -332,7 +332,7 @@ ellipse(0, 0, 100, 50);
 ```
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 ellipseMode(RADIUS);
 
@@ -341,7 +341,7 @@ ellipse(0, 0, 50, 25);
 ```
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 ellipseMode(CORNER);
 
@@ -350,7 +350,7 @@ ellipse(-50, -25, 100, 50);
 ```
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 ellipseMode(CORNERS);
 

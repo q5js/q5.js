@@ -120,8 +120,8 @@ class MiniEditor {
 				userCode.includes('= function') ||
 				userCode.startsWith('await') ||
 				userCode.includes('\nawait') ||
-				userCode.includes('await createCanvas') || // safeguard
-				userCode.includes('await createLienzo') ||
+				userCode.includes('await Canvas') || // safeguard
+				userCode.includes('await Lienzo') ||
 				/webgpu/i.test(userCode);
 
 			if (useWebGPU) {

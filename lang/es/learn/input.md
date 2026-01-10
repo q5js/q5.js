@@ -121,7 +121,7 @@ Define esta función para responder a eventos de presionar el ratón.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alPresionarRatón = function () {
@@ -149,7 +149,7 @@ Define esta función para responder a eventos de soltar el ratón.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alSoltarRatón = function () {
@@ -180,7 +180,7 @@ cuando el usuario arrastra su dedo en la pantalla.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alMoverRatón = function () {
@@ -211,7 +211,7 @@ mientras un botón del ratón está presionado.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alArrastrarRatón = function () {
@@ -239,7 +239,7 @@ Define esta función para responder a eventos de doble clic del ratón.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.dobleClic = function () {
@@ -347,7 +347,7 @@ Define esta función para responder a eventos de presionar tecla.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alPresionarTecla = function () {
@@ -375,7 +375,7 @@ Define esta función para responder a eventos de soltar tecla.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alSoltarTecla = function () {
@@ -435,7 +435,7 @@ y desplazarse, que q5 deshabilita en el lienzo por defecto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alEmpezarToque = function () {
@@ -467,7 +467,7 @@ y desplazarse, que q5 deshabilita en el lienzo por defecto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alTerminarToque = function () {
@@ -499,7 +499,7 @@ y desplazarse, que q5 deshabilita en el lienzo por defecto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 let gris = 0.4;
 
 q5.alMoverToque = function () {
@@ -571,7 +571,7 @@ especificar el punto activo del cursor.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 cursor('pointer');
 ```
 
@@ -589,7 +589,7 @@ Oculta el cursor dentro de los límites del lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 sinCursor();
 ```
 

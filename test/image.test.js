@@ -8,7 +8,7 @@ function q5ImageTest(resolve) {
 
 	let q = new Q5('instance');
 
-	q.createCanvas(200, 200);
+	q.Canvas(200, 200);
 
 	let icon = q.loadImage('./q5js_icon.png');
 

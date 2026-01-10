@@ -35,7 +35,7 @@ Here are some examples of valid use:
 - `color([1, 0, 0])` (colorComponents)
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 rect(-100, -100, 100, 200);
 
 //                ( r,   g,   b,   a)
@@ -47,7 +47,7 @@ circle(0, 0, 155);
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 //          (gray, alpha)
 let c = color(0.8, 0.2);
 
@@ -59,7 +59,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 //           (r, g, b,   a)
 let c = color(0, 1, 1, 0.2);
@@ -139,7 +139,7 @@ Color gamut is 'display-p3' by default, if the device supports HDR.
 The default color mode is RGB in float format.
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 colorMode(RGB, 1);
 fill(1, 0, 0);
@@ -151,7 +151,7 @@ rect(33, -100, 67, 200);
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 colorMode(OKLCH);
 
@@ -202,7 +202,7 @@ legacy integer 0-255 format.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 colorMode(RGB);
 
@@ -247,7 +247,7 @@ in-gamut colors.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 colorMode(OKLCH);
 
@@ -255,7 +255,7 @@ background(0.64, 0.3, 30);
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 colorMode(OKLCH);
 
 q5.draw = function () {
@@ -306,7 +306,7 @@ using the "display-p3" color space.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 colorMode(HSL);
 
@@ -314,7 +314,7 @@ background(0, 100, 50);
 ```
 
 ```js
-await createCanvas(200, 220);
+await Canvas(200, 220);
 noStroke();
 
 colorMode(HSL);
@@ -367,7 +367,7 @@ to 100 and saturation to 0.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 colorMode(HSB);
 
@@ -375,7 +375,7 @@ background(0, 100, 100);
 ```
 
 ```js
-await createCanvas(200, 220);
+await Canvas(200, 220);
 noStroke();
 
 colorMode(HSB);
@@ -421,7 +421,7 @@ an SDR display.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 colorMode(RGB, 1, SRGB);
 
@@ -450,7 +450,7 @@ fully saturated and bright in the following example.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 colorMode(RGB, 1, DISPLAY_P3);
 
@@ -482,7 +482,7 @@ CSS color string, grayscale value, and color component values.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background('crimson');
 ```
 

@@ -13,7 +13,7 @@ Personaliza cómo se presenta tu lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(50, 25);
+await Lienzo(50, 25);
 
 modoVisualización(CENTRO, PIXELADO, 4);
 
@@ -116,7 +116,7 @@ El ancho del lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 120);
+await Lienzo(200, 120);
 círculo(0, 0, ancho);
 ```
 
@@ -127,7 +127,7 @@ El alto del lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 80);
+await Lienzo(200, 80);
 círculo(0, 0, alto);
 ```
 
@@ -138,7 +138,7 @@ La mitad del ancho del lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 80);
+await Lienzo(200, 80);
 círculo(0, 0, medioAncho);
 ```
 
@@ -149,7 +149,7 @@ La mitad del alto del lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 80);
+await Lienzo(200, 80);
 círculo(0, 0, medioAlto);
 ```
 
@@ -171,7 +171,7 @@ Redimensiona el lienzo al ancho y alto especificados.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 q5.dibujar = function () {
 	fondo(0.8);
@@ -256,7 +256,7 @@ Esta es una función asíncrona.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 pausar();
 
 q5.dibujar = function () {
@@ -288,7 +288,7 @@ Inicia el bucle de dibujo de nuevo si estaba detenido.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 pausar();
 
 q5.dibujar = function () {
@@ -469,7 +469,7 @@ Establece la densidad de píxeles del lienzo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 densidadPíxeles(1);
 círculo(0, 0, 80);
@@ -497,7 +497,7 @@ En la mayoría de pantallas modernas, este valor será 2 o 3.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 tamañoTexto(64);
 texto(densidadVisualización(), -90, 6);

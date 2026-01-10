@@ -13,7 +13,7 @@ Customize how your canvas is presented.
 ### webgpu
 
 ```js
-await createCanvas(50, 25);
+await Canvas(50, 25);
 
 displayMode(CENTER, PIXELATED, 4);
 
@@ -116,7 +116,7 @@ The width of the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 120);
+await Canvas(200, 120);
 circle(0, 0, width);
 ```
 
@@ -127,7 +127,7 @@ The height of the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 80);
+await Canvas(200, 80);
 circle(0, 0, height);
 ```
 
@@ -138,7 +138,7 @@ Half the width of the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 80);
+await Canvas(200, 80);
 circle(0, 0, halfWidth);
 ```
 
@@ -149,7 +149,7 @@ Half the height of the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 80);
+await Canvas(200, 80);
 circle(0, 0, halfHeight);
 ```
 
@@ -171,7 +171,7 @@ Resizes the canvas to the specified width and height.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 
 q5.draw = function () {
 	background(0.8);
@@ -256,7 +256,7 @@ This is an async function.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 noLoop();
 
 q5.draw = function () {
@@ -288,7 +288,7 @@ Starts the draw loop again if it was stopped.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 noLoop();
 
 q5.draw = function () {
@@ -469,7 +469,7 @@ Sets the pixel density of the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 pixelDensity(1);
 circle(0, 0, 80);
@@ -497,7 +497,7 @@ On most modern displays, this value will be 2 or 3.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 textSize(64);
 text(displayDensity(), -90, 6);

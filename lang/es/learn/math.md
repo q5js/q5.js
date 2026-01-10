@@ -18,7 +18,7 @@ Genera un valor aleatorio.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 frecuenciaRefresco(5);
 
@@ -73,7 +73,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 q5.dibujar = function () {
 	círculo(flu(50), 0, aleatorio(50));
@@ -307,7 +307,7 @@ Redondea un número.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 tamañoTexto(32);
 texto(redondear(PI, 5), -90, 10);
@@ -334,7 +334,7 @@ Redondea un número hacia arriba.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 tamañoTexto(32);
 texto(techo(PI), -90, 10);
@@ -361,7 +361,7 @@ Redondea un número hacia abajo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 tamañoTexto(32);
 texto(piso(-PI), -90, 10);

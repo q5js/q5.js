@@ -14,7 +14,7 @@ By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to 
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
 
@@ -24,7 +24,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = await loadImage('/q5js_logo.avif');
 background(logo);
@@ -61,7 +61,7 @@ Draws an image or video frame to the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
 
@@ -71,7 +71,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = loadImage('/q5js_logo.avif');
 
@@ -115,7 +115,7 @@ Changes how inputs to `image` are interpreted.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
 q5.draw = function () {
@@ -127,7 +127,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
 q5.draw = function () {
@@ -139,7 +139,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
 q5.draw = function () {
@@ -217,7 +217,7 @@ Resizes the image.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
@@ -255,7 +255,7 @@ function only has an effect if `noSmooth` has been called.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let icon = await load('/q5js_icon.png');
 image(icon, -100, -100, 200, 200);
 ```
@@ -279,7 +279,7 @@ Disables smooth image rendering for a pixelated look.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let icon = await load('/q5js_icon.png');
 
@@ -327,7 +327,7 @@ each copy separately.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
@@ -387,7 +387,7 @@ Can be used to create a detail inset, aka a magnifying glass effect.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
@@ -433,7 +433,7 @@ Not applicable to WebGPU canvases.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
@@ -486,7 +486,7 @@ Not applicable to WebGPU canvases.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 let c = color('lime');
 let img = createImage(50, 50);
@@ -574,7 +574,7 @@ Not applicable to WebGPU canvases.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let c = color('pink');
 
 let img = createImage(50, 50);
@@ -620,7 +620,7 @@ Not applicable to WebGPU canvases.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let logo = await load('/q5js_logo.avif');
 logo.filter(INVERT);
 image(logo, -100, -100, 200, 200);

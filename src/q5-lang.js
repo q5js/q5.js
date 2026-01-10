@@ -2,6 +2,7 @@ const supportedLangs = ['es'];
 
 const libLangs = `
 # core
+Canvas -> es:Lienzo
 createCanvas -> es:crearLienzo
 log -> es:log
 
@@ -405,9 +406,9 @@ Q5.lang = 'en';
 for (let l of supportedLangs) {
 	if (typeof window == 'object') {
 		let m = parseLangs(libLangs.slice(0, libLangs.indexOf('\n', 8)), l);
-		window[m.createCanvas] = function () {
+		window[m.createCanvas] = window[m.Canvas] = function () {
 			Q5.lang = l;
-			return createCanvas(...arguments);
+			return window.Canvas(...arguments);
 		};
 	}
 
@@ -439,9 +440,7 @@ Q5.modules.lang = ($) => {
 
 	let m = Q5._libMap;
 
-	if (m.createCanvas) {
-		$[m.createCanvas] = $.createCanvas;
-	}
+	if (m.Canvas) $[m.createCanvas] = $[m.Canvas] = $.Canvas;
 };
 
 Q5.addHook('init', (q) => {

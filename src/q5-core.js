@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 3.8
+ * @version 3.9
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -437,7 +437,7 @@ Q5.prototype.registerMethod = (m, fn) => {
 Q5.preloadMethods = {};
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
 
-function createCanvas(w, h, opt) {
+function Canvas(w, h, opt) {
 	if (Q5._hasGlobal) return;
 
 	let useC2D = w == 'c2d' || h == 'c2d' || opt == 'c2d' || opt?.renderer == 'c2d' || !Q5._esm;
@@ -451,6 +451,10 @@ function createCanvas(w, h, opt) {
 	}
 }
 
+function createCanvas(w, h, opt) {
+	return Canvas(w, h, opt);
+}
+
 if (Q5._server) {
 	global.q5 = global.Q5 = Q5;
 	global.p5 ??= Q5;
@@ -459,12 +463,12 @@ if (Q5._server) {
 if (typeof window == 'object') {
 	window.q5 = window.Q5 = Q5;
 	window.p5 ??= Q5;
-	window.createCanvas = createCanvas;
+	window.createCanvas = window.Canvas = Canvas;
 	window.C2D = 'c2d';
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '3.8';
+Q5.version = Q5.VERSION = '3.9';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

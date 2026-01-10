@@ -15,7 +15,7 @@ Crea un nuevo objeto Vector.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 let v = crearVector(0, 0);

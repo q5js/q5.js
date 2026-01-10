@@ -1,7 +1,7 @@
 declare global {
 	// ⭐️ core
 
-	function createCanvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
+	function Canvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
 
 	function draw(): void;
 

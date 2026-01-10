@@ -121,7 +121,7 @@ Define this function to respond to mouse down events.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.mousePressed = function () {
@@ -149,7 +149,7 @@ Define this function to respond to mouse up events.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.mouseReleased = function () {
@@ -180,7 +180,7 @@ when the user drags their finger on the screen.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.mouseMoved = function () {
@@ -211,7 +211,7 @@ while a mouse button is pressed.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.mouseDragged = function () {
@@ -239,7 +239,7 @@ Define this function to respond to mouse double click events.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.doubleClicked = function () {
@@ -347,7 +347,7 @@ Define this function to respond to key down events.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.keyPressed = function () {
@@ -375,7 +375,7 @@ Define this function to respond to key up events.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.keyReleased = function () {
@@ -435,7 +435,7 @@ and scroll, which q5 disables on the canvas by default.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.touchStarted = function () {
@@ -467,7 +467,7 @@ and scroll, which q5 disables on the canvas by default.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.touchEnded = function () {
@@ -499,7 +499,7 @@ and scroll, which q5 disables on the canvas by default.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 let gray = 0.4;
 
 q5.touchMoved = function () {
@@ -571,7 +571,7 @@ specify the active point of the cursor.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 cursor('pointer');
 ```
 
@@ -589,7 +589,7 @@ Hides the cursor within the bounds of the canvas.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 noCursor();
 ```
 

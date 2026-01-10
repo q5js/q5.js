@@ -21,7 +21,7 @@ q5 WebGPU solo soporta el modo por defecto `PIE_OPEN`.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 
 arco(0, 0, 160, 160, 0.8, -0.8);
@@ -46,7 +46,7 @@ Dibuja una curva.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo(0.8);
 
 curva(-100, -200, -50, 0, 50, 0, 100, -200);
@@ -65,7 +65,7 @@ Solo tiene efecto en q5 WebGPU.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 detalleCurva(4);
 

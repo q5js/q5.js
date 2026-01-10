@@ -21,7 +21,7 @@ q5 WebGPU only supports the default `PIE_OPEN` mode.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 arc(0, 0, 160, 160, 0.8, -0.8);
@@ -46,7 +46,7 @@ Draws a curve.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 
 curve(-100, -200, -50, 0, 50, 0, 100, -200);
@@ -65,7 +65,7 @@ Only takes effect in q5 WebGPU.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 curveDetail(4);
 

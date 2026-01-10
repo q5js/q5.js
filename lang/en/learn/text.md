@@ -18,7 +18,7 @@ parameters and can optionally be constrained.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background('silver');
 
 textSize(32);
@@ -26,7 +26,7 @@ text('Hello, world!', -88, 10);
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 textSize(20);
 
@@ -88,7 +88,7 @@ In q5 WebGPU, fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGP
 with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
 
 ```js
-await createCanvas(200, 56);
+await Canvas(200, 56);
 
 await loadFont('/assets/Robotica.ttf');
 
@@ -98,7 +98,7 @@ textImage('Hello!', -98, 24);
 ```
 
 ```js
-await createCanvas(200, 74);
+await Canvas(200, 74);
 
 loadFont('fonts.googleapis.com/css2?family=Pacifico');
 
@@ -110,7 +110,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200, 74);
+await Canvas(200, 74);
 
 await loadFont('sans-serif'); // msdf
 
@@ -159,7 +159,7 @@ By default, the font is set to the [CSS font family](https://developer.mozilla.o
 ### webgpu
 
 ```js
-await createCanvas(200, 160);
+await Canvas(200, 160);
 background(0.8);
 
 textFont('serif');
@@ -171,7 +171,7 @@ q5.draw = function () {
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 textFont('monospace');
@@ -280,7 +280,7 @@ Not applicable to WebGPU when using MSDF fonts.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 
 textStyle(ITALIC);
@@ -313,7 +313,7 @@ Sets the horizontal and vertical alignment of text.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 textSize(32);
 
@@ -353,7 +353,7 @@ Sets the text weight.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 textSize(32);
 textAlign(CENTER, MIDDLE);
@@ -452,7 +452,7 @@ Calculates and returns the descent (the distance from the baseline to the bottom
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 textSize(64);
 
@@ -485,7 +485,7 @@ Creates an image from a string of text.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 textSize(96);
 
 let img = createTextImage('🐶');
@@ -534,7 +534,7 @@ a very high performance cost.
 ### webgpu
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 background(0.8);
 textSize(96);
 textAlign(CENTER, CENTER);
@@ -543,7 +543,7 @@ textImage('🐶', 0, 0);
 ```
 
 ```js
-await createCanvas(200);
+await Canvas(200);
 
 await load('/assets/Robotica.ttf');
 
@@ -591,7 +591,7 @@ optionally adding padding with zeros.
 ### webgpu
 
 ```js
-await createCanvas(200, 100);
+await Canvas(200, 100);
 background(0.8);
 
 textSize(32);

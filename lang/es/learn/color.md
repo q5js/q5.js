@@ -35,7 +35,7 @@ Aquí hay algunos ejemplos de uso válido:
 - `color([1, 0, 0])` (componentes de color)
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 rect(-100, -100, 100, 200);
 
 //                ( r,   g,   b,   a)
@@ -47,7 +47,7 @@ círculo(0, 0, 155);
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 //          (gris, alfa)
 let c = color(0.8, 0.2);
 
@@ -59,7 +59,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 //           (r, g, b,   a)
 let c = color(0, 1, 1, 0.2);
@@ -139,7 +139,7 @@ La gama de color es 'display-p3' por defecto, si el dispositivo soporta HDR.
 El modo de color por defecto es RGB en formato flotante.
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 modoColor(RGB, 1);
 relleno(1, 0, 0);
@@ -151,7 +151,7 @@ rect(33, -100, 67, 200);
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 modoColor(OKLCH);
 
@@ -202,7 +202,7 @@ formato entero legado 0-255.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 modoColor(RGB);
 
@@ -247,7 +247,7 @@ colores dentro de la gama.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 modoColor(OKLCH);
 
@@ -255,7 +255,7 @@ fondo(0.64, 0.3, 30);
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 modoColor(OKLCH);
 
 q5.dibujar = function () {
@@ -306,7 +306,7 @@ se usa el espacio de color "display-p3".
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 modoColor(HSL);
 
@@ -314,7 +314,7 @@ fondo(0, 100, 50);
 ```
 
 ```js
-await crearLienzo(200, 220);
+await Lienzo(200, 220);
 sinTrazo();
 
 modoColor(HSL);
@@ -367,7 +367,7 @@ a 100 y la saturación a 0.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 modoColor(HSB);
 
@@ -375,7 +375,7 @@ fondo(0, 100, 100);
 ```
 
 ```js
-await crearLienzo(200, 220);
+await Lienzo(200, 220);
 sinTrazo();
 
 modoColor(HSB);
@@ -421,7 +421,7 @@ una pantalla SDR.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 modoColor(RGB, 1, SRGB);
 
@@ -450,7 +450,7 @@ totalmente saturado y brillante en el siguiente ejemplo.
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 
 modoColor(RGB, 1, DISPLAY_P3);
 
@@ -482,7 +482,7 @@ cadena de color CSS, valor de escala de grises y valores de componentes de color
 ### webgpu
 
 ```js
-await crearLienzo(200, 100);
+await Lienzo(200, 100);
 fondo('crimson');
 ```
 

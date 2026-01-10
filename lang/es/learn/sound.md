@@ -30,7 +30,7 @@ El archivo de sonido completo debe cargarse antes de que la reproducción pueda 
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let sonido = cargarSonido('/assets/jump.wav');
 sonido.volumen = 0.3;
@@ -70,7 +70,7 @@ del usuario con la página!
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let audio = cargarAudio('/assets/retro.flac');
 audio.volume = 0.4;

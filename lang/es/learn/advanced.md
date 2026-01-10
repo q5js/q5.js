@@ -30,7 +30,7 @@ La versión menor actual de q5.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 fondo(0.8);
 tamañoTexto(64);
 alineaciónTexto(CENTRO, CENTRO);
@@ -195,7 +195,7 @@ Q5.registerAddon((Q5, proto, lifecycles) => {
 });
 
 // sketch.js
-await crearLienzo(200);
+await Lienzo(200);
 ```
 
 ## Q5.modulos

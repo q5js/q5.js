@@ -28,7 +28,7 @@ en tu código de shader personalizado, lee la página wiki
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let wobble = crearShader(`
 @vertex
@@ -52,7 +52,7 @@ q5.dibujar = function () {
 ```
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let stripes = crearShader(`
 @fragment
@@ -81,7 +81,7 @@ Un plano es un rectángulo centrado sin trazo.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 plano(0, 0, 100);
 ```
 
@@ -100,7 +100,7 @@ Hace que q5 use el shader de formas por defecto.
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let stripes = crearShader(`
 @fragment
@@ -150,7 +150,7 @@ Usa esta función para personalizar una copia del
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 
 let boxy = crearShaderFotograma(`
 @fragment
@@ -184,7 +184,7 @@ Usa esta función para personalizar una copia del
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 modoImagen(CENTER);
 
 let logo = cargarImagen('/q5js_logo.avif');
@@ -219,7 +219,7 @@ Usa esta función para personalizar una copia del
 ### webgpu
 
 ```js
-await crearLienzo(200, 600);
+await Lienzo(200, 600);
 
 let vid = crearVideo('/assets/apollo4.mp4');
 vid.hide();
@@ -270,7 +270,7 @@ Usa esta función para personalizar una copia del
 ### webgpu
 
 ```js
-await crearLienzo(200);
+await Lienzo(200);
 alineaciónTexto(CENTER, CENTER);
 
 let spin = crearShaderTexto(`
