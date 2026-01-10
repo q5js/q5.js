@@ -8920,7 +8920,8 @@ Q5.lang = 'en';
 
 for (let l of supportedLangs) {
 	if (typeof window == 'object') {
-		let m = parseLangs(libLangs.slice(0, libLangs.indexOf('\n', 8)), l);
+		let secondNL = libLangs.indexOf('\n', libLangs.indexOf('\n', 8) + 1);
+		let m = parseLangs(libLangs.slice(0, secondNL), l);
 		window[m.createCanvas] = window[m.Canvas] = function () {
 			Q5.lang = l;
 			return window.Canvas(...arguments);

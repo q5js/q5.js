@@ -15,7 +15,7 @@ q5.js was designed to make creative coding fun and accessible for a new generati
 Familiar with p5? You'll be right at home with q5. It's like getting a free computer upgrade! 🖥️
 
 ```js
-createCanvas(100, 100);
+await Canvas(100, 100);
 circle(50, 50, 50);
 ```
 
