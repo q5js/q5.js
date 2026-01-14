@@ -2390,7 +2390,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let isVideo;
 		if (img._texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
-			if (!img.width || (isVideo && !img.currentTime)) return;
+			if (img.width <= 1 || (isVideo && !img.currentTime)) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 
@@ -2960,7 +2960,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.text = (str, x, y, w, h) => {
-		if (_textSize < 1) return;
+		if (_textSize * _scale < 1) return;
 
 		let type = typeof str;
 		if (type != 'string') {
@@ -3206,6 +3206,28 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		imagePL = 2;
 		videoPL = 3;
 		textPL = 4;
+	};
+
+	const _remove = $.remove;
+	$.remove = () => {
+		$._frameA?.destroy();
+		$._frameB?.destroy();
+		uniformBuffer?.destroy();
+		transformsBuffer?.destroy();
+		colorsBuffer?.destroy();
+		shapesVertBuff?.destroy();
+		imgVertBuff?.destroy();
+		charBuffer?.destroy();
+		textBuffer?.destroy();
+		rectBuffer?.destroy();
+		rectIndexBuffer?.destroy();
+		ellipseBuffer?.destroy();
+		ellipseIndexBuffer?.destroy();
+
+		for (let b of $._buffers) b.destroy();
+		$._buffers = [];
+
+		_remove();
 	};
 };
 

@@ -8,6 +8,8 @@ declare global {
 	 * ¿Primera vez programando? Revisa la [guía para principiantes de q5](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief).
 	 * 
 	 * En estas páginas de "Aprender" puedes experimentar editando los mini ejemplos. ¡Diviértete! 😎
+	 * 
+	 * [![](/assets/Authored-By-Humans-Not-By-AI-Badge.png)](https://notbyai.fyi/)
 	 */
 
 	/** ⭐
@@ -27,7 +29,7 @@ declare global {
 	 * fondo('silver');
 	 * círculo(0, 0, 80);
 	 */
-	function Lienzo(ancho?: number, alto?: number, opciones?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
+	function Lienzo(ancho?: number, alto?: number, opciones?: object): Promise<HTMLCanvasElement>;
 
 	/** ⭐
 	 * Función a declarar. Se ejecutará 60 veces por segundo de forma predeterminada. Tiene comportamiento de bucle, lo que permite hacer animaciones cuadro a cuadro.

@@ -131,14 +131,16 @@ function Q5(scope, parent, renderer) {
 		$.resetMatrix();
 
 		if ($._beginRender) $._beginRender();
-		await runHooks('predraw');
+
 		try {
+			await runHooks('predraw');
 			await $.draw();
 		} catch (e) {
 			if (!Q5.errorTolerant) $.noLoop();
 			if ($._fes) $._fes(e);
 			throw e;
 		}
+
 		await runHooks('postdraw');
 		await $.postProcess();
 		if ($._render) $._render();
@@ -315,11 +317,10 @@ function Q5(scope, parent, renderer) {
 			$.preload();
 		}
 
-		// wait for the user to define setup, update, or draw
 		await Promise.race([
 			new Promise((resolve) => {
 				function checkUserFns() {
-					if ($.setup || $.update || $.draw || t.setup || t.update || t.draw) {
+					if ($._disablePreload || $.setup || $.update || $.draw || t.setup || t.update || t.draw) {
 						resolve();
 					} else if (!$._setupDone) {
 						// render during loading
@@ -336,7 +337,7 @@ function Q5(scope, parent, renderer) {
 			new Promise((resolve) => {
 				setTimeout(() => {
 					// if not loading
-					if (!$._loaders.length) resolve();
+					if (!$._loaders.length && !$._g?._loaders.length) resolve();
 				}, 500);
 			})
 		]);

@@ -44,11 +44,19 @@ class MiniEditor {
 
 		this.editor.onDidChangeModelContent(() => {
 			clearTimeout(this.debounceTimeout);
+
+			let lineCount = this.editor.getValue().split('\n').length;
+			if (lineCount != this.lineCount) {
+				this.lineCount = lineCount;
+				this.resizeEditor();
+			}
+
 			this.debounceTimeout = setTimeout(() => this.runCode(), 500);
 		});
 
-		this.resizeEditor();
 		window.addEventListener('resize', () => this.resizeEditor());
+
+		this.resizeEditor();
 	}
 
 	async initializeEditor() {
@@ -75,6 +83,14 @@ class MiniEditor {
 					},
 					scrollBeyondLastLine: false,
 					tabSize: 2
+				});
+
+				this.editor.addCommand(monaco.KeyCode.Escape, () => {
+					this.moveFocus(2);
+				});
+
+				this.editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Tab, () => {
+					this.moveFocus(-1);
 				});
 
 				if (!typeDefs) {
@@ -113,42 +129,42 @@ class MiniEditor {
 
 		this.outputEl.innerHTML = '';
 
-		try {
-			let userCode = this.editor.getValue();
+		let userCode = this.editor.getValue();
+		this.lineCount = userCode.split('\n').length;
 
-			let useWebGPU =
-				userCode.includes('= function') ||
-				userCode.startsWith('await') ||
-				userCode.includes('\nawait') ||
-				userCode.includes('await Canvas') || // safeguard
-				userCode.includes('await Lienzo') ||
-				/webgpu/i.test(userCode);
+		let useWebGPU =
+			userCode.includes('= function') ||
+			userCode.startsWith('await') ||
+			userCode.includes('\nawait') ||
+			userCode.includes('await Canvas') || // safeguard
+			userCode.includes('await Lienzo') ||
+			/webgpu/i.test(userCode);
 
-			if (useWebGPU) {
-				if (Q5.canUseWebGPU == false) {
-					this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
-					return;
-				}
-				Q5._esm = true;
+		if (useWebGPU) {
+			if (Q5.canUseWebGPU == false) {
+				this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
+				return;
 			}
+			Q5._esm = true;
+		}
 
-			const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|(await\s+)*Q5\.WebGPU)\s*\([^)]*\);?/g;
-			userCode = userCode.replace(q5InstanceRegex, '');
+		const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|(await\s+)*Q5\.WebGPU)\s*\([^)]*\);?/g;
+		userCode = userCode.replace(q5InstanceRegex, '');
 
-			let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : 'c2d');
+		let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : 'c2d');
 
-			for (let f of Q5._userFns) {
-				const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');
-				userCode = userCode.replace(`q5.${f}`, `q.${f}`);
-				userCode = userCode.replace(regex, (match) => {
-					const isAsync = match.includes('async');
-					return `q.${f} = ${isAsync ? 'async ' : ''}function(`;
-				});
-			}
+		for (let f of Q5._userFns) {
+			const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');
+			userCode = userCode.replace(`q5.${f}`, `q.${f}`);
+			userCode = userCode.replace(regex, (match) => {
+				const isAsync = match.includes('async');
+				return `q.${f} = ${isAsync ? 'async ' : ''}function(`;
+			});
+		}
 
-			const func = new Function(
-				'q',
-				`
+		const func = new Function(
+			'q',
+			`
 //# sourceURL=${this.container.id}.js
 return (async () => {
 	with (q) {
@@ -158,18 +174,14 @@ ${userCode}
 	}
 })();
 `
-			);
+		);
 
-			func(q).catch((e) => {
-				console.error('Error executing user code:', e);
-				this.handleError(e);
-			});
-
-			this.q5Instance = q;
-		} catch (e) {
+		func(q).catch((e) => {
 			console.error('Error executing user code:', e);
 			this.handleError(e);
-		}
+		});
+
+		this.q5Instance = q;
 	}
 
 	handleError(e) {
@@ -199,9 +211,36 @@ ${userCode}
 		}${lineNo ? ' (Line ' + lineNo + ')' : ''}</div>`;
 	}
 
+	moveFocus(step) {
+		const focusableElements = Array.from(
+			document.querySelectorAll('a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])')
+		).filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+		const index = focusableElements.indexOf(document.activeElement);
+		if (index > -1) {
+			const nextElement = focusableElements[index + step];
+			if (nextElement) {
+				nextElement.focus();
+			}
+		}
+	}
+
 	resizeEditor() {
-		this.editorEl.style.height = this.initialCode.split('\n').length * 25 + 'px';
+		this.editorEl.style.height = this.lineCount * 25 + 'px';
 		this.editor.layout();
+	}
+
+	remove() {
+		if (this.debounceTimeout) {
+			clearTimeout(this.debounceTimeout);
+		}
+		if (this.q5Instance) {
+			this.q5Instance.remove();
+			this.q5Instance = null;
+		}
+		if (this.editor) {
+			this.editor.dispose();
+			this.editor = null;
+		}
 	}
 }
 

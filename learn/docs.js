@@ -582,6 +582,13 @@ function generateHeadings() {
 			button.type = 'button';
 			button.innerText = '';
 
+			button.addEventListener('focus', () => {
+				button.style.opacity = 1;
+			});
+			button.addEventListener('blur', () => {
+				button.style.opacity = '';
+			});
+
 			button.addEventListener('pointerup', () => {
 				let url = `${location.origin}${location.pathname.slice(0, location.pathname.lastIndexOf('/') + 1)}#${id}`;
 				button.classList.add('copied');
@@ -666,6 +673,9 @@ async function populateContentArea() {
 		button.append(title);
 
 		button.addEventListener('pointerup', () => navigateTo(nav.id));
+		button.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') navigateTo(nav.id);
+		});
 		navButtonsContainer.append(button);
 	}
 

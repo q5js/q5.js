@@ -6,6 +6,8 @@ Bienvenido al contenido de q5! 🤩
 
 En estas páginas de "Aprender" puedes experimentar editando los mini ejemplos. ¡Diviértete! 😎
 
+[![](/assets/Authored-By-Humans-Not-By-AI-Badge.png)](https://notbyai.fyi/)
+
 ## Lienzo
 
 Crea un elemento de lienzo, una sección de la pantalla donde tu programa

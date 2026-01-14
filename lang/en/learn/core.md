@@ -7,6 +7,8 @@ First time coding? Check out the [q5 Beginner's Brief](https://github.com/q5js/q
 On these Learn pages, you can experiment with editing the
 interactive mini examples. Have fun! 😎
 
+[![](/assets/Authored-By-Humans-Not-By-AI-Badge.png)](https://notbyai.fyi/)
+
 ## Canvas
 
 Creates a canvas element, a section of the screen your program

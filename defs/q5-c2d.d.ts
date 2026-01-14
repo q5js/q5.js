@@ -9,6 +9,8 @@ declare global {
 	 * 
 	 * On these Learn pages, you can experiment with editing the
 	 * interactive mini examples. Have fun! 😎
+	 * 
+	 * [![](/assets/Authored-By-Humans-Not-By-AI-Badge.png)](https://notbyai.fyi/)
 	 */
 
 	/** ⭐
@@ -28,7 +30,7 @@ declare global {
 	 * background('silver');
 	 * circle(0, 0, 80);
 	 */
-	function Canvas(w?: number, h?: number, options?: CanvasRenderingContext2DSettings): Promise<HTMLCanvasElement>;
+	function Canvas(w?: number, h?: number, options?: object): Promise<HTMLCanvasElement>;
 
 	/** ⭐
 	 * The q5 draw function is run 60 times per second by default.
