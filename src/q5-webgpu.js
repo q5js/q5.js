@@ -19,7 +19,8 @@ struct Q5 {
 	mouseY: f32,
 	mouseIsPressed: f32,
 	keyCode: f32,
-	keyIsPressed: f32
+	keyIsPressed: f32,
+	yUp: f32
 }`;
 
 	$._g = $.createGraphics(1, 1, 'c2d');
@@ -141,7 +142,8 @@ fn vertexMain(v: VertexParams) -> FragParams {
 @fragment
 fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	return textureSample(tex, samp, f.texCoord);
-}`;
+}
+`;
 
 		let frameShader = Q5.device.createShaderModule({
 			label: 'frameShader',
@@ -362,16 +364,31 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrixIdx = 0,
 		matrixDirty = false; // tracks if the matrix has been modified
 
-	// 4x4 identity matrix with y axis flipped
+	// 4x4 identity matrix
 	// prettier-ignore
 	matrices.push([
 		1, 0, 0, 0,
-		0, -1, 0, 0, // -1 here flips the y axis
+		0, 1, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	]);
 
 	transforms.set(matrices[0]);
+
+	let flippedY = false,
+		yDir = 1;
+
+	$.flipY = () => {
+		$._flippedY = flippedY = !flippedY;
+		yDir *= -1;
+
+		// edit the identity matrix to flip Y axis
+		matrices[0][5] *= -1;
+		transforms.set(matrices[0], 0);
+	};
+
+	// current default is y-down for q5 WebGPU
+	$.flipY();
 
 	$.translate = (x, y) => {
 		if (!x && !y) return;
@@ -630,20 +647,20 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			l = x;
 			r = x + w;
 			t = y;
-			b = y + h;
+			b = y - h * yDir;
 		} else if (mode == 'center') {
 			let hw = w / 2,
 				hh = h / 2;
 			l = x - hw;
 			r = x + hw;
-			t = y - hh;
-			b = y + hh;
+			t = y + hh * yDir;
+			b = y - hh * yDir;
 		} else {
 			// CORNERS
 			l = x;
 			r = w;
 			t = y;
-			b = h;
+			b = -h * yDir;
 		}
 
 		boxCache[0] = l;
@@ -819,6 +836,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$._uniforms[10] = $.mouseIsPressed ? 1 : 0;
 		$._uniforms[11] = $.keyCode;
 		$._uniforms[12] = $.keyIsPressed ? 1 : 0;
+		$._uniforms[13] = yDir;
 
 		Q5.device.queue.writeBuffer(uniformBuffer, 0, $._uniforms);
 
@@ -1646,7 +1664,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if (_rectMode != 'center') {
 			if (_rectMode == 'corner') {
 				x += hw;
-				y += hh;
+				y += hh * -yDir;
 				hw = Math.abs(hw);
 				hh = Math.abs(hh);
 			} else if (_rectMode == 'radius') {
@@ -1679,7 +1697,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	function addCapsule(x1, y1, x2, y2, r, strokeW, fillCapsule) {
 		let dx = x2 - x1,
-			dy = y2 - y1,
+			dy = flippedY ? y2 - y1 : y1 - y2,
 			len = Math.hypot(dx, dy);
 
 		if (len === 0) return;
@@ -1848,7 +1866,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let strokeAlpha = innerAlpha * outerAlpha;
 	return vec4f(f.stroke.rgb, f.stroke.a * strokeAlpha);
 }
-		`;
+`;
 
 	let ellipseShader = Q5.device.createShaderModule({
 		label: 'ellipseShader',
@@ -2028,61 +2046,61 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._imageShaderCode =
 		$._baseShaderCode +
 		/* wgsl */ `
-	struct VertexParams {
-		@builtin(vertex_index) vertexIndex : u32,
-		@location(0) pos: vec2f,
-		@location(1) texCoord: vec2f,
-		@location(2) tintIndex: f32,
-		@location(3) matrixIndex: f32,
-		@location(4) imageAlpha: f32
-	}
-	struct FragParams {
-		@builtin(position) position: vec4f,
-		@location(0) texCoord: vec2f,
-		@location(1) tintColor: vec4f,
-		@location(2) imageAlpha: f32
-	}
-	
-	@group(0) @binding(0) var<uniform> q: Q5;
-	@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
-	@group(0) @binding(2) var<storage> colors : array<vec4f>;
-	
-	@group(1) @binding(0) var samp: sampler;
-	@group(1) @binding(1) var tex: texture_2d<f32>;
-	
-	fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
-		var vert = vec4f(pos, 0f, 1f);
-		vert = transforms[i32(matrixIndex)] * vert;
-		vert.x /= q.halfWidth;
-		vert.y /= q.halfHeight;
-		return vert;
-	}
-	
-	fn applyTint(texColor: vec4f, tintColor: vec4f) -> vec4f {
-		// apply the tint color to the sampled texture color at full strength
-		let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
-		// mix in the tint using the tint alpha as the blend strength
-		return mix(texColor, tinted, tintColor.a);
-	}
-	
-	@vertex
-	fn vertexMain(v: VertexParams) -> FragParams {
-		var vert = transformVertex(v.pos, v.matrixIndex);
-	
-		var f: FragParams;
-		f.position = vert;
-		f.texCoord = v.texCoord;
-		f.tintColor = colors[i32(v.tintIndex)];
-		f.imageAlpha = v.imageAlpha;
-		return f;
-	}
-	
-	@fragment
-	fn fragMain(f: FragParams) -> @location(0) vec4f {
-		var texColor = textureSample(tex, samp, f.texCoord);
-		texColor.a *= f.imageAlpha;
-		return applyTint(texColor, f.tintColor);
-	}
+struct VertexParams {
+	@builtin(vertex_index) vertexIndex : u32,
+	@location(0) pos: vec2f,
+	@location(1) texCoord: vec2f,
+	@location(2) tintIndex: f32,
+	@location(3) matrixIndex: f32,
+	@location(4) imageAlpha: f32
+}
+struct FragParams {
+	@builtin(position) position: vec4f,
+	@location(0) texCoord: vec2f,
+	@location(1) tintColor: vec4f,
+	@location(2) imageAlpha: f32
+}
+
+@group(0) @binding(0) var<uniform> q: Q5;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
+
+@group(1) @binding(0) var samp: sampler;
+@group(1) @binding(1) var tex: texture_2d<f32>;
+
+fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+	var vert = vec4f(pos, 0f, 1f);
+	vert = transforms[i32(matrixIndex)] * vert;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
+	return vert;
+}
+
+fn applyTint(texColor: vec4f, tintColor: vec4f) -> vec4f {
+	// apply the tint color to the sampled texture color at full strength
+	let tinted = vec4f(texColor.rgb * tintColor.rgb, texColor.a);
+	// mix in the tint using the tint alpha as the blend strength
+	return mix(texColor, tinted, tintColor.a);
+}
+
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
+
+	var f: FragParams;
+	f.position = vert;
+	f.texCoord = v.texCoord;
+	f.tintColor = colors[i32(v.tintIndex)];
+	f.imageAlpha = v.imageAlpha;
+	return f;
+}
+
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor = textureSample(tex, samp, f.texCoord);
+	texColor.a *= f.imageAlpha;
+	return applyTint(texColor, f.tintColor);
+}
 	`;
 
 	let imageShader = Q5.device.createShaderModule({
@@ -2370,7 +2388,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	$._getImageMode = () => _imageMode;
 
 	// Reusable uniform buffer array to avoid GC
-	$._uniforms = new Float32Array(13);
+	$._uniforms = new Float32Array(14);
 
 	const addImgVert = (x, y, u, v, ci, ti, ia) => {
 		let s = imgVertStack,
@@ -2429,8 +2447,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let u0 = sx / w,
 			v0 = sy / h,
 			u1 = (sx + sw) / w,
-			v1 = (sy + sh) / h,
-			ti = matrixIdx,
+			v1 = (sy + sh) / h;
+
+		let ti = matrixIdx,
 			ci = tintIdx,
 			ia = globalAlpha;
 
@@ -2515,12 +2534,11 @@ struct Text {
 @group(2) @binding(0) var<storage> textChars: array<vec4f>;
 @group(2) @binding(1) var<storage> textMetadata: array<Text>;
 
-const quad = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
+const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 const uvs = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
 
 fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
-	return ((quad[i] * fontChar.size + char.xy + fontChar.offset) *
-		text.scale) + text.pos;
+	return ((vec2f(quad[i].x, quad[i].y * q.yUp) * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
 }
 
 fn calcUV(i: u32, fontChar: Char) -> vec2f {
@@ -2751,7 +2769,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			fontChars[o + 4] = char.width; // size.x
 			fontChars[o + 5] = char.height; // size.y
 			fontChars[o + 6] = char.xoffset; // offset.x
-			fontChars[o + 7] = char.yoffset; // offset.y
+			fontChars[o + 7] = -char.yoffset * yDir; // offset.y
 			o += 8;
 		}
 		charsBuffer.unmap();
@@ -3016,16 +3034,16 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 				o += 4;
 			});
 
-			if (tb == 'alphabetic') y -= _textSize;
-			else if (tb == 'center') y -= _textSize * 0.5;
-			else if (tb == 'bottom') y -= leading;
+			if (tb == 'alphabetic') y += _textSize * yDir;
+			else if (tb == 'center') y += _textSize * 0.5 * yDir;
+			else if (tb == 'bottom') y += leading * yDir;
 		} else {
 			// measure the text to get the line height before setting
 			// the x position to properly align the text
 			measurements = measureText($._font, str);
 
 			let offsetY = 0;
-			if (tb == 'alphabetic') y -= _textSize;
+			if (tb == 'alphabetic') y += _textSize * yDir;
 			else if (tb == 'center') offsetY = measurements.height * 0.5;
 			else if (tb == 'bottom') offsetY = measurements.height;
 
@@ -3037,7 +3055,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 					offsetX = -measurements.lineWidths[line];
 				}
 				charsData[o] = textX + offsetX;
-				charsData[o + 1] = -(textY + offsetY);
+				charsData[o + 1] = (textY + offsetY) * yDir;
 				charsData[o + 2] = char.charIndex;
 				charsData[o + 3] = textIndex;
 				o += 4;
@@ -3114,10 +3132,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		else if (ta == 'right') x -= img.width;
 
 		let bl = _textBaseline;
-		if (bl == 'alphabetic') y -= img._leading;
-		else if (bl == 'center') y -= img._middle;
-		else if (bl == 'bottom') y -= img._bottom;
-		else if (bl == 'top') y -= img._top;
+		if (bl == 'alphabetic') y += img._leading * yDir;
+		else if (bl == 'center') y += img._middle * yDir;
+		else if (bl == 'bottom') y += img._bottom * yDir;
+		else if (bl == 'top') y += img._top * yDir;
 
 		$.image(img, x, y);
 		_imageMode = og;

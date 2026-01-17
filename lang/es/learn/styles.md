@@ -462,7 +462,7 @@ Limpia el lienzo, haciendo que cada píxel sea completamente transparente.
 
 Ten en cuenta que el lienzo solo se puede ver a través si tiene un canal alfa.
 
-#### webgpu
+### webgpu
 
 ```js
 await Lienzo(200, { alpha: true });

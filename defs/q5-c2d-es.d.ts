@@ -1961,8 +1961,6 @@ declare global {
 	 * Limpia el lienzo, haciendo que cada píxel sea completamente transparente.
 	 * 
 	 * Ten en cuenta que el lienzo solo se puede ver a través si tiene un canal alfa.
-	 * 
-	 * #### webgpu
 	 * @example
 	 * crearLienzo(200, 200, { alpha: true });
 	 * 

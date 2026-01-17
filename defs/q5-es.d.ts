@@ -1886,8 +1886,13 @@ declare global {
 	 * Limpia el lienzo, haciendo que cada píxel sea completamente transparente.
 	 * 
 	 * Ten en cuenta que el lienzo solo se puede ver a través si tiene un canal alfa.
+	 * @example
+	 * await Lienzo(200, { alpha: true });
 	 * 
-	 * #### webgpu
+	 * q5.dibujar = function () {
+	 * 	limpiar();
+	 * 	círculo((frameCount % 200) - 100, 0, 80);
+	 * };
 	 */
 	function limpiar(): void;
 

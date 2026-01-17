@@ -58,6 +58,7 @@ Q5.modules.input = ($, q) => {
 			if ($._webgpu) {
 				x -= c.hw;
 				y -= c.hh;
+				if (!$._flippedY) y *= -1;
 			}
 		} else {
 			x = e.clientX;
@@ -171,18 +172,24 @@ Q5.modules.input = ($, q) => {
 	$.keyIsDown = (v) => !!keysHeld[typeof v == 'string' ? v.toLowerCase() : v];
 
 	function getTouchInfo(touch) {
-		const rect = $.canvas.getBoundingClientRect();
-		const sx = $.canvas.scrollWidth / $.width || 1;
-		const sy = $.canvas.scrollHeight / $.height || 1;
+		const rect = $.canvas.getBoundingClientRect(),
+			sx = $.canvas.scrollWidth / $.width || 1,
+			sy = $.canvas.scrollHeight / $.height || 1;
 		let modX = 0,
 			modY = 0;
 		if ($._webgpu) {
 			modX = $.halfWidth;
 			modY = $.halfHeight;
 		}
+
+		let x = (touch.clientX - rect.left) / sx - modX,
+			y = (touch.clientY - rect.top) / sy - modY;
+
+		if ($._webgpu && !$._flippedY) y *= -1;
+
 		return {
-			x: (touch.clientX - rect.left) / sx - modX,
-			y: (touch.clientY - rect.top) / sy - modY,
+			x,
+			y,
 			id: touch.identifier
 		};
 	}

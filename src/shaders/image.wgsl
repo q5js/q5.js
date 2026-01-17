@@ -14,7 +14,8 @@ struct Q5 {
 	mouseY: f32,
 	mouseIsPressed: f32,
 	keyCode: f32,
-	keyIsPressed: f32
+	keyIsPressed: f32,
+	yUp: f32
 }
 struct VertexParams {
 	@builtin(vertex_index) vertexIndex : u32,
@@ -39,7 +40,7 @@ struct FragParams {
 @group(1) @binding(1) var tex: texture_2d<f32>;
 
 fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
-	var vert = vec4f(pos, 0.0, 1.0);
+	var vert = vec4f(pos, 0f, 1f);
 	vert = transforms[i32(matrixIndex)] * vert;
 	vert.x /= q.halfWidth;
 	vert.y /= q.halfHeight;

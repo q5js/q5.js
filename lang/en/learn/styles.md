@@ -462,7 +462,7 @@ Clears the canvas, making every pixel completely transparent.
 
 Note that the canvas can only be seen through if it has an alpha channel.
 
-#### webgpu
+### webgpu
 
 ```js
 await Canvas(200, { alpha: true });

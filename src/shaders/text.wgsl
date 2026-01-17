@@ -14,7 +14,8 @@ struct Q5 {
 	mouseY: f32,
 	mouseIsPressed: f32,
 	keyCode: f32,
-	keyIsPressed: f32
+	keyIsPressed: f32,
+	yUp: f32
 }
 struct VertexParams {
 	@builtin(vertex_index) vertexIndex : u32,
@@ -55,12 +56,11 @@ struct Text {
 @group(2) @binding(0) var<storage> textChars: array<vec4f>;
 @group(2) @binding(1) var<storage> textMetadata: array<Text>;
 
-const quad = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
+const quad = array(vec2f(0, -1), vec2f(1, -1), vec2f(0, 0), vec2f(1, 0));
 const uvs = array(vec2f(0, 1), vec2f(1, 1), vec2f(0, 0), vec2f(1, 0));
 
 fn calcPos(i: u32, char: vec4f, fontChar: Char, text: Text) -> vec2f {
-	return ((quad[i] * fontChar.size + char.xy + fontChar.offset) *
-		text.scale) + text.pos;
+	return ((vec2f(quad[i].x, quad[i].y * q.yUp) * fontChar.size + char.xy + fontChar.offset) * text.scale) + text.pos;
 }
 
 fn calcUV(i: u32, fontChar: Char) -> vec2f {

@@ -379,8 +379,6 @@ declare global {
 
 	function norm(n: number, start: number, stop: number): number;
 
-	function fract(n: number): number;
-
 	function abs(n: number): number;
 
 	function round(n: number, d: number): number;
@@ -393,7 +391,25 @@ declare global {
 
 	function max(...args: number[]): number;
 
+	function sin(angle: number): number;
+
+	function cos(angle: number): number;
+
+	function tan(angle: number): number;
+
+	function mag(val1: number, val2: number): number;
+
+	function asin(n: number): number;
+
+	function acos(n: number): number;
+
+	function atan(n: number): number;
+
+	function atan2(y: number, x: number): number;
+
 	function pow(base: number, exponent: number): number;
+
+	function fract(n: number): number;
 
 	function sq(n: number): number;
 

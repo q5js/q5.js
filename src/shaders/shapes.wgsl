@@ -14,7 +14,8 @@ struct Q5 {
 	mouseY: f32,
 	mouseIsPressed: f32,
 	keyCode: f32,
-	keyIsPressed: f32
+	keyIsPressed: f32,
+	yUp: f32
 }
 struct VertexParams {
 	@builtin(vertex_index) vertexIndex : u32,

@@ -1970,8 +1970,6 @@ declare global {
 	 * Clears the canvas, making every pixel completely transparent.
 	 * 
 	 * Note that the canvas can only be seen through if it has an alpha channel.
-	 * 
-	 * #### webgpu
 	 * @example
 	 * createCanvas(200, 200, { alpha: true });
 	 * 
@@ -2827,6 +2825,22 @@ declare global {
 	 * Approximately 0.7854.
 	 */
 	const QUARTER_PI: number;
+
+	function sin(angle: number): number;
+
+	function cos(angle: number): number;
+
+	function tan(angle: number): number;
+
+	function mag(val1: number, val2: number): number;
+
+	function asin(n: number): number;
+
+	function acos(n: number): number;
+
+	function atan(n: number): number;
+
+	function atan2(y: number, x: number): number;
 
 	// 🔊 sound
 
