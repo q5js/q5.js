@@ -5955,7 +5955,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	];
 
 	const blendModes = {
-		'source-over': [2, 3, 0, 2, 3, 0],
+		'source-over': [2, 3, 0, 1, 3, 0],
 		'destination-over': [6, 1, 0, 6, 1, 0],
 		'source-in': [5, 0, 0, 5, 0, 0],
 		'destination-in': [0, 2, 0, 0, 2, 0],
@@ -5964,8 +5964,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		'source-atop': [5, 3, 0, 5, 3, 0],
 		'destination-atop': [6, 2, 0, 6, 2, 0],
 		lighter: [1, 1, 0, 1, 1, 0],
-		darken: [1, 1, 3, 3, 5, 0],
-		lighten: [1, 1, 4, 3, 5, 0],
+		darken: [1, 1, 3, 1, 3, 0],
+		lighten: [1, 1, 4, 1, 3, 0],
 		replace: [1, 0, 0, 1, 0, 0]
 	};
 
@@ -7574,8 +7574,11 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 					GPUTextureUsage.RENDER_ATTACHMENT
 			});
 
+			let src = { source: cnv };
+			if (cnv.tagName == 'IMG') src.colorSpace = $.canvas.colorSpace;
+
 			Q5.device.queue.copyExternalImageToTexture(
-				{ source: cnv },
+				src,
 				{
 					texture,
 					colorSpace: $.canvas.colorSpace
@@ -8523,7 +8526,7 @@ Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
 
-Q5.MAX_TRANSFORMS = 1e7;
+Q5.MAX_TRANSFORMS = 2097152;
 Q5.MAX_RECTS = 200200;
 Q5.MAX_ELLIPSES = 200200;
 Q5.MAX_CHARS = 100000;
@@ -8534,20 +8537,50 @@ Q5.initWebGPU = async () => {
 		console.warn('q5 WebGPU not supported on this browser! Use Google Chrome or Edge.');
 		return false;
 	}
-	if (!Q5.requestedGPU) {
-		Q5.requestedGPU = true;
-		let adapter = await navigator.gpu.requestAdapter();
-		if (!adapter) {
-			console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, Vulkan may need to be enabled.');
-			return false;
-		}
-		Q5.device = await adapter.requestDevice();
 
-		Q5.device.lost.then((e) => {
-			console.error('WebGPU crashed!');
-			console.error(e);
-		});
+	// fn can only be called once
+	if (Q5.requestedGPU) return;
+	Q5.requestedGPU = true;
+
+	let adapter = await navigator.gpu.requestAdapter();
+
+	adapter ??= await navigator.gpu.requestAdapter({
+		featureLevel: 'compatibility'
+	});
+
+	if (!adapter) {
+		console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, Vulkan may need to be enabled.');
+		return false;
 	}
+
+	let device = await adapter.requestDevice();
+
+	const vertexStorageLimit =
+		device.limits.maxStorageBuffersInVertexStage ?? device.limits.maxStorageBuffersPerShaderStage;
+	if (vertexStorageLimit < 3) {
+		console.warn('q5 WebGPU requires vertex storage buffers, which are not supported by this device.');
+		return false;
+	}
+
+	// Update to fit device limits
+	const maxStorage = device.limits.maxStorageBufferBindingSize;
+
+	let min = Math.min,
+		floor = Math.floor;
+
+	Q5.MAX_TRANSFORMS = min(Q5.MAX_TRANSFORMS, floor(maxStorage / 64));
+	Q5.MAX_RECTS = min(Q5.MAX_RECTS, floor(maxStorage / 64));
+	Q5.MAX_ELLIPSES = min(Q5.MAX_ELLIPSES, floor(maxStorage / 64));
+	Q5.MAX_CHARS = min(Q5.MAX_CHARS, floor(maxStorage / 16));
+	Q5.MAX_TEXTS = min(Q5.MAX_TEXTS, floor(maxStorage / 32));
+
+	device.lost.then((e) => {
+		console.error('WebGPU crashed!');
+		console.error(e);
+	});
+
+	Q5.device = device;
+
 	return true;
 };
 

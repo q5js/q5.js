@@ -72,6 +72,7 @@ class MiniEditor {
 					folding: false,
 					renderLineHighlight: 'none',
 					theme: 'vs-dark',
+					wordWrap: 'on',
 					fontSize: 16,
 					lineNumbersMinChars: 2,
 					glyphMargin: false,
