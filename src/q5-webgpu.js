@@ -2411,7 +2411,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let isVideo;
 		if (img._texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
-			if (img.width <= 1 || (isVideo && !img.currentTime)) return;
+			if (!isVideo || !img.currentTime) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 

@@ -13,7 +13,7 @@ Q5.modules.fes = ($) => {
 			idx = 0;
 			sep = '@';
 		}
-		while (stackLines[idx].indexOf('q5') >= 0) idx++;
+		while (idx > stackLines.length && stackLines[idx].indexOf('q5') >= 0) idx++;
 
 		let errFile = stackLines[idx].split(sep).at(-1);
 		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);

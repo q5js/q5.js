@@ -3335,7 +3335,7 @@ Q5.modules.fes = ($) => {
 			idx = 0;
 			sep = '@';
 		}
-		while (stackLines[idx].indexOf('q5') >= 0) idx++;
+		while (idx > stackLines.length && stackLines[idx].indexOf('q5') >= 0) idx++;
 
 		let errFile = stackLines[idx].split(sep).at(-1);
 		if (errFile.startsWith('blob:')) errFile = errFile.slice(5);
@@ -7676,7 +7676,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		let isVideo;
 		if (img._texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
-			if (img.width <= 1 || (isVideo && !img.currentTime)) return;
+			if (!isVideo || !img.currentTime) return;
 			if (img.flipped) $.scale(-1, 1);
 		}
 
