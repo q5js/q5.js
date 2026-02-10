@@ -143,7 +143,7 @@ Make q5 use all default shaders.
 
 Creates a shader that q5 can use to draw frames.
 
-`createCanvas` must be run before using this function.
+You must create a canvas before using this function.
 
 Use this function to customize a copy of the
 [default frame shader](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).

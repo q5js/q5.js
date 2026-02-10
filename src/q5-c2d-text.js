@@ -151,7 +151,7 @@ Q5.renderers.c2d.text = ($, q) => {
 
 	$.textStyle = (x) => {
 		if (!x) return emphasis;
-		emphasis = x;
+		$._textStyle = emphasis = x;
 		$._fontMod = true;
 		styleHash = -1;
 	};
@@ -281,7 +281,6 @@ Q5.renderers.c2d.text = ($, q) => {
 			if ($._textBaseline == 'middle') tY -= leading * (lines.length - 1) * 0.5;
 			else if ($._textBaseline == 'bottom') tY -= leading * (lines.length - 1);
 		} else {
-			tX = 0;
 			tY = leading;
 
 			if (!img) {
@@ -322,9 +321,14 @@ Q5.renderers.c2d.text = ($, q) => {
 
 			ctx = img.ctx;
 
+			ctx.textAlign = $._textAlign;
+			if ($._textAlign == 'center') tX = img.width / 2;
+			else if ($._textAlign == 'right') tX = img.width;
+			else tX = 0;
+
 			ctx.font = $.ctx.font;
-			ctx.fillStyle = $._fill;
-			ctx.strokeStyle = $._stroke;
+			if ($._doFill && $._fillSet) ctx.fillStyle = $._fill;
+			if ($._doStroke && $._strokeSet) ctx.strokeStyle = $._stroke;
 			ctx.lineWidth = $.ctx.lineWidth;
 		}
 
@@ -368,7 +372,11 @@ Q5.renderers.c2d.text = ($, q) => {
 						colorCache = styleCache[hash];
 						for (let c in colorCache) {
 							let _img = colorCache[c];
-							if (_img._texture) _img._texture.destroy();
+							if (_img._texture) {
+								let owner = _img._owner || $;
+								if (owner._texturesToDestroy) owner._texturesToDestroy.push(_img._texture);
+								else _img._texture.destroy();
+							}
 							delete colorCache[c];
 						}
 					}
@@ -397,6 +405,79 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		$.image(img, x, y);
 		$._imageMode = og;
+	};
+
+	$.textToPoints = (str, x = 0, y = 0, sampleRate = 0.1, density = 1) => {
+		let pd = $._pixelDensity;
+		$._pixelDensity = density;
+		let img = $.createTextImage(str);
+		$._pixelDensity = pd;
+
+		img.loadPixels();
+
+		let w = img.canvas.width,
+			h = img.canvas.height;
+
+		let points = [];
+
+		let ta = $._textAlign,
+			bl = $._textBaseline,
+			offsetX = 0,
+			offsetY = 0;
+
+		if (ta == 'center') offsetX = -w / 2;
+		else if (ta == 'right') offsetX = -w;
+
+		if (bl == 'alphabetic') offsetY = -img._leading;
+		else if (bl == 'middle') offsetY = -img._middle;
+		else if (bl == 'bottom') offsetY = -img._bottom;
+		else if (bl == 'top') offsetY = -img._top;
+
+		offsetY *= density;
+
+		let allPoints = [];
+
+		// Z-order curve (Morton code)
+		const part1by1 = (n) => {
+			n &= 0x0000ffff;
+			n = (n | (n << 8)) & 0x00ff00ff;
+			n = (n | (n << 4)) & 0x0f0f0f0f;
+			n = (n | (n << 2)) & 0x33333333;
+			n = (n | (n << 1)) & 0x55555555;
+			return n;
+		};
+
+		let r = Math.max(0.5, sampleRate);
+
+		for (let py = 0; py < h; py++) {
+			for (let px = 0; px < w; px++) {
+				let index = (py * w + px) * 4;
+
+				if ((r == 1 || $.random() < r) && img.pixels[index + 3] > 128) {
+					allPoints.push({
+						x: px,
+						y: py,
+						z: part1by1(px) | (part1by1(py) << 1)
+					});
+				}
+			}
+		}
+
+		let total = allPoints.length;
+		let numPoints = total * sampleRate * (1 / r);
+
+		if (sampleRate < 1) allPoints.sort((a, b) => a.z - b.z);
+
+		let step = total / numPoints;
+		for (let i = 0; i < total; i += step) {
+			let p = allPoints[Math.floor(i)];
+			points.push({
+				x: (p.x + offsetX) / density + x,
+				y: (p.y + offsetY) / density + y
+			});
+		}
+
+		return points;
 	};
 };
 

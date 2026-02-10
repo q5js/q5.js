@@ -108,6 +108,7 @@ Q5.modules.math = ($, q) => {
 		return {
 			setSeed(val) {
 				jsr = seed = (val == null ? Math.random() * m : val) >>> 0;
+				if (jsr === 0) jsr = 1;
 			},
 			getSeed() {
 				return seed;

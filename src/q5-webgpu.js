@@ -44,6 +44,7 @@ struct Q5 {
 	$._pipelineConfigs = [];
 	$._pipelines = [];
 	$._buffers = [];
+	$._texturesToDestroy = [];
 
 	// local variables used for slightly better performance
 
@@ -1090,9 +1091,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		ellipseStackIdx = 0;
 
 		// destroy buffers
+		let bufs = $._buffers;
+		let texs = $._texturesToDestroy;
+		$._buffers = [];
+		$._texturesToDestroy = [];
+
 		Q5.device.queue.onSubmittedWorkDone().then(() => {
-			for (let b of $._buffers) b.destroy();
-			$._buffers = [];
+			for (let b of bufs) b.destroy();
+			for (let t of texs) t.destroy();
 		});
 	};
 
@@ -1807,7 +1813,12 @@ fn vertexMain(v: VertexParams) -> FragParams {
 	f.position = transformVertex(pos, ellipse.matrixIndex);
 	f.outerEdge = dist / (ellipse.size + halfStrokeSize);
 	f.fillEdge = dist / ellipse.size;
-	f.innerEdge = dist / (ellipse.size - halfStrokeSize);
+	let innerSize = ellipse.size - halfStrokeSize;
+	if (innerSize.x <= 0.0 || innerSize.y <= 0.0) {
+		f.innerEdge = vec2f(2.0, 0.0);
+	} else {
+		f.innerEdge = dist / innerSize;
+	}
 	f.strokeWeight = ellipse.strokeWeight;
 
 	let fill = colors[i32(ellipse.fillIndex)];
@@ -2848,9 +2859,10 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 	let _textSize = 18,
 		_textAlign = 'left',
+		_textStyle = 'normal',
 		_textBaseline = 'alphabetic',
 		leadingSet = false,
-		leading = 22.5,
+		_textLeading = 22.5,
 		leadDiff = 4.5,
 		leadPercent = 1.25;
 
@@ -2871,8 +2883,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		if (size == undefined) return _textSize;
 		_textSize = size;
 		if (!leadingSet) {
-			leading = size * leadPercent;
-			leadDiff = leading - size;
+			_textLeading = size * leadPercent;
+			leadDiff = _textLeading - size;
 		}
 	};
 
@@ -2905,29 +2917,29 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 	$.textLeading = (lineHeight) => {
 		if (!$._font) return $._g.textLeading(lineHeight);
-		if (!lineHeight) return leading;
-		$._font.lineHeight = leading = lineHeight;
-		leadDiff = leading - _textSize;
-		leadPercent = leading / _textSize;
+		if (!lineHeight) return _textLeading;
+		$._font.lineHeight = _textLeading = lineHeight;
+		leadDiff = _textLeading - _textSize;
+		leadPercent = _textLeading / _textSize;
 		leadingSet = true;
 	};
 
 	$.textAlign = (horiz, vert) => {
 		_textAlign = horiz;
-		if (vert) _textBaseline = vert;
+		if (vert) _textBaseline = vert[0] == 'c' ? 'middle' : vert;
 	};
 
 	$.textStyle = (style) => {
-		// stub
+		_textStyle = style;
 	};
 
 	let charStack = [],
 		textStack = [];
 
 	// Reusable array for line widths to avoid GC
-	let lineWidthsCache = new Array(100);
+	let lineWidths = new Array(100);
 
-	// Reusable buffers for text data to avoid creating new arrays
+	// Reusable buffers for text data to avoid GC
 	let charDataBuffer = new Float32Array(Q5.MAX_CHARS * 4); // reusable buffer for char data
 	let textDataBuffer = new Float32Array(Q5.MAX_TEXTS * 8); // reusable buffer for text metadata
 
@@ -2937,7 +2949,6 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			offsetY = 0,
 			line = 0,
 			printedCharCount = 0,
-			lineWidths = lineWidthsCache, // reuse array
 			nextCharCode = text.charCodeAt(0);
 
 		for (let i = 0; i < text.length; ++i) {
@@ -2945,7 +2956,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			nextCharCode = i < text.length - 1 ? text.charCodeAt(i + 1) : -1;
 			switch (charCode) {
 				case 10: // newline
-					lineWidths.push(offsetX);
+					lineWidths[line] = offsetX;
 					line++;
 					maxWidth = Math.max(maxWidth, offsetX);
 					offsetX = 0;
@@ -3038,8 +3049,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			});
 
 			if (tb == 'alphabetic') y += _textSize * yDir;
-			else if (tb == 'center') y += _textSize * 0.5 * yDir;
-			else if (tb == 'bottom') y += leading * yDir;
+			else if (tb == 'middle') y += _textSize * 0.5 * yDir;
+			else if (tb == 'bottom') y += _textLeading * yDir;
 		} else {
 			// measure the text to get the line height before setting
 			// the x position to properly align the text
@@ -3047,7 +3058,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 			let offsetY = 0;
 			if (tb == 'alphabetic') y += _textSize * yDir;
-			else if (tb == 'center') offsetY = measurements.height * 0.5;
+			else if (tb == 'middle') offsetY = measurements.height * 0.5;
 			else if (tb == 'bottom') offsetY = measurements.height;
 
 			measureText($._font, str, (textX, textY, line, char) => {
@@ -3096,7 +3107,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			$._g.textSize(_textSize);
 			return $._g.textAscent(str);
 		}
-		return leading - leadDiff;
+		return _textLeading - leadDiff;
 	};
 
 	$.textDescent = (str) => {
@@ -3107,17 +3118,28 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		return leadDiff;
 	};
 
-	$.createTextImage = (str, w, h) => {
-		$._g.textSize(_textSize);
-
-		if (doFill && fillSet) {
+	$._applyTextStylesToC2D = () => {
+		if (!doFill) $._g.noFill();
+		else if (fillSet) {
 			let fi = fillIdx * 4;
 			$._g.fill(colorStack.slice(fi, fi + 4));
 		}
-		if (doStroke && strokeSet) {
+
+		if (!doStroke) $._g.noStroke();
+		else if (strokeSet) {
 			let si = strokeIdx * 4;
 			$._g.stroke(colorStack.slice(si, si + 4));
 		}
+
+		if (sw != $._g._strokeWeight) $._g.strokeWeight(sw);
+		if (_textSize != $._g._textSize) $._g.textSize(_textSize);
+		if (_textStyle != $._g._textStyle) $._g.textStyle(_textStyle);
+		if (_textLeading != $._g.textLeading()) $._g.textLeading(_textLeading);
+		$._g.textAlign(_textAlign, _textBaseline);
+	};
+
+	$.createTextImage = (str, w, h) => {
+		$._applyTextStylesToC2D();
 
 		let g = $._g.createTextImage(str, w, h);
 		$._makeDrawable(g);
@@ -3136,12 +3158,17 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 		let bl = _textBaseline;
 		if (bl == 'alphabetic') y += img._leading * yDir;
-		else if (bl == 'center') y += img._middle * yDir;
+		else if (bl == 'middle') y += img._middle * yDir;
 		else if (bl == 'bottom') y += img._bottom * yDir;
 		else if (bl == 'top') y += img._top * yDir;
 
 		$.image(img, x, y);
 		_imageMode = og;
+	};
+
+	$.textToPoints = (str, x, y, sampleRate, density) => {
+		$._applyTextStylesToC2D();
+		return $._g.textToPoints(str, x, y, sampleRate, density);
 	};
 
 	/* SHADERS */

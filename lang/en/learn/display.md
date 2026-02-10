@@ -157,8 +157,6 @@ circle(0, 0, halfHeight);
 
 The canvas element associated with the Q5 instance.
 
-If a canvas is not explicitly created with `createCanvas()`, but a q5 function like `draw` or `mousePressed` is defined, a default canvas of size 200x200 will be created automatically.
-
 ## resizeCanvas
 
 Resizes the canvas to the specified width and height.
@@ -566,8 +564,3 @@ function draw() {
 	circle(x % 200, 100, 20);
 }
 ```
-
-## ctx
-
-The 2D rendering context for the canvas, if using the Canvas2D
-renderer.

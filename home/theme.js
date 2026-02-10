@@ -1,6 +1,13 @@
 {
+	let systemTheme = window.matchMedia('prefers-color-scheme: dark').matches ? 'dark' : 'light';
+	let storedSystemTheme = localStorage.getItem('last-system-theme');
+	if (storedSystemTheme !== systemTheme) {
+		localStorage.removeItem('theme');
+		localStorage.setItem('last-system-theme', systemTheme);
+	}
+
 	let theme = localStorage.getItem('theme');
-	theme ??= window.matchMedia('prefers-color-scheme: dark').matches ? 'dark' : 'light';
+	theme ??= systemTheme;
 	document.body.className = theme;
 }
 
@@ -60,17 +67,34 @@ async function modifyTokenizer(languageId, customRules) {
 	monaco.languages.setMonarchTokensProvider(languageId, language);
 }
 
-function setTheme(theme) {
+function applyTheme(theme) {
 	if (theme == 'dark') {
 		document.body.classList.remove('light');
 		document.body.classList.add('dark');
 		setMonacoEditorTheme('aijs_dark_modern');
+		let hl = document.getElementById('highlight-theme');
+		if (hl) hl.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
 	} else {
 		document.body.classList.remove('dark');
 		document.body.classList.add('light');
 		setMonacoEditorTheme('aijs_light');
+		let hl = document.getElementById('highlight-theme');
+		if (hl) hl.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css';
 	}
+}
+
+function setTheme(theme) {
+	applyTheme(theme);
 	localStorage.setItem('theme', theme);
 }
 
-setTheme(localStorage.getItem('theme') || 'light');
+window.matchMedia('prefers-color-scheme: dark').addEventListener('change', (e) => {
+	let newTheme = e.matches ? 'dark' : 'light';
+	localStorage.removeItem('theme');
+	localStorage.setItem('last-system-theme', newTheme);
+	applyTheme(newTheme);
+});
+
+applyTheme(
+	localStorage.getItem('theme') || (window.matchMedia('prefers-color-scheme: dark').matches ? 'dark' : 'light')
+);

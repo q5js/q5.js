@@ -515,9 +515,6 @@ components.
 Use the `color` function for greater flexibility, it runs
 this constructor internally.
 
-`Color` is not actually a class itself, it's a reference to a
-Q5 color class based on the color mode, format, and gamut.
-
 ## Color.equals
 
 Checks if this color is exactly equal to another color.

@@ -42,8 +42,10 @@ await Canvas(200);
 let [jump, retro] = await load('/assets/jump.wav', '/assets/retro.flac');
 
 q5.mousePressed = function () {
-	mouseButton == 'left' ? jump.play() : retro.play();
+	if (mouseButton == 'left') jump.play();
+	if (mouseButton == 'right') retro.play();
 };
+//
 ```
 
 ```js
@@ -51,11 +53,11 @@ await Canvas(200);
 background(0.8);
 textSize(32);
 
-let myXML = await load('/assets/animals.xml');
-let mammals = myXML.getElementsByTagName('mammal');
-let y = -100;
+let xml = await load('/assets/animals.xml');
+let mammals = xml.querySelectorAll('mammal');
+let y = -90;
 for (let mammal of mammals) {
-	text(mammal.textContent, -100, (y += 32));
+	text(mammal.textContent, -90, (y += 32));
 }
 ```
 
@@ -180,15 +182,14 @@ Using `await` to get the loaded XML Element is recommended.
 
 ```js
 await Canvas(200);
-background(200);
+background(0.8);
 textSize(32);
 
-let animals = await loadXML('/assets/animals.xml');
-
-let mammals = animals.getElementsByTagName('mammal');
-let y = 64;
+let xml = await load('/assets/animals.xml');
+let mammals = xml.querySelectorAll('mammal');
+let y = -90;
 for (let mammal of mammals) {
-	text(mammal.textContent, 20, (y += 32));
+	text(mammal.textContent, -90, (y += 32));
 }
 ```
 

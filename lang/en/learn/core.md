@@ -67,16 +67,13 @@ function draw() {
 
 ## log
 
-Logs a message to the JavaScript console.
+Logs a message to the JavaScript [console](https://developer.mozilla.org/docs/Web/API/console/log_static).
 
 To view the console, open your browser's web developer tools
 via the keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
 then click the "Console" tab.
 
-This is an alias for the standard
-[`console.log`](https://developer.mozilla.org/docs/Web/API/console/log_static) function.
-
-When you're curious about what your code is doing, use `log()`!
+Use `log` when you're curious about what your code is doing!
 
 ```
 @param {*} message

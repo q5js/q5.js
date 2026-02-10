@@ -11,9 +11,9 @@ declare global {
 
 	function circle(x: number, y: number, diameter: number): void;
 
-	function ellipse(x: number, y: number, width: number, height?: number): void;
+	function ellipse(x: number, y: number, width: number, height: number): void;
 
-	function rect(x: number, y: number, w: number, h?: number, rounded?: number): void;
+	function rect(x: number, y: number, w: number, h: number, rounded?: number): void;
 
 	function square(x: number, y: number, size: number, rounded?: number): void;
 
@@ -131,6 +131,8 @@ declare global {
 
 	function textImage(img: Q5.Image | String, x: number, y: number): void;
 
+	function textToPoints(str: string, x?: number, y?: number, sampleRate?: number, density?: number): [];
+
 	function nf(n: number, l: number, r: number): string;
 
 	const NORMAL: 'normal';
@@ -148,6 +150,8 @@ declare global {
 	const RIGHT: 'right';
 
 	const TOP: 'top';
+
+	const MIDDLE: 'middle';
 
 	const BOTTOM: 'bottom';
 
@@ -273,6 +277,8 @@ declare global {
 
 	function clear(): void;
 
+	var ctx: CanvasRenderingContext2D;
+
 	function inFill(x: number, y: number): boolean;
 
 	function inStroke(x: number, y: number): boolean;
@@ -351,15 +357,11 @@ declare global {
 
 	var deltaTime: number;
 
-	var ctx: CanvasRenderingContext2D;
-
-	var drawingContext: CanvasRenderingContext2D;
-
 	// 🧮 math
 
 	function random(low?: number | any[], high?: number): number | any;
 
-	function jit(amount: number): number;
+	function jit(amount?: number): number;
 
 	function noise(x?: number, y?: number, z?: number): number;
 
@@ -477,7 +479,7 @@ declare global {
 
 	// 📑 dom
 
-	function createElement(tag: string, content?: string): HTMLElement;
+	function createEl(tag: string, content?: string): HTMLElement;
 
 	function createA(href: string, text?: string): HTMLAnchorElement;
 
@@ -503,9 +505,9 @@ declare global {
 
 	function createCapture(type?: string, flipped?: boolean): HTMLVideoElement & PromiseLike<HTMLVideoElement>;
 
-	function findElement(selector: string): HTMLElement;
+	function findEl(selector: string): HTMLElement;
 
-	function findElements(selector: string): HTMLElement[];
+	function findEls(selector: string): HTMLElement[];
 
 	// 🎞️ record
 

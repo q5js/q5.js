@@ -154,7 +154,7 @@ Q5.modules.canvas = ($, q) => {
 
 		let m = Q5._libMap;
 
-		if (m.width) {
+		if (m?.width) {
 			q[m.width] = w;
 			q[m.height] = h;
 			q[m.halfWidth] = q.halfWidth;

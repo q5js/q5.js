@@ -25,8 +25,8 @@ declare global {
 	 * @param {object} [opt] [options](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes)
 	 * @returns {Promise<HTMLCanvasElement>} created canvas element
 	 * @example
-	 * // Canvas2D
-	 * createCanvas(200, 100);
+	 * // WebGPU
+	 * await Canvas(200, 100);
 	 * background('silver');
 	 * circle(0, 0, 80);
 	 */
@@ -35,30 +35,27 @@ declare global {
 	/** ⭐
 	 * The q5 draw function is run 60 times per second by default.
 	 * @example
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	background('silver');
 	 * 	circle(mouseX, mouseY, 80);
-	 * }
+	 * };
 	 */
 	function draw(): void;
 
 	/** ⭐
-	 * Logs a message to the JavaScript console.
+	 * Logs a message to the JavaScript [console](https://developer.mozilla.org/docs/Web/API/console/log_static).
 	 * 
 	 * To view the console, open your browser's web developer tools
 	 * via the keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
 	 * then click the "Console" tab.
 	 * 
-	 * This is an alias for the standard
-	 * [`console.log`](https://developer.mozilla.org/docs/Web/API/console/log_static) function.
-	 * 
-	 * When you're curious about what your code is doing, use `log()`!
+	 * Use `log` when you're curious about what your code is doing!
 	 * @param {*} message
 	 * @example
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	circle(mouseX, mouseY, 80);
 	 * 	log('The mouse is at:', mouseX, mouseY);
-	 * }
+	 * };
 	 */
 	function log(message: any): void;
 
@@ -70,8 +67,8 @@ declare global {
 	 * @param {number} y y-coordinate
 	 * @param {number} diameter diameter of the circle
 	 * @example
-	 * createCanvas(200, 100);
-	 * circle(100, 50, 80);
+	 * await Canvas(200, 100);
+	 * circle(0, 0, 80);
 	 */
 	function circle(x: number, y: number, diameter: number): void;
 
@@ -80,29 +77,29 @@ declare global {
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} width width of the ellipse
-	 * @param {number} [height] height of the ellipse
+	 * @param {number} height height of the ellipse
 	 * @example
-	 * createCanvas(200, 100);
-	 * ellipse(100, 50, 160, 80);
+	 * await Canvas(200, 100);
+	 * ellipse(0, 0, 160, 80);
 	 */
-	function ellipse(x: number, y: number, width: number, height?: number): void;
+	function ellipse(x: number, y: number, width: number, height: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a rectangle or a rounded rectangle.
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} w width of the rectangle
-	 * @param {number} [h] height of the rectangle
+	 * @param {number} h height of the rectangle
 	 * @param {number} [rounded] radius for all corners
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
-	 * rect(30, 20, 40, 60);
-	 * rect(80, 70, 40, 60, 10);
-	 * rect(130, 120, 40, 60, 30, 2, 8, 20);
+	 * rect(-70, -80, 40, 60);
+	 * rect(-20, -30, 40, 60, 10);
+	 * rect(30, 20, 40, 60, 30);
 	 */
-	function rect(x: number, y: number, w: number, h?: number, rounded?: number): void;
+	function rect(x: number, y: number, w: number, h: number, rounded?: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a square or a rounded square.
@@ -111,12 +108,12 @@ declare global {
 	 * @param {number} size size of the sides of the square
 	 * @param {number} [rounded] radius for all corners
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
-	 * square(30, 30, 40);
-	 * square(80, 80, 40, 10);
-	 * square(130, 130, 40, 30, 2, 8, 20);
+	 * square(-70, -70, 40);
+	 * square(-20, -20, 40, 10);
+	 * square(30, 30, 40, 30);
 	 */
 	function square(x: number, y: number, size: number, rounded?: number): void;
 
@@ -125,12 +122,12 @@ declare global {
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * stroke('white');
-	 * point(75, 50);
+	 * point(-25, 0);
 	 * 
 	 * strokeWeight(10);
-	 * point(125, 50);
+	 * point(25, 0);
 	 */
 	function point(x: number, y: number): void;
 
@@ -141,9 +138,9 @@ declare global {
 	 * @param {number} x2 x-coordinate of the second point
 	 * @param {number} y2 y-coordinate of the second point
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * stroke('lime');
-	 * line(20, 20, 180, 80);
+	 * line(-80, -30, 80, 30);
 	 */
 	function line(x1: number, y1: number, x2: number, y2: number): void;
 
@@ -155,17 +152,17 @@ declare global {
 	 * @param {number} y2 y-coordinate of the second point
 	 * @param {number} r radius of the capsule semi-circle ends
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * strokeWeight(5);
-	 * capsule(40, 40, 160, 60, 10);
+	 * capsule(-60, -10, 60, 10, 10);
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	fill('cyan');
 	 * 	strokeWeight(10);
-	 * 	capsule(100, 100, mouseX, mouseY, 20);
-	 * }
+	 * 	capsule(0, 0, mouseX, mouseY, 20);
+	 * };
 	 */
 	function capsule(x1: number, y1: number, x2: number, y2: number, r: number): void;
 
@@ -176,33 +173,33 @@ declare global {
 	 * `rect` and `square` are interpreted.
 	 * @param {string} mode
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * rectMode(CORNER);
 	 * 
-	 * //  ( x,  y,   w,  h)
-	 * rect(50, 25, 100, 50);
+	 * //  (  x,   y,   w,  h)
+	 * rect(-50, -25, 100, 50);
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * rectMode(CENTER);
 	 * 
-	 * //  ( cX, cY,   w,  h)
-	 * rect(100, 50, 100, 50);
+	 * //  (cX, cY, w,  h)
+	 * rect(0, 0, 100, 50);
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * rectMode(RADIUS);
 	 * 
-	 * //  ( cX, cY, rX, rY)
-	 * rect(100, 50, 50, 25);
+	 * // (cX, cY, rX, rY)
+	 * rect(0, 0, 50, 25);
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * rectMode(CORNERS);
 	 * 
-	 * //  ( x1, y1, x2, y2)
-	 * rect(50, 25, 150, 75);
+	 * //  ( x1,  y1, x2, y2)
+	 * rect(-50, -25, 50, 25);
 	 */
 	function rectMode(mode: string): void;
 
@@ -213,33 +210,33 @@ declare global {
 	 * `ellipse`, `circle`, and `arc` are interpreted.
 	 * @param {string} mode
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * ellipseMode(CENTER);
 	 * 
-	 * //     (  x,  y,   w,  h)
-	 * ellipse(100, 50, 100, 50);
+	 * //     (x, y,   w,  h)
+	 * ellipse(0, 0, 100, 50);
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * ellipseMode(RADIUS);
 	 * 
-	 * //     (  x,  y, rX, rY)
-	 * ellipse(100, 50, 50, 25);
+	 * //     (x, y, rX, rY)
+	 * ellipse(0, 0, 50, 25);
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * ellipseMode(CORNER);
 	 * 
-	 * //     (lX, tY,   w,  h)
-	 * ellipse(50, 25, 100, 50);
+	 * //     ( lX,  tY,   w,  h)
+	 * ellipse(-50, -25, 100, 50);
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * ellipseMode(CORNERS);
 	 * 
-	 * //     ( x1, y1, x2, y2)
-	 * ellipse(50, 25, 150, 75);
+	 * //     ( x1,  y1, x2, y2)
+	 * ellipse(-50, -25, 50, 25);
 	 */
 	function ellipseMode(mode: string): void;
 
@@ -267,13 +264,18 @@ declare global {
 	 * @param {string} url url of the image to load
 	 * @returns {Q5.Image & PromiseLike<Q5.Image>} image
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * let logo = loadImage('/q5js_logo.avif');
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	background(logo);
-	 * }
+	 * };
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * let logo = await loadImage('/q5js_logo.avif');
+	 * background(logo);
 	 */
 	function loadImage(url: string): Q5.Image & PromiseLike<Q5.Image>;
 
@@ -289,21 +291,21 @@ declare global {
 	 * @param {number} [sw] width of the subsection of the source image
 	 * @param {number} [sh] height of the subsection of the source image
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * let logo = load('/q5js_logo.avif');
 	 * 
-	 * function draw() {
-	 * 	image(logo, 0, 0, 200, 200);
-	 * }
+	 * q5.draw = function () {
+	 * 	image(logo, -100, -100, 200, 200);
+	 * };
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * let logo = load('/q5js_logo.avif');
 	 * 
-	 * function draw() {
-	 * 	image(logo, 0, 0, 200, 200, 256, 256, 512, 512);
-	 * }
+	 * q5.draw = function () {
+	 * 	image(logo, -100, -100, 200, 200, 256, 256, 512, 512);
+	 * };
 	 */
 	function image(): void;
 
@@ -313,35 +315,35 @@ declare global {
 	 * Changes how inputs to `image` are interpreted.
 	 * @param {string} mode
 	 * @example
-	 * createCanvas(200);
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * await Canvas(200);
+	 * let logo = load('/q5js_logo.avif');
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	imageMode(CORNER);
 	 * 
-	 * 	//   ( img,  x,  y,   w,   h)
-	 * 	image(logo, 50, 50, 100, 100);
-	 * }
+	 * 	//   ( img,   x,   y,   w,   h)
+	 * 	image(logo, -50, -50, 100, 100);
+	 * };
 	 * @example
-	 * createCanvas(200);
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * await Canvas(200);
+	 * let logo = load('/q5js_logo.avif');
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	imageMode(CENTER);
 	 * 
-	 * 	//   ( img,  cX,  cY,   w,   h)
-	 * 	image(logo, 100, 100, 100, 100);
-	 * }
+	 * 	//   (img, cX, cY,  w,   h)
+	 * 	image(logo, 0, 0, 100, 100);
+	 * };
 	 * @example
-	 * createCanvas(200);
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * await Canvas(200);
+	 * let logo = load('/q5js_logo.avif');
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	imageMode(CORNERS);
 	 * 
-	 * 	//   ( img, x1, y1,  x2,  y2)
-	 * 	image(logo, 50, 50, 100, 100);
-	 * }
+	 * 	//   ( img,  x1,  y1, x2, y2)
+	 * 	image(logo, -50, -50, 50, 50);
+	 * };
 	 */
 	function imageMode(mode: string): void;
 
@@ -365,14 +367,12 @@ declare global {
 	 * @param {number} w new width
 	 * @param {number} h new height
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * let logo = await load('/q5js_logo.avif');
 	 * 
-	 * function setup() {
-	 * 	logo.resize(128, 128);
-	 * 	image(logo, 0, 0, 200, 200);
-	 * }
+	 * logo.resize(128, 128);
+	 * image(logo, -100, -100, 200, 200);
 	 */
 	function resize(w: number, h: number): void;
 
@@ -387,27 +387,24 @@ declare global {
 	 * their actual size. This is the default setting, so running this
 	 * function only has an effect if `noSmooth` has been called.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * smooth();
 	 * 
-	 * let icon = loadImage('/q5js_icon.png');
-	 * 
-	 * function setup() {
-	 * 	image(icon, 0, 0, 200, 200);
-	 * }
+	 * let icon = await load('/q5js_icon.png');
+	 * image(icon, -100, -100, 200, 200);
 	 */
 	function smooth(): void;
 
 	/** 🌆
 	 * Disables smooth image rendering for a pixelated look.
+	 *
+	 * This setting is applied to images when they're loaded.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * noSmooth();
 	 * 
-	 * let icon = loadImage('/q5js_icon.png');
-	 * 
-	 * function setup() {
-	 * 	noSmooth();
-	 * 	image(icon, 0, 0, 200, 200);
-	 * }
+	 * let icon = await load('/q5js_icon.png');
+	 * image(icon, -100, -100, 200, 200);
 	 */
 	function noSmooth(): void;
 
@@ -431,14 +428,12 @@ declare global {
 	 * each copy separately.
 	 * @param {string | number} color tint color
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * let logo = await load('/q5js_logo.avif');
 	 * 
-	 * function setup() {
-	 * 	tint(255, 0, 0, 128);
-	 * 	image(logo, 0, 0, 200, 200);
-	 * }
+	 * tint(1, 0, 0, 0.5);
+	 * image(logo, -100, -100, 200, 200);
 	 */
 	function tint(color: string | number): void;
 
@@ -471,14 +466,12 @@ declare global {
 	 * @param {number} dw width of the destination region
 	 * @param {number} dh height of the destination region
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
-	 * let logo = loadImage('/q5js_logo.avif');
+	 * let logo = await load('/q5js_logo.avif');
 	 * 
-	 * function setup() {
-	 * 	logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
-	 * 	image(logo, 0, 0, 200, 200);
-	 * }
+	 * logo.inset(256, 256, 512, 512, 0, 0, 256, 256);
+	 * image(logo, -100, -100, 200, 200);
 	 */
 	function inset(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
 
@@ -500,24 +493,12 @@ declare global {
 	 * @param {number} [h] height of the area, default is 1
 	 * @returns {Q5.Image | number[]}
 	 * @example
-	 * function draw() {
-	 * 	background(200);
-	 * 	noStroke();
-	 * 	circle(100, 100, frameCount % 200);
+	 * await Canvas(200);
 	 * 
-	 * 	loadPixels();
-	 * 	let col = get(mouseX, mouseY);
-	 * 	text(col, mouseX, mouseY);
-	 * }
-	 * @example
-	 * createCanvas(200);
+	 * let logo = await load('/q5js_logo.avif');
 	 * 
-	 * let logo = loadImage('/q5js_logo.avif');
-	 * 
-	 * function setup() {
-	 * 	let cropped = logo.get(256, 256, 512, 512);
-	 * 	image(cropped, 0, 0, 200, 200);
-	 * }
+	 * let cropped = logo.get(256, 256, 512, 512);
+	 * image(cropped, -100, -100, 200, 200);
 	 */
 	function get(x: number, y: number, w?: number, h?: number): Q5.Image | number[];
 
@@ -534,13 +515,16 @@ declare global {
 	 * @param {number} y
 	 * @param {any} val color, canvas, or image
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * noSmooth();
 	 * let c = color('lime');
+	 * let img = createImage(50, 50);
 	 * 
-	 * function draw() {
-	 * 	set(random(200), random(200), c);
-	 * 	updatePixels();
-	 * }
+	 * q5.draw = function () {
+	 * 	img.set(random(50), random(50), c);
+	 * 	img.updatePixels();
+	 * 	background(img);
+	 * };
 	 */
 	function set(x: number, y: number, val: any): void;
 
@@ -566,17 +550,18 @@ declare global {
 	 * 
 	 * Not applicable to WebGPU canvases.
 	 * @example
+	 * await Canvas(200);
 	 * frameRate(5);
-	 * let icon = loadImage('/q5js_icon.png');
+	 * let icon = load('/q5js_icon.png');
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	icon.loadPixels();
 	 * 	for (let i = 0; i < icon.pixels.length; i += 16) {
-	 * 		icon.pixels[i + 1] = random(255);
+	 * 		icon.pixels[i + 1] = random(1);
 	 * 	}
 	 * 	icon.updatePixels();
 	 * 	background(icon);
-	 * }
+	 * };
 	 */
 	function loadPixels(): void;
 
@@ -585,14 +570,18 @@ declare global {
 	 * 
 	 * Not applicable to WebGPU canvases.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * let c = color('pink');
 	 * 
-	 * for (let x = 0; x < 200; x += 5) {
-	 * 	for (let y = 0; y < 200; y += 5) {
-	 * 		set(x, y, color('pink'));
+	 * let img = createImage(50, 50);
+	 * for (let x = 0; x < 50; x += 3) {
+	 * 	for (let y = 0; y < 50; y += 3) {
+	 * 		img.set(x, y, c);
 	 * 	}
 	 * }
-	 * updatePixels();
+	 * img.updatePixels();
+	 * 
+	 * background(img);
 	 */
 	function updatePixels(): void;
 
@@ -608,13 +597,10 @@ declare global {
 	 * @param {string} type filter type or a CSS filter string
 	 * @param {number} [value] optional value, depends on filter type
 	 * @example
-	 * createCanvas(200);
-	 * let logo = loadImage('/q5js_logo.avif');
-	 * 
-	 * function setup() {
-	 * 	logo.filter(INVERT);
-	 * 	image(logo, 0, 0, 200, 200);
-	 * }
+	 * await Canvas(200);
+	 * let logo = await load('/q5js_logo.avif');
+	 * logo.filter(INVERT);
+	 * image(logo, -100, -100, 200, 200);
 	 */
 	function filter(type: string, value?: number): void;
 
@@ -670,12 +656,22 @@ declare global {
 	/** 🌆
 	 * Creates a graphics buffer.
 	 * 
-	 * Disabled by default in q5 WebGPU.
+	 * Graphics looping is disabled by default in q5 WebGPU.
 	 * See issue [#104](https://github.com/q5js/q5.js/issues/104) for details.
 	 * @param {number} w width
 	 * @param {number} h height
 	 * @param {object} [opt] options
 	 * @returns {Q5} a new Q5 graphics buffer
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * let g = createGraphics(100);
+	 * g.noLoop();
+	 * g.stroke('pink');
+	 * g.fill('red');
+	 * g.circle(50, 50, 120);
+	 * 
+	 * image(g, -50, -50, 100, 100);
 	 */
 	function createGraphics(w: number, h: number, opt?: any): Q5;
 
@@ -683,29 +679,26 @@ declare global {
 
 	/** 📘
 	 * Renders text on the canvas.
-	 * 
-	 * Text can be positioned with the x and y
-	 * parameters and can optionally be constrained.
 	 * @param {string} str string of text to display
 	 * @param {number} x x-coordinate of the text's position
 	 * @param {number} y y-coordinate of the text's position
 	 * @param {number} [wrapWidth] maximum line width in characters
 	 * @param {number} [lineLimit] maximum number of lines
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * background('silver');
 	 * 
 	 * textSize(32);
-	 * text('Hello, world!', 12, 60);
+	 * text('Hello, world!', -88, 10);
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * textSize(20);
 	 * 
 	 * let info =
-	 * 	'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.';
+	 * 	'q5.js was designed to make creative coding fun and accessible for artists, designers, educators, and beginners.';
 	 * 
-	 * text(info, 12, 30, 20, 6);
+	 * text(info, -88, -70, 20);
 	 * //
 	 * //
 	 */
@@ -714,39 +707,46 @@ declare global {
 	/** 📘
 	 * Loads a font from a URL.
 	 * 
-	 * The font file can be in any format accepted in CSS, such as
-	 * .ttf and .otf files. The first example below loads
-	 * [Robotica](https://www.dafont.com/robotica-courtney.font).
+	 * The first example below loads [Robotica](https://www.dafont.com/robotica-courtney.font).
 	 * 
-	 * Also supports loading [Google fonts](https://fonts.google.com/).
 	 * The second example loads
-	 * [Pacifico](https://fonts.google.com/specimen/Pacifico).
-	 * 
-	 * If no fonts are loaded, the default sans-serif font is used.
+	 * [Pacifico](https://fonts.google.com/specimen/Pacifico) from [Google fonts](https://fonts.google.com/).
 	 * 
 	 * By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for a font to load.
+	 *
+	 * Fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
+	 * with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
+	 * 
+	 * If no fonts are loaded, q5 WebGPU will lazy load the default MSDF font from q5js.org. Until it is loaded, the system's default sans-serif font will be used via `textImage`.
 	 * @param {string} url URL of the font to load
 	 * @returns {FontFace & PromiseLike<FontFace>} font
 	 * @example
-	 * createCanvas(200, 56);
+	 * await Canvas(200, 56);
 	 * 
-	 * loadFont('/assets/Robotica.ttf');
+	 * await loadFont('/assets/Robotica.ttf');
 	 * 
-	 * function setup() {
-	 * 	fill('skyblue');
-	 * 	textSize(64);
-	 * 	text('Hello!', 2, 54);
-	 * }
+	 * fill('skyblue');
+	 * textSize(64);
+	 * text('Hello!', -98, 24);
 	 * @example
-	 * createCanvas(200, 74);
+	 * await Canvas(200, 74);
 	 * 
 	 * loadFont('fonts.googleapis.com/css2?family=Pacifico');
 	 * 
-	 * function setup() {
+	 * q5.draw = function () {
 	 * 	fill('hotpink');
 	 * 	textSize(68);
-	 * 	text('Hello!', 2, 68);
-	 * }
+	 * 	text('Hello!', -98, 31);
+	 * };
+	 * //
+	 * @example
+	 * await Canvas(200, 74);
+	 * 
+	 * await loadFont('sans-serif'); // msdf
+	 * 
+	 * fill('white');
+	 * textSize(68);
+	 * text('Hello!', -98, 31);
 	 */
 	function loadFont(url: string): FontFace & PromiseLike<FontFace>;
 
@@ -757,21 +757,19 @@ declare global {
 	 * "sans-serif" or the last font loaded.
 	 * @param {string} fontName name of the font family or a FontFace object
 	 * @example
-	 * createCanvas(200, 160);
-	 * background(200);
+	 * await Canvas(200, 160);
+	 * background(0.8);
 	 * 
 	 * textFont('serif');
 	 * 
-	 * textSize(32);
-	 * text('Hello, world!', 15, 90);
+	 * text('Hello, world!', -96, 10);
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * textFont('monospace');
 	 * 
-	 * textSize(24);
-	 * text('Hello, world!', 15, 90);
+	 * text('Hello, world!', -96, 10);
 	 */
 	function textFont(fontName: string): void;
 
@@ -780,12 +778,12 @@ declare global {
 	 * @param {number} [size] size of the font in pixels
 	 * @returns {number | void} current font size when no argument is provided
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
 	 * 	textSize(abs(mouseX));
-	 * 	text('A', 10, 190);
-	 * }
+	 * 	text('A', -90, 90);
+	 * };
 	 */
 	function textSize(size?: number): number | void;
 
@@ -794,43 +792,45 @@ declare global {
 	 * @param {number} [leading] line height in pixels
 	 * @returns {number | void} current line height when no argument is provided
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
 	 * 	textSize(abs(mouseX));
-	 * 	text('A', 10, 190);
-	 * 	rect(10, 190, 5, -textLeading());
-	 * }
+	 * 	text('A', -90, 90);
+	 * 	rect(-90, 90, 5, -textLeading());
+	 * };
 	 */
 	function textLeading(leading?: number): number | void;
 
 	/** 📘
 	 * Sets the current text style.
-	 * 
-	 * Not applicable to WebGPU when using MSDF fonts.
+	 *
+	 * Not applicable to MSDF fonts.
 	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style font style
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * textStyle(ITALIC);
 	 * 
 	 * textSize(32);
-	 * text('Hello, world!', 12, 106);
+	 * text('Hello, world!', -88, 6);
 	 */
 	function textStyle(style: 'normal' | 'italic' | 'bold' | 'bolditalic'): void;
 
 	/** 📘
 	 * Sets the horizontal and vertical alignment of text.
+	 * 
+	 * Alignment constants like `CENTER` can be used with this function.
 	 * @param {'left' | 'center' | 'right'} horiz horizontal alignment
 	 * @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] vertical alignment
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * textSize(32);
 	 * 
-	 * textAlign(CENTER, MIDDLE);
-	 * text('Hello, world!', 100, 100);
+	 * textAlign(CENTER, CENTER);
+	 * text('Hello, world!', 0, 0);
 	 */
 	function textAlign(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
 
@@ -848,13 +848,13 @@ declare global {
 	 * - 900: black/heavy
 	 * @param {number | string} weight font weight
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * textSize(32);
-	 * textAlign(CENTER, MIDDLE);
+	 * textAlign(CENTER, CENTER);
 	 * 
 	 * textWeight(100);
-	 * text('Hello, world!', 100, 100);
+	 * text('Hello, world!', 0, 0);
 	 */
 	function textWeight(weight: number | string): void;
 
@@ -863,13 +863,13 @@ declare global {
 	 * @param {string} str string to measure
 	 * @returns {number} width of the text in pixels
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
 	 * 	textSize(abs(mouseX));
-	 * 	rect(10, 190, textWidth('A'), -textLeading());
-	 * 	text('A', 10, 190);
-	 * }
+	 * 	rect(-90, 90, textWidth('A'), -textLeading());
+	 * 	text('A', -90, 90);
+	 * };
 	 */
 	function textWidth(str: string): number;
 
@@ -878,13 +878,13 @@ declare global {
 	 * @param {string} str string to measure
 	 * @returns {number} ascent of the text in pixels
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
 	 * 	textSize(abs(mouseX));
-	 * 	rect(10, 190, textWidth('A'), -textAscent());
-	 * 	text('A', 10, 190);
-	 * }
+	 * 	rect(-90, 90, textWidth('A'), -textAscent());
+	 * 	text('A', -90, 90);
+	 * };
 	 */
 	function textAscent(str: string): number;
 
@@ -893,12 +893,12 @@ declare global {
 	 * @param {string} str string to measure
 	 * @returns {number} descent of the text in pixels
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * textSize(64);
 	 * 
-	 * rect(0, 100, 200, textDescent('q5'));
-	 * text('q5', 10, 100);
+	 * rect(-100, 0, 200, textDescent('q5'));
+	 * text('q5', -90, 0);
 	 */
 	function textDescent(str: string): number;
 
@@ -909,15 +909,15 @@ declare global {
 	 * @param {number} [lineLimit] maximum number of lines
 	 * @returns {Q5.Image} an image object representing the rendered text
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * textSize(96);
 	 * 
 	 * let img = createTextImage('🐶');
 	 * img.filter(INVERT);
 	 * 
-	 * function draw() {
-	 * 	image(img, 55, 10);
-	 * }
+	 * q5.draw = function () {
+	 * 	image(img, -45, -90);
+	 * };
 	 */
 	function createTextImage(str: string, wrapWidth: number, lineLimit: number): Q5.Image;
 
@@ -929,33 +929,63 @@ declare global {
 	 * 
 	 * The positioning of the image is affected by the current text
 	 * alignment and baseline settings.
+	 *
+	 * This function can be used to draw emojis, which can
+	 * not be drawn with MSDF text rendering.
 	 * 
-	 * In q5 WebGPU, this function is the only way to draw multi-colored
-	 * text, like emojis, and to use fonts that aren't in MSDF format.
-	 * Using this function to draw text that changes every frame has
-	 * a very high performance cost.
+	 * Using this function to draw text that changes every frame has a
+	 * very high performance cost.
 	 * @param {Q5.Image | string} img image or text
 	 * @param {number} x x-coordinate where the image should be placed
 	 * @param {number} y y-coordinate where the image should be placed
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * textSize(96);
 	 * textAlign(CENTER, CENTER);
 	 * 
-	 * textImage('🐶', 100, 100);
-	 * @example
-	 * createCanvas(200);
-	 * 
-	 * loadFont('/assets/Robotica.ttf');
-	 * 
-	 * function setup() {
-	 * 	background(200);
-	 * 	textSize(66);
-	 * 	textImage('Hello!', 0, 0);
-	 * }
+	 * textImage('🐶', 0, 0);
 	 */
 	function textImage(img: Q5.Image | String, x: number, y: number): void;
+
+	/** 📘
+	 * Converts a string of text to an array of points.
+	 * 
+	 * Samples opaque pixels in a text image made with `createTextImage`.
+	 * 
+	 * It's influenced by text settings, such as font, size, and alignment.
+	 * 
+	 * Uses a [Z-order curve](https://wikipedia.org/wiki/Z-order_curve) to improve spatial distribution, which preserves the shape of text better than purely random sampling.
+	 * @param {string} str string of text
+	 * @param {number} [x=0] x coordinate of the text position
+	 * @param {number} [y=0] y coordinate of the text position
+	 * @param {number} [sampleRate=0.1] lower values increase dithering (1 = all points, 0.1 = ~10% of points)
+	 * @param {number} [density=1] pixel density of the text
+	 * @example
+	 * await Canvas(200);
+	 * textSize(220);
+	 * textAlign(CENTER, CENTER);
+	 * 
+	 * let points = textToPoints('5');
+	 * 
+	 * for (let pt of points) {
+	 * 	rect(pt.x, pt.y, 5, 20);
+	 * }
+	 * @example
+	 * await Canvas(200, 296);
+	 * textSize(340);
+	 * noFill();
+	 * stroke(1);
+	 * strokeWeight(8);
+	 * 
+	 * let pts = textToPoints('q', -100, 56);
+	 * 
+	 * strokeWeight(1);
+	 * for (let pt of pts) {
+	 * 	ellipse(pt.x, pt.y, 10, 0.1);
+	 * }
+	 */
+	function textToPoints(str: string, x?: number, y?: number, sampleRate?: number, density?: number): [];
 
 	/** 📘
 	 * Number formatter, can be used to display a number as a string with
@@ -966,11 +996,11 @@ declare global {
 	 * @param {number} r number of digits to appear after the decimal point
 	 * @returns {string} a string representation of the number, formatted accordingly
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * 
 	 * textSize(32);
-	 * text(nf(PI, 4, 5), 10, 60);
+	 * text(nf(PI, 4, 5), -90, 10);
 	 */
 	function nf(num: number, digits: number): string;
 
@@ -1015,6 +1045,11 @@ declare global {
 	const TOP: 'top';
 
 	/** 📘
+	 * Align text to the middle.
+	 */
+	const MIDDLE: 'middle';
+
+	/** 📘
 	 * Align text to the bottom.
 	 */
 	const BOTTOM: 'bottom';
@@ -1043,21 +1078,21 @@ declare global {
 	/** 🖲
 	 * Current X position of the mouse.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
-	 * 	text(round(mouseX), 50, 120);
-	 * }
+	 * 	text(round(mouseX), -50, 20);
+	 * };
 	 */
 	let mouseX: number;
 
 	/** 🖲
 	 * Current Y position of the mouse.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
-	 * 	circle(100, mouseY, 100);
-	 * }
+	 * q5.draw = function () {
+	 * 	background(0.8);
+	 * 	circle(0, mouseY, 100);
+	 * };
 	 */
 	let mouseY: number;
 
@@ -1076,47 +1111,47 @@ declare global {
 	 * 
 	 * The default value is an empty string.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
-	 * 	text(mouseButton, 20, 120);
-	 * }
+	 * 	text(mouseButton, -80, 20);
+	 * };
 	 */
 	let mouseButton: string;
 
 	/** 🖲
 	 * True if the mouse is currently pressed, false otherwise.
 	 * @example
-	 * function draw() {
-	 * 	if (mouseIsPressed) background(100);
-	 * 	else background(200);
-	 * }
+	 * q5.draw = function () {
+	 * 	if (mouseIsPressed) background(0.4);
+	 * 	else background(0.8);
+	 * };
 	 */
 	let mouseIsPressed: boolean;
 
 	/** 🖲
 	 * Define this function to respond to mouse down events.
 	 * @example
-	 * createCanvas(200);
-	 * let gray = 95;
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * function mousePressed() {
-	 * 	background(gray % 256);
-	 * 	gray += 40;
-	 * }
+	 * q5.mousePressed = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.1;
+	 * };
 	 */
 	function mousePressed(): void;
 
 	/** 🖲
 	 * Define this function to respond to mouse up events.
 	 * @example
-	 * createCanvas(200);
-	 * let gray = 95;
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * function mouseReleased() {
-	 * 	background(gray % 256);
-	 * 	gray += 40;
-	 * }
+	 * q5.mouseReleased = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.1;
+	 * };
 	 */
 	function mouseReleased(): void;
 
@@ -1126,13 +1161,13 @@ declare global {
 	 * On touchscreen devices this function is not called
 	 * when the user drags their finger on the screen.
 	 * @example
-	 * createCanvas(200);
-	 * let gray = 95;
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * function mouseMoved() {
-	 * 	background(gray % 256);
-	 * 	gray++;
-	 * }
+	 * q5.mouseMoved = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.005;
+	 * };
 	 */
 	function mouseMoved(): void;
 
@@ -1142,47 +1177,47 @@ declare global {
 	 * Dragging the mouse is defined as moving the mouse
 	 * while a mouse button is pressed.
 	 * @example
-	 * createCanvas(200);
-	 * let gray = 95;
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * function mouseDragged() {
-	 * 	background(gray % 256);
-	 * 	gray++;
-	 * }
+	 * q5.mouseDragged = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.005;
+	 * };
 	 */
 	function mouseDragged(): void;
 
 	/** 🖲
 	 * Define this function to respond to mouse double click events.
 	 * @example
-	 * createCanvas(200);
-	 * let gray = 95;
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * function doubleClicked() {
-	 * 	background(gray % 256);
-	 * 	gray += 40;
-	 * }
+	 * q5.doubleClicked = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.1;
+	 * };
 	 */
 	function doubleClicked(): void;
 
 	/** 🖲
 	 * The name of the last key pressed.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
-	 * 	text(key, 20, 120);
-	 * }
+	 * 	text(key, -80, 20);
+	 * };
 	 */
 	let key: string;
 
 	/** 🖲
 	 * True if a key is currently pressed, false otherwise.
 	 * @example
-	 * function draw() {
-	 * 	if (keyIsPressed) background(100);
-	 * 	else background(200);
-	 * }
+	 * q5.draw = function () {
+	 * 	if (keyIsPressed) background(0.4);
+	 * 	else background(0.8);
+	 * };
 	 */
 	let keyIsPressed: boolean;
 
@@ -1192,39 +1227,39 @@ declare global {
 	 * @param {string} key key to check
 	 * @returns {boolean} true if the key is pressed, false otherwise
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
 	 * 	if (keyIsDown('f') && keyIsDown('j')) {
-	 * 		rect(50, 50, 100, 100);
+	 * 		rect(-50, -50, 100, 100);
 	 * 	}
-	 * }
+	 * };
 	 */
 	function keyIsDown(key: string): boolean;
 
 	/** 🖲
 	 * Define this function to respond to key down events.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * let gray = 95;
-	 * function keyPressed() {
-	 * 	background(gray % 256);
-	 * 	gray += 40;
-	 * }
+	 * q5.keyPressed = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.1;
+	 * };
 	 */
 	function keyPressed(): void;
 
 	/** 🖲
 	 * Define this function to respond to key up events.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * let gray = 95;
-	 * function keyReleased() {
-	 * 	background(gray % 256);
-	 * 	gray += 40;
-	 * }
+	 * q5.keyReleased = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.1;
+	 * };
 	 */
 	function keyReleased(): void;
 
@@ -1233,12 +1268,12 @@ declare global {
 	 * browser window. Each touch being an object with
 	 * `id`, `x`, and `y` properties.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	for (let touch of touches) {
 	 * 		circle(touch.x, touch.y, 100);
 	 * 	}
-	 * }
+	 * };
 	 */
 	let touches: any[];
 
@@ -1249,13 +1284,13 @@ declare global {
 	 * Return true to enable touch gestures like pinch-to-zoom
 	 * and scroll, which q5 disables on the canvas by default.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * let gray = 95;
-	 * function touchStarted() {
-	 * 	background(gray % 256);
-	 * 	gray += 40;
-	 * }
+	 * q5.touchStarted = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.1;
+	 * };
 	 */
 	function touchStarted(): void;
 
@@ -1266,13 +1301,13 @@ declare global {
 	 * Return true to enable touch gestures like pinch-to-zoom
 	 * and scroll, which q5 disables on the canvas by default.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * let gray = 95;
-	 * function touchEnded() {
-	 * 	background(gray % 256);
-	 * 	gray += 40;
-	 * }
+	 * q5.touchEnded = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.1;
+	 * };
 	 */
 	function touchEnded(): void;
 
@@ -1283,13 +1318,13 @@ declare global {
 	 * Return true to enable touch gestures like pinch-to-zoom
 	 * and scroll, which q5 disables on the canvas by default.
 	 * @example
-	 * createCanvas(200);
-	 * let gray = 95;
+	 * await Canvas(200);
+	 * let gray = 0.4;
 	 * 
-	 * function touchMoved() {
-	 * 	background(gray % 256);
-	 * 	gray++;
-	 * }
+	 * q5.touchMoved = function () {
+	 * 	background(gray % 1);
+	 * 	gray += 0.005;
+	 * };
 	 */
 	function touchMoved(): void;
 
@@ -1304,13 +1339,13 @@ declare global {
 	 * The `event` property contains the original
 	 * [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent).
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	for (let pointerID in pointers) {
 	 * 		let pointer = pointers[pointerID];
 	 * 		circle(pointer.x, pointer.y, 100);
 	 * 	}
-	 * }
+	 * };
 	 */
 	let pointers: {};
 
@@ -1322,7 +1357,7 @@ declare global {
 	 * @param {number} [x] x-coordinate of the cursor's point
 	 * @param {number} [y] y-coordinate of the cursor's point
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * cursor('pointer');
 	 */
 	function cursor(name: string, x?: number, y?: number): void;
@@ -1330,7 +1365,7 @@ declare global {
 	/** 🖲
 	 * Hides the cursor within the bounds of the canvas.
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * noCursor();
 	 */
 	function noCursor(): void;
@@ -1343,15 +1378,15 @@ declare global {
 	 * 
 	 * Return true to allow the default behavior of scrolling the page.
 	 * @example
-	 * let x = (y = 100);
-	 * function draw() {
+	 * let x = (y = 0);
+	 * q5.draw = function () {
 	 * 	circle(x, y, 10);
-	 * }
-	 * function mouseWheel(e) {
+	 * };
+	 * q5.mouseWheel = function (e) {
 	 * 	x += e.deltaX;
 	 * 	y += e.deltaY;
 	 * 	return false;
-	 * }
+	 * };
 	 */
 	function mouseWheel(event: any): void;
 
@@ -1364,17 +1399,17 @@ declare global {
 	 * To exit pointer lock mode, call `document.exitPointerLock()`.
 	 * @param {boolean} unadjustedMovement set to true to disable OS-level mouse acceleration and access raw mouse input
 	 * @example
-	 * function draw() {
-	 * 	circle(mouseX / 10 + 100, mouseY / 10 + 100, 10);
-	 * }
+	 * q5.draw = function () {
+	 * 	circle(mouseX / 10, mouseY / 10, 10);
+	 * };
 	 * 
-	 * function doubleClicked() {
+	 * q5.doubleClicked = function () {
 	 * 	if (!document.pointerLockElement) {
 	 * 		pointerLock();
 	 * 	} else {
 	 * 		document.exitPointerLock();
 	 * 	}
-	 * }
+	 * };
 	 */
 	function pointerLock(unadjustedMovement: boolean): void;
 
@@ -1390,53 +1425,53 @@ declare global {
 	 * The [`fill`](https://q5js.org/learn/#fill), [`stroke`](https://q5js.org/learn/#stroke), and [`background`](https://q5js.org/learn/#background)
 	 * functions accept the same wide range of color representations as this function.
 	 *
-	 * The default color format is "integer",
-	 * so set components to values between 0 and 255.
+	 * The default color format is "float", so
+	 * set color components to values between 0 and 1.
 	 * 
 	 * Here are some examples of valid use:
 	 * 
-	 * - `color(255)` (grayscale)
-	 * - `color(255, 200)` (grayscale, alpha)
-	 * - `color(255, 0, 0)` (r, g, b)
-	 * - `color(255, 0, 0, 10)` (r, g, b, a)
+	 * - `color(1)` (grayscale)
+	 * - `color(1, 0.8)` (grayscale, alpha)
+	 * - `color(1, 0, 0)` (r, g, b)
+	 * - `color(1, 0, 0, 0.1)` (r, g, b, a)
 	 * - `color('red')` (colorName)
 	 * - `color('#ff0000')` (hexColor)
-	 * - `color([255, 0, 0])` (colorComponents)
+	 * - `color([1, 0, 0])` (colorComponents)
 	 * @param {string | number | Color | number[]} c0 color or first color component
 	 * @param {number} [c1] second color component
 	 * @param {number} [c2] third color component
 	 * @param {number} [c3] fourth color component (alpha)
 	 * @returns {Color} a new `Color` object
 	 * @example
-	 * createCanvas(200);
-	 * rect(0, 0, 100, 200);
+	 * await Canvas(200);
+	 * rect(-100, -100, 100, 200);
 	 * 
 	 * //                ( r,   g,   b,   a)
-	 * let bottle = color(90, 100, 255, 100);
+	 * let bottle = color(0.35, 0.39, 1, 0.4);
 	 * fill(bottle);
 	 * stroke(bottle);
 	 * strokeWeight(30);
-	 * circle(100, 100, 155);
+	 * circle(0, 0, 155);
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * //          (gray, alpha)
-	 * let c = color(200, 50);
+	 * let c = color(0.8, 0.2);
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	background(c);
 	 * 	circle(mouseX, mouseY, 50);
-	 * 	c.g = (c.g + 1) % 256;
-	 * }
+	 * 	c.g = (c.g + 0.005) % 1;
+	 * };
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
-	 * //           (r,   g,   b,  a)
-	 * let c = color(0, 255, 255, 50);
+	 * //           (r, g, b,   a)
+	 * let c = color(0, 1, 1, 0.2);
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	fill(c);
 	 * 	circle(mouseX, mouseY, 50);
-	 * }
+	 * };
 	 */
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
 
@@ -1446,30 +1481,30 @@ declare global {
 	 * 
 	 * Color gamut is 'display-p3' by default, if the device supports HDR.
 	 *
-	 * The default color mode is RGB in legacy integer format.
+	 * The default color mode is RGB in float format.
 	 * @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} mode color mode
 	 * @param {1 | 255} format color format (1 for float, 255 for integer)
 	 * @param {'srgb' | 'display-p3'} [gamut] color gamut
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * colorMode(RGB, 1);
 	 * fill(1, 0, 0);
-	 * rect(0, 0, 66, 200);
+	 * rect(-100, -100, 66, 200);
 	 * fill(0, 1, 0);
-	 * rect(66, 0, 67, 200);
+	 * rect(-34, -100, 67, 200);
 	 * fill(0, 0, 1);
-	 * rect(133, 0, 67, 200);
+	 * rect(33, -100, 67, 200);
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * colorMode(OKLCH);
 	 * 
 	 * fill(0.25, 0.15, 0);
-	 * rect(0, 0, 100, 200);
+	 * rect(-100, -100, 100, 200);
 	 * 
 	 * fill(0.75, 0.15, 0);
-	 * rect(100, 0, 100, 200);
+	 * rect(0, -100, 100, 200);
 	 */
 	function colorMode(mode: 'rgb' | 'oklch', format: 1 | 255, gamut: 'srgb' | 'display-p3'): void;
 
@@ -1481,11 +1516,11 @@ declare global {
 	 * rgb colors are mapped to the full P3 gamut, even when they use the
 	 * legacy integer 0-255 format.
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * colorMode(RGB);
 	 * 
-	 * background(255, 0, 0);
+	 * background(1, 0, 0);
 	 */
 	const RGB: 'rgb';
 
@@ -1513,18 +1548,18 @@ declare global {
 	 * - `hue`: 0 to 360
 	 * - `alpha`: 0 to 1
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * colorMode(OKLCH);
 	 * 
 	 * background(0.64, 0.3, 30);
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * colorMode(OKLCH);
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	background(0.7, 0.16, frameCount % 360);
-	 * }
+	 * };
 	 */
 	const OKLCH: 'oklch';
 
@@ -1548,20 +1583,20 @@ declare global {
 	 * - `lightness`: 0 to 100
 	 * - `alpha`: 0 to 1
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * colorMode(HSL);
 	 * 
 	 * background(0, 100, 50);
 	 * @example
-	 * createCanvas(200, 220);
+	 * await Canvas(200, 220);
 	 * noStroke();
 	 * 
 	 * colorMode(HSL);
 	 * for (let h = 0; h < 360; h += 10) {
 	 * 	for (let l = 0; l <= 100; l += 10) {
 	 * 		fill(h, 100, l);
-	 * 		rect(h * (11 / 20), l * 2, 6, 20);
+	 * 		rect(h * (11 / 20) - 100, l * 2 - 110, 6, 20);
 	 * 	}
 	 * }
 	 */
@@ -1581,20 +1616,20 @@ declare global {
 	 * - `brightness`: 0 to 100
 	 * - `alpha`: 0 to 1
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * colorMode(HSB);
 	 * 
 	 * background(0, 100, 100);
 	 * @example
-	 * createCanvas(200, 220);
+	 * await Canvas(200, 220);
 	 * noStroke();
 	 * 
 	 * colorMode(HSB);
 	 * for (let h = 0; h < 360; h += 10) {
 	 * 	for (let b = 0; b <= 100; b += 10) {
 	 * 		fill(h, 100, b);
-	 * 		rect(h * (11 / 20), b * 2, 6, 20);
+	 * 		rect(h * (11 / 20) - 100, b * 2 - 110, 6, 20);
 	 * 	}
 	 * }
 	 */
@@ -1607,11 +1642,11 @@ declare global {
 	 * less saturated and darker in this example, as it would on
 	 * an SDR display.
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
-	 * colorMode(RGB, 255, SRGB);
+	 * colorMode(RGB, 1, SRGB);
 	 * 
-	 * background(255, 0, 0);
+	 * background(1, 0, 0);
 	 */
 	const SRGB: 'srgb';
 
@@ -1623,11 +1658,11 @@ declare global {
 	 * If your display is HDR capable, note that full red appears
 	 * fully saturated and bright in the following example.
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
-	 * colorMode(RGB, 255, DISPLAY_P3);
+	 * colorMode(RGB, 1, DISPLAY_P3);
 	 * 
-	 * background(255, 0, 0);
+	 * background(1, 0, 0);
 	 */
 	const DISPLAY_P3: 'display-p3';
 
@@ -1639,13 +1674,13 @@ declare global {
 	 * CSS color string, grayscale value, and color component values.
 	 * @param {Color | Q5.Image} filler a color or image to draw
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * background('crimson');
 	 * @example
-	 * function draw() {
-	 * 	background(128, 32);
+	 * q5.draw = function () {
+	 * 	background(0.5, 0.2);
 	 * 	circle(mouseX, mouseY, 20);
-	 * }
+	 * };
 	 */
 	function background(filler: Color | Q5.Image): void;
 
@@ -1657,9 +1692,6 @@ declare global {
 		 * 
 		 * Use the `color` function for greater flexibility, it runs
 		 * this constructor internally.
-		 * 
-		 * `Color` is not actually a class itself, it's a reference to a
-		 * Q5 color class based on the color mode, format, and gamut.
 		 */
 		constructor(c0: number, c1: number, c2: number, c3: number);
 
@@ -1695,14 +1727,14 @@ declare global {
 	 * a `Color` object, grayscale value, or color component values.
 	 * @param {Color} color fill color
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * fill('red');
-	 * circle(80, 80, 80);
+	 * circle(-20, -20, 80);
 	 * 
 	 * fill('lime');
-	 * square(80, 80, 80);
+	 * square(-20, -20, 80);
 	 */
 	function fill(color: Color): void;
 
@@ -1714,44 +1746,44 @@ declare global {
 	 * a `Color` object, grayscale value, or color component values.
 	 * @param {Color} color stroke color
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * fill(36);
+	 * await Canvas(200);
+	 * background(0.8);
+	 * fill(0.14);
 	 * 
 	 * stroke('red');
-	 * circle(80, 80, 80);
+	 * circle(-20, -20, 80);
 	 * 
 	 * stroke('lime');
-	 * square(80, 80, 80);
+	 * square(-20, -20, 80);
 	 */
 	function stroke(color: Color): void;
 
 	/** 💅
 	 * After calling this function, drawing will not be filled.
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * noFill();
 	 * 
 	 * stroke('red');
-	 * circle(80, 80, 80);
+	 * circle(-20, -20, 80);
 	 * stroke('lime');
-	 * square(80, 80, 80);
+	 * square(-20, -20, 80);
 	 */
 	function noFill(): void;
 
 	/** 💅
 	 * After calling this function, drawing will not have a stroke (outline).
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * fill(36);
+	 * await Canvas(200);
+	 * background(0.8);
+	 * fill(0.14);
 	 * stroke('red');
-	 * circle(80, 80, 80);
+	 * circle(-20, -20, 80);
 	 * 
 	 * noStroke();
-	 * square(80, 80, 80);
+	 * square(-20, -20, 80);
 	 */
 	function noStroke(): void;
 
@@ -1759,13 +1791,13 @@ declare global {
 	 * Sets the size of the stroke used for lines and the border around drawings.
 	 * @param {number} weight size of the stroke in pixels
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * stroke('red');
-	 * circle(50, 100, 80);
+	 * circle(-50, 0, 80);
 	 * 
 	 * strokeWeight(12);
-	 * circle(150, 100, 80);
+	 * circle(50, 0, 80);
 	 */
 	function strokeWeight(weight: number): void;
 
@@ -1775,14 +1807,14 @@ declare global {
 	 * In q5 WebGPU this function only affects images.
 	 * @param {number} alpha opacity level, ranging from 0 to 1
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * opacity(1);
-	 * circle(80, 80, 80);
+	 * circle(-20, -20, 80);
 	 * 
 	 * opacity(0.2);
-	 * square(80, 80, 80);
+	 * square(-20, -20, 80);
 	 */
 	function opacity(alpha: number): void;
 
@@ -1798,22 +1830,6 @@ declare global {
 	 * 
 	 * Not available in q5 WebGPU.
 	 * @param {Color} color shadow color
-	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * 
-	 * noFill();
-	 * shadow('black');
-	 * rect(64, 60, 80, 80);
-	 * @example
-	 * createCanvas(200);
-	 * let logo = loadImage('/assets/p5play_logo.webp');
-	 * 
-	 * function setup() {
-	 * 	background(200);
-	 * 	shadow(0);
-	 * 	image(logo, 36, 36, 128, 128);
-	 * }
 	 */
 	function shadow(color: string | Color): void;
 
@@ -1821,15 +1837,6 @@ declare global {
 	 * Disables the shadow effect.
 	 * 
 	 * Not available in q5 WebGPU.
-	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * noStroke();
-	 * shadow('black');
-	 * rect(14, 14, 80, 80);
-	 * 
-	 * noShadow();
-	 * rect(104, 104, 80, 80);
 	 */
 	function noShadow(): void;
 
@@ -1842,26 +1849,6 @@ declare global {
 	 * @param {number} offsetX horizontal offset of the shadow
 	 * @param {number} offsetY vertical offset of the shadow, defaults to be the same as offsetX
 	 * @param {number} blur blur radius of the shadow, defaults to 0
-	 * @example
-	 * createCanvas(200);
-	 * noStroke();
-	 * shadow(50);
-	 * 
-	 * function draw() {
-	 * 	background(200);
-	 * 	shadowBox(-20, mouseY, 10);
-	 * 	circle(100, 100, 80, 80);
-	 * }
-	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * noStroke();
-	 * 
-	 * shadow('aqua');
-	 * shadowBox(20);
-	 * rect(50, 50, 100, 100);
-	 * textSize(64);
-	 * text('q5', 60, 115);
 	 */
 	function shadowBox(offsetX: number, offsetY: number, blur: number): void;
 
@@ -1878,19 +1865,6 @@ declare global {
 	 * 
 	 * Not available in q5 WebGPU.
 	 * @param {CanvasLineCap} val line cap style
-	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * strokeWeight(20);
-	 * 
-	 * strokeCap(ROUND);
-	 * line(50, 50, 150, 50);
-	 * 
-	 * strokeCap(SQUARE);
-	 * line(50, 100, 150, 100);
-	 * 
-	 * strokeCap(PROJECT);
-	 * line(50, 150, 150, 150);
 	 */
 	function strokeCap(val: CanvasLineCap): void;
 
@@ -1899,19 +1873,6 @@ declare global {
 	 * 
 	 * Not available in q5 WebGPU.
 	 * @param {CanvasLineJoin} val line join style
-	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * strokeWeight(10);
-	 * 
-	 * strokeJoin(ROUND);
-	 * triangle(50, 20, 150, 20, 50, 70);
-	 * 
-	 * strokeJoin(BEVEL);
-	 * triangle(150, 50, 50, 100, 150, 150);
-	 * 
-	 * strokeJoin(MITER);
-	 * triangle(50, 130, 150, 180, 50, 180);
 	 */
 	function strokeJoin(val: CanvasLineJoin): void;
 
@@ -1939,30 +1900,30 @@ declare global {
 	 * rect mode, ellipse mode, text size, text align, text baseline, and
 	 * shadow settings.
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * pushStyles();
 	 * fill('blue');
-	 * circle(50, 50, 80);
+	 * circle(-50, -50, 80);
 	 * 
 	 * popStyles();
-	 * circle(150, 150, 80);
+	 * circle(50, 50, 80);
 	 */
 	function pushStyles(): void;
 
 	/** 💅
 	 * Restores the previously saved drawing style settings.
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * pushStyles();
 	 * fill('blue');
-	 * circle(50, 50, 80);
+	 * circle(-50, -50, 80);
 	 * 
 	 * popStyles();
-	 * circle(150, 150, 80);
+	 * circle(50, 50, 80);
 	 */
 	function popStyles(): void;
 
@@ -1971,14 +1932,24 @@ declare global {
 	 * 
 	 * Note that the canvas can only be seen through if it has an alpha channel.
 	 * @example
-	 * createCanvas(200, 200, { alpha: true });
+	 * await Canvas(200, { alpha: true });
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	clear();
-	 * 	circle(frameCount % 200, 100, 80);
-	 * }
+	 * 	circle((frameCount % 200) - 100, 0, 80);
+	 * };
 	 */
 	function clear(): void;
+
+	/** 💅
+	 * The 2D rendering context for the canvas.
+	 * 
+	 * You can use it to create [linear gradients](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/createLinearGradient), [radial gradients](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/createRadialGradient), [font stretching](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/fontStretch), and
+	 * other advanced drawing features.
+	 * 
+	 * Not available in q5 WebGPU.
+	 */
+	var ctx: CanvasRenderingContext2D;
 
 	/** 💅
 	 * Checks if a given point is within the current path's fill area.
@@ -2007,12 +1978,12 @@ declare global {
 	 * @param {number} x translation along the x-axis
 	 * @param {number} y translation along the y-axis
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
-	 * 	translate(150, 150);
+	 * 	translate(50, 50);
 	 * 	circle(0, 0, 80);
-	 * }
+	 * };
 	 */
 	function translate(x: number, y: number): void;
 
@@ -2020,15 +1991,14 @@ declare global {
 	 * Rotates the drawing context.
 	 * @param {number} angle rotation angle in radians
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
-	 * 	translate(100, 100);
 	 * 	rotate(mouseX / 50);
 	 * 
 	 * 	rectMode(CENTER);
-	 * 	square(0, 0, 50);
-	 * }
+	 * 	square(0, 0, 120);
+	 * };
 	 */
 	function rotate(angle: number): void;
 
@@ -2040,12 +2010,12 @@ declare global {
 	 * @param {number} x scaling factor along the x-axis
 	 * @param {number} [y] scaling factor along the y-axis
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
 	 * 	scale(mouseX / 10);
 	 * 	circle(0, 0, 20);
-	 * }
+	 * };
 	 */
 	function scale(x: number, y?: number): void;
 
@@ -2053,13 +2023,13 @@ declare global {
 	 * Shears the drawing context along the x-axis.
 	 * @param {number} angle shear angle in radians
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
-	 * 	translate(25, 60);
+	 * 	translate(-75, -40);
 	 * 	shearX(mouseX / 100);
 	 * 	square(0, 0, 80);
-	 * }
+	 * };
 	 */
 	function shearX(angle: number): void;
 
@@ -2067,13 +2037,13 @@ declare global {
 	 * Shears the drawing context along the y-axis.
 	 * @param {number} angle shear angle in radians
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
-	 * 	translate(25, 60);
+	 * 	translate(-75, -40);
 	 * 	shearY(mouseX / 100);
 	 * 	square(0, 0, 80);
-	 * }
+	 * };
 	 */
 	function shearY(angle: number): void;
 
@@ -2081,6 +2051,10 @@ declare global {
 	 * Applies a transformation matrix.
 	 * 
 	 * Accepts a 3x3 matrix as either an array or multiple arguments.
+	 *
+	 * Note that in q5 WebGPU, the identity matrix (default)
+	 * has a negative y scale to flip the y-axis to match
+	 * the Canvas2D renderer.
 	 * @param {number} a
 	 * @param {number} b
 	 * @param {number} c
@@ -2088,12 +2062,12 @@ declare global {
 	 * @param {number} e
 	 * @param {number} f
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
-	 * 	applyMatrix(2, 1, 1, 1, 100, 100);
+	 * 	applyMatrix(2, -1, 1, -1);
 	 * 	circle(0, 0, 80);
-	 * }
+	 * };
 	 */
 	function applyMatrix(a: number, b: number, c: number, d: number, e: number, f: number): void;
 
@@ -2103,10 +2077,10 @@ declare global {
 	 * q5 runs this function before every time the `draw` function is run,
 	 * so that transformations don't carry over to the next frame.
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
-	 * translate(100, 100);
+	 * translate(50, 50);
 	 * circle(0, 0, 80);
 	 * 
 	 * resetMatrix();
@@ -2117,9 +2091,8 @@ declare global {
 	/** 🦋
 	 * Saves the current transformation matrix.
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * translate(100, 100);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * pushMatrix();
 	 * rotate(QUARTER_PI);
@@ -2133,9 +2106,8 @@ declare global {
 	/** 🦋
 	 * Restores the previously saved transformation matrix.
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * translate(100, 100);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
 	 * pushMatrix();
 	 * rotate(QUARTER_PI);
@@ -2149,11 +2121,11 @@ declare global {
 	/** 🦋
 	 * Saves the current drawing style settings and transformations.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * push();
 	 * fill('blue');
-	 * translate(100, 100);
+	 * translate(50, 50);
 	 * circle(0, 0, 80);
 	 * pop();
 	 * 
@@ -2164,11 +2136,11 @@ declare global {
 	/** 🦋
 	 * Restores the previously saved drawing style settings and transformations.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * push();
 	 * fill('blue');
-	 * translate(100, 100);
+	 * translate(50, 50);
 	 * circle(0, 0, 80);
 	 * pop();
 	 * 
@@ -2184,11 +2156,11 @@ declare global {
 	 * @param {string} renderQuality SMOOTH or PIXELATED
 	 * @param {number} scale can also be given as a string (for example "x2")
 	 * @example
-	 * createCanvas(50, 25);
+	 * await Canvas(50, 25);
 	 * 
 	 * displayMode(CENTER, PIXELATED, 4);
 	 * 
-	 * circle(25, 12.5, 16);
+	 * circle(0, 0, 16);
 	 */
 	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
 
@@ -2223,51 +2195,61 @@ declare global {
 	/** 💻
 	 * The width of the window.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
 	 * 	textAlign(CENTER, CENTER);
-	 * 	text(windowWidth, 100, 100);
-	 * }
+	 * 	text(windowWidth, 0, 0);
+	 * };
 	 */
 	var windowWidth: number;
 
 	/** 💻
 	 * The height of the window.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
 	 * 	textAlign(CENTER, CENTER);
-	 * 	text(windowHeight, 100, 100);
-	 * }
+	 * 	text(windowHeight, 0, 0);
+	 * };
 	 */
 	var windowHeight: number;
 
 	/** 💻
 	 * The width of the canvas.
+	 * @example
+	 * await Canvas(200, 120);
+	 * circle(0, 0, width);
 	 */
 	var width: number;
 
 	/** 💻
 	 * The height of the canvas.
+	 * @example
+	 * await Canvas(200, 80);
+	 * circle(0, 0, height);
 	 */
 	var height: number;
 
 	/** 💻
 	 * Half the width of the canvas.
+	 * @example
+	 * await Canvas(200, 80);
+	 * circle(0, 0, halfWidth);
 	 */
 	var halfWidth: number;
 
 	/** 💻
 	 * Half the height of the canvas.
+	 * @example
+	 * await Canvas(200, 80);
+	 * circle(0, 0, halfHeight);
 	 */
 	var halfHeight: number;
 
 	/** 💻
 	 * The canvas element associated with the Q5 instance.
-	 * 
-	 * If a canvas is not explicitly created with `createCanvas()`, but a q5 function like `draw` or `mousePressed` is defined, a default canvas of size 200x200 will be created automatically.
 	 */
 	var canvas: HTMLCanvasElement;
 
@@ -2276,36 +2258,36 @@ declare global {
 	 * @param {number} w width of the canvas
 	 * @param {number} h height of the canvas
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
-	 * function draw() {
-	 * 	background(200);
-	 * }
+	 * q5.draw = function () {
+	 * 	background(0.8);
+	 * };
 	 * 
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	resizeCanvas(200, 200);
-	 * }
+	 * };
 	 */
 	function resizeCanvas(w: number, h: number): void;
 
 	/** 💻
 	 * The number of frames that have been displayed since the program started.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
-	 * 	text(frameCount, 8, 120);
-	 * }
+	 * 	text(frameCount, -92, 20);
+	 * };
 	 */
 	var frameCount: number;
 
 	/** 💻
 	 * Stops the draw loop.
 	 * @example
-	 * function draw() {
-	 * 	circle(frameCount * 5, 100, 80);
+	 * q5.draw = function () {
+	 * 	circle(frameCount * 5 - 100, 0, 80);
 	 * 	noLoop();
-	 * }
+	 * };
 	 */
 	function noLoop(): void;
 
@@ -2316,30 +2298,30 @@ declare global {
 	 * This is an async function.
 	 * @param {number} [n] number of times to redraw the canvas, default is 1
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * noLoop();
 	 * 
-	 * function draw() {
-	 * 	circle(frameCount * 5, 100, 80);
-	 * }
-	 * function mousePressed() {
+	 * q5.draw = function () {
+	 * 	circle(frameCount * 5 - 100, 0, 80);
+	 * };
+	 * q5.mousePressed = function () {
 	 * 	redraw(10);
-	 * }
+	 * };
 	 */
 	function redraw(n?: number): void;
 
 	/** 💻
 	 * Starts the draw loop again if it was stopped.
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * noLoop();
 	 * 
-	 * function draw() {
-	 * 	circle(frameCount * 5, 100, 80);
-	 * }
-	 * function mousePressed() {
+	 * q5.draw = function () {
+	 * 	circle(frameCount * 5 - 100, 0, 80);
+	 * };
+	 * q5.mousePressed = function () {
 	 * 	loop();
-	 * }
+	 * };
 	 */
 	function loop(): void;
 
@@ -2353,20 +2335,20 @@ declare global {
 	 * @param {number} [hertz] target frame rate, default is 60
 	 * @returns {number} current frame rate
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 
 	 * 	if (mouseIsPressed) frameRate(10);
 	 * 	else frameRate(60);
 	 * 
-	 * 	circle(frameCount % 200, 100, 80);
-	 * }
+	 * 	circle((frameCount % 200) - 100, 0, 80);
+	 * };
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
-	 * 	text(round(frameRate()), 65, 120);
-	 * }
+	 * 	text(round(frameRate()), -35, 20);
+	 * };
 	 */
 	function frameRate(hertz?: number): number;
 
@@ -2374,12 +2356,12 @@ declare global {
 	 * The desired frame rate of the sketch.
 	 * @returns {number} target frame rate
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	textSize(64);
 	 * 
-	 * 	text(getTargetFrameRate(), 65, 120);
-	 * }
+	 * 	text(getTargetFrameRate(), -35, 20);
+	 * };
 	 */
 	function getTargetFrameRate(): number;
 
@@ -2391,13 +2373,13 @@ declare global {
 	 * performance analysis.
 	 * @returns {number} frames per second
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	frameRate(1);
 	 * 	textSize(64);
 	 * 
-	 * 	text(getFPS(), 8, 120);
-	 * }
+	 * 	text(getFPS(), -92, 20);
+	 * };
 	 */
 	function getFPS(): number;
 
@@ -2408,15 +2390,6 @@ declare global {
 	 * to do so at the end of the `draw` function, such as when using
 	 * addons like p5play that auto-draw to the canvas after the `draw`
 	 * function is run.
-	 * @example
-	 * function draw() {
-	 * 	background(200);
-	 * 	circle(frameCount % 200, 100, 80);
-	 * }
-	 * 
-	 * function postProcess() {
-	 * 	filter(INVERT);
-	 * }
 	 */
 	function postProcess(): void;
 
@@ -2425,10 +2398,10 @@ declare global {
 	 * @param {number} v pixel density value
 	 * @returns {number} pixel density
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * pixelDensity(1);
-	 * circle(100, 50, 80);
+	 * circle(0, 0, 80);
 	 */
 	function pixelDensity(v: number): number;
 
@@ -2438,10 +2411,10 @@ declare global {
 	 * On most modern displays, this value will be 2 or 3.
 	 * @returns {number} display density
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * textSize(64);
-	 * text(displayDensity(), 10, 20);
+	 * text(displayDensity(), -90, 6);
 	 */
 	function displayDensity(): number;
 
@@ -2456,30 +2429,23 @@ declare global {
 	 * rates are consistently low, consider reducing the target frame
 	 * rate instead.
 	 * @example
-	 * function draw() {
-	 * 	background(200);
-	 * 	text(deltaTime, 60, 106);
-	 * }
+	 * q5.draw = function () {
+	 * 	background(0.8);
+	 * 	text(deltaTime, -90, 6);
+	 * };
 	 * @example
-	 * let x = 0;
-	 * function draw() {
-	 * 	background(200);
+	 * let x = -100;
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	// simulate frame rate drops
 	 * 	frameRate(random(30, 60));
 	 * 
 	 * 	x += deltaTime * 0.2;
-	 * 	circle(x % 200, 100, 20);
-	 * }
+	 * 	if (x > 100) x = -100;
+	 * 	circle(x, 0, 20);
+	 * };
 	 */
 	var deltaTime: number;
-
-	/** 💻
-	 * The 2D rendering context for the canvas, if using the Canvas2D
-	 * renderer.
-	 */
-	var ctx: CanvasRenderingContext2D;
-
-	var drawingContext: CanvasRenderingContext2D;
 
 	// 🧮 math
 
@@ -2494,17 +2460,17 @@ declare global {
 	 * @param {number} [high] upper bound (exclusive)
 	 * @returns {number | any} a random number or element
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * frameRate(5);
 	 * 
-	 * function draw() {
-	 * 	circle(100, 100, random(20, 200));
-	 * }
+	 * q5.draw = function () {
+	 * 	circle(0, 0, random(200));
+	 * };
 	 * @example
-	 * function draw() {
-	 * 	circle(random(200), random(200), 10);
-	 * }
+	 * q5.draw = function () {
+	 * 	circle(random(-100, 100), random(-10, 10), 10);
+	 * };
 	 */
 	function random(low?: number | any[], high?: number): number | any;
 
@@ -2514,21 +2480,20 @@ declare global {
 	 * Can be used to create a jitter effect (random displacement).
 	 * 
 	 * Equivalent to `random(-amount, amount)`.
-	 * @param {number} amount absolute maximum amount of jitter, default is 1
+	 * @param {number} [amount] absolute maximum amount of jitter, default is 1
 	 * @returns {number} random number between -val and val
 	 * @example
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	circle(mouseX + jit(3), mouseY + jit(3), 5);
-	 * }
+	 * };
 	 * @example
-	 * let q = await Q5.WebGPU();
-	 * createCanvas(200, 100);
+	 * await Canvas(200);
 	 * 
-	 * q.draw = () => {
+	 * q5.draw = function () {
 	 * 	circle(jit(50), 0, random(50));
 	 * };
 	 */
-	function jit(amount: number): number;
+	function jit(amount?: number): number;
 
 	/** 🧮
 	 * Generates a noise value based on the x, y, and z inputs.
@@ -2539,20 +2504,31 @@ declare global {
 	 * @param {number} [z] z-coordinate input
 	 * @returns {number} a noise value
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	let n = noise(frameCount * 0.01);
-	 * 	circle(100, 100, n * 200);
-	 * }
+	 * 	circle(0, 0, n * 200);
+	 * };
 	 * @example
-	 * function draw() {
-	 * 	background(200);
+	 * q5.draw = function () {
+	 * 	background(0.8);
 	 * 	let t = (frameCount + mouseX) * 0.02;
 	 * 	for (let x = -5; x < 220; x += 10) {
 	 * 		let n = noise(t, x * 0.1);
-	 * 		circle(x, 100, n * 40);
+	 * 		circle(x - 100, 0, n * 40);
 	 * 	}
-	 * }
+	 * };
+	 * @example
+	 * q5.draw = function () {
+	 * 	noStroke();
+	 * 	let t = millis() * 0.002;
+	 * 	for (let x = -100; x < 100; x += 5) {
+	 * 		for (let y = -100; y < 100; y += 5) {
+	 * 			fill(noise(t, (mouseX + x) * 0.05, y * 0.05));
+	 * 			square(x, y, 5);
+	 * 		}
+	 * 	}
+	 * };
 	 */
 	function noise(x?: number, y?: number, z?: number): number;
 
@@ -2566,14 +2542,13 @@ declare global {
 	 * @param {number} y2 y-coordinate of the second point
 	 * @returns {number} distance between the points
 	 * @example
-	 * function draw() {
-	 * 	background(200);
-	 * 	circle(100, 100, 20);
-	 * 	circle(mouseX, mouseY, 20);
+	 * q5.draw = function () {
+	 * 	background(0.8);
+	 * 	line(0, 0, mouseX, mouseY);
 	 * 
-	 * 	let d = dist(100, 100, mouseX, mouseY);
-	 * 	text(round(d), 20, 20);
-	 * }
+	 * 	let d = dist(0, 0, mouseX, mouseY);
+	 * 	text(round(d), -80, -80);
+	 * };
 	 */
 	function dist(x1: number, y1: number, x2: number, y2: number): number;
 
@@ -2655,10 +2630,10 @@ declare global {
 	 * @param {number} [d] number of decimal places to round to
 	 * @returns {number} rounded number
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * textSize(32);
-	 * text(round(PI, 5), 10, 60);
+	 * text(round(PI, 5), -90, 10);
 	 */
 	function round(n: number, d: number): number;
 
@@ -2667,10 +2642,10 @@ declare global {
 	 * @param {number} n a number
 	 * @returns {number} rounded number
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * textSize(32);
-	 * text(ceil(PI), 10, 60);
+	 * text(ceil(PI), -90, 10);
 	 */
 	function ceil(n: number): number;
 
@@ -2679,10 +2654,10 @@ declare global {
 	 * @param {number} n a number
 	 * @returns {number} rounded number
 	 * @example
-	 * createCanvas(200, 100);
-	 * background(200);
+	 * await Canvas(200, 100);
+	 * background(0.8);
 	 * textSize(32);
-	 * text(floor(-PI), 10, 60);
+	 * text(floor(-PI), -90, 10);
 	 */
 	function floor(n: number): number;
 
@@ -2691,10 +2666,10 @@ declare global {
 	 * @param {...number} args numbers to compare
 	 * @returns {number} minimum
 	 * @example
-	 * function draw() {
-	 * 	background(min(mouseX, 100));
-	 * 	circle(min(mouseX, 100), 0, 80);
-	 * }
+	 * q5.draw = function () {
+	 * 	background(min(-mouseX / 100, 0.5));
+	 * 	circle(min(mouseX, 0), 0, 80);
+	 * };
 	 */
 	function min(...args: number[]): number;
 
@@ -2703,10 +2678,10 @@ declare global {
 	 * @param {...number} args numbers to compare
 	 * @returns {number} maximum
 	 * @example
-	 * function draw() {
-	 * 	background(max(mouseX, 100));
-	 * 	circle(max(mouseX, 100), 0, 80);
-	 * }
+	 * q5.draw = function () {
+	 * 	background(max(-mouseX / 100, 0.5));
+	 * 	circle(max(mouseX, 0), 0, 80);
+	 * };
 	 */
 	function max(...args: number[]): number;
 
@@ -2869,14 +2844,14 @@ declare global {
 	 * @param {string} url sound file
 	 * @returns {Sound & PromiseLike<Sound>} sound
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * let sound = loadSound('/assets/jump.wav');
 	 * sound.volume = 0.3;
 	 * 
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	sound.play();
-	 * }
+	 * };
 	 */
 	function loadSound(url: string): Sound & PromiseLike<Sound>;
 
@@ -2888,14 +2863,14 @@ declare global {
 	 * Note that audio can only be played after the first user
 	 * interaction with the page!
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * let audio = loadAudio('/assets/retro.flac');
 	 * audio.volume = 0.4;
 	 * 
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	audio.play();
-	 * }
+	 * };
 	 */
 	function loadAudio(url: string): HTMLAudioElement & PromiseLike<HTMLAudioElement>;
 
@@ -2985,7 +2960,7 @@ declare global {
 	 */
 
 	/** 📑
-	 * Creates a new HTML element and adds it to the page. `createEl` is
+	 * Creates a new HTML element and adds it to the page. `createElement` is
 	 * an alias.
 	 * 
 	 * Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
@@ -3007,7 +2982,7 @@ declare global {
 	 * @param {string} [content] content of the element
 	 * @returns {HTMLElement} element
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * let el = createEl('div', '*');
 	 * el.position(50, 50);
@@ -3017,7 +2992,7 @@ declare global {
 	 * el.style.backgroundColor = 'blue';
 	 * el.style.color = 'white';
 	 */
-	function createElement(tag: string, content?: string): HTMLElement;
+	function createEl(tag: string, content?: string): HTMLElement;
 
 	/** 📑
 	 * Creates a link element.
@@ -3025,7 +3000,7 @@ declare global {
 	 * @param {string} [text] text content
 	 * @param {boolean} [newTab] whether to open the link in a new tab
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * let link = createA('https://q5js.org', 'q5.js');
 	 * link.position(16, 42);
@@ -3041,12 +3016,12 @@ declare global {
 	 * Creates a button element.
 	 * @param {string} [content] text content
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * let btn = createButton('Click me!');
 	 * 
 	 * btn.addEventListener('click', () => {
-	 * 	background(random(100, 255));
+	 * 	background(random(0.4, 1));
 	 * });
 	 */
 	function createButton(content?: string): HTMLButtonElement;
@@ -3060,7 +3035,7 @@ declare global {
 	 * @param {string} [label] text label placed next to the checkbox
 	 * @param {boolean} [checked] initial state
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * let box = createCheckbox('Check me!');
 	 * box.label.style.color = 'lime';
@@ -3078,14 +3053,14 @@ declare global {
 	 * Use the `value` property to get or set the color value.
 	 * @param {string} [value] initial color value
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * let picker = createColorPicker();
 	 * picker.value = '#fd7575';
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	background(picker.value);
-	 * }
+	 * };
 	 */
 	function createColorPicker(value?: string): HTMLInputElement;
 
@@ -3093,7 +3068,7 @@ declare global {
 	 * Creates an image element.
 	 * @param {string} src url of the image
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * let img = createImg('/assets/p5play_logo.webp');
 	 * img.position(0, 0).size(100, 100);
@@ -3112,7 +3087,7 @@ declare global {
 	 * @param {string} [value] initial value
 	 * @param {string} [type] text input type, can be 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * textSize(64);
 	 * 
 	 * let input = createInput();
@@ -3121,7 +3096,7 @@ declare global {
 	 * 
 	 * input.addEventListener('input', () => {
 	 * 	background('orange');
-	 * 	text(input.value, 10, 70);
+	 * 	text(input.value, -90, 30);
 	 * });
 	 */
 	function createInput(value?: string, type?: string): HTMLInputElement;
@@ -3130,7 +3105,7 @@ declare global {
 	 * Creates a paragraph element.
 	 * @param {string} [content] text content
 	 * @example
-	 * createCanvas(200, 50);
+	 * await Canvas(200, 50);
 	 * background('coral');
 	 * 
 	 * let p = createP('Hello, world!');
@@ -3147,16 +3122,17 @@ declare global {
 	 * Use the `value` property to get or set the value of the selected radio button.
 	 * @param {string} [groupName]
 	 * @example
-	 * createCanvas(200, 160);
+	 * await Canvas(200, 160);
 	 * 
 	 * let radio = createRadio();
-	 * radio.option('square', '1').option('circle', '2');
+	 * radio.option('square', '1');
+	 * radio.option('circle', '2');
 	 * 
-	 * function draw() {
-	 * 	background(200);
-	 * 	if (radio.value == '1') square(75, 25, 80);
-	 * 	if (radio.value == '2') circle(100, 50, 80);
-	 * }
+	 * q5.draw = function () {
+	 * 	background(0.8);
+	 * 	if (radio.value == '1') square(-40, -40, 80);
+	 * 	if (radio.value == '2') circle(0, 0, 80);
+	 * };
 	 */
 	function createRadio(groupName?: string): HTMLDivElement;
 
@@ -3175,10 +3151,11 @@ declare global {
 	 * string or an array of strings.
 	 * @param {string} [placeholder] optional placeholder text that appears before an option is selected
 	 * @example
-	 * createCanvas(200, 100);
+	 * await Canvas(200, 100);
 	 * 
 	 * let sel = createSelect('Select an option');
-	 * sel.option('Red', '#f55').option('Green', '#5f5');
+	 * sel.option('Red', '#f55');
+	 * sel.option('Green', '#5f5');
 	 * 
 	 * sel.addEventListener('change', () => {
 	 * 	background(sel.value);
@@ -3197,14 +3174,14 @@ declare global {
 	 * @param {number} [value] initial value
 	 * @param {number} [step] step size
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
-	 * let slider = createSlider(0, 255);
+	 * let slider = createSlider(0, 1, 0.5, 0.1);
 	 * slider.position(10, 10).size(180);
 	 * 
-	 * function draw() {
+	 * q5.draw = function () {
 	 * 	background(slider.val());
-	 * }
+	 * };
 	 */
 	function createSlider(min: number, max: number, value?: number, step?: number): HTMLInputElement;
 
@@ -3219,25 +3196,25 @@ declare global {
 	 * @param {string} src url of the video
 	 * @returns {HTMLVideoElement & PromiseLike<HTMLVideoElement>} a new video element
 	 * @example
-	 * createCanvas(1);
+	 * await Canvas(1);
 	 * 
 	 * let vid = createVideo('/assets/apollo4.mp4');
 	 * vid.size(200, 150);
 	 * vid.autoplay = vid.muted = vid.loop = true;
 	 * vid.controls = true;
 	 * @example
-	 * createCanvas(200, 150);
+	 * await Canvas(200, 150);
 	 * let vid = createVideo('/assets/apollo4.mp4');
 	 * vid.hide();
 	 * 
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	vid.currentTime = 0;
 	 * 	vid.play();
-	 * }
-	 * function draw() {
-	 * 	image(vid, 0, 0, 200, 150);
-	 * 	filter(HUE_ROTATE, 90);
-	 * }
+	 * };
+	 * q5.draw = function () {
+	 * 	rotate(mouseX / 55);
+	 * 	image(vid, -100, -75, 200, 150);
+	 * };
 	 */
 	function createVideo(src: string): HTMLVideoElement & PromiseLike<HTMLVideoElement>;
 
@@ -3258,46 +3235,50 @@ declare global {
 	 * @param {boolean} [flipped] whether to mirror the video vertically, true by default
 	 * @returns {HTMLVideoElement & PromiseLike<HTMLVideoElement>} a new video element
 	 * @example
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	let cap = createCapture(VIDEO);
 	 * 	cap.size(200, 112.5);
 	 * 	canvas.remove();
-	 * }
+	 * };
 	 * @example
 	 * let cap;
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	cap = createCapture(VIDEO);
 	 * 	cap.hide();
-	 * }
+	 * };
 	 * 
-	 * function draw() {
-	 * 	let y = frameCount % height;
-	 * 	image(cap, 0, y, 200, 200);
-	 * }
+	 * q5.draw = function () {
+	 * 	let y = (frameCount % 200) - 100;
+	 * 	image(cap, -100, y, 200, 200);
+	 * };
 	 * @example
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	let cap = createCapture({
 	 * 		video: { width: 640, height: 480 }
 	 * 	});
 	 * 	cap.size(200, 150);
 	 * 	canvas.remove();
-	 * }
+	 * };
 	 */
 	function createCapture(type?: string, flipped?: boolean): HTMLVideoElement & PromiseLike<HTMLVideoElement>;
 
 	/** 📑
 	 * Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * 
+	 * Alias for `document.querySelector`.
 	 * @param {string} selector
 	 * @returns {HTMLElement} element
 	 */
-	function findElement(selector: string): HTMLElement;
+	function findEl(selector: string): HTMLElement;
 
 	/** 📑
 	 * Finds all elements in the DOM that match the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * 
+	 * Alias for `document.querySelectorAll`.
 	 * @param {string} selector
 	 * @returns {HTMLElement[]} elements
 	 */
-	function findElements(selector: string): HTMLElement[];
+	function findEls(selector: string): HTMLElement[];
 
 	// 🎞 record
 
@@ -3321,14 +3302,14 @@ declare global {
 	 * wiki page.
 	 * @returns {HTMLElement} a recorder, q5 DOM element
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
 	 * 
 	 * let rec = createRecorder();
 	 * rec.bitrate = 10;
 	 * 
-	 * function draw() {
-	 * 	circle(mouseX, random(height), 10);
-	 * }
+	 * q5.draw = function () {
+	 * 	circle(mouseX, jit(halfHeight), 10);
+	 * };
 	 */
 	function createRecorder(): HTMLElement;
 
@@ -3353,14 +3334,14 @@ declare global {
 	 * Saves the current recording as a video file.
 	 * @param {string} fileName
 	 * @example
-	 * function draw() {
-	 * 	square(mouseX, random(200), 10);
-	 * }
+	 * q5.draw = function () {
+	 * 	square(mouseX, jit(100), 10);
+	 * };
 	 * 
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	if (!recording) record();
 	 * 	else saveRecording('squares');
-	 * }
+	 * };
 	 */
 	function saveRecording(fileName: string): void;
 
@@ -3381,11 +3362,41 @@ declare global {
 	 * @param {...string} urls
 	 * @returns {Promise<any[]>} a promise that resolves with objects
 	 * @example
-	 * createCanvas(200);
+	 * await Canvas(200);
+	 * 
 	 * let logo = load('/q5js_logo.avif');
 	 * 
-	 * function draw() {
-	 * 	image(logo, 0, 0, 200, 200);
+	 * q5.draw = function () {
+	 * 	image(logo, -100, -100, 200, 200);
+	 * };
+	 * @example
+	 * await Canvas(200);
+	 * background(0.8);
+	 * 
+	 * await load('/assets/Robotica.ttf');
+	 * 
+	 * textSize(28);
+	 * text('Hello, world!', -97, 100);
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * let [jump, retro] = await load('/assets/jump.wav', '/assets/retro.flac');
+	 * 
+	 * q5.mousePressed = function () {
+	 * 	if (mouseButton == 'left') jump.play();
+	 * 	if (mouseButton == 'right') retro.play();
+	 * };
+	 * //
+	 * @example
+	 * await Canvas(200);
+	 * background(0.8);
+	 * textSize(32);
+	 * 
+	 * let xml = await load('/assets/animals.xml');
+	 * let mammals = xml.querySelectorAll('mammal');
+	 * let y = -90;
+	 * for (let mammal of mammals) {
+	 * 	text(mammal.textContent, -90, (y += 32));
 	 * }
 	 */
 	function load(...urls: string[]): PromiseLike<any[]>;
@@ -3400,23 +3411,23 @@ declare global {
 	 * @param {object} [data] canvas, image, or JS object
 	 * @param {string} [fileName] filename to save as
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
-	 * circle(100, 100, 50);
+	 * await Canvas(200);
+	 * background(0.8);
+	 * circle(0, 0, 50);
 	 * 
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	save('circle.png');
-	 * }
+	 * };
 	 * @example
-	 * createCanvas(200);
-	 * 
+	 * await Canvas(200);
+	 * background(0.8);
+	 * text('save me?', -90, 0);
 	 * textSize(180);
 	 * let bolt = createTextImage('⚡️');
-	 * image(bolt, 16, -56);
 	 * 
-	 * function mousePressed() {
+	 * q5.mousePressed = function () {
 	 * 	save(bolt, 'bolt.png');
-	 * }
+	 * };
 	 */
 	function save(data?: object, fileName?: string): void;
 
@@ -3453,6 +3464,17 @@ declare global {
 	 * Using `await` to get the loaded XML Element is recommended.
 	 * @param {string} url xml file
 	 * @returns {Element & PromiseLike<Element>} an object containing the loaded XML Element in a property called `obj.DOM` or use await to get the XML Element directly
+	 * @example
+	 * await Canvas(200);
+	 * background(0.8);
+	 * textSize(32);
+	 * 
+	 * let xml = await load('/assets/animals.xml');
+	 * let mammals = xml.querySelectorAll('mammal');
+	 * let y = -90;
+	 * for (let mammal of mammals) {
+	 * 	text(mammal.textContent, -90, (y += 32));
+	 * }
 	 */
 	function loadXML(url: string): object & PromiseLike<Element>;
 
@@ -3473,6 +3495,12 @@ declare global {
 	 * @param {number} num number to format
 	 * @param {number} digits number of digits to format to
 	 * @returns {string} formatted number
+	 * @example
+	 * await Canvas(200, 100);
+	 * background(0.8);
+	 * 
+	 * textSize(32);
+	 * text(nf(PI, 4, 5), -90, 10);
 	 */
 	function nf(num: number, digits: number): string;
 
@@ -3548,6 +3576,12 @@ declare global {
 		 * @param {number} x x component of the vector
 		 * @param {number} y y component of the vector
 		 * @param {number} [z] optional. The z component of the vector
+		 * @example
+		 * await Canvas(200);
+		 * background(0.8);
+		 * 
+		 * let v = createVector(0, 0);
+		 * circle(v.x, v.y, 50);
 		 */
 		constructor(x: number, y: number, z?: number);
 
@@ -3711,18 +3745,20 @@ declare global {
 	 * @param {number} stop angle to stop the arc
 	 * @param {number} [mode] shape and stroke style setting, default is `PIE_OPEN` for a pie shape with an unclosed stroke, can be `PIE`, `CHORD`, or `CHORD_OPEN`
 	 * @example
-	 * createCanvas(200);
-	 * background(200);
+	 * await Canvas(200);
+	 * background(0.8);
 	 * 
-	 * arc(40, 40, 40, 40, 0.8, -0.8);
-	 * arc(80, 80, 40, 40, 0.8, -0.8, PIE);
-	 * arc(120, 120, 40, 40, 0.8, -0.8, CHORD_OPEN);
-	 * arc(160, 160, 40, 40, 0.8, -0.8, CHORD);
+	 * arc(0, 0, 160, 160, 0.8, -0.8);
 	 */
 	function arc(x: number, y: number, w: number, h: number, start: number, stop: number, mode?: number): void;
 
 	/** 🖌
 	 * Draws a curve.
+	 * @example
+	 * await Canvas(200, 100);
+	 * background(0.8);
+	 * 
+	 * curve(-100, -200, -50, 0, 50, 0, 100, -200);
 	 */
 	function curve(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
@@ -3731,6 +3767,14 @@ declare global {
 	 * 
 	 * Only takes effect in q5 WebGPU.
 	 * @param {number} val curve detail level, default is 20
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * curveDetail(4);
+	 * 
+	 * strokeWeight(10);
+	 * stroke(0, 1, 1);
+	 * curve(-100, -200, -50, 0, 50, 0, 100, -200);
 	 */
 	function curveDetail(val: number): void;
 
@@ -3822,6 +3866,281 @@ declare global {
 	 */
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
+	// ⚡ shaders
+
+	/**
+	 * Custom shaders written in WGSL (WebGPU Shading Language) can be
+	 * used to create advanced visual effects in q5!
+	 */
+
+	/** ⚡
+	 * Creates a shader that q5 can use to draw shapes.
+	 * 
+	 * Affects the following functions:
+	 * `triangle`, `quad`, `plane`,
+	 * `curve`, `bezier`, `beginShape`/`endShape`,
+	 * and `background` (unless an image is used).
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).
+	 * 
+	 * For more information on the vertex and fragment function
+	 * input parameters, data, and helper functions made available for use
+	 * in your custom shader code, read the
+	 * ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU)
+	 * wiki page.
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * let wobble = createShader(`
+	 * @vertex
+	 * fn vertexMain(v: VertexParams) -> FragParams {
+	 * 	var vert = transformVertex(v.pos, v.matrixIndex);
+	 * 
+	 *   let i = f32(v.vertexIndex) % 4 * 100;
+	 *   vert.x += cos((q.time + i) * 0.01) * 0.1;
+	 * 
+	 * 	var f: FragParams;
+	 * 	f.position = vert;
+	 * 	f.color = vec4f(1, 0, 0, 1);
+	 * 	return f;
+	 * }`);
+	 * 
+	 * q5.draw = function () {
+	 * 	clear();
+	 * 	shader(wobble);
+	 * 	plane(0, 0, 100);
+	 * };
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * let stripes = createShader(`
+	 * @fragment
+	 * fn fragMain(f: FragParams) -> @location(0) vec4f {
+	 * 	let r = cos((q.mouseY + f.position.y) * 0.2);
+	 * 	return vec4(r, 0.0, 1, 1);
+	 * }`);
+	 * 
+	 * q5.draw = function () {
+	 * 	shader(stripes);
+	 * 	triangle(-50, -50, 0, 50, 50, -50);
+	 * };
+	 */
+	function createShader(code: string): GPUShaderModule;
+
+	/** ⚡
+	 * A plane is a centered rectangle with no stroke.
+	 * @param {number} x center x
+	 * @param {number} y center y
+	 * @param {number} w width or side length
+	 * @param {number} [h] height
+	 * @example
+	 * await Canvas(200);
+	 * plane(0, 0, 100);
+	 */
+	function plane(x: number, y: number, w: number, h?: number): void;
+
+	/** ⚡
+	 * Applies a shader.
+	 * @param {GPUShaderModule} shaderModule a shader program
+	 */
+	function shader(shaderModule: GPUShaderModule): void;
+
+	/** ⚡
+	 * Make q5 use the default shapes shader.
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * let stripes = createShader(`
+	 * @fragment
+	 * fn fragMain(f: FragParams) -> @location(0) vec4f {
+	 * 	let g = cos((q.mouseY + f.position.y) * 0.05);
+	 * 	return vec4(1, g, 0, 1);
+	 * }`);
+	 * 
+	 * q5.draw = function () {
+	 * 	shader(stripes);
+	 * 	background(0);
+	 * 
+	 * 	resetShader();
+	 * 	triangle(-50, -50, 0, 50, 50, -50);
+	 * };
+	 */
+	function resetShader(): void;
+
+	/** ⚡
+	 * Make q5 use the default frame shader.
+	 */
+	function resetFrameShader(): void;
+
+	/** ⚡
+	 * Make q5 use the default image shader.
+	 */
+	function resetImageShader(): void;
+
+	/** ⚡
+	 * Make q5 use the default video shader.
+	 */
+	function resetVideoShader(): void;
+
+	/** ⚡
+	 * Make q5 use the default text shader.
+	 */
+	function resetTextShader(): void;
+
+	/** ⚡
+	 * Make q5 use all default shaders.
+	 */
+	function resetShaders(): void;
+
+	/** ⚡
+	 * Creates a shader that q5 can use to draw frames.
+	 * 
+	 * You must create a canvas before using this function.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default frame shader](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * let boxy = createFrameShader(`
+	 * @fragment
+	 * fn fragMain(f: FragParams) -> @location(0) vec4f {
+	 * 	let x = sin(f.texCoord.y * 4 + q.time * 0.002);
+	 * 	let y = cos(f.texCoord.x * 4 + q.time * 0.002);
+	 * 	let uv = f.texCoord + vec2f(x, y);
+	 * 	return textureSample(tex, samp, uv);
+	 * }`);
+	 * 
+	 * q5.draw = function () {
+	 * 	stroke(1);
+	 * 	strokeWeight(8);
+	 * 	line(mouseX, mouseY, pmouseX, pmouseY);
+	 * 	mouseIsPressed ? resetShaders() : shader(boxy);
+	 * };
+	 */
+	function createFrameShader(code: string): GPUShaderModule;
+
+	/** ⚡
+	 * Creates a shader that q5 can use to draw images.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default image shader](https://github.com/q5js/q5.js/blob/main/src/shaders/image.wgsl).
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+	 * await Canvas(200);
+	 * imageMode(CENTER);
+	 * 
+	 * let logo = loadImage('/q5js_logo.avif');
+	 * 
+	 * let grate = createImageShader(`
+	 * @fragment
+	 * fn fragMain(f: FragParams) -> @location(0) vec4f {
+	 * 	var texColor = textureSample(tex, samp, f.texCoord);
+	 * 	texColor.b += (q.mouseX + f.position.x) % 20 / 10;
+	 * 	return texColor;
+	 * }`);
+	 * 
+	 * q5.draw = function () {
+	 * 	background(0.7);
+	 * 	shader(grate);
+	 * 	image(logo, 0, 0, 180, 180);
+	 * };
+	 */
+	function createImageShader(code: string): GPUShaderModule;
+
+	/** ⚡
+	 * Creates a shader that q5 can use to draw video frames.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default video shader](https://github.com/q5js/q5.js/blob/main/src/shaders/video.wgsl).
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+	 * await Canvas(200, 600);
+	 * 
+	 * let vid = createVideo('/assets/apollo4.mp4');
+	 * vid.hide();
+	 * 
+	 * let flipper = createVideoShader(`
+	 * @vertex
+	 * fn vertexMain(v: VertexParams) -> FragParams {
+	 * 	var vert = transformVertex(v.pos, v.matrixIndex);
+	 * 
+	 * 	var vi = f32(v.vertexIndex);
+	 * 	vert.y *= cos((q.frameCount + vi * 10) * 0.03);
+	 * 
+	 * 	var f: FragParams;
+	 * 	f.position = vert;
+	 * 	f.texCoord = v.texCoord;
+	 * 	return f;
+	 * }
+	 * 	
+	 * @fragment
+	 * fn fragMain(f: FragParams) -> @location(0) vec4f {
+	 * 	var texColor =
+	 * 		textureSampleBaseClampToEdge(tex, samp, f.texCoord);
+	 * 	texColor.r = 0;
+	 * 	texColor.b *= 2;
+	 * 	return texColor;
+	 * }`);
+	 * 
+	 * q5.draw = function () {
+	 * 	clear();
+	 * 	if (mouseIsPressed) vid.play();
+	 * 	shader(flipper);
+	 * 	image(vid, -100, 150, 200, 150);
+	 * };
+	 */
+	function createVideoShader(code: string): GPUShaderModule;
+
+	/** ⚡
+	 * Creates a shader that q5 can use to draw text.
+	 * 
+	 * Use this function to customize a copy of the
+	 * [default text shader](https://github.com/q5js/q5.js/blob/main/src/shaders/text.wgsl).
+	 * @param {string} code WGSL shader code excerpt
+	 * @returns {GPUShaderModule} a shader program
+	 * @example
+	 * await Canvas(200);
+	 * textAlign(CENTER, CENTER);
+	 * 
+	 * let spin = createTextShader(`
+	 * @vertex
+	 * fn vertexMain(v : VertexParams) -> FragParams {
+	 * 	let char = textChars[v.instanceIndex];
+	 * 	let text = textMetadata[i32(char.w)];
+	 * 	let fontChar = fontChars[i32(char.z)];
+	 * 	let pos = calcPos(v.vertexIndex, char, fontChar, text);
+	 * 
+	 * 	var vert = transformVertex(pos, text.matrixIndex);
+	 * 
+	 * 	let i = f32(v.instanceIndex + 1);
+	 * 	vert.y *= cos((q.frameCount - 5 * i) * 0.05);
+	 * 
+	 * 	var f : FragParams;
+	 * 	f.position = vert;
+	 * 	f.texCoord = calcUV(v.vertexIndex, fontChar);
+	 * 	f.fillColor = colors[i32(text.fillIndex)];
+	 * 	f.strokeColor = colors[i32(text.strokeIndex)];
+	 * 	f.strokeWeight = text.strokeWeight;
+	 * 	f.edge = text.edge;
+	 * 	return f;
+	 * }`);
+	 * 
+	 * q5.draw = function () {
+	 * 	clear();
+	 * 	shader(spin);
+	 * 	fill(1, 0, 1);
+	 * 	textSize(32);
+	 * 	text('Hello, World!', 0, 0);
+	 * };
+	 */
+	function createTextShader(code: string): GPUShaderModule;
+
 	// ⚙ advanced
 
 	/** ⚙
@@ -3837,16 +4156,18 @@ declare global {
 		 * Used by the global `Canvas` function.
 		 * @param {string | Function} [scope]
 		 * @param {HTMLElement} [parent] element that the canvas will be placed inside
-		 * @example
-		 * let q = new Q5('namespace');
-		 * q.createCanvas(200, 100);
-		 * q.circle(100, 50, 20);
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
 		/** ⚙
 		 * The current minor version of q5.
 		 * @returns {string} the q5 version
+		 * @example
+		 * await Canvas(200);
+		 * background(0.8);
+		 * textSize(64);
+		 * textAlign(CENTER, CENTER);
+		 * text('v' + Q5.version, 0, 0);
 		 */
 		static version: string;
 
@@ -3925,6 +4246,14 @@ declare global {
 
 		/** ⚙
 		 * Creates a new Q5 instance that uses [q5's WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer).
+		 * @example
+		 * let q = await Q5.WebGPU('namespace');
+		 * q.Canvas(200, 100);
+		 * 
+		 * q.draw = () => {
+		 * 	q.background(0.8);
+		 * 	q.circle(q.mouseX, 0, 80);
+		 * };
 		 */
 		static WebGPU(): Q5;
 
@@ -3935,6 +4264,14 @@ declare global {
 		 * Inside the function, `this` refers to the Q5 instance.
 		 * @param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', or 'remove'
 		 * @param {Function} fn The function to be run at the specified lifecycle phase.
+		 * @example
+		 * Q5.addHook('predraw', function () {
+		 * 	this.background('cyan');
+		 * });
+		 * 
+		 * q5.draw = function () {
+		 * 	circle(mouseX, mouseY, 80);
+		 * };
 		 */
 		static addHook(lifecycle: string, fn: Function): void;
 

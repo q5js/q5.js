@@ -125,8 +125,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.mousePressed = function () {
-	background(gray);
-	gray = (gray + 0.1) % 1;
+	background(gray % 1);
+	gray += 0.1;
 };
 ```
 
@@ -153,8 +153,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.mouseReleased = function () {
-	background(gray);
-	gray = (gray + 0.1) % 1;
+	background(gray % 1);
+	gray += 0.1;
 };
 ```
 
@@ -184,8 +184,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.mouseMoved = function () {
-	background(gray);
-	gray = (gray + 0.005) % 1;
+	background(gray % 1);
+	gray += 0.005;
 };
 ```
 
@@ -215,8 +215,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.mouseDragged = function () {
-	background(gray);
-	gray = (gray + 0.005) % 1;
+	background(gray % 1);
+	gray += 0.005;
 };
 ```
 
@@ -243,8 +243,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.doubleClicked = function () {
-	background(gray);
-	gray = (gray + 0.1) % 1;
+	background(gray % 1);
+	gray += 0.1;
 };
 ```
 
@@ -351,8 +351,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.keyPressed = function () {
-	background(gray);
-	gray = (gray + 0.1) % 1;
+	background(gray % 1);
+	gray += 0.1;
 };
 ```
 
@@ -379,8 +379,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.keyReleased = function () {
-	background(gray);
-	gray = (gray + 0.1) % 1;
+	background(gray % 1);
+	gray += 0.1;
 };
 ```
 
@@ -439,8 +439,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.touchStarted = function () {
-	background(gray);
-	gray = (gray + 0.1) % 1;
+	background(gray % 1);
+	gray += 0.1;
 };
 ```
 
@@ -471,8 +471,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.touchEnded = function () {
-	background(gray);
-	gray = (gray + 0.1) % 1;
+	background(gray % 1);
+	gray += 0.1;
 };
 ```
 
@@ -503,8 +503,8 @@ await Canvas(200);
 let gray = 0.4;
 
 q5.touchMoved = function () {
-	background(gray);
-	gray = (gray + 0.005) % 1;
+	background(gray % 1);
+	gray += 0.005;
 };
 ```
 

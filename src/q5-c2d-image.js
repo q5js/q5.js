@@ -193,7 +193,11 @@ Q5.renderers.c2d.image = ($, q) => {
 			$._retint = true;
 
 			if ($._owner?._makeDrawable) {
-				$._texture.destroy();
+				if ($._owner._texturesToDestroy && $._texture) {
+					$._owner._texturesToDestroy.push($._texture);
+				} else {
+					$._texture.destroy();
+				}
 				delete $._texture;
 				$._owner._makeDrawable($);
 			}
@@ -366,24 +370,26 @@ Q5.Image = class {
 		delete $.createCanvas;
 		$._loop = false;
 
-		let libMap = Q5._libMap;
-		let imgFns = [
-			'copy',
-			'filter',
-			'get',
-			'set',
-			'resize',
-			'mask',
-			'trim',
-			'inset',
-			'pixels',
-			'loadPixels',
-			'updatePixels',
-			'smooth',
-			'noSmooth'
-		];
-		for (let name of imgFns) {
-			if (libMap[name]) $[libMap[name]] = $[name];
+		let m = Q5._libMap;
+		if (m) {
+			let imgFns = [
+				'copy',
+				'filter',
+				'get',
+				'set',
+				'resize',
+				'mask',
+				'trim',
+				'inset',
+				'pixels',
+				'loadPixels',
+				'updatePixels',
+				'smooth',
+				'noSmooth'
+			];
+			for (let name of imgFns) {
+				if (m[name]) $[m[name]] = $[name];
+			}
 		}
 	}
 	get w() {

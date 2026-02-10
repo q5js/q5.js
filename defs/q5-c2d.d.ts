@@ -43,16 +43,13 @@ declare global {
 	function draw(): void;
 
 	/** ⭐
-	 * Logs a message to the JavaScript console.
+	 * Logs a message to the JavaScript [console](https://developer.mozilla.org/docs/Web/API/console/log_static).
 	 * 
 	 * To view the console, open your browser's web developer tools
 	 * via the keyboard shortcut `Ctrl + Shift + i` or `command + option + i`,
 	 * then click the "Console" tab.
 	 * 
-	 * This is an alias for the standard
-	 * [`console.log`](https://developer.mozilla.org/docs/Web/API/console/log_static) function.
-	 * 
-	 * When you're curious about what your code is doing, use `log()`!
+	 * Use `log` when you're curious about what your code is doing!
 	 * @param {*} message
 	 * @example
 	 * function draw() {
@@ -80,19 +77,19 @@ declare global {
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} width width of the ellipse
-	 * @param {number} [height] height of the ellipse
+	 * @param {number} height height of the ellipse
 	 * @example
 	 * createCanvas(200, 100);
 	 * ellipse(100, 50, 160, 80);
 	 */
-	function ellipse(x: number, y: number, width: number, height?: number): void;
+	function ellipse(x: number, y: number, width: number, height: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a rectangle or a rounded rectangle.
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
 	 * @param {number} w width of the rectangle
-	 * @param {number} [h] height of the rectangle
+	 * @param {number} h height of the rectangle
 	 * @param {number} [rounded] radius for all corners
 	 * @example
 	 * createCanvas(200);
@@ -102,7 +99,7 @@ declare global {
 	 * rect(80, 70, 40, 60, 10);
 	 * rect(130, 120, 40, 60, 30, 2, 8, 20);
 	 */
-	function rect(x: number, y: number, w: number, h?: number, rounded?: number): void;
+	function rect(x: number, y: number, w: number, h: number, rounded?: number): void;
 
 	/** 🧑‍🎨
 	 * Draws a square or a rounded square.
@@ -566,6 +563,7 @@ declare global {
 	 * 
 	 * Not applicable to WebGPU canvases.
 	 * @example
+	 * createCanvas(200);
 	 * frameRate(5);
 	 * let icon = loadImage('/q5js_icon.png');
 	 * 
@@ -670,7 +668,7 @@ declare global {
 	/** 🌆
 	 * Creates a graphics buffer.
 	 * 
-	 * Disabled by default in q5 WebGPU.
+	 * Graphics looping is disabled by default in q5 WebGPU.
 	 * See issue [#104](https://github.com/q5js/q5.js/issues/104) for details.
 	 * @param {number} w width
 	 * @param {number} h height
@@ -683,9 +681,6 @@ declare global {
 
 	/** 📘
 	 * Renders text on the canvas.
-	 * 
-	 * Text can be positioned with the x and y
-	 * parameters and can optionally be constrained.
 	 * @param {string} str string of text to display
 	 * @param {number} x x-coordinate of the text's position
 	 * @param {number} y y-coordinate of the text's position
@@ -703,9 +698,9 @@ declare global {
 	 * textSize(20);
 	 * 
 	 * let info =
-	 * 	'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.';
+	 * 	'q5.js was designed to make creative coding fun and accessible for artists, designers, educators, and beginners.';
 	 * 
-	 * text(info, 12, 30, 20, 6);
+	 * text(info, 12, 30, 20);
 	 * //
 	 * //
 	 */
@@ -714,17 +709,14 @@ declare global {
 	/** 📘
 	 * Loads a font from a URL.
 	 * 
-	 * The font file can be in any format accepted in CSS, such as
-	 * .ttf and .otf files. The first example below loads
-	 * [Robotica](https://www.dafont.com/robotica-courtney.font).
+	 * The first example below loads [Robotica](https://www.dafont.com/robotica-courtney.font).
 	 * 
-	 * Also supports loading [Google fonts](https://fonts.google.com/).
 	 * The second example loads
-	 * [Pacifico](https://fonts.google.com/specimen/Pacifico).
-	 * 
-	 * If no fonts are loaded, the default sans-serif font is used.
+	 * [Pacifico](https://fonts.google.com/specimen/Pacifico) from [Google fonts](https://fonts.google.com/).
 	 * 
 	 * By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for a font to load.
+	 *
+	 * If no fonts are loaded, the system's default sans-serif font is used.
 	 * @param {string} url URL of the font to load
 	 * @returns {FontFace & PromiseLike<FontFace>} font
 	 * @example
@@ -742,7 +734,7 @@ declare global {
 	 * 
 	 * loadFont('fonts.googleapis.com/css2?family=Pacifico');
 	 * 
-	 * function setup() {
+	 * function draw() {
 	 * 	fill('hotpink');
 	 * 	textSize(68);
 	 * 	text('Hello!', 2, 68);
@@ -762,7 +754,6 @@ declare global {
 	 * 
 	 * textFont('serif');
 	 * 
-	 * textSize(32);
 	 * text('Hello, world!', 15, 90);
 	 * @example
 	 * createCanvas(200);
@@ -770,7 +761,6 @@ declare global {
 	 * 
 	 * textFont('monospace');
 	 * 
-	 * textSize(24);
 	 * text('Hello, world!', 15, 90);
 	 */
 	function textFont(fontName: string): void;
@@ -806,8 +796,6 @@ declare global {
 
 	/** 📘
 	 * Sets the current text style.
-	 * 
-	 * Not applicable to WebGPU when using MSDF fonts.
 	 * @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style font style
 	 * @example
 	 * createCanvas(200);
@@ -822,6 +810,8 @@ declare global {
 
 	/** 📘
 	 * Sets the horizontal and vertical alignment of text.
+	 * 
+	 * Alignment constants like `CENTER` can be used with this function.
 	 * @param {'left' | 'center' | 'right'} horiz horizontal alignment
 	 * @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] vertical alignment
 	 * @example
@@ -829,7 +819,7 @@ declare global {
 	 * background(200);
 	 * textSize(32);
 	 * 
-	 * textAlign(CENTER, MIDDLE);
+	 * textAlign(CENTER, CENTER);
 	 * text('Hello, world!', 100, 100);
 	 */
 	function textAlign(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
@@ -851,7 +841,7 @@ declare global {
 	 * createCanvas(200);
 	 * background(200);
 	 * textSize(32);
-	 * textAlign(CENTER, MIDDLE);
+	 * textAlign(CENTER, CENTER);
 	 * 
 	 * textWeight(100);
 	 * text('Hello, world!', 100, 100);
@@ -929,11 +919,6 @@ declare global {
 	 * 
 	 * The positioning of the image is affected by the current text
 	 * alignment and baseline settings.
-	 * 
-	 * In q5 WebGPU, this function is the only way to draw multi-colored
-	 * text, like emojis, and to use fonts that aren't in MSDF format.
-	 * Using this function to draw text that changes every frame has
-	 * a very high performance cost.
 	 * @param {Q5.Image | string} img image or text
 	 * @param {number} x x-coordinate where the image should be placed
 	 * @param {number} y y-coordinate where the image should be placed
@@ -944,18 +929,24 @@ declare global {
 	 * textAlign(CENTER, CENTER);
 	 * 
 	 * textImage('🐶', 100, 100);
-	 * @example
-	 * createCanvas(200);
-	 * 
-	 * loadFont('/assets/Robotica.ttf');
-	 * 
-	 * function setup() {
-	 * 	background(200);
-	 * 	textSize(66);
-	 * 	textImage('Hello!', 0, 0);
-	 * }
 	 */
 	function textImage(img: Q5.Image | String, x: number, y: number): void;
+
+	/** 📘
+	 * Converts a string of text to an array of points.
+	 * 
+	 * Samples opaque pixels in a text image made with `createTextImage`.
+	 * 
+	 * It's influenced by text settings, such as font, size, and alignment.
+	 * 
+	 * Uses a [Z-order curve](https://wikipedia.org/wiki/Z-order_curve) to improve spatial distribution, which preserves the shape of text better than purely random sampling.
+	 * @param {string} str string of text
+	 * @param {number} [x=0] x coordinate of the text position
+	 * @param {number} [y=0] y coordinate of the text position
+	 * @param {number} [sampleRate=0.1] lower values increase dithering (1 = all points, 0.1 = ~10% of points)
+	 * @param {number} [density=1] pixel density of the text
+	 */
+	function textToPoints(str: string, x?: number, y?: number, sampleRate?: number, density?: number): [];
 
 	/** 📘
 	 * Number formatter, can be used to display a number as a string with
@@ -1013,6 +1004,11 @@ declare global {
 	 * Align text to the top.
 	 */
 	const TOP: 'top';
+
+	/** 📘
+	 * Align text to the middle.
+	 */
+	const MIDDLE: 'middle';
 
 	/** 📘
 	 * Align text to the bottom.
@@ -1657,9 +1653,6 @@ declare global {
 		 * 
 		 * Use the `color` function for greater flexibility, it runs
 		 * this constructor internally.
-		 * 
-		 * `Color` is not actually a class itself, it's a reference to a
-		 * Q5 color class based on the color mode, format, and gamut.
 		 */
 		constructor(c0: number, c1: number, c2: number, c3: number);
 
@@ -1981,6 +1974,26 @@ declare global {
 	function clear(): void;
 
 	/** 💅
+	 * The 2D rendering context for the canvas.
+	 * 
+	 * You can use it to create [linear gradients](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/createLinearGradient), [radial gradients](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/createRadialGradient), [font stretching](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/fontStretch), and
+	 * other advanced drawing features.
+	 * 
+	 * Not available in q5 WebGPU.
+	 * @example
+	 * createCanvas(200);
+	 * 
+	 * let lg = ctx.createLinearGradient(0, 0, 200, 0);
+	 * lg.addColorStop(0, 'green');
+	 * lg.addColorStop(0.5, 'cyan');
+	 * lg.addColorStop(1, 'green');
+	 * 
+	 * ctx.fillStyle = lg;
+	 * rect(0, 0, 200, 200);
+	 */
+	var ctx: CanvasRenderingContext2D;
+
+	/** 💅
 	 * Checks if a given point is within the current path's fill area.
 	 * 
 	 * Not available in q5 WebGPU.
@@ -2266,8 +2279,6 @@ declare global {
 
 	/** 💻
 	 * The canvas element associated with the Q5 instance.
-	 * 
-	 * If a canvas is not explicitly created with `createCanvas()`, but a q5 function like `draw` or `mousePressed` is defined, a default canvas of size 200x200 will be created automatically.
 	 */
 	var canvas: HTMLCanvasElement;
 
@@ -2473,14 +2484,6 @@ declare global {
 	 */
 	var deltaTime: number;
 
-	/** 💻
-	 * The 2D rendering context for the canvas, if using the Canvas2D
-	 * renderer.
-	 */
-	var ctx: CanvasRenderingContext2D;
-
-	var drawingContext: CanvasRenderingContext2D;
-
 	// 🧮 math
 
 	/** 🧮
@@ -2503,7 +2506,7 @@ declare global {
 	 * }
 	 * @example
 	 * function draw() {
-	 * 	circle(random(200), random(200), 10);
+	 * 	circle(random(200), random(50, 150), 10);
 	 * }
 	 */
 	function random(low?: number | any[], high?: number): number | any;
@@ -2514,7 +2517,7 @@ declare global {
 	 * Can be used to create a jitter effect (random displacement).
 	 * 
 	 * Equivalent to `random(-amount, amount)`.
-	 * @param {number} amount absolute maximum amount of jitter, default is 1
+	 * @param {number} [amount] absolute maximum amount of jitter, default is 1
 	 * @returns {number} random number between -val and val
 	 * @example
 	 * function draw() {
@@ -2528,7 +2531,7 @@ declare global {
 	 * 	circle(jit(50), 0, random(50));
 	 * };
 	 */
-	function jit(amount: number): number;
+	function jit(amount?: number): number;
 
 	/** 🧮
 	 * Generates a noise value based on the x, y, and z inputs.
@@ -2985,7 +2988,7 @@ declare global {
 	 */
 
 	/** 📑
-	 * Creates a new HTML element and adds it to the page. `createEl` is
+	 * Creates a new HTML element and adds it to the page. `createElement` is
 	 * an alias.
 	 * 
 	 * Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
@@ -3017,7 +3020,7 @@ declare global {
 	 * el.style.backgroundColor = 'blue';
 	 * el.style.color = 'white';
 	 */
-	function createElement(tag: string, content?: string): HTMLElement;
+	function createEl(tag: string, content?: string): HTMLElement;
 
 	/** 📑
 	 * Creates a link element.
@@ -3287,17 +3290,21 @@ declare global {
 
 	/** 📑
 	 * Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * 
+	 * Alias for `document.querySelector`.
 	 * @param {string} selector
 	 * @returns {HTMLElement} element
 	 */
-	function findElement(selector: string): HTMLElement;
+	function findEl(selector: string): HTMLElement;
 
 	/** 📑
 	 * Finds all elements in the DOM that match the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+	 * 
+	 * Alias for `document.querySelectorAll`.
 	 * @param {string} selector
 	 * @returns {HTMLElement[]} elements
 	 */
-	function findElements(selector: string): HTMLElement[];
+	function findEls(selector: string): HTMLElement[];
 
 	// 🎞 record
 

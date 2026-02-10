@@ -1,5 +1,6 @@
 dev/assets
 dev/experiments
+dev/p5
 dev/wgsl
 dev/sketch.js
 dev/sketch-p5.js

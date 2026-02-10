@@ -27,9 +27,6 @@ function winResized() {
 winResized();
 window.addEventListener('resize', winResized);
 
-// theme select control replaces previous toggle button
-// `setTheme` is provided by /home/theme.js
-
 function stripParams(params) {
 	return params
 		.split(',')
@@ -334,10 +331,10 @@ rawQSInit = rawQSInit.replace(/(?:^|&)(c2d)(?:=[^&]*)?(?=$|&)/g, '$1');
 let queryString = rawQSInit ? '?' + rawQSInit : '';
 
 // Renderer mode is read from the explicit `renderer` url param
-// Allowed values: 'webgpu' or 'c2d' (defaults to 'c2d')
+// Allowed values: 'webgpu' or 'c2d' (defaults to 'webgpu')
 // Detection: prefer explicit flags `?webgpu` or `?c2d` in the URL.
-// If none are present, default to c2d (isWebGPU=false).
-let isWebGPU = urlParams.has('webgpu') ? true : urlParams.has('c2d') ? false : false;
+// If none are present, default to webgpu (isWebGPU=true).
+let isWebGPU = urlParams.has('c2d') ? false : true;
 // Language selection is saved in localStorage. Fallback to any URL param
 // for backward compatibility, then default to English `en`.
 let lang = localStorage.getItem('lang') || urlParams.get('lang') || 'en';
@@ -351,9 +348,9 @@ async function loadDtsAndRender(useWebGPU) {
 	Q5.lang = lang;
 
 	// TODO: enable when WebGPU becomes the default
-	// const dir = lang == 'en' && useWebGPU ? '/' : `/defs/`;
+	const dir = lang == 'en' && useWebGPU ? '/' : `/defs/`;
 
-	const dir = `/defs/`;
+	// const dir = `/defs/`;
 	const dtsFile = `${dir}${baseName}${langSuffix}.d.ts`;
 	// load the d.ts file for the requested renderer + language
 	const data = await fetch(dtsFile).then((res) => res.text());
@@ -685,9 +682,6 @@ async function populateContentArea() {
 	spacer.style.height = '100vh';
 	contentArea.append(spacer);
 
-	if (currentLoadedSectionId != currentSectionId) {
-		history.pushState(null, '', `${queryString}#${currentSectionId}`);
-	}
 	currentLoadedSectionId = currentSectionId;
 }
 

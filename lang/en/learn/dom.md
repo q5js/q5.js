@@ -3,9 +3,9 @@
 The Document Object Model (DOM) is an interface for
 creating and editing web pages with JavaScript.
 
-## createElement
+## createEl
 
-Creates a new HTML element and adds it to the page. `createEl` is
+Creates a new HTML element and adds it to the page. `createElement` is
 an alias.
 
 Modify the element's CSS [`style`](https://developer.mozilla.org/docs/Web/API/HTMLElement/style) to change its appearance.
@@ -326,7 +326,8 @@ Use the `value` property to get or set the value of the selected radio button.
 await Canvas(200, 160);
 
 let radio = createRadio();
-radio.option('square', '1').option('circle', '2');
+radio.option('square', '1');
+radio.option('circle', '2');
 
 q5.draw = function () {
 	background(0.8);
@@ -375,7 +376,8 @@ string or an array of strings.
 await Canvas(200, 100);
 
 let sel = createSelect('Select an option');
-sel.option('Red', '#f55').option('Green', '#5f5');
+sel.option('Red', '#f55');
+sel.option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
 	background(sel.value);
@@ -472,8 +474,8 @@ q5.mousePressed = function () {
 	vid.play();
 };
 q5.draw = function () {
+	rotate(mouseX / 55);
 	image(vid, -100, -75, 200, 150);
-	// filter(HUE_ROTATE, 90);
 };
 ```
 
@@ -590,18 +592,22 @@ function mousePressed() {
 }
 ```
 
-## findElement
+## findEl
 
 Finds the first element in the DOM that matches the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+
+Alias for `document.querySelector`.
 
 ```
 @param {string} selector
 @returns {HTMLElement} element
 ```
 
-## findElements
+## findEls
 
 Finds all elements in the DOM that match the given [CSS selector](https://developer.mozilla.org/docs/Learn_web_development/Core/Styling_basics/Basic_selectors).
+
+Alias for `document.querySelectorAll`.
 
 ```
 @param {string} selector

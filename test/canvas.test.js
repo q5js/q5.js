@@ -3,7 +3,7 @@ require('../q5-server.js');
 let log = console.log;
 
 test('q5-canvas-behavior', () => {
-	const q = new Q5('instance');
+	const q = new Q5('namespace');
 	q.noLoop();
 
 	// Canvas sets up canvas and dimensions

@@ -15,7 +15,7 @@ let log = console.log;
 function q5CoreTest(resolve) {
 	expect(Q5).toBeDefined();
 
-	let q = new Q5('instance');
+	let q = new Q5('namespace');
 
 	q.Canvas(200, 200);
 	expect(q.canvas).toBeTruthy();

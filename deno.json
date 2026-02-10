@@ -1,8 +1,8 @@
 {
 	"name": "@q5/q5",
-	"version": "3.9.5",
+	"version": "4.0.0",
 	"license": "LGPL-3.0",
-	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
+	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",
 	"exports": "./q5-deno-server.js",
 	"types": "./q5.d.ts",

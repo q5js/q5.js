@@ -484,6 +484,29 @@ function draw() {
 }
 ```
 
+## ctx
+
+The 2D rendering context for the canvas.
+
+You can use it to create [linear gradients](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/createLinearGradient), [radial gradients](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/createRadialGradient), [font stretching](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/fontStretch), and
+other advanced drawing features.
+
+Not available in q5 WebGPU.
+
+### c2d
+
+```js
+createCanvas(200);
+
+let lg = ctx.createLinearGradient(0, 0, 200, 0);
+lg.addColorStop(0, 'green');
+lg.addColorStop(0.5, 'cyan');
+lg.addColorStop(1, 'green');
+
+ctx.fillStyle = lg;
+rect(0, 0, 200, 200);
+```
+
 ## inFill
 
 Checks if a given point is within the current path's fill area.

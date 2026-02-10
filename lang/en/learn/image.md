@@ -63,7 +63,7 @@ Draws an image or video frame to the canvas.
 ```js
 await Canvas(200);
 
-let logo = loadImage('/q5js_logo.avif');
+let logo = load('/q5js_logo.avif');
 
 q5.draw = function () {
 	image(logo, -100, -100, 200, 200);
@@ -73,7 +73,7 @@ q5.draw = function () {
 ```js
 await Canvas(200);
 
-let logo = loadImage('/q5js_logo.avif');
+let logo = load('/q5js_logo.avif');
 
 q5.draw = function () {
 	image(logo, -100, -100, 200, 200, 256, 256, 512, 512);
@@ -116,36 +116,36 @@ Changes how inputs to `image` are interpreted.
 
 ```js
 await Canvas(200);
-let logo = loadImage('/q5js_logo.avif');
+let logo = load('/q5js_logo.avif');
 
 q5.draw = function () {
 	imageMode(CORNER);
 
-	//   ( img,  x,  y,   w,   h)
+	//   ( img,   x,   y,   w,   h)
 	image(logo, -50, -50, 100, 100);
 };
 ```
 
 ```js
 await Canvas(200);
-let logo = loadImage('/q5js_logo.avif');
+let logo = load('/q5js_logo.avif');
 
 q5.draw = function () {
 	imageMode(CENTER);
 
-	//   ( img,  cX,  cY,   w,   h)
+	//   (img, cX, cY,  w,   h)
 	image(logo, 0, 0, 100, 100);
 };
 ```
 
 ```js
 await Canvas(200);
-let logo = loadImage('/q5js_logo.avif');
+let logo = load('/q5js_logo.avif');
 
 q5.draw = function () {
 	imageMode(CORNERS);
 
-	//   ( img, x1, y1,  x2,  y2)
+	//   ( img,  x1,  y1, x2, y2)
 	image(logo, -50, -50, 50, 50);
 };
 ```
@@ -256,6 +256,8 @@ function only has an effect if `noSmooth` has been called.
 
 ```js
 await Canvas(200);
+smooth();
+
 let icon = await load('/q5js_icon.png');
 image(icon, -100, -100, 200, 200);
 ```
@@ -278,12 +280,13 @@ Disables smooth image rendering for a pixelated look.
 
 ### webgpu
 
+This setting is applied to images when they're loaded.
+
 ```js
 await Canvas(200);
+noSmooth();
 
 let icon = await load('/q5js_icon.png');
-
-noSmooth();
 image(icon, -100, -100, 200, 200);
 ```
 
@@ -487,14 +490,13 @@ Not applicable to WebGPU canvases.
 
 ```js
 await Canvas(200);
-
+noSmooth();
 let c = color('lime');
 let img = createImage(50, 50);
 
 q5.draw = function () {
 	img.set(random(50), random(50), c);
 	img.updatePixels();
-
 	background(img);
 };
 ```
@@ -536,8 +538,9 @@ Not applicable to WebGPU canvases.
 ### webgpu
 
 ```js
+await Canvas(200);
 frameRate(5);
-let icon = loadImage('/q5js_icon.png');
+let icon = load('/q5js_icon.png');
 
 q5.draw = function () {
 	icon.loadPixels();
@@ -552,6 +555,7 @@ q5.draw = function () {
 ### c2d
 
 ```js
+createCanvas(200);
 frameRate(5);
 let icon = loadImage('/q5js_icon.png');
 
@@ -685,7 +689,7 @@ Creates a new image.
 
 Creates a graphics buffer.
 
-Disabled by default in q5 WebGPU.
+Graphics looping is disabled by default in q5 WebGPU.
 See issue [#104](https://github.com/q5js/q5.js/issues/104) for details.
 
 ```
@@ -693,4 +697,18 @@ See issue [#104](https://github.com/q5js/q5.js/issues/104) for details.
 @param {number} h height
 @param {object} [opt] options
 @returns {Q5} a new Q5 graphics buffer
+```
+
+### webgpu
+
+```js
+await Canvas(200);
+
+let g = createGraphics(100);
+g.noLoop();
+g.stroke('pink');
+g.fill('red');
+g.circle(50, 50, 120);
+
+image(g, -50, -50, 100, 100);
 ```

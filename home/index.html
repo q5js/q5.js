@@ -6,7 +6,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>q5</title>
 	<link rel="icon" href="/q5js_logo.avif">
-	<link rel="stylesheet" href="index.css">
 	<meta name="description"
 		content="Beginner friendly graphics powered by WebGPU and optimized for interactive art! q5.js is also compatible with popular p5.js addons including p5.sound, ml5.js, and p5play.">
 
@@ -16,19 +15,42 @@
 	<meta property="og:image" content="q5js_logo.avif">
 	<meta property="og:description"
 		content="Beginner friendly graphics powered by WebGPU and optimized for interactive art! q5.js is also compatible with popular p5.js addons including p5.sound, ml5.js, and p5play.">
+
+	<!-- Custom Styles -->
+	<link rel="stylesheet" href="home.css">
+
+	<!-- Libraries -->
+	<link id="highlight-theme" rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 
 <body class="dark">
 	<main></main>
+	<a id="releaseVideoLink" href="" target="_blank">
+		<md id="news">
+			📣 v4.0 released!</md>
+	</a>
 	<nav id="topNav">
 		<a id="q5_home" href="../home">
 			<div class="img q5js_logo"></div>
 			<div class="img q5js_brand"></div>
 		</a>
 		<div id="navLinks">
-			<a href="../learn">📖&nbsp;Learn</a>
-			<a href="https://discord.gg/QuxQYwGWuB">🤝&nbsp;Join</a>
-			<a href="https://www.patreon.com/q5play">💙&nbsp;Support</a>
+			<a href="../learn">
+				<md id="nav0">
+					📖&nbsp;Learn</md>
+			</a>
+			<a href="https://discord.gg/QuxQYwGWuB">
+				<md id="nav1">
+					🤝&nbsp;Join</md>
+			</a>
+			<a href="https://www.patreon.com/q5play">
+				<md id="nav2">
+					💙&nbsp;Support</md>
+			</a>
 		</div>
 	</nav>
 	<div id="reel0" class="reel">
@@ -36,146 +58,400 @@
 			<div class="btn">
 				<div id="darkModeIcon"></div>
 			</div>
-			<textarea id="scriptLink" rows="1"
-				readonly="">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;</textarea>
+			<div class="scroll-indicator">↓ scroll ↓</div>
 			<div class="btn">
 				<div id="fullscreenIcon"></div>
 			</div>
 		</div>
 	</div>
-	<div id="reel1" class="reel">
+
+	<section id="part0">
+		<md id="md0-0">
+			<h2 id="what-is-q5">What is q5?</h2>
+			<p>q5.js WebGPU is the fastest, most beginner friendly 2D graphics library on the web!</p>
+			<p>It was designed to make creative coding fun and accessible for educators, designers, artists, and beginners.
+			</p>
+		</md>
+	</section>
+
+	<!-- PART 1: SKETCH FORMAT -->
+	<section id="part1">
 		<md id="md1-0">
-			<h2 id="create-art-with-q5-🎨">Create art with q5! 🎨</h2>
-			<ul>
-				<li>inspired by <a href="https://p5js.org" target="_blank">p5.js</a> and <a href="https://processing.org/"
-						target="_blank">Processing</a> ⭐️</li>
-				<li>performance optimized for interactive art 🚀</li>
-				<li>lightning fast <a href="https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer" target="_blank">WebGPU
-						renderer</a> ⚡️</li>
-				<li>beginner friendly <a href="/learn" target="_blank">documentation</a> 📚</li>
-				<li>compatible with popular p5 addons 🧩</li>
-				<li>no dependencies, ~110kb minified 📦</li>
-				<li>free to use under the LGPL (just like p5.js) 🆓</li>
-			</ul>
+			<h2 id="new-v4-sketch-format">New v4 Sketch Format</h2>
 		</md>
-		<div class="minis">
+		<div class="subtitle">
 			<md id="md1-1">
-				<p>Familiar with p5? You'll be right at home with q5. 🏡</p>
-				<p>It's like getting a free computer upgrade! 🖥️</p>
-			</md>
-			<script type="mini" id="q5.js" horiz="">
-createCanvas(100, 100);
-circle(50, 50, 50);
-
-			</script>
+				Eliminates the need for preload and setup functions.</md>
 		</div>
-	</div>
-	<div class="reel">
-		<md id="md3-0">
-			<h2 id="works-with">Works with</h2>
+		<div class="content-wrapper">
+			<div class="img-wrapper">
+				<img src="/assets/q5js_logo-light.avif" class="sketch-img" alt="Sketch Icon">
+			</div>
+			<!-- Use separate ID for code block to avoid global conflicts in highlight.js if any -->
+			<pre><code id="code1"></code></pre>
+		</div>
+	</section>
+
+	<!-- PART 2: PERFORMANCE DEMO -->
+	<section id="part2">
+		<md id="md2-0">
+			<h2 id="performance-showdown">Performance Showdown</h2>
 		</md>
-		<div id="partners">
-			<!-- <a href="https://b5editor.app/"
-				title="b5 - A node based online editor for introducing q5.js to young programmers." target="_blank">
-				<img id="b5_brand" src="/assets/brands/b5_brand.svg" alt="">
-			</a> -->
-			<a href="https://p5js.org/reference/p5.sound/">
-				<img id="ml5_brand" src="/assets/brands/p5sound_brand.webp" alt="">
-			</a>
-			<a href="https://p5play.org"
-				title="p5play - A JavaScript game engine that uses q5.js for graphics and Box2D for physics." target="_blank">
-				<!-- <img id="p5play_logo" src="/assets/brands/p5play_logo.svg" alt=""> -->
-				<img id="p5play_brand" src="/assets/brands/p5play_brand_dark.webp" alt="">
-			</a>
-			<a href="https://ml5js.org/">
-				<img id="ml5_brand" src="/assets/brands/ml5_brand.webp" alt="">
-			</a>
-			<a href="https://openprocessing.org/user/504812">
-				<img id="openprocessing_brand" src="/assets/brands/openprocessing_brand.webp" alt="">
-			</a>
+		<div class="subtitle">
+			<md id="md2-1">
+				Max shapes rendered per frame on a MacBook Air 2025 in 4K @ 60FPS.</md>
 		</div>
-	</div>
 
-	<div id="reel4" class="reel">
-		<div class="minis horiz">
-			<md id="md4-0">
-				<h2 id="start-coding-💻">Start coding! 💻</h2>
-				<p>No installation required! Use an online code editor: <a
-						href="https://studio.firebase.google.com/new?template=https:%2F%2Fgithub.com%2Fq5js%2Fq5-webgpu-template"
-						target="_blank">Firebase Studio</a>, <a href="https://openprocessing.org/sketch/2643917"
-						target="_blank">OpenProcessing</a>, <a href="https://editor.p5js.org/quinton-ashley/sketches/ycFqKuo7c"
-						target="_blank">p5.js web editor</a>, or <a href="https://codepen.io/qashto/pen/jENEJNy"
-						target="_blank">CodePen</a>.</p>
+		<div class="legend" id="legend2">
+			<div class="legend-item p5">
+				<div class="dot"></div> p5.js (Canvas2D)
+			</div>
+			<div class="legend-item webgl">
+				<div class="dot"></div> p5.js (WebGL)
+			</div>
+			<div class="legend-item q5">
+				<div class="dot"></div> q5.js (WebGPU)
+			</div>
+		</div>
+
+		<div class="chart-container" id="chart2">
+			<!-- Grid lines injected via JS -->
+		</div>
+	</section>
+
+	<!-- PART 3: CONCISENESS -->
+	<section id="part3">
+
+		<header>
+			<md id="md3-0">
+				<h2 id="documentation-quality">Documentation Quality</h2>
 			</md>
-			<md id="md4-1">
-				<h2 id="join-us-🤝">Join us 🤝</h2>
-				<p>The future of creative coding is here! Join us on the <a href="https://discord.gg/QuxQYwGWuB"
-						target="_blank">q5 community Discord</a>.</p>
-			</md>
-			<div class="minis horiz">
-				<md id="md4-2">
-					<h2 id="local-dev-🛠️">Local dev 🛠️</h2>
-					<p>You can <a href="https://github.com/q5js/q5.js/wiki/Get-Started" target="_blank">use q5 offline</a> or add
-						this to your HTML file to always load the latest version.</p>
-					<pre><code class="language-html">&lt;script src="https://q5js.org/q5.js"&gt;&lt;/script&gt;
-</code></pre>
+			<div class="subtitle">
+				<md id="md3-1">
+					Comparing the q5.js WebGPU vs p5.js Canvas2D docs. <a
+						href="https://q5js.substack.com/p/the-p5js-reference-pages-are-bad" target="_blank">Less is more!</a></md>
+			</div>
+		</header>
+
+		<div class="grid">
+
+			<!-- Graph 1: Average Lines -->
+			<div class="card">
+				<md id="md3-2">
+					<h3 id="avg-lines-per-example">Avg. Lines <span>per Example</span></h3>
 				</md>
-				<md id="md4-3">
-					<h2 id="support-q5-💙">Support q5 💙</h2>
-					<p><a href="https://github.com/q5js/q5.js" target="_blank">q5 is open source on GitHub</a> and anyone can use
-						it for free under the terms of the LGPL (just like p5.js).</p>
-					<p>If you enjoy using q5, we need your support via <a href="https://github.com/sponsors/quinton-ashley"
-							target="_blank">GitHub Sponsors</a>, <a href="https://ko-fi.com/q5play" target="_blank">Ko-fi</a>, or <a
-							href="https://www.patreon.com/q5play" target="_blank">Patreon</a>.</p>
+				<div class="visualization">
+					<!-- p5 -->
+					<div class="bar-group">
+						<div class="label-row">
+							<span>p5.js</span>
+						</div>
+						<div class="bar-container">
+							<div class="bar bar-p5" data-width="100%">
+								<span class="value-label">33</span>
+							</div>
+						</div>
+					</div>
+					<!-- q5 -->
+					<div class="bar-group">
+						<div class="label-row">
+							<span class="q5-text">q5.js</span>
+						</div>
+						<div class="bar-container">
+							<div class="bar bar-q5 bar-small" data-width="18%">
+								<span class="value-label">6</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="stats-footer">
+					<div class="highlight-stat">82%</div>
+					<div class="stat-desc">
+						<md id="md3-5">
+							Fewer lines of code</md>
+					</div>
+				</div>
+			</div>
+
+			<!-- Graph 2: Average Characters -->
+			<div class="card">
+				<md id="md3-6">
+					<h3 id="avg-characters-per-example">Avg. Characters <span>per Example</span></h3>
+				</md>
+				<div class="visualization">
+					<!-- p5 -->
+					<div class="bar-group">
+						<div class="label-row">
+							<span>p5.js</span>
+						</div>
+						<div class="bar-container">
+							<div class="bar bar-p5" data-width="100%">
+								<span class="value-label">822</span>
+							</div>
+						</div>
+					</div>
+					<!-- q5 -->
+					<div class="bar-group">
+						<div class="label-row">
+							<span class="q5-text">q5.js</span>
+						</div>
+						<div class="bar-container">
+							<div class="bar bar-q5 bar-small" data-width="15%">
+								<span class="value-label">124</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="stats-footer">
+					<div class="highlight-stat">6.6x</div>
+					<div class="stat-desc">
+						<md id="md3-7">
+							More concise examples</md>
+					</div>
+				</div>
+			</div>
+
+			<!-- Graph 3: Total Volume -->
+			<div class="card">
+				<md id="md3-8">
+					<h3 id="total-characters-in-docs">Total Characters <span>in Docs</span></h3>
+				</md>
+				<div class="visualization">
+					<!-- p5 -->
+					<div class="bar-group">
+						<div class="label-row">
+							<span>p5.js</span>
+						</div>
+						<div class="bar-container">
+							<div class="bar bar-p5" data-width="100%">
+								<span class="value-label">852k</span>
+							</div>
+						</div>
+					</div>
+					<!-- q5 -->
+					<div class="bar-group">
+						<div class="label-row">
+							<span class="q5-text">q5.js</span>
+						</div>
+						<div class="bar-container">
+							<div class="bar bar-q5 bar-small" data-width="10.7%">
+								<span class="value-label">91k</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="stats-footer">
+					<div class="highlight-stat">1:9</div>
+					<div class="stat-desc">
+						<md id="md3-9">
+							Less reading, more doing</md>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Learn More -->
+		<md id="md3-10" class="learn-more">
+			Learn more and learn faster with the <a href="https://q5js.org/learn" target="_blank">q5 Learn pages</a>!</md>
+	</section>
+
+	<!-- PART 4: FEATURE TABLE -->
+	<section id="part4">
+		<header>
+			<h2>
+				<md id="md4-0">
+					<h2 id="feature-comparison">Feature Comparison</h2>
+				</md>
+			</h2>
+			<div class="subtitle">
+				<md id="md4-1">
+					Tons of modern features in a small bundle.</md>
+			</div>
+		</header>
+		<!-- Feature Table -->
+		<div class="card feature-card">
+			<div class="table-scroller">
+				<md id="md4-2">
+					<table>
+						<thead>
+							<tr>
+								<th align="left">Does it include?</th>
+								<th align="left">q5 v4</th>
+								<th align="left">p5 v2</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="left">built-in <a href="../learn/?webgpu#recordSection" target="_blank">video recorder</a>
+								</td>
+								<td align="left">✅</td>
+								<td align="left">❌ <span class="note">requires p5.capture addon which is outdated and slow</span></td>
+							</tr>
+							<tr>
+								<td align="left">built-in <a href="../learn/?webgpu#displaySection" target="_blank">display modes</a>
+								</td>
+								<td align="left">✅</td>
+								<td align="left">❌ <span class="note">requires custom CSS styling</span></td>
+							</tr>
+							<tr>
+								<td align="left">built-in <a href="../learn/?webgpu#soundSection" target="_blank">sound playback</a>
+								</td>
+								<td align="left">✅</td>
+								<td align="left">⚠️ <span class="note">requires p5.sound addon (200kb minified)</span></td>
+							</tr>
+							<tr>
+								<td align="left">HiDPI scaling by default</td>
+								<td align="left">✅</td>
+								<td align="left">❌ <span class="note">images are not auto-scaled to display at native res</span></td>
+							</tr>
+							<tr>
+								<td align="left">HDR colors by default</td>
+								<td align="left">✅</td>
+								<td align="left">❌ <span class="note">must be set explicitly</span></td>
+							</tr>
+							<tr>
+								<td align="left">fast SDF shape rendering</td>
+								<td align="left">✅</td>
+								<td align="left">❌ <span class="note">slow triangle mesh rasterization</span></td>
+							</tr>
+							<tr>
+								<td align="left">fast MSDF text rendering</td>
+								<td align="left">✅</td>
+								<td align="left">❌ <span class="note">slow triangle mesh rasterization</span></td>
+							</tr>
+							<tr>
+								<td align="left">HTML creation</td>
+								<td align="left">✅</td>
+								<td align="left">⚠️ <span class="note">outdated API doesn't use getter/setters</span></td>
+							</tr>
+							<tr>
+								<td align="left">async/await loading</td>
+								<td align="left">✅</td>
+								<td align="left">✅ <span class="note"></span></td>
+							</tr>
+							<tr>
+								<td align="left">easy parallel loading</td>
+								<td align="left">✅</td>
+								<td align="left">❌ <span class="note">preload system removed from p5.js v2</span></td>
+							</tr>
+							<tr>
+								<td align="left">legacy support</td>
+								<td align="left">✅</td>
+								<td align="left">⚠️ <span class="note">can't run p5 v1 sketches without compatibility addon that
+										overrides load functions</span></td>
+							</tr>
+							<tr>
+								<td align="left">3D rendering</td>
+								<td align="left">❌</td>
+								<td align="left">✅ <span class="note">only in WebGL mode, which has poor performance</span></td>
+							</tr>
+							<tr>
+								<td align="left">file size</td>
+								<td align="left">200kb</td>
+								<td align="left">4400kb <span class="note">1000kb minified</span></td>
+							</tr>
+						</tbody>
+					</table>
 				</md>
 			</div>
 		</div>
-	</div>
+	</section>
 
-	<div id="reel10" class="reel">
-		<md id="md10-0">
-			<h2 id="exclusive-features-💫">Exclusive Features 💫</h2>
-		</md>
-		<div class="minis horiz">
-			<md id="md10-1">
-				<ul>
-					<li>frame your canvas with <a href="/learn/#displayMode" target="_blank"><code>displayMode</code></a> 🖼️</li>
-					<li><a href="https://github.com/q5js/q5.js/wiki/Top%E2%80%90Level-Global-Mode" target="_blank">top-level
-							global mode</a> ⚙️</li>
-					<li>modular use from <a href="https://github.com/q5js/q5.js/tree/main/src" target="_blank">source</a> 📦</li>
-				</ul>
-			</md>
-			<md id="md10-2">
-				<ul>
-					<li>98% smaller than p5 + p5.sound + p5.capture 🌳</li>
-					<li>includes <a href="/learn/#soundSection" target="_blank">sound</a> playback and mixing 🔊</li>
-					<li>includes canvas <a href="/learn/#recordSection" target="_blank">recorder</a> 🎞️</li>
-				</ul>
-			</md>
+	<!-- PART 5: ADDONS -->
+	<section id="part5">
+		<header>
+			<h2>
+				<md id="md5-0">
+					<h2 id="addons">Addons</h2>
+				</md>
+			</h2>
+			<div class="subtitle">
+				<md id="md5-1">
+					q5 works with popular addons.</md>
+			</div>
+		</header>
+
+		<div class="grid">
+			<div class="card">
+				<a href="https://p5js.org/reference/p5.sound/" target="_blank">
+					<img src="/assets/brands/p5sound_brand.webp" alt="p5.sound" class="brand-img">
+				</a>
+				<p>
+					<md id="md5-2">
+						<a href="https://p5js.org/reference/p5.sound/" target="_blank">p5.sound</a> adds audio generation, signal
+						analysis, and advanced mixing capabilities. <a href="https://openprocessing.org/curation/88608"
+							target="_blank">See p5.sound demos.</a>
+					</md>
+				</p>
+			</div>
+			<div class="card">
+				<a href="https://p5play.org" target="_blank">
+					<img src="/assets/brands/p5play_brand_dark.webp" alt="p5play" class="brand-img">
+				</a>
+				<p>
+					<md id="md5-3">
+						<a href="https://p5play.org" target="_blank">p5play</a> adds high quality Box2D physics simulation, better
+						input handling, a camera, and animations.
+					</md>
+				</p>
+			</div>
+			<div class="card">
+				<a href="https://ml5js.org/" target="_blank">
+					<img src="/assets/brands/ml5_brand.webp" alt="ml5.js" class="brand-img">
+				</a>
+				<p>
+					<md id="md5-4">
+						<a href="https://ml5js.org/" target="_blank">ml5.js</a> adds AI capabilities like hand tracking, face
+						detection, and body pose estimation. <a href="https://openprocessing.org/curation/88587" target="_blank">See
+							ml5 demos.</a>
+					</md>
+				</p>
+			</div>
 		</div>
-	</div>
+	</section>
 
-	<div id="reel20" class="reel">
-		<md id="md20-0">
-			<h2 id="credits-🌟">Credits 🌟</h2>
-			<p>This project aims to continue the legacy of the incredible work done by <a href="https://benfry.com"
-					target="_blank">Ben Fry</a> and <a href="https://x.com/REAS" target="_blank">Casey Reas</a> on Java <a
-					href="https://processingfoundation.org/" target="_blank">Processing</a>, <a href="http://lauren-mccarthy.com"
-					target="_blank">Lauren McCarthy</a>'s work on <a href="https://p5js.org" target="_blank">p5.js</a>, and all
-				contributors to these projects.</p>
-			<p>The original <a href="https://github.com/LingDong-/q5xjs" target="_blank">q5xjs (v0)</a> was created by <a
-					href="https://github.com/LingDong-" target="_blank">@LingDong~</a> and released under the public domain
-				Unlicense license. We forked and significantly extended the abandoned codebase.</p>
-			<p>q5.js is open source under the LGPLv3, created and actively maintained by <a
-					href="https://github.com/quinton-ashley" target="_blank">@quinton-ashley</a>. The q5 team includes contributor
-				<a href="https://github.com/Tezumie" target="_blank">@Tezumie</a>.
-			</p>
-		</md>
-	</div>
+	<!-- PART 6: COMMUNITY / GET STARTED -->
+	<section id="part6">
+		<div class="grid">
+			<div class="card">
+				<md id="md6-0">
+					<h3 id="start-coding-💻">Start coding 💻</h3>
+					<p>The <a href="" target="_blank">q5 Web Editor</a> is coming soon!</p>
+				</md>
+			</div>
+			<div class="card">
+				<md id="md6-1">
+					<h3 id="join-us-🤝">Join us 🤝</h3>
+					<p>Share your creations on the <a href="https://discord.gg/QuxQYwGWuB" target="_blank">q5 community
+							Discord</a>.</p>
+				</md>
+			</div>
+			<div class="card">
+				<md id="md6-2">
+					<h3 id="local-dev-🛠️">Local dev 🛠️</h3>
+					<p>You can <a href="https://github.com/q5js/q5.js/wiki/Get-Started" target="_blank">use q5 offline</a> or
+						always get the latest version from this link:</p>
+					<pre><code>https://q5js.org/q5.js
+</code></pre>
+				</md>
+			</div>
+			<div class="card">
+				<md id="md6-3">
+					<h3 id="support-q5-💙">Support q5 💙</h3>
+					<p>q5 is 100% free and <a href="https://github.com/q5js/q5.js" target="_blank">open source</a>.</p>
+					<p>If you enjoy using q5, please support the project via <a href="https://ko-fi.com/q5play"
+							target="_blank">Ko-fi</a>, <a href="https://www.patreon.com/q5play" target="_blank">Patreon</a>, or <a
+							href="https://github.com/sponsors/quinton-ashley" target="_blank">GitHub Sponsors</a>.</p>
+				</md>
+			</div>
+		</div>
+	</section>
+
+
+
 	<footer>
-		<md id="md100">
-			<p>q5js.org was created by the q5 team. Copyright 2024-2025.</p>
-		</md>
+		<md id="md100-0">
+			q5js.org was created by Quinton Ashley and <a href="https://github.com/q5js/q5.js/graphs/contributors"
+				target="_blank">contributors</a>. Copyright 2024-2026.</md>
 	</footer>
 
 	<script src="../q5.js"></script>
@@ -305,9 +581,10 @@ circle(50, 50, 50);
 	</script>
 
 	<script src="/home/theme.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/loader.min.js"></script>
-	<script src="/learn/mini-editor.js"></script>
+
 	<script type="module">
+		// Prevent initial transition
+		document.body.classList.add('no-transition');
 
 		document.getElementById('fullscreenIcon').addEventListener('click', () => {
 			if (document.fullscreenElement) document.exitFullscreen();
@@ -318,32 +595,26 @@ circle(50, 50, 50);
 			setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
 		});
 
-		window.addEventListener('scroll', function () {
+		function handleScroll() {
 			if (window.scrollY > 50) {
 				// Adjust the scroll position as needed
 				document.body.classList.add('nav-fixed');
 			} else {
 				document.body.classList.remove('nav-fixed');
 			}
+		}
+
+		window.addEventListener('scroll', handleScroll);
+		handleScroll();
+
+		// Enable transitions after a moment
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				document.body.classList.remove('no-transition');
+			});
 		});
-
-		(async () => {
-			await Q5.initWebGPU();
-
-			let scripts = document.body.querySelectorAll('script[type="mini"]');
-			for (let script of scripts) {
-				let mie = new MiniEditor(script);
-				await mie.init();
-			}
-		})();
 	</script>
-
-
-
-
-
-
-
+	<script src="home.js" defer=""></script>
 </body>
 
 </html>

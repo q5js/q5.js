@@ -358,6 +358,6 @@ Q5.modules.dom = ($, q) => {
 		return vid;
 	};
 
-	$.findElement = (selector) => document.querySelector(selector);
-	$.findElements = (selector) => document.querySelectorAll(selector);
+	$.findEl = (selector) => document.querySelector(selector);
+	$.findEls = (selector) => document.querySelectorAll(selector);
 };

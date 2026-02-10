@@ -1,7 +1,7 @@
 {
 	"name": "q5",
-	"version": "3.9.5",
-	"description": "Beginner friendly graphics powered by WebGPU and optimized for interactive art!",
+	"version": "4.0.0",
+	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",
 	"contributors": [
 		"evanalulu",
@@ -34,7 +34,8 @@
 		"dist": "bun bundle && bun min",
 		"dist-p5play": "bun dist && cp q5.js ../../web/p5play-web/v3/q5.js && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
 		"tests": "jest test",
-		"bld": "node lang/types.js",
+		"bld": "node lang/build.js",
+		"dts": "node lang/types.js",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
 		"version": "git add -A",
@@ -50,7 +51,8 @@
 	"keywords": [
 		"q5.js",
 		"q5js",
-		"q5xjs",
+		"WebGPU",
+		"graphics",
 		"p5",
 		"p5js",
 		"p5.js",

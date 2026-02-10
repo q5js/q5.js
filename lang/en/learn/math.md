@@ -29,7 +29,7 @@ q5.draw = function () {
 
 ```js
 q5.draw = function () {
-	circle(random(-100, 100), random(-100, 100), 10);
+	circle(random(-100, 100), random(-10, 10), 10);
 };
 ```
 
@@ -47,7 +47,7 @@ function draw() {
 
 ```js
 function draw() {
-	circle(random(200), random(200), 10);
+	circle(random(200), random(50, 150), 10);
 }
 ```
 
@@ -60,7 +60,7 @@ Can be used to create a jitter effect (random displacement).
 Equivalent to `random(-amount, amount)`.
 
 ```
-@param {number} amount absolute maximum amount of jitter, default is 1
+@param {number} [amount] absolute maximum amount of jitter, default is 1
 @returns {number} random number between -val and val
 ```
 

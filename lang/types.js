@@ -783,15 +783,15 @@ function buildLang(lang) {
 	let file = path.join(dir, `q5${langSuffix}.d.ts`);
 	buildDtsFile(sections, baseDtsPath, file, true, 'webgpu');
 
-	// Build q5-c2d.d.ts with C2D examples
-	file = path.join(defsDir, `q5-c2d${langSuffix}.d.ts`);
-	buildDtsFile(sections, baseDtsPath, file, true, 'c2d');
-
-	// copy c2d d.ts to root
+	// copy webgpu d.ts to root
 	if (lang === 'en') {
 		const destFile = path.join(rootDir, `q5.d.ts`);
 		fs.copyFileSync(file, destFile);
 	}
+
+	// Build q5-c2d.d.ts with C2D examples
+	file = path.join(defsDir, `q5-c2d${langSuffix}.d.ts`);
+	buildDtsFile(sections, baseDtsPath, file, true, 'c2d');
 }
 
 /**

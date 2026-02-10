@@ -186,20 +186,6 @@ p5.js v2 compatible way to register an addon with q5.
 @param {Function} addon A function that receives `Q5`, `Q5.prototype`, and a `lifecycles` object.
 ```
 
-### webgpu
-
-```js
-// addon.js
-Q5.registerAddon((Q5, proto, lifecycles) => {
-	lifecycles.predraw = function () {
-		this.background('pink');
-	};
-});
-
-// sketch.js
-await Canvas(200);
-```
-
 ## Q5.modules
 
 An object containing q5's modules, functions that run when q5 loads.

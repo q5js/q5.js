@@ -4,9 +4,6 @@
 
 Renders text on the canvas.
 
-Text can be positioned with the x and y
-parameters and can optionally be constrained.
-
 ```
 @param {string} str string of text to display
 @param {number} x x-coordinate of the text's position
@@ -31,9 +28,9 @@ background(0.8);
 textSize(20);
 
 let info =
-	'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.';
+	'q5.js was designed to make creative coding fun and accessible for artists, designers, educators, and beginners.';
 
-text(info, -88, -70, 20, 6);
+text(info, -88, -70, 20);
 //
 //
 ```
@@ -54,9 +51,9 @@ background(200);
 textSize(20);
 
 let info =
-	'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.';
+	'q5.js was designed to make creative coding fun and accessible for artists, designers, educators, and beginners.';
 
-text(info, 12, 30, 20, 6);
+text(info, 12, 30, 20);
 //
 //
 ```
@@ -65,15 +62,10 @@ text(info, 12, 30, 20, 6);
 
 Loads a font from a URL.
 
-The font file can be in any format accepted in CSS, such as
-.ttf and .otf files. The first example below loads
-[Robotica](https://www.dafont.com/robotica-courtney.font).
+The first example below loads [Robotica](https://www.dafont.com/robotica-courtney.font).
 
-Also supports loading [Google fonts](https://fonts.google.com/).
 The second example loads
-[Pacifico](https://fonts.google.com/specimen/Pacifico).
-
-If no fonts are loaded, the default sans-serif font is used.
+[Pacifico](https://fonts.google.com/specimen/Pacifico) from [Google fonts](https://fonts.google.com/).
 
 By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to wait for a font to load.
 
@@ -84,8 +76,10 @@ By default, assets are loaded in parallel before q5 runs `draw`. Use `await` to 
 
 ### webgpu
 
-In q5 WebGPU, fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
+Fonts in [MSDF format](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer#text-rendering)
 with the file ending "-msdf.json" can be used for high performance text rendering. Make your own using the [MSDF font converter](https://msdf-bmfont.donmccurdy.com/).
+
+If no fonts are loaded, q5 WebGPU will lazy load the default MSDF font from q5js.org. Until it is loaded, the system's default sans-serif font will be used via `textImage`.
 
 ```js
 await Canvas(200, 56);
@@ -94,7 +88,7 @@ await loadFont('/assets/Robotica.ttf');
 
 fill('skyblue');
 textSize(64);
-textImage('Hello!', -98, 24);
+text('Hello!', -98, 24);
 ```
 
 ```js
@@ -105,8 +99,9 @@ loadFont('fonts.googleapis.com/css2?family=Pacifico');
 q5.draw = function () {
 	fill('hotpink');
 	textSize(68);
-	textImage('Hello!', -98, 31);
+	text('Hello!', -98, 31);
 };
+//
 ```
 
 ```js
@@ -116,10 +111,12 @@ await loadFont('sans-serif'); // msdf
 
 fill('white');
 textSize(68);
-textImage('Hello!', -98, 31);
+text('Hello!', -98, 31);
 ```
 
 ### c2d
+
+If no fonts are loaded, the system's default sans-serif font is used.
 
 ```js
 createCanvas(200, 56);
@@ -138,7 +135,7 @@ createCanvas(200, 74);
 
 loadFont('fonts.googleapis.com/css2?family=Pacifico');
 
-function setup() {
+function draw() {
 	fill('hotpink');
 	textSize(68);
 	text('Hello!', 2, 68);
@@ -164,10 +161,7 @@ background(0.8);
 
 textFont('serif');
 
-q5.draw = function () {
-	textSize(32);
-	text('Hello, world!', -96, 10);
-};
+text('Hello, world!', -96, 10);
 ```
 
 ```js
@@ -176,9 +170,7 @@ background(0.8);
 
 textFont('monospace');
 
-q5.draw = function () {
-	text('Hello, world!', -68, 10);
-};
+text('Hello, world!', -96, 10);
 ```
 
 ### c2d
@@ -189,7 +181,6 @@ background(200);
 
 textFont('serif');
 
-textSize(32);
 text('Hello, world!', 15, 90);
 ```
 
@@ -199,7 +190,6 @@ background(200);
 
 textFont('monospace');
 
-textSize(24);
 text('Hello, world!', 15, 90);
 ```
 
@@ -271,13 +261,13 @@ function draw() {
 
 Sets the current text style.
 
-Not applicable to WebGPU when using MSDF fonts.
-
 ```
 @param {'normal' | 'italic' | 'bold' | 'bolditalic'} style font style
 ```
 
 ### webgpu
+
+Not applicable to MSDF fonts.
 
 ```js
 await Canvas(200);
@@ -305,6 +295,8 @@ text('Hello, world!', 12, 106);
 
 Sets the horizontal and vertical alignment of text.
 
+Alignment constants like `CENTER` can be used with this function.
+
 ```
 @param {'left' | 'center' | 'right'} horiz horizontal alignment
 @param {'top' | 'middle' | 'bottom' | 'alphabetic'} [vert] vertical alignment
@@ -317,7 +309,7 @@ await Canvas(200);
 background(0.8);
 textSize(32);
 
-textAlign(CENTER, MIDDLE);
+textAlign(CENTER, CENTER);
 text('Hello, world!', 0, 0);
 ```
 
@@ -328,7 +320,7 @@ createCanvas(200);
 background(200);
 textSize(32);
 
-textAlign(CENTER, MIDDLE);
+textAlign(CENTER, CENTER);
 text('Hello, world!', 100, 100);
 ```
 
@@ -356,7 +348,7 @@ Sets the text weight.
 await Canvas(200);
 background(0.8);
 textSize(32);
-textAlign(CENTER, MIDDLE);
+textAlign(CENTER, CENTER);
 
 textWeight(100);
 text('Hello, world!', 0, 0);
@@ -368,7 +360,7 @@ text('Hello, world!', 0, 0);
 createCanvas(200);
 background(200);
 textSize(32);
-textAlign(CENTER, MIDDLE);
+textAlign(CENTER, CENTER);
 
 textWeight(100);
 text('Hello, world!', 100, 100);
@@ -520,11 +512,6 @@ created and cached automatically.
 The positioning of the image is affected by the current text
 alignment and baseline settings.
 
-In q5 WebGPU, this function is the only way to draw multi-colored
-text, like emojis, and to use fonts that aren't in MSDF format.
-Using this function to draw text that changes every frame has
-a very high performance cost.
-
 ```
 @param {Q5.Image | string} img image or text
 @param {number} x x-coordinate where the image should be placed
@@ -533,6 +520,12 @@ a very high performance cost.
 
 ### webgpu
 
+This function can be used to draw emojis, which can
+not be drawn with MSDF text rendering.
+
+Using this function to draw text that changes every frame has a
+very high performance cost.
+
 ```js
 await Canvas(200);
 background(0.8);
@@ -540,16 +533,6 @@ textSize(96);
 textAlign(CENTER, CENTER);
 
 textImage('🐶', 0, 0);
-```
-
-```js
-await Canvas(200);
-
-await load('/assets/Robotica.ttf');
-
-background(0.8);
-textSize(66);
-textImage('Hello!', -100, 100);
 ```
 
 ### c2d
@@ -563,15 +546,50 @@ textAlign(CENTER, CENTER);
 textImage('🐶', 100, 100);
 ```
 
+## textToPoints
+
+Converts a string of text to an array of points.
+
+Samples opaque pixels in a text image made with `createTextImage`.
+
+It's influenced by text settings, such as font, size, and alignment.
+
+Uses a [Z-order curve](https://wikipedia.org/wiki/Z-order_curve) to improve spatial distribution, which preserves the shape of text better than purely random sampling.
+
+```
+@param {string} str string of text
+@param {number} [x=0] x coordinate of the text position
+@param {number} [y=0] y coordinate of the text position
+@param {number} [sampleRate=0.1] lower values increase dithering (1 = all points, 0.1 = ~10% of points)
+@param {number} [density=1] pixel density of the text
+```
+
+### webgpu
+
 ```js
-createCanvas(200);
+await Canvas(200);
+textSize(220);
+textAlign(CENTER, CENTER);
 
-loadFont('/assets/Robotica.ttf');
+let points = textToPoints('5');
 
-function setup() {
-	background(200);
-	textSize(66);
-	textImage('Hello!', 0, 0);
+for (let pt of points) {
+	rect(pt.x, pt.y, 5, 20);
+}
+```
+
+```js
+await Canvas(200, 296);
+textSize(340);
+noFill();
+stroke(1);
+strokeWeight(8);
+
+let pts = textToPoints('q', -100, 56);
+
+strokeWeight(1);
+for (let pt of pts) {
+	ellipse(pt.x, pt.y, 10, 0.1);
 }
 ```
 
@@ -639,6 +657,10 @@ Align text to the right.
 ## TOP
 
 Align text to the top.
+
+## MIDDLE
+
+Align text to the middle.
 
 ## BOTTOM
 

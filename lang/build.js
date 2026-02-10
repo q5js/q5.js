@@ -54,7 +54,13 @@ async function buildPage(pageGroup, page) {
 		if (!isNaN(id[0])) id = 'md' + id;
 		let md = document.getElementById(id);
 		if (!md) continue;
-		md.innerHTML = '\n' + marked.parse(content.slice(splitIdx + 1));
+		let htmlContent = marked.parse(content.slice(splitIdx + 1));
+		if (htmlContent.trim().startsWith('<p>') && htmlContent.trim().endsWith('</p>')) {
+			let inner = htmlContent.trim().slice(3, -4);
+
+			htmlContent = inner;
+		}
+		md.innerHTML = '\n' + htmlContent;
 		let links = md.getElementsByTagName('a');
 		for (let link of links) {
 			link.setAttribute('target', '_blank');
