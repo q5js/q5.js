@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",
 	"contributors": [
@@ -10,7 +10,7 @@
 		"Dukemz",
 		"LingDong-"
 	],
-	"license": "LGPL-3.0",
+	"license": "LGPL-3.0-only",
 	"homepage": "https://q5js.org/home",
 	"main": "q5-server.js",
 	"types": "q5.d.ts",
