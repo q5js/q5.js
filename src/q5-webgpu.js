@@ -46,10 +46,12 @@ struct Q5 {
 	$._buffers = [];
 	$._texturesToDestroy = [];
 
-	// local variables used for slightly better performance
+	// local variables used for better performance
 
 	// stores pipeline shifts and vertex counts/image indices
-	let drawStack = [];
+	let drawStack = ($._drawStack = []);
+	$._customDrawHandlers = {};
+	$._customBindHandlers = {};
 
 	// colors used for each draw call
 	let colorStack = new Float32Array(1e6);
@@ -82,7 +84,7 @@ struct Q5 {
 		]
 	});
 
-	$._bindGroupLayouts = [mainLayout];
+	$._mainLayout = mainLayout;
 
 	let uniformBuffer = Q5.device.createBuffer({
 		size: 64,
@@ -365,19 +367,22 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrixIdx = 0,
 		matrixDirty = false; // tracks if the matrix has been modified
 
+	$._getMatrixIdx = () => matrixIdx;
+
 	// 4x4 identity matrix
 	// prettier-ignore
 	matrices.push([
 		1, 0, 0, 0,
-		0, 1, 0, 0,
+		0, -1, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	]);
 
 	transforms.set(matrices[0]);
 
-	let flippedY = false,
-		yDir = 1;
+	// default is y-down for q5 WebGPU
+	let flippedY = true,
+		yDir = -1;
 
 	$.flipY = () => {
 		$._flippedY = flippedY = !flippedY;
@@ -387,9 +392,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		matrices[0][5] *= -1;
 		transforms.set(matrices[0], 0);
 	};
-
-	// current default is y-down for q5 WebGPU
-	$.flipY();
 
 	$.translate = (x, y) => {
 		if (!x && !y) return;
@@ -1001,6 +1003,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				} else if (curPipelineIndex == 6) {
 					pass.setIndexBuffer(ellipseIndexBuffer, 'uint16');
 					pass.setBindGroup(1, ellipseBindGroup);
+				} else if ($._customBindHandlers[curPipelineIndex]) {
+					$._customBindHandlers[curPipelineIndex](pass);
 				}
 			}
 
@@ -1028,11 +1032,14 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				pass.setBindGroup(1, $._textureBindGroups[v]);
 				pass.draw(4, 1, imageVertOffset);
 				imageVertOffset += 4;
-			} else {
+			} else if (curPipelineIndex == 1 || curPipelineIndex >= 1000) {
 				// draw a shape
 				// v is the number of vertices
 				pass.draw(v, 1, drawVertOffset);
 				drawVertOffset += v;
+			} else {
+				let used = $._customDrawHandlers[curPipelineIndex](pass, v, drawStack, i);
+				if (used) i += used;
 			}
 		}
 	};
@@ -1169,7 +1176,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let shapesPipelineLayout = Q5.device.createPipelineLayout({
 		label: 'shapesPipelineLayout',
-		bindGroupLayouts: $._bindGroupLayouts
+		bindGroupLayouts: [mainLayout]
 	});
 
 	$._pipelineConfigs[1] = {
@@ -1598,7 +1605,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let rectPipelineLayout = Q5.device.createPipelineLayout({
 		label: 'rectPipelineLayout',
-		bindGroupLayouts: [...$._bindGroupLayouts, rectBindGroupLayout]
+		bindGroupLayouts: [mainLayout, rectBindGroupLayout]
 	});
 
 	$._pipelineConfigs[5] = {
@@ -1906,7 +1913,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let ellipsePipelineLayout = Q5.device.createPipelineLayout({
 		label: 'ellipsePipelineLayout',
-		bindGroupLayouts: [...$._bindGroupLayouts, ellipseBindGroupLayout]
+		bindGroupLayouts: [mainLayout, ellipseBindGroupLayout]
 	});
 
 	$._pipelineConfigs[6] = {
@@ -2176,12 +2183,12 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 	let imagePipelineLayout = Q5.device.createPipelineLayout({
 		label: 'imagePipelineLayout',
-		bindGroupLayouts: [...$._bindGroupLayouts, textureLayout]
+		bindGroupLayouts: [mainLayout, textureLayout]
 	});
 
 	let videoPipelineLayout = Q5.device.createPipelineLayout({
 		label: 'videoPipelineLayout',
-		bindGroupLayouts: [...$._bindGroupLayouts, videoTextureLayout]
+		bindGroupLayouts: [mainLayout, videoTextureLayout]
 	});
 
 	$._pipelineConfigs[2] = {
@@ -2674,7 +2681,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	});
 
 	let fontPipelineLayout = Q5.device.createPipelineLayout({
-		bindGroupLayouts: [...$._bindGroupLayouts, fontBindGroupLayout, textBindGroupLayout]
+		bindGroupLayouts: [mainLayout, fontBindGroupLayout, textBindGroupLayout]
 	});
 
 	$._pipelineConfigs[4] = {
@@ -3183,8 +3190,116 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		text: 4000
 	};
 
-	$._createShader = (code, type = 'shapes') => {
+	$._createPipeline = (opt) => {
+		if (typeof opt == 'string') opt = { shader: opt };
+
+		let { label, shader = '', topology = 'triangle-list', cullMode = 'none', blend = 'source-over' } = opt;
+
+		let module;
+		if (opt.module) module = opt.module;
+		else {
+			module = Q5.device.createShaderModule({
+				label: label + 'Shader',
+				code: $._baseShaderCode + shader
+			});
+		}
+
+		// Handle optional custom data buffer and its bind group layout
+		let layout = opt.layout;
+		let _dataBuffer = null;
+		let _dataBindLayout = null;
+		let _dataBindGroup = null;
+		if (opt.data) {
+			_dataBuffer = Q5.device.createBuffer({
+				size: opt.data.byteLength,
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+			});
+			_dataBindLayout = Q5.device.createBindGroupLayout({
+				entries: [
+					{
+						binding: 0,
+						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+						buffer: { type: 'read-only-storage' }
+					}
+				]
+			});
+			_dataBindGroup = Q5.device.createBindGroup({
+				layout: _dataBindLayout,
+				entries: [{ binding: 0, resource: { buffer: _dataBuffer } }]
+			});
+			$._buffers.push(_dataBuffer);
+		}
+
+		if (!layout) {
+			if (_dataBindLayout) {
+				layout = Q5.device.createPipelineLayout({
+					bindGroupLayouts: [mainLayout, _dataBindLayout]
+				});
+			} else {
+				layout = Q5.device.createPipelineLayout({
+					bindGroupLayouts: [mainLayout]
+				});
+			}
+		}
+
+		let pipelineConfig = {
+			label: label + 'Pipeline',
+			layout,
+			vertex: {
+				module,
+				entryPoint: 'vertexMain'
+			},
+			fragment: {
+				module,
+				entryPoint: 'fragMain',
+				targets: [
+					{
+						format: 'bgra8unorm',
+						blend: $.blendConfigs[blend]
+					}
+				]
+			},
+			primitive: {
+				topology,
+				cullMode
+			},
+			multisample: { count: 4 }
+		};
+
+		let id = $._pipelines.length;
+		$._pipelineConfigs[id] = pipelineConfig;
+		$._pipelines[id] = Q5.device.createRenderPipeline(pipelineConfig);
+
+		// If we created a data buffer/bind group, register a bind handler
+		if (_dataBindGroup) {
+			$._customBindHandlers[id] = (pass) => {
+				Q5.device.queue.writeBuffer(_dataBuffer, 0, opt.data);
+				pass.setBindGroup(1, _dataBindGroup);
+			};
+		}
+
+		return id;
+	};
+
+	$.createShader = (code, type = 'shapes', options = {}) => {
 		code = code.trim();
+
+		// create custom shader
+		if (!pipelineTypes.includes(type)) {
+			if (options instanceof Float32Array) options = { data: options };
+			options.shader = code;
+			options.label = type;
+
+			let id = $._createPipeline(options);
+
+			let shader = $._pipelineConfigs[id].vertex.module;
+			shader.type = type;
+			shader.pipelineIndex = id;
+			$._customDrawHandlers[id] ??= (pass, count) => {
+				pass.draw(count, 1, 0, 0);
+			};
+			return shader;
+		}
 
 		// default shader code
 		let def = $['_' + type + 'ShaderCode'];
@@ -3223,11 +3338,11 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		return shader;
 	};
 
-	$.createShader = $.createShapesShader = $._createShader;
-	$.createFrameShader = (code) => $._createShader(code, 'frame');
-	$.createImageShader = (code) => $._createShader(code, 'image');
-	$.createVideoShader = (code) => $._createShader(code, 'video');
-	$.createTextShader = (code) => $._createShader(code, 'text');
+	$.createShapesShader = $.createShader;
+	$.createFrameShader = (code) => $.createShader(code, 'frame');
+	$.createImageShader = (code) => $.createShader(code, 'image');
+	$.createVideoShader = (code) => $.createShader(code, 'video');
+	$.createTextShader = (code) => $.createShader(code, 'text');
 
 	$.shader = (shader) => {
 		let type = shader.type;
@@ -3297,7 +3412,7 @@ Q5.MAX_TEXTS = 10000;
 Q5.initWebGPU = async () => {
 	if (!navigator.gpu) {
 		console.warn('q5 WebGPU not supported on this browser! Use Google Chrome or Edge.');
-		return false;
+		return;
 	}
 
 	// fn can only be called once
@@ -3312,7 +3427,7 @@ Q5.initWebGPU = async () => {
 
 	if (!adapter) {
 		console.warn('q5 WebGPU could not start! No appropriate GPUAdapter found, Vulkan may need to be enabled.');
-		return false;
+		return;
 	}
 
 	let device = await adapter.requestDevice();
@@ -3321,7 +3436,7 @@ Q5.initWebGPU = async () => {
 		device.limits.maxStorageBuffersInVertexStage ?? device.limits.maxStorageBuffersPerShaderStage;
 	if (vertexStorageLimit < 3) {
 		console.warn('q5 WebGPU requires vertex storage buffers, which are not supported by this device.');
-		return false;
+		return;
 	}
 
 	// Update to fit device limits

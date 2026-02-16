@@ -185,7 +185,7 @@ Q5.modules.input = ($, q) => {
 		let x = (touch.clientX - rect.left) / sx - modX,
 			y = (touch.clientY - rect.top) / sy - modY;
 
-		if ($._webgpu && !$._flippedY) y *= -1;
+		if (!$._flippedY) y *= -1;
 
 		return {
 			x,

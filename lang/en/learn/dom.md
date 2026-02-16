@@ -218,7 +218,7 @@ Creates an image element.
 ```js
 await Canvas(200, 100);
 
-let img = createImg('/assets/p5play_logo.webp');
+let img = createImg('/assets/q5play_logo.avif');
 img.position(0, 0).size(100, 100);
 ```
 
@@ -227,7 +227,7 @@ img.position(0, 0).size(100, 100);
 ```js
 createCanvas(200, 100);
 
-let img = createImg('/assets/p5play_logo.webp');
+let img = createImg('/assets/q5play_logo.avif');
 img.position(0, 0).size(100, 100);
 ```
 

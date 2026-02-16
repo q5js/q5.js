@@ -3070,7 +3070,7 @@ declare global {
 	 * @example
 	 * await Canvas(200, 100);
 	 * 
-	 * let img = createImg('/assets/p5play_logo.webp');
+	 * let img = createImg('/assets/q5play_logo.avif');
 	 * img.position(0, 0).size(100, 100);
 	 */
 	function createImg(src: string): HTMLImageElement;
@@ -3874,15 +3874,13 @@ declare global {
 	 */
 
 	/** ⚡
-	 * Creates a shader that q5 can use to draw shapes.
+	 * Creates a shader that q5's WebGPU renderer can use.
 	 * 
-	 * Affects the following functions:
+	 * If `type` is not specified, this function customizes a copy of the [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), which affects the following functions:
+	 * 
 	 * `triangle`, `quad`, `plane`,
 	 * `curve`, `bezier`, `beginShape`/`endShape`,
 	 * and `background` (unless an image is used).
-	 * 
-	 * Use this function to customize a copy of the
-	 * [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).
 	 * 
 	 * For more information on the vertex and fragment function
 	 * input parameters, data, and helper functions made available for use
@@ -3890,6 +3888,8 @@ declare global {
 	 * ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU)
 	 * wiki page.
 	 * @param {string} code WGSL shader code excerpt
+	 * @param {string} [type] defaults to "shapes"
+	 * @param {Float32Array} [data] only for use with [fully custom shaders](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU#fully-custom-shaders)
 	 * @returns {GPUShaderModule} a shader program
 	 * @example
 	 * await Canvas(200);
@@ -3928,7 +3928,7 @@ declare global {
 	 * 	triangle(-50, -50, 0, 50, 50, -50);
 	 * };
 	 */
-	function createShader(code: string): GPUShaderModule;
+	function createShader(code: string, type?: string, data?: Float32Array | {}): GPUShaderModule;
 
 	/** ⚡
 	 * A plane is a centered rectangle with no stroke.
@@ -4049,6 +4049,7 @@ declare global {
 	 * 	shader(grate);
 	 * 	image(logo, 0, 0, 180, 180);
 	 * };
+	 * //
 	 */
 	function createImageShader(code: string): GPUShaderModule;
 
@@ -4206,7 +4207,7 @@ declare global {
 		 * A WebGPU memory allocation limit.
 		 * 
 		 * The maximum number of transformation matrixes
-		 * that can be used in a single draw call.
+		 * that can be used per frame.
 		 */
 		static MAX_TRANSFORMS: number;
 
@@ -4215,7 +4216,7 @@ declare global {
 		 * 
 		 * The maximum number of rectangles
 		 * (calls to `rect`, `square`, `capsule`)
-		 * that can be drawn in a single draw call.
+		 * that can be drawn per frame.
 		 */
 		static MAX_RECTS: number;
 
@@ -4224,7 +4225,7 @@ declare global {
 		 * 
 		 * The maximum number of ellipses
 		 * (calls to `ellipse`, `circle`, and `arc`)
-		 * that can be drawn in a single draw call.
+		 * that can be drawn per frame.
 		 */
 		static MAX_ELLIPSES: number;
 
@@ -4232,7 +4233,7 @@ declare global {
 		 * A WebGPU memory allocation limit.
 		 * 
 		 * The maximum number of text characters
-		 * that can be drawn in a single draw call.
+		 * that can be drawn per frame.
 		 */
 		static MAX_CHARS: number;
 
@@ -4240,7 +4241,7 @@ declare global {
 		 * A WebGPU memory allocation limit.
 		 * 
 		 * The maximum number of separate calls to `text`
-		 * that can be drawn in a single draw call.
+		 * that can be drawn per frame.
 		 */
 		static MAX_TEXTS: number;
 
@@ -4264,14 +4265,6 @@ declare global {
 		 * Inside the function, `this` refers to the Q5 instance.
 		 * @param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', or 'remove'
 		 * @param {Function} fn The function to be run at the specified lifecycle phase.
-		 * @example
-		 * Q5.addHook('predraw', function () {
-		 * 	this.background('cyan');
-		 * });
-		 * 
-		 * q5.draw = function () {
-		 * 	circle(mouseX, mouseY, 80);
-		 * };
 		 */
 		static addHook(lifecycle: string, fn: Function): void;
 
@@ -4294,7 +4287,7 @@ declare global {
 		/** ⚙
 		 * The q5 draw function is run 60 times per second by default.
 		 */
-		draw(): void;
+		static draw(): void;
 
 		/** ⚙
 		 * Runs after each `draw` function call and post-draw q5 addon processes, if any.
@@ -4304,13 +4297,199 @@ declare global {
 		 * addons like p5play that auto-draw to the canvas after the `draw`
 		 * function is run.
 		 */
-		postProcess(): void;
-		update(): void; //-
-
-		drawFrame(): void; //-
-
-		static Image: {
-			new (w: number, h: number, opt?: any): Q5.Image;
+		static postProcess(): void;
+		//-
+			static update(): void;
+			update(): void;
+			draw(): void;
+			postProcess(): void;
+			Canvas: typeof Canvas;
+			log: typeof log;
+			circle: typeof circle;
+			ellipse: typeof ellipse;
+			rect: typeof rect;
+			square: typeof square;
+			point: typeof point;
+			line: typeof line;
+			capsule: typeof capsule;
+			rectMode: typeof rectMode;
+			ellipseMode: typeof ellipseMode;
+			loadImage: typeof loadImage;
+			image: typeof image;
+			imageMode: typeof imageMode;
+			defaultImageScale: typeof defaultImageScale;
+			resize: typeof resize;
+			trim: typeof trim;
+			smooth: typeof smooth;
+			noSmooth: typeof noSmooth;
+			tint: typeof tint;
+			noTint: typeof noTint;
+			mask: typeof mask;
+			copy: typeof copy;
+			inset: typeof inset;
+			get: typeof get;
+			set: typeof set;
+			loadPixels: typeof loadPixels;
+			updatePixels: typeof updatePixels;
+			filter: typeof filter;
+			createImage: typeof createImage;
+			createGraphics: typeof createGraphics;
+			text: typeof text;
+			loadFont: typeof loadFont;
+			textFont: typeof textFont;
+			textSize: typeof textSize;
+			textLeading: typeof textLeading;
+			textStyle: typeof textStyle;
+			textAlign: typeof textAlign;
+			textWeight: typeof textWeight;
+			textWidth: typeof textWidth;
+			textAscent: typeof textAscent;
+			textDescent: typeof textDescent;
+			createTextImage: typeof createTextImage;
+			textImage: typeof textImage;
+			textToPoints: typeof textToPoints;
+			nf: typeof nf;
+			mousePressed: typeof mousePressed;
+			mouseReleased: typeof mouseReleased;
+			mouseMoved: typeof mouseMoved;
+			mouseDragged: typeof mouseDragged;
+			doubleClicked: typeof doubleClicked;
+			keyIsDown: typeof keyIsDown;
+			keyPressed: typeof keyPressed;
+			keyReleased: typeof keyReleased;
+			touchStarted: typeof touchStarted;
+			touchEnded: typeof touchEnded;
+			touchMoved: typeof touchMoved;
+			cursor: typeof cursor;
+			noCursor: typeof noCursor;
+			mouseWheel: typeof mouseWheel;
+			pointerLock: typeof pointerLock;
+			color: typeof color;
+			colorMode: typeof colorMode;
+			background: typeof background;
+			fill: typeof fill;
+			stroke: typeof stroke;
+			noFill: typeof noFill;
+			noStroke: typeof noStroke;
+			strokeWeight: typeof strokeWeight;
+			opacity: typeof opacity;
+			shadow: typeof shadow;
+			noShadow: typeof noShadow;
+			shadowBox: typeof shadowBox;
+			blendMode: typeof blendMode;
+			strokeCap: typeof strokeCap;
+			strokeJoin: typeof strokeJoin;
+			erase: typeof erase;
+			noErase: typeof noErase;
+			pushStyles: typeof pushStyles;
+			popStyles: typeof popStyles;
+			clear: typeof clear;
+			inFill: typeof inFill;
+			inStroke: typeof inStroke;
+			translate: typeof translate;
+			rotate: typeof rotate;
+			scale: typeof scale;
+			shearX: typeof shearX;
+			shearY: typeof shearY;
+			applyMatrix: typeof applyMatrix;
+			resetMatrix: typeof resetMatrix;
+			pushMatrix: typeof pushMatrix;
+			popMatrix: typeof popMatrix;
+			push: typeof push;
+			pop: typeof pop;
+			displayMode: typeof displayMode;
+			fullscreen: typeof fullscreen;
+			resizeCanvas: typeof resizeCanvas;
+			noLoop: typeof noLoop;
+			redraw: typeof redraw;
+			loop: typeof loop;
+			frameRate: typeof frameRate;
+			getTargetFrameRate: typeof getTargetFrameRate;
+			getFPS: typeof getFPS;
+			pixelDensity: typeof pixelDensity;
+			displayDensity: typeof displayDensity;
+			random: typeof random;
+			jit: typeof jit;
+			noise: typeof noise;
+			dist: typeof dist;
+			map: typeof map;
+			angleMode: typeof angleMode;
+			radians: typeof radians;
+			degrees: typeof degrees;
+			lerp: typeof lerp;
+			constrain: typeof constrain;
+			norm: typeof norm;
+			abs: typeof abs;
+			round: typeof round;
+			ceil: typeof ceil;
+			floor: typeof floor;
+			min: typeof min;
+			max: typeof max;
+			sin: typeof sin;
+			cos: typeof cos;
+			tan: typeof tan;
+			mag: typeof mag;
+			asin: typeof asin;
+			acos: typeof acos;
+			atan: typeof atan;
+			atan2: typeof atan2;
+			pow: typeof pow;
+			fract: typeof fract;
+			sq: typeof sq;
+			sqrt: typeof sqrt;
+			loge: typeof loge;
+			exp: typeof exp;
+			randomSeed: typeof randomSeed;
+			randomGenerator: typeof randomGenerator;
+			randomGaussian: typeof randomGaussian;
+			randomExponential: typeof randomExponential;
+			noiseMode: typeof noiseMode;
+			noiseSeed: typeof noiseSeed;
+			noiseDetail: typeof noiseDetail;
+			loadSound: typeof loadSound;
+			loadAudio: typeof loadAudio;
+			getAudioContext: typeof getAudioContext;
+			userStartAudio: typeof userStartAudio;
+			createEl: typeof createEl;
+			createA: typeof createA;
+			createButton: typeof createButton;
+			createCheckbox: typeof createCheckbox;
+			createColorPicker: typeof createColorPicker;
+			createImg: typeof createImg;
+			createInput: typeof createInput;
+			createP: typeof createP;
+			createRadio: typeof createRadio;
+			createSelect: typeof createSelect;
+			createSlider: typeof createSlider;
+			createVideo: typeof createVideo;
+			createCapture: typeof createCapture;
+			findEl: typeof findEl;
+			findEls: typeof findEls;
+			createRecorder: typeof createRecorder;
+			record: typeof record;
+			pauseRecording: typeof pauseRecording;
+			deleteRecording: typeof deleteRecording;
+			saveRecording: typeof saveRecording;
+			load: typeof load;
+			save: typeof save;
+			loadText: typeof loadText;
+			loadJSON: typeof loadJSON;
+			loadCSV: typeof loadCSV;
+			loadXML: typeof loadXML;
+			loadAll: typeof loadAll;
+			disablePreload: typeof disablePreload;
+			shuffle: typeof shuffle;
+			storeItem: typeof storeItem;
+			getItem: typeof getItem;
+			removeItem: typeof removeItem;
+			clearStorage: typeof clearStorage;
+			year: typeof year;
+			day: typeof day;
+			hour: typeof hour;
+			minute: typeof minute;
+			second: typeof second;
+			static Image: {
+				new (w: number, h: number, opt?: any): Q5.Image;
 			};
 
 	}
@@ -4319,7 +4498,20 @@ declare global {
 		interface Image {
 			width: number;
 			height: number;
+			copy(): Q5.Image;
+			get(x: number, y: number, w?: number, h?: number): Q5.Image | number[];
+			set(x: number, y: number, val: any): void;
+			resize(w: number, h: number): void;
+			mask(img: Q5.Image): void;
+			trim(): Q5.Image;
+			filter(type: string, value?: number): void;
+			loadPixels(): void;
+			updatePixels(): void;
+			save(fileName?: string): void;
 		}
+
+		export import Color = globalThis.Color;
+		export import Vector = globalThis.Vector;
 	}
 
 }

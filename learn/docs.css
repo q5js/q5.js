@@ -83,6 +83,7 @@ body {
 	background-color: var(--backGround);
 	color: var(--textColor);
 	font-size: 18px;
+	height: 100vh;
 }
 
 h1 {
@@ -1328,5 +1329,37 @@ pre[class*="language-"] code {
 	ul ul {
 		margin: 8px 0;
 		padding-left: 8px;
+	}
+}
+
+.webgpu-warning {
+	display: none;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: calc(100% - 16px);
+	box-sizing: border-box;
+	margin: 8px;
+}
+
+.webgpu-warning div {
+	background: linear-gradient(180deg, rgba(255, 230, 230, 0.95), rgba(255, 215, 215, 0.9));
+	border: 1px solid rgba(224, 106, 106, 0.25);
+	border-left: 4px solid rgba(224, 106, 106, 0.9);
+	color: #5b0b0b;
+	padding: 10px 14px;
+	border-radius: 8px;
+	font-weight: 600;
+	box-shadow: 0 6px 18px rgba(200, 80, 80, 0.06);
+}
+
+.webgpu-warning.show {
+	display: block;
+}
+
+@media (max-width: 600px) {
+	.webgpu-warning div {
+		font-size: 0.95rem;
+		padding: 10px;
 	}
 }

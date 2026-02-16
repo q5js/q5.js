@@ -153,7 +153,7 @@ function convertTSDefToMarkdown(data) {
 			continue;
 		} else if (line.endsWith('//-')) {
 			jsDocBuffer = '';
-			continue;
+			return;
 		} else if (line.includes('(')) {
 			// capture a function/method name, its params, and any return/type (allow complex types)
 			let funcMatch = line.match(/([a-zA-Z0-9_\u00C0-\u00FF]+)\s*\(([^)]*)\)\s*:\s*([^;]+)/);
@@ -602,7 +602,7 @@ function generateHeadings() {
 }
 
 async function executeDataScripts() {
-	Q5.canUseWebGPU = await Q5.initWebGPU();
+	await Q5.initWebGPU();
 	let scripts = contentArea.querySelectorAll('script[type="mini"]');
 	for (let script of scripts) {
 		let mie = new MiniEditor(script);

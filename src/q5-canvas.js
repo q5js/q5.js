@@ -114,6 +114,7 @@ Q5.modules.canvas = ($, q) => {
 
 		if ($._addEventMethods) $._addEventMethods(c);
 
+		if (!$._isImage) $.resetMatrix();
 		$.canvas.ready = true;
 
 		return rend;

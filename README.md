@@ -2,17 +2,13 @@
 
 ## Visit [q5js.org](https://q5js.org)! 💫
 
-- inspired by [p5.js][] and [Processing][] ⭐️
-- performance optimized for interactive art 🚀
-- lightning fast [WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer) ⚡️
+q5 was designed to make creative coding fun and accessible for educators, artists, designers, and beginners. 🤝
+
+- 100x faster than [p5.js][] ⚡️
 - beginner friendly [documentation](https://q5js.org/learn) 📚
 - compatible with popular addons, including [p5.sound][], [ml5.js][], and [p5play][] 🎮
 - no dependencies, ~140kb minified 📦
-- free to use under the LGPL 🆓
-
-q5 was designed to make creative coding fun and accessible for educators, artists, designers, and beginners. 🤝
-
-Familiar with p5? You'll be right at home with q5. It's like getting a free computer upgrade! 🖥️
+- free and open source 🆓
 
 ```js
 await Canvas(200);
@@ -21,7 +17,7 @@ circle(0, 0, 80);
 
 ## Documentation
 
-Browse the [q5 reference pages](https://q5js.org/learn) to learn how to use q5.js.
+The [q5 learn pages](https://q5js.org/learn) are organized into sections with interactive mini-examples.
 
 See the [wiki](https://github.com/q5js/q5.js/wiki) for extended documentation.
 
@@ -54,7 +50,7 @@ All contributors must agree to the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Licensing
 
-q5.js was created by [Quinton Ashley](https://github.com/quinton-ashley) and [contributors](https://github.com/q5js/q5.js/graphs/contributors). It is open source licensed under the LGPLv3.
+q5.js was created by [Quinton Ashley](https://github.com/quinton-ashley) and [contributors](https://github.com/q5js/q5.js/graphs/contributors). It is free to use and open source licensed under the LGPLv3.
 
 @LingDong- created the original q5xjs library which is Unlicense (public domain) licensed.
 

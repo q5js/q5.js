@@ -218,7 +218,7 @@ Crea un elemento de imagen.
 ```js
 await Lienzo(200, 100);
 
-let img = crearImg('/assets/p5play_logo.webp');
+let img = crearImg('/assets/q5play_logo.avif');
 img.position(0, 0).size(100, 100);
 ```
 
@@ -227,7 +227,7 @@ img.position(0, 0).size(100, 100);
 ```js
 crearLienzo(200, 100);
 
-let img = crearImg('/assets/p5play_logo.webp');
+let img = crearImg('/assets/q5play_logo.avif');
 img.position(0, 0).size(100, 100);
 ```
 

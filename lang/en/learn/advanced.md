@@ -86,7 +86,7 @@ per-canvas options you pass to `Canvas`.
 A WebGPU memory allocation limit.
 
 The maximum number of transformation matrixes
-that can be used in a single draw call.
+that can be used per frame.
 
 ```
 @default 1000000
@@ -98,7 +98,7 @@ A WebGPU memory allocation limit.
 
 The maximum number of rectangles
 (calls to `rect`, `square`, `capsule`)
-that can be drawn in a single draw call.
+that can be drawn per frame.
 
 ```
 @default 200200
@@ -110,7 +110,7 @@ A WebGPU memory allocation limit.
 
 The maximum number of ellipses
 (calls to `ellipse`, `circle`, and `arc`)
-that can be drawn in a single draw call.
+that can be drawn per frame.
 
 ```
 @default 200200
@@ -121,7 +121,7 @@ that can be drawn in a single draw call.
 A WebGPU memory allocation limit.
 
 The maximum number of text characters
-that can be drawn in a single draw call.
+that can be drawn per frame.
 
 ```
 @default 100000
@@ -132,7 +132,7 @@ that can be drawn in a single draw call.
 A WebGPU memory allocation limit.
 
 The maximum number of separate calls to `text`
-that can be drawn in a single draw call.
+that can be drawn per frame.
 
 ```
 @default 10000
@@ -164,18 +164,6 @@ Inside the function, `this` refers to the Q5 instance.
 ```
 @param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', or 'remove'
 @param {Function} fn The function to be run at the specified lifecycle phase.
-```
-
-### webgpu
-
-```js
-Q5.addHook('predraw', function () {
-	this.background('cyan');
-});
-
-q5.draw = function () {
-	circle(mouseX, mouseY, 80);
-};
 ```
 
 ## Q5.registerAddon

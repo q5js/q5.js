@@ -3011,7 +3011,7 @@ declare global {
 	 * @example
 	 * await Lienzo(200, 100);
 	 * 
-	 * let img = crearImg('/assets/p5play_logo.webp');
+	 * let img = crearImg('/assets/q5play_logo.avif');
 	 * img.position(0, 0).size(100, 100);
 	 */
 	function crearImg(src: string): HTMLImageElement;
@@ -3888,21 +3888,21 @@ declare global {
 	 */
 
 	/** ⚡
-	 * Crea un shader que q5 puede usar para dibujar formas.
+	 * Crea un shader que el renderizador WebGPU de q5 puede usar.
 	 * 
-	 * Afecta a las siguientes funciones:
+	 * Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones:
+	 * 
 	 * `triángulo`, `quad`, `plano`,
 	 * `curva`, `bezier`, `empezarForma`/`terminarForma`,
 	 * y `fondo` (a menos que se use una imagen).
 	 * 
-	 * Usa esta función para personalizar una copia del
-	 * [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).
-	 * 
 	 * Para más información sobre los parámetros de entrada de las funciones de vértice y fragmento,
-	 * datos, y funciones auxiliares disponibles para usar
+	 * los datos y las funciones auxiliares disponibles para usar
 	 * en tu código de shader personalizado, lee la página wiki
 	 * ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU).
-	 * @param {string} codigo extracto de código shader WGSL
+	 * @param {string} codigo Extracto de código WGSL para el shader
+	 * @param {string} [tipo] por defecto "shapes"
+	 * @param {Float32Array} [datos] solo para usar con [shaders totalmente personalizados](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU#fully-custom-shaders)
 	 * @returns {GPUShaderModule} un programa shader
 	 * @example
 	 * await Lienzo(200);
@@ -3941,7 +3941,7 @@ declare global {
 	 * 	triángulo(-50, -50, 0, 50, 50, -50);
 	 * };
 	 */
-	function crearShader(codigo: string): GPUShaderModule;
+	function crearShader(codigo: string, tipo?: string, datos?: Float32Array | {}): GPUShaderModule;
 
 	/** ⚡
 	 * Un plano es un rectángulo centrado sin trazo.
@@ -4062,6 +4062,7 @@ declare global {
 	 * 	shader(grate);
 	 * 	imagen(logo, 0, 0, 180, 180);
 	 * };
+	 * //
 	 */
 	function crearShaderImagen(codigo: string): GPUShaderModule;
 
@@ -4315,7 +4316,7 @@ declare global {
 		/** ⚙
 		 * La función de dibujo de q5 se ejecuta 60 veces por segundo por defecto.
 		 */
-		dibujar(): void;
+		static dibujar(): void;
 
 		/** ⚙
 		 * Se ejecuta después de cada llamada a la función `dibujar` y procesos de addons de q5 post-dibujo, si los hay.
@@ -4325,17 +4326,195 @@ declare global {
 		 * addons como p5play que dibujan automáticamente al lienzo después de que
 		 * la función `dibujar` se ejecuta.
 		 */
-		postProcesar(): void;
+		static postProcesar(): void;
 		static versión: string;
 
 		static agregarHook(cicloVida: string, fn: Function): void;
 
 		static registrarAddon(addon: Function): void;
 
-		actualizar(): void; //-
-
-		static Imagen: {
-			new (w: number, h: number, opt?: any): Q5.Imagen;
+		//-
+			static actualizar(): void;
+			actualizar(): void;
+			dibujar(): void;
+			postProcesar(): void;
+			Lienzo: typeof Lienzo;
+			log: typeof log;
+			círculo: typeof círculo;
+			elipse: typeof elipse;
+			rect: typeof rect;
+			cuadrado: typeof cuadrado;
+			punto: typeof punto;
+			línea: typeof línea;
+			cápsula: typeof cápsula;
+			modoRect: typeof modoRect;
+			modoEliptico: typeof modoEliptico;
+			cargarImagen: typeof cargarImagen;
+			imagen: typeof imagen;
+			modoImagen: typeof modoImagen;
+			escalaImagenPorDefecto: typeof escalaImagenPorDefecto;
+			redimensionar: typeof redimensionar;
+			recortar: typeof recortar;
+			suavizar: typeof suavizar;
+			noSuavizar: typeof noSuavizar;
+			teñir: typeof teñir;
+			noTeñir: typeof noTeñir;
+			enmascarar: typeof enmascarar;
+			copiar: typeof copiar;
+			insertado: typeof insertado;
+			obtener: typeof obtener;
+			establecer: typeof establecer;
+			cargarPíxeles: typeof cargarPíxeles;
+			actualizarPíxeles: typeof actualizarPíxeles;
+			filtro: typeof filtro;
+			crearImagen: typeof crearImagen;
+			crearGráficos: typeof crearGráficos;
+			texto: typeof texto;
+			cargarFuente: typeof cargarFuente;
+			fuenteTexto: typeof fuenteTexto;
+			tamañoTexto: typeof tamañoTexto;
+			interlineado: typeof interlineado;
+			estiloTexto: typeof estiloTexto;
+			alineaciónTexto: typeof alineaciónTexto;
+			pesoTexto: typeof pesoTexto;
+			anchoTexto: typeof anchoTexto;
+			ascensoTexto: typeof ascensoTexto;
+			descensoTexto: typeof descensoTexto;
+			crearImagenTexto: typeof crearImagenTexto;
+			imagenTexto: typeof imagenTexto;
+			nf: typeof nf;
+			alPresionarRatón: typeof alPresionarRatón;
+			alSoltarRatón: typeof alSoltarRatón;
+			alMoverRatón: typeof alMoverRatón;
+			alArrastrarRatón: typeof alArrastrarRatón;
+			dobleClic: typeof dobleClic;
+			teclaEstaPresionada: typeof teclaEstaPresionada;
+			alPresionarTecla: typeof alPresionarTecla;
+			alSoltarTecla: typeof alSoltarTecla;
+			alEmpezarToque: typeof alEmpezarToque;
+			alTerminarToque: typeof alTerminarToque;
+			alMoverToque: typeof alMoverToque;
+			cursor: typeof cursor;
+			sinCursor: typeof sinCursor;
+			ruedaRatón: typeof ruedaRatón;
+			bloqueoPuntero: typeof bloqueoPuntero;
+			color: typeof color;
+			modoColor: typeof modoColor;
+			fondo: typeof fondo;
+			relleno: typeof relleno;
+			trazo: typeof trazo;
+			sinRelleno: typeof sinRelleno;
+			sinTrazo: typeof sinTrazo;
+			grosorTrazo: typeof grosorTrazo;
+			opacidad: typeof opacidad;
+			sombra: typeof sombra;
+			sinSombra: typeof sinSombra;
+			cajaSombra: typeof cajaSombra;
+			modoMezcla: typeof modoMezcla;
+			terminaciónTrazo: typeof terminaciónTrazo;
+			uniónTrazo: typeof uniónTrazo;
+			borrar: typeof borrar;
+			noBorrar: typeof noBorrar;
+			guardarEstilos: typeof guardarEstilos;
+			recuperarEstilos: typeof recuperarEstilos;
+			limpiar: typeof limpiar;
+			enRelleno: typeof enRelleno;
+			enTrazo: typeof enTrazo;
+			trasladar: typeof trasladar;
+			rotar: typeof rotar;
+			escalar: typeof escalar;
+			cizallarX: typeof cizallarX;
+			cizallarY: typeof cizallarY;
+			aplicarMatriz: typeof aplicarMatriz;
+			reiniciarMatriz: typeof reiniciarMatriz;
+			guardarMatriz: typeof guardarMatriz;
+			recuperarMatriz: typeof recuperarMatriz;
+			guardar: typeof guardar;
+			recuperar: typeof recuperar;
+			modoVisualización: typeof modoVisualización;
+			pantallaCompleta: typeof pantallaCompleta;
+			redimensionarLienzo: typeof redimensionarLienzo;
+			pausar: typeof pausar;
+			redibujar: typeof redibujar;
+			reanudar: typeof reanudar;
+			frecuenciaRefresco: typeof frecuenciaRefresco;
+			obtenerTasaFotogramasObjetivo: typeof obtenerTasaFotogramasObjetivo;
+			obtenerFPS: typeof obtenerFPS;
+			densidadPíxeles: typeof densidadPíxeles;
+			densidadVisualización: typeof densidadVisualización;
+			aleatorio: typeof aleatorio;
+			flu: typeof flu;
+			ruido: typeof ruido;
+			dist: typeof dist;
+			mapa: typeof mapa;
+			modoÁngulo: typeof modoÁngulo;
+			radianes: typeof radianes;
+			grados: typeof grados;
+			interpolar: typeof interpolar;
+			constreñir: typeof constreñir;
+			norm: typeof norm;
+			frac: typeof frac;
+			abs: typeof abs;
+			redondear: typeof redondear;
+			techo: typeof techo;
+			piso: typeof piso;
+			min: typeof min;
+			max: typeof max;
+			pot: typeof pot;
+			cuad: typeof cuad;
+			raiz: typeof raiz;
+			loge: typeof loge;
+			exp: typeof exp;
+			semillaAleatoria: typeof semillaAleatoria;
+			generadorAleatorio: typeof generadorAleatorio;
+			aleatorioGaussiano: typeof aleatorioGaussiano;
+			aleatorioExponencial: typeof aleatorioExponencial;
+			modoRuido: typeof modoRuido;
+			semillaRuido: typeof semillaRuido;
+			detalleRuido: typeof detalleRuido;
+			cargarSonido: typeof cargarSonido;
+			cargarAudio: typeof cargarAudio;
+			obtenerContextoAudio: typeof obtenerContextoAudio;
+			iniciarAudioUsuario: typeof iniciarAudioUsuario;
+			crearElemento: typeof crearElemento;
+			crearA: typeof crearA;
+			crearBotón: typeof crearBotón;
+			crearCasilla: typeof crearCasilla;
+			crearSelectorColor: typeof crearSelectorColor;
+			crearImg: typeof crearImg;
+			crearEntrada: typeof crearEntrada;
+			crearP: typeof crearP;
+			crearOpciónes: typeof crearOpciónes;
+			crearSelección: typeof crearSelección;
+			crearDeslizador: typeof crearDeslizador;
+			crearVideo: typeof crearVideo;
+			crearCaptura: typeof crearCaptura;
+			encontrarElemento: typeof encontrarElemento;
+			encontrarElementos: typeof encontrarElementos;
+			crearGrabadora: typeof crearGrabadora;
+			recordar: typeof grabar;
+			pausarGrabación: typeof pausarGrabación;
+			borrarGrabación: typeof borrarGrabación;
+			guardarGrabación: typeof guardarGrabación;
+			cargar: typeof cargar;
+			cargarTexto: typeof cargarTexto;
+			cargarJSON: typeof cargarJSON;
+			cargarCSV: typeof cargarCSV;
+			cargarXML: typeof cargarXML;
+			cargarTodo: typeof cargarTodo;
+			deshabilitarPrecarga: typeof deshabilitarPrecarga;
+			barajar: typeof barajar;
+			guardarItem: typeof guardarItem;
+			obtenerItem: typeof obtenerItem;
+			eliminarItem: typeof eliminarItem;
+			limpiarAlmacenamiento: typeof limpiarAlmacenamiento;
+			año: typeof año;
+			día: typeof día;
+			hora: typeof hora;
+			minuto: typeof minuto;
+			segundo: typeof segundo;
+			static Imagen: {
+				new (w: number, h: number, opt?: any): Q5.Imagen;
 			};
 
 	}
@@ -4344,7 +4523,20 @@ declare global {
 		interface Imagen {
 			ancho: number;
 			alto: number;
+			copiar(): Q5.Imagen;
+			obtener(x: number, y: number, w?: number, h?: number): Q5.Imagen | number[];
+			establecer(x: number, y: number, val: any): void;
+			redimensionar(w: number, h: number): void;
+			enmascarar(img: Q5.Imagen): void;
+			recortar(): Q5.Imagen;
+			filtro(tipo: string, valor?: number): void;
+			cargarPíxeles(): void;
+			actualizarPíxeles(): void;
+			guardar(nombreArchivo?: string): void;
 		}
+
+		export import Color = globalThis.Color;
+		export import Vector = globalThis.Vector;
 	}
 
 }

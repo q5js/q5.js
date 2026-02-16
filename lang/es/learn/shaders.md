@@ -5,23 +5,23 @@ usados para crear efectos visuales avanzados en q5!
 
 ## crearShader
 
-Crea un shader que q5 puede usar para dibujar formas.
+Crea un shader que el renderizador WebGPU de q5 puede usar.
 
-Afecta a las siguientes funciones:
+Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones:
+
 `triángulo`, `quad`, `plano`,
 `curva`, `bezier`, `empezarForma`/`terminarForma`,
 y `fondo` (a menos que se use una imagen).
 
-Usa esta función para personalizar una copia del
-[shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).
-
 Para más información sobre los parámetros de entrada de las funciones de vértice y fragmento,
-datos, y funciones auxiliares disponibles para usar
+los datos y las funciones auxiliares disponibles para usar
 en tu código de shader personalizado, lee la página wiki
 ["Custom Shaders in q5 WebGPU"](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU).
 
 ```
-@param {string} codigo extracto de código shader WGSL
+@param {string} codigo Extracto de código WGSL para el shader
+@param {string} [tipo] por defecto "shapes"
+@param {Float32Array} [datos] solo para usar con [shaders totalmente personalizados](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU#fully-custom-shaders)
 @returns {GPUShaderModule} un programa shader
 ```
 
@@ -202,6 +202,7 @@ q5.dibujar = function () {
 	shader(grate);
 	imagen(logo, 0, 0, 180, 180);
 };
+//
 ```
 
 ## crearShaderVideo

@@ -1,12 +1,16 @@
 # nav0
 
-📖&nbsp;Learn
+🎨&nbsp;Create
 
 # nav1
 
-🤝&nbsp;Join
+📖&nbsp;Learn
 
 # nav2
+
+🤝&nbsp;Join
+
+# nav3
 
 💙&nbsp;Support
 
@@ -124,7 +128,7 @@ q5 works with popular addons.
 
 ### Start coding 💻
 
-The [q5 Web Editor]() is coming soon!
+No installation required! Use the new [q5 Web Editor](https://codevre.com/q5-editor).
 
 # 6-1
 

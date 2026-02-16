@@ -25,6 +25,13 @@ class MiniEditor {
 			editorEl.style.display = 'none';
 		}
 
+		// Toggle global WebGPU unsupported banner (if present)
+		const banner = document.querySelector('#webgpu-warning');
+		if (banner) {
+			if (!Q5.device) banner.classList.add('show');
+			else banner.classList.remove('show');
+		}
+
 		let outputEl = document.createElement('div');
 		outputEl.id = `${this.container.id}-output`;
 		outputEl.className = 'mie-output';
@@ -141,10 +148,15 @@ class MiniEditor {
 			userCode.includes('await Lienzo') ||
 			/webgpu/i.test(userCode);
 
+		// if the examples uses the WebGPU renderer
 		if (useWebGPU) {
-			if (Q5.canUseWebGPU == false) {
-				this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
-				return;
+			// if WebGPU is not supported
+			if (!Q5.device) {
+				// check if the example needs WebGPU
+				if (userCode.includes('Shader')) {
+					this.outputEl.innerHTML = '<p>WebGPU is not supported in this browser.</p>';
+					return;
+				}
 			}
 			Q5._esm = true;
 		}
@@ -152,7 +164,7 @@ class MiniEditor {
 		const q5InstanceRegex = /(?:(?:let|const|var)\s+\w+\s*=\s*)?(?:new\s+Q5|(await\s+)*Q5\.WebGPU)\s*\([^)]*\);?/g;
 		userCode = userCode.replace(q5InstanceRegex, '');
 
-		let q = new Q5('instance', this.outputEl, useWebGPU ? 'webgpu' : 'c2d');
+		let q = new Q5('instance', this.outputEl, useWebGPU ? (Q5.device ? 'webgpu' : 'webgpu-fallback') : 'c2d');
 
 		for (let f of Q5._userFns) {
 			const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');

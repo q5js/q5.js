@@ -238,7 +238,7 @@ rect(64, 60, 80, 80);
 
 ```js
 crearLienzo(200);
-let logo = cargarImagen('/assets/p5play_logo.webp');
+let logo = cargarImagen('/assets/q5play_logo.avif');
 
 function setup() {
 	fondo(200);

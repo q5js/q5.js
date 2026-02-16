@@ -5,15 +5,13 @@ used to create advanced visual effects in q5!
 
 ## createShader
 
-Creates a shader that q5 can use to draw shapes.
+Creates a shader that q5's WebGPU renderer can use.
 
-Affects the following functions:
+If `type` is not specified, this function customizes a copy of the [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), which affects the following functions:
+
 `triangle`, `quad`, `plane`,
 `curve`, `bezier`, `beginShape`/`endShape`,
 and `background` (unless an image is used).
-
-Use this function to customize a copy of the
-[default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl).
 
 For more information on the vertex and fragment function
 input parameters, data, and helper functions made available for use
@@ -23,6 +21,8 @@ wiki page.
 
 ```
 @param {string} code WGSL shader code excerpt
+@param {string} [type] defaults to "shapes"
+@param {Float32Array} [data] only for use with [fully custom shaders](https://github.com/q5js/q5.js/wiki/Custom-Shaders-in-q5-WebGPU#fully-custom-shaders)
 @returns {GPUShaderModule} a shader program
 ```
 
@@ -203,6 +203,7 @@ q5.draw = function () {
 	shader(grate);
 	image(logo, 0, 0, 180, 180);
 };
+//
 ```
 
 ## createVideoShader

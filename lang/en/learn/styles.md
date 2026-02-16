@@ -238,7 +238,7 @@ rect(64, 60, 80, 80);
 
 ```js
 createCanvas(200);
-let logo = loadImage('/assets/p5play_logo.webp');
+let logo = loadImage('/assets/q5play_logo.avif');
 
 function setup() {
 	background(200);
