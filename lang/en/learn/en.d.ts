@@ -1,3 +1,5 @@
+declare interface GPUShaderModule {}
+
 declare global {
 	// ⭐️ core
 
@@ -75,7 +77,7 @@ declare global {
 
 	function set(x: number, y: number, val: any): void;
 
-	var pixels: number[];
+	let pixels: number[];
 
 	function loadPixels(): void;
 
@@ -199,13 +201,17 @@ declare global {
 
 	function touchMoved(): void;
 
-	let pointers: {};
+	let pointers: [];
 
 	function cursor(name: string, x?: number, y?: number): void;
 
 	function noCursor(): void;
 
 	function mouseWheel(event: any): void;
+
+	let movedX: number;
+
+	let movedY: number;
 
 	function pointerLock(unadjustedMovement: boolean): void;
 
@@ -277,7 +283,7 @@ declare global {
 
 	function clear(): void;
 
-	var ctx: CanvasRenderingContext2D;
+	let ctx: CanvasRenderingContext2D;
 
 	function inFill(x: number, y: number): boolean;
 
@@ -319,23 +325,23 @@ declare global {
 
 	function fullscreen(v?: boolean): void;
 
-	var windowWidth: number;
+	let windowWidth: number;
 
-	var windowHeight: number;
+	let windowHeight: number;
 
-	var width: number;
+	let width: number;
 
-	var height: number;
+	let height: number;
 
-	var halfWidth: number;
+	let halfWidth: number;
 
-	var halfHeight: number;
+	let halfHeight: number;
 
-	var canvas: HTMLCanvasElement;
+	let canvas: HTMLCanvasElement;
 
 	function resizeCanvas(w: number, h: number): void;
 
-	var frameCount: number;
+	let frameCount: number;
 
 	function noLoop(): void;
 
@@ -355,7 +361,7 @@ declare global {
 
 	function displayDensity(): number;
 
-	var deltaTime: number;
+	let deltaTime: number;
 
 	// 🧮 math
 
@@ -521,7 +527,7 @@ declare global {
 
 	function saveRecording(fileName: string): void;
 
-	var recording: boolean;
+	let recording: boolean;
 
 	// 🛠️ utilities
 

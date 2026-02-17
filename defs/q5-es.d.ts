@@ -465,7 +465,7 @@ declare global {
 	 * logo.insertado(256, 256, 512, 512, 0, 0, 256, 256);
 	 * imagen(logo, -100, -100, 200, 200);
 	 */
-	function insertado(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
+	function insertado(): void;
 
 	/** 🌆
 	 * Recupera una subsección de una imagen o lienzo como una nueva Imagen Q5

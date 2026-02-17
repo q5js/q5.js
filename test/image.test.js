@@ -3,7 +3,7 @@ require('../q5-server.js');
 
 let log = console.log;
 
-function q5ImageTest(resolve) {
+function imageTest(resolve) {
 	expect(Q5).toBeDefined();
 
 	let q = new Q5('namespace');
@@ -24,4 +24,4 @@ function q5ImageTest(resolve) {
 	};
 }
 
-test('q5-image', () => new Promise(q5ImageTest));
+test('q5-image', () => new Promise(imageTest));

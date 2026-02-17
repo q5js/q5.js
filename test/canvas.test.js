@@ -2,7 +2,7 @@ require('../q5-server.js');
 
 let log = console.log;
 
-test('q5-canvas-behavior', () => {
+test('q5-canvas', () => {
 	const q = new Q5('namespace');
 	q.noLoop();
 

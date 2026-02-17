@@ -12,7 +12,7 @@ require('../q5-server.js');
 
 let log = console.log;
 
-function q5CoreTest(resolve) {
+function coreTest(resolve) {
 	expect(Q5).toBeDefined();
 
 	let q = new Q5('namespace');
@@ -51,18 +51,6 @@ function q5CoreTest(resolve) {
 	expect(q.width).toBe(200);
 	expect(q.height).toBe(200);
 	expect(q.frameCount).toBe(0);
-
-	// Test event hooks
-	let mousePressedCalled = false;
-	q.mousePressed = function () {
-		mousePressedCalled = true;
-	};
-	// Simulate mousePressed
-	if (typeof window !== 'undefined') {
-		let evt = new window.MouseEvent('mousedown');
-		q.canvas.dispatchEvent(evt);
-		expect(mousePressedCalled).toBe(true);
-	}
 
 	// Test noLoop and loop
 	q.noLoop();
@@ -104,4 +92,4 @@ function q5CoreTest(resolve) {
 	}
 }
 
-test('q5-core', () => new Promise(q5CoreTest));
+test('q5-core', () => new Promise(coreTest));

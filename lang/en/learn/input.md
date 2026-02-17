@@ -522,23 +522,23 @@ function touchMoved() {
 
 ## pointers
 
-Object containing all current pointers within the
+Array containing all current pointers within the
 browser window.
 
-This includes mouse, touch, and pen pointers.
+This includes mouse, pen, and touch interactions.
 
 Each pointer is an object with
 `event`, `x`, and `y` properties.
-The `event` property contains the original
-[PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent).
+
+The `event` property contains the most recent
+[PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) associated with the pointer, which includes additional information such as the pointer type.
 
 ### webgpu
 
 ```js
 q5.draw = function () {
 	background(0.8);
-	for (let pointerID in pointers) {
-		let pointer = pointers[pointerID];
+	for (let pointer of pointers) {
 		circle(pointer.x, pointer.y, 100);
 	}
 };
@@ -549,8 +549,7 @@ q5.draw = function () {
 ```js
 function draw() {
 	background(200);
-	for (let pointerID in pointers) {
-		let pointer = pointers[pointerID];
+	for (let pointer of pointers) {
 		circle(pointer.x, pointer.y, 100);
 	}
 }
@@ -612,7 +611,8 @@ Return true to allow the default behavior of scrolling the page.
 ### webgpu
 
 ```js
-let x = (y = 0);
+let x = 0;
+let y = 0;
 q5.draw = function () {
 	circle(x, y, 10);
 };
@@ -626,7 +626,8 @@ q5.mouseWheel = function (e) {
 ### c2d
 
 ```js
-let x = (y = 100);
+let x = 100;
+let y = 100;
 function draw() {
 	circle(x, y, 10);
 }
@@ -635,6 +636,34 @@ function mouseWheel(e) {
 	y += e.deltaY;
 	return false;
 }
+```
+
+## movedX
+
+Distance the mouse has moved since the last frame in the horizontal direction.
+
+### webgpu
+
+```js
+q5.draw = function () {
+	background(0.8);
+	if (movedX > 0) text('>>', 0, 0);
+	if (movedX < 0) text('<<', 0, 0);
+};
+```
+
+## movedY
+
+Distance the mouse has moved since the last frame in the vertical direction.
+
+### webgpu
+
+```js
+q5.draw = function () {
+	background(0.8);
+	if (movedY > 0) text('vv', 0, 0);
+	if (movedY < 0) text('^^', 0, 0);
+};
 ```
 
 ## pointerLock

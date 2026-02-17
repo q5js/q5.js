@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "4.1.0",
+	"version": "4.2.0",
 	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",
 	"contributors": [
@@ -32,7 +32,6 @@
 		"bundle": "cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-shapes.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-color.js src/q5-display.js src/q5-dom.js src/q5-fes.js src/q5-input.js src/q5-math.js src/q5-record.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu.js src/q5-lang.js > q5.js",
 		"min": "terser q5.js --compress ecma=2025 --mangle > q5.min.js",
 		"dist": "bun bundle && bun min",
-		"dist-p5play": "bun dist && cp q5.js ../../web/p5play-web/v3/q5.js && cp q5.min.js ../../web/p5play-web/v3/q5.min.js",
 		"tests": "jest test",
 		"bld": "node lang/build.js",
 		"dts": "node lang/types.js",

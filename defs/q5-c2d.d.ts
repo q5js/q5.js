@@ -553,7 +553,7 @@ declare global {
 	 * and the bottom right pixel's data is at the end, going from
 	 * left to right and top to bottom.
 	 */
-	var pixels: number[];
+	let pixels: number[];
 
 	/** 🌆
 	 * Loads pixel data into `pixels` from the canvas or image.
@@ -1290,25 +1290,25 @@ declare global {
 	function touchMoved(): void;
 
 	/** 🖲
-	 * Object containing all current pointers within the
+	 * Array containing all current pointers within the
 	 * browser window.
 	 * 
-	 * This includes mouse, touch, and pen pointers.
+	 * This includes mouse, pen, and touch interactions.
 	 * 
 	 * Each pointer is an object with
 	 * `event`, `x`, and `y` properties.
-	 * The `event` property contains the original
-	 * [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent).
+	 * 
+	 * The `event` property contains the most recent
+	 * [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) associated with the pointer, which includes additional information such as the pointer type.
 	 * @example
 	 * function draw() {
 	 * 	background(200);
-	 * 	for (let pointerID in pointers) {
-	 * 		let pointer = pointers[pointerID];
+	 * 	for (let pointer of pointers) {
 	 * 		circle(pointer.x, pointer.y, 100);
 	 * 	}
 	 * }
 	 */
-	let pointers: {};
+	let pointers: [];
 
 	/** 🖲
 	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/docs/Web/CSS/cursor) or image.
@@ -1339,7 +1339,8 @@ declare global {
 	 * 
 	 * Return true to allow the default behavior of scrolling the page.
 	 * @example
-	 * let x = (y = 100);
+	 * let x = 100;
+	 * let y = 100;
 	 * function draw() {
 	 * 	circle(x, y, 10);
 	 * }
@@ -1350,6 +1351,16 @@ declare global {
 	 * }
 	 */
 	function mouseWheel(event: any): void;
+
+	/** 🖲
+	 * Distance the mouse has moved since the last frame in the horizontal direction.
+	 */
+	let movedX: number;
+
+	/** 🖲
+	 * Distance the mouse has moved since the last frame in the vertical direction.
+	 */
+	let movedY: number;
 
 	/** 🖲
 	 * Requests that the pointer be locked to the document body, hiding
@@ -1991,7 +2002,7 @@ declare global {
 	 * ctx.fillStyle = lg;
 	 * rect(0, 0, 200, 200);
 	 */
-	var ctx: CanvasRenderingContext2D;
+	let ctx: CanvasRenderingContext2D;
 
 	/** 💅
 	 * Checks if a given point is within the current path's fill area.
@@ -2243,7 +2254,7 @@ declare global {
 	 * 	text(windowWidth, 100, 100);
 	 * }
 	 */
-	var windowWidth: number;
+	let windowWidth: number;
 
 	/** 💻
 	 * The height of the window.
@@ -2255,32 +2266,32 @@ declare global {
 	 * 	text(windowHeight, 100, 100);
 	 * }
 	 */
-	var windowHeight: number;
+	let windowHeight: number;
 
 	/** 💻
 	 * The width of the canvas.
 	 */
-	var width: number;
+	let width: number;
 
 	/** 💻
 	 * The height of the canvas.
 	 */
-	var height: number;
+	let height: number;
 
 	/** 💻
 	 * Half the width of the canvas.
 	 */
-	var halfWidth: number;
+	let halfWidth: number;
 
 	/** 💻
 	 * Half the height of the canvas.
 	 */
-	var halfHeight: number;
+	let halfHeight: number;
 
 	/** 💻
 	 * The canvas element associated with the Q5 instance.
 	 */
-	var canvas: HTMLCanvasElement;
+	let canvas: HTMLCanvasElement;
 
 	/** 💻
 	 * Resizes the canvas to the specified width and height.
@@ -2308,7 +2319,7 @@ declare global {
 	 * 	text(frameCount, 8, 120);
 	 * }
 	 */
-	var frameCount: number;
+	let frameCount: number;
 
 	/** 💻
 	 * Stops the draw loop.
@@ -2482,7 +2493,7 @@ declare global {
 	 * 	circle(x % 200, 100, 20);
 	 * }
 	 */
-	var deltaTime: number;
+	let deltaTime: number;
 
 	// 🧮 math
 
@@ -3374,7 +3385,7 @@ declare global {
 	/** 🎞
 	 * True if the canvas is currently being recorded.
 	 */
-	var recording: boolean;
+	let recording: boolean;
 
 	// 🛠 utilities
 

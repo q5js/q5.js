@@ -1,4 +1,5 @@
 declare global {
+	declare interface GPUShaderModule {}
 	// ⭐️ core
 
 	function Lienzo(ancho?: number, alto?: number, opciones?: object): Promise<HTMLCanvasElement>;
@@ -69,7 +70,16 @@ declare global {
 
 	function copiar(): Q5.Imagen;
 
-	function insertado(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
+	function insertado(
+		sx: number,
+		sy: number,
+		sw: number,
+		sh: number,
+		dx: number,
+		dy: number,
+		dw: number,
+		dh: number
+	): void;
 
 	function obtener(x: number, y: number, w?: number, h?: number): Q5.Imagen | number[];
 

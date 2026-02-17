@@ -1,6 +1,6 @@
 {
 	"name": "@q5/q5",
-	"version": "4.1.0",
+	"version": "4.2.0",
 	"license": "LGPL-3.0-only",
 	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",

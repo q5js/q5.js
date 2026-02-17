@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 4.1
+ * @version 4.2
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -149,7 +149,12 @@ function Q5(scope, parent, renderer) {
 
 		q.pmouseX = $.mouseX;
 		q.pmouseY = $.mouseY;
-		q.moveX = q.moveY = 0;
+		q.movedX = q.movedY = 0;
+		if ($.pointers) {
+			for (let i = $.pointers.length - 1; i >= 0; i--) {
+				if ($.pointers[i]._ended) $.pointers.splice(i, 1);
+			}
+		}
 		$._lastFrameTime = ts;
 		let post = performance.now();
 		$._fps = Math.round(1000 / (post - pre));
@@ -470,7 +475,7 @@ if (typeof window == 'object') {
 	window.WEBGPU = 'webgpu';
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '4.1';
+Q5.version = Q5.VERSION = '4.2';
 
 if (typeof document == 'object') {
 	document.addEventListener('DOMContentLoaded', () => {

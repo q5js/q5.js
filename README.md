@@ -21,19 +21,6 @@ The [q5 learn pages](https://q5js.org/learn) are organized into sections with in
 
 See the [wiki](https://github.com/q5js/q5.js/wiki) for extended documentation.
 
-Use the [q5.d.ts](q5.d.ts) file in Visual Studio Code to get autocompletion and inline hover-over documentation. Simply add this `jsconfig.json` file to your project folder:
-
-```json
-{
-	"compilerOptions": {
-		"target": "ESNext"
-	},
-	"typeAcquisition": {
-		"include": ["node_modules/q5"]
-	}
-}
-```
-
 ## Support q5 💙
 
 q5 is open source and anyone can use it for free under the terms of the LGPL. 🎉
