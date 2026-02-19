@@ -1286,25 +1286,23 @@ declare global {
 	function alMoverToque(): void;
 
 	/** 🖲
-	 * Objeto que contiene todos los punteros actuales dentro de la
+	 * Array que contiene todos los punteros actuales dentro de la
 	 * ventana del navegador.
 	 * 
-	 * Esto incluye ratón, toque y punteros de lápiz.
+	 * Esto incluye interacciones de ratón, lápiz y táctil.
 	 * 
-	 * Cada puntero es un objeto con
-	 * propiedades `event`, `x`, e `y`.
-	 * La propiedad `event` contiene el
-	 * [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) original.
+	 * Cada puntero es un objeto con las propiedades `event`, `x` y `y`.
+	 * 
+	 * La propiedad `event` contiene el [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) más reciente asociado al puntero, que incluye información adicional como el tipo de puntero.
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(200);
-	 * 	for (let punteroID in punteros) {
-	 * 		let puntero = punteros[punteroID];
+	 * 	for (let puntero of punteros) {
 	 * 		círculo(puntero.x, puntero.y, 100);
 	 * 	}
 	 * }
 	 */
-	let punteros: {};
+	let punteros: [];
 
 	/** 🖲
 	 * Establece el cursor a un [tipo de cursor CSS](https://developer.mozilla.org/docs/Web/CSS/cursor) o imagen.
@@ -1346,6 +1344,16 @@ declare global {
 	 * }
 	 */
 	function ruedaRatón(evento: any): void;
+
+	/** 🖲
+	 * Distancia que el ratón ha recorrido desde el último fotograma en la dirección horizontal.
+	 */
+	let movidoX: number;
+
+	/** 🖲
+	 * Distancia que el ratón ha recorrido desde el último fotograma en la dirección vertical.
+	 */
+	let movidoY: number;
 
 	/** 🖲
 	 * Solicita que el puntero se bloquee al cuerpo del documento, ocultando
@@ -1991,6 +1999,8 @@ declare global {
 	 */
 	function enTrazo(x: number, y: number): boolean;
 
+	let ctx: CanvasRenderingContext2D;
+
 	// 🦋 transformaciones
 
 	/** 🦋
@@ -2470,7 +2480,11 @@ declare global {
 	 * El contexto de renderizado 2D para el lienzo, si se usa el renderizador
 	 * Canvas2D.
 	 */
-	var contextoDibujo: CanvasRenderingContext2D;
+	function contextoDibujo(): void;
+
+	const C2D: 'c2d';
+
+	const WEBGPU: 'webgpu';
 
 	// 🧮 matemáticas
 

@@ -363,6 +363,10 @@ declare global {
 
 	let deltaTime: number;
 
+	const C2D: 'c2d';
+
+	const WEBGPU: 'webgpu';
+
 	// 🧮 math
 
 	function random(low?: number | any[], high?: number): number | any;
@@ -534,6 +538,8 @@ declare global {
 	function load(...urls: string[]): PromiseLike<any[]>;
 
 	function save(data?: object, fileName?: string): void;
+
+	function millis(): number;
 
 	function loadText(url: string): object & PromiseLike<string>;
 

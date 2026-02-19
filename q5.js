@@ -2136,6 +2136,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textAlign = (horiz, vert) => {
+		if (!horiz) return { horizontal: $._textAlign, vertical: $._textBaseline };
 		$.ctx.textAlign = $._textAlign = horiz;
 		if (vert) {
 			$.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? 'middle' : vert;
@@ -8318,6 +8319,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textAlign = (horiz, vert) => {
+		if (!horiz) return { horizontal: _textAlign, vertical: _textBaseline };
 		_textAlign = horiz;
 		if (vert) _textBaseline = vert[0] == 'c' ? 'middle' : vert;
 	};
@@ -8974,6 +8976,8 @@ touches -> es:toques
 pointers -> es:punteros
 cursor -> es:cursor
 noCursor -> es:sinCursor
+movedX -> es:movidoX
+movedY -> es:movidoY
 pointerLock -> es:bloqueoPuntero
 
 # style
@@ -9321,6 +9325,8 @@ Q5.addHook('predraw', (q) => {
 		'frameCount',
 		'mouseX',
 		'mouseY',
+		'movedX',
+		'movedY',
 		'mouseIsPressed',
 		'mouseButton',
 		'key',
@@ -9330,5 +9336,7 @@ Q5.addHook('predraw', (q) => {
 	];
 
 	// sync properties
-	for (let p of props) q[m[p]] = q[p];
+	for (let p of props) {
+		if (m[p]) q[m[p]] = q[p];
+	}
 });

@@ -134,6 +134,28 @@ function mousePressed() {
 }
 ```
 
+## millis
+
+Returns the number of milliseconds since the program started.
+
+```
+@returns {number} milliseconds since the program started
+```
+
+### webgpu
+
+```js
+await Canvas(200);
+
+q5.draw = function () {
+	background(0.8);
+
+	if (millis() > 2000) {
+		text('Hello, world!', -90, 0);
+	}
+};
+```
+
 ## loadText
 
 Loads a text file from the specified url.

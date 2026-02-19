@@ -522,23 +522,21 @@ function alMoverToque() {
 
 ## punteros
 
-Objeto que contiene todos los punteros actuales dentro de la
+Array que contiene todos los punteros actuales dentro de la
 ventana del navegador.
 
-Esto incluye ratón, toque y punteros de lápiz.
+Esto incluye interacciones de ratón, lápiz y táctil.
 
-Cada puntero es un objeto con
-propiedades `event`, `x`, e `y`.
-La propiedad `event` contiene el
-[PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) original.
+Cada puntero es un objeto con las propiedades `event`, `x` y `y`.
+
+La propiedad `event` contiene el [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) más reciente asociado al puntero, que incluye información adicional como el tipo de puntero.
 
 ### webgpu
 
 ```js
 q5.dibujar = function () {
 	fondo(0.8);
-	for (let punteroID in punteros) {
-		let puntero = punteros[punteroID];
+	for (let puntero of punteros) {
 		círculo(puntero.x, puntero.y, 100);
 	}
 };
@@ -549,8 +547,7 @@ q5.dibujar = function () {
 ```js
 function dibujar() {
 	fondo(200);
-	for (let punteroID in punteros) {
-		let puntero = punteros[punteroID];
+	for (let puntero of punteros) {
 		círculo(puntero.x, puntero.y, 100);
 	}
 }
@@ -635,6 +632,34 @@ function ruedaRatón(e) {
 	y += e.deltaY;
 	return false;
 }
+```
+
+## movidoX
+
+Distancia que el ratón ha recorrido desde el último fotograma en la dirección horizontal.
+
+### webgpu
+
+```js
+q5.dibujar = function () {
+	fondo(0.8);
+	if (movidoX > 0) texto('>>', 0, 0);
+	if (movidoX < 0) texto('<<', 0, 0);
+};
+```
+
+## movidoY
+
+Distancia que el ratón ha recorrido desde el último fotograma en la dirección vertical.
+
+### webgpu
+
+```js
+q5.dibujar = function () {
+	fondo(0.8);
+	if (movidoY > 0) texto('vv', 0, 0);
+	if (movidoY < 0) texto('^^', 0, 0);
+};
 ```
 
 ## bloqueoPuntero

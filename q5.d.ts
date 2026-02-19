@@ -23,7 +23,7 @@ declare global {
 	 * @param {number} [w] width or side lengths of the canvas
 	 * @param {number} [h] height of the canvas
 	 * @param {object} [opt] [options](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes)
-	 * @returns {Promise<HTMLCanvasElement>} created canvas element
+	 * @returns {Promise<HTMLCanvasElement>} canvas element
 	 * @example
 	 * // WebGPU
 	 * await Canvas(200, 100);
@@ -2470,6 +2470,26 @@ declare global {
 	 */
 	let deltaTime: number;
 
+	/** 💻
+	 * A constant that can be passed as the third argument to `Canvas` to specify that the Canvas2D renderer should be used.
+	 * 
+	 * Note that in this example, the circle is located at position [0, 0], the origin of the canvas.
+	 * @example
+	 * await Canvas(200, 100, C2D);
+	 * background('silver');
+	 * circle(0, 0, 80);
+	 */
+	const C2D: 'c2d';
+
+	/** 💻
+	 * Since WebGPU is the default renderer in JavaScript modules, it's not necessary to use this constant with `Canvas`, unless you want to make it explicit.
+	 * @example
+	 * await Canvas(200, 100, WEBGPU);
+	 * background('silver');
+	 * circle(0, 0, 80);
+	 */
+	const WEBGPU: 'webgpu';
+
 	// 🧮 math
 
 	/** 🧮
@@ -3453,6 +3473,22 @@ declare global {
 	 * };
 	 */
 	function save(data?: object, fileName?: string): void;
+
+	/** 🛠
+	 * Returns the number of milliseconds since the program started.
+	 * @returns {number} milliseconds since the program started
+	 * @example
+	 * await Canvas(200);
+	 * 
+	 * q5.draw = function () {
+	 * 	background(0.8);
+	 * 
+	 * 	if (millis() > 2000) {
+	 * 		text('Hello, world!', -90, 0);
+	 * 	}
+	 * };
+	 */
+	function millis(): number;
 
 	/** 🛠
 	 * Loads a text file from the specified url.

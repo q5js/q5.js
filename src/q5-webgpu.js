@@ -2932,6 +2932,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 	};
 
 	$.textAlign = (horiz, vert) => {
+		if (!horiz) return { horizontal: _textAlign, vertical: _textBaseline };
 		_textAlign = horiz;
 		if (vert) _textBaseline = vert[0] == 'c' ? 'middle' : vert;
 	};

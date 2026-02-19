@@ -205,13 +205,17 @@ declare global {
 
 	function alMoverToque(): void;
 
-	let punteros: {};
+	let punteros: [];
 
 	function cursor(nombre: string, x?: number, y?: number): void;
 
 	function sinCursor(): void;
 
 	function ruedaRatón(evento: any): void;
+
+	let movidoX: number;
+
+	let movidoY: number;
 
 	function bloqueoPuntero(movimientoNoAjustado: boolean): void;
 
@@ -282,6 +286,8 @@ declare global {
 	function recuperarEstilos(): void;
 
 	function limpiar(): void;
+
+	let ctx: CanvasRenderingContext2D;
 
 	function enRelleno(x: number, y: number): boolean;
 
@@ -361,7 +367,9 @@ declare global {
 
 	var deltaTiempo: number;
 
-	var contextoDibujo: CanvasRenderingContext2D;
+	const C2D: 'c2d';
+
+	const WEBGPU: 'webgpu';
 
 	// 🧮 math
 

@@ -564,3 +564,37 @@ function draw() {
 	circle(x % 200, 100, 20);
 }
 ```
+
+## C2D
+
+A constant that can be passed as the third argument to `Canvas` to specify that the Canvas2D renderer should be used.
+
+Note that in this example, the circle is located at position [0, 0], the origin of the canvas.
+
+### webgpu
+
+```js
+await Canvas(200, 100, C2D);
+background('silver');
+circle(0, 0, 80);
+```
+
+### c2d
+
+```js
+await Canvas(200, 100, C2D);
+background('silver');
+circle(0, 0, 80);
+```
+
+## WEBGPU
+
+Since WebGPU is the default renderer in JavaScript modules, it's not necessary to use this constant with `Canvas`, unless you want to make it explicit.
+
+### webgpu
+
+```js
+await Canvas(200, 100, WEBGPU);
+background('silver');
+circle(0, 0, 80);
+```

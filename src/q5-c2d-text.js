@@ -173,6 +173,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	};
 
 	$.textAlign = (horiz, vert) => {
+		if (!horiz) return { horizontal: $._textAlign, vertical: $._textBaseline };
 		$.ctx.textAlign = $._textAlign = horiz;
 		if (vert) {
 			$.ctx.textBaseline = $._textBaseline = vert == $.CENTER ? 'middle' : vert;
