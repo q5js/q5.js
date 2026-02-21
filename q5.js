@@ -473,6 +473,17 @@ if (typeof window == 'object') {
 	window.createCanvas = window.Canvas = Canvas;
 	window.C2D = 'c2d';
 	window.WEBGPU = 'webgpu';
+
+	const cleanup = () => {
+		for (let inst of Q5.instances) {
+			try {
+				inst.remove();
+			} catch (e) {}
+		}
+	};
+
+	window.addEventListener('beforeunload', cleanup);
+	window.addEventListener('pagehide', cleanup);
 } else global.window = 0;
 
 Q5.version = Q5.VERSION = '4.2';

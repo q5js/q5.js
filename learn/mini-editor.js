@@ -6,7 +6,7 @@ class MiniEditor {
 		let scriptContent = scriptEl.innerHTML.slice(0, -1).replaceAll('\t', '  ').trim();
 		let container = document.createElement('div');
 		container.id = 'mie-' + scriptEl.id;
-		container.className = 'mie-container';
+		container.className = 'mie';
 		scriptEl.insertAdjacentElement('beforebegin', container);
 		this.container = container;
 		this.initialCode = scriptContent;

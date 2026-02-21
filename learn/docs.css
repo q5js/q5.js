@@ -356,7 +356,7 @@ header {
 	border: 2px solid var(--blue1);
 }
 
-.mie-container {
+.mie {
 	display: flex;
 	align-items: center;
 	margin: 24px 32px;
