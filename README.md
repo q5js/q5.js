@@ -6,7 +6,7 @@ q5 was designed to make creative coding fun and accessible for educators, artist
 
 - 100x faster than [p5.js][] ⚡️
 - beginner friendly [documentation](https://q5js.org/learn) 📚
-- compatible with popular addons, including [p5.sound][], [ml5.js][], and [p5play][] 🎮
+- compatible with popular addons, including [p5.sound][], [ml5.js][], and [q5play][] 🎮
 - no dependencies, ~140kb minified 📦
 - free and open source 🆓
 
@@ -25,7 +25,7 @@ See the [wiki](https://github.com/q5js/q5.js/wiki) for extended documentation.
 
 q5 is open source and anyone can use it for free under the terms of the LGPL. 🎉
 
-We need your support though! If you enjoy using q5, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley), [ko-fi](https://ko-fi.com/q5play), or [Patreon](https://www.patreon.com/p5play).
+We need your support though! If you enjoy using q5, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley), [ko-fi](https://ko-fi.com/q5play), or [Patreon](https://www.patreon.com/q5play).
 
 ## Contributing
 
@@ -79,4 +79,4 @@ https://github.com/processing/p5.js/blob/1.1.9/src/math/noise.js
 [Processing]: https://processing.org
 [p5.sound]: https://archive.p5js.org/reference/#/libraries/p5.sound
 [ml5.js]: https://ml5js.org
-[p5play]: https://p5play.org
+[q5play]: https://q5play.org

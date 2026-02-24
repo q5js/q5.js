@@ -454,8 +454,9 @@ function Canvas(w, h, opt) {
 
 	if (useC2D) {
 		let q = new Q5();
+		if (!Q5._esm) q.createCanvas(w, h, opt);
 		return q.ready.then(() => {
-			return q.createCanvas(w, h, opt);
+			if (Q5._esm) q.createCanvas(w, h, opt);
 		});
 	} else {
 		return Q5.WebGPU().then((q) => q.createCanvas(w, h, opt));

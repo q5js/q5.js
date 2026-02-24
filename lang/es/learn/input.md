@@ -2,7 +2,7 @@
 
 El manejo de entrada de q5 es muy básico.
 
-Para un mejor manejo de entrada, incluyendo soporte para controladores de juegos, considera usar el addon [p5play](https://p5play.org/) con q5.
+Para un mejor manejo de entrada, incluyendo soporte para controladores de juegos, considera usar el addon [q5play](https://q5play.org/) con q5.
 
 Ten en cuenta que las respuestas de entrada dentro de `dibujar` pueden retrasarse
 hasta un ciclo de fotograma: desde el momento exacto en que ocurre un evento de entrada

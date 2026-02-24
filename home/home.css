@@ -853,6 +853,15 @@ section {
 	display: flex;
 	flex-direction: column;
 	border: 1px solid var(--border-color);
+	position: relative;
+	/* room for the top-half background and centered image */
+	overflow: visible;
+}
+
+/* Ensure card children render above the black band */
+.card>* {
+	position: relative;
+	z-index: 1;
 }
 
 .animated .card {
@@ -1265,7 +1274,7 @@ section {
 }
 
 .brand-img {
-	height: 64px;
+	height: 96px;
 	object-fit: contain;
 	border-radius: 8px;
 	margin-bottom: 16px;
@@ -1273,9 +1282,20 @@ section {
 	transition: transform 0.2s, border-color 0.2s;
 }
 
-.card:hover .brand-img {
+.brand-img:hover {
 	transform: scale(1.05);
-	border-color: var(--blue1);
+}
+
+@media (max-width: 1200px) {
+	.brand-img {
+		height: 72px;
+	}
+}
+
+@media (max-width: 970px) {
+	.brand-img {
+		height: 54px;
+	}
 }
 
 .card p a {

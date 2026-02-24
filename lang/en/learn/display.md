@@ -439,7 +439,7 @@ Runs after each `draw` function call and post-draw q5 addon processes, if any.
 
 Useful for adding post-processing effects when it's not possible
 to do so at the end of the `draw` function, such as when using
-addons like p5play that auto-draw to the canvas after the `draw`
+addons like q5play that auto-draw to the canvas after the `draw`
 function is run.
 
 ### c2d

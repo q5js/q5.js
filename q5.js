@@ -454,8 +454,9 @@ function Canvas(w, h, opt) {
 
 	if (useC2D) {
 		let q = new Q5();
+		if (!Q5._esm) q.createCanvas(w, h, opt);
 		return q.ready.then(() => {
-			return q.createCanvas(w, h, opt);
+			if (Q5._esm) q.createCanvas(w, h, opt);
 		});
 	} else {
 		return Q5.WebGPU().then((q) => q.createCanvas(w, h, opt));
@@ -1449,7 +1450,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		if (url.canvas) return url;
 		if (url.slice(-3).toLowerCase() == 'gif') {
 			throw new Error(
-				`q5 doesn't support GIFs. Use a video or p5play animation instead. https://github.com/q5js/q5.js/issues/84`
+				`q5 doesn't support GIFs. Use a video or q5play animation instead. https://github.com/q5js/q5.js/issues/84`
 			);
 		}
 		let last = [...arguments].at(-1);

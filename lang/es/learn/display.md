@@ -441,7 +441,7 @@ Se ejecuta después de cada llamada a la función `dibujar` y procesos de addons
 
 Útil para añadir efectos de post-procesamiento cuando no es posible
 hacerlo al final de la función `dibujar`, como cuando se usan
-addons como p5play que auto-dibujan al lienzo después de que
+addons como q5play que auto-dibujan al lienzo después de que
 la función `dibujar` se ejecuta.
 
 ### c2d

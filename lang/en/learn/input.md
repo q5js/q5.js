@@ -2,7 +2,7 @@
 
 q5's input handling is very basic.
 
-For better input handling, including game controller support, consider using the [p5play](https://p5play.org/) addon with q5.
+For better input handling, including game controller support, consider using the [q5play](https://q5play.org/) addon with q5.
 
 Note that input responses inside `draw` can be delayed by
 up to one frame cycle: from the exact moment an input event occurs

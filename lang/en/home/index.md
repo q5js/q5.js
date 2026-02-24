@@ -118,7 +118,7 @@ q5 works with popular addons.
 
 # 5-3
 
-[p5play](https://p5play.org) adds high quality Box2D physics simulation, better input handling, a camera, and animations.
+[q5play](https://q5play.org) adds high quality Box2D physics simulation, better input handling, a camera, and animations.
 
 # 5-4
 

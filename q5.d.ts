@@ -1064,7 +1064,7 @@ declare global {
 	/**
 	 * q5's input handling is very basic.
 	 * 
-	 * For better input handling, including game controller support, consider using the [p5play](https://p5play.org/) addon with q5.
+	 * For better input handling, including game controller support, consider using the [q5play](https://q5play.org/) addon with q5.
 	 * 
 	 * Note that input responses inside `draw` can be delayed by
 	 * up to one frame cycle: from the exact moment an input event occurs
@@ -2411,7 +2411,7 @@ declare global {
 	 * 
 	 * Useful for adding post-processing effects when it's not possible
 	 * to do so at the end of the `draw` function, such as when using
-	 * addons like p5play that auto-draw to the canvas after the `draw`
+	 * addons like q5play that auto-draw to the canvas after the `draw`
 	 * function is run.
 	 */
 	function postProcess(): void;
@@ -4353,7 +4353,7 @@ declare global {
 		 * 
 		 * Useful for adding post-processing effects when it's not possible
 		 * to do so at the end of the `draw` function, such as when using
-		 * addons like p5play that auto-draw to the canvas after the `draw`
+		 * addons like q5play that auto-draw to the canvas after the `draw`
 		 * function is run.
 		 */
 		static postProcess(): void;

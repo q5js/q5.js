@@ -23,7 +23,7 @@ Q5.renderers.c2d.image = ($, q) => {
 		if (url.canvas) return url;
 		if (url.slice(-3).toLowerCase() == 'gif') {
 			throw new Error(
-				`q5 doesn't support GIFs. Use a video or p5play animation instead. https://github.com/q5js/q5.js/issues/84`
+				`q5 doesn't support GIFs. Use a video or q5play animation instead. https://github.com/q5js/q5.js/issues/84`
 			);
 		}
 		let last = [...arguments].at(-1);

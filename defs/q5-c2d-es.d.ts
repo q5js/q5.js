@@ -1021,7 +1021,7 @@ declare global {
 	/**
 	 * El manejo de entrada de q5 es muy básico.
 	 * 
-	 * Para un mejor manejo de entrada, incluyendo soporte para controladores de juegos, considera usar el addon [p5play](https://p5play.org/) con q5.
+	 * Para un mejor manejo de entrada, incluyendo soporte para controladores de juegos, considera usar el addon [q5play](https://q5play.org/) con q5.
 	 * 
 	 * Ten en cuenta que las respuestas de entrada dentro de `dibujar` pueden retrasarse
 	 * hasta un ciclo de fotograma: desde el momento exacto en que ocurre un evento de entrada
@@ -2409,7 +2409,7 @@ declare global {
 	 * 
 	 * Útil para añadir efectos de post-procesamiento cuando no es posible
 	 * hacerlo al final de la función `dibujar`, como cuando se usan
-	 * addons como p5play que auto-dibujan al lienzo después de que
+	 * addons como q5play que auto-dibujan al lienzo después de que
 	 * la función `dibujar` se ejecuta.
 	 * @example
 	 * function dibujar() {
@@ -4033,7 +4033,7 @@ declare global {
 		 * 
 		 * Útil para agregar efectos de post-procesamiento cuando no es posible
 		 * hacerlo al final de la función `dibujar`, como cuando se usan
-		 * addons como p5play que dibujan automáticamente al lienzo después de que
+		 * addons como q5play que dibujan automáticamente al lienzo después de que
 		 * la función `dibujar` se ejecuta.
 		 */
 		static postProcesar(): void;
