@@ -86,8 +86,8 @@ Q5.modules.input = ($, q) => {
 				q.mouseY += e.movementY;
 			}
 		} else {
-			q.mouseX = p.x;
-			q.mouseY = p.y;
+			q.mouseX = p.canvasPos?.x ?? p.x;
+			q.mouseY = p.canvasPos?.y ?? p.y;
 		}
 
 		if (e.movementX != undefined) {

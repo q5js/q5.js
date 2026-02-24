@@ -56,6 +56,7 @@ function Q5(scope, parent, renderer) {
 	$.deltaTime = 16;
 	$._targetFrameRate = 0;
 	$._targetFrameDuration = 16.666666666666668;
+	$._lastFrameTime = performance.now();
 	$._frameRate = $._fps = 60;
 	$._loop = true;
 
@@ -275,10 +276,12 @@ function Q5(scope, parent, renderer) {
 	let raf =
 		window.requestAnimationFrame ||
 		function (cb) {
-			const idealFrameTime = $._lastFrameTime + $._targetFrameDuration;
-			return setTimeout(() => {
-				cb(idealFrameTime);
-			}, idealFrameTime - performance.now());
+			const lastFrame = Number.isFinite($._lastFrameTime) ? $._lastFrameTime : (performance?.now?.() ?? Date.now());
+			const targetDur = Number.isFinite($._targetFrameDuration) ? $._targetFrameDuration : 16.666666666666668;
+			const idealFrameTime = lastFrame + targetDur;
+			let delay = idealFrameTime - (performance?.now?.() ?? Date.now());
+			if (!Number.isFinite(delay) || delay < 0) delay = 0;
+			return setTimeout(() => cb(idealFrameTime), Math.max(0, Math.floor(delay)));
 		};
 
 	let t = globalScope || $;
@@ -451,8 +454,9 @@ function Canvas(w, h, opt) {
 
 	if (useC2D) {
 		let q = new Q5();
-		let c = q.createCanvas(w, h, opt);
-		return q.ready.then(() => c);
+		return q.ready.then(() => {
+			return q.createCanvas(w, h, opt);
+		});
 	} else {
 		return Q5.WebGPU().then((q) => q.createCanvas(w, h, opt));
 	}
@@ -944,12 +948,6 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	$.noFill = () => ($._doFill = false);
 	$.noStroke = () => ($._doStroke = false);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
-
-	// polyfill for q5 WebGPU functions (used by q5play)
-	$._getFillIdx = () => $._fill;
-	$._setFillIdx = (v) => ($._fill = v);
-	$._getStrokeIdx = () => $._stroke;
-	$._setStrokeIdx = (v) => ($._stroke = v);
 
 	$._doShadow = false;
 	$._shadowOffsetX = $._shadowOffsetY = $._shadowBlur = 10;
@@ -3604,8 +3602,8 @@ Q5.modules.input = ($, q) => {
 				q.mouseY += e.movementY;
 			}
 		} else {
-			q.mouseX = p.x;
-			q.mouseY = p.y;
+			q.mouseX = p.canvasPos?.x ?? p.x;
+			q.mouseY = p.canvasPos?.y ?? p.y;
 		}
 
 		if (e.movementX != undefined) {
