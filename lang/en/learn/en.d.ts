@@ -201,8 +201,6 @@ declare global {
 
 	function touchMoved(): void;
 
-	let pointers: [];
-
 	function cursor(name: string, x?: number, y?: number): void;
 
 	function noCursor(): void;

@@ -1302,7 +1302,7 @@ declare global {
 	 * 	}
 	 * }
 	 */
-	let punteros: [];
+	function punteros(): void;
 
 	/** 🖲
 	 * Establece el cursor a un [tipo de cursor CSS](https://developer.mozilla.org/docs/Web/CSS/cursor) o imagen.

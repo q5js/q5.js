@@ -205,8 +205,6 @@ declare global {
 
 	function alMoverToque(): void;
 
-	let punteros: [];
-
 	function cursor(nombre: string, x?: number, y?: number): void;
 
 	function sinCursor(): void;

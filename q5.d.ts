@@ -1347,7 +1347,7 @@ declare global {
 	 * 	}
 	 * };
 	 */
-	let pointers: [];
+	function pointers(): void;
 
 	/** 🖲
 	 * Sets the cursor to a [CSS cursor type](https://developer.mozilla.org/docs/Web/CSS/cursor) or image.
