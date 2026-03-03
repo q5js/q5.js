@@ -402,13 +402,16 @@ Array containing all current touch points within the
 browser window. Each touch being an object with
 `id`, `x`, and `y` properties.
 
+Consider using the `pointers` array instead,
+which includes mouse, touch, and pen input.
+
 ### webgpu
 
 ```js
 q5.draw = function () {
 	background(0.8);
-	for (let touch of touches) {
-		circle(touch.x, touch.y, 100);
+	for (let pt of pointers) {
+		circle(pt.x, pt.y, 100);
 	}
 };
 ```
@@ -418,8 +421,8 @@ q5.draw = function () {
 ```js
 function draw() {
 	background(200);
-	for (let touch of touches) {
-		circle(touch.x, touch.y, 100);
+	for (let pt of pointers) {
+		circle(pt.x, pt.y, 100);
 	}
 }
 ```
@@ -517,41 +520,6 @@ let gray = 95;
 function touchMoved() {
 	background(gray % 256);
 	gray++;
-}
-```
-
-## pointers
-
-Array containing all current pointers within the
-browser window.
-
-This includes mouse, pen, and touch interactions.
-
-Each pointer is an object with
-`event`, `x`, and `y` properties.
-
-The `event` property contains the most recent
-[PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) associated with the pointer, which includes additional information such as the pointer type.
-
-### webgpu
-
-```js
-q5.draw = function () {
-	background(0.8);
-	for (let pointer of pointers) {
-		circle(pointer.x, pointer.y, 100);
-	}
-};
-```
-
-### c2d
-
-```js
-function draw() {
-	background(200);
-	for (let pointer of pointers) {
-		circle(pointer.x, pointer.y, 100);
-	}
 }
 ```
 

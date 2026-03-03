@@ -1224,11 +1224,13 @@ declare global {
 	 * Array que contiene todos los puntos de toque actuales dentro de la
 	 * ventana del navegador. Cada toque es un objeto con
 	 * propiedades `id`, `x`, e `y`.
+	 * 
+	 * Considera usar el array `punteros` en su lugar, el cual incluye entrada de ratón, táctil y de lápiz óptico.
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(200);
-	 * 	for (let toque of toques) {
-	 * 		círculo(toque.x, toque.y, 100);
+	 * 	for (let pt of punteros) {
+	 * 		círculo(pt.x, pt.y, 100);
 	 * 	}
 	 * }
 	 */
@@ -1284,25 +1286,6 @@ declare global {
 	 * }
 	 */
 	function alMoverToque(): void;
-
-	/** 🖲
-	 * Array que contiene todos los punteros actuales dentro de la
-	 * ventana del navegador.
-	 * 
-	 * Esto incluye interacciones de ratón, lápiz y táctil.
-	 * 
-	 * Cada puntero es un objeto con las propiedades `event`, `x` y `y`.
-	 * 
-	 * La propiedad `event` contiene el [PointerEvent](https://developer.mozilla.org/docs/Web/API/PointerEvent) más reciente asociado al puntero, que incluye información adicional como el tipo de puntero.
-	 * @example
-	 * function dibujar() {
-	 * 	fondo(200);
-	 * 	for (let puntero of punteros) {
-	 * 		círculo(puntero.x, puntero.y, 100);
-	 * 	}
-	 * }
-	 */
-	function punteros(): void;
 
 	/** 🖲
 	 * Establece el cursor a un [tipo de cursor CSS](https://developer.mozilla.org/docs/Web/CSS/cursor) o imagen.
