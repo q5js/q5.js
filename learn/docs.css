@@ -1236,7 +1236,7 @@ pre[class*="language-"] code {
 }
 
 @media (max-width: 720px) {
-	.mie-container {
+	.mie {
 		flex-direction: column;
 		gap: 8px;
 	}
@@ -1308,7 +1308,7 @@ pre[class*="language-"] code {
 		display: none;
 	}
 
-	.mie-container {
+	.mie {
 		margin: 16px 8px;
 	}
 

@@ -39,18 +39,16 @@ Q5.modules.input = ($, q) => {
 	};
 
 	$._updatePointer = (e) => {
-		let id = e.pointerId || $.pointers[0]?.id;
-		if (id == undefined) {
-			if (e instanceof MouseEvent) id = 0;
-			else return;
-		}
+		let id = e.pointerId ?? $.pointers[0]?.id;
 
 		let p = $.pointers.find((p) => p.id === id);
 		if (!p) {
 			p = { id };
-			$.pointers.push(p);
+			if (e.type != 'wheel') $.pointers.push(p);
 		}
-		p.event = e;
+
+		if (e.type != 'wheel') p.event = e;
+		else $._wheel = p;
 
 		let x, y;
 		if (c) {
@@ -78,16 +76,19 @@ Q5.modules.input = ($, q) => {
 
 	$._updateMouse = (e) => {
 		let p = $.pointers[0];
-		if (e.pointerId != undefined && e.pointerId != p.id) return;
 
 		if (document.pointerLockElement) {
 			if (e.movementX != undefined) {
 				q.mouseX += e.movementX;
 				q.mouseY += e.movementY;
 			}
-		} else {
+		} else if (p) {
+			if (e.pointerId != undefined && e.pointerId != p.id) return;
 			q.mouseX = p.canvasPos?.x ?? p.x;
 			q.mouseY = p.canvasPos?.y ?? p.y;
+		} else if ($._wheel) {
+			q.mouseX = $._wheel.x;
+			q.mouseY = $._wheel.y;
 		}
 
 		if (e.movementX != undefined) {
@@ -118,15 +119,16 @@ Q5.modules.input = ($, q) => {
 
 	$._onpointerup = (e) => {
 		q.mouseIsPressed = false;
-		if (pressAmt > 0) pressAmt--;
-		else return;
-		$._updatePointer(e);
-		$._updateMouse(e);
-		if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+		if (pressAmt > 0) {
+			pressAmt--;
+			$._updatePointer(e);
+			$._updateMouse(e);
+			$.mouseReleased(e);
+		}
+		if (e.pointerType == 'touch' || e.pointerType == 'pen') {
 			let p = $.pointers.find((p) => p.id === e.pointerId);
 			if (p) p._ended = true;
 		}
-		$.mouseReleased(e);
 	};
 
 	$._onclick = (e) => {

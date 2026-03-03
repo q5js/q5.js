@@ -3459,6 +3459,12 @@ Q5.initWebGPU = async () => {
 
 	Q5.device = device;
 
+	if (typeof window == 'object') {
+		window.addEventListener('pagehide', () => {
+			if (device) device.destroy();
+		});
+	}
+
 	return true;
 };
 
