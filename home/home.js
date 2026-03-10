@@ -380,7 +380,7 @@ function initPart2() {
 		{ label: 'Rounded_Rects', p5: 9271, p5webgl: 149, q5: 188510 },
 		{ label: 'Text', p5: 110, p5webgl: 452, q5: 56183 },
 		{ label: 'Ellipses', p5: 11303, p5webgl: 3385, q5: 213096 },
-		{ label: 'Lines', p5: 15946, p5webgl: 1275, q5: 83395 },
+		{ label: 'Lines', p5: 15946, p5webgl: 1275, q5: 247123 },
 		{ label: 'Capsules', p5: 6106, p5webgl: 128, q5: 87615 }
 	];
 
@@ -388,7 +388,7 @@ function initPart2() {
 
 	// Initial scale
 	let currentMax = 20000;
-	const finalMax = 220000;
+	const finalMax = 250000;
 
 	// Create Grid Lines
 	const gridLabels = [];

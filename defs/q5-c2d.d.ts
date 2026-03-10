@@ -3757,28 +3757,15 @@ declare global {
 	function curveDetail(val: number): void;
 
 	/** 🖌
-	 * Starts storing vertices for a convex shape.
+	 * Starts storing vertices for a shape.
 	 */
 	function beginShape(): void;
 
 	/** 🖌
-	 * Ends storing vertices for a convex shape.
+	 * Ends storing vertices for a shape.
+	 * @param {boolean} [close] whether to close the shape by connecting the last vertex to the first vertex, default is false
 	 */
 	function endShape(): void;
-
-	/** 🖌
-	 * Starts storing vertices for a contour.
-	 * 
-	 * Not available in q5 WebGPU.
-	 */
-	function beginContour(): void;
-
-	/** 🖌
-	 * Ends storing vertices for a contour.
-	 * 
-	 * Not available in q5 WebGPU.
-	 */
-	function endContour(): void;
 
 	/** 🖌
 	 * Specifies a vertex in a shape.
@@ -3843,6 +3830,20 @@ declare global {
 	 * @param {number} y4 y-coordinate of the fourth vertex
 	 */
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+
+	/** 🖌
+	 * Starts storing vertices for a contour.
+	 * 
+	 * Not available in q5 WebGPU.
+	 */
+	function beginContour(): void;
+
+	/** 🖌
+	 * Ends storing vertices for a contour.
+	 * 
+	 * Not available in q5 WebGPU.
+	 */
+	function endContour(): void;
 
 	// ⚙ advanced
 

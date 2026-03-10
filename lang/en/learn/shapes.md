@@ -160,6 +160,8 @@ Draws a line on the canvas.
 
 ### webgpu
 
+To draw lines with rounded stroke caps, use `capsule` instead.
+
 ```js
 await Canvas(200, 100);
 stroke('lime');

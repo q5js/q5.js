@@ -755,11 +755,16 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			$.pop();
 		} else {
 			addColor(r, g, b, a);
-			let lx = -c.hw,
+			let ci = colorIndex,
+				lx = -c.hw,
 				rx = c.hw,
 				ty = -c.hh,
 				by = c.hh;
-			addQuad(lx, ty, rx, ty, rx, by, lx, by, colorIndex, 0);
+			addVert(lx, ty, ci, 0);
+			addVert(rx, ty, ci, 0);
+			addVert(lx, by, ci, 0);
+			addVert(rx, by, ci, 0);
+			drawStack.push(1, 4); // always use the default shapes pipeline
 		}
 	};
 
@@ -799,7 +804,15 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		shouldClear = false;
 	};
 
-	let transformsBuffer, colorsBuffer, shapesVertBuff, imgVertBuff, charBuffer, textBuffer;
+	let transformsBuffer,
+		colorsBuffer,
+		shapesVertBuff,
+		imgVertBuff,
+		polygonVertBuff,
+		polyPtsBuffer,
+		polyPtsBindGroup,
+		charBuffer,
+		textBuffer;
 	let mainBindGroup, lastTransformsBuffer, lastColorsBuffer;
 
 	$._render = () => {
@@ -877,6 +890,37 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		$._pass.setVertexBuffer(0, shapesVertBuff);
 
 		// prepare to render images and videos
+
+		if (polygonVertIdx) {
+			let polygonVertSize = polygonVertIdx * 4; // 4 bytes per float
+			if (!polygonVertBuff || polygonVertBuff.size < polygonVertSize) {
+				if (polygonVertBuff) polygonVertBuff.destroy();
+				polygonVertBuff = Q5.device.createBuffer({
+					size: polygonVertSize * 2,
+					usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+				});
+			}
+
+			Q5.device.queue.writeBuffer(polygonVertBuff, 0, polygonVertStack.subarray(0, polygonVertIdx));
+			$._pass.setVertexBuffer(2, polygonVertBuff);
+
+			if (polyPtsIdx) {
+				let polyPtsSize = polyPtsIdx * 4;
+				if (!polyPtsBuffer || polyPtsBuffer.size < polyPtsSize) {
+					if (polyPtsBuffer) polyPtsBuffer.destroy();
+					polyPtsBuffer = Q5.device.createBuffer({
+						size: Math.max(polyPtsSize * 2, 64),
+						usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+					});
+				}
+				Q5.device.queue.writeBuffer(polyPtsBuffer, 0, polyPtsStack.subarray(0, polyPtsIdx));
+
+				polyPtsBindGroup = Q5.device.createBindGroup({
+					layout: polygonBindGroupLayout,
+					entries: [{ binding: 0, resource: { buffer: polyPtsBuffer } }]
+				});
+			}
+		}
 
 		if (imgVertIdx) {
 			$._pass.setPipeline($._pipelines[2]); // images pipeline
@@ -976,6 +1020,7 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 		let drawVertOffset = 0,
 			imageVertOffset = 0,
 			textCharOffset = 0,
+			polygonVertOffset = 0,
 			rectIdx = 0,
 			ellipseIdx = 0,
 			curPipelineIndex = -1;
@@ -1003,12 +1048,18 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 				} else if (curPipelineIndex == 6) {
 					pass.setIndexBuffer(ellipseIndexBuffer, 'uint16');
 					pass.setBindGroup(1, ellipseBindGroup);
+				} else if (curPipelineIndex == 7) {
+					pass.setBindGroup(1, polyPtsBindGroup);
 				} else if ($._customBindHandlers[curPipelineIndex]) {
 					$._customBindHandlers[curPipelineIndex](pass);
 				}
 			}
 
-			if (curPipelineIndex == 6) {
+			if (curPipelineIndex == 7) {
+				// draw a polygon
+				pass.draw(v, 1, polygonVertOffset, 0);
+				polygonVertOffset += v;
+			} else if (curPipelineIndex == 6) {
 				// draw an ellipse
 				pass.drawIndexed(18, v, 0, 0, ellipseIdx);
 				ellipseIdx += v;
@@ -1085,6 +1136,8 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 		// reset
 		shapesVertIdx = 0;
+		polygonVertIdx = 0;
+		polyPtsIdx = 0;
 		imgVertIdx = 0;
 		// Remove video frames without creating new array
 		if (vidFrames > 0) {
@@ -1235,19 +1288,16 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.vertex = (x, y) => {
-		if (matrixDirty) saveMatrix();
-		sv.push(x, y, fillIdx, matrixIdx);
+		sv.push(x, y, fillIdx);
 		shapeVertCount++;
 	};
 
 	$.curveVertex = (x, y) => {
-		if (matrixDirty) saveMatrix();
 		curveVertices.push({ x, y });
 	};
 
 	$.bezierVertex = function (cx1, cy1, cx2, cy2, x, y) {
 		if (shapeVertCount === 0) throw new Error('Shape needs a vertex()');
-		if (matrixDirty) saveMatrix();
 
 		// Get the last vertex as the starting point (P₀)
 		let prevIndex = (shapeVertCount - 1) * 4;
@@ -1283,118 +1333,26 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 				vy = mt3 * startY + 3 * mt2 * t * cy1 + 3 * mt * t2 * cy2 + t3 * y;
 			}
 
-			sv.push(vx, vy, fillIdx, matrixIdx);
+			sv.push(vx, vy, fillIdx);
 			shapeVertCount++;
 		}
 	};
 
 	$.quadraticVertex = (cx, cy, x, y) => $.bezierVertex(cx, cy, x, y);
 
-	$.endShape = (close) => {
-		if (curveVertices.length > 0) {
-			// duplicate start and end points if necessary
-			let points = [...curveVertices];
-			if (points.length < 4) {
-				// duplicate first and last points
-				while (points.length < 4) {
-					points.unshift(points[0]);
-					points.push(points[points.length - 1]);
-				}
-			}
+	function addQuad(x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) {
+		addVert(x1, y1, ci, ti); // v0
+		addVert(x2, y2, ci, ti); // v1
+		addVert(x4, y4, ci, ti); // v3
+		addVert(x3, y3, ci, ti); // v2
+		drawStack.push(shapesPL, 4);
+	}
 
-			// Use curveSegments to determine step size
-			let step = 1 / curveSegments;
-
-			// calculate catmull-rom spline curve points
-			for (let i = 0; i < points.length - 3; i++) {
-				let p0 = points[i];
-				let p1 = points[i + 1];
-				let p2 = points[i + 2];
-				let p3 = points[i + 3];
-
-				for (let t = 0; t <= 1; t += step) {
-					let t2 = t * t;
-					let t3 = t2 * t;
-
-					let x =
-						0.5 *
-						(2 * p1.x +
-							(-p0.x + p2.x) * t +
-							(2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
-							(-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
-
-					let y =
-						0.5 *
-						(2 * p1.y +
-							(-p0.y + p2.y) * t +
-							(2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
-							(-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
-
-					sv.push(x, y, fillIdx, matrixIdx);
-					shapeVertCount++;
-				}
-			}
-		}
-
-		if (!shapeVertCount) return;
-		if (shapeVertCount == 1) return $.point(sv[0], sv[1]);
-		if (shapeVertCount == 2) return $.line(sv[0], sv[1], sv[4], sv[5]);
-
-		// close the shape if requested
-		if (close) {
-			let firstIndex = 0;
-			let lastIndex = (shapeVertCount - 1) * 4;
-
-			let firstX = sv[firstIndex];
-			let firstY = sv[firstIndex + 1];
-			let lastX = sv[lastIndex];
-			let lastY = sv[lastIndex + 1];
-
-			if (firstX !== lastX || firstY !== lastY) {
-				sv.push(firstX, firstY, sv[firstIndex + 2], sv[firstIndex + 3]);
-				shapeVertCount++;
-			}
-		}
-
-		if (doFill) {
-			if (shapeVertCount == 5) {
-				// for quads, draw two triangles
-				addVert(sv[0], sv[1], sv[2], sv[3]); // v0
-				addVert(sv[4], sv[5], sv[6], sv[7]); // v1
-				addVert(sv[12], sv[13], sv[14], sv[15]); // v3
-				addVert(sv[8], sv[9], sv[10], sv[11]); // v2
-				drawStack.push(shapesPL, 4);
-			} else {
-				// triangulate the shape
-				for (let i = 1; i < shapeVertCount - 1; i++) {
-					let v0 = 0;
-					let v1 = i * 4;
-					let v2 = (i + 1) * 4;
-
-					addVert(sv[v0], sv[v0 + 1], sv[v0 + 2], sv[v0 + 3]);
-					addVert(sv[v1], sv[v1 + 1], sv[v1 + 2], sv[v1 + 3]);
-					addVert(sv[v2], sv[v2 + 1], sv[v2 + 2], sv[v2 + 3]);
-				}
-				drawStack.push(shapesPL, (shapeVertCount - 2) * 3);
-			}
-		}
-
-		if (doStroke) {
-			// draw lines between vertices
-			for (let i = 0; i < shapeVertCount - 1; i++) {
-				let v1 = i * 4;
-				let v2 = (i + 1) * 4;
-				$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
-			}
-			let v1 = (shapeVertCount - 1) * 4;
-			let v2 = 0;
-			if (close) $.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
-		}
-
-		// reset for the next shape
-		shapeVertCount = 0;
-		sv = [];
-		curveVertices = [];
+	$.plane = (x, y, w, h) => {
+		h ??= w;
+		let [l, r, t, b] = calcBox(x, y, w, h, 'center');
+		if (matrixDirty) saveMatrix();
+		addQuad(l, t, r, t, r, b, l, b, fillIdx, matrixIdx);
 	};
 
 	$.curve = (x1, y1, x2, y2, x3, y3, x4, y4) => {
@@ -1413,6 +1371,375 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		$.endShape();
 	};
 
+	/* POLYGONS */
+
+	let polygonPL = 7;
+
+	$._polygonShaderCode =
+		$._baseShaderCode +
+		/* wgsl */ `
+struct VertexParams {
+	@builtin(vertex_index) vertexIndex : u32,
+	@location(0) pos: vec2f,
+	@location(1) polyStart: f32,
+	@location(2) polyCount: f32,
+	@location(3) fillIndex: f32,
+	@location(4) strokeIndex: f32,
+	@location(5) strokeWeight: f32,
+	@location(6) matrixIndex: f32
+}
+
+struct FragParams {
+	@builtin(position) position: vec4f,
+	@location(0) localPos: vec2f,
+	@location(1) @interpolate(flat) polyStart: u32,
+	@location(2) @interpolate(flat) polyCount: u32,
+	@location(3) @interpolate(flat) fillIndex: f32,
+	@location(4) @interpolate(flat) strokeIndex: f32,
+	@location(5) @interpolate(flat) strokeWeight: f32,
+	@location(6) @interpolate(flat) isClosed: f32
+}
+
+@group(0) @binding(0) var<uniform> q: Q5;
+@group(0) @binding(1) var<storage> transforms: array<mat4x4<f32>>;
+@group(0) @binding(2) var<storage> colors : array<vec4f>;
+
+@group(1) @binding(0) var<storage, read> polyPts: array<vec4f>;
+
+fn transformVertex(pos: vec2f, matrixIndex: f32) -> vec4f {
+	var vert = vec4f(pos, 0.0, 1.0);
+	vert = transforms[i32(matrixIndex)] * vert;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
+	return vert;
+}
+
+fn getPolyColor(p: vec2f, start: u32, count: u32, fIdx: f32) -> vec4f {
+	let uniformColor = colors[i32(fIdx)];
+	if (uniformColor.a == 0.0) {
+		return uniformColor;
+	}
+
+	var sumWeight: f32 = 0.0;
+	var sumColor = vec4f(0.0);
+	for (var i: u32 = 0u; i < count; i = i + 1u) {
+		let pt = polyPts[start + i];
+		let d = distance(p, pt.xy);
+		if (d < 0.1) {
+			return colors[i32(pt.z)];
+		}
+		let w = 1.0 / (d * d * d);
+		sumWeight += w;
+		sumColor += colors[i32(pt.z)] * w;
+	}
+	return sumColor / sumWeight;
+}
+
+fn sdPolygon(p: vec2f, start: u32, count: u32, isClosed: f32) -> f32 {
+	var d: f32 = dot(p - polyPts[start].xy, p - polyPts[start].xy);
+	var s: f32 = 1.0;
+	var j: u32 = count - 1u;
+	for (var i: u32 = 0u; i < count; i = i + 1u) {
+		let vi = polyPts[start + i].xy;
+		let vj = polyPts[start + j].xy;
+		let e = vj - vi;
+		let w = p - vi;
+		let b = w - e * clamp(dot(w, e) / dot(e, e), 0.0, 1.0);
+		let bSq = dot(b, b);
+		if (isClosed != 0.0 || i != 0u) {
+			if (bSq < d) { d = bSq; }
+		}
+		
+		let condX = p.y >= vi.y;
+		let condY = p.y < vj.y;
+		let condZ = e.x * w.y > e.y * w.x;
+		if ((condX && condY && condZ) || (!condX && !condY && !condZ)) {
+			s = -s;
+		}
+		j = i;
+	}
+	if (isClosed == 0.0) {
+		return sqrt(d);
+	}
+	return s * sqrt(d);
+}
+
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	var f: FragParams;
+	
+	// manually apply transform
+	var vert = vec4f(v.pos, 0.0, 1.0);
+	vert = transforms[i32(v.matrixIndex)] * vert;
+	vert.x /= q.halfWidth;
+	vert.y /= q.halfHeight;
+	
+	f.position = vert;
+	f.localPos = v.pos;
+	f.polyStart = u32(v.polyStart + 0.1);
+	f.polyCount = u32(abs(v.polyCount) + 0.1);
+	f.isClosed = step(0.0, v.polyCount);
+	f.fillIndex = v.fillIndex;
+	f.strokeIndex = v.strokeIndex;
+	f.strokeWeight = v.strokeWeight;
+	return f;
+}
+
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let dist = sdPolygon(f.localPos, f.polyStart, f.polyCount, f.isClosed);
+	let fill = getPolyColor(f.localPos, f.polyStart, f.polyCount, f.fillIndex);
+	let stroke = colors[i32(f.strokeIndex)];
+	
+	let dpdx_d = dpdx(dist);
+	let dpdy_d = dpdy(dist);
+	let distGrad = sqrt(dpdx_d * dpdx_d + dpdy_d * dpdy_d);
+	let aa = clamp(distGrad * 1.5, 0.001, 2.0);
+	
+	let halfStroke = f.strokeWeight * 0.5;
+	
+	var outFragColor: vec4f;
+
+	if (fill.a != 0.0 && f.strokeWeight == 0.0) {
+		let fillAlpha = 1.0 - smoothstep(-aa, aa, dist);
+		if (fillAlpha <= 0.0) { discard; }
+		outFragColor = vec4f(fill.rgb, fill.a * fillAlpha);
+	} else if (fill.a != 0.0) {
+		let fillAlpha = 1.0 - smoothstep(-aa, aa, dist);
+		let strokeDist = abs(dist) - halfStroke;
+		let strokeAlphaMask = 1.0 - smoothstep(-aa, aa, strokeDist);
+		
+		if (fillAlpha <= 0.0 && strokeAlphaMask <= 0.0) { discard; }
+		
+		let sA = stroke.a * strokeAlphaMask;
+		let fA = fill.a * fillAlpha;
+		let outAlpha = sA + fA * (1.0 - sA);
+		let outCol = stroke.rgb * sA + fill.rgb * fA * (1.0 - sA);
+		outFragColor = vec4f(outCol / max(outAlpha, 1e-5), outAlpha);
+	} else {
+		let strokeDist = abs(dist) - halfStroke;
+		let strokeAlpha = 1.0 - smoothstep(-aa, aa, strokeDist);
+		
+		if (strokeAlpha <= 0.0) { discard; }
+		outFragColor = vec4f(stroke.rgb, stroke.a * strokeAlpha);
+	}
+	return outFragColor;
+}
+`;
+
+	let polygonShader = Q5.device.createShaderModule({
+		label: 'polygonShader',
+		code: $._polygonShaderCode
+	});
+
+	let polygonVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
+		polygonVertIdx = 0;
+	let polyPtsStack = new Float32Array($._isGraphics ? 1000 : 1e7),
+		polyPtsIdx = 0;
+
+	let polygonVertBuffLayout = {
+		arrayStride: 32, // 8 floats * 4 bytes
+		attributes: [
+			{ format: 'float32x2', offset: 0, shaderLocation: 0 },
+			{ format: 'float32', offset: 8, shaderLocation: 1 },
+			{ format: 'float32', offset: 12, shaderLocation: 2 },
+			{ format: 'float32', offset: 16, shaderLocation: 3 },
+			{ format: 'float32', offset: 20, shaderLocation: 4 },
+			{ format: 'float32', offset: 24, shaderLocation: 5 },
+			{ format: 'float32', offset: 28, shaderLocation: 6 }
+		]
+	};
+
+	let polygonBindGroupLayout = Q5.device.createBindGroupLayout({
+		entries: [{ binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }]
+	});
+
+	let polygonPipelineLayout = Q5.device.createPipelineLayout({
+		label: 'polygonPipelineLayout',
+		bindGroupLayouts: [mainLayout, polygonBindGroupLayout]
+	});
+
+	$._pipelineConfigs[7] = {
+		label: 'polygonPipeline',
+		layout: polygonPipelineLayout,
+		vertex: { module: polygonShader, entryPoint: 'vertexMain', buffers: [null, null, polygonVertBuffLayout] },
+		fragment: {
+			module: polygonShader,
+			entryPoint: 'fragMain',
+			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
+		},
+		primitive: { topology: 'triangle-list' },
+		multisample: { count: 4 }
+	};
+	$._pipelines[7] = Q5.device.createRenderPipeline($._pipelineConfigs[7]);
+
+	const addPolygonVert = (x, y, start, count, fIdx, sIdx, sWeight, mIdx) => {
+		let v = polygonVertStack,
+			i = polygonVertIdx;
+		v[i++] = x;
+		v[i++] = y;
+		v[i++] = start;
+		v[i++] = count;
+		v[i++] = fIdx;
+		v[i++] = sIdx;
+		v[i++] = sWeight;
+		v[i++] = mIdx;
+		polygonVertIdx = i;
+	};
+
+	$.endShape = (close) => {
+		if (curveVertices.length > 0) {
+			let points = [...curveVertices];
+			if (points.length < 4) {
+				while (points.length < 4) {
+					points.unshift(points[0]);
+					points.push(points[points.length - 1]);
+				}
+			}
+			let step = 1 / curveSegments;
+			for (let i = 0; i < points.length - 3; i++) {
+				let p0 = points[i],
+					p1 = points[i + 1],
+					p2 = points[i + 2],
+					p3 = points[i + 3];
+				let startT = i === 0 ? 0 : 1;
+				for (let j = startT; j <= curveSegments; j++) {
+					let t = j / curveSegments;
+					let t2 = t * t,
+						t3 = t2 * t;
+					let x =
+						0.5 *
+						(2 * p1.x +
+							(-p0.x + p2.x) * t +
+							(2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+							(-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
+					let y =
+						0.5 *
+						(2 * p1.y +
+							(-p0.y + p2.y) * t +
+							(2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+							(-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
+					sv.push(x, y, fillIdx);
+					shapeVertCount++;
+				}
+			}
+		}
+
+		if (!shapeVertCount) return;
+		if (shapeVertCount == 1) {
+			$.point(sv[0], sv[1]);
+			shapeVertCount = 0;
+			sv = [];
+			curveVertices = [];
+			return;
+		}
+		if (shapeVertCount == 2) {
+			$.line(sv[0], sv[1], sv[3], sv[4]);
+			shapeVertCount = 0;
+			sv = [];
+			curveVertices = [];
+			return;
+		}
+
+		if (matrixDirty) saveMatrix();
+		let ti = matrixIdx;
+
+		let isAutoClosed = false;
+		let isClosedPath = false;
+		let firstX = sv[0],
+			firstY = sv[1];
+		let lastX = sv[(shapeVertCount - 1) * 3],
+			lastY = sv[(shapeVertCount - 1) * 3 + 1];
+
+		if (firstX === lastX && firstY === lastY) {
+			isClosedPath = true;
+		} else if (close || doFill) {
+			sv.push(firstX, firstY, sv[2]);
+			shapeVertCount++;
+			isAutoClosed = !close;
+			isClosedPath = true;
+		}
+
+		let runSDF = shapeVertCount >= 3 && doStroke;
+
+		if (runSDF) {
+			let fi = doFill ? fillIdx : 0,
+				si = strokeIdx;
+
+			let polyStart = polyPtsIdx / 4,
+				polyCount = isClosedPath ? shapeVertCount - 1 : shapeVertCount;
+			for (let i = 0; i < polyCount; i++) {
+				polyPtsStack[polyPtsIdx++] = sv[i * 3];
+				polyPtsStack[polyPtsIdx++] = sv[i * 3 + 1];
+				polyPtsStack[polyPtsIdx++] = sv[i * 3 + 2];
+				polyPtsStack[polyPtsIdx++] = ti;
+			}
+
+			let minX = Infinity,
+				minY = Infinity,
+				maxX = -Infinity,
+				maxY = -Infinity;
+			for (let i = 0; i < shapeVertCount; i++) {
+				let vx = sv[i * 3],
+					vy = sv[i * 3 + 1];
+				if (vx < minX) minX = vx;
+				if (vx > maxX) maxX = vx;
+				if (vy < minY) minY = vy;
+				if (vy > maxY) maxY = vy;
+			}
+			let padding = sw * 0.5 + 1.0; // padding for stroke and AA
+			minX -= padding;
+			minY -= padding;
+			maxX += padding;
+			maxY += padding;
+
+			let passedCount = isClosedPath ? polyCount : -polyCount;
+			addPolygonVert(minX, minY, polyStart, passedCount, fi, si, sw, ti);
+			addPolygonVert(maxX, minY, polyStart, passedCount, fi, si, sw, ti);
+			addPolygonVert(minX, maxY, polyStart, passedCount, fi, si, sw, ti);
+
+			addPolygonVert(maxX, minY, polyStart, passedCount, fi, si, sw, ti);
+			addPolygonVert(maxX, maxY, polyStart, passedCount, fi, si, sw, ti);
+			addPolygonVert(minX, maxY, polyStart, passedCount, fi, si, sw, ti);
+
+			drawStack.push(polygonPL, 6);
+		} else {
+			if (doFill) {
+				if (shapeVertCount == 5) {
+					// Quads
+					addVert(sv[0], sv[1], sv[2], ti);
+					addVert(sv[3], sv[4], sv[5], ti);
+					addVert(sv[9], sv[10], sv[11], ti);
+					addVert(sv[6], sv[7], sv[8], ti);
+					drawStack.push(shapesPL, 4);
+				} else {
+					// Triangulation fan
+					for (let i = 1; i < shapeVertCount - 1; i++) {
+						let v0 = 0,
+							v1 = i * 3,
+							v2 = (i + 1) * 3;
+						addVert(sv[v0], sv[v0 + 1], sv[v0 + 2], ti);
+						addVert(sv[v1], sv[v1 + 1], sv[v1 + 2], ti);
+						addVert(sv[v2], sv[v2 + 1], sv[v2 + 2], ti);
+					}
+					drawStack.push(shapesPL, (shapeVertCount - 2) * 3);
+				}
+			}
+			if (doStroke) {
+				let maxLines = isAutoClosed ? shapeVertCount - 2 : shapeVertCount - 1;
+				for (let i = 0; i < maxLines; i++) {
+					let v1 = i * 3,
+						v2 = (i + 1) * 3;
+					$.line(sv[v1], sv[v1 + 1], sv[v2], sv[v2 + 1]);
+				}
+			}
+		}
+
+		shapeVertCount = 0;
+		sv = [];
+		curveVertices = [];
+	};
+
 	$.triangle = (x1, y1, x2, y2, x3, y3) => {
 		$.beginShape();
 		$.vertex(x1, y1);
@@ -1428,21 +1755,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		$.vertex(x3, y3);
 		$.vertex(x4, y4);
 		$.endShape(true);
-	};
-
-	function addQuad(x1, y1, x2, y2, x3, y3, x4, y4, ci, ti) {
-		addVert(x1, y1, ci, ti); // v0
-		addVert(x2, y2, ci, ti); // v1
-		addVert(x4, y4, ci, ti); // v3
-		addVert(x3, y3, ci, ti); // v2
-		drawStack.push(shapesPL, 4);
-	}
-
-	$.plane = (x, y, w, h) => {
-		h ??= w;
-		let [l, r, t, b] = calcBox(x, y, w, h, 'center');
-		if (matrixDirty) saveMatrix();
-		addQuad(l, t, r, t, r, b, l, b, fillIdx, matrixIdx);
 	};
 
 	/* RECT */
@@ -1737,7 +2049,21 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.line = (x1, y1, x2, y2) => {
-		if (doStroke) addCapsule(x1, y1, x2, y2, qsw, hsw, 0);
+		if (!doStroke) return;
+		if (matrixDirty) saveMatrix();
+
+		let dx = x2 - x1,
+			dy = y2 - y1,
+			sqLen = dx * dx + dy * dy;
+
+		if (sqLen === 0) return;
+
+		let len = Math.sqrt(sqLen),
+			ratio = hsw / len,
+			nx = -dy * ratio,
+			ny = dx * ratio;
+
+		addQuad(x1 + nx, y1 + ny, x1 - nx, y1 - ny, x2 - nx, y2 - ny, x2 + nx, y2 + ny, strokeIdx, matrixIdx);
 	};
 
 	/* ELLIPSE */
@@ -3380,6 +3706,8 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		transformsBuffer?.destroy();
 		colorsBuffer?.destroy();
 		shapesVertBuff?.destroy();
+		polygonVertBuff?.destroy();
+		polyPtsBuffer?.destroy();
 		imgVertBuff?.destroy();
 		charBuffer?.destroy();
 		textBuffer?.destroy();
