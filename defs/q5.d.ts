@@ -1876,10 +1876,20 @@ declare global {
 	function strokeCap(val: CanvasLineCap): void;
 
 	/** 💅
-	 * Set the line join style to `ROUND`, `BEVEL`, or `MITER`.
+	 * Set the line join style to `ROUND` or `MITER`.
 	 * 
-	 * Not available in q5 WebGPU.
+	 * The default is `MITER`.
 	 * @param {CanvasLineJoin} val line join style
+	 * @example
+	 * await Canvas(200);
+	 * background(0.8);
+	 * strokeWeight(10);
+	 * 
+	 * strokeJoin(ROUND);
+	 * triangle(-50, -30, 50, -30, -50, 20);
+	 * 
+	 * strokeJoin(MITER);
+	 * triangle(50, 0, -50, 50, 50, 50);
 	 */
 	function strokeJoin(val: CanvasLineJoin): void;
 
@@ -3836,23 +3846,8 @@ declare global {
 	 * Specifies a vertex in a shape.
 	 *
 	 * Each vertex can have its own fill color. Useful for creating gradients.
-	 * 
-	 * Note that shapes without a stroke will be drawn using the shapes shader. Stroked shapes will be drawn using the more complex stroked shapes shader.
 	 * @param {number} x x-coordinate
 	 * @param {number} y y-coordinate
-	 * @example
-	 * await Canvas(200);
-	 * 
-	 * noStroke();
-	 * 
-	 * beginShape();
-	 * fill(1, 0, 0);
-	 * vertex(-80, -80);
-	 * vertex(40, -60);
-	 * fill(0, 0, 1);
-	 * vertex(80, 60);
-	 * vertex(-60, 80);
-	 * endShape(true);
 	 * @example
 	 * await Canvas(200);
 	 * 

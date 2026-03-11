@@ -99,23 +99,6 @@ Specifies a vertex in a shape.
 
 Each vertex can have its own fill color. Useful for creating gradients.
 
-Note that shapes without a stroke will be drawn using the shapes shader. Stroked shapes will be drawn using the more complex stroked shapes shader.
-
-```js
-await Canvas(200);
-
-noStroke();
-
-beginShape();
-fill(1, 0, 0);
-vertex(-80, -80);
-vertex(40, -60);
-fill(0, 0, 1);
-vertex(80, 60);
-vertex(-60, 80);
-endShape(true);
-```
-
 ```js
 await Canvas(200);
 

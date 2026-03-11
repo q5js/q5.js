@@ -1883,7 +1883,7 @@ declare global {
 	/** 💅
 	 * Set the line join style to `ROUND`, `BEVEL`, or `MITER`.
 	 * 
-	 * Not available in q5 WebGPU.
+	 * The default is `ROUND`.
 	 * @param {CanvasLineJoin} val line join style
 	 * @example
 	 * createCanvas(200);

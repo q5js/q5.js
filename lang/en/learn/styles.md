@@ -345,15 +345,33 @@ line(50, 150, 150, 150);
 
 ## strokeJoin
 
-Set the line join style to `ROUND`, `BEVEL`, or `MITER`.
-
-Not available in q5 WebGPU.
-
 ```
 @param {CanvasLineJoin} val line join style
 ```
 
+### webgpu
+
+Set the line join style to `ROUND` or `MITER`.
+
+The default is `MITER`.
+
+```js
+await Canvas(200);
+background(0.8);
+strokeWeight(10);
+
+strokeJoin(ROUND);
+triangle(-50, -30, 50, -30, -50, 20);
+
+strokeJoin(MITER);
+triangle(50, 0, -50, 50, 50, 50);
+```
+
 ### c2d
+
+Set the line join style to `ROUND`, `BEVEL`, or `MITER`.
+
+The default is `ROUND`.
 
 ```js
 createCanvas(200);

@@ -95,23 +95,6 @@ Especifica un vértice en una forma.
 
 Cada vértice puede tener su propio color de relleno, lo que es útil para crear degradados.
 
-Ten en cuenta que las formas sin trazo se dibujan usando el sombreador de formas. Las formas con trazo se dibujan usando un sombreador más complejo para trazos.
-
-```js
-await Lienzo(200);
-
-sinTrazo();
-
-empezarForma();
-relleno(1, 0, 0);
-vértice(-80, -80);
-vértice(40, -60);
-relleno(0, 0, 1);
-vértice(80, 60);
-vértice(-60, 80);
-terminarForma(true);
-```
-
 ```js
 await Lienzo(200);
 
