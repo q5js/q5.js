@@ -7,11 +7,7 @@ usados para crear efectos visuales avanzados en q5!
 
 Crea un shader que el renderizador WebGPU de q5 puede usar.
 
-Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones:
-
-`triángulo`, `quad`, `plano`,
-`curva`, `bezier`, `empezarForma`/`terminarForma`,
-y `fondo` (a menos que se use una imagen).
+Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones: `plano`, `línea`, y `terminarForma`.
 
 Para más información sobre los parámetros de entrada de las funciones de vértice y fragmento,
 los datos y las funciones auxiliares disponibles para usar

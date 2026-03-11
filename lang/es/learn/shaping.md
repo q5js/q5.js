@@ -82,18 +82,6 @@ Comienza a almacenar vértices para una forma convexa.
 
 Termina de almacenar vértices para una forma convexa.
 
-## empezarContorno
-
-Comienza a almacenar vértices para un contorno.
-
-No disponible en q5 WebGPU.
-
-## terminarContorno
-
-Termina de almacenar vértices para un contorno.
-
-No disponible en q5 WebGPU.
-
 ## vértice
 
 Especifica un vértice en una forma.
@@ -101,6 +89,43 @@ Especifica un vértice en una forma.
 ```
 @param {number} x coordenada-x
 @param {number} y coordenada-y
+```
+
+### webgpu
+
+Cada vértice puede tener su propio color de relleno, lo que es útil para crear degradados.
+
+Ten en cuenta que las formas sin trazo se dibujan usando el sombreador de formas. Las formas con trazo se dibujan usando un sombreador más complejo para trazos.
+
+```js
+await Lienzo(200);
+
+sinTrazo();
+
+empezarForma();
+relleno(1, 0, 0);
+vértice(-80, -80);
+vértice(40, -60);
+relleno(0, 0, 1);
+vértice(80, 60);
+vértice(-60, 80);
+terminarForma(true);
+```
+
+```js
+await Lienzo(200);
+
+trazo(1, 0.5);
+grosorTrazo(20);
+
+empezarForma();
+relleno(1, 0, 0);
+vértice(-80, -80);
+vértice(40, -60);
+relleno(0, 0, 1);
+vértice(80, 60);
+vértice(-60, 80);
+terminarForma(true);
 ```
 
 ## vérticeBezier
@@ -169,3 +194,15 @@ Dibuja un cuadrilátero.
 @param {number} x4 coordenada-x del cuarto vértice
 @param {number} y4 coordenada-y del cuarto vértice
 ```
+
+## empezarContorno
+
+Comienza a almacenar vértices para un contorno.
+
+No disponible en q5 WebGPU.
+
+## terminarContorno
+
+Termina de almacenar vértices para un contorno.
+
+No disponible en q5 WebGPU.

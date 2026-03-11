@@ -1487,39 +1487,52 @@ fn vertexMain(v: VertexParams) -> FragParams {
 
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
-	let dist = sdPolygon(f.localPos, f.polyStart, f.polyCount, f.isClosed);
 	let fill = getPolyColor(f.localPos, f.polyStart, f.polyCount, f.fillIndex);
 	let stroke = colors[i32(f.strokeIndex)];
-	
-	let dpdx_d = dpdx(dist);
-	let dpdy_d = dpdy(dist);
-	let distGrad = sqrt(dpdx_d * dpdx_d + dpdy_d * dpdy_d);
-	let aa = clamp(distGrad * 1.5, 0.001, 2.0);
-	
-	let halfStroke = f.strokeWeight * 0.5;
-	
+
+	// f.isClosed is derived from the sign of v.polyCount (used for fill closure)
+	let distFill = sdPolygon(f.localPos, f.polyStart, f.polyCount, f.isClosed);
+
+	// encode stroke-closure in the sign of strokeWeight; use absolute stroke weight for width
+	let isClosedStroke = step(0.0, f.strokeWeight);
+	let strokeW = abs(f.strokeWeight);
+	let distStroke = sdPolygon(f.localPos, f.polyStart, f.polyCount, isClosedStroke);
+
+	// compute AA using gradients from both distances (conservative)
+	let dpdx_fill = dpdx(distFill);
+	let dpdy_fill = dpdy(distFill);
+	let gradFill = sqrt(dpdx_fill * dpdx_fill + dpdy_fill * dpdy_fill);
+
+	let dpdx_stroke = dpdx(distStroke);
+	let dpdy_stroke = dpdy(distStroke);
+	let gradStroke = sqrt(dpdx_stroke * dpdx_stroke + dpdy_stroke * dpdy_stroke);
+
+	let aa = clamp(max(gradFill, gradStroke) * 1.5, 0.001, 2.0);
+
+	let halfStroke = strokeW * 0.5;
+
 	var outFragColor: vec4f;
 
-	if (fill.a != 0.0 && f.strokeWeight == 0.0) {
-		let fillAlpha = 1.0 - smoothstep(-aa, aa, dist);
+	if (fill.a != 0.0 && strokeW == 0.0) {
+		let fillAlpha = 1.0 - smoothstep(-aa, aa, distFill);
 		if (fillAlpha <= 0.0) { discard; }
 		outFragColor = vec4f(fill.rgb, fill.a * fillAlpha);
 	} else if (fill.a != 0.0) {
-		let fillAlpha = 1.0 - smoothstep(-aa, aa, dist);
-		let strokeDist = abs(dist) - halfStroke;
+		let fillAlpha = 1.0 - smoothstep(-aa, aa, distFill);
+		let strokeDist = abs(distStroke) - halfStroke;
 		let strokeAlphaMask = 1.0 - smoothstep(-aa, aa, strokeDist);
-		
+
 		if (fillAlpha <= 0.0 && strokeAlphaMask <= 0.0) { discard; }
-		
+
 		let sA = stroke.a * strokeAlphaMask;
 		let fA = fill.a * fillAlpha;
 		let outAlpha = sA + fA * (1.0 - sA);
 		let outCol = stroke.rgb * sA + fill.rgb * fA * (1.0 - sA);
 		outFragColor = vec4f(outCol / max(outAlpha, 1e-5), outAlpha);
 	} else {
-		let strokeDist = abs(dist) - halfStroke;
+		let strokeDist = abs(distStroke) - halfStroke;
 		let strokeAlpha = 1.0 - smoothstep(-aa, aa, strokeDist);
-		
+
 		if (strokeAlpha <= 0.0) { discard; }
 		outFragColor = vec4f(stroke.rgb, stroke.a * strokeAlpha);
 	}
@@ -1596,7 +1609,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 					points.push(points[points.length - 1]);
 				}
 			}
-			let step = 1 / curveSegments;
 			for (let i = 0; i < points.length - 3; i++) {
 				let p0 = points[i],
 					p1 = points[i + 1],
@@ -1646,6 +1658,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		let isAutoClosed = false;
 		let isClosedPath = false;
+		let isClosedForStroke = false;
 		let firstX = sv[0],
 			firstY = sv[1];
 		let lastX = sv[(shapeVertCount - 1) * 3],
@@ -1653,14 +1666,16 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		if (firstX === lastX && firstY === lastY) {
 			isClosedPath = true;
+			isClosedForStroke = true;
 		} else if (close || doFill) {
 			sv.push(firstX, firstY, sv[2]);
 			shapeVertCount++;
 			isAutoClosed = !close;
 			isClosedPath = true;
+			isClosedForStroke = !!close;
 		}
 
-		let runSDF = shapeVertCount >= 3 && doStroke;
+		let runSDF = shapeVertCount >= 3 && doStroke && hswScaled > 3;
 
 		if (runSDF) {
 			let fi = doFill ? fillIdx : 0,
@@ -1693,14 +1708,16 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			maxX += padding;
 			maxY += padding;
 
-			let passedCount = isClosedPath ? polyCount : -polyCount;
-			addPolygonVert(minX, minY, polyStart, passedCount, fi, si, sw, ti);
-			addPolygonVert(maxX, minY, polyStart, passedCount, fi, si, sw, ti);
-			addPolygonVert(minX, maxY, polyStart, passedCount, fi, si, sw, ti);
+			// single SDF pass: encode fill-closure in polyCount sign, stroke-closure in strokeWeight sign
+			let passedCount = doFill ? polyCount : -polyCount;
+			let strokeWeightSigned = isClosedForStroke ? sw : -sw;
+			addPolygonVert(minX, minY, polyStart, passedCount, fi, si, strokeWeightSigned, ti);
+			addPolygonVert(maxX, minY, polyStart, passedCount, fi, si, strokeWeightSigned, ti);
+			addPolygonVert(minX, maxY, polyStart, passedCount, fi, si, strokeWeightSigned, ti);
 
-			addPolygonVert(maxX, minY, polyStart, passedCount, fi, si, sw, ti);
-			addPolygonVert(maxX, maxY, polyStart, passedCount, fi, si, sw, ti);
-			addPolygonVert(minX, maxY, polyStart, passedCount, fi, si, sw, ti);
+			addPolygonVert(maxX, minY, polyStart, passedCount, fi, si, strokeWeightSigned, ti);
+			addPolygonVert(maxX, maxY, polyStart, passedCount, fi, si, strokeWeightSigned, ti);
+			addPolygonVert(minX, maxY, polyStart, passedCount, fi, si, strokeWeightSigned, ti);
 
 			drawStack.push(polygonPL, 6);
 		} else {

@@ -3799,20 +3799,6 @@ declare global {
 	function terminarForma(): void;
 
 	/** 🖌
-	 * Comienza a almacenar vértices para un contorno.
-	 * 
-	 * No disponible en q5 WebGPU.
-	 */
-	function empezarContorno(): void;
-
-	/** 🖌
-	 * Termina de almacenar vértices para un contorno.
-	 * 
-	 * No disponible en q5 WebGPU.
-	 */
-	function terminarContorno(): void;
-
-	/** 🖌
 	 * Especifica un vértice en una forma.
 	 * @param {number} x coordenada-x
 	 * @param {number} y coordenada-y
@@ -3875,6 +3861,20 @@ declare global {
 	 * @param {number} y4 coordenada-y del cuarto vértice
 	 */
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
+
+	/** 🖌
+	 * Comienza a almacenar vértices para un contorno.
+	 * 
+	 * No disponible en q5 WebGPU.
+	 */
+	function empezarContorno(): void;
+
+	/** 🖌
+	 * Termina de almacenar vértices para un contorno.
+	 * 
+	 * No disponible en q5 WebGPU.
+	 */
+	function terminarContorno(): void;
 
 	// ⚙ avanzado
 

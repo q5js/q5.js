@@ -3812,23 +3812,40 @@ declare global {
 	function terminarForma(): void;
 
 	/** 🖌
-	 * Comienza a almacenar vértices para un contorno.
-	 * 
-	 * No disponible en q5 WebGPU.
-	 */
-	function empezarContorno(): void;
-
-	/** 🖌
-	 * Termina de almacenar vértices para un contorno.
-	 * 
-	 * No disponible en q5 WebGPU.
-	 */
-	function terminarContorno(): void;
-
-	/** 🖌
 	 * Especifica un vértice en una forma.
+	 *
+	 * Cada vértice puede tener su propio color de relleno, lo que es útil para crear degradados.
+	 * 
+	 * Ten en cuenta que las formas sin trazo se dibujan usando el sombreador de formas. Las formas con trazo se dibujan usando un sombreador más complejo para trazos.
 	 * @param {number} x coordenada-x
 	 * @param {number} y coordenada-y
+	 * @example
+	 * await Lienzo(200);
+	 * 
+	 * sinTrazo();
+	 * 
+	 * empezarForma();
+	 * relleno(1, 0, 0);
+	 * vértice(-80, -80);
+	 * vértice(40, -60);
+	 * relleno(0, 0, 1);
+	 * vértice(80, 60);
+	 * vértice(-60, 80);
+	 * terminarForma(true);
+	 * @example
+	 * await Lienzo(200);
+	 * 
+	 * trazo(1, 0.5);
+	 * grosorTrazo(20);
+	 * 
+	 * empezarForma();
+	 * relleno(1, 0, 0);
+	 * vértice(-80, -80);
+	 * vértice(40, -60);
+	 * relleno(0, 0, 1);
+	 * vértice(80, 60);
+	 * vértice(-60, 80);
+	 * terminarForma(true);
 	 */
 	function vértice(x: number, y: number): void;
 
@@ -3889,6 +3906,20 @@ declare global {
 	 */
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
+	/** 🖌
+	 * Comienza a almacenar vértices para un contorno.
+	 * 
+	 * No disponible en q5 WebGPU.
+	 */
+	function empezarContorno(): void;
+
+	/** 🖌
+	 * Termina de almacenar vértices para un contorno.
+	 * 
+	 * No disponible en q5 WebGPU.
+	 */
+	function terminarContorno(): void;
+
 	// ⚡ sombreadores
 
 	/**
@@ -3899,11 +3930,7 @@ declare global {
 	/** ⚡
 	 * Crea un shader que el renderizador WebGPU de q5 puede usar.
 	 * 
-	 * Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones:
-	 * 
-	 * `triángulo`, `quad`, `plano`,
-	 * `curva`, `bezier`, `empezarForma`/`terminarForma`,
-	 * y `fondo` (a menos que se use una imagen).
+	 * Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones: `plano`, `línea`, y `terminarForma`.
 	 * 
 	 * Para más información sobre los parámetros de entrada de las funciones de vértice y fragmento,
 	 * los datos y las funciones auxiliares disponibles para usar

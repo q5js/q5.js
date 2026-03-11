@@ -7,11 +7,7 @@ used to create advanced visual effects in q5!
 
 Creates a shader that q5's WebGPU renderer can use.
 
-If `type` is not specified, this function customizes a copy of the [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), which affects the following functions:
-
-`triangle`, `quad`, `plane`,
-`curve`, `bezier`, `beginShape`/`endShape`,
-and `background` (unless an image is used).
+If `type` is not specified, this function customizes a copy of the [default shapes shader](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), which affects these functions: `plane`, `line`, and `endShape` (only for shapes drawn without a stroke).
 
 For more information on the vertex and fragment function
 input parameters, data, and helper functions made available for use
