@@ -28,7 +28,6 @@ Note that in this example, the circle is located at position [0, 0], the origin 
 ### webgpu
 
 ```js
-// WebGPU
 await Canvas(200, 100);
 background('silver');
 circle(0, 0, 80);
@@ -37,7 +36,6 @@ circle(0, 0, 80);
 ### c2d
 
 ```js
-// Canvas2D
 createCanvas(200, 100);
 background('silver');
 circle(0, 0, 80);

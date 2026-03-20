@@ -25,7 +25,6 @@ declare global {
 	 * @param {object} [opt] [options](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes)
 	 * @returns {Promise<HTMLCanvasElement>} canvas element
 	 * @example
-	 * // WebGPU
 	 * await Canvas(200, 100);
 	 * background('silver');
 	 * circle(0, 0, 80);

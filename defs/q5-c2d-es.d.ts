@@ -24,7 +24,6 @@ declare global {
 	 * @param {object} [opciones] opciones para el contexto 2d
 	 * @return {Promise<HTMLCanvasElement>} una promesa que se resuelve con el elemento canvas creado
 	 * @example
-	 * // Canvas2D
 	 * crearLienzo(200, 100);
 	 * fondo('silver');
 	 * círculo(0, 0, 80);

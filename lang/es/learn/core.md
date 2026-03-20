@@ -27,7 +27,6 @@ Ten en cuenta que en este ejemplo, el círculo se encuentra en la posición [0, 
 ### webgpu
 
 ```js
-// WebGPU
 await Lienzo(200, 100);
 fondo('silver');
 círculo(0, 0, 80);
@@ -36,7 +35,6 @@ círculo(0, 0, 80);
 ### c2d
 
 ```js
-// Canvas2D
 crearLienzo(200, 100);
 fondo('silver');
 círculo(0, 0, 80);
