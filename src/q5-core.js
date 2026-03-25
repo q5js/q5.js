@@ -181,6 +181,7 @@ function Q5(scope, parent, renderer) {
 		$._redraw = false;
 	};
 	$.remove = async () => {
+		$._removed = true;
 		$.noLoop();
 		if ($.canvas.remove) $.canvas.remove();
 		await runHooks('remove');

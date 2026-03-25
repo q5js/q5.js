@@ -83,9 +83,9 @@ Q5.modules.canvas = ($, q) => {
 				if (window.IntersectionObserver) {
 					let wasObserved = false;
 					new IntersectionObserver((e) => {
-						let isIntersecting = e[0].isIntersecting;
+						if ($._removed) return;
 
-						if (!isIntersecting) {
+						if (!e[0].isIntersecting) {
 							// the canvas might still be onscreen, just behind other elements
 							let r = c.getBoundingClientRect();
 							c.visible = r.top < window.innerHeight && r.bottom > 0 && r.left < window.innerWidth && r.right > 0;
@@ -194,7 +194,7 @@ Q5.modules.canvas = ($, q) => {
 			el.append(c);
 
 			function parentResized() {
-				if ($.frameCount > 1) {
+				if ($.frameCount > 1 && !$._removed) {
 					$._didResize = true;
 					$._adjustDisplay();
 				}
