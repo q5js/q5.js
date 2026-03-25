@@ -132,7 +132,7 @@ Q5.modules.canvas = ($, q) => {
 		g.createCanvas.call($, w, h, opt);
 		let scale = g._pixelDensity * $._defaultImageScale;
 		g.defaultWidth = w * scale;
-		g.defaultHeight = h * scale;
+		g.defaultHeight = (h || w) * scale;
 		return g;
 	};
 

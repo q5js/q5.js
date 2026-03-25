@@ -637,7 +637,7 @@ Q5.modules.canvas = ($, q) => {
 		g.createCanvas.call($, w, h, opt);
 		let scale = g._pixelDensity * $._defaultImageScale;
 		g.defaultWidth = w * scale;
-		g.defaultHeight = h * scale;
+		g.defaultHeight = (h || w) * scale;
 		return g;
 	};
 
@@ -3335,6 +3335,7 @@ Q5.modules.dom = ($, q) => {
 		el.height ||= el.videoHeight;
 		el.defaultWidth = el.width * $._defaultImageScale;
 		el.defaultHeight = el.height * $._defaultImageScale;
+		el._pixelDensity = 1;
 		el.ready = true;
 	}
 
@@ -7971,7 +7972,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	};
 
 	$.image = (img, dx = 0, dy = 0, dw, dh, sx = 0, sy = 0, sw, sh) => {
-		if (!img) return;
+		if (img == undefined) return;
 		let isVideo;
 		if (img._texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
@@ -7981,10 +7982,9 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		if (matrixDirty) saveMatrix();
 
-		let cnv = img.canvas || img,
-			w = cnv.width,
-			h = cnv.height,
-			pd = img._pixelDensity || 1,
+		let w = img.width,
+			h = img.height,
+			pd = img._pixelDensity,
 			makeFrame = img._isGraphics && img._drawStack?.length;
 
 		if (makeFrame) {
@@ -7993,17 +7993,18 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		}
 
 		if (img.modified) {
+			let cnv = img.canvas;
 			Q5.device.queue.copyExternalImageToTexture(
 				{ source: cnv },
 				{ texture: img._texture, colorSpace: $.canvas.colorSpace },
-				[w, h, 1]
+				[cnv.width, cnv.height, 1]
 			);
 			img.frameCount++;
 			img.modified = false;
 		}
 
-		dw ??= img.defaultWidth || img.videoWidth;
-		dh ??= img.defaultHeight || img.videoHeight;
+		dw ??= img.defaultWidth;
+		dh ??= img.defaultHeight;
 		sw ??= w;
 		sh ??= h;
 		sx *= pd;

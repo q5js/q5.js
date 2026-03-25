@@ -272,6 +272,7 @@ Q5.modules.dom = ($, q) => {
 		el.height ||= el.videoHeight;
 		el.defaultWidth = el.width * $._defaultImageScale;
 		el.defaultHeight = el.height * $._defaultImageScale;
+		el._pixelDensity = 1;
 		el.ready = true;
 	}
 
