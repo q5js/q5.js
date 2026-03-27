@@ -1,16 +1,3 @@
-{
-	let systemTheme = window.matchMedia('prefers-color-scheme: dark').matches ? 'dark' : 'light';
-	let storedSystemTheme = localStorage.getItem('last-system-theme');
-	if (storedSystemTheme !== systemTheme) {
-		localStorage.removeItem('theme');
-		localStorage.setItem('last-system-theme', systemTheme);
-	}
-
-	let theme = localStorage.getItem('theme');
-	theme ??= systemTheme;
-	document.body.className = theme;
-}
-
 let themeCache = {};
 
 async function setMonacoEditorTheme(themeName) {
@@ -86,15 +73,23 @@ function applyTheme(theme) {
 function setTheme(theme) {
 	applyTheme(theme);
 	localStorage.setItem('theme', theme);
+	localStorage.setItem('lastUsed', Date.now());
 }
 
-window.matchMedia('prefers-color-scheme: dark').addEventListener('change', (e) => {
-	let newTheme = e.matches ? 'dark' : 'light';
-	localStorage.removeItem('theme');
-	localStorage.setItem('last-system-theme', newTheme);
-	applyTheme(newTheme);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+	setTheme(e.matches ? 'dark' : 'light');
 });
 
-applyTheme(
-	localStorage.getItem('theme') || (window.matchMedia('prefers-color-scheme: dark').matches ? 'dark' : 'light')
-);
+{
+	let pref,
+		theme = localStorage.getItem('theme'),
+		time = localStorage.getItem('lastUsed');
+	// preference expires after 1 hour
+	if (theme && time && Date.now() - parseInt(time) < 3600000) {
+		pref = theme;
+	} else {
+		pref = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+	}
+
+	setTheme(pref);
+}
