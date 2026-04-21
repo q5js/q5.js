@@ -23,13 +23,13 @@ fondo(0.8);
 frecuenciaRefresco(5);
 
 q5.dibujar = function () {
-	círculo(0, 0, aleatorio(200));
+	circulo(0, 0, aleatorio(200));
 };
 ```
 
 ```js
 q5.dibujar = function () {
-	círculo(aleatorio(-100, 100), aleatorio(-100, 100), 10);
+	circulo(aleatorio(-100, 100), aleatorio(-100, 100), 10);
 };
 ```
 
@@ -41,13 +41,13 @@ fondo(200);
 frecuenciaRefresco(5);
 
 function dibujar() {
-	círculo(100, 100, aleatorio(20, 200));
+	circulo(100, 100, aleatorio(20, 200));
 }
 ```
 
 ```js
 function dibujar() {
-	círculo(aleatorio(200), aleatorio(200), 10);
+	circulo(aleatorio(200), aleatorio(200), 10);
 }
 ```
 
@@ -68,7 +68,7 @@ Equivalente a `aleatorio(-cantidad, cantidad)`.
 
 ```js
 q5.dibujar = function () {
-	círculo(ratónX + flu(3), ratónY + flu(3), 5);
+	circulo(ratonX + flu(3), ratonY + flu(3), 5);
 };
 ```
 
@@ -76,7 +76,7 @@ q5.dibujar = function () {
 await Lienzo(200);
 
 q5.dibujar = function () {
-	círculo(flu(50), 0, aleatorio(50));
+	circulo(flu(50), 0, aleatorio(50));
 };
 ```
 
@@ -84,7 +84,7 @@ q5.dibujar = function () {
 
 ```js
 function dibujar() {
-	círculo(ratónX + flu(3), ratónY + flu(3), 5);
+	circulo(ratonX + flu(3), ratonY + flu(3), 5);
 }
 ```
 
@@ -93,7 +93,7 @@ let q = await Q5.WebGPU();
 crearLienzo(200, 100);
 
 q.dibujar = () => {
-	círculo(flu(50), 0, aleatorio(50));
+	circulo(flu(50), 0, aleatorio(50));
 };
 ```
 
@@ -116,17 +116,17 @@ Usa [Ruido Perlin](https://es.wikipedia.org/wiki/Ruido_Perlin) por defecto.
 q5.dibujar = function () {
 	fondo(0.8);
 	let n = ruido(frameCount * 0.01);
-	círculo(0, 0, n * 200);
+	circulo(0, 0, n * 200);
 };
 ```
 
 ```js
 q5.dibujar = function () {
 	fondo(0.8);
-	let t = (frameCount + ratónX) * 0.02;
+	let t = (frameCount + ratonX) * 0.02;
 	for (let x = -5; x < 220; x += 10) {
 		let n = ruido(t, x * 0.1);
-		círculo(x - 100, 0, n * 40);
+		circulo(x - 100, 0, n * 40);
 	}
 };
 ```
@@ -137,7 +137,7 @@ q5.dibujar = function () {
 	let t = millis() * 0.002;
 	for (let x = -100; x < 100; x += 5) {
 		for (let y = -100; y < 100; y += 5) {
-			relleno(ruido(t, (ratónX + x) * 0.05, y * 0.05));
+			relleno(ruido(t, (ratonX + x) * 0.05, y * 0.05));
 			cuadrado(x, y, 5);
 		}
 	}
@@ -150,17 +150,17 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 	let n = ruido(frameCount * 0.01);
-	círculo(100, 100, n * 200);
+	circulo(100, 100, n * 200);
 }
 ```
 
 ```js
 function dibujar() {
 	fondo(200);
-	let t = (frameCount + ratónX) * 0.02;
+	let t = (frameCount + ratonX) * 0.02;
 	for (let x = -5; x < 220; x += 10) {
 		let n = ruido(t, x * 0.1);
-		círculo(x, 100, n * 40);
+		circulo(x, 100, n * 40);
 	}
 }
 ```
@@ -184,9 +184,9 @@ Esta función también acepta dos objetos con propiedades `x` e `y`.
 ```js
 q5.dibujar = function () {
 	fondo(0.8);
-	línea(0, 0, ratónX, ratónY);
+	linea(0, 0, ratonX, ratonY);
 
-	let d = dist(0, 0, ratónX, ratónY);
+	let d = dist(0, 0, ratonX, ratonY);
 	texto(redondear(d), -80, -80);
 };
 ```
@@ -196,10 +196,10 @@ q5.dibujar = function () {
 ```js
 function dibujar() {
 	fondo(200);
-	círculo(100, 100, 20);
-	círculo(ratónX, ratónY, 20);
+	circulo(100, 100, 20);
+	circulo(ratonX, ratonY, 20);
 
-	let d = dist(100, 100, ratónX, ratónY);
+	let d = dist(100, 100, ratonX, ratonY);
 	texto(redondear(d), 20, 20);
 }
 ```
@@ -217,7 +217,7 @@ Mapea un número de un rango a otro.
 @returns {number} valor mapeado
 ```
 
-## modoÁngulo
+## modoAngulo
 
 Establece el modo para interpretar y dibujar ángulos. Puede ser 'degrees' (grados) o 'radians' (radianes).
 
@@ -389,8 +389,8 @@ Devuelve el valor más pequeño en una secuencia de números.
 
 ```js
 q5.dibujar = function () {
-	fondo(min(-ratónX / 100, 0.5));
-	círculo(min(ratónX, 0), 0, 80);
+	fondo(min(-ratonX / 100, 0.5));
+	circulo(min(ratonX, 0), 0, 80);
 };
 ```
 
@@ -398,8 +398,8 @@ q5.dibujar = function () {
 
 ```js
 function dibujar() {
-	fondo(min(ratónX, 100));
-	círculo(min(ratónX, 100), 0, 80);
+	fondo(min(ratonX, 100));
+	circulo(min(ratonX, 100), 0, 80);
 }
 ```
 
@@ -416,8 +416,8 @@ Devuelve el valor más grande en una secuencia de números.
 
 ```js
 q5.dibujar = function () {
-	fondo(max(-ratónX / 100, 0.5));
-	círculo(max(ratónX, 0), 0, 80);
+	fondo(max(-ratonX / 100, 0.5));
+	circulo(max(ratonX, 0), 0, 80);
 };
 ```
 
@@ -425,8 +425,8 @@ q5.dibujar = function () {
 
 ```js
 function dibujar() {
-	fondo(max(ratónX, 100));
-	círculo(max(ratónX, 100), 0, 80);
+	fondo(max(ratonX, 100));
+	circulo(max(ratonX, 100), 0, 80);
 }
 ```
 

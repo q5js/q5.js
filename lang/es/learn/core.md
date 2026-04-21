@@ -29,7 +29,7 @@ Ten en cuenta que en este ejemplo, el círculo se encuentra en la posición [0, 
 ```js
 await Lienzo(200, 100);
 fondo('silver');
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 ```
 
 ### c2d
@@ -37,7 +37,7 @@ círculo(0, 0, 80);
 ```js
 crearLienzo(200, 100);
 fondo('silver');
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 ```
 
 ## dibujar
@@ -49,7 +49,7 @@ Función a declarar. Se ejecutará 60 veces por segundo de forma predeterminada.
 ```js
 q5.dibujar = function () {
 	fondo('silver');
-	círculo(ratónX, ratónY, 80);
+	circulo(ratonX, ratonY, 80);
 };
 ```
 
@@ -58,7 +58,7 @@ q5.dibujar = function () {
 ```js
 function dibujar() {
 	fondo('silver');
-	círculo(ratónX, ratónY, 80);
+	circulo(ratonX, ratonY, 80);
 }
 ```
 
@@ -76,8 +76,8 @@ Para acceder a las herramientas del navegador (DevTools) generalmente es con cli
 
 ```js
 q5.dibujar = function () {
-	círculo(ratónX, ratónY, 80);
-	log('El ratón está en:', ratónX, ratónY);
+	circulo(ratonX, ratonY, 80);
+	log('El ratón está en:', ratonX, ratonY);
 };
 ```
 
@@ -85,7 +85,7 @@ q5.dibujar = function () {
 
 ```js
 function dibujar() {
-	círculo(ratónX, ratónY, 80);
-	log('El ratón está en:', ratónX, ratónY);
+	circulo(ratonX, ratonY, 80);
+	log('El ratón está en:', ratonX, ratonY);
 }
 ```

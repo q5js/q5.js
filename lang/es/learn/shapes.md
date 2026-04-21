@@ -1,6 +1,6 @@
 # formas
 
-## círculo
+## circulo
 
 Dibuja un círculo en la posición (x, y) con el diámetro especificado.
 
@@ -14,14 +14,14 @@ Dibuja un círculo en la posición (x, y) con el diámetro especificado.
 
 ```js
 await Lienzo(200, 100);
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 ```
 
 ### c2d
 
 ```js
 crearLienzo(200, 100);
-círculo(100, 50, 80);
+circulo(100, 50, 80);
 ```
 
 ## elipse
@@ -147,7 +147,7 @@ grosorTrazo(10);
 punto(125, 50);
 ```
 
-## línea
+## linea
 
 Dibuja una línea en el lienzo.
 
@@ -163,7 +163,7 @@ Dibuja una línea en el lienzo.
 ```js
 await Lienzo(200, 100);
 trazo('lime');
-línea(-80, -30, 80, 30);
+linea(-80, -30, 80, 30);
 ```
 
 ### c2d
@@ -171,10 +171,10 @@ línea(-80, -30, 80, 30);
 ```js
 crearLienzo(200, 100);
 trazo('lime');
-línea(20, 20, 180, 80);
+linea(20, 20, 180, 80);
 ```
 
-## cápsula
+## capsula
 
 Dibuja una cápsula.
 
@@ -192,7 +192,7 @@ Dibuja una cápsula.
 await Lienzo(200, 100);
 fondo(0.8);
 grosorTrazo(5);
-cápsula(-60, -10, 60, 10, 10);
+capsula(-60, -10, 60, 10, 10);
 ```
 
 ```js
@@ -200,7 +200,7 @@ q5.dibujar = function () {
 	fondo(0.8);
 	relleno('cyan');
 	grosorTrazo(10);
-	cápsula(0, 0, ratónX, ratónY, 20);
+	capsula(0, 0, ratonX, ratonY, 20);
 };
 ```
 
@@ -210,7 +210,7 @@ q5.dibujar = function () {
 crearLienzo(200, 100);
 fondo(200);
 grosorTrazo(5);
-cápsula(40, 40, 160, 60, 10);
+capsula(40, 40, 160, 60, 10);
 ```
 
 ```js
@@ -218,7 +218,7 @@ function dibujar() {
 	fondo(200);
 	relleno('cyan');
 	grosorTrazo(10);
-	cápsula(100, 100, ratónX, ratónY, 20);
+	capsula(100, 100, ratonX, ratonY, 20);
 }
 ```
 
@@ -314,7 +314,7 @@ rect(50, 25, 150, 75);
 Establecer a `CENTRO` (por defecto), `RADIO`, `ESQUINA`, o `ESQUINAS`.
 
 Cambia cómo se interpretan las primeras cuatro entradas para
-`elipse`, `círculo`, y `arco`.
+`elipse`, `circulo`, y `arco`.
 
 ```
 @param {string} modo

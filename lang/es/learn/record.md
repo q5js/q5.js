@@ -32,7 +32,7 @@ let grab = crearGrabadora();
 grab.bitrate = 10;
 
 q5.dibujar = function () {
-	círculo(ratónX, flu(medioAlto), 10);
+	circulo(ratonX, flu(medioAlto), 10);
 };
 ```
 
@@ -45,7 +45,7 @@ let grab = crearGrabadora();
 grab.bitrate = 10;
 
 function dibujar() {
-	círculo(ratónX, aleatorio(alto), 10);
+	circulo(ratonX, aleatorio(alto), 10);
 }
 ```
 
@@ -55,15 +55,15 @@ Comienza a grabar el lienzo o reanuda la grabación si estaba pausada.
 
 Si no existe grabadora, se crea una pero no se muestra.
 
-## pausarGrabación
+## pausarGrabacion
 
 Pausa la grabación del lienzo, si hay una en progreso.
 
-## borrarGrabación
+## borrarGrabacion
 
 Descarta la grabación actual.
 
-## guardarGrabación
+## guardarGrabacion
 
 Guarda la grabación actual como un archivo de video.
 
@@ -75,12 +75,12 @@ Guarda la grabación actual como un archivo de video.
 
 ```js
 q5.dibujar = function () {
-	cuadrado(ratónX, flu(100), 10);
+	cuadrado(ratonX, flu(100), 10);
 };
 
 q5.alPresionarRatón = function () {
 	if (!grabando) grabar();
-	else guardarGrabación('squares');
+	else guardarGrabacion('squares');
 };
 ```
 
@@ -88,12 +88,12 @@ q5.alPresionarRatón = function () {
 
 ```js
 function dibujar() {
-	cuadrado(ratónX, aleatorio(200), 10);
+	cuadrado(ratonX, aleatorio(200), 10);
 }
 
 function alPresionarRatón() {
 	if (!grabando) grabar();
-	else guardarGrabación('squares');
+	else guardarGrabacion('squares');
 }
 ```
 

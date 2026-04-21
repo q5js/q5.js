@@ -43,7 +43,7 @@ let botella = color(0.35, 0.39, 1, 0.4);
 relleno(botella);
 trazo(botella);
 grosorTrazo(30);
-círculo(0, 0, 155);
+circulo(0, 0, 155);
 ```
 
 ```js
@@ -53,7 +53,7 @@ let c = color(0.8, 0.2);
 
 q5.dibujar = function () {
 	fondo(c);
-	círculo(ratónX, ratónY, 50);
+	circulo(ratonX, ratonY, 50);
 	c.g = (c.g + 0.005) % 1;
 };
 ```
@@ -66,7 +66,7 @@ let c = color(0, 1, 1, 0.2);
 
 q5.dibujar = function () {
 	relleno(c);
-	círculo(ratónX, ratónY, 50);
+	circulo(ratonX, ratonY, 50);
 };
 ```
 
@@ -94,7 +94,7 @@ let botella = color(90, 100, 255, 100);
 relleno(botella);
 trazo(botella);
 grosorTrazo(30);
-círculo(100, 100, 155);
+circulo(100, 100, 155);
 ```
 
 ```js
@@ -104,7 +104,7 @@ let c = color(200, 50);
 
 function dibujar() {
 	fondo(c);
-	círculo(ratónX, ratónY, 50);
+	circulo(ratonX, ratonY, 50);
 	c.g = (c.g + 1) % 256;
 }
 ```
@@ -117,7 +117,7 @@ let c = color(0, 255, 255, 50);
 
 function dibujar() {
 	relleno(c);
-	círculo(ratónX, ratónY, 50);
+	circulo(ratonX, ratonY, 50);
 }
 ```
 
@@ -489,7 +489,7 @@ fondo('crimson');
 ```js
 q5.dibujar = function () {
 	fondo(0.5, 0.2);
-	círculo(ratónX, ratónY, 20);
+	circulo(ratonX, ratonY, 20);
 };
 ```
 
@@ -503,7 +503,7 @@ fondo('crimson');
 ```js
 function dibujar() {
 	fondo(128, 32);
-	círculo(ratónX, ratónY, 20);
+	circulo(ratonX, ratonY, 20);
 }
 ```
 

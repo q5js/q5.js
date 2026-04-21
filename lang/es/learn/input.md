@@ -10,9 +10,9 @@ hasta la próxima vez que se dibuja un fotograma.
 
 Reproduce sonidos o activa otra retroalimentación no visual inmediatamente
 respondiendo a eventos de entrada dentro de funciones como
-`alPresionarRatón` y `alPresionarTecla`.
+`alPresionarRaton` y `alPresionarTecla`.
 
-## ratónX
+## ratonX
 
 Posición X actual del ratón.
 
@@ -22,7 +22,7 @@ Posición X actual del ratón.
 q5.dibujar = function () {
 	fondo(0.8);
 	tamañoTexto(64);
-	texto(redondear(ratónX), -50, 20);
+	texto(redondear(ratonX), -50, 20);
 };
 ```
 
@@ -32,11 +32,11 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 	tamañoTexto(64);
-	texto(redondear(ratónX), 50, 120);
+	texto(redondear(ratonX), 50, 120);
 }
 ```
 
-## ratónY
+## ratonY
 
 Posición Y actual del ratón.
 
@@ -45,7 +45,7 @@ Posición Y actual del ratón.
 ```js
 q5.dibujar = function () {
 	fondo(0.8);
-	círculo(0, ratónY, 100);
+	circulo(0, ratonY, 100);
 };
 ```
 
@@ -54,19 +54,19 @@ q5.dibujar = function () {
 ```js
 function dibujar() {
 	fondo(200);
-	círculo(100, ratónY, 100);
+	circulo(100, ratonY, 100);
 }
 ```
 
-## pRatónX
+## pRatonX
 
 Posición X previa del ratón.
 
-## pRatónY
+## pRatonY
 
 Posición Y previa del ratón.
 
-## botónRatón
+## botonRaton
 
 El botón actual siendo presionado: 'left', 'right', 'center').
 
@@ -78,7 +78,7 @@ El valor por defecto es una cadena vacía.
 q5.dibujar = function () {
 	fondo(0.8);
 	tamañoTexto(64);
-	texto(botónRatón, -80, 20);
+	texto(botonRaton, -80, 20);
 };
 ```
 
@@ -88,19 +88,19 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 	tamañoTexto(64);
-	texto(botónRatón, 20, 120);
+	texto(botonRaton, 20, 120);
 }
 ```
 
-## ratónPresionado
+## ratonPresionado
 
-Verdadero si el ratón está actualmente presionado, falso de lo contrario.
+Verdadero si el raton está actualmente presionado, falso de lo contrario.
 
 ### webgpu
 
 ```js
 q5.dibujar = function () {
-	if (ratónPresionado) fondo(0.4);
+	if (ratonPresionado) fondo(0.4);
 	else fondo(0.8);
 };
 ```
@@ -109,12 +109,12 @@ q5.dibujar = function () {
 
 ```js
 function dibujar() {
-	if (ratónPresionado) fondo(100);
+	if (ratonPresionado) fondo(100);
 	else fondo(200);
 }
 ```
 
-## alPresionarRatón
+## alPresionarRaton
 
 Define esta función para responder a eventos de presionar el ratón.
 
@@ -124,7 +124,7 @@ Define esta función para responder a eventos de presionar el ratón.
 await Lienzo(200);
 let gris = 0.4;
 
-q5.alPresionarRatón = function () {
+q5.alPresionarRaton = function () {
 	fondo(gris);
 	gris = (gris + 0.1) % 1;
 };
@@ -136,13 +136,13 @@ q5.alPresionarRatón = function () {
 crearLienzo(200);
 let gris = 95;
 
-function alPresionarRatón() {
+function alPresionarRaton() {
 	fondo(gris % 256);
 	gris += 40;
 }
 ```
 
-## alSoltarRatón
+## alSoltarRaton
 
 Define esta función para responder a eventos de soltar el ratón.
 
@@ -152,7 +152,7 @@ Define esta función para responder a eventos de soltar el ratón.
 await Lienzo(200);
 let gris = 0.4;
 
-q5.alSoltarRatón = function () {
+q5.alSoltarRaton = function () {
 	fondo(gris);
 	gris = (gris + 0.1) % 1;
 };
@@ -164,13 +164,13 @@ q5.alSoltarRatón = function () {
 crearLienzo(200);
 let gris = 95;
 
-function alSoltarRatón() {
+function alSoltarRaton() {
 	fondo(gris % 256);
 	gris += 40;
 }
 ```
 
-## alMoverRatón
+## alMoverRaton
 
 Define esta función para responder a eventos de mover el ratón.
 
@@ -183,7 +183,7 @@ cuando el usuario arrastra su dedo en la pantalla.
 await Lienzo(200);
 let gris = 0.4;
 
-q5.alMoverRatón = function () {
+q5.alMoverRaton = function () {
 	fondo(gris);
 	gris = (gris + 0.005) % 1;
 };
@@ -195,13 +195,13 @@ q5.alMoverRatón = function () {
 crearLienzo(200);
 let gris = 95;
 
-function alMoverRatón() {
+function alMoverRaton() {
 	fondo(gris % 256);
 	gris++;
 }
 ```
 
-## alArrastrarRatón
+## alArrastrarRaton
 
 Define esta función para responder a eventos de arrastrar el ratón.
 
@@ -214,7 +214,7 @@ mientras un botón del ratón está presionado.
 await Lienzo(200);
 let gris = 0.4;
 
-q5.alArrastrarRatón = function () {
+q5.alArrastrarRaton = function () {
 	fondo(gris);
 	gris = (gris + 0.005) % 1;
 };
@@ -226,7 +226,7 @@ q5.alArrastrarRatón = function () {
 crearLienzo(200);
 let gris = 95;
 
-function alArrastrarRatón() {
+function alArrastrarRaton() {
 	fondo(gris % 256);
 	gris++;
 }
@@ -410,7 +410,7 @@ Considera usar el array `punteros` en su lugar, el cual incluye entrada de rató
 q5.dibujar = function () {
 	fondo(0.8);
 	for (let pt of punteros) {
-		círculo(pt.x, pt.y, 100);
+		circulo(pt.x, pt.y, 100);
 	}
 };
 ```
@@ -421,7 +421,7 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 	for (let pt of punteros) {
-		círculo(pt.x, pt.y, 100);
+		circulo(pt.x, pt.y, 100);
 	}
 }
 ```
@@ -566,7 +566,7 @@ crearLienzo(200, 100);
 sinCursor();
 ```
 
-## ruedaRatón
+## ruedaRaton
 
 Define esta función para responder a eventos de la rueda del ratón.
 
@@ -580,9 +580,9 @@ Devuelve true para permitir el comportamiento por defecto de desplazar la págin
 ```js
 let x = (y = 0);
 q5.dibujar = function () {
-	círculo(x, y, 10);
+	circulo(x, y, 10);
 };
-q5.ruedaRatón = function (e) {
+q5.ruedaRaton = function (e) {
 	x += e.deltaX;
 	y += e.deltaY;
 	return false;
@@ -594,9 +594,9 @@ q5.ruedaRatón = function (e) {
 ```js
 let x = (y = 100);
 function dibujar() {
-	círculo(x, y, 10);
+	circulo(x, y, 10);
 }
-function ruedaRatón(e) {
+function ruedaRaton(e) {
 	x += e.deltaX;
 	y += e.deltaY;
 	return false;
@@ -648,7 +648,7 @@ Para salir del modo de bloqueo de puntero, llama a `document.exitPointerLock()`.
 
 ```js
 q5.dibujar = function () {
-	círculo(ratónX / 10, ratónY / 10, 10);
+	circulo(ratonX / 10, ratonY / 10, 10);
 };
 
 q5.dobleClic = function () {
@@ -664,7 +664,7 @@ q5.dobleClic = function () {
 
 ```js
 function dibujar() {
-	círculo(ratónX / 10 + 100, ratónY / 10 + 100, 10);
+	circulo(ratonX / 10 + 100, ratonY / 10 + 100, 10);
 }
 
 function dobleClic() {

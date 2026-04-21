@@ -19,7 +19,7 @@ await Lienzo(200);
 fondo(0.8);
 
 let v = crearVector(0, 0);
-círculo(v.x, v.y, 50);
+circulo(v.x, v.y, 50);
 ```
 
 ## Vector.constructor
