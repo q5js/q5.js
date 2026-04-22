@@ -61,6 +61,10 @@
 		"jest-cli": "^29.7.0",
 		"jsdom": "^25.0.1",
 		"json2csv": "^6.0.0-alpha.2",
-		"skia-canvas": "^1.0.2"
-	}
+		"skia-canvas": "^1.0.2",
+		"terser": "^5.46.1"
+	},
+	"trustedDependencies": [
+		"skia-canvas"
+	]
 }
