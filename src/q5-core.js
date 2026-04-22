@@ -308,9 +308,9 @@ function Q5(scope, parent, renderer) {
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
-		$[name] = (event) => {
+		$[name] = function(...args) {
 			try {
-				return fn.call($, event);
+				return fn.apply(this, args);
 			} catch (e) {
 				if ($._fes) $._fes(e);
 				throw e;
