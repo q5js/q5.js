@@ -310,7 +310,7 @@ function Q5(scope, parent, renderer) {
 		const fn = t[name] || $[name];
 		$[name] = (event) => {
 			try {
-				return fn(event);
+				return fn.call($, event);
 			} catch (e) {
 				if ($._fes) $._fes(e);
 				throw e;
