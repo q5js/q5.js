@@ -12,8 +12,27 @@
 	],
 	"license": "LGPL-3.0-only",
 	"homepage": "https://q5js.org/home",
-	"main": "q5-server.js",
 	"types": "q5.d.ts",
+	"browser": {
+		".": "./q5.min.js",
+		"node:process": false
+	},
+	"exports": {
+		".": {
+			"types": "./q5.d.ts",
+			"browser": "./q5.min.js",
+			"deno": "./q5-deno-server.js",
+			"node": "./q5-server.js",
+			"default": "./q5.min.js"
+		},
+		"./q5.min.js": "./q5.min.js",
+		"./q5.js": "./q5.js",
+		"./q5-server.js": {
+			"browser": null,
+			"deno": "./q5-deno-server.js",
+			"default": "./q5-server.js"
+		}
+	},
 	"funding": [
 		{
 			"type": "patreon",

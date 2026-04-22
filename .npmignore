@@ -7,9 +7,11 @@ fonts
 home
 lang
 learn
+teach
 src
 node_modules
 test
+.prettierignore
 p5-test
 package-lock.json
 .vscode
@@ -17,6 +19,7 @@ package-lock.json
 index.html
 jsconfig.json
 CODE_OF_CONDUCT.md
+bun.lock
 bun.lockb
 deno.lock
 q5js_brand.avif
