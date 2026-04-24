@@ -16,7 +16,7 @@ q5.dibujar = function () {
 	fondo(0.8);
 
 	trasladar(50, 50);
-	círculo(0, 0, 80);
+	circulo(0, 0, 80);
 };
 ```
 
@@ -27,7 +27,7 @@ function dibujar() {
 	fondo(200);
 
 	trasladar(150, 150);
-	círculo(0, 0, 80);
+	circulo(0, 0, 80);
 }
 ```
 
@@ -45,7 +45,7 @@ Rota el contexto de dibujo.
 q5.dibujar = function () {
 	fondo(0.8);
 
-	rotar(ratónX / 50);
+	rotar(ratonX / 50);
 
 	modoRect(CENTER);
 	cuadrado(0, 0, 120);
@@ -59,7 +59,7 @@ function dibujar() {
 	fondo(200);
 
 	trasladar(100, 100);
-	rotar(ratónX / 50);
+	rotar(ratonX / 50);
 
 	modoRect(CENTER);
 	cuadrado(0, 0, 50);
@@ -84,8 +84,8 @@ el contexto de dibujo se escalará uniformemente.
 q5.dibujar = function () {
 	fondo(0.8);
 
-	escalar(ratónX / 10);
-	círculo(0, 0, 20);
+	escalar(ratonX / 10);
+	circulo(0, 0, 20);
 };
 ```
 
@@ -95,8 +95,8 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 
-	escalar(ratónX / 10);
-	círculo(0, 0, 20);
+	escalar(ratonX / 10);
+	circulo(0, 0, 20);
 }
 ```
 
@@ -115,7 +115,7 @@ q5.dibujar = function () {
 	fondo(0.8);
 
 	trasladar(-75, -40);
-	cizallarX(ratónX / 100);
+	cizallarX(ratonX / 100);
 	cuadrado(0, 0, 80);
 };
 ```
@@ -127,7 +127,7 @@ function dibujar() {
 	fondo(200);
 
 	trasladar(25, 60);
-	cizallarX(ratónX / 100);
+	cizallarX(ratonX / 100);
 	cuadrado(0, 0, 80);
 }
 ```
@@ -147,7 +147,7 @@ q5.dibujar = function () {
 	fondo(0.8);
 
 	trasladar(-75, -40);
-	cizallarY(ratónX / 100);
+	cizallarY(ratonX / 100);
 	cuadrado(0, 0, 80);
 };
 ```
@@ -159,7 +159,7 @@ function dibujar() {
 	fondo(200);
 
 	trasladar(25, 60);
-	cizallarY(ratónX / 100);
+	cizallarY(ratonX / 100);
 	cuadrado(0, 0, 80);
 }
 ```
@@ -190,7 +190,7 @@ q5.dibujar = function () {
 	fondo(0.8);
 
 	aplicarMatriz(2, -1, 1, -1);
-	círculo(0, 0, 80);
+	circulo(0, 0, 80);
 };
 ```
 
@@ -201,7 +201,7 @@ function dibujar() {
 	fondo(200);
 
 	aplicarMatriz(2, 1, 1, 1, 100, 100);
-	círculo(0, 0, 80);
+	circulo(0, 0, 80);
 }
 ```
 
@@ -219,7 +219,7 @@ await Lienzo(200);
 fondo(0.8);
 
 trasladar(50, 50);
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 
 reiniciarMatriz();
 cuadrado(0, 0, 50);
@@ -232,7 +232,7 @@ crearLienzo(200);
 fondo(200);
 
 trasladar(100, 100);
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 
 reiniciarMatriz();
 cuadrado(0, 0, 50);
@@ -316,7 +316,7 @@ await Lienzo(200);
 apilar();
 relleno('blue');
 trasladar(50, 50);
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 desapilar();
 
 cuadrado(0, 0, 50);
@@ -330,7 +330,7 @@ crearLienzo(200);
 apilar();
 relleno('blue');
 trasladar(100, 100);
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 desapilar();
 
 cuadrado(0, 0, 50);
@@ -348,7 +348,7 @@ await Lienzo(200);
 apilar();
 relleno('blue');
 trasladar(50, 50);
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 desapilar();
 
 cuadrado(0, 0, 50);
@@ -362,7 +362,7 @@ crearLienzo(200);
 apilar();
 relleno('blue');
 trasladar(100, 100);
-círculo(0, 0, 80);
+circulo(0, 0, 80);
 desapilar();
 
 cuadrado(0, 0, 50);

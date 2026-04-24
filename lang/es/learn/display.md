@@ -1,6 +1,6 @@
 # visualización
 
-## modoVisualización
+## modoVisualizacion
 
 Personaliza cómo se presenta tu lienzo.
 
@@ -15,9 +15,9 @@ Personaliza cómo se presenta tu lienzo.
 ```js
 await Lienzo(50, 25);
 
-modoVisualización(CENTRO, PIXELADO, 4);
+modoVisualizacion(CENTRO, PIXELADO, 4);
 
-círculo(0, 0, 16);
+circulo(0, 0, 16);
 ```
 
 ### c2d
@@ -25,27 +25,27 @@ círculo(0, 0, 16);
 ```js
 crearLienzo(50, 25);
 
-modoVisualización(CENTRO, PIXELADO, 4);
+modoVisualizacion(CENTRO, PIXELADO, 4);
 
-círculo(25, 12.5, 16);
+circulo(25, 12.5, 16);
 ```
 
 ## MAXIMIZADO
 
-Una configuración de `modoVisualización`.
+Una configuración de `modoVisualizacion`.
 
 El lienzo se escalará para llenar el elemento padre,
 con bandas negras si es necesario para preservar su relación de aspecto.
 
 ## SUAVE
 
-Una calidad de renderizado de `modoVisualización`.
+Una calidad de renderizado de `modoVisualizacion`.
 
 Se usa escalado suave si el lienzo se escala.
 
 ## PIXELADO
 
-Una calidad de renderizado de `modoVisualización`.
+Una calidad de renderizado de `modoVisualizacion`.
 
 Los píxeles se renderizan como cuadrados nítidos si el lienzo se escala.
 
@@ -117,7 +117,7 @@ El ancho del lienzo.
 
 ```js
 await Lienzo(200, 120);
-círculo(0, 0, ancho);
+circulo(0, 0, ancho);
 ```
 
 ## alto
@@ -128,7 +128,7 @@ El alto del lienzo.
 
 ```js
 await Lienzo(200, 80);
-círculo(0, 0, alto);
+circulo(0, 0, alto);
 ```
 
 ## medioAncho
@@ -139,7 +139,7 @@ La mitad del ancho del lienzo.
 
 ```js
 await Lienzo(200, 80);
-círculo(0, 0, medioAncho);
+circulo(0, 0, medioAncho);
 ```
 
 ## medioAlto
@@ -150,7 +150,7 @@ La mitad del alto del lienzo.
 
 ```js
 await Lienzo(200, 80);
-círculo(0, 0, medioAlto);
+circulo(0, 0, medioAlto);
 ```
 
 ## lienzo
@@ -228,7 +228,7 @@ Detiene el bucle de dibujo.
 
 ```js
 q5.dibujar = function () {
-	círculo(cuadroActual * 5 - 100, 0, 80);
+	circulo(cuadroActual * 5 - 100, 0, 80);
 	pausar();
 };
 ```
@@ -237,7 +237,7 @@ q5.dibujar = function () {
 
 ```js
 function dibujar() {
-	círculo(cuadroActual * 5, 100, 80);
+	circulo(cuadroActual * 5, 100, 80);
 	pausar();
 }
 ```
@@ -260,7 +260,7 @@ await Lienzo(200);
 pausar();
 
 q5.dibujar = function () {
-	círculo(cuadroActual * 5 - 100, 0, 80);
+	circulo(cuadroActual * 5 - 100, 0, 80);
 };
 q5.alPresionarRatón = function () {
 	redibujar(10);
@@ -274,7 +274,7 @@ crearLienzo(200);
 pausar();
 
 function dibujar() {
-	círculo(cuadroActual * 5, 100, 80);
+	circulo(cuadroActual * 5, 100, 80);
 }
 function alPresionarRatón() {
 	redibujar(10);
@@ -292,7 +292,7 @@ await Lienzo(200);
 pausar();
 
 q5.dibujar = function () {
-	círculo(cuadroActual * 5 - 100, 0, 80);
+	circulo(cuadroActual * 5 - 100, 0, 80);
 };
 q5.alPresionarRatón = function () {
 	reanudar();
@@ -306,7 +306,7 @@ crearLienzo(200);
 pausar();
 
 function dibujar() {
-	círculo(cuadroActual * 5, 100, 80);
+	circulo(cuadroActual * 5, 100, 80);
 }
 function alPresionarRatón() {
 	reanudar();
@@ -333,10 +333,10 @@ de tu navegador web para un análisis de rendimiento más preciso.
 q5.dibujar = function () {
 	fondo(0.8);
 
-	if (ratónPresionado) frecuenciaRefresco(10);
+	if (ratonPresionado) frecuenciaRefresco(10);
 	else frecuenciaRefresco(60);
 
-	círculo((cuadroActual % 200) - 100, 0, 80);
+	circulo((cuadroActual % 200) - 100, 0, 80);
 };
 ```
 
@@ -354,10 +354,10 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 
-	if (ratónPresionado) frecuenciaRefresco(10);
+	if (ratonPresionado) frecuenciaRefresco(10);
 	else frecuenciaRefresco(60);
 
-	círculo(cuadroActual % 200, 100, 80);
+	circulo(cuadroActual % 200, 100, 80);
 }
 ```
 
@@ -449,7 +449,7 @@ la función `dibujar` se ejecuta.
 ```js
 function dibujar() {
 	fondo(200);
-	círculo(cuadroActual % 200, 100, 80);
+	circulo(cuadroActual % 200, 100, 80);
 }
 
 function postProcesar() {
@@ -457,7 +457,7 @@ function postProcesar() {
 }
 ```
 
-## densidadPíxeles
+## densidadPixeles
 
 Establece la densidad de píxeles del lienzo.
 
@@ -471,8 +471,8 @@ Establece la densidad de píxeles del lienzo.
 ```js
 await Lienzo(200, 100);
 fondo(0.8);
-densidadPíxeles(1);
-círculo(0, 0, 80);
+densidadPixeles(1);
+circulo(0, 0, 80);
 ```
 
 ### c2d
@@ -480,11 +480,11 @@ círculo(0, 0, 80);
 ```js
 crearLienzo(200, 100);
 fondo(200);
-densidadPíxeles(1);
-círculo(100, 50, 80);
+densidadPixeles(1);
+circulo(100, 50, 80);
 ```
 
-## densidadVisualización
+## densidadVisualizacion
 
 Devuelve la densidad de visualización actual.
 
@@ -500,7 +500,7 @@ En la mayoría de pantallas modernas, este valor será 2 o 3.
 await Lienzo(200, 100);
 fondo(0.8);
 tamañoTexto(64);
-texto(densidadVisualización(), -90, 6);
+texto(densidadVisualizacion(), -90, 6);
 ```
 
 ### c2d
@@ -509,7 +509,7 @@ texto(densidadVisualización(), -90, 6);
 crearLienzo(200, 100);
 fondo(200);
 tamañoTexto(64);
-texto(densidadVisualización(), 10, 20);
+texto(densidadVisualizacion(), 10, 20);
 ```
 
 ## deltaTiempo
@@ -542,7 +542,7 @@ q5.dibujar = function () {
 
 	x += deltaTiempo * 0.2;
 	if (x > 100) x = -100;
-	círculo(x, 0, 20);
+	circulo(x, 0, 20);
 };
 ```
 
@@ -563,7 +563,7 @@ function dibujar() {
 	frecuenciaRefresco(aleatorio(30, 60));
 
 	x += deltaTiempo * 0.2;
-	círculo(x % 200, 100, 20);
+	circulo(x % 200, 100, 20);
 }
 ```
 

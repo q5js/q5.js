@@ -218,7 +218,7 @@ Establece u obtiene el tamaño de fuente actual. Si no se proporciona argumento,
 q5.dibujar = function () {
 	fondo(0.8);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	texto('A', -90, 90);
 };
 ```
@@ -229,7 +229,7 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	texto('A', 10, 190);
 }
 ```
@@ -249,7 +249,7 @@ Establece u obtiene la altura de línea actual. Si no se proporciona argumento, 
 q5.dibujar = function () {
 	fondo(0.8);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	texto('A', -90, 90);
 	rect(-90, 90, 5, -interlineado());
 };
@@ -261,7 +261,7 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	texto('A', 10, 190);
 	rect(10, 190, 5, -interlineado());
 }
@@ -301,7 +301,7 @@ tamañoTexto(32);
 texto('Hello, world!', 12, 106);
 ```
 
-## alineaciónTexto
+## alineacionTexto
 
 Establece la alineación horizontal y vertical del texto.
 
@@ -317,7 +317,7 @@ await Lienzo(200);
 fondo(0.8);
 tamañoTexto(32);
 
-alineaciónTexto(CENTRO, MEDIO);
+alineacionTexto(CENTRO, MEDIO);
 texto('Hello, world!', 0, 0);
 ```
 
@@ -328,7 +328,7 @@ crearLienzo(200);
 fondo(200);
 tamañoTexto(32);
 
-alineaciónTexto(CENTRO, MEDIO);
+alineacionTexto(CENTRO, MEDIO);
 texto('Hello, world!', 100, 100);
 ```
 
@@ -356,7 +356,7 @@ Establece el peso del texto.
 await Lienzo(200);
 fondo(0.8);
 tamañoTexto(32);
-alineaciónTexto(CENTRO, MEDIO);
+alineacionTexto(CENTRO, MEDIO);
 
 pesoTexto(100);
 texto('Hello, world!', 0, 0);
@@ -368,7 +368,7 @@ texto('Hello, world!', 0, 0);
 crearLienzo(200);
 fondo(200);
 tamañoTexto(32);
-alineaciónTexto(CENTRO, MEDIO);
+alineacionTexto(CENTRO, MEDIO);
 
 pesoTexto(100);
 texto('Hello, world!', 100, 100);
@@ -389,7 +389,7 @@ Calcula y devuelve el ancho de una cadena de texto dada.
 q5.dibujar = function () {
 	fondo(0.8);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	rect(-90, 90, anchoTexto('A'), -interlineado());
 	texto('A', -90, 90);
 };
@@ -401,7 +401,7 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	rect(10, 190, anchoTexto('A'), -interlineado());
 	texto('A', 10, 190);
 }
@@ -422,7 +422,7 @@ Calcula y devuelve el ascenso (la distancia desde la línea base hasta la parte 
 q5.dibujar = function () {
 	fondo(0.8);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	rect(-90, 90, anchoTexto('A'), -ascensoTexto());
 	texto('A', -90, 90);
 };
@@ -434,7 +434,7 @@ q5.dibujar = function () {
 function dibujar() {
 	fondo(200);
 
-	tamañoTexto(abs(ratónX));
+	tamañoTexto(abs(ratonX));
 	rect(10, 190, anchoTexto('A'), -ascensoTexto());
 	texto('A', 10, 190);
 }
@@ -537,7 +537,7 @@ un costo de rendimiento muy alto.
 await Lienzo(200);
 fondo(0.8);
 tamañoTexto(96);
-alineaciónTexto(CENTRO, CENTRO);
+alineacionTexto(CENTRO, CENTRO);
 
 imagenTexto('🐶', 0, 0);
 ```
@@ -558,7 +558,7 @@ imagenTexto('Hello!', -100, 100);
 crearLienzo(200);
 fondo(200);
 tamañoTexto(96);
-alineaciónTexto(CENTRO, CENTRO);
+alineacionTexto(CENTRO, CENTRO);
 
 imagenTexto('🐶', 100, 100);
 ```

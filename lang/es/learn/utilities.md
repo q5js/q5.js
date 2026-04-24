@@ -89,7 +89,7 @@ un archivo de imagen llamado "untitled.png".
 ```js
 await Lienzo(200);
 fondo(0.8);
-círculo(0, 0, 50);
+circulo(0, 0, 50);
 
 q5.alPresionarRatón = function () {
 	guardar('circle.png');
@@ -113,7 +113,7 @@ q5.alPresionarRatón = function () {
 ```js
 crearLienzo(200);
 fondo(200);
-círculo(100, 100, 50);
+circulo(100, 100, 50);
 
 function alPresionarRatón() {
 	guardar('circle.png');
@@ -273,7 +273,7 @@ Devuelve el año actual.
 @returns {number} año actual
 ```
 
-## día
+## dia
 
 Devuelve el día actual del mes.
 

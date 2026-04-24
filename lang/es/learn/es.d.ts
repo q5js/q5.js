@@ -10,7 +10,7 @@ declare global {
 
 	// 🧑‍🎨 shapes
 
-	function círculo(x: number, y: number, diámetro: number): void;
+	function circulo(x: number, y: number, diametro: number): void;
 
 	function elipse(x: number, y: number, ancho: number, alto?: number): void;
 
@@ -20,9 +20,9 @@ declare global {
 
 	function punto(x: number, y: number): void;
 
-	function línea(x1: number, y1: number, x2: number, y2: number): void;
+	function linea(x1: number, y1: number, x2: number, y2: number): void;
 
-	function cápsula(x1: number, y1: number, x2: number, y2: number, r: number): void;
+	function capsula(x1: number, y1: number, x2: number, y2: number, r: number): void;
 
 	function modoRect(modo: string): void;
 
@@ -85,11 +85,11 @@ declare global {
 
 	function establecer(x: number, y: number, val: any): void;
 
-	var píxeles: number[];
+	var pixeles: number[];
 
-	function cargarPíxeles(): void;
+	function cargarPixeles(): void;
 
-	function actualizarPíxeles(): void;
+	function actualizarPixeles(): void;
 
 	function filtro(tipo: string, valor?: number): void;
 
@@ -111,7 +111,7 @@ declare global {
 
 	function crearImagen(w: number, h: number, opt?: any): Q5.Imagen;
 
-	function crearGráficos(w: number, h: number, opt?: any): Q5;
+	function crearGraficos(w: number, h: number, opt?: any): Q5;
 
 	// 📘 text
 
@@ -127,7 +127,7 @@ declare global {
 
 	function estiloTexto(estilo: 'normal' | 'italic' | 'bold' | 'bolditalic'): void;
 
-	function alineaciónTexto(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
+	function alineacionTexto(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
 
 	function pesoTexto(peso: number | string): void;
 
@@ -165,25 +165,25 @@ declare global {
 
 	// 🖲️ input
 
-	let ratónX: number;
+	let ratonX: number;
 
-	let ratónY: number;
+	let ratonY: number;
 
-	let pRatónX: number;
+	let pRatonX: number;
 
-	let pRatónY: number;
+	let pRatonY: number;
 
-	let botónRatón: string;
+	let botonRaton: string;
 
-	let ratónPresionado: boolean;
+	let ratonPresionado: boolean;
 
-	function alPresionarRatón(): void;
+	function alPresionarRaton(): void;
 
-	function alSoltarRatón(): void;
+	function alSoltarRaton(): void;
 
-	function alMoverRatón(): void;
+	function alMoverRaton(): void;
 
-	function alArrastrarRatón(): void;
+	function alArrastrarRaton(): void;
 
 	function dobleClic(): void;
 
@@ -209,7 +209,7 @@ declare global {
 
 	function sinCursor(): void;
 
-	function ruedaRatón(evento: any): void;
+	function ruedaRaton(evento: any): void;
 
 	let movidoX: number;
 
@@ -271,9 +271,9 @@ declare global {
 
 	function modoMezcla(val: string): void;
 
-	function terminaciónTrazo(val: CanvasLineCap): void;
+	function terminacionTrazo(val: CanvasLineCap): void;
 
-	function uniónTrazo(val: CanvasLineJoin): void;
+	function unionTrazo(val: CanvasLineJoin): void;
 
 	function borrar(rellenoAlfa?: number, trazoAlfa?: number): void;
 
@@ -317,7 +317,7 @@ declare global {
 
 	// 💻 display
 
-	function modoVisualización(modo: string, calidadRender: string, escala: string | number): void;
+	function modoVisualizacion(modo: string, calidadRender: string, escala: string | number): void;
 
 	const MAXIMIZADO: 'maxed';
 
@@ -359,9 +359,9 @@ declare global {
 
 	function postProcesar(): void;
 
-	function densidadPíxeles(v: number): number;
+	function densidadPixeles(v: number): number;
 
-	function densidadVisualización(): number;
+	function densidadVisualizacion(): number;
 
 	var deltaTiempo: number;
 
@@ -381,7 +381,7 @@ declare global {
 
 	function mapa(val: number, inicio1: number, fin1: number, inicio2: number, fin2: number): number;
 
-	function modoÁngulo(modo: 'degrees' | 'radians'): void;
+	function modoAngulo(modo: 'degrees' | 'radians'): void;
 
 	function radianes(grados: number): number;
 
@@ -475,7 +475,7 @@ declare global {
 
 	function crearA(href: string, texto?: string): HTMLAnchorElement;
 
-	function crearBotón(contenido?: string): HTMLButtonElement;
+	function crearBoton(contenido?: string): HTMLButtonElement;
 
 	function crearCasilla(etiqueta?: string, marcado?: boolean): HTMLInputElement;
 
@@ -487,9 +487,9 @@ declare global {
 
 	function crearP(contenido?: string): HTMLParagraphElement;
 
-	function crearOpciónes(nombreGrupo?: string): HTMLDivElement;
+	function crearOpciones(nombreGrupo?: string): HTMLDivElement;
 
-	function crearSelección(placeholder?: string): HTMLSelectElement;
+	function crearSeleccion(placeholder?: string): HTMLSelectElement;
 
 	function crearDeslizador(min: number, max: number, valor?: number, paso?: number): HTMLInputElement;
 
@@ -507,11 +507,11 @@ declare global {
 
 	function grabar(): void;
 
-	function pausarGrabación(): void;
+	function pausarGrabacion(): void;
 
-	function borrarGrabación(): void;
+	function borrarGrabacion(): void;
 
-	function guardarGrabación(nombreArchivo: string): void;
+	function guardarGrabacion(nombreArchivo: string): void;
 
 	var grabando: boolean;
 
@@ -547,7 +547,7 @@ declare global {
 
 	function año(): number;
 
-	function día(): number;
+	function dia(): number;
 
 	function hora(): number;
 
@@ -602,7 +602,7 @@ declare global {
 
 		slerp(v: Vector, amt: number): Vector;
 
-		static desdeÁngulo(angulo: number, longitud?: number): Vector;
+		static desdeAngulo(angulo: number, longitud?: number): Vector;
 	}
 
 	// 🖌️ shaping
@@ -621,15 +621,15 @@ declare global {
 
 	function terminarContorno(): void;
 
-	function vértice(x: number, y: number): void;
+	function vertice(x: number, y: number): void;
 
-	function vérticeBezier(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
+	function verticeBezier(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
 
-	function vérticeCuadrático(cp1x: number, cp1y: number, x: number, y: number): void;
+	function verticeCuadratico(cp1x: number, cp1y: number, x: number, y: number): void;
 
 	function bezier(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
-	function triángulo(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
+	function triangulo(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
 
 	function quad(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): void;
 
@@ -666,7 +666,7 @@ declare global {
 	class Q5 {
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
-		static versión: string;
+		static version: string;
 
 		static lang: string;
 
@@ -707,13 +707,13 @@ declare global {
 		postProcesar(): void;
 		Lienzo: typeof Lienzo;
 		log: typeof log;
-		círculo: typeof círculo;
+		circulo: typeof circulo;
 		elipse: typeof elipse;
 		rect: typeof rect;
 		cuadrado: typeof cuadrado;
 		punto: typeof punto;
-		línea: typeof línea;
-		cápsula: typeof cápsula;
+		linea: typeof linea;
+		capsula: typeof capsula;
 		modoRect: typeof modoRect;
 		modoEliptico: typeof modoEliptico;
 		cargarImagen: typeof cargarImagen;
@@ -731,18 +731,18 @@ declare global {
 		insertado: typeof insertado;
 		obtener: typeof obtener;
 		establecer: typeof establecer;
-		cargarPíxeles: typeof cargarPíxeles;
-		actualizarPíxeles: typeof actualizarPíxeles;
+		cargarPixeles: typeof cargarPixeles;
+		actualizarPixeles: typeof actualizarPixeles;
 		filtro: typeof filtro;
 		crearImagen: typeof crearImagen;
-		crearGráficos: typeof crearGráficos;
+		crearGraficos: typeof crearGraficos;
 		texto: typeof texto;
 		cargarFuente: typeof cargarFuente;
 		fuenteTexto: typeof fuenteTexto;
 		tamañoTexto: typeof tamañoTexto;
 		interlineado: typeof interlineado;
 		estiloTexto: typeof estiloTexto;
-		alineaciónTexto: typeof alineaciónTexto;
+		alineacionTexto: typeof alineacionTexto;
 		pesoTexto: typeof pesoTexto;
 		anchoTexto: typeof anchoTexto;
 		ascensoTexto: typeof ascensoTexto;
@@ -750,10 +750,10 @@ declare global {
 		crearImagenTexto: typeof crearImagenTexto;
 		imagenTexto: typeof imagenTexto;
 		nf: typeof nf;
-		alPresionarRatón: typeof alPresionarRatón;
-		alSoltarRatón: typeof alSoltarRatón;
-		alMoverRatón: typeof alMoverRatón;
-		alArrastrarRatón: typeof alArrastrarRatón;
+		alPresionarRaton: typeof alPresionarRaton;
+		alSoltarRaton: typeof alSoltarRaton;
+		alMoverRaton: typeof alMoverRaton;
+		alArrastrarRaton: typeof alArrastrarRaton;
 		dobleClic: typeof dobleClic;
 		teclaEstaPresionada: typeof teclaEstaPresionada;
 		alPresionarTecla: typeof alPresionarTecla;
@@ -763,7 +763,7 @@ declare global {
 		alMoverToque: typeof alMoverToque;
 		cursor: typeof cursor;
 		sinCursor: typeof sinCursor;
-		ruedaRatón: typeof ruedaRatón;
+		ruedaRaton: typeof ruedaRaton;
 		bloqueoPuntero: typeof bloqueoPuntero;
 		color: typeof color;
 		modoColor: typeof modoColor;
@@ -778,8 +778,8 @@ declare global {
 		sinSombra: typeof sinSombra;
 		cajaSombra: typeof cajaSombra;
 		modoMezcla: typeof modoMezcla;
-		terminaciónTrazo: typeof terminaciónTrazo;
-		uniónTrazo: typeof uniónTrazo;
+		terminacionTrazo: typeof terminacionTrazo;
+		unionTrazo: typeof unionTrazo;
 		borrar: typeof borrar;
 		noBorrar: typeof noBorrar;
 		guardarEstilos: typeof guardarEstilos;
@@ -798,7 +798,7 @@ declare global {
 		recuperarMatriz: typeof recuperarMatriz;
 		guardar: typeof guardar;
 		recuperar: typeof recuperar;
-		modoVisualización: typeof modoVisualización;
+		modoVisualizacion: typeof modoVisualizacion;
 		pantallaCompleta: typeof pantallaCompleta;
 		redimensionarLienzo: typeof redimensionarLienzo;
 		pausar: typeof pausar;
@@ -807,14 +807,14 @@ declare global {
 		frecuenciaRefresco: typeof frecuenciaRefresco;
 		obtenerTasaFotogramasObjetivo: typeof obtenerTasaFotogramasObjetivo;
 		obtenerFPS: typeof obtenerFPS;
-		densidadPíxeles: typeof densidadPíxeles;
-		densidadVisualización: typeof densidadVisualización;
+		densidadPixeles: typeof densidadPixeles;
+		densidadVisualizacion: typeof densidadVisualizacion;
 		aleatorio: typeof aleatorio;
 		flu: typeof flu;
 		ruido: typeof ruido;
 		dist: typeof dist;
 		mapa: typeof mapa;
-		modoÁngulo: typeof modoÁngulo;
+		modoAngulo: typeof modoAngulo;
 		radianes: typeof radianes;
 		grados: typeof grados;
 		interpolar: typeof interpolar;
@@ -845,14 +845,14 @@ declare global {
 		iniciarAudioUsuario: typeof iniciarAudioUsuario;
 		crearElemento: typeof crearElemento;
 		crearA: typeof crearA;
-		crearBotón: typeof crearBotón;
+		crearBoton: typeof crearBoton;
 		crearCasilla: typeof crearCasilla;
 		crearSelectorColor: typeof crearSelectorColor;
 		crearImg: typeof crearImg;
 		crearEntrada: typeof crearEntrada;
 		crearP: typeof crearP;
-		crearOpciónes: typeof crearOpciónes;
-		crearSelección: typeof crearSelección;
+		crearOpciones: typeof crearOpciones;
+		crearSeleccion: typeof crearSeleccion;
 		crearDeslizador: typeof crearDeslizador;
 		crearVideo: typeof crearVideo;
 		crearCaptura: typeof crearCaptura;
@@ -860,9 +860,9 @@ declare global {
 		encontrarElementos: typeof encontrarElementos;
 		crearGrabadora: typeof crearGrabadora;
 		recordar: typeof grabar;
-		pausarGrabación: typeof pausarGrabación;
-		borrarGrabación: typeof borrarGrabación;
-		guardarGrabación: typeof guardarGrabación;
+		pausarGrabacion: typeof pausarGrabacion;
+		borrarGrabacion: typeof borrarGrabacion;
+		guardarGrabacion: typeof guardarGrabacion;
 		cargar: typeof cargar;
 		cargarTexto: typeof cargarTexto;
 		cargarJSON: typeof cargarJSON;
@@ -876,7 +876,7 @@ declare global {
 		eliminarItem: typeof eliminarItem;
 		limpiarAlmacenamiento: typeof limpiarAlmacenamiento;
 		año: typeof año;
-		día: typeof día;
+		dia: typeof dia;
 		hora: typeof hora;
 		minuto: typeof minuto;
 		segundo: typeof segundo;
@@ -896,8 +896,8 @@ declare global {
 			enmascarar(img: Q5.Imagen): void;
 			recortar(): Q5.Imagen;
 			filtro(tipo: string, valor?: number): void;
-			cargarPíxeles(): void;
-			actualizarPíxeles(): void;
+			cargarPixeles(): void;
+			actualizarPixeles(): void;
 			guardar(nombreArchivo?: string): void;
 		}
 

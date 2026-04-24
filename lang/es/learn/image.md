@@ -414,10 +414,10 @@ Recupera una subsección de una imagen o lienzo como una nueva Imagen Q5
 o el color de un píxel en la imagen o lienzo.
 
 Si solo se especifican x e y, esta función devuelve el color del píxel
-en la coordenada dada en formato de array `[R, G, B, A]`. Si `cargarPíxeles`
+en la coordenada dada en formato de array `[R, G, B, A]`. Si `cargarPixeles`
 nunca se ha ejecutado, es ejecutado por esta función.
 
-Si haces cambios en el lienzo o imagen, debes llamar a `cargarPíxeles`
+Si haces cambios en el lienzo o imagen, debes llamar a `cargarPixeles`
 antes de usar esta función para obtener los datos de color actuales.
 
 No aplicable a lienzos WebGPU.
@@ -447,11 +447,11 @@ imagen(recortada, -100, -100, 200, 200);
 function dibujar() {
 	fondo(200);
 	sinTrazo();
-	círculo(100, 100, frameCount % 200);
+	circulo(100, 100, frameCount % 200);
 
-	cargarPíxeles();
-	let col = obtener(ratónX, ratónY);
-	texto(col, ratónX, ratónY);
+	cargarPixeles();
+	let col = obtener(ratonX, ratonY);
+	texto(col, ratonX, ratonY);
 }
 ```
 
@@ -473,7 +473,7 @@ Establece el color de un píxel en la imagen o lienzo. El modo de color debe ser
 O si se proporciona un lienzo o imagen, se dibuja encima de la
 imagen o lienzo de destino, ignorando su configuración de tinte.
 
-Ejecuta `actualizarPíxeles` para aplicar los cambios.
+Ejecuta `actualizarPixeles` para aplicar los cambios.
 
 No aplicable a lienzos WebGPU.
 
@@ -493,7 +493,7 @@ let img = crearImagen(50, 50);
 
 q5.dibujar = function () {
 	img.establecer(aleatorio(50), aleatorio(50), c);
-	img.actualizarPíxeles();
+	img.actualizarPixeles();
 
 	fondo(img);
 };
@@ -507,15 +507,15 @@ let c = color('lime');
 
 function dibujar() {
 	establecer(aleatorio(200), aleatorio(200), c);
-	actualizarPíxeles();
+	actualizarPixeles();
 }
 ```
 
-## píxeles
+## pixeles
 
 Array de datos de color de píxeles de un lienzo o imagen.
 
-Vacío por defecto, obtener el dato ejecutando `cargarPíxeles`.
+Vacío por defecto, obtener el dato ejecutando `cargarPixeles`.
 
 Cada píxel está representado por cuatro valores consecutivos en el array,
 correspondientes a sus canales rojo, verde, azul y alfa.
@@ -524,9 +524,9 @@ Los datos del píxel superior izquierdo están al principio del array
 y los datos del píxel inferior derecho están al final, yendo de
 izquierda a derecha y de arriba a abajo.
 
-## cargarPíxeles
+## cargarPixeles
 
-Carga datos de píxeles en `píxeles` desde el lienzo o imagen.
+Carga datos de píxeles en `pixeles` desde el lienzo o imagen.
 
 El ejemplo a continuación establece el canal verde de algunos píxeles
 a un valor aleatorio.
@@ -540,11 +540,11 @@ frecuenciaRefresco(5);
 let icono = cargarImagen('/q5js_icon.png');
 
 q5.dibujar = function () {
-	icono.cargarPíxeles();
-	for (let i = 0; i < icono.píxeles.length; i += 16) {
-		icono.píxeles[i + 1] = aleatorio(1);
+	icono.cargarPixeles();
+	for (let i = 0; i < icono.pixeles.length; i += 16) {
+		icono.pixeles[i + 1] = aleatorio(1);
 	}
-	icono.actualizarPíxeles();
+	icono.actualizarPixeles();
 	fondo(icono);
 };
 ```
@@ -556,18 +556,18 @@ frecuenciaRefresco(5);
 let icono = cargarImagen('/q5js_icon.png');
 
 function dibujar() {
-	icono.cargarPíxeles();
-	for (let i = 0; i < icono.píxeles.length; i += 16) {
-		icono.píxeles[i + 1] = aleatorio(255);
+	icono.cargarPixeles();
+	for (let i = 0; i < icono.pixeles.length; i += 16) {
+		icono.pixeles[i + 1] = aleatorio(255);
 	}
-	icono.actualizarPíxeles();
+	icono.actualizarPixeles();
 	fondo(icono);
 }
 ```
 
-## actualizarPíxeles
+## actualizarPixeles
 
-Aplica cambios en el array `píxeles` al lienzo o imagen.
+Aplica cambios en el array `pixeles` al lienzo o imagen.
 
 No aplicable a lienzos WebGPU.
 
@@ -583,7 +583,7 @@ for (let x = 0; x < 50; x += 3) {
 		img.establecer(x, y, c);
 	}
 }
-img.actualizarPíxeles();
+img.actualizarPixeles();
 
 fondo(img);
 ```
@@ -598,7 +598,7 @@ for (let x = 0; x < 200; x += 5) {
 		establecer(x, y, color('pink'));
 	}
 }
-actualizarPíxeles();
+actualizarPixeles();
 ```
 
 ## filtro
@@ -681,7 +681,7 @@ Crea una nueva imagen.
 @returns {Q5.Image}
 ```
 
-## crearGráficos
+## crearGraficos
 
 Crea un búfer de gráficos.
 

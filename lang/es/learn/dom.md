@@ -96,7 +96,7 @@ enlace.addEventListener('mouseover', () => {
 });
 ```
 
-## crearBotón
+## crearBoton
 
 Crea un elemento de botón.
 
@@ -109,7 +109,7 @@ Crea un elemento de botón.
 ```js
 await Lienzo(200, 100);
 
-let btn = crearBotón('¡Clic aqui!');
+let btn = crearBoton('¡Clic aqui!');
 
 btn.addEventListener('click', () => {
 	fondo(aleatorio(0.4, 1));
@@ -121,7 +121,7 @@ btn.addEventListener('click', () => {
 ```js
 crearLienzo(200, 100);
 
-let btn = crearBotón('¡Click aqui!');
+let btn = crearBoton('¡Click aqui!');
 
 btn.addEventListener('click', () => {
 	fondo(aleatorio(100, 255));
@@ -307,7 +307,7 @@ let p = crearP('¡Hola, mundo!');
 p.style.color = 'pink';
 ```
 
-## crearOpciónes
+## crearOpciones
 
 Crea un grupo de botones de radio.
 
@@ -325,13 +325,13 @@ Usa la propiedad `value` para obtener o establecer el valor del botón de radio 
 ```js
 await Lienzo(200, 160);
 
-let radio = crearOpciónes();
+let radio = crearOpciones();
 radio.option('cuadrado', '1').option('círculo', '2');
 
 q5.dibujar = function () {
 	fondo(0.8);
 	if (radio.value == '1') cuadrado(-40, -40, 80);
-	if (radio.value == '2') círculo(0, 0, 80);
+	if (radio.value == '2') circulo(0, 0, 80);
 };
 ```
 
@@ -340,17 +340,17 @@ q5.dibujar = function () {
 ```js
 crearLienzo(200, 160);
 
-let radio = crearOpciónes();
+let radio = crearOpciones();
 radio.option('cuadrado', '1').option('círculo', '2');
 
 function dibujar() {
 	fondo(200);
 	if (radio.value == '1') cuadrado(75, 25, 80);
-	if (radio.value == '2') círculo(100, 50, 80);
+	if (radio.value == '2') circulo(100, 50, 80);
 }
 ```
 
-## crearSelección
+## crearSeleccion
 
 Crea un elemento de selección (select).
 
@@ -374,7 +374,7 @@ cadena o un array de cadenas.
 ```js
 await Lienzo(200, 100);
 
-let sel = crearSelección('Seleccionar un opcion');
+let sel = crearSeleccion('Seleccionar un opcion');
 sel.option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {
@@ -387,7 +387,7 @@ sel.addEventListener('change', () => {
 ```js
 crearLienzo(200, 100);
 
-let sel = crearSelección('Seleccionar un opcion');
+let sel = crearSeleccion('Seleccionar un opcion');
 sel.option('Red', '#f55').option('Green', '#5f5');
 
 sel.addEventListener('change', () => {

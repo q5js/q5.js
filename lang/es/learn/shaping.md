@@ -82,7 +82,7 @@ Comienza a almacenar vértices para una forma convexa.
 
 Termina de almacenar vértices para una forma convexa.
 
-## vértice
+## vertice
 
 Especifica un vértice en una forma.
 
@@ -103,15 +103,15 @@ grosorTrazo(20);
 
 empezarForma();
 relleno(1, 0, 0);
-vértice(-80, -80);
-vértice(40, -60);
+vertice(-80, -80);
+vertice(40, -60);
 relleno(0, 0, 1);
-vértice(80, 60);
-vértice(-60, 80);
+vertice(80, 60);
+vertice(-60, 80);
 terminarForma(true);
 ```
 
-## vérticeBezier
+## verticeBezier
 
 Especifica un vértice Bezier en una forma.
 
@@ -124,7 +124,7 @@ Especifica un vértice Bezier en una forma.
 @param {number} y coordenada-y del punto de anclaje
 ```
 
-## vérticeCuadrático
+## verticeCuadratico
 
 Especifica un vértice Bezier cuadrático en una forma.
 
@@ -150,7 +150,7 @@ Dibuja una curva Bezier.
 @param {number} y4 coordenada-y del segundo punto de anclaje
 ```
 
-## triángulo
+## triangulo
 
 Dibuja un triángulo.
 

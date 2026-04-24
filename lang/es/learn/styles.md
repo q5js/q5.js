@@ -19,7 +19,7 @@ await Lienzo(200);
 fondo(0.8);
 
 relleno('red');
-círculo(-20, -20, 80);
+circulo(-20, -20, 80);
 
 relleno('lime');
 cuadrado(-20, -20, 80);
@@ -32,7 +32,7 @@ crearLienzo(200);
 fondo(200);
 
 relleno('red');
-círculo(80, 80, 80);
+circulo(80, 80, 80);
 
 relleno('lime');
 cuadrado(80, 80, 80);
@@ -58,7 +58,7 @@ fondo(0.8);
 relleno(0.14);
 
 trazo('red');
-círculo(-20, -20, 80);
+circulo(-20, -20, 80);
 
 trazo('lime');
 cuadrado(-20, -20, 80);
@@ -72,7 +72,7 @@ fondo(200);
 relleno(36);
 
 trazo('red');
-círculo(80, 80, 80);
+circulo(80, 80, 80);
 
 trazo('lime');
 cuadrado(80, 80, 80);
@@ -91,7 +91,7 @@ fondo(0.8);
 sinRelleno();
 
 trazo('red');
-círculo(-20, -20, 80);
+circulo(-20, -20, 80);
 trazo('lime');
 cuadrado(-20, -20, 80);
 ```
@@ -105,7 +105,7 @@ fondo(200);
 sinRelleno();
 
 trazo('red');
-círculo(80, 80, 80);
+circulo(80, 80, 80);
 trazo('lime');
 cuadrado(80, 80, 80);
 ```
@@ -121,7 +121,7 @@ await Lienzo(200);
 fondo(0.8);
 relleno(0.14);
 trazo('red');
-círculo(-20, -20, 80);
+circulo(-20, -20, 80);
 
 sinTrazo();
 cuadrado(-20, -20, 80);
@@ -134,7 +134,7 @@ crearLienzo(200);
 fondo(200);
 relleno(36);
 trazo('red');
-círculo(80, 80, 80);
+circulo(80, 80, 80);
 
 sinTrazo();
 cuadrado(80, 80, 80);
@@ -154,10 +154,10 @@ Establece el tamaño del trazo usado para líneas y el borde alrededor de dibujo
 await Lienzo(200);
 fondo(0.8);
 trazo('red');
-círculo(-50, 0, 80);
+circulo(-50, 0, 80);
 
 grosorTrazo(12);
-círculo(50, 0, 80);
+circulo(50, 0, 80);
 ```
 
 ### c2d
@@ -166,10 +166,10 @@ círculo(50, 0, 80);
 crearLienzo(200);
 fondo(200);
 trazo('red');
-círculo(50, 100, 80);
+circulo(50, 100, 80);
 
 grosorTrazo(12);
-círculo(150, 100, 80);
+circulo(150, 100, 80);
 ```
 
 ## opacidad
@@ -189,7 +189,7 @@ await Lienzo(200);
 fondo(0.8);
 
 opacidad(1);
-círculo(-20, -20, 80);
+circulo(-20, -20, 80);
 
 opacidad(0.2);
 cuadrado(-20, -20, 80);
@@ -202,7 +202,7 @@ crearLienzo(200);
 fondo(200);
 
 opacidad(1);
-círculo(80, 80, 80);
+circulo(80, 80, 80);
 
 opacidad(0.2);
 cuadrado(80, 80, 80);
@@ -289,8 +289,8 @@ sombra(50);
 
 function dibujar() {
 	fondo(200);
-	cajaSombra(-20, ratónY, 10);
-	círculo(100, 100, 80, 80);
+	cajaSombra(-20, ratonY, 10);
+	circulo(100, 100, 80, 80);
 }
 ```
 
@@ -316,7 +316,7 @@ No disponible en q5 WebGPU.
 @param {string} val operación de composición
 ```
 
-## terminaciónTrazo
+## terminacionTrazo
 
 Establece el estilo de terminación de línea a `ROUND`, `SQUARE`, o `PROJECT`.
 
@@ -333,17 +333,17 @@ crearLienzo(200);
 fondo(200);
 grosorTrazo(20);
 
-terminaciónTrazo(ROUND);
-línea(50, 50, 150, 50);
+terminacionTrazo(ROUND);
+linea(50, 50, 150, 50);
 
-terminaciónTrazo(SQUARE);
-línea(50, 100, 150, 100);
+terminacionTrazo(SQUARE);
+linea(50, 100, 150, 100);
 
-terminaciónTrazo(PROJECT);
-línea(50, 150, 150, 150);
+terminacionTrazo(PROJECT);
+linea(50, 150, 150, 150);
 ```
 
-## uniónTrazo
+## unionTrazo
 
 Establece el estilo de unión de línea a `ROUND`, `BEVEL`, o `MITER`.
 
@@ -360,13 +360,13 @@ crearLienzo(200);
 fondo(200);
 grosorTrazo(10);
 
-uniónTrazo(ROUND);
+unionTrazo(ROUND);
 triángulo(50, 20, 150, 20, 50, 70);
 
-uniónTrazo(BEVEL);
+unionTrazo(BEVEL);
 triángulo(150, 50, 50, 100, 150, 150);
 
-uniónTrazo(MITER);
+unionTrazo(MITER);
 triángulo(50, 130, 150, 180, 50, 180);
 ```
 
@@ -404,10 +404,10 @@ fondo(0.8);
 
 guardarEstilos();
 relleno('blue');
-círculo(-50, -50, 80);
+circulo(-50, -50, 80);
 
 recuperarEstilos();
-círculo(50, 50, 80);
+circulo(50, 50, 80);
 ```
 
 ### c2d
@@ -418,10 +418,10 @@ fondo(200);
 
 guardarEstilos();
 relleno('blue');
-círculo(50, 50, 80);
+circulo(50, 50, 80);
 
 recuperarEstilos();
-círculo(150, 150, 80);
+circulo(150, 150, 80);
 ```
 
 ## recuperarEstilos
@@ -436,10 +436,10 @@ fondo(0.8);
 
 guardarEstilos();
 relleno('blue');
-círculo(-50, -50, 80);
+circulo(-50, -50, 80);
 
 recuperarEstilos();
-círculo(50, 50, 80);
+circulo(50, 50, 80);
 ```
 
 ### c2d
@@ -450,10 +450,10 @@ fondo(200);
 
 guardarEstilos();
 relleno('blue');
-círculo(50, 50, 80);
+circulo(50, 50, 80);
 
 recuperarEstilos();
-círculo(150, 150, 80);
+circulo(150, 150, 80);
 ```
 
 ## limpiar
@@ -469,7 +469,7 @@ await Lienzo(200, { alpha: true });
 
 q5.dibujar = function () {
 	limpiar();
-	círculo((frameCount % 200) - 100, 0, 80);
+	circulo((frameCount % 200) - 100, 0, 80);
 };
 ```
 
@@ -480,7 +480,7 @@ crearLienzo(200, 200, { alpha: true });
 
 function dibujar() {
 	limpiar();
-	círculo(frameCount % 200, 100, 80);
+	circulo(frameCount % 200, 100, 80);
 }
 ```
 

@@ -7,7 +7,7 @@ usados para crear efectos visuales avanzados en q5!
 
 Crea un shader que el renderizador WebGPU de q5 puede usar.
 
-Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones: `plano`, `línea`, y `terminarForma`.
+Si `tipo` no se especifica, esta función personaliza una copia del [shader de formas por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/shapes.wgsl), lo que afecta a las siguientes funciones: `plano`, `linea`, y `terminarForma`.
 
 Para más información sobre los parámetros de entrada de las funciones de vértice y fragmento,
 los datos y las funciones auxiliares disponibles para usar
@@ -160,8 +160,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 q5.dibujar = function () {
 	trazo(1);
 	grosorTrazo(8);
-	línea(ratónX, ratónY, pRatónX, pRatónY);
-	ratónPresionado ? reiniciarShaders() : shader(boxy);
+	linea(ratonX, ratonY, pRatonX, pRatonY);
+	ratonPresionado ? reiniciarShaders() : shader(boxy);
 };
 ```
 
@@ -246,7 +246,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 q5.dibujar = function () {
 	limpiar();
-	if (ratónPresionado) vid.play();
+	if (ratonPresionado) vid.play();
 	shader(flipper);
 	imagen(vid, -100, 150, 200, 150);
 };
