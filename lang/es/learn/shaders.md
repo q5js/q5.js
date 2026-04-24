@@ -107,7 +107,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 q5.dibujar = function () {
 	shader(stripes);
-	fondo(0);
+	plano(0, 0, ancho, alto);
 
 	reiniciarShader();
 	triángulo(-50, -50, 0, 50, 50, -50);

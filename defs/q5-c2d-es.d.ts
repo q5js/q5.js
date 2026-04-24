@@ -26,7 +26,7 @@ declare global {
 	 * @example
 	 * crearLienzo(200, 100);
 	 * fondo('silver');
-	 * círculo(0, 0, 80);
+	 * circulo(0, 0, 80);
 	 */
 	function Lienzo(ancho?: number, alto?: number, opciones?: object): Promise<HTMLCanvasElement>;
 
@@ -35,7 +35,7 @@ declare global {
 	 * @example
 	 * function dibujar() {
 	 * 	fondo('silver');
-	 * 	círculo(ratónX, ratónY, 80);
+	 * 	circulo(ratonX, ratonY, 80);
 	 * }
 	 */
 	function dibujar(): void;
@@ -47,8 +47,8 @@ declare global {
 	 * @param {any} mensaje a imprimir
 	 * @example
 	 * function dibujar() {
-	 * 	círculo(ratónX, ratónY, 80);
-	 * 	log('El ratón está en:', ratónX, ratónY);
+	 * 	circulo(ratonX, ratonY, 80);
+	 * 	log('El ratón está en:', ratonX, ratonY);
 	 * }
 	 */
 	function log(mensaje: any): void;
@@ -62,9 +62,9 @@ declare global {
 	 * @param {number} diámetro del círculo
 	 * @example
 	 * crearLienzo(200, 100);
-	 * círculo(100, 50, 80);
+	 * circulo(100, 50, 80);
 	 */
-	function círculo(x: number, y: number, diámetro: number): void;
+	function circulo(x: number, y: number, diametro: number): void;
 
 	/** 🧑‍🎨
 	 * Dibuja una elipse.
@@ -134,9 +134,9 @@ declare global {
 	 * @example
 	 * crearLienzo(200, 100);
 	 * trazo('lime');
-	 * línea(20, 20, 180, 80);
+	 * linea(20, 20, 180, 80);
 	 */
-	function línea(x1: number, y1: number, x2: number, y2: number): void;
+	function linea(x1: number, y1: number, x2: number, y2: number): void;
 
 	/** 🧑‍🎨
 	 * Dibuja una cápsula.
@@ -149,16 +149,16 @@ declare global {
 	 * crearLienzo(200, 100);
 	 * fondo(200);
 	 * grosorTrazo(5);
-	 * cápsula(40, 40, 160, 60, 10);
+	 * capsula(40, 40, 160, 60, 10);
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 	relleno('cyan');
 	 * 	grosorTrazo(10);
-	 * 	cápsula(100, 100, ratónX, ratónY, 20);
+	 * 	capsula(100, 100, ratonX, ratonY, 20);
 	 * }
 	 */
-	function cápsula(x1: number, y1: number, x2: number, y2: number, r: number): void;
+	function capsula(x1: number, y1: number, x2: number, y2: number, r: number): void;
 
 	/** 🧑‍🎨
 	 * Establecer a `ESQUINA` (por defecto), `CENTRO`, `RADIO`, o `ESQUINAS`.
@@ -201,7 +201,7 @@ declare global {
 	 * Establecer a `CENTRO` (por defecto), `RADIO`, `ESQUINA`, o `ESQUINAS`.
 	 * 
 	 * Cambia cómo se interpretan las primeras cuatro entradas para
-	 * `elipse`, `círculo`, y `arco`.
+	 * `elipse`, `circulo`, y `arco`.
 	 * @param {string} modo
 	 * @example
 	 * crearLienzo(200, 100);
@@ -478,10 +478,10 @@ declare global {
 	 * o el color de un píxel en la imagen o lienzo.
 	 * 
 	 * Si solo se especifican x e y, esta función devuelve el color del píxel
-	 * en la coordenada dada en formato de array `[R, G, B, A]`. Si `cargarPíxeles`
+	 * en la coordenada dada en formato de array `[R, G, B, A]`. Si `cargarPixeles`
 	 * nunca se ha ejecutado, es ejecutado por esta función.
 	 * 
-	 * Si haces cambios en el lienzo o imagen, debes llamar a `cargarPíxeles`
+	 * Si haces cambios en el lienzo o imagen, debes llamar a `cargarPixeles`
 	 * antes de usar esta función para obtener los datos de color actuales.
 	 * 
 	 * No aplicable a lienzos WebGPU.
@@ -494,11 +494,11 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 	sinTrazo();
-	 * 	círculo(100, 100, frameCount % 200);
+	 * 	circulo(100, 100, frameCount % 200);
 	 * 
-	 * 	cargarPíxeles();
-	 * 	let col = obtener(ratónX, ratónY);
-	 * 	texto(col, ratónX, ratónY);
+	 * 	cargarPixeles();
+	 * 	let col = obtener(ratonX, ratonY);
+	 * 	texto(col, ratonX, ratonY);
 	 * }
 	 * @example
 	 * crearLienzo(200);
@@ -518,7 +518,7 @@ declare global {
 	 * O si se proporciona un lienzo o imagen, se dibuja encima de la
 	 * imagen o lienzo de destino, ignorando su configuración de tinte.
 	 * 
-	 * Ejecuta `actualizarPíxeles` para aplicar los cambios.
+	 * Ejecuta `actualizarPixeles` para aplicar los cambios.
 	 * 
 	 * No aplicable a lienzos WebGPU.
 	 * @param {number} x
@@ -530,7 +530,7 @@ declare global {
 	 * 
 	 * function dibujar() {
 	 * 	establecer(aleatorio(200), aleatorio(200), c);
-	 * 	actualizarPíxeles();
+	 * 	actualizarPixeles();
 	 * }
 	 */
 	function establecer(x: number, y: number, val: any): void;
@@ -538,7 +538,7 @@ declare global {
 	/** 🌆
 	 * Array de datos de color de píxeles de un lienzo o imagen.
 	 * 
-	 * Vacío por defecto, obtener el dato ejecutando `cargarPíxeles`.
+	 * Vacío por defecto, obtener el dato ejecutando `cargarPixeles`.
 	 * 
 	 * Cada píxel está representado por cuatro valores consecutivos en el array,
 	 * correspondientes a sus canales rojo, verde, azul y alfa.
@@ -547,10 +547,10 @@ declare global {
 	 * y los datos del píxel inferior derecho están al final, yendo de
 	 * izquierda a derecha y de arriba a abajo.
 	 */
-	var píxeles: number[];
+	var pixeles: number[];
 
 	/** 🌆
-	 * Carga datos de píxeles en `píxeles` desde el lienzo o imagen.
+	 * Carga datos de píxeles en `pixeles` desde el lienzo o imagen.
 	 * 
 	 * El ejemplo a continuación establece el canal verde de algunos píxeles
 	 * a un valor aleatorio.
@@ -561,18 +561,18 @@ declare global {
 	 * let icono = cargarImagen('/q5js_icon.png');
 	 * 
 	 * function dibujar() {
-	 * 	icono.cargarPíxeles();
-	 * 	for (let i = 0; i < icono.píxeles.length; i += 16) {
-	 * 		icono.píxeles[i + 1] = aleatorio(255);
+	 * 	icono.cargarPixeles();
+	 * 	for (let i = 0; i < icono.pixeles.length; i += 16) {
+	 * 		icono.pixeles[i + 1] = aleatorio(255);
 	 * 	}
-	 * 	icono.actualizarPíxeles();
+	 * 	icono.actualizarPixeles();
 	 * 	fondo(icono);
 	 * }
 	 */
-	function cargarPíxeles(): void;
+	function cargarPixeles(): void;
 
 	/** 🌆
-	 * Aplica cambios en el array `píxeles` al lienzo o imagen.
+	 * Aplica cambios en el array `pixeles` al lienzo o imagen.
 	 * 
 	 * No aplicable a lienzos WebGPU.
 	 * @example
@@ -583,9 +583,9 @@ declare global {
 	 * 		establecer(x, y, color('pink'));
 	 * 	}
 	 * }
-	 * actualizarPíxeles();
+	 * actualizarPixeles();
 	 */
-	function actualizarPíxeles(): void;
+	function actualizarPixeles(): void;
 
 	/** 🌆
 	 * Aplica un filtro a la imagen.
@@ -668,7 +668,7 @@ declare global {
 	 * @param {object} [opt] opciones
 	 * @returns {Q5} un nuevo búfer de gráficos Q5
 	 */
-	function crearGráficos(w: number, h: number, opt?: any): Q5;
+	function crearGraficos(w: number, h: number, opt?: any): Q5;
 
 	// 📘 texto
 
@@ -774,7 +774,7 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 
-	 * 	tamañoTexto(abs(ratónX));
+	 * 	tamañoTexto(abs(ratonX));
 	 * 	texto('A', 10, 190);
 	 * }
 	 */
@@ -788,7 +788,7 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 
-	 * 	tamañoTexto(abs(ratónX));
+	 * 	tamañoTexto(abs(ratonX));
 	 * 	texto('A', 10, 190);
 	 * 	rect(10, 190, 5, -interlineado());
 	 * }
@@ -820,10 +820,10 @@ declare global {
 	 * fondo(200);
 	 * tamañoTexto(32);
 	 * 
-	 * alineaciónTexto(CENTRO, MEDIO);
+	 * alineacionTexto(CENTRO, MEDIO);
 	 * texto('Hello, world!', 100, 100);
 	 */
-	function alineaciónTexto(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
+	function alineacionTexto(horiz: 'left' | 'center' | 'right', vert?: 'top' | 'middle' | 'bottom' | 'alphabetic'): void;
 
 	/** 📘
 	 * Establece el peso del texto.
@@ -842,7 +842,7 @@ declare global {
 	 * crearLienzo(200);
 	 * fondo(200);
 	 * tamañoTexto(32);
-	 * alineaciónTexto(CENTRO, MEDIO);
+	 * alineacionTexto(CENTRO, MEDIO);
 	 * 
 	 * pesoTexto(100);
 	 * texto('Hello, world!', 100, 100);
@@ -857,7 +857,7 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 
-	 * 	tamañoTexto(abs(ratónX));
+	 * 	tamañoTexto(abs(ratonX));
 	 * 	rect(10, 190, anchoTexto('A'), -interlineado());
 	 * 	texto('A', 10, 190);
 	 * }
@@ -872,7 +872,7 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 
-	 * 	tamañoTexto(abs(ratónX));
+	 * 	tamañoTexto(abs(ratonX));
 	 * 	rect(10, 190, anchoTexto('A'), -ascensoTexto());
 	 * 	texto('A', 10, 190);
 	 * }
@@ -932,7 +932,7 @@ declare global {
 	 * crearLienzo(200);
 	 * fondo(200);
 	 * tamañoTexto(96);
-	 * alineaciónTexto(CENTRO, CENTRO);
+	 * alineacionTexto(CENTRO, CENTRO);
 	 * 
 	 * imagenTexto('🐶', 100, 100);
 	 * @example
@@ -1028,7 +1028,7 @@ declare global {
 	 * 
 	 * Reproduce sonidos o activa otra retroalimentación no visual inmediatamente
 	 * respondiendo a eventos de entrada dentro de funciones como
-	 * `alPresionarRatón` y `alPresionarTecla`.
+	 * `alPresionarRaton` y `alPresionarTecla`.
 	 */
 
 	/** 🖲
@@ -1037,30 +1037,30 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 	tamañoTexto(64);
-	 * 	texto(redondear(ratónX), 50, 120);
+	 * 	texto(redondear(ratonX), 50, 120);
 	 * }
 	 */
-	let ratónX: number;
+	let ratonX: number;
 
 	/** 🖲
 	 * Posición Y actual del ratón.
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(200);
-	 * 	círculo(100, ratónY, 100);
+	 * 	circulo(100, ratonY, 100);
 	 * }
 	 */
-	let ratónY: number;
+	let ratonY: number;
 
 	/** 🖲
 	 * Posición X previa del ratón.
 	 */
-	let pRatónX: number;
+	let pRatonX: number;
 
 	/** 🖲
 	 * Posición Y previa del ratón.
 	 */
-	let pRatónY: number;
+	let pRatonY: number;
 
 	/** 🖲
 	 * El botón actual siendo presionado: 'left', 'right', 'center').
@@ -1070,20 +1070,20 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 	tamañoTexto(64);
-	 * 	texto(botónRatón, 20, 120);
+	 * 	texto(botonRaton, 20, 120);
 	 * }
 	 */
-	let botónRatón: string;
+	let botonRaton: string;
 
 	/** 🖲
-	 * Verdadero si el ratón está actualmente presionado, falso de lo contrario.
+	 * Verdadero si el raton está actualmente presionado, falso de lo contrario.
 	 * @example
 	 * function dibujar() {
-	 * 	if (ratónPresionado) fondo(100);
+	 * 	if (ratonPresionado) fondo(100);
 	 * 	else fondo(200);
 	 * }
 	 */
-	let ratónPresionado: boolean;
+	let ratonPresionado: boolean;
 
 	/** 🖲
 	 * Define esta función para responder a eventos de presionar el ratón.
@@ -1091,12 +1091,12 @@ declare global {
 	 * crearLienzo(200);
 	 * let gris = 95;
 	 * 
-	 * function alPresionarRatón() {
+	 * function alPresionarRaton() {
 	 * 	fondo(gris % 256);
 	 * 	gris += 40;
 	 * }
 	 */
-	function alPresionarRatón(): void;
+	function alPresionarRaton(): void;
 
 	/** 🖲
 	 * Define esta función para responder a eventos de soltar el ratón.
@@ -1104,12 +1104,12 @@ declare global {
 	 * crearLienzo(200);
 	 * let gris = 95;
 	 * 
-	 * function alSoltarRatón() {
+	 * function alSoltarRaton() {
 	 * 	fondo(gris % 256);
 	 * 	gris += 40;
 	 * }
 	 */
-	function alSoltarRatón(): void;
+	function alSoltarRaton(): void;
 
 	/** 🖲
 	 * Define esta función para responder a eventos de mover el ratón.
@@ -1120,12 +1120,12 @@ declare global {
 	 * crearLienzo(200);
 	 * let gris = 95;
 	 * 
-	 * function alMoverRatón() {
+	 * function alMoverRaton() {
 	 * 	fondo(gris % 256);
 	 * 	gris++;
 	 * }
 	 */
-	function alMoverRatón(): void;
+	function alMoverRaton(): void;
 
 	/** 🖲
 	 * Define esta función para responder a eventos de arrastrar el ratón.
@@ -1136,12 +1136,12 @@ declare global {
 	 * crearLienzo(200);
 	 * let gris = 95;
 	 * 
-	 * function alArrastrarRatón() {
+	 * function alArrastrarRaton() {
 	 * 	fondo(gris % 256);
 	 * 	gris++;
 	 * }
 	 */
-	function alArrastrarRatón(): void;
+	function alArrastrarRaton(): void;
 
 	/** 🖲
 	 * Define esta función para responder a eventos de doble clic del ratón.
@@ -1229,7 +1229,7 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 	for (let pt of punteros) {
-	 * 		círculo(pt.x, pt.y, 100);
+	 * 		circulo(pt.x, pt.y, 100);
 	 * 	}
 	 * }
 	 */
@@ -1317,15 +1317,15 @@ declare global {
 	 * @example
 	 * let x = (y = 100);
 	 * function dibujar() {
-	 * 	círculo(x, y, 10);
+	 * 	circulo(x, y, 10);
 	 * }
-	 * function ruedaRatón(e) {
+	 * function ruedaRaton(e) {
 	 * 	x += e.deltaX;
 	 * 	y += e.deltaY;
 	 * 	return false;
 	 * }
 	 */
-	function ruedaRatón(evento: any): void;
+	function ruedaRaton(evento: any): void;
 
 	/** 🖲
 	 * Distancia que el ratón ha recorrido desde el último fotograma en la dirección horizontal.
@@ -1347,7 +1347,7 @@ declare global {
 	 * @param {boolean} movimientoNoAjustado establecer a true para deshabilitar la aceleración del ratón a nivel de SO y acceder a la entrada de ratón sin procesar
 	 * @example
 	 * function dibujar() {
-	 * 	círculo(ratónX / 10 + 100, ratónY / 10 + 100, 10);
+	 * 	circulo(ratonX / 10 + 100, ratonY / 10 + 100, 10);
 	 * }
 	 * 
 	 * function dobleClic() {
@@ -1398,7 +1398,7 @@ declare global {
 	 * relleno(botella);
 	 * trazo(botella);
 	 * grosorTrazo(30);
-	 * círculo(100, 100, 155);
+	 * circulo(100, 100, 155);
 	 * @example
 	 * crearLienzo(200);
 	 * //          (gris, alfa)
@@ -1406,7 +1406,7 @@ declare global {
 	 * 
 	 * function dibujar() {
 	 * 	fondo(c);
-	 * 	círculo(ratónX, ratónY, 50);
+	 * 	circulo(ratonX, ratonY, 50);
 	 * 	c.g = (c.g + 1) % 256;
 	 * }
 	 * @example
@@ -1417,7 +1417,7 @@ declare global {
 	 * 
 	 * function dibujar() {
 	 * 	relleno(c);
-	 * 	círculo(ratónX, ratónY, 50);
+	 * 	circulo(ratonX, ratonY, 50);
 	 * }
 	 */
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
@@ -1626,7 +1626,7 @@ declare global {
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(128, 32);
-	 * 	círculo(ratónX, ratónY, 20);
+	 * 	circulo(ratonX, ratonY, 20);
 	 * }
 	 */
 	function fondo(relleno: Color | Q5.Imagen): void;
@@ -1680,7 +1680,7 @@ declare global {
 	 * fondo(200);
 	 * 
 	 * relleno('red');
-	 * círculo(80, 80, 80);
+	 * circulo(80, 80, 80);
 	 * 
 	 * relleno('lime');
 	 * cuadrado(80, 80, 80);
@@ -1700,7 +1700,7 @@ declare global {
 	 * relleno(36);
 	 * 
 	 * trazo('red');
-	 * círculo(80, 80, 80);
+	 * circulo(80, 80, 80);
 	 * 
 	 * trazo('lime');
 	 * cuadrado(80, 80, 80);
@@ -1716,7 +1716,7 @@ declare global {
 	 * sinRelleno();
 	 * 
 	 * trazo('red');
-	 * círculo(80, 80, 80);
+	 * circulo(80, 80, 80);
 	 * trazo('lime');
 	 * cuadrado(80, 80, 80);
 	 */
@@ -1729,7 +1729,7 @@ declare global {
 	 * fondo(200);
 	 * relleno(36);
 	 * trazo('red');
-	 * círculo(80, 80, 80);
+	 * circulo(80, 80, 80);
 	 * 
 	 * sinTrazo();
 	 * cuadrado(80, 80, 80);
@@ -1743,10 +1743,10 @@ declare global {
 	 * crearLienzo(200);
 	 * fondo(200);
 	 * trazo('red');
-	 * círculo(50, 100, 80);
+	 * circulo(50, 100, 80);
 	 * 
 	 * grosorTrazo(12);
-	 * círculo(150, 100, 80);
+	 * circulo(150, 100, 80);
 	 */
 	function grosorTrazo(grosor: number): void;
 
@@ -1760,7 +1760,7 @@ declare global {
 	 * fondo(200);
 	 * 
 	 * opacidad(1);
-	 * círculo(80, 80, 80);
+	 * circulo(80, 80, 80);
 	 * 
 	 * opacidad(0.2);
 	 * cuadrado(80, 80, 80);
@@ -1830,8 +1830,8 @@ declare global {
 	 * 
 	 * function dibujar() {
 	 * 	fondo(200);
-	 * 	cajaSombra(-20, ratónY, 10);
-	 * 	círculo(100, 100, 80, 80);
+	 * 	cajaSombra(-20, ratonY, 10);
+	 * 	circulo(100, 100, 80, 80);
 	 * }
 	 * @example
 	 * crearLienzo(200);
@@ -1864,16 +1864,16 @@ declare global {
 	 * fondo(200);
 	 * grosorTrazo(20);
 	 * 
-	 * terminaciónTrazo(ROUND);
-	 * línea(50, 50, 150, 50);
+	 * terminacionTrazo(ROUND);
+	 * linea(50, 50, 150, 50);
 	 * 
-	 * terminaciónTrazo(SQUARE);
-	 * línea(50, 100, 150, 100);
+	 * terminacionTrazo(SQUARE);
+	 * linea(50, 100, 150, 100);
 	 * 
-	 * terminaciónTrazo(PROJECT);
-	 * línea(50, 150, 150, 150);
+	 * terminacionTrazo(PROJECT);
+	 * linea(50, 150, 150, 150);
 	 */
-	function terminaciónTrazo(val: CanvasLineCap): void;
+	function terminacionTrazo(val: CanvasLineCap): void;
 
 	/** 💅
 	 * Establece el estilo de unión de línea a `ROUND`, `BEVEL`, o `MITER`.
@@ -1885,16 +1885,16 @@ declare global {
 	 * fondo(200);
 	 * grosorTrazo(10);
 	 * 
-	 * uniónTrazo(ROUND);
+	 * unionTrazo(ROUND);
 	 * triángulo(50, 20, 150, 20, 50, 70);
 	 * 
-	 * uniónTrazo(BEVEL);
+	 * unionTrazo(BEVEL);
 	 * triángulo(150, 50, 50, 100, 150, 150);
 	 * 
-	 * uniónTrazo(MITER);
+	 * unionTrazo(MITER);
 	 * triángulo(50, 130, 150, 180, 50, 180);
 	 */
-	function uniónTrazo(val: CanvasLineJoin): void;
+	function unionTrazo(val: CanvasLineJoin): void;
 
 	/** 💅
 	 * Establece el lienzo en modo borrar, donde las formas borrarán lo que está
@@ -1925,10 +1925,10 @@ declare global {
 	 * 
 	 * guardarEstilos();
 	 * relleno('blue');
-	 * círculo(50, 50, 80);
+	 * circulo(50, 50, 80);
 	 * 
 	 * recuperarEstilos();
-	 * círculo(150, 150, 80);
+	 * circulo(150, 150, 80);
 	 */
 	function guardarEstilos(): void;
 
@@ -1940,10 +1940,10 @@ declare global {
 	 * 
 	 * guardarEstilos();
 	 * relleno('blue');
-	 * círculo(50, 50, 80);
+	 * circulo(50, 50, 80);
 	 * 
 	 * recuperarEstilos();
-	 * círculo(150, 150, 80);
+	 * circulo(150, 150, 80);
 	 */
 	function recuperarEstilos(): void;
 
@@ -1956,7 +1956,7 @@ declare global {
 	 * 
 	 * function dibujar() {
 	 * 	limpiar();
-	 * 	círculo(frameCount % 200, 100, 80);
+	 * 	circulo(frameCount % 200, 100, 80);
 	 * }
 	 */
 	function limpiar(): void;
@@ -1994,7 +1994,7 @@ declare global {
 	 * 	fondo(200);
 	 * 
 	 * 	trasladar(150, 150);
-	 * 	círculo(0, 0, 80);
+	 * 	circulo(0, 0, 80);
 	 * }
 	 */
 	function trasladar(x: number, y: number): void;
@@ -2007,7 +2007,7 @@ declare global {
 	 * 	fondo(200);
 	 * 
 	 * 	trasladar(100, 100);
-	 * 	rotar(ratónX / 50);
+	 * 	rotar(ratonX / 50);
 	 * 
 	 * 	modoRect(CENTER);
 	 * 	cuadrado(0, 0, 50);
@@ -2026,8 +2026,8 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 
-	 * 	escalar(ratónX / 10);
-	 * 	círculo(0, 0, 20);
+	 * 	escalar(ratonX / 10);
+	 * 	circulo(0, 0, 20);
 	 * }
 	 */
 	function escalar(x: number, y?: number): void;
@@ -2040,7 +2040,7 @@ declare global {
 	 * 	fondo(200);
 	 * 
 	 * 	trasladar(25, 60);
-	 * 	cizallarX(ratónX / 100);
+	 * 	cizallarX(ratonX / 100);
 	 * 	cuadrado(0, 0, 80);
 	 * }
 	 */
@@ -2054,7 +2054,7 @@ declare global {
 	 * 	fondo(200);
 	 * 
 	 * 	trasladar(25, 60);
-	 * 	cizallarY(ratónX / 100);
+	 * 	cizallarY(ratonX / 100);
 	 * 	cuadrado(0, 0, 80);
 	 * }
 	 */
@@ -2075,7 +2075,7 @@ declare global {
 	 * 	fondo(200);
 	 * 
 	 * 	aplicarMatriz(2, 1, 1, 1, 100, 100);
-	 * 	círculo(0, 0, 80);
+	 * 	circulo(0, 0, 80);
 	 * }
 	 */
 	function aplicarMatriz(a: number, b: number, c: number, d: number, e: number, f: number): void;
@@ -2090,7 +2090,7 @@ declare global {
 	 * fondo(200);
 	 * 
 	 * trasladar(100, 100);
-	 * círculo(0, 0, 80);
+	 * circulo(0, 0, 80);
 	 * 
 	 * reiniciarMatriz();
 	 * cuadrado(0, 0, 50);
@@ -2137,7 +2137,7 @@ declare global {
 	 * apilar();
 	 * relleno('blue');
 	 * trasladar(100, 100);
-	 * círculo(0, 0, 80);
+	 * circulo(0, 0, 80);
 	 * desapilar();
 	 * 
 	 * cuadrado(0, 0, 50);
@@ -2152,7 +2152,7 @@ declare global {
 	 * apilar();
 	 * relleno('blue');
 	 * trasladar(100, 100);
-	 * círculo(0, 0, 80);
+	 * circulo(0, 0, 80);
 	 * desapilar();
 	 * 
 	 * cuadrado(0, 0, 50);
@@ -2171,14 +2171,14 @@ declare global {
 	 * @example
 	 * crearLienzo(50, 25);
 	 * 
-	 * modoVisualización(CENTRO, PIXELADO, 4);
+	 * modoVisualizacion(CENTRO, PIXELADO, 4);
 	 * 
-	 * círculo(25, 12.5, 16);
+	 * circulo(25, 12.5, 16);
 	 */
-	function modoVisualización(modo: string, calidadRender: string, escala: string | number): void;
+	function modoVisualizacion(modo: string, calidadRender: string, escala: string | number): void;
 
 	/** 💻
-	 * Una configuración de `modoVisualización`.
+	 * Una configuración de `modoVisualizacion`.
 	 * 
 	 * El lienzo se escalará para llenar el elemento padre,
 	 * con bandas negras si es necesario para preservar su relación de aspecto.
@@ -2186,14 +2186,14 @@ declare global {
 	const MAXIMIZADO: 'maxed';
 
 	/** 💻
-	 * Una calidad de renderizado de `modoVisualización`.
+	 * Una calidad de renderizado de `modoVisualizacion`.
 	 * 
 	 * Se usa escalado suave si el lienzo se escala.
 	 */
 	const SUAVE: 'smooth';
 
 	/** 💻
-	 * Una calidad de renderizado de `modoVisualización`.
+	 * Una calidad de renderizado de `modoVisualizacion`.
 	 * 
 	 * Los píxeles se renderizan como cuadrados nítidos si el lienzo se escala.
 	 */
@@ -2288,7 +2288,7 @@ declare global {
 	 * Detiene el bucle de dibujo.
 	 * @example
 	 * function dibujar() {
-	 * 	círculo(cuadroActual * 5, 100, 80);
+	 * 	circulo(cuadroActual * 5, 100, 80);
 	 * 	pausar();
 	 * }
 	 */
@@ -2305,7 +2305,7 @@ declare global {
 	 * pausar();
 	 * 
 	 * function dibujar() {
-	 * 	círculo(cuadroActual * 5, 100, 80);
+	 * 	circulo(cuadroActual * 5, 100, 80);
 	 * }
 	 * function alPresionarRatón() {
 	 * 	redibujar(10);
@@ -2320,7 +2320,7 @@ declare global {
 	 * pausar();
 	 * 
 	 * function dibujar() {
-	 * 	círculo(cuadroActual * 5, 100, 80);
+	 * 	circulo(cuadroActual * 5, 100, 80);
 	 * }
 	 * function alPresionarRatón() {
 	 * 	reanudar();
@@ -2341,10 +2341,10 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 
-	 * 	if (ratónPresionado) frecuenciaRefresco(10);
+	 * 	if (ratonPresionado) frecuenciaRefresco(10);
 	 * 	else frecuenciaRefresco(60);
 	 * 
-	 * 	círculo(cuadroActual % 200, 100, 80);
+	 * 	circulo(cuadroActual % 200, 100, 80);
 	 * }
 	 * @example
 	 * function dibujar() {
@@ -2396,7 +2396,7 @@ declare global {
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(200);
-	 * 	círculo(cuadroActual % 200, 100, 80);
+	 * 	circulo(cuadroActual % 200, 100, 80);
 	 * }
 	 * 
 	 * function postProcesar() {
@@ -2412,10 +2412,10 @@ declare global {
 	 * @example
 	 * crearLienzo(200, 100);
 	 * fondo(200);
-	 * densidadPíxeles(1);
-	 * círculo(100, 50, 80);
+	 * densidadPixeles(1);
+	 * circulo(100, 50, 80);
 	 */
-	function densidadPíxeles(v: number): number;
+	function densidadPixeles(v: number): number;
 
 	/** 💻
 	 * Devuelve la densidad de visualización actual.
@@ -2426,9 +2426,9 @@ declare global {
 	 * crearLienzo(200, 100);
 	 * fondo(200);
 	 * tamañoTexto(64);
-	 * texto(densidadVisualización(), 10, 20);
+	 * texto(densidadVisualizacion(), 10, 20);
 	 */
-	function densidadVisualización(): number;
+	function densidadVisualizacion(): number;
 
 	/** 💻
 	 * El tiempo pasado desde que se dibujó el último fotograma.
@@ -2453,7 +2453,7 @@ declare global {
 	 * 	frecuenciaRefresco(aleatorio(30, 60));
 	 * 
 	 * 	x += deltaTiempo * 0.2;
-	 * 	círculo(x % 200, 100, 20);
+	 * 	circulo(x % 200, 100, 20);
 	 * }
 	 */
 	var deltaTiempo: number;
@@ -2486,11 +2486,11 @@ declare global {
 	 * frecuenciaRefresco(5);
 	 * 
 	 * function dibujar() {
-	 * 	círculo(100, 100, aleatorio(20, 200));
+	 * 	circulo(100, 100, aleatorio(20, 200));
 	 * }
 	 * @example
 	 * function dibujar() {
-	 * 	círculo(aleatorio(200), aleatorio(200), 10);
+	 * 	circulo(aleatorio(200), aleatorio(200), 10);
 	 * }
 	 */
 	function aleatorio(bajo?: number | any[], alto?: number): number | any;
@@ -2505,14 +2505,14 @@ declare global {
 	 * @returns {number} número aleatorio entre -val y val
 	 * @example
 	 * function dibujar() {
-	 * 	círculo(ratónX + flu(3), ratónY + flu(3), 5);
+	 * 	circulo(ratonX + flu(3), ratonY + flu(3), 5);
 	 * }
 	 * @example
 	 * let q = await Q5.WebGPU();
 	 * crearLienzo(200, 100);
 	 * 
 	 * q.dibujar = () => {
-	 * 	círculo(flu(50), 0, aleatorio(50));
+	 * 	circulo(flu(50), 0, aleatorio(50));
 	 * };
 	 */
 	function flu(cantidad: number): number;
@@ -2529,15 +2529,15 @@ declare global {
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 	let n = ruido(frameCount * 0.01);
-	 * 	círculo(100, 100, n * 200);
+	 * 	circulo(100, 100, n * 200);
 	 * }
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(200);
-	 * 	let t = (frameCount + ratónX) * 0.02;
+	 * 	let t = (frameCount + ratonX) * 0.02;
 	 * 	for (let x = -5; x < 220; x += 10) {
 	 * 		let n = ruido(t, x * 0.1);
-	 * 		círculo(x, 100, n * 40);
+	 * 		circulo(x, 100, n * 40);
 	 * 	}
 	 * }
 	 */
@@ -2555,10 +2555,10 @@ declare global {
 	 * @example
 	 * function dibujar() {
 	 * 	fondo(200);
-	 * 	círculo(100, 100, 20);
-	 * 	círculo(ratónX, ratónY, 20);
+	 * 	circulo(100, 100, 20);
+	 * 	circulo(ratonX, ratonY, 20);
 	 * 
-	 * 	let d = dist(100, 100, ratónX, ratónY);
+	 * 	let d = dist(100, 100, ratonX, ratonY);
 	 * 	texto(redondear(d), 20, 20);
 	 * }
 	 */
@@ -2579,7 +2579,7 @@ declare global {
 	 * Establece el modo para interpretar y dibujar ángulos. Puede ser 'degrees' (grados) o 'radians' (radianes).
 	 * @param {'degrees' | 'radians'} modo modo a establecer para la interpretación de ángulos
 	 */
-	function modoÁngulo(modo: 'degrees' | 'radians'): void;
+	function modoAngulo(modo: 'degrees' | 'radians'): void;
 
 	/** 🧮
 	 * Convierte grados a radianes.
@@ -2679,8 +2679,8 @@ declare global {
 	 * @returns {number} mínimo
 	 * @example
 	 * function dibujar() {
-	 * 	fondo(min(ratónX, 100));
-	 * 	círculo(min(ratónX, 100), 0, 80);
+	 * 	fondo(min(ratonX, 100));
+	 * 	circulo(min(ratonX, 100), 0, 80);
 	 * }
 	 */
 	function min(...args: number[]): number;
@@ -2691,8 +2691,8 @@ declare global {
 	 * @returns {number} máximo
 	 * @example
 	 * function dibujar() {
-	 * 	fondo(max(ratónX, 100));
-	 * 	círculo(max(ratónX, 100), 0, 80);
+	 * 	fondo(max(ratonX, 100));
+	 * 	circulo(max(ratonX, 100), 0, 80);
 	 * }
 	 */
 	function max(...args: number[]): number;
@@ -3016,13 +3016,13 @@ declare global {
 	 * @example
 	 * crearLienzo(200, 100);
 	 * 
-	 * let btn = crearBotón('¡Click aqui!');
+	 * let btn = crearBoton('¡Click aqui!');
 	 * 
 	 * btn.addEventListener('click', () => {
 	 * 	fondo(aleatorio(100, 255));
 	 * });
 	 */
-	function crearBotón(contenido?: string): HTMLButtonElement;
+	function crearBoton(contenido?: string): HTMLButtonElement;
 
 	/** 📑
 	 * Crea un elemento de casilla de verificación (checkbox).
@@ -3122,16 +3122,16 @@ declare global {
 	 * @example
 	 * crearLienzo(200, 160);
 	 * 
-	 * let radio = crearOpciónes();
+	 * let radio = crearOpciones();
 	 * radio.option('cuadrado', '1').option('círculo', '2');
 	 * 
 	 * function dibujar() {
 	 * 	fondo(200);
 	 * 	if (radio.value == '1') cuadrado(75, 25, 80);
-	 * 	if (radio.value == '2') círculo(100, 50, 80);
+	 * 	if (radio.value == '2') circulo(100, 50, 80);
 	 * }
 	 */
-	function crearOpciónes(nombreGrupo?: string): HTMLDivElement;
+	function crearOpciones(nombreGrupo?: string): HTMLDivElement;
 
 	/** 📑
 	 * Crea un elemento de selección (select).
@@ -3150,14 +3150,14 @@ declare global {
 	 * @example
 	 * crearLienzo(200, 100);
 	 * 
-	 * let sel = crearSelección('Seleccionar un opcion');
+	 * let sel = crearSeleccion('Seleccionar un opcion');
 	 * sel.option('Red', '#f55').option('Green', '#5f5');
 	 * 
 	 * sel.addEventListener('change', () => {
 	 * 	fondo(sel.value);
 	 * });
 	 */
-	function crearSelección(placeholder?: string): HTMLSelectElement;
+	function crearSeleccion(placeholder?: string): HTMLSelectElement;
 
 	/** 📑
 	 * Crea un elemento deslizador (slider).
@@ -3299,7 +3299,7 @@ declare global {
 	 * grab.bitrate = 10;
 	 * 
 	 * function dibujar() {
-	 * 	círculo(ratónX, aleatorio(alto), 10);
+	 * 	circulo(ratonX, aleatorio(alto), 10);
 	 * }
 	 */
 	function crearGrabadora(): HTMLElement;
@@ -3314,27 +3314,27 @@ declare global {
 	/** 🎞
 	 * Pausa la grabación del lienzo, si hay una en progreso.
 	 */
-	function pausarGrabación(): void;
+	function pausarGrabacion(): void;
 
 	/** 🎞
 	 * Descarta la grabación actual.
 	 */
-	function borrarGrabación(): void;
+	function borrarGrabacion(): void;
 
 	/** 🎞
 	 * Guarda la grabación actual como un archivo de video.
 	 * @param {string} nombreArchivo
 	 * @example
 	 * function dibujar() {
-	 * 	cuadrado(ratónX, aleatorio(200), 10);
+	 * 	cuadrado(ratonX, aleatorio(200), 10);
 	 * }
 	 * 
 	 * function alPresionarRatón() {
 	 * 	if (!grabando) grabar();
-	 * 	else guardarGrabación('squares');
+	 * 	else guardarGrabacion('squares');
 	 * }
 	 */
-	function guardarGrabación(nombreArchivo: string): void;
+	function guardarGrabacion(nombreArchivo: string): void;
 
 	/** 🎞
 	 * Verdadero si el lienzo está siendo grabado actualmente.
@@ -3374,7 +3374,7 @@ declare global {
 	 * @example
 	 * crearLienzo(200);
 	 * fondo(200);
-	 * círculo(100, 100, 50);
+	 * circulo(100, 100, 50);
 	 * 
 	 * function alPresionarRatón() {
 	 * 	guardar('circle.png');
@@ -3491,7 +3491,7 @@ declare global {
 	 * Devuelve el día actual del mes.
 	 * @returns {number} día actual
 	 */
-	function día(): number;
+	function dia(): number;
 
 	/** 🛠
 	 * Devuelve la hora actual.
@@ -3744,7 +3744,7 @@ declare global {
 
 		slerp(v: Vector, amt: number): Vector;
 
-		static desdeÁngulo(angulo: number, longitud?: number): Vector;
+		static desdeAngulo(angulo: number, longitud?: number): Vector;
 
 	}
 
@@ -3802,7 +3802,7 @@ declare global {
 	 * @param {number} x coordenada-x
 	 * @param {number} y coordenada-y
 	 */
-	function vértice(x: number, y: number): void;
+	function vertice(x: number, y: number): void;
 
 	/** 🖌
 	 * Especifica un vértice Bezier en una forma.
@@ -3813,7 +3813,7 @@ declare global {
 	 * @param {number} x coordenada-x del punto de anclaje
 	 * @param {number} y coordenada-y del punto de anclaje
 	 */
-	function vérticeBezier(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
+	function verticeBezier(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
 
 	/** 🖌
 	 * Especifica un vértice Bezier cuadrático en una forma.
@@ -3822,7 +3822,7 @@ declare global {
 	 * @param {number} x coordenada-x del punto de anclaje
 	 * @param {number} y coordenada-y del punto de anclaje
 	 */
-	function vérticeCuadrático(cp1x: number, cp1y: number, x: number, y: number): void;
+	function verticeCuadratico(cp1x: number, cp1y: number, x: number, y: number): void;
 
 	/** 🖌
 	 * Dibuja una curva Bezier.
@@ -3846,7 +3846,7 @@ declare global {
 	 * @param {number} x3 coordenada-x del tercer vértice
 	 * @param {number} y3 coordenada-y del tercer vértice
 	 */
-	function triángulo(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
+	function triangulo(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void;
 
 	/** 🖌
 	 * Dibuja un cuadrilátero.
@@ -3891,7 +3891,7 @@ declare global {
 		 * @example
 		 * let q = new Q5('namespace');
 		 * q.crearLienzo(200, 100);
-		 * q.círculo(100, 50, 20);
+		 * q.circulo(100, 50, 20);
 		 */
 		constructor(scope?: string | Function, parent?: HTMLElement);
 
@@ -3899,7 +3899,7 @@ declare global {
 		 * La versión menor actual de q5.
 		 * @returns {string} la versión de q5
 		 */
-		version(): void;
+		static version: string;
 
 		/** ⚙
 		 * Establece un código de idioma distinto de 'en' (inglés) para usar q5 en otro idioma.
@@ -3953,7 +3953,7 @@ declare global {
 		 * Un límite de asignación de memoria WebGPU.
 		 * 
 		 * El número máximo de elipses
-		 * (llamadas a `elipse`, `círculo`, y `arco`)
+		 * (llamadas a `elipse`, `circulo`, y `arco`)
 		 * que se pueden dibujar en una sola llamada de dibujo.
 		 */
 		static MAX_ELIPSES: number;
@@ -4019,8 +4019,6 @@ declare global {
 		 * la función `dibujar` se ejecuta.
 		 */
 		static postProcesar(): void;
-		static versión: string;
-
 		static agregarHook(cicloVida: string, fn: Function): void;
 
 		static registrarAddon(addon: Function): void;
@@ -4032,13 +4030,13 @@ declare global {
 			postProcesar(): void;
 			Lienzo: typeof Lienzo;
 			log: typeof log;
-			círculo: typeof círculo;
+			circulo: typeof circulo;
 			elipse: typeof elipse;
 			rect: typeof rect;
 			cuadrado: typeof cuadrado;
 			punto: typeof punto;
-			línea: typeof línea;
-			cápsula: typeof cápsula;
+			linea: typeof linea;
+			capsula: typeof capsula;
 			modoRect: typeof modoRect;
 			modoEliptico: typeof modoEliptico;
 			cargarImagen: typeof cargarImagen;
@@ -4056,18 +4054,18 @@ declare global {
 			insertado: typeof insertado;
 			obtener: typeof obtener;
 			establecer: typeof establecer;
-			cargarPíxeles: typeof cargarPíxeles;
-			actualizarPíxeles: typeof actualizarPíxeles;
+			cargarPixeles: typeof cargarPixeles;
+			actualizarPixeles: typeof actualizarPixeles;
 			filtro: typeof filtro;
 			crearImagen: typeof crearImagen;
-			crearGráficos: typeof crearGráficos;
+			crearGraficos: typeof crearGraficos;
 			texto: typeof texto;
 			cargarFuente: typeof cargarFuente;
 			fuenteTexto: typeof fuenteTexto;
 			tamañoTexto: typeof tamañoTexto;
 			interlineado: typeof interlineado;
 			estiloTexto: typeof estiloTexto;
-			alineaciónTexto: typeof alineaciónTexto;
+			alineacionTexto: typeof alineacionTexto;
 			pesoTexto: typeof pesoTexto;
 			anchoTexto: typeof anchoTexto;
 			ascensoTexto: typeof ascensoTexto;
@@ -4075,10 +4073,10 @@ declare global {
 			crearImagenTexto: typeof crearImagenTexto;
 			imagenTexto: typeof imagenTexto;
 			nf: typeof nf;
-			alPresionarRatón: typeof alPresionarRatón;
-			alSoltarRatón: typeof alSoltarRatón;
-			alMoverRatón: typeof alMoverRatón;
-			alArrastrarRatón: typeof alArrastrarRatón;
+			alPresionarRaton: typeof alPresionarRaton;
+			alSoltarRaton: typeof alSoltarRaton;
+			alMoverRaton: typeof alMoverRaton;
+			alArrastrarRaton: typeof alArrastrarRaton;
 			dobleClic: typeof dobleClic;
 			teclaEstaPresionada: typeof teclaEstaPresionada;
 			alPresionarTecla: typeof alPresionarTecla;
@@ -4088,7 +4086,7 @@ declare global {
 			alMoverToque: typeof alMoverToque;
 			cursor: typeof cursor;
 			sinCursor: typeof sinCursor;
-			ruedaRatón: typeof ruedaRatón;
+			ruedaRaton: typeof ruedaRaton;
 			bloqueoPuntero: typeof bloqueoPuntero;
 			color: typeof color;
 			modoColor: typeof modoColor;
@@ -4103,8 +4101,8 @@ declare global {
 			sinSombra: typeof sinSombra;
 			cajaSombra: typeof cajaSombra;
 			modoMezcla: typeof modoMezcla;
-			terminaciónTrazo: typeof terminaciónTrazo;
-			uniónTrazo: typeof uniónTrazo;
+			terminacionTrazo: typeof terminacionTrazo;
+			unionTrazo: typeof unionTrazo;
 			borrar: typeof borrar;
 			noBorrar: typeof noBorrar;
 			guardarEstilos: typeof guardarEstilos;
@@ -4123,7 +4121,7 @@ declare global {
 			recuperarMatriz: typeof recuperarMatriz;
 			guardar: typeof guardar;
 			recuperar: typeof recuperar;
-			modoVisualización: typeof modoVisualización;
+			modoVisualizacion: typeof modoVisualizacion;
 			pantallaCompleta: typeof pantallaCompleta;
 			redimensionarLienzo: typeof redimensionarLienzo;
 			pausar: typeof pausar;
@@ -4132,14 +4130,14 @@ declare global {
 			frecuenciaRefresco: typeof frecuenciaRefresco;
 			obtenerTasaFotogramasObjetivo: typeof obtenerTasaFotogramasObjetivo;
 			obtenerFPS: typeof obtenerFPS;
-			densidadPíxeles: typeof densidadPíxeles;
-			densidadVisualización: typeof densidadVisualización;
+			densidadPixeles: typeof densidadPixeles;
+			densidadVisualizacion: typeof densidadVisualizacion;
 			aleatorio: typeof aleatorio;
 			flu: typeof flu;
 			ruido: typeof ruido;
 			dist: typeof dist;
 			mapa: typeof mapa;
-			modoÁngulo: typeof modoÁngulo;
+			modoAngulo: typeof modoAngulo;
 			radianes: typeof radianes;
 			grados: typeof grados;
 			interpolar: typeof interpolar;
@@ -4170,14 +4168,14 @@ declare global {
 			iniciarAudioUsuario: typeof iniciarAudioUsuario;
 			crearElemento: typeof crearElemento;
 			crearA: typeof crearA;
-			crearBotón: typeof crearBotón;
+			crearBoton: typeof crearBoton;
 			crearCasilla: typeof crearCasilla;
 			crearSelectorColor: typeof crearSelectorColor;
 			crearImg: typeof crearImg;
 			crearEntrada: typeof crearEntrada;
 			crearP: typeof crearP;
-			crearOpciónes: typeof crearOpciónes;
-			crearSelección: typeof crearSelección;
+			crearOpciones: typeof crearOpciones;
+			crearSeleccion: typeof crearSeleccion;
 			crearDeslizador: typeof crearDeslizador;
 			crearVideo: typeof crearVideo;
 			crearCaptura: typeof crearCaptura;
@@ -4185,9 +4183,9 @@ declare global {
 			encontrarElementos: typeof encontrarElementos;
 			crearGrabadora: typeof crearGrabadora;
 			recordar: typeof grabar;
-			pausarGrabación: typeof pausarGrabación;
-			borrarGrabación: typeof borrarGrabación;
-			guardarGrabación: typeof guardarGrabación;
+			pausarGrabacion: typeof pausarGrabacion;
+			borrarGrabacion: typeof borrarGrabacion;
+			guardarGrabacion: typeof guardarGrabacion;
 			cargar: typeof cargar;
 			cargarTexto: typeof cargarTexto;
 			cargarJSON: typeof cargarJSON;
@@ -4201,7 +4199,7 @@ declare global {
 			eliminarItem: typeof eliminarItem;
 			limpiarAlmacenamiento: typeof limpiarAlmacenamiento;
 			año: typeof año;
-			día: typeof día;
+			dia: typeof dia;
 			hora: typeof hora;
 			minuto: typeof minuto;
 			segundo: typeof segundo;
@@ -4222,8 +4220,8 @@ declare global {
 			enmascarar(img: Q5.Imagen): void;
 			recortar(): Q5.Imagen;
 			filtro(tipo: string, valor?: number): void;
-			cargarPíxeles(): void;
-			actualizarPíxeles(): void;
+			cargarPixeles(): void;
+			actualizarPixeles(): void;
 			guardar(nombreArchivo?: string): void;
 		}
 

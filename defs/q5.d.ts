@@ -4035,7 +4035,7 @@ declare global {
 	 * 
 	 * q5.draw = function () {
 	 * 	shader(stripes);
-	 * 	background(0);
+	 * 	plane(0, 0, width, height);
 	 * 
 	 * 	resetShader();
 	 * 	triangle(-50, -50, 0, 50, 50, -50);

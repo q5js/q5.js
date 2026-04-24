@@ -289,17 +289,17 @@ const userLangs = `
 update -> es:actualizar
 draw -> es:dibujar
 postProcess -> es:postProcesar
-mousePressed -> es:alPresionarRatón
-mouseReleased -> es:alSoltarRatón
-mouseMoved -> es:alMoverRatón
-mouseDragged -> es:alArrastrarRatón
+mousePressed -> es:alPresionarRaton
+mouseReleased -> es:alSoltarRaton
+mouseMoved -> es:alMoverRaton
+mouseDragged -> es:alArrastrarRaton
 doubleClicked -> es:dobleClic
 keyPressed -> es:alPresionarTecla
 keyReleased -> es:alSoltarTecla
 touchStarted -> es:alEmpezarToque
 touchEnded -> es:alTerminarToque
 touchMoved -> es:alMoverToque
-mouseWheel -> es:ruedaRatón
+mouseWheel -> es:ruedaRaton
 `;
 
 const classLangs = {
@@ -380,20 +380,19 @@ Object.defineProperty(Q5, 'lang', {
 
 		for (let className in classLangs) {
 			let target = className == 'Q5' ? Q5 : Q5[className] ? Q5[className].prototype : null;
-			if (target) {
-				let map = parseLangs(classLangs[className], val);
-				for (let name in map) {
-					let translatedName = map[name];
-					if (target.hasOwnProperty(translatedName)) continue;
-					Object.defineProperty(target, translatedName, {
-						get: function () {
-							return this[name];
-						},
-						set: function (v) {
-							this[name] = v;
-						}
-					});
-				}
+			if (!target) continue;
+			let map = parseLangs(classLangs[className], val);
+			for (let name in map) {
+				let translatedName = map[name];
+				if (target.hasOwnProperty(translatedName)) continue;
+				Object.defineProperty(target, translatedName, {
+					get: function () {
+						return this[name];
+					},
+					set: function (v) {
+						this[name] = v;
+					}
+				});
 			}
 		}
 
@@ -452,6 +451,13 @@ Q5.addHook('init', (q) => {
 	for (let name in m) {
 		let translatedName = m[name];
 		q[translatedName] = q[name];
+
+		if (Q5._lang == 'es') {
+			let unaccentedName = translatedName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+			if (unaccentedName != translatedName) {
+				q[unaccentedName] = q[name];
+			}
+		}
 	}
 });
 
@@ -464,6 +470,8 @@ Q5.addHook('predraw', (q) => {
 		'frameCount',
 		'mouseX',
 		'mouseY',
+		'pmouseX',
+		'pmouseY',
 		'movedX',
 		'movedY',
 		'mouseIsPressed',
@@ -476,6 +484,13 @@ Q5.addHook('predraw', (q) => {
 
 	// sync properties
 	for (let p of props) {
-		if (m[p]) q[m[p]] = q[p];
+		if (!m[p]) continue;
+		q[m[p]] = q[p];
+		if (Q5._lang == 'es') {
+			let unaccentedName = m[p].normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+			if (unaccentedName != m[p]) {
+				q[unaccentedName] = q[p];
+			}
+		}
 	}
 });

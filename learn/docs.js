@@ -803,14 +803,16 @@ function updateNavigationActiveState() {
 
 async function displayContent() {
 	const hash = decodeURIComponent(location.hash.slice(1).split('?')[0]); // Remove query params from hash
-	if (!hash) {
-		// Find the first section ID (e.g., "coreSection")
-		const firstSectionId = Object.keys(sections)[0];
-		if (firstSectionId) await navigateTo(firstSectionId);
-		return;
+	let sectionId, subsectionId;
+	if (hash) {
+		({ sectionId, subsectionId } = findSectionAndSubsection(hash));
 	}
-	const { sectionId, subsectionId } = findSectionAndSubsection(hash);
-	await navigateTo(sectionId, subsectionId);
+	if (!sectionId) {
+		// Find the first section ID (e.g., "coreSection")
+		sectionId = Object.keys(sections)[0];
+		subsectionId = null;
+	}
+	if (sectionId) await navigateTo(sectionId, subsectionId);
 }
 
 // Event Listeners
