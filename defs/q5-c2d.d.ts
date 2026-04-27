@@ -2509,6 +2509,8 @@ declare global {
 	 * - If one numerical input is provided, returns a number between 0 and the provided value.
 	 * - If two numerical inputs are provided, returns a number between the two values.
 	 * - If an array is provided, returns a random element from the array.
+	 * 
+	 * Return value can be the lower bound but can never exactly be the upper bound.
 	 * @param {number | any[]} [low] lower bound (inclusive) or an array
 	 * @param {number} [high] upper bound (exclusive)
 	 * @returns {number | any} a random number or element

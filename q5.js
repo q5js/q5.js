@@ -308,7 +308,7 @@ function Q5(scope, parent, renderer) {
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
-		$[name] = function(...args) {
+		$[name] = function (...args) {
 			try {
 				return fn.apply(this, args);
 			} catch (e) {
@@ -453,7 +453,7 @@ Q5.preloadMethods = {};
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
 
 function Canvas(w, h, opt) {
-	if (Q5._hasGlobal) return;
+	if (Q5._hasGlobal) return Promise.resolve(Q5.instances[0].canvas);
 
 	let useC2D = w == 'c2d' || h == 'c2d' || opt == 'c2d' || opt?.renderer == 'c2d' || !Q5._esm;
 
@@ -3459,16 +3459,12 @@ Q5.modules.fes = ($) => {
 		try {
 			let res = await (await fetch(fileUrl)).text(),
 				lines = res.split('\n'),
-				errLine = lines[lineNum - 1]?.trim() ?? '',
-				bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)],
-				inIframe = window.self !== window.top,
-				prefix = `q5.js ${bug}`,
-				errorMsg = ` Error in ${fileBase} on line ${lineNum}:\n\n${errLine}`;
+				errLine = lines[lineNum - 1]?.trim();
 
-			if (inIframe) $.log(prefix + errorMsg);
-			else {
-				$.log(`%c${prefix}%c${errorMsg}`, 'background: #b7ebff; color: #000;', '');
-			}
+			let type = '';
+			if (e instanceof SyntaxError || e.name === 'SyntaxError') type = 'syntax';
+
+			Q5.friendlyError(fileBase, lineNum, errLine, type);
 		} catch (err) {}
 	};
 
@@ -3481,7 +3477,7 @@ Q5.modules.fes = ($) => {
 			let match = line.match(/(https?:\/\/[^\s)]+\.js|\b\/[^\s)]+\.js)/);
 			if (match) {
 				let file = match[1];
-				if (!/q5|p5play/i.test(file)) {
+				if (!/q5|p5play|q5play|brython/i.test(file)) {
 					$._sketchFile = file;
 					break;
 				}
@@ -3519,6 +3515,19 @@ Q5.modules.fes = ($) => {
 
 		checkLatestVersion();
 	}
+};
+
+Q5.friendlyError = (file, lineNum, detail) => {
+	let bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)],
+		inIframe = window.self !== window.top,
+		prefix = `q5 ${bug}`,
+		msg = `Error in ${file} on line ${lineNum}`;
+
+	if (detail) msg += ':\n\n' + detail;
+
+	if (inIframe) return console.log(prefix + msg);
+
+	console.log(`%c${prefix}%c ${msg}`, 'background: #b7ebff; color: #000;', '');
 };
 Q5.modules.input = ($, q) => {
 	if ($._isGraphics) return;
@@ -9572,34 +9581,9 @@ const runPython = async function () {
 				document.head.appendChild(script);
 			});
 
-		await loadScript('https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.js');
-		await loadScript('https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.min.js');
+		await loadScript('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython.min.js');
+		await loadScript('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython_stdlib.min.js');
 	}
-
-	brython();
-
-	__BRYTHON__.runPythonSource(`
-from browser import window, aio
-
-async def runQ5PY(code, q5py):
-	ns = globals().copy()
-	ns['ns'] = ns
-	ns['q5py'] = q5py
-
-	for attr in dir(q5py):
-	  if not attr.startswith('_'):
-		try:
-			ns[attr] = getattr(q5py, attr)
-		except Exception:
-			pass
-
-	exec(code, ns)
-	
-	if "__run_code" in ns:
-	  await ns["__run_code"]()
-
-window._runQ5PY = runQ5PY
-`);
 
 	let code = '';
 	for (const script of scripts) {
@@ -9609,30 +9593,111 @@ window._runQ5PY = runQ5PY
 	const useWebGPU = !code.slice(0, code.indexOf('\n')).includes('C2D'),
 		q5py = useWebGPU ? await Q5.WebGPU() : new Q5();
 
+	// `window.Canvas` returns a promise that resolves when Q5 is ready
+	// but `q5py.Canvas` returns the renderer synchronously
+	// so to make Brython happy with `await Canvas()` we need to make it async
+	const Canvas = q5py.Canvas;
+	q5py.Canvas = async (...a) => Canvas(...a);
+
 	code = code.replaceAll('\n', '\n\t');
 
 	code = `
-async def __run_code():
-	pass
-
+async def __run():
 	${code}
 
-	q5_state_vars = ["mouseX", "mouseY", "pmouseX", "pmouseY", "width", "height", "frameCount", "deltaTime", "mouseIsPressed", "mouseButton", "keyIsPressed", "key", "keyCode", "touches", "movedX", "movedY"]
+	_q5_state_vars = ["mouseX", "mouseY", "pmouseX", "pmouseY", "width", "height", "frameCount", "deltaTime", "mouseIsPressed", "mouseButton", "keyIsPressed", "key", "keyCode", "touches", "movedX", "movedY"]
 
 	def _sync_and_call(fn):
 		def _wrapper(*args):
-			for _var in q5_state_vars:
-				if hasattr(q5py, _var):
-					ns[_var] = getattr(q5py, _var)
-			return fn(*args)
+			try:
+				for var in _q5_state_vars:
+					if hasattr(q5py, var):
+						ns[var] = getattr(q5py, var)
+				return fn(*args)
+			except Exception as e:
+				window._pyErr(_err())
+				raise e
 		return _wrapper
 
-	for _fn_name in ["update", "draw", "mousePressed", "mouseReleased", "mouseMoved", "mouseDragged", "mouseClicked", "doubleClicked", "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "touchStarted", "touchMoved", "touchEnded", "windowResized"]:
-		if _fn_name in locals():
-			setattr(window, _fn_name, _sync_and_call(locals()[_fn_name]))
+	for fn_name in ["update", "draw", "mousePressed", "mouseReleased", "mouseMoved", "mouseDragged", "mouseClicked", "doubleClicked", "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "touchStarted", "touchMoved", "touchEnded", "windowResized"]:
+		if fn_name in locals():
+			setattr(window, fn_name, _sync_and_call(locals()[fn_name]))
 `;
 
-	await window._runQ5PY(code, q5py);
+	window._pyErr = (err, lineNum) => {
+		if (typeof err === 'string' && err.includes('Traceback')) {
+			let lines = err.split('\n');
+			for (let i = 0; i < lines.length; i++) {
+				const match = lines[i].match(/File "<string>", line (\d+)/);
+				if (match) {
+					lineNum = parseInt(match[1]);
+					lines = lines.slice(i + 1);
+					// de-indent the first two lines based on the first line's indentation
+					const indentMatch = lines[0].match(/^\s+/);
+					if (indentMatch) {
+						const indent = indentMatch[0];
+						for (let j = 0; j < Math.min(2, lines.length); j++) {
+							lines[j] = lines[j].slice(indent.length);
+						}
+					}
+					err = lines.join('\n');
+					break;
+				}
+			}
+		}
+
+		let file = scripts[0].src.split('/').at(-1);
+		lineNum -= 2; // adjust for the wrapper code lines
+		if (Q5.friendlyError) Q5.friendlyError(file, lineNum, err);
+		else console.error(`Error in ${file} on line ${lineNum}:\n\n${err}`);
+	};
+
+	brython();
+
+	// hide brython's internal logs by temporarily overriding console.log
+	let log = console.log;
+	console.log = function () {};
+
+	__BRYTHON__.runPythonSource(`
+from browser import window, aio
+import traceback
+import io
+
+def _err():
+	f = io.StringIO()
+	traceback.print_exc(file=f)
+	return f.getvalue()
+
+async def _run_py(q5py, code):
+	ns = globals().copy()
+	ns['ns'] = ns
+	ns['q5py'] = q5py
+
+	for attr in dir(q5py):
+		if not attr.startswith('_'):
+			try:
+				ns[attr] = getattr(q5py, attr)
+			except Exception:
+				pass
+
+	try:
+		exec(code, ns)
+	except SyntaxError as e:
+		return window._pyErr(_err(), e.lineno)
+	except Exception as e:
+		return window._pyErr(_err())
+	
+	try:
+		await ns["__run"]()
+	except Exception as e:
+		window._pyErr(_err())
+
+window._runPy = _run_py
+`);
+
+	console.log = log;
+
+	await window._runPy(q5py, code);
 };
 
 if (typeof document == 'object') {

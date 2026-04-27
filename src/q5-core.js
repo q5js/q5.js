@@ -308,7 +308,7 @@ function Q5(scope, parent, renderer) {
 
 	function wrapWithFES(name) {
 		const fn = t[name] || $[name];
-		$[name] = function(...args) {
+		$[name] = function (...args) {
 			try {
 				return fn.apply(this, args);
 			} catch (e) {
@@ -453,7 +453,7 @@ Q5.preloadMethods = {};
 Q5.prototype.registerPreloadMethod = (n, fn) => (Q5.preloadMethods[n] = fn[n]);
 
 function Canvas(w, h, opt) {
-	if (Q5._hasGlobal) return;
+	if (Q5._hasGlobal) return Promise.resolve(Q5.instances[0].canvas);
 
 	let useC2D = w == 'c2d' || h == 'c2d' || opt == 'c2d' || opt?.renderer == 'c2d' || !Q5._esm;
 

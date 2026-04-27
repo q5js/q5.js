@@ -27,16 +27,12 @@ Q5.modules.fes = ($) => {
 		try {
 			let res = await (await fetch(fileUrl)).text(),
 				lines = res.split('\n'),
-				errLine = lines[lineNum - 1]?.trim() ?? '',
-				bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)],
-				inIframe = window.self !== window.top,
-				prefix = `q5.js ${bug}`,
-				errorMsg = ` Error in ${fileBase} on line ${lineNum}:\n\n${errLine}`;
+				errLine = lines[lineNum - 1]?.trim();
 
-			if (inIframe) $.log(prefix + errorMsg);
-			else {
-				$.log(`%c${prefix}%c${errorMsg}`, 'background: #b7ebff; color: #000;', '');
-			}
+			let type = '';
+			if (e instanceof SyntaxError || e.name === 'SyntaxError') type = 'syntax';
+
+			Q5.friendlyError(fileBase, lineNum, errLine, type);
 		} catch (err) {}
 	};
 
@@ -49,7 +45,7 @@ Q5.modules.fes = ($) => {
 			let match = line.match(/(https?:\/\/[^\s)]+\.js|\b\/[^\s)]+\.js)/);
 			if (match) {
 				let file = match[1];
-				if (!/q5|p5play/i.test(file)) {
+				if (!/q5|p5play|q5play|brython/i.test(file)) {
 					$._sketchFile = file;
 					break;
 				}
@@ -87,4 +83,17 @@ Q5.modules.fes = ($) => {
 
 		checkLatestVersion();
 	}
+};
+
+Q5.friendlyError = (file, lineNum, detail) => {
+	let bug = ['🐛', '🐞', '🐜', '🦗', '🦋', '🪲'][Math.floor(Math.random() * 6)],
+		inIframe = window.self !== window.top,
+		prefix = `q5 ${bug}`,
+		msg = `Error in ${file} on line ${lineNum}`;
+
+	if (detail) msg += ':\n\n' + detail;
+
+	if (inIframe) return console.log(prefix + msg);
+
+	console.log(`%c${prefix}%c ${msg}`, 'background: #b7ebff; color: #000;', '');
 };
