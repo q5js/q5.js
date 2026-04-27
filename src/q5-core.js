@@ -2,7 +2,7 @@
  * q5.js
  * @version 4.5
  * @author quinton-ashley
- * @contributors evanalulu, Tezumie, ormaq, Dukemz, LingDong-
+ * @contributors evanalulu, Tezumie, keturn, ormaq, bertubi, RedWilly, Dukemz, LingDong-
  * @license LGPL-3.0
  * @class Q5
  */
@@ -393,6 +393,7 @@ Q5._esm = this === undefined;
 
 Q5._instanceCount = 0;
 Q5.instances = [];
+Q5.errorTolerant = false;
 Q5._friendlyError = (msg, func) => {
 	if (!Q5.disableFriendlyErrors) console.error(func + ': ' + msg);
 };

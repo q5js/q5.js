@@ -47,7 +47,9 @@ p5.js is licensed under the LGPLv2, small sections of p5' code directly copied i
 
 q5 was inspired by the incredible work of [Ben Fry](https://benfry.com) and [Casey Reas](https://x.com/REAS) on Java [Processing](https://processingfoundation.org/) from 2001 to 2023, [Lauren McCarthy](http://lauren-mccarthy.com)'s work on [p5.js](https://p5js.org) from 2013 to 2019, and all contributors to these projects.
 
-## Code Excerpt Sources
+Huge thanks to all the [q5 contributors](https://github.com/q5js/q5.js/graphs/contributors)!
+
+@evanalulu, @Tezumie, @keturn, @ormaq, @bertubi, @RedWilly, @Dukemz, @LingDong-
 
 WebGPU MSDF text rendering:
 https://webgpu.github.io/webgpu-samples/?sample=textRenderingMsdf

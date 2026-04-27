@@ -393,6 +393,7 @@ Q5._esm = this === undefined;
 
 Q5._instanceCount = 0;
 Q5.instances = [];
+Q5.errorTolerant = false;
 Q5._friendlyError = (msg, func) => {
 	if (!Q5.disableFriendlyErrors) console.error(func + ': ' + msg);
 };
@@ -9591,35 +9592,42 @@ const runPython = async function () {
 	}
 
 	const useWebGPU = !code.slice(0, code.indexOf('\n')).includes('C2D'),
-		q5py = useWebGPU ? await Q5.WebGPU() : new Q5();
+		q = useWebGPU ? await Q5.WebGPU() : new Q5();
 
 	// `window.Canvas` returns a promise that resolves when Q5 is ready
 	// but `q5py.Canvas` returns the renderer synchronously
 	// so to make Brython happy with `await Canvas()` we need to make it async
-	const Canvas = q5py.Canvas;
-	q5py.Canvas = async (...a) => Canvas(...a);
+	const Canvas = q.Canvas;
+	q.Canvas = async (...a) => Canvas(...a);
 
-	code = code.replaceAll('\n', '\n\t');
+	// add a tab before each line of code to nest it inside the __run function
+	// but not within triple-quoted strings
+	code = code
+		.split(/(\"\"\"[\s\S]*?\"\"\"|\'\'\'[\s\S]*?\'\'\')/g)
+		.map((part, i) => (i % 2 === 0 ? part.replaceAll('\n', '\n\t') : part))
+		.join('');
 
 	code = `
-async def __run():
+async def __run(q):
 	${code}
 
-	_q5_state_vars = ["mouseX", "mouseY", "pmouseX", "pmouseY", "width", "height", "frameCount", "deltaTime", "mouseIsPressed", "mouseButton", "keyIsPressed", "key", "keyCode", "touches", "movedX", "movedY"]
+	_state_vars = ["mouseX", "mouseY", "pmouseX", "pmouseY", "width", "height", "frameCount", "deltaTime", "mouseIsPressed", "mouseButton", "keyIsPressed", "key", "keyCode", "touches", "movedX", "movedY"]
+
+	_usr_fns = ["update", "draw", "postProcess", "mousePressed", "mouseReleased", "mouseMoved", "mouseDragged", "mouseClicked", "doubleClicked", "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "touchStarted", "touchMoved", "touchEnded", "windowResized"]
 
 	def _sync_and_call(fn):
 		def _wrapper(*args):
 			try:
-				for var in _q5_state_vars:
-					if hasattr(q5py, var):
-						ns[var] = getattr(q5py, var)
+				for var in _state_vars:
+					if hasattr(q, var):
+						ns[var] = getattr(q, var)
 				return fn(*args)
 			except Exception as e:
 				window._pyErr(_err())
-				raise e
+				if not window.Q5.errorTolerant: noLoop()
 		return _wrapper
 
-	for fn_name in ["update", "draw", "mousePressed", "mouseReleased", "mouseMoved", "mouseDragged", "mouseClicked", "doubleClicked", "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "touchStarted", "touchMoved", "touchEnded", "windowResized"]:
+	for fn_name in _usr_fns:
 		if fn_name in locals():
 			setattr(window, fn_name, _sync_and_call(locals()[fn_name]))
 `;
@@ -9627,7 +9635,7 @@ async def __run():
 	window._pyErr = (err, lineNum) => {
 		if (typeof err === 'string' && err.includes('Traceback')) {
 			let lines = err.split('\n');
-			for (let i = 0; i < lines.length; i++) {
+			for (let i = lines.length - 1; i > 0; i--) {
 				const match = lines[i].match(/File "<string>", line (\d+)/);
 				if (match) {
 					lineNum = parseInt(match[1]);
@@ -9639,6 +9647,9 @@ async def __run():
 						for (let j = 0; j < Math.min(2, lines.length); j++) {
 							lines[j] = lines[j].slice(indent.length);
 						}
+					} else {
+						let line = code.split('\n')[lineNum - 1].trim();
+						lines.unshift(line, '');
 					}
 					err = lines.join('\n');
 					break;
@@ -9646,7 +9657,9 @@ async def __run():
 			}
 		}
 
-		let file = scripts[0].src.split('/').at(-1);
+		let file = scripts[0].src || scripts[0]['data-filename'] || 'sketch.py';
+		file = file.split('/').at(-1);
+
 		lineNum -= 2; // adjust for the wrapper code lines
 		if (Q5.friendlyError) Q5.friendlyError(file, lineNum, err);
 		else console.error(`Error in ${file} on line ${lineNum}:\n\n${err}`);
@@ -9668,15 +9681,15 @@ def _err():
 	traceback.print_exc(file=f)
 	return f.getvalue()
 
-async def _run_py(q5py, code):
+async def _run_py(q, code):
 	ns = globals().copy()
 	ns['ns'] = ns
-	ns['q5py'] = q5py
+	ns['Q5'] = window.Q5
 
-	for attr in dir(q5py):
+	for attr in dir(q):
 		if not attr.startswith('_'):
 			try:
-				ns[attr] = getattr(q5py, attr)
+				ns[attr] = getattr(q, attr)
 			except Exception:
 				pass
 
@@ -9688,7 +9701,7 @@ async def _run_py(q5py, code):
 		return window._pyErr(_err())
 	
 	try:
-		await ns["__run"]()
+		await ns["__run"](q)
 	except Exception as e:
 		window._pyErr(_err())
 
@@ -9697,7 +9710,7 @@ window._runPy = _run_py
 
 	console.log = log;
 
-	await window._runPy(q5py, code);
+	await window._runPy(q, code);
 };
 
 if (typeof document == 'object') {
