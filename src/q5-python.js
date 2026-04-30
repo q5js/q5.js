@@ -42,25 +42,7 @@ const runPython = async function () {
 async def __run(q):
 	${code}
 
-	_state_vars = ["mouseX", "mouseY", "pmouseX", "pmouseY", "width", "height", "frameCount", "deltaTime", "mouseIsPressed", "mouseButton", "keyIsPressed", "key", "keyCode", "touches", "movedX", "movedY"]
-
-	_usr_fns = ["update", "draw", "postProcess", "mousePressed", "mouseReleased", "mouseMoved", "mouseDragged", "mouseClicked", "doubleClicked", "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "touchStarted", "touchMoved", "touchEnded", "windowResized"]
-
-	def _sync_and_call(fn):
-		def _wrapper(*args):
-			try:
-				for var in _state_vars:
-					if hasattr(q, var):
-						ns[var] = getattr(q, var)
-				return fn(*args)
-			except Exception as e:
-				window._pyErr(_err())
-				if not window.Q5.errorTolerant: noLoop()
-		return _wrapper
-
-	for fn_name in _usr_fns:
-		if fn_name in locals():
-			setattr(window, fn_name, _sync_and_call(locals()[fn_name]))
+	_wrap_fns(q, locals(), ns)
 `;
 
 	window._pyErr = (err, lineNum) => {
@@ -107,10 +89,34 @@ from browser import window, aio
 import traceback
 import io
 
+_state_vars = ["frameCount", "deltaTime", "width", "height", "halfWidth", "halfHeight", "windowWidth", "windowHeight", "mouseX", "mouseY", "pmouseX", "pmouseY", "movedX", "movedY", "mouseIsPressed", "mouseButton", "keyIsPressed", "key", "keyCode", "touches", "recording"]
+
+_usr_fns = ["update", "draw", "postProcess", "mousePressed", "mouseReleased", "mouseMoved", "mouseDragged", "mouseClicked", "doubleClicked", "mouseWheel", "keyPressed", "keyReleased", "keyTyped", "touchStarted", "touchMoved", "touchEnded", "windowResized"]
+
 def _err():
 	f = io.StringIO()
 	traceback.print_exc(file=f)
 	return f.getvalue()
+
+def _sync_state(q, ns):
+	for var in _state_vars:
+		if hasattr(q, var):
+			ns[var] = getattr(q, var)
+
+def _sync_and_call(q, fn, ns):
+	def _wrapper(*args):
+		try:
+			_sync_state(q, ns)
+			return fn(*args)
+		except Exception as e:
+			window._pyErr(_err(), None, q)
+			if not window.Q5.errorTolerant: q.noLoop()
+	return _wrapper
+
+def _wrap_fns(q, locs, ns):
+	for fn_name in _usr_fns:
+		if fn_name in locs:
+			setattr(q, fn_name, _sync_and_call(q, locs[fn_name], ns))
 
 async def _run_py(q, code):
 	ns = globals().copy()
@@ -124,17 +130,24 @@ async def _run_py(q, code):
 			except Exception:
 				pass
 
+	_orig_Canvas = ns['Canvas']
+	async def _canvas_wrapper(*args):
+		result = await _orig_Canvas(*args)
+		_sync_state(q, ns)
+		return result
+	ns['Canvas'] = ns['createCanvas'] = _canvas_wrapper
+
 	try:
 		exec(code, ns)
 	except SyntaxError as e:
-		return window._pyErr(_err(), e.lineno)
+		return window._pyErr(_err(), e.lineno, q)
 	except Exception as e:
-		return window._pyErr(_err())
-	
+		return window._pyErr(_err(), 0, q)
+
 	try:
 		await ns["__run"](q)
 	except Exception as e:
-		window._pyErr(_err())
+		window._pyErr(_err(), 0, q)
 
 window._runPy = _run_py
 `);

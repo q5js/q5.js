@@ -17,13 +17,13 @@ circle(0, 0, 80);
 
 ## Documentation
 
-The [q5 learn pages](https://q5js.org/learn) are organized into sections with interactive mini-examples.
+The [q5 learn pages](https://q5js.org/learn) have interactive mini-examples.
 
 See the [wiki](https://github.com/q5js/q5.js/wiki) for extended documentation.
 
 ## Support q5 💙
 
-q5 is open source and anyone can use it for free under the terms of the LGPL. 🎉
+q5 is open source. Anyone can use it for free under the terms of the LGPL. 🎉
 
 We need your support though! If you enjoy using q5, please donate via [GitHub Sponsors](https://github.com/sponsors/quinton-ashley), [ko-fi](https://ko-fi.com/q5play), or [Patreon](https://www.patreon.com/q5play).
 
