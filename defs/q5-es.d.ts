@@ -1818,10 +1818,18 @@ declare global {
 	function modoMezcla(val: string): void;
 
 	/** 💅
-	 * Establece el estilo de terminación de línea a `ROUND`, `SQUARE`, o `PROJECT`.
-	 * 
-	 * No disponible en q5 WebGPU.
+	 * Establece el estilo de terminación de línea a `SQUARE` o `PROJECT`.
 	 * @param {CanvasLineCap} val estilo de terminación de línea
+	 * @example
+	 * await Lienzo(200);
+	 * fondo(0.8);
+	 * grosorTrazo(20);
+	 * 
+	 * terminacionTrazo(SQUARE);
+	 * linea(-50, -25, 50, -25);
+	 * 
+	 * terminacionTrazo(PROJECT);
+	 * linea(-50, 25, 50, 25);
 	 */
 	function terminacionTrazo(val: CanvasLineCap): void;
 
@@ -4036,7 +4044,10 @@ declare global {
 	 * Usa esta función para personalizar una copia del
 	 * [shader de fotograma por defecto](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).
 	 * @example
-	 * await Lienzo(200);
+	 * await Lienzo(200, 400);
+	 * trazo(1);
+	 * grosorTrazo(8);
+	 * terminacionTrazo(PROJECT);
 	 * 
 	 * let boxy = crearShaderFotograma(`
 	 * @fragment
@@ -4048,8 +4059,6 @@ declare global {
 	 * }`);
 	 * 
 	 * q5.dibujar = function () {
-	 * 	trazo(1);
-	 * 	grosorTrazo(8);
 	 * 	linea(ratonX, ratonY, pRatonX, pRatonY);
 	 * 	ratonPresionado ? reiniciarShaders() : shader(boxy);
 	 * };
@@ -4064,7 +4073,7 @@ declare global {
 	 * @param {string} codigo extracto de código shader WGSL
 	 * @returns {GPUShaderModule} un programa shader
 	 * @example
-	 * await Lienzo(200);
+	 * await Lienzo(200, 400);
 	 * modoImagen(CENTER);
 	 * 
 	 * let logo = cargarImagen('/q5js_logo.avif');

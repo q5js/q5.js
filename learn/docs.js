@@ -242,6 +242,7 @@ let sections = {};
 // Current section state (must be declared before loader functions)
 let currentSectionId = '';
 let currentLoadedSectionId = '';
+let currentSubsectionId = '';
 
 // Current section state (must be declared before loader functions)
 // (declared earlier)
@@ -340,14 +341,29 @@ let isWebGPU = urlParams.has('c2d') ? false : true;
 let lang = localStorage.getItem('lang') || urlParams.get('lang') || 'en';
 
 async function loadDtsAndRender(useWebGPU) {
-	const prevSection = currentSectionId;
+	// Snapshot everything needed BEFORE data or language changes.
+	const sectionKeys = Object.keys(sections);
+	const prevSectionIndex = sectionKeys.indexOf(currentSectionId);
+	const prevSubId = currentSubsectionId; // e.g. "canvas", "q5.canvas", "Vector.add"
+
+	// Positional fallback in case translation lookup fails.
+	let prevSubsectionIndex = -1;
+	if (prevSubId && currentSectionId && sections[currentSectionId]) {
+		const subKeys = Object.keys(sections[currentSectionId].subsections || {});
+		prevSubsectionIndex = subKeys.indexOf(prevSubId);
+	}
+
+	// Save the current translation map (English → currentLang) before Q5.lang changes.
+	// Q5._libMap is {} when on English, so we also save the current lang string.
+	const oldLibMap = { ...Q5._libMap };
+	const oldLang = Q5._lang || 'en';
+
 	// Build file name according to renderer + language. English (en) is default and has no suffix.
 	const baseName = useWebGPU ? 'q5' : 'q5-c2d';
 	const langSuffix = lang && lang !== 'en' ? `-${lang}` : '';
 
 	Q5.lang = lang;
 
-	// TODO: enable when WebGPU becomes the default
 	const dir = lang == 'en' && useWebGPU ? '/' : `/defs/`;
 
 	// const dir = `/defs/`;
@@ -388,11 +404,50 @@ async function loadDtsAndRender(useWebGPU) {
 	// Force content reload by resetting currentLoadedSectionId
 	currentLoadedSectionId = '';
 
-	// If we had a section selected previously, try to restore it in the new data.
-	if (prevSection && sections[prevSection]) {
-		await navigateTo(prevSection);
+	// Restore the same section/subsection using the translation map.
+	if (prevSectionIndex >= 0) {
+		const newSectionKeys = Object.keys(sections);
+		const targetSectionId = newSectionKeys[Math.min(prevSectionIndex, newSectionKeys.length - 1)];
+
+		let targetSubId = null;
+		if (prevSubId && targetSectionId) {
+			// Subsection IDs can be plain names ("canvas") or class-prefixed ("q5.canvas", "Vector.add").
+			// Split off the prefix so we look up just the member name in the translation map.
+			const dotIdx = prevSubId.indexOf('.');
+			const prefix = dotIdx >= 0 ? prevSubId.slice(0, dotIdx + 1) : '';
+			const memberName = dotIdx >= 0 ? prevSubId.slice(dotIdx + 1) : prevSubId;
+
+			// Step 1: get the English canonical name.
+			// If we were already on a translated page, reverse-look up the old map.
+			let englishName = memberName;
+			if (oldLang !== 'en') {
+				for (const [en, tr] of Object.entries(oldLibMap)) {
+					if (tr === memberName) {
+						englishName = en;
+						break;
+					}
+				}
+			}
+
+			// Step 2: translate the English name into the new language via Q5._libMap.
+			const newLibMap = Q5._libMap; // English → newLang (empty when newLang is 'en')
+			const newMemberName = newLibMap[englishName] || englishName;
+			const translatedSubId = prefix + newMemberName;
+
+			// Step 3: verify the translated subsection actually exists, fall back to positional.
+			if (sections[targetSectionId]?.subsections[translatedSubId]) {
+				targetSubId = translatedSubId;
+			} else if (prevSubsectionIndex >= 0) {
+				const newSubKeys = Object.keys(sections[targetSectionId]?.subsections || {});
+				if (prevSubsectionIndex < newSubKeys.length) {
+					targetSubId = newSubKeys[prevSubsectionIndex];
+				}
+			}
+		}
+
+		await navigateTo(targetSectionId, targetSubId);
 	} else {
-		// fall back to displayContent (handles hash and default)
+		// Initial load or no prior section — use hash or default first section.
 		await displayContent();
 	}
 }
@@ -743,9 +798,9 @@ function updateStickyHeader() {
 	closestWrapper.classList.add('sticky');
 	prevStickyWrapper = closestWrapper;
 
-	const subsectionId = closestWrapper.parentElement?.id || '';
+	currentSubsectionId = closestWrapper.parentElement?.id || '';
 	for (const link of document.querySelectorAll('.subsection-link')) {
-		link.classList.toggle('active', link.getAttribute('href').slice(1) === subsectionId);
+		link.classList.toggle('active', link.getAttribute('href').slice(1) === currentSubsectionId);
 	}
 }
 

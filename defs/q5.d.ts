@@ -1875,10 +1875,18 @@ declare global {
 	function blendMode(val: string): void;
 
 	/** 💅
-	 * Set the line cap style to `ROUND`, `SQUARE`, or `PROJECT`.
-	 * 
-	 * Not available in q5 WebGPU.
+	 * Set the line cap style to `SQUARE` or `PROJECT`.
 	 * @param {CanvasLineCap} val line cap style
+	 * @example
+	 * await Canvas(200);
+	 * background(0.8);
+	 * strokeWeight(20);
+	 * 
+	 * strokeCap(SQUARE);
+	 * line(-50, -25, 50, -25);
+	 * 
+	 * strokeCap(PROJECT);
+	 * line(-50, 25, 50, 25);
 	 */
 	function strokeCap(val: CanvasLineCap): void;
 
@@ -4073,12 +4081,13 @@ declare global {
 	/** ⚡
 	 * Creates a shader that q5 can use to draw frames.
 	 * 
-	 * You must create a canvas before using this function.
-	 * 
 	 * Use this function to customize a copy of the
 	 * [default frame shader](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).
 	 * @example
-	 * await Canvas(200);
+	 * await Canvas(200, 400);
+	 * stroke(1);
+	 * strokeWeight(8);
+	 * strokeCap(PROJECT);
 	 * 
 	 * let boxy = createFrameShader(`
 	 * @fragment
@@ -4090,8 +4099,6 @@ declare global {
 	 * }`);
 	 * 
 	 * q5.draw = function () {
-	 * 	stroke(1);
-	 * 	strokeWeight(8);
 	 * 	line(mouseX, mouseY, pmouseX, pmouseY);
 	 * 	mouseIsPressed ? resetShaders() : shader(boxy);
 	 * };
@@ -4106,7 +4113,7 @@ declare global {
 	 * @param {string} code WGSL shader code excerpt
 	 * @returns {GPUShaderModule} a shader program
 	 * @example
-	 * await Canvas(200);
+	 * await Canvas(200, 400);
 	 * imageMode(CENTER);
 	 * 
 	 * let logo = loadImage('/q5js_logo.avif');

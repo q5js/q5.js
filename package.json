@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "4.6.2",
+	"version": "4.6.3",
 	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",
 	"license": "LGPL-3.0-only",
@@ -46,7 +46,7 @@
 		"dist": "bun bundle && bun min",
 		"tests": "jest test",
 		"bld": "node lang/build.js",
-		"dts": "node lang/types.js",
+		"types": "node lang/types.js",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
 		"version": "git add -A",

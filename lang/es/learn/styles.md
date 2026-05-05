@@ -318,15 +318,29 @@ No disponible en q5 WebGPU.
 
 ## terminacionTrazo
 
-Establece el estilo de terminación de línea a `ROUND`, `SQUARE`, o `PROJECT`.
-
-No disponible en q5 WebGPU.
-
 ```
 @param {CanvasLineCap} val estilo de terminación de línea
 ```
 
+### webgpu
+
+Establece el estilo de terminación de línea a `SQUARE` o `PROJECT`.
+
+```js
+await Lienzo(200);
+fondo(0.8);
+grosorTrazo(20);
+
+terminacionTrazo(SQUARE);
+linea(-50, -25, 50, -25);
+
+terminacionTrazo(PROJECT);
+linea(-50, 25, 50, 25);
+```
+
 ### c2d
+
+Establece el estilo de terminación de línea a `ROUND`, `SQUARE`, o `PROJECT`.
 
 ```js
 crearLienzo(200);

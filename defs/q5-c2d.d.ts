@@ -1868,8 +1868,6 @@ declare global {
 
 	/** 💅
 	 * Set the line cap style to `ROUND`, `SQUARE`, or `PROJECT`.
-	 * 
-	 * Not available in q5 WebGPU.
 	 * @param {CanvasLineCap} val line cap style
 	 * @example
 	 * createCanvas(200);

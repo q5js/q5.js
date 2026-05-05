@@ -146,7 +146,10 @@ Usa esta función para personalizar una copia del
 ### webgpu
 
 ```js
-await Lienzo(200);
+await Lienzo(200, 400);
+trazo(1);
+grosorTrazo(8);
+terminacionTrazo(PROJECT);
 
 let boxy = crearShaderFotograma(`
 @fragment
@@ -158,8 +161,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 }`);
 
 q5.dibujar = function () {
-	trazo(1);
-	grosorTrazo(8);
 	linea(ratonX, ratonY, pRatonX, pRatonY);
 	ratonPresionado ? reiniciarShaders() : shader(boxy);
 };
@@ -180,7 +181,7 @@ Usa esta función para personalizar una copia del
 ### webgpu
 
 ```js
-await Lienzo(200);
+await Lienzo(200, 400);
 modoImagen(CENTER);
 
 let logo = cargarImagen('/q5js_logo.avif');

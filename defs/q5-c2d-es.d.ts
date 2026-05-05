@@ -1856,8 +1856,6 @@ declare global {
 
 	/** 💅
 	 * Establece el estilo de terminación de línea a `ROUND`, `SQUARE`, o `PROJECT`.
-	 * 
-	 * No disponible en q5 WebGPU.
 	 * @param {CanvasLineCap} val estilo de terminación de línea
 	 * @example
 	 * crearLienzo(200);

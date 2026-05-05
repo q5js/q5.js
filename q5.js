@@ -7326,10 +7326,29 @@ fn vertexMain(v: VertexParams) -> FragParams {
 
 		let len = Math.sqrt(sqLen),
 			ratio = hsw / len,
-			nx = -dy * ratio,
-			ny = dx * ratio;
+			nx = -dy * ratio, // line thickness
+			ny = dx * ratio,
+			ex = 0,
+			ey = 0;
 
-		addQuad(x1 + nx, y1 + ny, x1 - nx, y1 - ny, x2 - nx, y2 - ny, x2 + nx, y2 + ny, strokeIdx, matrixIdx);
+		if (_strokeCap[0] === 's') {
+			// 'square' PROJECT
+			ex = ny;
+			ey = -nx;
+		}
+
+		addQuad(
+			x1 - ex + nx,
+			y1 - ey + ny,
+			x1 - ex - nx,
+			y1 - ey - ny,
+			x2 + ex - nx,
+			y2 + ey - ny,
+			x2 + ex + nx,
+			y2 + ey + ny,
+			strokeIdx,
+			matrixIdx
+		);
 	};
 
 	/* ELLIPSE */

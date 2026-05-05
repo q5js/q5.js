@@ -139,15 +139,16 @@ Make q5 use all default shaders.
 
 Creates a shader that q5 can use to draw frames.
 
-You must create a canvas before using this function.
-
 Use this function to customize a copy of the
 [default frame shader](https://github.com/q5js/q5.js/blob/main/src/shaders/frame.wgsl).
 
 ### webgpu
 
 ```js
-await Canvas(200);
+await Canvas(200, 400);
+stroke(1);
+strokeWeight(8);
+strokeCap(PROJECT);
 
 let boxy = createFrameShader(`
 @fragment
@@ -159,8 +160,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 }`);
 
 q5.draw = function () {
-	stroke(1);
-	strokeWeight(8);
 	line(mouseX, mouseY, pmouseX, pmouseY);
 	mouseIsPressed ? resetShaders() : shader(boxy);
 };
@@ -181,7 +180,7 @@ Use this function to customize a copy of the
 ### webgpu
 
 ```js
-await Canvas(200);
+await Canvas(200, 400);
 imageMode(CENTER);
 
 let logo = loadImage('/q5js_logo.avif');

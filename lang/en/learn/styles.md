@@ -318,15 +318,29 @@ Not available in q5 WebGPU.
 
 ## strokeCap
 
-Set the line cap style to `ROUND`, `SQUARE`, or `PROJECT`.
-
-Not available in q5 WebGPU.
-
 ```
 @param {CanvasLineCap} val line cap style
 ```
 
+### webgpu
+
+Set the line cap style to `SQUARE` or `PROJECT`.
+
+```js
+await Canvas(200);
+background(0.8);
+strokeWeight(20);
+
+strokeCap(SQUARE);
+line(-50, -25, 50, -25);
+
+strokeCap(PROJECT);
+line(-50, 25, 50, 25);
+```
+
 ### c2d
+
+Set the line cap style to `ROUND`, `SQUARE`, or `PROJECT`.
 
 ```js
 createCanvas(200);
