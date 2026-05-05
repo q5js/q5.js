@@ -364,6 +364,10 @@ const parseLangs = function (data, lang) {
 	return map;
 };
 
+const unaccent = function (s) {
+	return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+};
+
 Object.defineProperty(Q5, 'lang', {
 	get: () => Q5._lang,
 	set: (val) => {
@@ -429,6 +433,40 @@ for (let l of supportedLangs) {
 	}
 }
 
+Q5.applyLang = function (q, libs, classes) {
+	let val = Q5._lang;
+	if (val == 'en') return;
+
+	let map = parseLangs(libs, val);
+	for (let name in map) {
+		let translatedName = map[name];
+		q[translatedName] = q[name];
+		if (val == 'es') {
+			let unaccentedName = unaccent(translatedName);
+			if (unaccentedName != translatedName) q[unaccentedName] = q[name];
+		}
+	}
+
+	if (!classes) return;
+
+	for (let className in classes) {
+		let target = q[className].prototype;
+		let map = parseLangs(classes[className], val);
+		for (let name in map) {
+			let translatedName = map[name];
+			if (target.hasOwnProperty(translatedName)) continue;
+			Object.defineProperty(target, translatedName, {
+				get: function () {
+					return this[name];
+				},
+				set: function (v) {
+					this[name] = v;
+				}
+			});
+		}
+	}
+};
+
 Q5.modules.lang = ($) => {
 	let userFnsMap = Q5._userFnsMap;
 
@@ -453,7 +491,7 @@ Q5.addHook('init', (q) => {
 		q[translatedName] = q[name];
 
 		if (Q5._lang == 'es') {
-			let unaccentedName = translatedName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+			let unaccentedName = unaccent(translatedName);
 			if (unaccentedName != translatedName) {
 				q[unaccentedName] = q[name];
 			}
@@ -487,7 +525,7 @@ Q5.addHook('predraw', (q) => {
 		if (!m[p]) continue;
 		q[m[p]] = q[p];
 		if (Q5._lang == 'es') {
-			let unaccentedName = m[p].normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+			let unaccentedName = unaccent(m[p]);
 			if (unaccentedName != m[p]) {
 				q[unaccentedName] = q[p];
 			}

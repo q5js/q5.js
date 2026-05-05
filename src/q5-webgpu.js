@@ -895,13 +895,6 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 			}
 
 			Q5.device.queue.writeBuffer(imgVertBuff, 0, imgVertStack.subarray(0, imgVertIdx));
-
-			$._pass.setVertexBuffer(1, imgVertBuff);
-
-			if (vidFrames) {
-				$._pass.setPipeline($._pipelines[3]); // video pipeline
-				$._pass.setVertexBuffer(1, imgVertBuff);
-			}
 		}
 
 		// prepare to render text
@@ -1000,6 +993,12 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 
 				curPipelineIndex = drawStack[i];
 				pass.setPipeline($._pipelines[curPipelineIndex]);
+
+				if (curPipelineIndex == 2 || curPipelineIndex == 3 || curPipelineIndex >= 2000) {
+					pass.setVertexBuffer(0, imgVertBuff);
+				} else if (curPipelineIndex == 1 || (curPipelineIndex >= 1000 && curPipelineIndex < 2000)) {
+					pass.setVertexBuffer(0, shapesVertBuff);
+				}
 
 				if (curPipelineIndex == 5) {
 					pass.setIndexBuffer(rectIndexBuffer, 'uint16');
@@ -2376,7 +2375,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		vertex: {
 			module: imageShader,
 			entryPoint: 'vertexMain',
-			buffers: [{ arrayStride: 0, attributes: [] }, imgVertBuffLayout]
+			buffers: [imgVertBuffLayout]
 		},
 		fragment: {
 			module: imageShader,
@@ -2395,7 +2394,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		vertex: {
 			module: videoShader,
 			entryPoint: 'vertexMain',
-			buffers: [{ arrayStride: 0, attributes: [] }, imgVertBuffLayout]
+			buffers: [imgVertBuffLayout]
 		},
 		fragment: {
 			module: videoShader,
