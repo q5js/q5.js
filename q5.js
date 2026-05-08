@@ -9081,11 +9081,8 @@ Q5.initWebGPU = async () => {
 
 Q5.WebGPU = async function (scope, parent) {
 	if (!scope || scope == 'global') Q5._hasGlobal = true;
-	let q;
-	if (!(await Q5.initWebGPU())) {
-		q = new Q5(scope, parent, 'webgpu-fallback');
-	}
-	q = new Q5(scope, parent, 'webgpu');
+	let supportsWebGPU = await Q5.initWebGPU(),
+		q = new Q5(scope, parent, 'webgpu' + (supportsWebGPU ? '' : '-fallback'));
 	await q.ready;
 	return q;
 };
