@@ -7660,10 +7660,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 		// if the point stroke size is a single pixel (or smaller), use a rectangle
 		if (hswScaled <= 0.5) {
-			addRect(x, y, hsw, hsw, calcRectRadii(0), hsw, 0);
+			addRect(x, y, qsw, qsw, calcRectRadii(0), hsw, 0);
 		} else {
 			// dimensions of the point needs to be set to half the stroke weight
-			addEllipse(x, y, hsw, hsw, 0, TAU, hsw, 0);
+			addEllipse(x, y, qsw, qsw, 0, TAU, hsw, 0);
 		}
 	};
 
