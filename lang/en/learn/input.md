@@ -26,6 +26,15 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+	text(round(mouseX), -50, 20)
+```
+
 ### c2d
 
 ```js
@@ -47,6 +56,14 @@ q5.draw = function () {
 	background(0.8);
 	circle(0, mouseY, 100);
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+	circle(0, mouseY, 100)
 ```
 
 ### c2d
@@ -82,6 +99,15 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+	text(mouseButton, -80, 20)
+```
+
 ### c2d
 
 ```js
@@ -103,6 +129,14 @@ q5.draw = function () {
 	if (mouseIsPressed) background(0.4);
 	else background(0.8);
 };
+```
+
+### python
+
+```py
+def draw():
+	if mouseIsPressed: background(0.4)
+	else: background(0.8)
 ```
 
 ### c2d
@@ -128,6 +162,17 @@ q5.mousePressed = function () {
 	background(gray % 1);
 	gray += 0.1;
 };
+```
+
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def mousePressed():
+	background(gray % 1)
+	gray += 0.1
 ```
 
 ### c2d
@@ -156,6 +201,17 @@ q5.mouseReleased = function () {
 	background(gray % 1);
 	gray += 0.1;
 };
+```
+
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def mouseReleased():
+	background(gray % 1)
+	gray += 0.1
 ```
 
 ### c2d
@@ -189,6 +245,17 @@ q5.mouseMoved = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def mouseMoved():
+	background(gray % 1)
+	gray += 0.005
+```
+
 ### c2d
 
 ```js
@@ -220,6 +287,17 @@ q5.mouseDragged = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def mouseDragged():
+	background(gray % 1)
+	gray += 0.005
+```
+
 ### c2d
 
 ```js
@@ -248,6 +326,17 @@ q5.doubleClicked = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def doubleClicked():
+	background(gray % 1)
+	gray += 0.1
+```
+
 ### c2d
 
 ```js
@@ -274,6 +363,15 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+	text(key, -80, 20)
+```
+
 ### c2d
 
 ```js
@@ -295,6 +393,14 @@ q5.draw = function () {
 	if (keyIsPressed) background(0.4);
 	else background(0.8);
 };
+```
+
+### python
+
+```py
+def draw():
+	if keyIsPressed: background(0.4)
+	else: background(0.8)
 ```
 
 ### c2d
@@ -328,6 +434,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	if keyIsDown('f': && keyIsDown('j'))
+		rect(-50, -50, 100, 100)
+```
+
 ### c2d
 
 ```js
@@ -356,6 +472,17 @@ q5.keyPressed = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def keyPressed():
+	background(gray % 1)
+	gray += 0.1
+```
+
 ### c2d
 
 ```js
@@ -382,6 +509,17 @@ q5.keyReleased = function () {
 	background(gray % 1);
 	gray += 0.1;
 };
+```
+
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def keyReleased():
+	background(gray % 1)
+	gray += 0.1
 ```
 
 ### c2d
@@ -416,6 +554,15 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	for (let pt of pointers)
+		circle(pt.x, pt.y, 100)
+```
+
 ### c2d
 
 ```js
@@ -445,6 +592,17 @@ q5.touchStarted = function () {
 	background(gray % 1);
 	gray += 0.1;
 };
+```
+
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def touchStarted():
+	background(gray % 1)
+	gray += 0.1
 ```
 
 ### c2d
@@ -479,6 +637,17 @@ q5.touchEnded = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def touchEnded():
+	background(gray % 1)
+	gray += 0.1
+```
+
 ### c2d
 
 ```js
@@ -509,6 +678,17 @@ q5.touchMoved = function () {
 	background(gray % 1);
 	gray += 0.005;
 };
+```
+
+### python
+
+```py
+Canvas(200)
+gray = 0.4
+
+def touchMoved():
+	background(gray % 1)
+	gray += 0.005
 ```
 
 ### c2d
@@ -542,6 +722,13 @@ await Canvas(200, 100);
 cursor('pointer');
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+cursor('pointer')
+```
+
 ### c2d
 
 ```js
@@ -558,6 +745,13 @@ Hides the cursor within the bounds of the canvas.
 ```js
 await Canvas(200, 100);
 noCursor();
+```
+
+### python
+
+```py
+Canvas(200, 100)
+noCursor()
 ```
 
 ### c2d
@@ -591,6 +785,19 @@ q5.mouseWheel = function (e) {
 };
 ```
 
+### python
+
+```py
+x = 0
+y = 0
+def draw():
+	circle(x, y, 10)
+def mouseWheel(e):
+	x += e.deltaX
+	y += e.deltaY
+	return False
+```
+
 ### c2d
 
 ```js
@@ -620,6 +827,15 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	if movedX > 0: text('>>', 0, 0)
+	if movedX < 0: text('<<', 0, 0)
+```
+
 ## movedY
 
 Distance the mouse has moved since the last frame in the vertical direction.
@@ -632,6 +848,15 @@ q5.draw = function () {
 	if (movedY > 0) text('vv', 0, 0);
 	if (movedY < 0) text('^^', 0, 0);
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+	if movedY > 0: text('vv', 0, 0)
+	if movedY < 0: text('^^', 0, 0)
 ```
 
 ## pointerLock
@@ -661,6 +886,19 @@ q5.doubleClicked = function () {
 		document.exitPointerLock();
 	}
 };
+```
+
+### python
+
+```py
+def draw():
+	circle(mouseX / 10, mouseY / 10, 10)
+
+def doubleClicked():
+	if !document.pointerLockElement:
+		pointerLock()
+		} else
+			document.exitPointerLock()
 ```
 
 ### c2d

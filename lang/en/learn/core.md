@@ -33,6 +33,14 @@ background('silver');
 circle(0, 0, 80);
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+background('silver')
+circle(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -52,6 +60,14 @@ q5.draw = function () {
 	background('silver');
 	circle(mouseX, mouseY, 80);
 };
+```
+
+### python
+
+```py
+def draw():
+	background('silver')
+	circle(mouseX, mouseY, 80)
 ```
 
 ### c2d
@@ -84,6 +100,14 @@ q5.draw = function () {
 	circle(mouseX, mouseY, 80);
 	log('The mouse is at:', mouseX, mouseY);
 };
+```
+
+### python
+
+```py
+def draw():
+	circle(mouseX, mouseY, 80)
+	log('The mouse is at:', mouseX, mouseY)
 ```
 
 ### c2d

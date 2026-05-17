@@ -39,6 +39,16 @@ textAlign(CENTER, CENTER);
 text('v' + Q5.version, 0, 0);
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+textSize(64)
+textAlign(CENTER, CENTER)
+text('v' + Q5.version, 0, 0)
+```
+
 ## Q5.lang
 
 Set to a language code other than 'en' (English) to use q5 in an additional language.
@@ -152,6 +162,17 @@ q.draw = () => {
 	q.background(0.8);
 	q.circle(q.mouseX, 0, 80);
 };
+```
+
+### python
+
+```py
+q = await Q5.WebGPU('namespace')
+q.Canvas(200, 100)
+
+q.draw = () =>
+	q.background(0.8)
+	q.circle(q.mouseX, 0, 80)
 ```
 
 ## Q5.addHook

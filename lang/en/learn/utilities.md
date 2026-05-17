@@ -61,6 +61,49 @@ for (let mammal of mammals) {
 }
 ```
 
+### python
+
+```py
+Canvas(200)
+
+logo = load('/q5js_logo.avif')
+
+def draw():
+	image(logo, -100, -100, 200, 200)
+```
+
+```py
+Canvas(200)
+background(0.8)
+
+await load('/assets/Robotica.ttf')
+
+textSize(28)
+text('Hello, world!', -97, 100)
+```
+
+```py
+Canvas(200)
+
+[jump, retro] = await load('/assets/jump.wav', '/assets/retro.flac')
+
+def mousePressed():
+	if mouseButton == 'left': jump.play()
+	if mouseButton == 'right': retro.play()
+```
+
+```py
+Canvas(200)
+background(0.8)
+textSize(32)
+
+xml = await load('/assets/animals.xml')
+mammals = xml.querySelectorAll('mammal')
+y = -90
+for (let mammal of mammals)
+	text(mammal.textContent, -90, (y += 32))
+```
+
 ### c2d
 
 ```js
@@ -110,6 +153,28 @@ q5.mousePressed = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+circle(0, 0, 50)
+
+def mousePressed():
+	save('circle.png')
+```
+
+```py
+Canvas(200)
+background(0.8)
+text('save me?', -90, 0)
+textSize(180)
+bolt = createTextImage('⚡️')
+
+def mousePressed():
+	save(bolt, 'bolt.png')
+```
+
 ### c2d
 
 ```js
@@ -154,6 +219,18 @@ q5.draw = function () {
 		text('Hello, world!', -90, 0);
 	}
 };
+```
+
+### python
+
+```py
+Canvas(200)
+
+def draw():
+	background(0.8)
+
+	if millis(: > 2000)
+		text('Hello, world!', -90, 0)
 ```
 
 ## loadText
@@ -215,6 +292,20 @@ for (let mammal of mammals) {
 }
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+textSize(32)
+
+xml = await load('/assets/animals.xml')
+mammals = xml.querySelectorAll('mammal')
+y = -90
+for (let mammal of mammals)
+	text(mammal.textContent, -90, (y += 32))
+```
+
 ## loadAll
 
 Wait for any assets that started loading to finish loading. By default q5 runs this before looping draw (which is called preloading), but it can be used even after draw starts looping.
@@ -246,6 +337,16 @@ background(0.8);
 
 textSize(32);
 text(nf(PI, 4, 5), -90, 10);
+```
+
+### python
+
+```py
+Canvas(200, 100)
+background(0.8)
+
+textSize(32)
+text(nf(PI, 4, 5), -90, 10)
 ```
 
 ## shuffle

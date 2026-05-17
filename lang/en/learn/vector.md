@@ -20,6 +20,16 @@ let v = createVector(0, 0);
 circle(v.x, v.y, 50);
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+
+v = createVector(0, 0)
+circle(v.x, v.y, 50)
+```
+
 ## Vector.x
 
 The x component of the vector.

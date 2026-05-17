@@ -4,6 +4,7 @@ dev/p5
 dev/wgsl
 dev/sketch.js
 dev/sketch-p5.js
+dev/sketch.ipynb
 dev/sketch.py
 dev/test*
 node_modules

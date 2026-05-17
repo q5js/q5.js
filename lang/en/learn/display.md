@@ -20,6 +20,16 @@ displayMode(CENTER, PIXELATED, 4);
 circle(0, 0, 16);
 ```
 
+### python
+
+```py
+Canvas(50, 25)
+
+displayMode(CENTER, PIXELATED, 4)
+
+circle(0, 0, 16)
+```
+
 ### c2d
 
 ```js
@@ -72,6 +82,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+	textAlign(CENTER, CENTER)
+	text(windowWidth, 0, 0)
+```
+
 ### c2d
 
 ```js
@@ -98,6 +118,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+	textAlign(CENTER, CENTER)
+	text(windowHeight, 0, 0)
+```
+
 ### c2d
 
 ```js
@@ -120,6 +150,13 @@ await Canvas(200, 120);
 circle(0, 0, width);
 ```
 
+### python
+
+```py
+Canvas(200, 120)
+circle(0, 0, width)
+```
+
 ## height
 
 The height of the canvas.
@@ -129,6 +166,13 @@ The height of the canvas.
 ```js
 await Canvas(200, 80);
 circle(0, 0, height);
+```
+
+### python
+
+```py
+Canvas(200, 80)
+circle(0, 0, height)
 ```
 
 ## halfWidth
@@ -142,6 +186,13 @@ await Canvas(200, 80);
 circle(0, 0, halfWidth);
 ```
 
+### python
+
+```py
+Canvas(200, 80)
+circle(0, 0, halfWidth)
+```
+
 ## halfHeight
 
 Half the height of the canvas.
@@ -151,6 +202,13 @@ Half the height of the canvas.
 ```js
 await Canvas(200, 80);
 circle(0, 0, halfHeight);
+```
+
+### python
+
+```py
+Canvas(200, 80)
+circle(0, 0, halfHeight)
 ```
 
 ## canvas
@@ -178,6 +236,18 @@ q5.draw = function () {
 q5.mousePressed = function () {
 	resizeCanvas(200, 200);
 };
+```
+
+### python
+
+```py
+Canvas(200, 100)
+
+def draw():
+	background(0.8)
+
+def mousePressed():
+	resizeCanvas(200, 200)
 ```
 
 ### c2d
@@ -208,6 +278,15 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+	text(frameCount, -92, 20)
+```
+
 ### c2d
 
 ```js
@@ -229,6 +308,14 @@ q5.draw = function () {
 	circle(frameCount * 5 - 100, 0, 80);
 	noLoop();
 };
+```
+
+### python
+
+```py
+def draw():
+	circle(frameCount * 5 - 100, 0, 80)
+	noLoop()
 ```
 
 ### c2d
@@ -265,6 +352,18 @@ q5.mousePressed = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+noLoop()
+
+def draw():
+	circle(frameCount * 5 - 100, 0, 80)
+def mousePressed():
+	redraw(10)
+```
+
 ### c2d
 
 ```js
@@ -295,6 +394,18 @@ q5.draw = function () {
 q5.mousePressed = function () {
 	loop();
 };
+```
+
+### python
+
+```py
+Canvas(200)
+noLoop()
+
+def draw():
+	circle(frameCount * 5 - 100, 0, 80)
+def mousePressed():
+	loop()
 ```
 
 ### c2d
@@ -346,6 +457,25 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	if mouseIsPressed: frameRate(10)
+	else: frameRate(60)
+
+	circle((frameCount % 200) - 100, 0, 80)
+```
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+	text(round(frameRate()), -35, 20)
+```
+
 ### c2d
 
 ```js
@@ -386,6 +516,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	textSize(64)
+
+	text(getTargetFrameRate(), -35, 20)
+```
+
 ### c2d
 
 ```js
@@ -419,6 +559,17 @@ q5.draw = function () {
 
 	text(getFPS(), -92, 20);
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+	frameRate(1)
+	textSize(64)
+
+	text(getFPS(), -92, 20)
 ```
 
 ### c2d
@@ -473,6 +624,15 @@ pixelDensity(1);
 circle(0, 0, 80);
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+background(0.8)
+pixelDensity(1)
+circle(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -499,6 +659,15 @@ await Canvas(200, 100);
 background(0.8);
 textSize(64);
 text(displayDensity(), -90, 6);
+```
+
+### python
+
+```py
+Canvas(200, 100)
+background(0.8)
+textSize(64)
+text(displayDensity(), -90, 6)
 ```
 
 ### c2d
@@ -544,6 +713,26 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+	text(deltaTime, -90, 6)
+```
+
+```py
+x = -100
+def draw():
+	background(0.8)
+	# simulate frame rate drops
+	frameRate(random(30, 60))
+
+	x += deltaTime * 0.2
+	if x > 100: x = -100
+	circle(x, 0, 20)
+```
+
 ### c2d
 
 ```js
@@ -579,6 +768,14 @@ background('silver');
 circle(0, 0, 80);
 ```
 
+### python
+
+```py
+Canvas(200, 100, C2D)
+background('silver')
+circle(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -597,4 +794,12 @@ Since WebGPU is the default renderer in JavaScript modules, it's not necessary t
 await Canvas(200, 100, WEBGPU);
 background('silver');
 circle(0, 0, 80);
+```
+
+### python
+
+```py
+Canvas(200, 100, WEBGPU)
+background('silver')
+circle(0, 0, 80)
 ```

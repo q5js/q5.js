@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 4.6
+ * @version 4.7
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, keturn, ormaq, bertubi, RedWilly, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -225,8 +225,6 @@ function Q5(scope, parent, renderer) {
 	for (let m in r) {
 		r[m]($, q);
 	}
-
-	// INIT
 
 	for (let k in Q5) {
 		if (k[1] != '_' && k[1] == k[1].toUpperCase()) {
@@ -496,16 +494,17 @@ if (typeof window == 'object') {
 	window.addEventListener('pagehide', cleanup);
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '4.6';
+Q5.version = Q5.VERSION = '4.7';
 
 if (typeof document == 'object') {
-	document.addEventListener('DOMContentLoaded', () => {
-		if (!Q5._hasGlobal) {
-			if (Q5.update || Q5.draw) {
-				Q5.WebGPU();
-			} else {
-				new Q5('auto');
-			}
+	function init() {
+		if (Q5._hasGlobal) return;
+		if (Q5.update || Q5.draw) {
+			Q5.WebGPU();
+		} else {
+			new Q5('auto');
 		}
-	});
+	}
+	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+	else setTimeout(init, 0); // defer until the rest of q5.js is run
 }

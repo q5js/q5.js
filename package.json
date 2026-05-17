@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "4.6.6",
+	"version": "4.7.0",
 	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",
 	"license": "LGPL-3.0-only",
@@ -18,7 +18,6 @@
 			"node": "./q5-server.js",
 			"default": "./q5.js"
 		},
-		"./q5.min.js": "./q5.min.js",
 		"./q5.js": "./q5.js",
 		"./q5-server.js": {
 			"browser": null,
@@ -43,7 +42,7 @@
 	"scripts": {
 		"bundle": "cat src/q5-core.js src/q5-canvas.js src/q5-c2d-canvas.js src/q5-c2d-shapes.js src/q5-c2d-image.js src/q5-c2d-soft-filters.js src/q5-c2d-text.js src/q5-color.js src/q5-display.js src/q5-dom.js src/q5-fes.js src/q5-input.js src/q5-math.js src/q5-record.js src/q5-sound.js src/q5-util.js src/q5-vector.js src/q5-webgpu.js src/q5-lang.js src/q5-python.js > q5.js",
 		"min": "terser q5.js --compress ecma=2026 --mangle --output q5.min.js --source-map url=q5.min.js.map",
-		"dist": "bun bundle && bun min",
+		"dist": "bun bundle",
 		"tests": "jest test",
 		"bld": "node lang/build.js",
 		"types": "node lang/types.js",

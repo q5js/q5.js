@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 4.6
+ * @version 4.7
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, keturn, ormaq, bertubi, RedWilly, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -225,8 +225,6 @@ function Q5(scope, parent, renderer) {
 	for (let m in r) {
 		r[m]($, q);
 	}
-
-	// INIT
 
 	for (let k in Q5) {
 		if (k[1] != '_' && k[1] == k[1].toUpperCase()) {
@@ -496,18 +494,19 @@ if (typeof window == 'object') {
 	window.addEventListener('pagehide', cleanup);
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '4.6';
+Q5.version = Q5.VERSION = '4.7';
 
 if (typeof document == 'object') {
-	document.addEventListener('DOMContentLoaded', () => {
-		if (!Q5._hasGlobal) {
-			if (Q5.update || Q5.draw) {
-				Q5.WebGPU();
-			} else {
-				new Q5('auto');
-			}
+	function init() {
+		if (Q5._hasGlobal) return;
+		if (Q5.update || Q5.draw) {
+			Q5.WebGPU();
+		} else {
+			new Q5('auto');
 		}
-	});
+	}
+	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+	else setTimeout(init, 0); // defer until the rest of q5.js is run
 }
 Q5.modules.canvas = ($, q) => {
 	$._Canvas =
@@ -9621,42 +9620,60 @@ Q5.addHook('predraw', (q) => {
 	}
 });
 const runPython = async function () {
-	let scripts = [...document.getElementsByTagName('script')];
-	scripts = scripts.filter((s) => s.type == 'q5-python' || s.type == 'text/q5-python');
+	let scripts = [...document.getElementsByTagName('script')].filter(
+		(s) => s.type == 'q5-python' || s.type == 'text/q5-python'
+	);
 	if (!scripts.length) return;
 
 	if (!window.brython) {
-		const loadScript = (src) =>
-			new Promise((resolve, reject) => {
-				const script = document.createElement('script');
-				script.src = src;
-				script.onload = resolve;
-				script.onerror = reject;
-				document.head.appendChild(script);
+		const load = (src) =>
+			new Promise((res, rej) => {
+				const s = document.createElement('script');
+				s.src = src;
+				s.onload = res;
+				s.onerror = rej;
+				document.head.appendChild(s);
 			});
 
-		await loadScript('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython.min.js');
-		await loadScript('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython_stdlib.min.js');
+		await load('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython.min.js');
+		await load('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython_stdlib.min.js');
 	}
 
 	let code = '';
 	for (const script of scripts) {
-		code += script.src ? await (await fetch(script.src)).text() : script.innerText;
+		if (script.src?.endsWith?.('.ipynb')) {
+			const nb = await (await fetch(script.src)).json();
+			for (const cell of nb.cells) {
+				if (cell.cell_type !== 'code') continue;
+				const m = cell.metadata,
+					cellLang = m?.language_info?.name ?? m?.kernelspec?.language ?? m?.kernelspec?.name ?? m?.language;
+				if (cellLang && !String(cellLang).toLowerCase().includes('python')) continue;
+				const src = Array.isArray(cell.source)
+					? cell.source.join('')
+					: typeof cell.source === 'string'
+						? cell.source
+						: '';
+				code += src + '\n';
+			}
+		} else {
+			code += script.src ? await (await fetch(script.src)).text() : script.innerText;
+		}
 	}
+
+	// strip `from q5 import *` — it's only used for type hints (q5.pyi)
+	code = code.startsWith('from q5') ? code.slice(code.indexOf('\n') + 1) : code;
 
 	const useWebGPU = !code.slice(0, code.indexOf('\n')).includes('C2D'),
 		q = useWebGPU ? await Q5.WebGPU() : new Q5();
+	await q.ready;
 
-	// `window.Canvas` returns a promise that resolves when Q5 is ready
-	// but `q5py.Canvas` returns the renderer synchronously
-	// so to make Brython happy with `await Canvas()` we need to make it async
-	const Canvas = q.Canvas;
-	q.Canvas = async (...a) => Canvas(...a);
+	let pyReady;
+	q._loaders.push(new Promise((res) => (pyReady = res)));
 
 	// add a tab before each line of code to nest it inside the __run function
 	// but not within triple-quoted strings
 	code = code
-		.split(/(\"\"\"[\s\S]*?\"\"\"|\'\'\'[\s\S]*?\'\'\')/g)
+		.split(/("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')/g)
 		.map((part, i) => (i % 2 === 0 ? part.replaceAll('\n', '\n\t') : part))
 		.join('');
 
@@ -9753,8 +9770,8 @@ async def _run_py(q, code):
 				pass
 
 	_orig_Canvas = ns['Canvas']
-	async def _canvas_wrapper(*args):
-		result = await _orig_Canvas(*args)
+	def _canvas_wrapper(*args):
+		result = _orig_Canvas(*args)
 		_sync_state(q, ns)
 		return result
 	ns['Canvas'] = ns['createCanvas'] = _canvas_wrapper
@@ -9775,6 +9792,8 @@ window._runPy = _run_py
 `);
 
 	console.log = log;
+
+	pyReady();
 
 	await window._runPy(q, code);
 };

@@ -64,6 +64,46 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+
+wobble = createShader(`
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams
+	vert = transformVertex(v.pos, v.matrixIndex)
+
+	i = f32(v.vertexIndex) % 4 * 100
+	vert.x += cos((q.time + i) * 0.01) * 0.1
+
+	f: FragParams
+	f.position = vert
+	f.color = vec4f(1, 0, 0, 1)
+	return f
+	}`)
+
+	def draw():
+		clear()
+		shader(wobble)
+		plane(0, 0, 100)
+```
+
+```py
+Canvas(200)
+
+stripes = createShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f
+	r = cos((q.mouseY + f.position.y) * 0.2)
+	return vec4(r, 0.0, 1, 1)
+	}`)
+
+	def draw():
+		shader(stripes)
+		triangle(-50, -50, 0, 50, 50, -50)
+```
+
 ## plane
 
 A plane is a centered rectangle with no stroke.
@@ -80,6 +120,13 @@ A plane is a centered rectangle with no stroke.
 ```js
 await Canvas(200);
 plane(0, 0, 100);
+```
+
+### python
+
+```py
+Canvas(200)
+plane(0, 0, 100)
 ```
 
 ## shader
@@ -113,6 +160,26 @@ q5.draw = function () {
 	resetShader();
 	triangle(-50, -50, 0, 50, 50, -50);
 };
+```
+
+### python
+
+```py
+Canvas(200)
+
+stripes = createShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f
+	g = cos((q.mouseY + f.position.y) * 0.05)
+	return vec4(1, g, 0, 1)
+	}`)
+
+	def draw():
+		shader(stripes)
+		plane(0, 0, width, height)
+
+		resetShader()
+		triangle(-50, -50, 0, 50, 50, -50)
 ```
 
 ## resetFrameShader
@@ -165,6 +232,28 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200, 400)
+stroke(1)
+strokeWeight(8)
+strokeCap(PROJECT)
+
+boxy = createFrameShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f
+	x = sin(f.texCoord.y * 4 + q.time * 0.002)
+	y = cos(f.texCoord.x * 4 + q.time * 0.002)
+	uv = f.texCoord + vec2f(x, y)
+	return textureSample(tex, samp, uv)
+	}`)
+
+	def draw():
+		line(mouseX, mouseY, pmouseX, pmouseY)
+		mouseIsPressed ? resetShaders() : shader(boxy)
+```
+
 ## createImageShader
 
 Creates a shader that q5 can use to draw images.
@@ -199,6 +288,28 @@ q5.draw = function () {
 	image(logo, 0, 0, 180, 180);
 };
 //
+```
+
+### python
+
+```py
+Canvas(200, 400)
+imageMode(CENTER)
+
+logo = loadImage('/q5js_logo.avif')
+
+grate = createImageShader(`
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f
+	texColor = textureSample(tex, samp, f.texCoord)
+	texColor.b += (q.mouseX + f.position.x) % 20 / 10
+	return texColor
+	}`)
+
+	def draw():
+		background(0.7)
+		shader(grate)
+		image(logo, 0, 0, 180, 180)
 ```
 
 ## createVideoShader
@@ -252,6 +363,42 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200, 600)
+
+vid = createVideo('/assets/apollo4.mp4')
+vid.hide()
+
+flipper = createVideoShader(`
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams
+	vert = transformVertex(v.pos, v.matrixIndex)
+
+	vi = f32(v.vertexIndex)
+	vert.y *= cos((q.frameCount + vi * 10) * 0.03)
+
+	f: FragParams
+	f.position = vert
+	f.texCoord = v.texCoord
+	return f
+
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f
+	texColor = textureSampleBaseClampToEdge(tex, samp, f.texCoord)
+	texColor.r = 0
+	texColor.b *= 2
+	return texColor
+	}`)
+
+	def draw():
+		clear()
+		if mouseIsPressed: vid.play()
+		shader(flipper)
+		image(vid, -100, 150, 200, 150)
+```
+
 ## createTextShader
 
 Creates a shader that q5 can use to draw text.
@@ -300,4 +447,41 @@ q5.draw = function () {
 	textSize(32);
 	text('Hello, World!', 0, 0);
 };
+```
+
+### python
+
+```py
+Canvas(200)
+textAlign(CENTER, CENTER)
+
+spin = createTextShader(`
+@vertex
+fn vertexMain(v : VertexParams) -> FragParams
+	char = textChars[v.instanceIndex]
+	text = textMetadata[i32(char.w)]
+	fontChar = fontChars[i32(char.z)]
+	pos = calcPos(v.vertexIndex, char, fontChar, text)
+
+	vert = transformVertex(pos, text.matrixIndex)
+
+	i = f32(v.instanceIndex + 1)
+	vert.y *= cos((q.frameCount - 5 * i) * 0.05)
+
+	f : FragParams
+	f.position = vert
+	f.texCoord = calcUV(v.vertexIndex, fontChar)
+	f.fillColor = colors[i32(text.fillIndex)]
+	f.strokeColor = colors[i32(text.strokeIndex)]
+	f.strokeWeight = text.strokeWeight
+	f.edge = text.edge
+	return f
+	}`)
+
+	def draw():
+		clear()
+		shader(spin)
+		fill(1, 0, 1)
+		textSize(32)
+		text('Hello, World!', 0, 0)
 ```

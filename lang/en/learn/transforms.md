@@ -20,6 +20,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	translate(50, 50)
+	circle(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -50,6 +60,18 @@ q5.draw = function () {
 	rectMode(CENTER);
 	square(0, 0, 120);
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	rotate(mouseX / 50)
+
+	rectMode(CENTER)
+	square(0, 0, 120)
 ```
 
 ### c2d
@@ -89,6 +111,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	scale(mouseX / 10)
+	circle(0, 0, 20)
+```
+
 ### c2d
 
 ```js
@@ -118,6 +150,17 @@ q5.draw = function () {
 	shearX(mouseX / 100);
 	square(0, 0, 80);
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	translate(-75, -40)
+	shearX(mouseX / 100)
+	square(0, 0, 80)
 ```
 
 ### c2d
@@ -150,6 +193,17 @@ q5.draw = function () {
 	shearY(mouseX / 100);
 	square(0, 0, 80);
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	translate(-75, -40)
+	shearY(mouseX / 100)
+	square(0, 0, 80)
 ```
 
 ### c2d
@@ -194,6 +248,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	applyMatrix(2, -1, 1, -1)
+	circle(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -225,6 +289,19 @@ resetMatrix();
 square(0, 0, 50);
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+
+translate(50, 50)
+circle(0, 0, 80)
+
+resetMatrix()
+square(0, 0, 50)
+```
+
 ### c2d
 
 ```js
@@ -254,6 +331,20 @@ ellipse(0, 0, 120, 40);
 popMatrix();
 
 ellipse(0, 0, 120, 40);
+```
+
+### python
+
+```py
+Canvas(200)
+background(0.8)
+
+pushMatrix()
+rotate(QUARTER_PI)
+ellipse(0, 0, 120, 40)
+popMatrix()
+
+ellipse(0, 0, 120, 40)
 ```
 
 ### c2d
@@ -289,6 +380,20 @@ popMatrix();
 ellipse(0, 0, 120, 40);
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+
+pushMatrix()
+rotate(QUARTER_PI)
+ellipse(0, 0, 120, 40)
+popMatrix()
+
+ellipse(0, 0, 120, 40)
+```
+
 ### c2d
 
 ```js
@@ -322,6 +427,20 @@ pop();
 square(0, 0, 50);
 ```
 
+### python
+
+```py
+Canvas(200)
+
+push()
+fill('blue')
+translate(50, 50)
+circle(0, 0, 80)
+pop()
+
+square(0, 0, 50)
+```
+
 ### c2d
 
 ```js
@@ -352,6 +471,20 @@ circle(0, 0, 80);
 pop();
 
 square(0, 0, 50);
+```
+
+### python
+
+```py
+Canvas(200)
+
+push()
+fill('blue')
+translate(50, 50)
+circle(0, 0, 80)
+pop()
+
+square(0, 0, 50)
 ```
 
 ### c2d

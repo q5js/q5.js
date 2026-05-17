@@ -35,6 +35,26 @@ text(info, -88, -70, 20);
 //
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+background('silver')
+
+textSize(32)
+text('Hello, world!', -88, 10)
+```
+
+```py
+Canvas(200)
+background(0.8)
+textSize(20)
+
+info = 'q5.js was designed to make creative coding fun and accessible for artists, designers, educators, and beginners.'
+
+text(info, -88, -70, 20)
+```
+
 ### c2d
 
 ```js
@@ -114,6 +134,39 @@ textSize(68);
 text('Hello!', -98, 31);
 ```
 
+### python
+
+```py
+Canvas(200, 56)
+
+await loadFont('/assets/Robotica.ttf')
+
+fill('skyblue')
+textSize(64)
+text('Hello!', -98, 24)
+```
+
+```py
+Canvas(200, 74)
+
+loadFont('fonts.googleapis.com/css2?family=Pacifico')
+
+def draw():
+	fill('hotpink')
+	textSize(68)
+	text('Hello!', -98, 31)
+```
+
+```py
+Canvas(200, 74)
+
+await loadFont('sans-serif');  # msdf
+
+fill('white')
+textSize(68)
+text('Hello!', -98, 31)
+```
+
 ### c2d
 
 If no fonts are loaded, the system's default sans-serif font is used.
@@ -173,6 +226,26 @@ textFont('monospace');
 text('Hello, world!', -96, 10);
 ```
 
+### python
+
+```py
+Canvas(200, 160)
+background(0.8)
+
+textFont('serif')
+
+text('Hello, world!', -96, 10)
+```
+
+```py
+Canvas(200)
+background(0.8)
+
+textFont('monospace')
+
+text('Hello, world!', -96, 10)
+```
+
 ### c2d
 
 ```js
@@ -213,6 +286,16 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	textSize(abs(mouseX))
+	text('A', -90, 90)
+```
+
 ### c2d
 
 ```js
@@ -243,6 +326,17 @@ q5.draw = function () {
 	text('A', -90, 90);
 	rect(-90, 90, 5, -textLeading());
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	textSize(abs(mouseX))
+	text('A', -90, 90)
+	rect(-90, 90, 5, -textLeading())
 ```
 
 ### c2d
@@ -279,6 +373,18 @@ textSize(32);
 text('Hello, world!', -88, 6);
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+
+textStyle(ITALIC)
+
+textSize(32)
+text('Hello, world!', -88, 6)
+```
+
 ### c2d
 
 ```js
@@ -311,6 +417,17 @@ textSize(32);
 
 textAlign(CENTER, CENTER);
 text('Hello, world!', 0, 0);
+```
+
+### python
+
+```py
+Canvas(200)
+background(0.8)
+textSize(32)
+
+textAlign(CENTER, CENTER)
+text('Hello, world!', 0, 0)
 ```
 
 ### c2d
@@ -354,6 +471,18 @@ textWeight(100);
 text('Hello, world!', 0, 0);
 ```
 
+### python
+
+```py
+Canvas(200)
+background(0.8)
+textSize(32)
+textAlign(CENTER, CENTER)
+
+textWeight(100)
+text('Hello, world!', 0, 0)
+```
+
 ### c2d
 
 ```js
@@ -385,6 +514,17 @@ q5.draw = function () {
 	rect(-90, 90, textWidth('A'), -textLeading());
 	text('A', -90, 90);
 };
+```
+
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	textSize(abs(mouseX))
+	rect(-90, 90, textWidth('A'), -textLeading())
+	text('A', -90, 90)
 ```
 
 ### c2d
@@ -420,6 +560,17 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+def draw():
+	background(0.8)
+
+	textSize(abs(mouseX))
+	rect(-90, 90, textWidth('A'), -textAscent())
+	text('A', -90, 90)
+```
+
 ### c2d
 
 ```js
@@ -450,6 +601,17 @@ textSize(64);
 
 rect(-100, 0, 200, textDescent('q5'));
 text('q5', -90, 0);
+```
+
+### python
+
+```py
+Canvas(200)
+background(0.8)
+textSize(64)
+
+rect(-100, 0, 200, textDescent('q5'))
+text('q5', -90, 0)
 ```
 
 ### c2d
@@ -486,6 +648,19 @@ img.filter(INVERT);
 q5.draw = function () {
 	image(img, -45, -90);
 };
+```
+
+### python
+
+```py
+Canvas(200)
+textSize(96)
+
+img = createTextImage('🐶')
+img.filter(INVERT)
+
+def draw():
+	image(img, -45, -90)
 ```
 
 ### c2d
@@ -533,6 +708,17 @@ textSize(96);
 textAlign(CENTER, CENTER);
 
 textImage('🐶', 0, 0);
+```
+
+### python
+
+```py
+Canvas(200)
+background(0.8)
+textSize(96)
+textAlign(CENTER, CENTER)
+
+textImage('🐶', 0, 0)
 ```
 
 ### c2d
@@ -593,6 +779,33 @@ for (let pt of pts) {
 }
 ```
 
+### python
+
+```py
+Canvas(200)
+textSize(220)
+textAlign(CENTER, CENTER)
+
+points = textToPoints('5')
+
+for (let pt of points)
+	rect(pt.x, pt.y, 5, 20)
+```
+
+```py
+Canvas(200, 296)
+textSize(340)
+noFill()
+stroke(1)
+strokeWeight(8)
+
+pts = textToPoints('q', -100, 56)
+
+strokeWeight(1)
+for (let pt of pts)
+	ellipse(pt.x, pt.y, 10, 0.1)
+```
+
 ## nf
 
 Number formatter, can be used to display a number as a string with
@@ -614,6 +827,16 @@ background(0.8);
 
 textSize(32);
 text(nf(PI, 4, 5), -90, 10);
+```
+
+### python
+
+```py
+Canvas(200, 100)
+background(0.8)
+
+textSize(32)
+text(nf(PI, 4, 5), -90, 10)
 ```
 
 ### c2d

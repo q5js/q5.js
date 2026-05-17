@@ -40,6 +40,18 @@ q5.mousePressed = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+
+sound = loadSound('/assets/jump.wav')
+sound.volume = 0.3
+
+def mousePressed():
+	sound.play()
+```
+
 ### c2d
 
 ```js
@@ -78,6 +90,18 @@ q5.mousePressed = function () {
 	audio.play();
 };
 ````
+
+### python
+
+```py
+Canvas(200)
+
+audio = loadAudio('/assets/retro.flac')
+audio.volume = 0.4
+
+def mousePressed():
+	audio.play()
+```
 
 ### c2d
 

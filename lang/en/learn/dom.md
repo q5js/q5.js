@@ -44,6 +44,20 @@ el.style.backgroundColor = 'blue';
 el.style.color = 'white';
 ```
 
+### python
+
+```py
+Canvas(200)
+
+el = createEl('div', '*')
+el.position(50, 50)
+el.size(100, 100)
+el.style.fontSize = '136px'
+el.style.textAlign = 'center'
+el.style.backgroundColor = 'blue'
+el.style.color = 'white'
+```
+
 ### c2d
 
 ```js
@@ -82,6 +96,20 @@ link.addEventListener('mouseover', () => {
 });
 ```
 
+### python
+
+```py
+Canvas(200)
+
+link = createA('https://q5js.org', 'q5.js')
+link.position(16, 42)
+link.style.fontSize = '80px'
+
+link.addEventListener('mouseover', () =>
+	background('cyan')
+	})
+```
+
 ### c2d
 
 ```js
@@ -114,6 +142,18 @@ let btn = createButton('Click me!');
 btn.addEventListener('click', () => {
 	background(random(0.4, 1));
 });
+```
+
+### python
+
+```py
+Canvas(200, 100)
+
+btn = createButton('Click me!')
+
+btn.addEventListener('click', () =>
+	background(random(0.4, 1))
+	})
 ```
 
 ### c2d
@@ -155,6 +195,20 @@ box.addEventListener('input', () => {
 });
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+
+box = createCheckbox('Check me!')
+box.label.style.color = 'lime'
+
+box.addEventListener('input', () =>
+	if box.checked: background('lime')
+	else: background('black')
+	})
+```
+
 ### c2d
 
 ```js
@@ -192,6 +246,18 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+
+picker = createColorPicker()
+picker.value = '#fd7575'
+
+def draw():
+	background(picker.value)
+```
+
 ### c2d
 
 ```js
@@ -220,6 +286,15 @@ await Canvas(200, 100);
 
 let img = createImg('/assets/q5play_logo.avif');
 img.position(0, 0).size(100, 100);
+```
+
+### python
+
+```py
+Canvas(200, 100)
+
+img = createImg('/assets/q5play_logo.avif')
+img.position(0, 0).size(100, 100)
 ```
 
 ### c2d
@@ -263,6 +338,22 @@ input.addEventListener('input', () => {
 });
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+textSize(64)
+
+input = createInput()
+input.placeholder = 'Type here!'
+input.size(200, 32)
+
+input.addEventListener('input', () =>
+	background('orange')
+	text(input.value, -90, 30)
+	})
+```
+
 ### c2d
 
 ```js
@@ -295,6 +386,16 @@ background('coral');
 
 let p = createP('Hello, world!');
 p.style.color = 'pink';
+```
+
+### python
+
+```py
+Canvas(200, 50)
+background('coral')
+
+p = createP('Hello, world!')
+p.style.color = 'pink'
 ```
 
 ### c2d
@@ -334,6 +435,21 @@ q5.draw = function () {
 	if (radio.value == '1') square(-40, -40, 80);
 	if (radio.value == '2') circle(0, 0, 80);
 };
+```
+
+### python
+
+```py
+Canvas(200, 160)
+
+radio = createRadio()
+radio.option('square', '1')
+radio.option('circle', '2')
+
+def draw():
+	background(0.8)
+	if radio.value == '1': square(-40, -40, 80)
+	if radio.value == '2': circle(0, 0, 80)
 ```
 
 ### c2d
@@ -384,6 +500,20 @@ sel.addEventListener('change', () => {
 });
 ```
 
+### python
+
+```py
+Canvas(200, 100)
+
+sel = createSelect('Select an option')
+sel.option('Red', '#f55')
+sel.option('Green', '#5f5')
+
+sel.addEventListener('change', () =>
+	background(sel.value)
+	})
+```
+
 ### c2d
 
 ```js
@@ -423,6 +553,18 @@ slider.position(10, 10).size(180);
 q5.draw = function () {
 	background(slider.val());
 };
+```
+
+### python
+
+```py
+Canvas(200)
+
+slider = createSlider(0, 1, 0.5, 0.1)
+slider.position(10, 10).size(180)
+
+def draw():
+	background(slider.val())
 ```
 
 ### c2d
@@ -477,6 +619,30 @@ q5.draw = function () {
 	rotate(mouseX / 55);
 	image(vid, -100, -75, 200, 150);
 };
+```
+
+### python
+
+```py
+Canvas(1)
+
+vid = createVideo('/assets/apollo4.mp4')
+vid.size(200, 150)
+vid.autoplay = vid.muted = vid.loop = True
+vid.controls = True
+```
+
+```py
+Canvas(200, 150)
+vid = createVideo('/assets/apollo4.mp4')
+vid.hide()
+
+def mousePressed():
+	vid.currentTime = 0
+	vid.play()
+def draw():
+	rotate(mouseX / 55)
+	image(vid, -100, -75, 200, 150)
 ```
 
 ### c2d
@@ -557,6 +723,35 @@ q5.mousePressed = function () {
 	cap.size(200, 150);
 	canvas.remove();
 };
+```
+
+### python
+
+```py
+def mousePressed():
+	cap = createCapture(VIDEO)
+	cap.size(200, 112.5)
+	canvas.remove()
+```
+
+```py
+cap
+def mousePressed():
+	cap = createCapture(VIDEO)
+	cap.hide()
+
+def draw():
+	y = (frameCount % 200) - 100
+	image(cap, -100, y, 200, 200)
+```
+
+```py
+def mousePressed():
+	cap = createCapture(
+		video: { width: 640, height: 480 }
+		})
+		cap.size(200, 150)
+		canvas.remove()
 ```
 
 ### c2d

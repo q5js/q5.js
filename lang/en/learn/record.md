@@ -37,6 +37,18 @@ q5.draw = function () {
 };
 ```
 
+### python
+
+```py
+Canvas(200)
+
+rec = createRecorder()
+rec.bitrate = 10
+
+def draw():
+	circle(mouseX, jit(halfHeight), 10)
+```
+
 ### c2d
 
 ```js
@@ -83,6 +95,17 @@ q5.mousePressed = function () {
 	if (!recording) record();
 	else saveRecording('squares');
 };
+```
+
+### python
+
+```py
+def draw():
+	square(mouseX, jit(100), 10)
+
+def mousePressed():
+	if !recording: record()
+	else: saveRecording('squares')
 ```
 
 ### c2d
