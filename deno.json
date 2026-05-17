@@ -32,7 +32,9 @@
 			"CODE_OF_CONDUCT.md",
 			"deno.lock",
 			"Icon?",
-			"package.json"
+			"package.json",
+			"q5.min.js",
+			"q5.min.js.map"
 		]
 	}
 }
