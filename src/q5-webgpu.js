@@ -1246,7 +1246,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if (shapeVertCount === 0) throw new Error('Shape needs a vertex()');
 
 		// Get the last vertex as the starting point (P₀)
-		let prevIndex = (shapeVertCount - 1) * 4;
+		let prevIndex = (shapeVertCount - 1) * 3;
 		let startX = sv[prevIndex];
 		let startY = sv[prevIndex + 1];
 
@@ -1259,7 +1259,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			y = cy2;
 		}
 
-		let end = 1 + step;
+		let end = 1 + step * 0.5;
 		for (let t = step; t <= end; t += step) {
 			// Start from 0.1 to avoid duplicating the start point
 			let t2 = t * t;
@@ -1388,15 +1388,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 					}
 				}
 			} else {
-				let cx = 0,
-					cy = 0;
-				for (let i = 0; i < shapeVertCount - 1; i++) {
-					cx += sv[i * 3];
-					cy += sv[i * 3 + 1];
-				}
-				cx /= Math.max(1, shapeVertCount - 1);
-				cy /= Math.max(1, shapeVertCount - 1);
-
 				let signedArea = 0,
 					sign = 1;
 				for (let i = 0; i < shapeVertCount - 1; i++) {
