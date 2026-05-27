@@ -231,7 +231,9 @@ declare global {
 
 	const DISPLAY_P3: 'display-p3';
 
-	function background(filler: Color | Q5.Image): void;
+	function background(filler: string | Color | Q5.Image): void;
+
+	function background(c0: number, c1: number, c2: number, c3: number): void;
 
 	class Color {
 		constructor(c0: number, c1: number, c2: number, c3: number);
@@ -247,9 +249,13 @@ declare global {
 
 	// 💅 styles
 
-	function fill(color: Color): void;
+	function fill(color: string | Color): void;
 
-	function stroke(color: Color): void;
+	function fill(c0: number, c1: number, c2: number, c3: number): void;
+
+	function stroke(color: string | Color): void;
+
+	function stroke(c0: number, c1: number, c2: number, c3: number): void;
 
 	function noFill(): void;
 
@@ -343,7 +349,7 @@ declare global {
 
 	function noLoop(): void;
 
-	function redraw(n?: number): void;
+	function redraw(n?: number): Promise<void>;
 
 	function loop(): void;
 
@@ -358,6 +364,8 @@ declare global {
 	function pixelDensity(v: number): number;
 
 	function displayDensity(): number;
+
+	function remove(): Promise<void>;
 
 	let deltaTime: number;
 
@@ -527,7 +535,7 @@ declare global {
 
 	function deleteRecording(): void;
 
-	function saveRecording(fileName: string): void;
+	function saveRecording(fileName: string): Promise<void>;
 
 	let recording: boolean;
 
@@ -535,7 +543,7 @@ declare global {
 
 	function load(...urls: string[]): PromiseLike<any[]>;
 
-	function save(data?: object, fileName?: string): void;
+	function save(data?: object, fileName?: string): Promise<void>;
 
 	function millis(): number;
 
@@ -714,15 +722,15 @@ declare global {
 
 		static modules: object;
 
-		static draw(): void;
+		static draw(): void | Promise<void>;
 
-		static postProcess(): void;
+		static postProcess(): void | Promise<void>;
 
 		//-
 		static update(): void;
 		update(): void;
-		draw(): void;
-		postProcess(): void;
+		draw(): void | Promise<void>;
+		postProcess(): void | Promise<void>;
 		Canvas: typeof Canvas;
 		log: typeof log;
 		circle: typeof circle;

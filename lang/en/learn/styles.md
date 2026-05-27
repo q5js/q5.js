@@ -9,7 +9,7 @@ can accept colors in a wide range of formats: as a CSS color string,
 a `Color` object, grayscale value, or color component values.
 
 ```
-@param {Color} color fill color
+@param {string | Color} color fill color
 ```
 
 ### webgpu
@@ -60,7 +60,7 @@ can accept colors in a wide range of formats: as a CSS color string,
 a `Color` object, grayscale value, or color component values.
 
 ```
-@param {Color} color stroke color
+@param {string | Color} color stroke color
 ```
 
 ### webgpu
@@ -301,7 +301,7 @@ a `Color` object, grayscale value, or color component values.
 Not available in q5 WebGPU.
 
 ```
-@param {Color} color shadow color
+@param {string | Color} color shadow color
 ```
 
 ### c2d

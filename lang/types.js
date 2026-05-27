@@ -131,7 +131,7 @@ function parseMarkdownFile(filePath) {
 			// Collect params
 			while (i < lines.length && lines[i].trim() !== '```') {
 				const paramLine = lines[i].trim();
-				if (paramLine.startsWith('@param') || paramLine.startsWith('@return')) {
+				if (paramLine.startsWith('@param') || paramLine.startsWith('@return') || paramLine.startsWith('@type')) {
 					if (currentEntry) {
 						currentEntry.params.push(paramLine);
 					}
@@ -936,9 +936,57 @@ function generatePyiEntry(func, emoji, indent = '') {
 }
 
 /**
+ * Extracts property/method signatures from a class in the base .d.ts content.
+ * Returns a map of member name → { isProperty, jsType? (for properties), jsReturnType? (for methods) }
+ */
+function extractClassMemberSignatures(className, baseContent) {
+	const lines = baseContent.split('\n');
+	const sigs = {};
+
+	let classStart = -1;
+	for (let i = 0; i < lines.length; i++) {
+		if (new RegExp(`^\\s*class\\s+${className}[\\s{]`).test(lines[i])) {
+			classStart = i;
+			break;
+		}
+	}
+	if (classStart === -1) return sigs;
+
+	let braceCount = 0;
+	for (let i = classStart; i < lines.length; i++) {
+		const line = lines[i];
+		braceCount += (line.match(/{/g) || []).length;
+		braceCount -= (line.match(/}/g) || []).length;
+		if (i === classStart) continue;
+		if (braceCount <= 0) break;
+
+		const t = line.trim();
+		if (!t || t.startsWith('//') || t.startsWith('*') || t.startsWith('/*')) continue;
+
+		const bare = t.replace(/^static\s+/, '');
+		if (bare.startsWith('constructor')) continue;
+
+		// Method: name(...): returnType;
+		const methodMatch = bare.match(/^(\w+)\s*\([^)]*\)\s*:\s*(.+?)\s*;?\s*$/);
+		if (methodMatch) {
+			sigs[methodMatch[1]] = { isProperty: false, jsReturnType: methodMatch[2].trim() };
+			continue;
+		}
+
+		// Property: name: type;
+		const propMatch = bare.match(/^(\w+)\s*:\s*(.+?)\s*;?\s*$/);
+		if (propMatch) {
+			sigs[propMatch[1]] = { isProperty: true, jsType: propMatch[2].trim() };
+		}
+	}
+
+	return sigs;
+}
+
+/**
  * Generates a Python .pyi stub entry for a class
  */
-function generatePyiClass(cls, emoji) {
+function generatePyiClass(cls, emoji, classMemberSigs = {}) {
 	const lines = [];
 	lines.push(`class ${cls.name}:`);
 
@@ -956,6 +1004,30 @@ function generatePyiClass(cls, emoji) {
 		for (const member of cls.members) {
 			lines.push('');
 			if (member.name === 'constructor') continue; // skip JS constructors
+
+			// @type tag (explicit override) → property
+			const typeParam = member.params.find((p) => p.startsWith('@type'));
+			if (typeParam) {
+				const tm = typeParam.match(/@type\s+\{([^}]+)\}/);
+				const pyType = tm ? jsTypeToPython(tm[1]) : 'Any';
+				lines.push(`\t${member.name}: ${pyType}`);
+				if (member.description) {
+					lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
+				}
+				continue;
+			}
+
+			// Auto-detect property vs method from TypeScript signature
+			const sig = classMemberSigs[member.name];
+			if (sig && sig.isProperty) {
+				const pyType = jsTypeToPython(sig.jsType);
+				lines.push(`\t${member.name}: ${pyType}`);
+				if (member.description) {
+					lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
+				}
+				continue;
+			}
+
 			const parsedParams = member.params
 				.filter((p) => p.startsWith('@param'))
 				.map(parseJsDocParam)
@@ -965,7 +1037,13 @@ function generatePyiClass(cls, emoji) {
 			const paramStrs = parsedParams.map((p) =>
 				p.optional ? `${p.name}: ${p.pyType} = ...` : `${p.name}: ${p.pyType}`
 			);
-			const retType = parsedReturn ? parsedReturn.pyType : 'None';
+			// Use TypeScript signature return type as fallback when @returns is absent
+			let retType = 'None';
+			if (parsedReturn) {
+				retType = parsedReturn.pyType;
+			} else if (sig && sig.jsReturnType) {
+				retType = jsTypeToPython(sig.jsReturnType);
+			}
 			lines.push(`\tdef ${member.name}(self${paramStrs.length ? ', ' + paramStrs.join(', ') : ''}) -> ${retType}:`);
 			lines.push(`\t\t"""${emoji} ${stripMarkdown(member.description || member.name)}"""`);
 			lines.push('\t\t...');
@@ -1011,7 +1089,8 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 
 		for (const func of section.functions) {
 			if (func.isClass) {
-				output.push(generatePyiClass(func, emoji));
+				const classMemberSigs = extractClassMemberSignatures(func.name, baseContent);
+				output.push(generatePyiClass(func, emoji, classMemberSigs));
 			} else {
 				// Look up the base TypeScript declaration for type hints on constants/vars
 				const baseLine = baseLines.find((l) => l.includes(`const ${func.name}:`) || l.includes(`let ${func.name}:`));

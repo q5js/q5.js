@@ -9656,6 +9656,7 @@ const runPython = async function () {
 
 	const useWebGPU = !code.slice(0, code.indexOf('\n')).includes('C2D'),
 		q = useWebGPU ? await Q5.WebGPU() : new Q5();
+	q._py = true;
 	await q.ready;
 
 	let pyReady;

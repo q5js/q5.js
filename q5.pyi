@@ -1662,7 +1662,7 @@ Example::
 	background(1, 0, 0)
 """
 
-def background(filler: Color | Image) -> None:
+def background(filler: str | Color | Image) -> None:
 	"""🎨
 	Draws over the entire canvas with a color or image.
 	
@@ -1670,7 +1670,7 @@ def background(filler: Color | Image) -> None:
 	this function can accept colors in a wide range of formats:
 	CSS color string, grayscale value, and color component values.
 	
-	:param filler: a color or image to draw
+	:param filler: color or image
 	
 	Example::
 	
@@ -1689,26 +1689,25 @@ class Color:
 	"""
 
 
-	def equals(self) -> None:
+	def equals(self) -> bool:
 		"""🎨 Checks if this color is exactly equal to another color."""
 		...
 
-	def isSameColor(self) -> None:
+	def isSameColor(self) -> bool:
 		"""🎨 Checks if the color is the same as another color,
 disregarding their alpha values."""
 		...
 
-	def toString(self) -> None:
+	def toString(self) -> str:
 		"""🎨 Produces a CSS color string representation."""
 		...
 
-	def levels(self) -> None:
-		"""🎨 An array of the color's components."""
-		...
+	levels: list[float]
+	"""🎨 An array of the color's components."""
 
 # 💅 styles
 
-def fill(color: Color) -> None:
+def fill(color: str | Color) -> None:
 	"""💅
 	Sets the fill color. The default is white.
 	
@@ -1731,7 +1730,7 @@ def fill(color: Color) -> None:
 	"""
 	...
 
-def stroke(color: Color) -> None:
+def stroke(color: str | Color) -> None:
 	"""💅
 	Sets the stroke (outline) color. The default is black.
 	
@@ -1829,7 +1828,7 @@ def opacity(alpha: float) -> None:
 	"""
 	...
 
-def shadow(color: Color) -> None:
+def shadow(color: str | Color) -> None:
 	"""💅
 	Sets the shadow color. The default is transparent (no shadow).
 	
@@ -3057,30 +3056,24 @@ class Sound:
 	"""
 
 
-	def volume(self) -> None:
-		"""🔊 Set the sound's volume to a value between
+	volume: float
+	"""🔊 Set the sound's volume to a value between
 0 (silent) and 1 (full volume)."""
-		...
 
-	def pan(self) -> None:
-		"""🔊 Set the sound's stereo position between -1 (left) and 1 (right)."""
-		...
+	pan: float
+	"""🔊 Set the sound's stereo position between -1 (left) and 1 (right)."""
 
-	def loop(self) -> None:
-		"""🔊 Set to true to make the sound loop continuously."""
-		...
+	loop: bool
+	"""🔊 Set to true to make the sound loop continuously."""
 
-	def loaded(self) -> None:
-		"""🔊 True if the sound data has finished loading."""
-		...
+	loaded: bool
+	"""🔊 True if the sound data has finished loading."""
 
-	def paused(self) -> None:
-		"""🔊 True if the sound is currently paused."""
-		...
+	paused: bool
+	"""🔊 True if the sound is currently paused."""
 
-	def ended(self) -> None:
-		"""🔊 True if the sound has finished playing."""
-		...
+	ended: bool
+	"""🔊 True if the sound has finished playing."""
 
 	def play(self) -> object:
 		"""🔊 Plays the sound.
@@ -3768,17 +3761,14 @@ class Vector:
 	"""
 
 
-	def x(self) -> None:
-		"""↗ The x component of the vector."""
-		...
+	x: float
+	"""↗ The x component of the vector."""
 
-	def y(self) -> None:
-		"""↗ The y component of the vector."""
-		...
+	y: float
+	"""↗ The y component of the vector."""
 
-	def z(self) -> None:
-		"""↗ The z component of the vector, if applicable."""
-		...
+	z: float
+	"""↗ The z component of the vector, if applicable."""
 
 	def add(self, v: Vector) -> Vector:
 		"""↗ Adds a vector to this vector."""
@@ -4330,74 +4320,63 @@ class Q5:
 	"""
 
 
-	def version(self) -> str:
-		"""⚙ The current minor version of q5."""
-		...
+	version: str
+	"""⚙ The current minor version of q5."""
 
-	def lang(self) -> None:
-		"""⚙ Set to a language code other than 'en' (English) to use q5 in an additional language.
+	lang: str
+	"""⚙ Set to a language code other than 'en' (English) to use q5 in an additional language.
 
 Currently supported languages:
 
 - 'es' (Spanish)"""
-		...
 
-	def disableFriendlyErrors(self) -> None:
-		"""⚙ Turn off q5's friendly error messages."""
-		...
+	disableFriendlyErrors: bool
+	"""⚙ Turn off q5's friendly error messages."""
 
-	def errorTolerant(self) -> None:
-		"""⚙ Set to true to keep draw looping after an error."""
-		...
+	errorTolerant: bool
+	"""⚙ Set to true to keep draw looping after an error."""
 
-	def supportsHDR(self) -> None:
-		"""⚙ True if the device supports HDR (the display-p3 colorspace)."""
-		...
+	supportsHDR: bool
+	"""⚙ True if the device supports HDR (the display-p3 colorspace)."""
 
-	def canvasOptions(self) -> None:
-		"""⚙ Sets the default canvas context attributes used for newly created
+	canvasOptions: dict
+	"""⚙ Sets the default canvas context attributes used for newly created
 canvases and internal graphics. These options are overwritten by any
 per-canvas options you pass to Canvas."""
-		...
 
-	def MAX_TRANSFORMS(self) -> None:
-		"""⚙ A WebGPU memory allocation limit.
+	MAX_TRANSFORMS: float
+	"""⚙ A WebGPU memory allocation limit.
 
 The maximum number of transformation matrixes
 that can be used per frame."""
-		...
 
-	def MAX_RECTS(self) -> None:
-		"""⚙ A WebGPU memory allocation limit.
+	MAX_RECTS: float
+	"""⚙ A WebGPU memory allocation limit.
 
 The maximum number of rectangles
 (calls to rect, square, capsule)
 that can be drawn per frame."""
-		...
 
-	def MAX_ELLIPSES(self) -> None:
-		"""⚙ A WebGPU memory allocation limit.
+	MAX_ELLIPSES: float
+	"""⚙ A WebGPU memory allocation limit.
 
 The maximum number of ellipses
 (calls to ellipse, circle, and arc)
 that can be drawn per frame."""
-		...
 
-	def MAX_CHARS(self) -> None:
-		"""⚙ A WebGPU memory allocation limit.
+	MAX_CHARS: float
+	"""⚙ A WebGPU memory allocation limit.
 
 The maximum number of text characters
 that can be drawn per frame."""
-		...
 
-	def MAX_TEXTS(self) -> None:
-		"""⚙ A WebGPU memory allocation limit.
+	MAX_TEXTS: float
+	"""⚙ A WebGPU memory allocation limit.
 
 The maximum number of separate calls to text
 that can be drawn per frame."""
-		...
 
-	def WebGPU(self) -> None:
+	def WebGPU(self) -> Q5:
 		"""⚙ Creates a new Q5 instance that uses q5's WebGPU renderer."""
 		...
 
@@ -4412,14 +4391,13 @@ Inside the function, this refers to the Q5 instance."""
 		"""⚙ p5.js v2 compatible way to register an addon with q5."""
 		...
 
-	def modules(self) -> None:
-		"""⚙ An object containing q5's modules, functions that run when q5 loads.
+	modules: dict
+	"""⚙ An object containing q5's modules, functions that run when q5 loads.
 
 Each function receives two input parameters:
 
 - the q5 instance
 - a proxy for editing the q5 instance and corresponding properties of the global scope"""
-		...
 
 	def draw(self) -> None:
 		"""⚙ The q5 draw function is run 60 times per second by default."""

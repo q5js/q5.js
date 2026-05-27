@@ -1,3 +1,4 @@
+/** @module q5 */
 declare global {
 
 	// ⭐ core
@@ -1686,7 +1687,7 @@ declare global {
 	 * Like the [`color`](https://q5js.org/learn/#color) function,
 	 * this function can accept colors in a wide range of formats:
 	 * CSS color string, grayscale value, and color component values.
-	 * @param {Color | Q5.Image} filler a color or image to draw
+	 * @param {string | Color | Q5.Image} filler color or image
 	 * @example
 	 * await Canvas(200, 100);
 	 * background('crimson');
@@ -1696,7 +1697,7 @@ declare global {
 	 * 	circle(mouseX, mouseY, 20);
 	 * };
 	 */
-	function background(filler: Color | Q5.Image): void;
+	function background(c0: number, c1: number, c2: number, c3: number): void;
 
 	class Color {
 
@@ -1739,7 +1740,7 @@ declare global {
 	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
 	 * can accept colors in a wide range of formats: as a CSS color string,
 	 * a `Color` object, grayscale value, or color component values.
-	 * @param {Color} color fill color
+	 * @param {string | Color} color fill color
 	 * @example
 	 * await Canvas(200);
 	 * background(0.8);
@@ -1750,7 +1751,7 @@ declare global {
 	 * fill('lime');
 	 * square(-20, -20, 80);
 	 */
-	function fill(color: Color): void;
+	function fill(c0: number, c1: number, c2: number, c3: number): void;
 
 	/** 💅
 	 * Sets the stroke (outline) color. The default is black.
@@ -1758,7 +1759,7 @@ declare global {
 	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
 	 * can accept colors in a wide range of formats: as a CSS color string,
 	 * a `Color` object, grayscale value, or color component values.
-	 * @param {Color} color stroke color
+	 * @param {string | Color} color stroke color
 	 * @example
 	 * await Canvas(200);
 	 * background(0.8);
@@ -1770,7 +1771,7 @@ declare global {
 	 * stroke('lime');
 	 * square(-20, -20, 80);
 	 */
-	function stroke(color: Color): void;
+	function stroke(c0: number, c1: number, c2: number, c3: number): void;
 
 	/** 💅
 	 * After calling this function, drawing will not be filled.
@@ -1843,7 +1844,7 @@ declare global {
 	 * a `Color` object, grayscale value, or color component values.
 	 * 
 	 * Not available in q5 WebGPU.
-	 * @param {Color} color shadow color
+	 * @param {string | Color} color shadow color
 	 */
 	function shadow(color: string | Color): void;
 

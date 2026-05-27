@@ -628,7 +628,7 @@ this function can accept colors in a wide range of formats:
 CSS color string, grayscale value, and color component values.
 
 ```
-@param {Color | Q5.Image} filler a color or image to draw
+@param {string | Color | Q5.Image} filler color or image
 ```
 
 ### webgpu
