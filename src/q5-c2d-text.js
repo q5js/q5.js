@@ -221,7 +221,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	let lines = [];
 
 	$.text = (str, x, y, w, h) => {
-		if (str === undefined || (!$._doFill && !$._doStroke)) return;
+		if (str === undefined || (!$.__doFill && !$.__doStroke)) return;
 		str = str.toString();
 		let ctx = $.ctx;
 		let img, colorStyle, styleCache, colorCache, recycling;
@@ -328,8 +328,8 @@ Q5.renderers.c2d.text = ($, q) => {
 			else tX = 0;
 
 			ctx.font = $.ctx.font;
-			if ($._doFill && $._fillSet) ctx.fillStyle = $._fill;
-			if ($._doStroke && $._strokeSet) ctx.strokeStyle = $._stroke;
+			if ($.__doFill && $._fillSet) ctx.fillStyle = $._fill;
+			if ($.__doStroke && $._strokeSet) ctx.strokeStyle = $._stroke;
 			ctx.lineWidth = $.ctx.lineWidth;
 		}
 
@@ -341,8 +341,8 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		let lineAmount = 0;
 		for (let line of lines) {
-			if ($._doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
-			if ($._doFill) ctx.fillText(line, tX, tY);
+			if ($.__doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
+			if ($.__doFill) ctx.fillText(line, tX, tY);
 			tY += leading;
 			lineAmount++;
 			if (lineAmount >= h) break;

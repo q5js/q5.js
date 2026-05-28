@@ -31,12 +31,12 @@ test('q5-canvas', () => {
 
 	// noFill disables fill
 	q.noFill();
-	expect(q._doFill).toBe(false);
+	expect(q.__doFill).toBe(false);
 
 	// noStroke disables stroke
 	q.stroke('red');
 	q.noStroke();
-	expect(q._doStroke).toBe(false);
+	expect(q.__doStroke).toBe(false);
 
 	// strokeWeight sets line width
 	q.strokeWeight(7);

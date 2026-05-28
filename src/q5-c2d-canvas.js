@@ -73,35 +73,37 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	};
 
 	$.fill = function (c) {
-		$._doFill = $._fillSet = true;
+		$.__doFill = $._fillSet = true;
 		if (Q5.Color) {
 			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
-			if (c.a <= 0) return ($._doFill = false);
+			if (c.a <= 0) return ($.__doFill = false);
 		}
 		$.ctx.fillStyle = $._fill = c.toString();
 	};
 
 	$.stroke = function (c) {
-		$._doStroke = $._strokeSet = true;
+		$.__doStroke = $._strokeSet = true;
 		if (Q5.Color) {
 			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
-			if (c.a <= 0) return ($._doStroke = false);
+			if (c.a <= 0) return ($.__doStroke = false);
 		}
 		$.ctx.strokeStyle = $._stroke = c.toString();
 	};
 
 	$.strokeWeight = (n) => {
-		if (!n) $._doStroke = false;
-		else $._doStroke = true;
+		if (!n) $.__doStroke = false;
+		else $.__doStroke = true;
 		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
 
-	$.noFill = () => ($._doFill = false);
-	$.noStroke = () => ($._doStroke = false);
+	$.noFill = () => ($.__doFill = false);
+	$.noStroke = () => ($.__doStroke = false);
+	$._doFill = () => ($.__doFill = true);
+	$._doStroke = () => ($.__doStroke = true);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
 	$._doShadow = false;
@@ -173,8 +175,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		'_fill',
 		'_stroke',
 		'_strokeWeight',
-		'_doFill',
-		'_doStroke',
+		'__doFill',
+		'__doStroke',
 		'_fillSet',
 		'_strokeSet',
 		'_shadow',

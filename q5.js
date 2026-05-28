@@ -923,35 +923,37 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	};
 
 	$.fill = function (c) {
-		$._doFill = $._fillSet = true;
+		$.__doFill = $._fillSet = true;
 		if (Q5.Color) {
 			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
-			if (c.a <= 0) return ($._doFill = false);
+			if (c.a <= 0) return ($.__doFill = false);
 		}
 		$.ctx.fillStyle = $._fill = c.toString();
 	};
 
 	$.stroke = function (c) {
-		$._doStroke = $._strokeSet = true;
+		$.__doStroke = $._strokeSet = true;
 		if (Q5.Color) {
 			if (!c._isColor && (typeof c != 'string' || $._namedColors[c])) {
 				c = $.color(...arguments);
 			}
-			if (c.a <= 0) return ($._doStroke = false);
+			if (c.a <= 0) return ($.__doStroke = false);
 		}
 		$.ctx.strokeStyle = $._stroke = c.toString();
 	};
 
 	$.strokeWeight = (n) => {
-		if (!n) $._doStroke = false;
-		else $._doStroke = true;
+		if (!n) $.__doStroke = false;
+		else $.__doStroke = true;
 		$.ctx.lineWidth = $._strokeWeight = n || 0.0001;
 	};
 
-	$.noFill = () => ($._doFill = false);
-	$.noStroke = () => ($._doStroke = false);
+	$.noFill = () => ($.__doFill = false);
+	$.noStroke = () => ($.__doStroke = false);
+	$._doFill = () => ($.__doFill = true);
+	$._doStroke = () => ($.__doStroke = true);
 	$.opacity = (a) => ($.ctx.globalAlpha = a);
 
 	$._doShadow = false;
@@ -1023,8 +1025,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 		'_fill',
 		'_stroke',
 		'_strokeWeight',
-		'_doFill',
-		'_doStroke',
+		'__doFill',
+		'__doStroke',
 		'_fillSet',
 		'_strokeSet',
 		'_shadow',
@@ -1082,8 +1084,8 @@ Q5.renderers.c2d.canvas = ($, q) => {
 	};
 };
 Q5.renderers.c2d.shapes = ($) => {
-	$._doStroke = true;
-	$._doFill = true;
+	$.__doStroke = true;
+	$.__doFill = true;
 	$._strokeSet = false;
 	$._fillSet = false;
 	$._ellipseMode = Q5.CENTER;
@@ -1093,8 +1095,8 @@ Q5.renderers.c2d.shapes = ($) => {
 	let curveBuff = [];
 
 	function ink() {
-		if ($._doFill) $.ctx.fill();
-		if ($._doStroke) $.ctx.stroke();
+		if ($.__doFill) $.ctx.fill();
+		if ($.__doStroke) $.ctx.stroke();
 	}
 
 	// DRAWING SETTINGS
@@ -1109,7 +1111,7 @@ Q5.renderers.c2d.shapes = ($) => {
 	// DRAWING
 
 	$.line = (x0, y0, x1, y1) => {
-		if ($._doStroke) {
+		if ($.__doStroke) {
 			$.ctx.beginPath();
 			$.ctx.moveTo(x0, y0);
 			$.ctx.lineTo(x1, y1);
@@ -1137,14 +1139,14 @@ Q5.renderers.c2d.shapes = ($) => {
 		w = Math.abs(w);
 		h = Math.abs(h);
 
-		if (!$._doFill && mode == $.PIE_OPEN) mode = $.CHORD_OPEN;
+		if (!$.__doFill && mode == $.PIE_OPEN) mode = $.CHORD_OPEN;
 
 		$.ctx.beginPath();
 		$.ctx.ellipse(x, y, w, h, 0, lo, hi);
 		if (mode == $.PIE || mode == $.PIE_OPEN) $.ctx.lineTo(x, y);
-		if ($._doFill) $.ctx.fill();
+		if ($.__doFill) $.ctx.fill();
 
-		if ($._doStroke) {
+		if ($.__doStroke) {
 			if (mode == $.PIE || mode == $.CHORD) $.ctx.closePath();
 			if (mode != $.PIE_OPEN) return $.ctx.stroke();
 
@@ -1198,7 +1200,7 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.point = (x, y) => {
-		if ($._doStroke) {
+		if ($.__doStroke) {
 			if (x.x) {
 				y = x.y;
 				x = x.x;
@@ -2198,7 +2200,7 @@ Q5.renderers.c2d.text = ($, q) => {
 	let lines = [];
 
 	$.text = (str, x, y, w, h) => {
-		if (str === undefined || (!$._doFill && !$._doStroke)) return;
+		if (str === undefined || (!$.__doFill && !$.__doStroke)) return;
 		str = str.toString();
 		let ctx = $.ctx;
 		let img, colorStyle, styleCache, colorCache, recycling;
@@ -2305,8 +2307,8 @@ Q5.renderers.c2d.text = ($, q) => {
 			else tX = 0;
 
 			ctx.font = $.ctx.font;
-			if ($._doFill && $._fillSet) ctx.fillStyle = $._fill;
-			if ($._doStroke && $._strokeSet) ctx.strokeStyle = $._stroke;
+			if ($.__doFill && $._fillSet) ctx.fillStyle = $._fill;
+			if ($.__doStroke && $._strokeSet) ctx.strokeStyle = $._stroke;
 			ctx.lineWidth = $.ctx.lineWidth;
 		}
 
@@ -2318,8 +2320,8 @@ Q5.renderers.c2d.text = ($, q) => {
 
 		let lineAmount = 0;
 		for (let line of lines) {
-			if ($._doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
-			if ($._doFill) ctx.fillText(line, tX, tY);
+			if ($.__doStroke && $._strokeSet) ctx.strokeText(line, tX, tY);
+			if ($.__doFill) ctx.fillText(line, tX, tY);
 			tY += leading;
 			lineAmount++;
 			if (lineAmount >= h) break;

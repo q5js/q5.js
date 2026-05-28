@@ -1,6 +1,6 @@
 Q5.renderers.c2d.shapes = ($) => {
-	$._doStroke = true;
-	$._doFill = true;
+	$.__doStroke = true;
+	$.__doFill = true;
 	$._strokeSet = false;
 	$._fillSet = false;
 	$._ellipseMode = Q5.CENTER;
@@ -10,8 +10,8 @@ Q5.renderers.c2d.shapes = ($) => {
 	let curveBuff = [];
 
 	function ink() {
-		if ($._doFill) $.ctx.fill();
-		if ($._doStroke) $.ctx.stroke();
+		if ($.__doFill) $.ctx.fill();
+		if ($.__doStroke) $.ctx.stroke();
 	}
 
 	// DRAWING SETTINGS
@@ -26,7 +26,7 @@ Q5.renderers.c2d.shapes = ($) => {
 	// DRAWING
 
 	$.line = (x0, y0, x1, y1) => {
-		if ($._doStroke) {
+		if ($.__doStroke) {
 			$.ctx.beginPath();
 			$.ctx.moveTo(x0, y0);
 			$.ctx.lineTo(x1, y1);
@@ -54,14 +54,14 @@ Q5.renderers.c2d.shapes = ($) => {
 		w = Math.abs(w);
 		h = Math.abs(h);
 
-		if (!$._doFill && mode == $.PIE_OPEN) mode = $.CHORD_OPEN;
+		if (!$.__doFill && mode == $.PIE_OPEN) mode = $.CHORD_OPEN;
 
 		$.ctx.beginPath();
 		$.ctx.ellipse(x, y, w, h, 0, lo, hi);
 		if (mode == $.PIE || mode == $.PIE_OPEN) $.ctx.lineTo(x, y);
-		if ($._doFill) $.ctx.fill();
+		if ($.__doFill) $.ctx.fill();
 
-		if ($._doStroke) {
+		if ($.__doStroke) {
 			if (mode == $.PIE || mode == $.CHORD) $.ctx.closePath();
 			if (mode != $.PIE_OPEN) return $.ctx.stroke();
 
@@ -115,7 +115,7 @@ Q5.renderers.c2d.shapes = ($) => {
 	};
 
 	$.point = (x, y) => {
-		if ($._doStroke) {
+		if ($.__doStroke) {
 			if (x.x) {
 				y = x.y;
 				x = x.x;
