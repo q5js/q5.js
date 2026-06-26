@@ -32,8 +32,8 @@ background(0.8);
 
 await load('/assets/Robotica.ttf');
 
-textSize(28);
-text('Hello, world!', -97, 100);
+textSize(64);
+text('Hello!', -97, 97);
 ```
 
 ```js

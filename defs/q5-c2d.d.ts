@@ -2335,7 +2335,7 @@ declare global {
 	 * 	redraw(10);
 	 * }
 	 */
-	function redraw(n?: number): void;
+	function redraw(n?: number): Promise<void>;
 
 	/** 💻
 	 * Starts the draw loop again if it was stopped.
@@ -2497,6 +2497,8 @@ declare global {
 	 * Since WebGPU is the default renderer in JavaScript modules, it's not necessary to use this constant with `Canvas`, unless you want to make it explicit.
 	 */
 	const WEBGPU: 'webgpu';
+
+	function remove(): Promise<void>;
 
 	// 🧮 math
 
@@ -3385,7 +3387,7 @@ declare global {
 	 * 	else saveRecording('squares');
 	 * }
 	 */
-	function saveRecording(fileName: string): void;
+	function saveRecording(fileName: string): Promise<void>;
 
 	/** 🎞
 	 * True if the canvas is currently being recorded.
@@ -3441,7 +3443,7 @@ declare global {
 	 * 	save(bolt, 'bolt.png');
 	 * }
 	 */
-	function save(data?: object, fileName?: string): void;
+	function save(data?: object, fileName?: string): Promise<void>;
 
 	/** 🛠
 	 * Returns the number of milliseconds since the program started.
@@ -3987,7 +3989,7 @@ declare global {
 		/** ⚙
 		 * The q5 draw function is run 60 times per second by default.
 		 */
-		static draw(): void;
+		static draw(): void | Promise<void>;
 
 		/** ⚙
 		 * Runs after each `draw` function call and post-draw q5 addon processes, if any.
@@ -3997,12 +3999,12 @@ declare global {
 		 * addons like q5play that auto-draw to the canvas after the `draw`
 		 * function is run.
 		 */
-		static postProcess(): void;
+		static postProcess(): void | Promise<void>;
 		//-
 			static update(): void;
 			update(): void;
-			draw(): void;
-			postProcess(): void;
+			draw(): void | Promise<void>;
+			postProcess(): void | Promise<void>;
 			Canvas: typeof Canvas;
 			log: typeof log;
 			circle: typeof circle;

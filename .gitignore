@@ -10,6 +10,7 @@ dev/test*
 node_modules
 package-lock.json
 jsconfig.json
+bun.lock
 bun.lockb
 deno.lock
 p5-test

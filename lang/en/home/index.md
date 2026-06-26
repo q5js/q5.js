@@ -12,7 +12,7 @@
 
 # nav3
 
-💙&nbsp;Support
+💙&nbsp;Fund
 
 # news
 

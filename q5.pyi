@@ -4399,11 +4399,11 @@ Each function receives two input parameters:
 - the q5 instance
 - a proxy for editing the q5 instance and corresponding properties of the global scope"""
 
-	def draw(self) -> None:
+	def draw(self) -> None | object:
 		"""⚙ The q5 draw function is run 60 times per second by default."""
 		...
 
-	def postProcess(self) -> None:
+	def postProcess(self) -> None | object:
 		"""⚙ Runs after each draw function call and post-draw q5 addon processes, if any.
 
 Useful for adding post-processing effects when it's not possible

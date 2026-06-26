@@ -1,6 +1,6 @@
 {
 	"name": "q5",
-	"version": "4.7.3",
+	"version": "4.7.4",
 	"description": "Beginner friendly graphics powered by WebGPU, optimized for interactive art!",
 	"author": "quinton-ashley",
 	"license": "LGPL-3.0-only",
@@ -70,9 +70,9 @@
 	],
 	"devDependencies": {
 		"jest-cli": "^29.7.0",
-		"jsdom": "^25.0.1",
+		"jsdom": "^29.1.1",
 		"json2csv": "^6.0.0-alpha.2",
-		"skia-canvas": "^1.0.2",
+		"skia-canvas": "^3.0.8",
 		"terser": "^5.46.1"
 	},
 	"trustedDependencies": [
