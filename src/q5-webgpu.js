@@ -5,6 +5,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 1);
 
+	const CANVAS_FORMAT = navigator.gpu.getPreferredCanvasFormat();
+
 	$._baseShaderCode = /* wgsl */ `
 struct Q5 {
 	width: f32,
@@ -1193,7 +1195,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: shapesShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -1755,7 +1757,7 @@ fn vertexMain(v: VertexParams) -> FragParams {
 			entryPoint: 'fragMain',
 			targets: [
 				{
-					format: 'bgra8unorm',
+					format: CANVAS_FORMAT,
 					blend: $.blendConfigs['source-over']
 				}
 			]
@@ -2117,7 +2119,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			entryPoint: 'fragMain',
 			targets: [
 				{
-					format: 'bgra8unorm',
+					format: CANVAS_FORMAT,
 					blend: $.blendConfigs['source-over']
 				}
 			]
@@ -2390,7 +2392,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: imageShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -2409,7 +2411,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: videoShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -2507,7 +2509,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			texture = Q5.device.createTexture({
 				size: textureSize,
-				format: 'bgra8unorm',
+				format: CANVAS_FORMAT,
 				usage:
 					GPUTextureUsage.TEXTURE_BINDING |
 					GPUTextureUsage.COPY_SRC |
@@ -2879,7 +2881,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: textShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: 'bgra8unorm', blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -3443,7 +3445,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 				entryPoint: 'fragMain',
 				targets: [
 					{
-						format: 'bgra8unorm',
+						format: CANVAS_FORMAT,
 						blend: $.blendConfigs[blend]
 					}
 				]

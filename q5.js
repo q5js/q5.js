@@ -1,5 +1,3 @@
-const DEVICE_FORMAT = navigator.gpu.getPreferredCanvasFormat();
-
 /**
  * q5.js
  * @version 4.7
@@ -8,7 +6,7 @@ const DEVICE_FORMAT = navigator.gpu.getPreferredCanvasFormat();
  * @license LGPL-3.0
  * @class Q5
  */
-export function Q5(scope, parent, renderer) {
+function Q5(scope, parent, renderer) {
 	let $ = this;
 	$._isQ5 = $._q5 = true;
 	$._parent = parent;
@@ -5422,6 +5420,8 @@ Q5.renderers.webgpu.canvas = ($, q) => {
 
 	if ($.colorMode) $.colorMode('rgb', 1);
 
+	const CANVAS_FORMAT = navigator.gpu.getPreferredCanvasFormat();
+
 	$._baseShaderCode = /* wgsl */ `
 struct Q5 {
 	width: f32,
@@ -5512,7 +5512,7 @@ struct Q5 {
 		let w = $.canvas.width,
 			h = $.canvas.height,
 			size = [w, h],
-			format = DEVICE_FORMAT;
+			format = 'bgra8unorm';
 
 		mainView = Q5.device
 			.createTexture({
@@ -6610,7 +6610,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: shapesShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: DEVICE_FORMAT, blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -7172,7 +7172,7 @@ fn vertexMain(v: VertexParams) -> FragParams {
 			entryPoint: 'fragMain',
 			targets: [
 				{
-					format: DEVICE_FORMAT,
+					format: CANVAS_FORMAT,
 					blend: $.blendConfigs['source-over']
 				}
 			]
@@ -7534,7 +7534,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			entryPoint: 'fragMain',
 			targets: [
 				{
-					format: DEVICE_FORMAT,
+					format: CANVAS_FORMAT,
 					blend: $.blendConfigs['source-over']
 				}
 			]
@@ -7807,7 +7807,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: imageShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: DEVICE_FORMAT, blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -7826,7 +7826,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: videoShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: DEVICE_FORMAT, blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -7924,7 +7924,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 
 			texture = Q5.device.createTexture({
 				size: textureSize,
-				format: DEVICE_FORMAT,
+				format: CANVAS_FORMAT,
 				usage:
 					GPUTextureUsage.TEXTURE_BINDING |
 					GPUTextureUsage.COPY_SRC |
@@ -8296,7 +8296,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		fragment: {
 			module: textShader,
 			entryPoint: 'fragMain',
-			targets: [{ format: DEVICE_FORMAT, blend: $.blendConfigs['source-over'] }]
+			targets: [{ format: CANVAS_FORMAT, blend: $.blendConfigs['source-over'] }]
 		},
 		primitive: { topology: 'triangle-strip', stripIndexFormat: 'uint32' },
 		multisample: { count: 4 }
@@ -8860,7 +8860,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 				entryPoint: 'fragMain',
 				targets: [
 					{
-						format: DEVICE_FORMAT,
+						format: CANVAS_FORMAT,
 						blend: $.blendConfigs[blend]
 					}
 				]
