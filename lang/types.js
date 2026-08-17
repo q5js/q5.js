@@ -466,7 +466,12 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 			output.push(ln);
 		}
 	};
-	push('declare global {');
+	let moduleName = outputPath.slice(outputPath.lastIndexOf('/') + 1, -5).replaceAll('-', '/');
+	push(`/**
+ * @module ${moduleName}
+ */
+
+declare global {`);
 
 	// Determine which names are already included via markdown-derived sections
 	const existingNames = new Set();

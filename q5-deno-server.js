@@ -28,6 +28,8 @@ Q5._createServerCanvas = function () {
 	let skiaCanvas = createCanvas(...arguments);
 	let domCanvas = document.createElement('canvas');
 
+	skiaCanvas.save = skiaCanvas.toFileSync;
+
 	return new Proxy(skiaCanvas, {
 		get: function (target, prop) {
 			let t = prop in target ? target : domCanvas;

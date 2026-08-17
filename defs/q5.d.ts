@@ -1,3 +1,7 @@
+/**
+ * @module q5
+ */
+
 declare global {
 
 	// ⭐ core

@@ -1,5 +1,6 @@
+declare interface GPUShaderModule {}
+
 declare global {
-	declare interface GPUShaderModule {}
 	// ⭐️ core
 
 	function Lienzo(ancho?: number, alto?: number, opciones?: object): Promise<HTMLCanvasElement>;

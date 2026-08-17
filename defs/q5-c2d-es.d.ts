@@ -1,3 +1,7 @@
+/**
+ * @module q5/c2d/es
+ */
+
 declare global {
 
 	// ⭐ núcleo

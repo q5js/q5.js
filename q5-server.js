@@ -1,6 +1,6 @@
 /**
  * @module q5-server
- * @description Run q5 with node.js using node-canvas and jsdom
+ * @description Run q5 with node.js using skia-canvas and jsdom
  */
 
 let depsLoaded = false;
@@ -36,7 +36,7 @@ if (depsLoaded) {
 		let skiaCanvas = new SkiaCanvas.Canvas(...arguments);
 		let domCanvas = document.createElement('canvas');
 
-		skiaCanvas.save = skiaCanvas.saveAsSync;
+		skiaCanvas.save = skiaCanvas.toFileSync;
 
 		return new Proxy(skiaCanvas, {
 			get: function (target, prop) {
