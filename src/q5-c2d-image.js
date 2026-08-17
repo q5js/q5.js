@@ -118,14 +118,15 @@ Q5.renderers.c2d.image = ($, q) => {
 			drawable = img._tintImg.canvas;
 		}
 
-		if (img.flipped) {
+		let mirrored = img.mirrorX || img.mirrorY;
+		if (mirrored) {
 			$.ctx.save();
 			$.ctx.translate(dx + dw, 0);
-			$.ctx.scale(-1, 1);
+			$.ctx.scale(img.mirrorX ? -1 : 1, img.mirrorY ? -1 : 1);
 			dx = 0;
 		}
 		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
-		if (img.flipped) $.ctx.restore();
+		if (mirrored) $.ctx.restore();
 	};
 
 	$.filter = (type, value) => {
@@ -367,6 +368,8 @@ Q5.Image = class {
 		let scale = $._pixelDensity * $._defaultImageScale;
 		$.defaultWidth = w * scale;
 		$.defaultHeight = h * scale;
+		$.mirrorX = false;
+		$.mirrorY = false;
 		delete $.createCanvas;
 		$._loop = false;
 

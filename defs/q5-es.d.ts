@@ -4554,6 +4554,10 @@ declare global {
 		interface Imagen {
 			ancho: number;
 			alto: number;
+			defectoAncho: number;
+			defectoAlto: number;
+			espejoX: boolean;
+			espejoY: boolean;
 			copiar(): Q5.Imagen;
 			obtener(x: number, y: number, w?: number, h?: number): Q5.Imagen | number[];
 			establecer(x: number, y: number, val: any): void;

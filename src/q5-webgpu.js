@@ -2620,7 +2620,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if (img._texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
 			if (!isVideo || !img.currentTime) return;
-			if (img.flipped) $.scale(-1, 1);
 		}
 
 		if (matrixDirty) saveMatrix();
@@ -2660,6 +2659,18 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			u1 = (sx + sw) / w,
 			v1 = (sy + sh) / h;
 
+		if (img.mirrorX) {
+			let temp = u0;
+			u0 = u1;
+			u1 = temp;
+		}
+
+		if (img.mirrorY) {
+			let temp = v0;
+			v0 = v1;
+			v1 = temp;
+		}
+
 		let ti = matrixIdx,
 			ci = tintIdx,
 			ia = globalAlpha;
@@ -2694,8 +2705,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			);
 
 			drawStack.push(videoPL, $._textureBindGroups.length - 1);
-
-			if (img.flipped) $.scale(-1, 1);
 		}
 	};
 

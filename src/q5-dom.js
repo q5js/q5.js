@@ -317,7 +317,7 @@ Q5.modules.dom = ($, q) => {
 		function extendVideo(vid) {
 			vid.playsinline = vid.autoplay = true;
 			if (flipped) {
-				vid.flipped = true;
+				vid.mirrorX = true;
 				vid.style.transform = 'scale(-1, 1)';
 			}
 			vid.loadPixels = () => {

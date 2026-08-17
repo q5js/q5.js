@@ -1551,14 +1551,15 @@ Q5.renderers.c2d.image = ($, q) => {
 			drawable = img._tintImg.canvas;
 		}
 
-		if (img.flipped) {
+		let mirrored = img.mirrorX || img.mirrorY;
+		if (mirrored) {
 			$.ctx.save();
 			$.ctx.translate(dx + dw, 0);
-			$.ctx.scale(-1, 1);
+			$.ctx.scale(img.mirrorX ? -1 : 1, img.mirrorY ? -1 : 1);
 			dx = 0;
 		}
 		$.ctx.drawImage(drawable, sx * pd, sy * pd, sw, sh, dx, dy, dw, dh);
-		if (img.flipped) $.ctx.restore();
+		if (mirrored) $.ctx.restore();
 	};
 
 	$.filter = (type, value) => {
@@ -1800,6 +1801,8 @@ Q5.Image = class {
 		let scale = $._pixelDensity * $._defaultImageScale;
 		$.defaultWidth = w * scale;
 		$.defaultHeight = h * scale;
+		$.mirrorX = false;
+		$.mirrorY = false;
 		delete $.createCanvas;
 		$._loop = false;
 
@@ -3387,7 +3390,7 @@ Q5.modules.dom = ($, q) => {
 		function extendVideo(vid) {
 			vid.playsinline = vid.autoplay = true;
 			if (flipped) {
-				vid.flipped = true;
+				vid.mirrorX = true;
 				vid.style.transform = 'scale(-1, 1)';
 			}
 			vid.loadPixels = () => {
@@ -8035,7 +8038,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if (img._texture == undefined) {
 			isVideo = img.tagName == 'VIDEO';
 			if (!isVideo || !img.currentTime) return;
-			if (img.flipped) $.scale(-1, 1);
 		}
 
 		if (matrixDirty) saveMatrix();
@@ -8075,6 +8077,18 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			u1 = (sx + sw) / w,
 			v1 = (sy + sh) / h;
 
+		if (img.mirrorX) {
+			let temp = u0;
+			u0 = u1;
+			u1 = temp;
+		}
+
+		if (img.mirrorY) {
+			let temp = v0;
+			v0 = v1;
+			v1 = temp;
+		}
+
 		let ti = matrixIdx,
 			ci = tintIdx,
 			ia = globalAlpha;
@@ -8109,8 +8123,6 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			);
 
 			drawStack.push(videoPL, $._textureBindGroups.length - 1);
-
-			if (img.flipped) $.scale(-1, 1);
 		}
 	};
 

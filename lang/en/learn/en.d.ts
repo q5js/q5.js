@@ -925,6 +925,10 @@ declare global {
 		interface Image {
 			width: number;
 			height: number;
+			defaultWidth: number;
+			defaultHeight: number;
+			mirrorX: boolean;
+			mirrorY: boolean;
 			copy(): Q5.Image;
 			get(x: number, y: number, w?: number, h?: number): Q5.Image | number[];
 			set(x: number, y: number, val: any): void;
