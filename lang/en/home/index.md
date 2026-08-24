@@ -102,21 +102,20 @@ Tons of modern features in a small bundle.
 
 # 4-2
 
-| Does it include?                                          | q5 v4 | p5 v2                                                                                                           |
-| :-------------------------------------------------------- | :---- | :-------------------------------------------------------------------------------------------------------------- |
-| built-in [video recorder](../learn/?webgpu#recordSection) | ✅    | ❌ <span class="note">requires p5.capture addon which is outdated and slow</span>                               |
-| built-in [display modes](../learn/?webgpu#displaySection) | ✅    | ❌ <span class="note">requires custom CSS styling</span>                                                        |
-| built-in [sound playback](../learn/?webgpu#soundSection)  | ✅    | ⚠️ <span class="note">requires p5.sound addon (200kb minified)</span>                                           |
-| HiDPI scaling by default                                  | ✅    | ❌ <span class="note">images are not auto-scaled to display at native res</span>                                |
-| HDR colors by default                                     | ✅    | ❌ <span class="note">must be set explicitly</span>                                                             |
-| fast SDF shape rendering                                  | ✅    | ❌ <span class="note">slow triangle mesh rasterization</span>                                                   |
-| fast MSDF text rendering                                  | ✅    | ❌ <span class="note">slow triangle mesh rasterization</span>                                                   |
-| HTML creation                                             | ✅    | ⚠️ <span class="note">outdated API doesn't use getter/setters</span>                                            |
-| async/await loading                                       | ✅    | ✅ <span class="note"></span>                                                                                   |
-| easy parallel loading                                     | ✅    | ❌ <span class="note">preload system removed from p5.js v2</span>                                               |
-| legacy support                                            | ✅    | ⚠️ <span class="note">can't run p5 v1 sketches without compatibility addon that overrides load functions</span> |
-| 3D rendering                                              | ❌    | ✅ <span class="note">only in WebGL mode, which has poor performance</span>                                     |
-| file size                                                 | 200kb | 4400kb <span class="note">1000kb minified</span>                                                                |
+| Does it include?                                          | q5 v4 | p5 v2                                                                             |
+| :-------------------------------------------------------- | :---- | :-------------------------------------------------------------------------------- |
+| built-in [video recorder](../learn/?webgpu#recordSection) | ✅    | ❌ <span class="note">requires p5.capture addon which is outdated and slow</span> |
+| built-in [display modes](../learn/?webgpu#displaySection) | ✅    | ❌ <span class="note">requires custom CSS styling</span>                          |
+| built-in [sound playback](../learn/?webgpu#soundSection)  | ✅    | ⚠️ <span class="note">requires p5.sound addon (200kb minified)</span>             |
+| HiDPI scaling by default                                  | ✅    | ❌ <span class="note">images are not auto-scaled to display at native res</span>  |
+| HDR colors by default                                     | ✅    | ❌ <span class="note">must be set explicitly</span>                               |
+| fast SDF shape rendering                                  | ✅    | ❌ <span class="note">slow triangle mesh rasterization</span>                     |
+| fast MSDF text rendering                                  | ✅    | ❌ <span class="note">slow triangle mesh rasterization</span>                     |
+| HTML creation                                             | ✅    | ⚠️ <span class="note">outdated API doesn't use getter/setters</span>              |
+| async/await loading                                       | ✅    | ✅ <span class="note"></span>                                                     |
+| easy parallel loading                                     | ✅    | ❌ <span class="note">preload system removed from p5.js v2</span>                 |
+| legacy support                                            | ✅    | ⚠️ <span class="note">can't run p5 v1 sketches without compatibility addon</span> |
+| file size                                                 | 200kb | 4400kb <span class="note">1000kb minified</span>                                  |
 
 # 8-0
 

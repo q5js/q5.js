@@ -150,7 +150,7 @@ li {
 
 :not(.mie-output)>button {
 	font-family: codicon;
-	padding: 0;
+	padding: 8px;
 }
 
 blockquote {
