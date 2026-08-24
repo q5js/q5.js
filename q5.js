@@ -3661,9 +3661,20 @@ Q5.modules.input = ($, q) => {
 			$._updateMouse(e);
 			$.mouseReleased(e);
 		}
-		if (e.pointerType == 'touch' || e.pointerType == 'pen') {
-			let p = $.pointers.find((p) => p.id === e.pointerId);
-			if (p) p._ended = true;
+		// if pointer is a touch or the event type is pointercancel or mousecancel
+		if (e.pointerType == 'touch' || e.type.at(-1) == 'l') {
+			removePointer(e);
+		}
+	};
+
+	function removePointer(e) {
+		let p = $.pointers.find((p) => p.id === e.pointerId);
+		if (p) p._ended = true;
+	}
+
+	$._onpointerleave = (e) => {
+		if (e.pointerType == 'pen') {
+			removePointer(e);
 		}
 	};
 
@@ -3803,6 +3814,7 @@ Q5.modules.input = ($, q) => {
 		l(pointer + 'move', (e) => $._onpointermove(e), false);
 		l(pointer + 'up', (e) => $._onpointerup(e));
 		l(pointer + 'cancel', (e) => $._onpointerup(e));
+		l(pointer + 'leave', (e) => $._onpointerleave(e));
 		l('touchstart', (e) => $._updateTouches(e));
 		l('touchmove', (e) => $._updateTouches(e));
 		l('touchend', (e) => $._updateTouches(e));
