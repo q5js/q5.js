@@ -247,6 +247,7 @@ a {
 	background-color: var(--brand-primary);
 	border-radius: 16px;
 	height: 48px;
+	width: 100%;
 	min-width: max-content;
 }
 
