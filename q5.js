@@ -180,11 +180,11 @@ function Q5(scope, parent, renderer) {
 		}
 		$._redraw = false;
 	};
-	$.remove = async () => {
+	$.remove = () => {
 		$._removed = true;
 		$.noLoop();
 		if ($.canvas.remove) $.canvas.remove();
-		await runHooks('remove');
+		return runHooks('remove');
 	};
 
 	$.frameRate = (hz) => {
@@ -2499,6 +2499,7 @@ Q5.modules.color = ($, q) => {
 
 	$._namedColors = {
 		aqua: [0, 255, 255],
+		beige: [245, 245, 220],
 		black: [0, 0, 0],
 		blue: [0, 0, 255],
 		brown: [165, 42, 42],
@@ -9020,7 +9021,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		for (let b of $._buffers) b.destroy();
 		$._buffers = [];
 
-		_remove();
+		return _remove();
 	};
 };
 
@@ -9084,8 +9085,14 @@ Q5._requestGPU = async () => {
 		Q5.MAX_TEXTS = min(Q5.MAX_TEXTS, floor(maxStorage / 32));
 
 		device.lost.then((e) => {
-			console.error('WebGPU crashed!');
+			// if purposefully destroyed, do nothing.
+			if (e.reason == 'destroyed') return;
+			// else attempt restart
 			console.error(e);
+			requestAnimationFrame(async () => {
+				Q5.device = Q5._gpuTask = null;
+				await Q5.initWebGPU();
+			});
 		});
 
 		Q5.device = device;
