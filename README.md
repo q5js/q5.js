@@ -5,6 +5,7 @@
 q5 was designed to make creative coding fun and accessible for educators, artists, designers, and beginners. 🤝
 
 - 100x faster than [p5.js][] ⚡️
+- Python support 🐍
 - beginner friendly [documentation](https://q5js.org/learn) 📚
 - compatible with popular addons, including [p5.sound][], [ml5.js][], and [q5play][] 🎮
 - no dependencies, ~140kb minified 📦

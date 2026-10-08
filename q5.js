@@ -8016,6 +8016,10 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 			$._addTexture(g, g._frameA);
 			$._addTexture(g, g._frameB);
 			g._beginRender();
+		} else if (g._3d || opt.renderer === '3d') {
+			g.modified = false;
+			if (g._texture) $._addTexture(g, g._texture);
+			g._owner = $;
 		} else {
 			$._makeDrawable(g);
 			// assume the user will draw to the graphics canvas
@@ -8063,9 +8067,15 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		if (makeFrame) {
 			img._render();
 			img._finishRender();
+		} else if (img._3d) {
+			if (typeof img._render === 'function') img._render();
+			if (img._texture && img._texture.index === undefined) {
+				$._addTexture(img, img._texture);
+			}
+			img.modified = false;
 		}
 
-		if (img.modified) {
+		if (img.modified && !img._3d) {
 			let cnv = img.canvas;
 			Q5.device.queue.copyExternalImageToTexture(
 				{ source: cnv },
