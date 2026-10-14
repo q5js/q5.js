@@ -1,6 +1,6 @@
 /**
  * q5.js
- * @version 4.8
+ * @version 4.9
  * @author quinton-ashley
  * @contributors evanalulu, Tezumie, keturn, ormaq, bertubi, RedWilly, Dukemz, LingDong-
  * @license LGPL-3.0
@@ -30,21 +30,23 @@ function Q5(scope, parent, renderer) {
 		if (!(window.setup || window.update || Q5.update || window.draw || Q5.draw)) return;
 		scope = 'global';
 	}
-	let globalScope;
+	let globalScope, isGlobal;
 	if (scope == 'global') {
-		Q5._hasGlobal = $._isGlobal = true;
+		Q5._hasGlobal = $._isGlobal = isGlobal = true;
 		globalScope = Q5._esm ? globalThis : !Q5._server ? window : global;
 	}
 	if (scope == 'graphics') $._isGraphics = true;
 	if (scope == 'image') $._isImage = true;
 
-	let q = new Proxy($, {
+	$._proxyHandler = {
 		set: (t, p, v) => {
 			$[p] = v;
-			if ($._isGlobal) globalScope[p] = v;
+			if (isGlobal) globalScope[p] = v;
 			return true;
 		}
-	});
+	};
+	let q = new Proxy($, $._proxyHandler);
+	$._q = q;
 
 	$.canvas = $.ctx = $.drawingContext = null;
 	$._flippedY = true;
@@ -61,7 +63,7 @@ function Q5(scope, parent, renderer) {
 	$._loop = true;
 
 	async function runHooks(name) {
-		for (let hook of Q5.hooks[name]) {
+		for (let hook of Q5._addonHooks[name]) {
 			await hook.call($, q);
 		}
 	}
@@ -234,14 +236,14 @@ function Q5(scope, parent, renderer) {
 
 	if ($._isGraphics) return;
 
-	if ($._isGlobal) {
+	if (isGlobal) {
 		let tmp = Object.assign({}, $);
 		delete tmp.Color;
 		Object.assign(Q5, tmp);
 		delete Q5.Q5;
 	}
 
-	for (let hook of Q5.hooks.init) {
+	for (let hook of Q5._addonHooks.init) {
 		hook.call($, q);
 	}
 
@@ -257,7 +259,7 @@ function Q5(scope, parent, renderer) {
 		};
 	}
 
-	if ($._isGlobal) {
+	if (isGlobal) {
 		let props = Object.getOwnPropertyNames($);
 		for (let p of props) {
 			if (p[0] != '_') globalScope[p] = $[p];
@@ -285,14 +287,14 @@ function Q5(scope, parent, renderer) {
 
 	let t = globalScope || $;
 
-	let userFns = Q5._userFns.slice(0, 15);
+	let hooks = Q5._hooks.slice(0, 15);
 	// shim if undefined
-	for (let name of userFns) $[name] ??= () => {};
+	for (let name of hooks) $[name] ??= () => {};
 
-	if ($._isGlobal) {
-		let allUserFns = Q5._userFns.slice(0, 19);
+	if (isGlobal) {
+		let allHooks = Q5._hooks.slice(0, 19);
 
-		for (let name of allUserFns) {
+		for (let name of allHooks) {
 			if (Q5[name]) $[name] = Q5[name];
 			else {
 				Object.defineProperty(Q5, name, {
@@ -319,6 +321,8 @@ function Q5(scope, parent, renderer) {
 	async function start() {
 		await runHooks('presetup');
 
+		if (Q5.lang?.active && Q5._esm) Q5.localize($, q);
+
 		readyResolve();
 		if ($._removed) return;
 
@@ -329,7 +333,7 @@ function Q5(scope, parent, renderer) {
 
 		await Promise.race([
 			new Promise((resolve) => {
-				function checkUserFns() {
+				function check() {
 					if ($._disablePreload || $.setup || $.update || $.draw || t.setup || t.update || t.draw) {
 						resolve();
 					} else if (!$._setupDone) {
@@ -339,10 +343,10 @@ function Q5(scope, parent, renderer) {
 							$._render();
 							$._finishRender();
 						}
-						raf(checkUserFns);
+						raf(check);
 					}
 				}
-				checkUserFns();
+				check();
 			}),
 			new Promise((resolve) => {
 				setTimeout(() => {
@@ -359,7 +363,7 @@ function Q5(scope, parent, renderer) {
 		$.setup ??= t.setup || (() => {});
 		wrapWithFES('setup');
 
-		for (let name of userFns) wrapWithFES(name);
+		for (let name of hooks) wrapWithFES(name);
 
 		$.draw ??= t.draw || (() => {});
 
@@ -397,7 +401,7 @@ Q5._friendlyError = (msg, func) => {
 };
 Q5._validateParameters = () => true;
 
-Q5._userFns = [
+Q5._hooks = [
 	'postProcess',
 	'mouseMoved',
 	'mousePressed',
@@ -419,7 +423,7 @@ Q5._userFns = [
 	'draw'
 ];
 
-Q5.hooks = {
+Q5._addonHooks = {
 	init: [],
 	presetup: [],
 	postsetup: [],
@@ -428,14 +432,14 @@ Q5.hooks = {
 	remove: []
 };
 
-Q5.addHook = (lifecycle, fn) => Q5.hooks[lifecycle].push(fn);
+Q5.addHook = (lifecycle, fn) => Q5._addonHooks[lifecycle].push(fn);
 
 // p5 v2 compat
 Q5.registerAddon = (addon) => {
 	let lifecycles = {};
 	addon(Q5, Q5.prototype, lifecycles);
 	for (let l in lifecycles) {
-		Q5.hooks[l].push(lifecycles[l]);
+		Q5._addonHooks[l].push(lifecycles[l]);
 	}
 };
 
@@ -445,7 +449,7 @@ Q5.prototype.registerMethod = (m, fn) => {
 	if (m == 'afterSetup') m = 'postsetup';
 	if (m == 'pre') m = 'predraw';
 	if (m == 'post') m = 'postdraw';
-	Q5.hooks[m].push(fn);
+	Q5._addonHooks[m].push(fn);
 };
 
 Q5.preloadMethods = {};
@@ -494,7 +498,7 @@ if (typeof window == 'object') {
 	window.addEventListener('pagehide', cleanup);
 } else global.window = 0;
 
-Q5.version = Q5.VERSION = '4.8';
+Q5.version = Q5.VERSION = '4.9';
 
 if (typeof document == 'object') {
 	function init() {

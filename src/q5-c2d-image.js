@@ -373,27 +373,7 @@ Q5.Image = class {
 		delete $.createCanvas;
 		$._loop = false;
 
-		let m = Q5._libMap;
-		if (m) {
-			let imgFns = [
-				'copy',
-				'filter',
-				'get',
-				'set',
-				'resize',
-				'mask',
-				'trim',
-				'inset',
-				'pixels',
-				'loadPixels',
-				'updatePixels',
-				'smooth',
-				'noSmooth'
-			];
-			for (let name of imgFns) {
-				if (m[name]) $[m[name]] = $[name];
-			}
-		}
+		if (Q5.lang?.active) Q5.lang.extendImage($);
 	}
 	get w() {
 		return this.width;

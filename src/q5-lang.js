@@ -1,534 +1,137 @@
-const supportedLangs = ['es'];
+{
+	const accentRegex = /[\u0300-\u036f]/g;
+	const unaccent = (s) => s.normalize('NFD').replace(accentRegex, '');
 
-const libLangs = `
-# core
-Canvas -> es:Lienzo
-createCanvas -> es:crearLienzo
-log -> es:log
-
-# color
-background -> es:fondo ja:背景
-fill -> es:relleno
-stroke -> es:trazo
-noFill -> es:sinRelleno
-noStroke -> es:sinTrazo
-color -> es:color
-colorMode -> es:modoColor
-
-# display
-windowWidth -> es:anchoVentana
-windowHeight -> es:altoVentana
-width -> es:ancho
-height -> es:alto
-frameCount ->  es:cuadroActual
-noLoop -> es:pausar
-redraw -> es:redibujar
-loop -> es:reanudar
-frameRate -> es:frecuenciaRefresco
-getTargetFrameRate -> es:obtenerTasaFotogramasObjetivo
-getFPS -> es:obtenerFPS
-deltaTime -> es:deltaTiempo
-pixelDensity -> es:densidadPíxeles
-displayDensity -> es:densidadVisualización
-fullscreen -> es:pantallaCompleta
-displayMode -> es:modoVisualización
-halfWidth -> es:medioAncho
-halfHeight -> es:medioAlto
-canvas -> es:lienzo
-resizeCanvas -> es:redimensionarLienzo
-drawingContext -> es:contextoDibujo
-
-# shape
-circle -> es:círculo
-ellipse -> es:elipse
-rect -> es:rect
-square -> es:cuadrado
-point -> es:punto
-line -> es:línea
-capsule -> es:cápsula
-rectMode -> es:modoRect
-ellipseMode -> es:modoEliptico
-arc -> es:arco
-curve -> es:curva
-beginShape -> es:empezarForma
-endShape -> es:terminarForma
-vertex -> es:vértice
-bezier -> es:bezier
-triangle -> es:triángulo
-quad -> es:quad
-curveDetail -> es:detalleCurva
-beginContour -> es:empezarContorno
-endContour -> es:terminarContorno
-bezierVertex -> es:vérticeBezier
-quadraticVertex -> es:vérticeCuadrático
-
-# image
-loadImage -> es:cargarImagen
-image -> es:imagen
-imageMode -> es:modoImagen
-noTint -> es:noTeñir
-tint -> es:teñir
-filter -> es:filtro
-createImage -> es:crearImagen
-createGraphics -> es:crearGráficos
-defaultImageScale -> es:escalaImagenPorDefecto
-resize -> es:redimensionar
-trim -> es:recortar
-smooth -> es:suavizar
-noSmooth -> es:noSuavizar
-mask -> es:enmascarar
-copy -> es:copiar
-inset -> es:insertado
-get -> es:obtener
-set -> es:establecer
-pixels -> es:píxeles
-loadPixels -> es:cargarPíxeles
-updatePixels -> es:actualizarPíxeles
-
-# text
-text -> es:texto
-loadFont -> es:cargarFuente
-textFont -> es:fuenteTexto
-textSize -> es:tamañoTexto
-textLeading -> es:interlineado
-textStyle -> es:estiloTexto
-textAlign -> es:alineaciónTexto
-textWidth -> es:anchoTexto
-textWeight -> es:pesoTexto
-textAscent -> es:ascensoTexto
-textDescent -> es:descensoTexto
-createTextImage -> es:crearImagenTexto
-textImage -> es:imagenTexto
-nf -> es:nf
-
-# input
-mouseX -> es:ratónX
-mouseY -> es:ratónY
-pmouseX -> es:pRatónX
-pmouseY -> es:pRatónY
-mouseIsPressed -> es:ratónPresionado
-mouseButton -> es:botónRatón
-key -> es:tecla
-keyIsPressed -> es:teclaPresionada
-keyIsDown -> es:teclaEstaPresionada
-touches -> es:toques
-pointers -> es:punteros
-cursor -> es:cursor
-noCursor -> es:sinCursor
-movedX -> es:movidoX
-movedY -> es:movidoY
-pointerLock -> es:bloqueoPuntero
-
-# style
-strokeWeight -> es:grosorTrazo
-opacity -> es:opacidad
-shadow -> es:sombra
-noShadow -> es:sinSombra
-shadowBox -> es:cajaSombra
-blendMode -> es:modoMezcla
-strokeCap -> es:terminaciónTrazo
-strokeJoin -> es:uniónTrazo
-erase -> es:borrar
-noErase -> es:noBorrar
-clear -> es:limpiar
-pushStyles -> es:guardarEstilos
-popStyles -> es:recuperarEstilos
-inFill -> es:enRelleno
-inStroke -> es:enTrazo
-
-# transform
-translate -> es:trasladar
-rotate -> es:rotar
-scale -> es:escalar
-shearX -> es:cizallarX
-shearY -> es:cizallarY
-applyMatrix -> es:aplicarMatriz
-resetMatrix -> es:reiniciarMatriz
-push -> es:apilar
-pop -> es:desapilar
-pushMatrix -> es:guardarMatriz
-popMatrix -> es:recuperarMatriz
-
-# math
-random -> es:aleatorio
-noise -> es:ruido
-dist -> es:dist
-map -> es:mapa
-angleMode -> es:modoÁngulo
-radians -> es:radianes
-degrees -> es:grados
-lerp -> es:interpolar
-constrain -> es:constreñir
-norm -> es:norm
-abs -> es:abs
-round -> es:redondear
-ceil -> es:techo
-floor -> es:piso
-min -> es:min
-max -> es:max
-pow -> es:pot
-sq -> es:cuad
-sqrt -> es:raiz
-exp -> es:exp
-randomSeed -> es:semillaAleatoria
-randomGaussian -> es:aleatorioGaussiano
-noiseMode -> es:modoRuido
-noiseSeed -> es:semillaRuido
-noiseDetail -> es:detalleRuido
-jit -> es:flu
-randomGenerator -> es:generadorAleatorio
-randomExponential -> es:aleatorioExponencial
-
-# sound
-loadSound -> es:cargarSonido
-loadAudio -> es:cargarAudio
-getAudioContext -> es:obtenerContextoAudio
-userStartAudio -> es:iniciarAudioUsuario
-
-# dom
-createElement -> es:crearElemento
-createA -> es:crearA
-createButton -> es:crearBotón
-createCheckbox -> es:crearCasilla
-createColorPicker -> es:crearSelectorColor
-createImg -> es:crearImg
-createInput -> es:crearEntrada
-createP -> es:crearP
-createRadio -> es:crearOpciónes
-createSelect -> es:crearSelección
-createSlider -> es:crearDeslizador
-createVideo -> es:crearVideo
-createCapture -> es:crearCaptura
-findElement -> es:encontrarElemento
-findElements -> es:encontrarElementos
-
-# record
-createRecorder -> es:crearGrabadora
-record -> es:grabar
-pauseRecording -> es:pausarGrabación
-deleteRecording -> es:borrarGrabación
-saveRecording -> es:guardarGrabación
-recording -> es:grabando
-
-# io
-load -> es:cargar
-save -> es:guardar
-loadJSON -> es:cargarJSON
-loadStrings -> es:cargarTexto
-year -> es:año
-day -> es:día
-hour -> es:hora
-minute -> es:minuto
-second -> es:segundo
-loadCSV -> es:cargarCSV
-loadXML -> es:cargarXML
-loadAll -> es:cargarTodo
-disablePreload -> es:deshabilitarPrecarga
-shuffle -> es:barajar
-storeItem -> es:guardarItem
-getItem -> es:obtenerItem
-removeItem -> es:eliminarItem
-clearStorage -> es:limpiarAlmacenamiento
-
-# shaders
-createShader -> es:crearShader
-plane -> es:plano
-shader -> es:shader
-resetShader -> es:reiniciarShader
-resetFrameShader -> es:reiniciarShaderFotograma
-resetImageShader -> es:reiniciarShaderImagen
-resetVideoShader -> es:reiniciarShaderVideo
-resetTextShader -> es:reiniciarShaderTexto
-resetShaders -> es:reiniciarShaders
-createFrameShader -> es:crearShaderFotograma
-createImageShader -> es:crearShaderImagen
-createVideoShader -> es:crearShaderVideo
-createTextShader -> es:crearShaderTexto
-
-# constants
-CORNER -> es:ESQUINA
-RADIUS -> es:RADIO
-CORNERS -> es:ESQUINAS
-THRESHOLD -> es:UMBRAL
-GRAY -> es:GRIS
-OPAQUE -> es:OPACO
-INVERT -> es:INVERTIR
-POSTERIZE -> es:POSTERIZAR
-DILATE -> es:DILATAR
-ERODE -> es:EROSIONAR
-BLUR -> es:DESENFOCAR
-NORMAL -> es:NORMAL
-ITALIC -> es:CURSIVA
-BOLD -> es:NEGRILLA
-BOLDITALIC -> es:NEGRILLA_CURSIVA
-LEFT -> es:IZQUIERDA
-CENTER -> es:CENTRO
-RIGHT -> es:DERECHA
-TOP -> es:ARRIBA
-BOTTOM -> es:ABAJO
-BASELINE -> es:LINEA_BASE
-MIDDLE -> es:MEDIO
-RGB -> es:RGB
-OKLCH -> es:OKLCH
-HSL -> es:HSL
-HSB -> es:HSB
-SRGB -> es:SRGB
-DISPLAY_P3 -> es:DISPLAY_P3
-MAXED -> es:MAXIMIZADO
-SMOOTH -> es:SUAVE
-PIXELATED -> es:PIXELADO
-TWO_PI -> es:DOS_PI
-HALF_PI -> es:MEDIO_PI
-QUARTER_PI -> es:CUARTO_PI
-
-# vector
-createVector -> es:crearVector
-`;
-
-const userLangs = `
-update -> es:actualizar
-draw -> es:dibujar
-postProcess -> es:postProcesar
-mousePressed -> es:alPresionarRaton
-mouseReleased -> es:alSoltarRaton
-mouseMoved -> es:alMoverRaton
-mouseDragged -> es:alArrastrarRaton
-doubleClicked -> es:dobleClic
-keyPressed -> es:alPresionarTecla
-keyReleased -> es:alSoltarTecla
-touchStarted -> es:alEmpezarToque
-touchEnded -> es:alTerminarToque
-touchMoved -> es:alMoverToque
-mouseWheel -> es:ruedaRaton
-`;
-
-const classLangs = {
-	Q5: `
-Image -> es:Imagen
-version -> es:versión
-disableFriendlyErrors -> es:deshabilitarErroresAmigables
-errorTolerant -> es:toleranteErrores
-supportsHDR -> es:soportaHDR
-canvasOptions -> es:opcionesLienzo
-MAX_ELLIPSES -> es:MAX_ELIPSES
-MAX_TRANSFORMS -> es:MAX_TRANSFORMACIONES
-MAX_CHARS -> es:MAX_CARACTERES
-MAX_TEXTS -> es:MAX_TEXTOS
-`,
-	Vector: `
-add -> es:sumar
-sub -> es:restar
-mult -> es:multiplicar
-div -> es:dividir
-mag -> es:magnitud
-magSq -> es:magnitudCuad
-dist -> es:distancia
-normalize -> es:normalizar
-limit -> es:limitar
-setMag -> es:establecerMagnitud
-heading -> es:rumbo
-rotate -> es:rotar
-lerp -> es:interpolar
-array -> es:arreglo
-copy -> es:copiar
-dot -> es:punto
-cross -> es:cruz
-angleBetween -> es:anguloEntre
-reflect -> es:reflejar
-`,
-	Sound: `
-load -> es:cargar
-play -> es:reproducir
-stop -> es:parar
-pause -> es:pausar
-loop -> es:bucle
-setVolume -> es:establecerVolumen
-setPan -> es:establecerPan
-setLoop -> es:establecerBucle
-isLoaded -> es:estaCargado
-isPlaying -> es:estaReproduciendo
-isPaused -> es:estaPausado
-isLooping -> es:estaEnBucle
-onended -> es:alTerminar
-`
-};
-
-const parseLangs = function (data, lang) {
-	let map = {};
-	for (let l of data.split('\n')) {
-		let i = l.indexOf(' ' + lang + ':');
-		if (i > 0 && l[0] != '#') {
-			map[l.split(' ')[0]] = l.slice(i + 4).split(' ')[0];
-		}
-	}
-	return map;
-};
-
-const unaccent = function (s) {
-	return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-};
-
-Object.defineProperty(Q5, 'lang', {
-	get: () => Q5._lang,
-	set: (val) => {
-		if (val == Q5._lang) return;
-
-		Q5._lang = val;
-
-		if (val == 'en') {
-			// reset to English only user functions
-			Q5._userFns = Q5._userFns.slice(0, 19);
-			Q5._libMap = Q5._userFnsMap = {};
-			return;
-		}
-
-		for (let className in classLangs) {
-			let target = className == 'Q5' ? Q5 : Q5[className] ? Q5[className].prototype : null;
-			if (!target) continue;
-			let map = parseLangs(classLangs[className], val);
+	const forEachMap = (maps, fn) => {
+		for (let map of maps) {
 			for (let name in map) {
 				let translatedName = map[name];
-				if (target.hasOwnProperty(translatedName)) continue;
+				fn(name, translatedName);
+			}
+		}
+	};
+
+	const lang = (Q5.lang = {
+		active: false,
+		members: [],
+		hooks: [],
+		classes: {},
+		makeAliases: (target, maps) => {
+			forEachMap(maps, (name, translatedName) => {
+				if (translatedName in target) return;
 				Object.defineProperty(target, translatedName, {
-					get: function () {
+					configurable: true,
+					get() {
 						return this[name];
 					},
-					set: function (v) {
+					set(v) {
 						this[name] = v;
 					}
 				});
+			});
+		},
+		makeCopies: (target, maps) => {
+			forEachMap(maps, (name, translatedName) => {
+				target[translatedName] = target[name];
+			});
+		},
+		extendImage: ($) => {
+			// prettier-ignore
+			let imgFns = ['copy','filter','get','set','resize','mask','trim','inset','pixels','loadPixels','updatePixels','smooth','noSmooth'];
+			let m0 = lang.members[0];
+			let m1 = lang.members[1];
+			for (let name of imgFns) {
+				$[m0[name]] = $[name];
+				if (m1) $[m1[name]] = $[name];
 			}
 		}
+	});
 
-		Q5._libMap = parseLangs(libLangs, val);
-		Q5._userFnsMap = parseLangs(userLangs, val);
-		Q5._userFns.push(...Object.values(Q5._userFnsMap));
-	}
-});
+	const globalScope = Q5._esm ? globalThis : !Q5._server ? window : global;
 
-Q5.lang = 'en';
+	const canvasMap = {
+		es: 'Lienzo'
+	};
 
-for (let l of supportedLangs) {
-	if (typeof window == 'object') {
-		let secondNL = libLangs.indexOf('\n', libLangs.indexOf('\n', 8) + 1);
-		let m = parseLangs(libLangs.slice(0, secondNL), l);
-		window[m.createCanvas] = window[m.Canvas] = function () {
-			Q5.lang = l;
-			return window.Canvas(...arguments);
+	for (let code in canvasMap) {
+		let t = canvasMap[code];
+		globalScope[t] = async (...args) => {
+			await import(`https://q5js.org/locales/q5-${code}.js`);
+			return globalScope.Canvas(...args);
 		};
 	}
 
-	let userFnsMap = parseLangs(userLangs, l);
+	Q5.addLang = (locale) => {
+		lang.active = true;
 
-	for (let name in userFnsMap) {
-		let translatedName = userFnsMap[name];
-		if (Q5.hasOwnProperty(translatedName)) continue;
-		Object.defineProperty(Q5, translatedName, {
-			get: () => Q5[name],
-			set: (fn) => {
-				Q5.lang = l;
-				Q5[name] = fn;
+		function add(maps, trans = {}) {
+			if (!maps.length) {
+				maps.push(Object.create(null));
+				if (locale.hasAccents) maps.push(Object.create(null));
 			}
-		});
-	}
-}
-
-Q5.applyLang = function (q, libs, classes) {
-	let val = Q5._lang;
-	if (val == 'en') return;
-
-	let map = parseLangs(libs, val);
-	for (let name in map) {
-		let translatedName = map[name];
-		q[translatedName] = q[name];
-		if (val == 'es') {
-			let unaccentedName = unaccent(translatedName);
-			if (unaccentedName != translatedName) q[unaccentedName] = q[name];
-		}
-	}
-
-	if (!classes) return;
-
-	for (let className in classes) {
-		let target = q[className].prototype;
-		let map = parseLangs(classes[className], val);
-		for (let name in map) {
-			let translatedName = map[name];
-			if (target.hasOwnProperty(translatedName)) continue;
-			Object.defineProperty(target, translatedName, {
-				get: function () {
-					return this[name];
-				},
-				set: function (v) {
-					this[name] = v;
+			for (let name in trans) {
+				let translatedName = trans[name];
+				if (!translatedName || translatedName == name) continue;
+				maps[0][name] = translatedName;
+				if (locale.hasAccents) {
+					let unaccentedName = unaccent(trans[name]);
+					if (unaccentedName != translatedName) maps[1][name] = unaccentedName;
 				}
-			});
-		}
-	}
-};
-
-Q5.modules.lang = ($) => {
-	let userFnsMap = Q5._userFnsMap;
-
-	for (let name in userFnsMap) {
-		let translatedName = userFnsMap[name];
-		Object.defineProperty($, translatedName, {
-			get: () => $[name],
-			set: (fn) => ($[name] = fn)
-		});
-	}
-
-	let m = Q5._libMap;
-
-	if (m.Canvas) $[m.createCanvas] = $[m.Canvas] = $.Canvas;
-};
-
-Q5.addHook('init', (q) => {
-	let m = Q5._libMap;
-
-	for (let name in m) {
-		let translatedName = m[name];
-		q[translatedName] = q[name];
-
-		if (Q5._lang == 'es') {
-			let unaccentedName = unaccent(translatedName);
-			if (unaccentedName != translatedName) {
-				q[unaccentedName] = q[name];
 			}
 		}
-	}
-});
 
-Q5.addHook('predraw', (q) => {
-	let m = Q5._libMap;
+		add(lang.members, locale.members);
 
-	if (!m.mouseX) return;
+		for (let className in locale.classes) {
+			add((lang.classes[className] ??= []), locale.classes[className]);
+		}
 
-	let props = [
-		'frameCount',
-		'mouseX',
-		'mouseY',
-		'pmouseX',
-		'pmouseY',
-		'movedX',
-		'movedY',
-		'mouseIsPressed',
-		'mouseButton',
-		'key',
-		'keyIsPressed',
-		'touches',
-		'pointers'
-	];
+		if (locale.hooks) {
+			add(lang.hooks, locale.hooks);
+			Q5._hooks.push(...Object.values(lang.hooks[0]));
+			if (locale.hasAccents) Q5._hooks.push(...Object.values(lang.hooks[1]));
 
-	// sync properties
-	for (let p of props) {
-		if (!m[p]) continue;
-		q[m[p]] = q[p];
-		if (Q5._lang == 'es') {
-			let unaccentedName = unaccent(m[p]);
-			if (unaccentedName != m[p]) {
-				q[unaccentedName] = q[p];
+			lang.makeAliases(Q5, lang.hooks);
+
+			for (let t of Object.values(canvasMap)) {
+				globalScope[t] = globalScope.Canvas;
 			}
 		}
-	}
-});
+	};
+
+	// if q5 was loaded as a module and an API translation file was added
+	// this runs after presetup addon hooks
+	Q5.localize = ($, q) => {
+		const g = $._isGlobal ? globalScope : null;
+		$._proxyHandler.set = (t, p, v) => {
+			$[p] = v;
+			if (g) g[p] = v;
+
+			for (let map of lang.members) {
+				let translatedName = map[p];
+				if (translatedName) {
+					$[translatedName] = v;
+					if (g) g[translatedName] = v;
+				}
+			}
+			return true;
+		};
+
+		lang.makeCopies(q, lang.members);
+		lang.makeAliases($, lang.hooks);
+
+		for (let className in lang.classes) {
+			let target =
+				className == 'Q5'
+					? Q5
+					: Q5[className]?.prototype || $[className]?.prototype || $._privateClasses[className]?.prototype;
+			if (target) lang.makeAliases(target, lang.classes[className]);
+		}
+	};
+
+	Q5.addHook('init', function (q) {
+		this._privateClasses = [];
+		// legacy support for classic (non-module) scripting
+		if (lang.active && !Q5._esm) Q5.localize(this, q);
+	});
+}

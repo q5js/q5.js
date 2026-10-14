@@ -107,6 +107,10 @@ class MiniEditor {
 		this.outputEl = outputEl;
 		this.editorEl = editorEl;
 
+		if (MiniEditor.lang != 'en') {
+			await import(`/locales/q5-${MiniEditor.lang}.js`);
+		}
+
 		await this.runCode();
 
 		if (!window.require) return;
@@ -209,10 +213,11 @@ class MiniEditor {
 			}
 		}
 
-		if (Q5._lang != 'en' && !q5LangTypeDefs) {
-			let res = await fetch(`${baseURL}/defs/q5-${Q5._lang}.d.ts`);
+		let lang = MiniEditor.lang;
+		if (lang != 'en' && !q5LangTypeDefs) {
+			let res = await fetch(`${baseURL}/defs/q5-${lang}.d.ts`);
 			q5LangTypeDefs = await res.text();
-			monaco.languages.typescript.javascriptDefaults.addExtraLib(q5LangTypeDefs, `${baseURL}/defs/q5-${Q5._lang}.d.ts`);
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(q5LangTypeDefs, `${baseURL}/defs/q5-${lang}.d.ts`);
 		}
 	}
 
@@ -291,14 +296,16 @@ q.update = () => {
 			if (this.editor) this.resizeEditor();
 		};
 
+		const proxy = q._q;
 		const _Canvas = q.Canvas;
-		q.Canvas = q.createCanvas = async (...args) => {
+		proxy.Canvas = proxy.createCanvas = async (...args) => {
 			const res = await _Canvas.apply(q, args);
 			resize();
 			return res;
 		};
 
-		for (let f of Q5._userFns) {
+		let hooks = Q5._hooks || Q5._userFns;
+		for (let f of hooks) {
 			const regex = new RegExp(`(async\\s+)?function\\s+${f}\\s*\\(`, 'g');
 			userCode = userCode.replace(`q5.${f}`, `q.${f}`);
 			userCode = userCode.replace(regex, (match) => {
@@ -418,5 +425,6 @@ ${userCode}
 }
 
 MiniEditor.bases = {};
+MiniEditor.lang = 'en';
 
 window.MiniEditor = MiniEditor;

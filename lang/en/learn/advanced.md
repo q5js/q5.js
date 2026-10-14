@@ -49,17 +49,10 @@ textAlign(CENTER, CENTER)
 text('v' + Q5.version, 0, 0)
 ```
 
-## Q5.lang
+## Q5.addLang
 
-Set to a language code other than 'en' (English) to use q5 in an additional language.
-
-Currently supported languages:
-
-- 'es' (Spanish)
-
-```
-@default 'en'
-```
+Add API translations. More info:
+https://github.com/q5js/q5.js/wiki/Translations
 
 ## Q5.disableFriendlyErrors
 

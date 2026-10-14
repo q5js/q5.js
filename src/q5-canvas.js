@@ -153,15 +153,6 @@ Q5.modules.canvas = ($, q) => {
 		q.halfWidth = c.hw = w / 2;
 		q.halfHeight = c.hh = h / 2;
 
-		let m = Q5._libMap;
-
-		if (m?.width) {
-			q[m.width] = w;
-			q[m.height] = h;
-			q[m.halfWidth] = q.halfWidth;
-			q[m.halfHeight] = q.halfHeight;
-		}
-
 		if ($.displayMode && !c.displayMode) $.displayMode();
 		else $._adjustDisplay(true);
 	};

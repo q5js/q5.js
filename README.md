@@ -8,6 +8,7 @@ q5 was designed to make creative coding fun and accessible for educators, artist
 - Python support 🐍
 - beginner friendly [documentation](https://q5js.org/learn) 📚
 - compatible with popular addons, including [p5.sound][], [ml5.js][], and [q5play][] 🎮
+- full [API translation][] to Spanish 💃🏽
 - no dependencies, ~140kb minified 📦
 - free and open source 🆓
 
@@ -82,3 +83,4 @@ https://github.com/processing/p5.js/blob/1.1.9/src/math/noise.js
 [p5.sound]: https://archive.p5js.org/reference/#/libraries/p5.sound
 [ml5.js]: https://ml5js.org
 [q5play]: https://q5play.org
+[API translation]: https://github.com/q5js/q5.js/wiki/Translations

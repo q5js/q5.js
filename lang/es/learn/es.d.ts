@@ -669,7 +669,9 @@ declare global {
 
 		static version: string;
 
-		static lang: string;
+		static lang: object;
+
+		static addLang(locale: object): void;
 
 		static deshabilitarErroresAmigables: boolean;
 

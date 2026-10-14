@@ -1009,6 +1009,7 @@ function generatePyiClass(cls, emoji, classMemberSigs = {}) {
 		for (const member of cls.members) {
 			lines.push('');
 			if (member.name === 'constructor') continue; // skip JS constructors
+			if (cls.name === 'Q5' && ['addLang', 'registerLang'].includes(member.name)) continue;
 
 			// @type tag (explicit override) → property
 			const typeParam = member.params.find((p) => p.startsWith('@type'));

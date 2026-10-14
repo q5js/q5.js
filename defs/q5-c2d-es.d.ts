@@ -3904,13 +3904,10 @@ declare global {
 		static version: string;
 
 		/** ⚙
-		 * Establece un código de idioma distinto de 'en' (inglés) para usar q5 en otro idioma.
-		 * 
-		 * Idiomas actualmente soportados:
-		 * 
-		 * - 'es' (Español)
+		 * Añadir traducciones de la API. Más información:
+		 * https://github.com/q5js/q5.js/wiki/Translations
 		 */
-		static lang: string;
+		static addLang(locale: object): void;
 
 		/** ⚙
 		 * Desactiva los mensajes de error amigables de q5.
@@ -4021,6 +4018,8 @@ declare global {
 		 * la función `dibujar` se ejecuta.
 		 */
 		static postProcesar(): void;
+		static lang: object;
+
 		static agregarHook(cicloVida: string, fn: Function): void;
 
 		static registrarAddon(addon: Function): void;

@@ -4017,7 +4017,7 @@ declare global {
 	 * 	triangle(-50, -50, 0, 50, 50, -50);
 	 * };
 	 */
-	function createShader(code: string, type?: string, data?: Float32Array | {}): GPUShaderModule;
+	function createShader(code: string, type?: string, data?: Float32Array | object): GPUShaderModule;
 
 	/** ⚡
 	 * A plane is a centered rectangle with no stroke.
@@ -4261,13 +4261,10 @@ declare global {
 		static version: string;
 
 		/** ⚙
-		 * Set to a language code other than 'en' (English) to use q5 in an additional language.
-		 * 
-		 * Currently supported languages:
-		 * 
-		 * - 'es' (Spanish)
+		 * Add API translations. More info:
+		 * https://github.com/q5js/q5.js/wiki/Translations
 		 */
-		static lang: string;
+		static addLang(locale: object): void;
 
 		/** ⚙
 		 * Turn off q5's friendly error messages.
@@ -4386,6 +4383,8 @@ declare global {
 		 * function is run.
 		 */
 		static postProcess(): void | Promise<void>;
+		static lang: object;
+
 		//-
 			static update(): void;
 			update(): void;

@@ -37,17 +37,10 @@ alineaciónTexto(CENTRO, CENTRO);
 texto('v' + Q5.version, 0, 0);
 ```
 
-## Q5.lang
+## Q5.addLang
 
-Establece un código de idioma distinto de 'en' (inglés) para usar q5 en otro idioma.
-
-Idiomas actualmente soportados:
-
-- 'es' (Español)
-
-```
-@default 'en'
-```
+Añadir traducciones de la API. Más información:
+https://github.com/q5js/q5.js/wiki/Translations
 
 ## Q5.deshabilitarErroresAmigables
 
@@ -164,38 +157,12 @@ Dentro de la función, `this` se refiere a la instancia de Q5.
 @param {Function} fn La función que se ejecutará en la fase del ciclo de vida especificada.
 ```
 
-### webgpu
-
-```js
-Q5.addHook('predraw', function () {
-	this.fondo('cyan');
-});
-
-q5.dibujar = function () {
-	circulo(ratonX, ratonY, 80);
-};
-```
-
 ## Q5.registerAddon
 
 Forma compatible con p5.js v2 de registrar un addon con q5.
 
 ```
 @param {Function} addon Una función que recibe `Q5`, `Q5.prototype`, y un objeto `lifecycles`.
-```
-
-### webgpu
-
-```js
-// addon.js
-Q5.registerAddon((Q5, proto, lifecycles) => {
-	lifecycles.predraw = function () {
-		this.fondo('pink');
-	};
-});
-
-// sketch.js
-await Lienzo(200);
 ```
 
 ## Q5.modulos

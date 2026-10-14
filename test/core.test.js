@@ -1,14 +1,4 @@
-/* node testing */
 require('../q5-server.js');
-
-/* bun testing */
-// import { expect, test } from 'bun:test';
-// import '../q5-server.js';
-
-/* deno testing */
-// import { expect } from '@std/expect';
-// import '../q5-deno-server.js';
-// let test = Deno.test;
 
 let log = console.log;
 

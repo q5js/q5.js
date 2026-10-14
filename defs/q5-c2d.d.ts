@@ -3887,13 +3887,10 @@ declare global {
 		static version: string;
 
 		/** ⚙
-		 * Set to a language code other than 'en' (English) to use q5 in an additional language.
-		 * 
-		 * Currently supported languages:
-		 * 
-		 * - 'es' (Spanish)
+		 * Add API translations. More info:
+		 * https://github.com/q5js/q5.js/wiki/Translations
 		 */
-		static lang: string;
+		static addLang(locale: object): void;
 
 		/** ⚙
 		 * Turn off q5's friendly error messages.
@@ -4004,6 +4001,8 @@ declare global {
 		 * function is run.
 		 */
 		static postProcess(): void | Promise<void>;
+		static lang: object;
+
 		//-
 			static update(): void;
 			update(): void;

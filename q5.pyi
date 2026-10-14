@@ -4323,12 +4323,6 @@ class Q5:
 	version: str
 	"""⚙ The current minor version of q5."""
 
-	lang: str
-	"""⚙ Set to a language code other than 'en' (English) to use q5 in an additional language.
-
-Currently supported languages:
-
-- 'es' (Spanish)"""
 
 	disableFriendlyErrors: bool
 	"""⚙ Turn off q5's friendly error messages."""

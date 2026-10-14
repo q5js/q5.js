@@ -4217,13 +4217,10 @@ declare global {
 		static version: string;
 
 		/** ⚙
-		 * Establece un código de idioma distinto de 'en' (inglés) para usar q5 en otro idioma.
-		 * 
-		 * Idiomas actualmente soportados:
-		 * 
-		 * - 'es' (Español)
+		 * Añadir traducciones de la API. Más información:
+		 * https://github.com/q5js/q5.js/wiki/Translations
 		 */
-		static lang: string;
+		static addLang(locale: object): void;
 
 		/** ⚙
 		 * Desactiva los mensajes de error amigables de q5.
@@ -4309,30 +4306,12 @@ declare global {
 		 * Dentro de la función, `this` se refiere a la instancia de Q5.
 		 * @param {string} lifecycle 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', o 'remove'
 		 * @param {Function} fn La función que se ejecutará en la fase del ciclo de vida especificada.
-		 * @example
-		 * Q5.addHook('predraw', function () {
-		 * 	this.fondo('cyan');
-		 * });
-		 * 
-		 * q5.dibujar = function () {
-		 * 	circulo(ratonX, ratonY, 80);
-		 * };
 		 */
 		addHook(): void;
 
 		/** ⚙
 		 * Forma compatible con p5.js v2 de registrar un addon con q5.
 		 * @param {Function} addon Una función que recibe `Q5`, `Q5.prototype`, y un objeto `lifecycles`.
-		 * @example
-		 * // addon.js
-		 * Q5.registerAddon((Q5, proto, lifecycles) => {
-		 * 	lifecycles.predraw = function () {
-		 * 		this.fondo('pink');
-		 * 	};
-		 * });
-		 * 
-		 * // sketch.js
-		 * await Lienzo(200);
 		 */
 		registerAddon(): void;
 
@@ -4360,6 +4339,8 @@ declare global {
 		 * la función `dibujar` se ejecuta.
 		 */
 		static postProcesar(): void;
+		static lang: object;
+
 		static agregarHook(cicloVida: string, fn: Function): void;
 
 		static registrarAddon(addon: Function): void;

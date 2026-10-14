@@ -661,7 +661,7 @@ declare global {
 
 	// ⚡️ shaders
 
-	function createShader(code: string, type?: string, data?: Float32Array | {}): GPUShaderModule;
+	function createShader(code: string, type?: string, data?: Float32Array | object): GPUShaderModule;
 
 	function plane(x: number, y: number, w: number, h?: number): void;
 
@@ -694,7 +694,9 @@ declare global {
 
 		static version: string;
 
-		static lang: string;
+		static lang: object;
+
+		static addLang(locale: object): void;
 
 		static disableFriendlyErrors: boolean;
 
