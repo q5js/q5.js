@@ -358,7 +358,7 @@ def resize(w: float, h: float) -> None:
 		
 		logo = await load('/q5js_logo.avif')
 		
-		logo.resize(128, 128)
+		logo.resize(64, 64)
 		image(logo, -100, -100, 200, 200)
 	"""
 	...

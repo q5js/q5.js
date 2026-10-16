@@ -338,10 +338,10 @@ let queryString = rawQSInit ? '?' + rawQSInit : '';
 let isWebGPU = urlParams.has('c2d') ? false : true;
 // Language selection is saved in localStorage. Fallback to any URL param
 // for backward compatibility, then default to English `en`.
-let lang = localStorage.getItem('lang') || urlParams.get('lang') || 'en';
+let locale = localStorage.getItem('locale') || urlParams.get('locale') || 'en';
 
 async function loadDtsAndRender(useWebGPU) {
-	MiniEditor.lang = lang;
+	MiniEditor.locale = locale;
 
 	// Snapshot everything needed BEFORE data or language changes.
 	const sectionKeys = Object.keys(sections);
@@ -357,9 +357,9 @@ async function loadDtsAndRender(useWebGPU) {
 
 	// Build file name according to renderer + language. English (en) is default and has no suffix.
 	const baseName = useWebGPU ? 'q5' : 'q5-c2d';
-	const langSuffix = lang && lang !== 'en' ? `-${lang}` : '';
+	const langSuffix = locale && locale !== 'en' ? `-${locale}` : '';
 
-	const dir = lang == 'en' && useWebGPU ? '/' : `/defs/`;
+	const dir = locale == 'en' && useWebGPU ? '/' : `/defs/`;
 
 	// const dir = `/defs/`;
 	const dtsFile = `${dir}${baseName}${langSuffix}.d.ts`;
@@ -380,7 +380,7 @@ async function loadDtsAndRender(useWebGPU) {
 		urlParams.delete('webgpu');
 	}
 	// persist language to localStorage; do NOT write language into the URL
-	localStorage.setItem('lang', lang);
+	localStorage.setItem('locale', locale);
 	// Serialize params but keep renderer flags as key-only (no '=')
 	let rawQS = urlParams.toString();
 	// Remove any `=...` for the renderer flags so they become key-only like `webgpu` or `c2d`.
@@ -431,11 +431,11 @@ if (codeModeSelect) {
 
 const langSelect = document.getElementById('langSelect');
 if (langSelect) {
-	langSelect.value = lang;
+	langSelect.value = locale;
 	langSelect.addEventListener('change', async (e) => {
-		lang = e.target.value;
+		locale = e.target.value;
 		// Persist language choice to localStorage and reload docs
-		localStorage.setItem('lang', lang);
+		localStorage.setItem('locale', locale);
 		await loadDtsAndRender(isWebGPU);
 	});
 }

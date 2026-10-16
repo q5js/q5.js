@@ -369,7 +369,7 @@ declare global {
 	 * 
 	 * let logo = await cargar('/q5js_logo.avif');
 	 * 
-	 * logo.redimensionar(128, 128);
+	 * logo.redimensionar(64, 64);
 	 * imagen(logo, -100, -100, 200, 200);
 	 */
 	function redimensionar(w: number, h: number): void;

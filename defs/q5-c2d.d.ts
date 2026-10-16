@@ -378,7 +378,7 @@ declare global {
 	 * let logo = loadImage('/q5js_logo.avif');
 	 * 
 	 * function setup() {
-	 * 	logo.resize(128, 128);
+	 * 	logo.resize(64, 64);
 	 * 	image(logo, 0, 0, 200, 200);
 	 * }
 	 */

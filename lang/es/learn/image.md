@@ -221,7 +221,7 @@ await Lienzo(200);
 
 let logo = await cargar('/q5js_logo.avif');
 
-logo.redimensionar(128, 128);
+logo.redimensionar(64, 64);
 imagen(logo, -100, -100, 200, 200);
 ```
 
@@ -233,7 +233,7 @@ crearLienzo(200);
 let logo = cargarImagen('/q5js_logo.avif');
 
 function setup() {
-	logo.redimensionar(128, 128);
+	logo.redimensionar(64, 64);
 	imagen(logo, 0, 0, 200, 200);
 }
 ```

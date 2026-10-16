@@ -1,4 +1,5 @@
 Q5.addLang({
+	module: 'q5',
 	language: 'Español',
 	code: 'es',
 	hasAccents: true,

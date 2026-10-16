@@ -1800,8 +1800,6 @@ Q5.Image = class {
 		$.mirrorY = false;
 		delete $.createCanvas;
 		$._loop = false;
-
-		if (Q5.lang?.active) Q5.lang.extendImage($);
 	}
 	get w() {
 		return this.width;
@@ -9138,16 +9136,6 @@ Q5.WebGPU = async function (scope, parent) {
 			forEachMap(maps, (name, translatedName) => {
 				target[translatedName] = target[name];
 			});
-		},
-		extendImage: ($) => {
-			// prettier-ignore
-			let imgFns = ['copy','filter','get','set','resize','mask','trim','inset','pixels','loadPixels','updatePixels','smooth','noSmooth'];
-			let m0 = lang.members[0];
-			let m1 = lang.members[1];
-			for (let name of imgFns) {
-				$[m0[name]] = $[name];
-				if (m1) $[m1[name]] = $[name];
-			}
 		}
 	});
 
@@ -9185,6 +9173,12 @@ Q5.WebGPU = async function (scope, parent) {
 		}
 
 		add(lang.members, locale.members);
+
+		if (locale.module == 'q5') {
+			// prettier-ignore
+			const imgProps = ['canvas','drawingContext','mirrorX','mirrorY','width','height','defaultWidth','defaultHeight','copy','filter','get','set','resize','mask','trim','inset','pixels','loadPixels','updatePixels','smooth','noSmooth'].filter((n) => n in locale.members);
+			locale.classes.Image = Object.fromEntries(imgProps.map((n) => [n, locale.members[n]]));
+		}
 
 		for (let className in locale.classes) {
 			add((lang.classes[className] ??= []), locale.classes[className]);

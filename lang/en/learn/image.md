@@ -294,7 +294,7 @@ await Canvas(200);
 
 let logo = await load('/q5js_logo.avif');
 
-logo.resize(128, 128);
+logo.resize(64, 64);
 image(logo, -100, -100, 200, 200);
 ```
 
@@ -305,7 +305,7 @@ Canvas(200)
 
 logo = await load('/q5js_logo.avif')
 
-logo.resize(128, 128)
+logo.resize(64, 64)
 image(logo, -100, -100, 200, 200)
 ```
 
@@ -317,7 +317,7 @@ createCanvas(200);
 let logo = loadImage('/q5js_logo.avif');
 
 function setup() {
-	logo.resize(128, 128);
+	logo.resize(64, 64);
 	image(logo, 0, 0, 200, 200);
 }
 ```

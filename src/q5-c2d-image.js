@@ -372,8 +372,6 @@ Q5.Image = class {
 		$.mirrorY = false;
 		delete $.createCanvas;
 		$._loop = false;
-
-		if (Q5.lang?.active) Q5.lang.extendImage($);
 	}
 	get w() {
 		return this.width;
