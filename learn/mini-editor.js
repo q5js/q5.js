@@ -3,7 +3,7 @@
 //   codeLang = PROGRAMMING language of an editor ('javascript' | 'python') -> editor.codeLang
 
 const MONACO_VERSION = '0.57.0';
-const BRYTHON_VERSION = '3.14.0';
+const BRYTHON_VERSION = '3.15.0';
 
 // one indentation level (matches Monaco's tabSize: 2)
 const indent = '  ';
@@ -521,12 +521,7 @@ ${userCode}
 
 		// With a non-English locale, q5 also hooks up the localized names of
 		// the user functions, so the Python bridge has to know about them too.
-		let hooks = Q5._hooks.slice(0, 15);
-		if (MiniEditor.locale != 'en') {
-			for (let f of Q5._hooks || Q5._userFns || []) {
-				if (!hooks.includes(f)) hooks.push(f);
-			}
-		}
+		let hooks = Q5._hooks || Q5._userFns || [];
 
 		// Q5 state variables that are copied into the Python namespace before
 		// every call of a user-defined function
@@ -577,7 +572,7 @@ async def _run_py(q, code):
 	ns['ns'] = ns
 	ns['Q5'] = window.Q5
 
-	for attr in dir(q):
+	for attr in window.Object.getOwnPropertyNames(q):
 		if not attr.startswith('_'):
 			try:
 				ns[attr] = getattr(q, attr)

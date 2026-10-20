@@ -9175,8 +9175,10 @@ Q5.WebGPU = async function (scope, parent) {
 		add(lang.members, locale.members);
 
 		if (locale.module == 'q5') {
-			// prettier-ignore
-			const imgProps = ['canvas','drawingContext','mirrorX','mirrorY','width','height','defaultWidth','defaultHeight','copy','filter','get','set','resize','mask','trim','inset','pixels','loadPixels','updatePixels','smooth','noSmooth'].filter((n) => n in locale.members);
+			const imgProps =
+				'canvas drawingContext mirrorX mirrorY width height defaultWidth defaultHeight copy filter get set resize mask trim inset pixels loadPixels updatePixels smooth noSmooth'
+					.split(' ')
+					.filter((n) => n in locale.members);
 			locale.classes.Image = Object.fromEntries(imgProps.map((n) => [n, locale.members[n]]));
 		}
 
@@ -9249,8 +9251,9 @@ const runPython = async function () {
 				document.head.appendChild(s);
 			});
 
-		await load('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython.min.js');
-		await load('https://cdn.jsdelivr.net/npm/brython@3.14.0/brython_stdlib.min.js');
+		Q5.brython ??= 'https://cdn.jsdelivr.net/npm/brython@3.15.0';
+		await load(Q5.brython + '/brython.min.js');
+		await load(Q5.brython + '/brython_stdlib.min.js');
 	}
 
 	let code = '';
@@ -9377,7 +9380,7 @@ async def _run_py(q, code):
 	ns['ns'] = ns
 	ns['Q5'] = window.Q5
 
-	for attr in dir(q):
+	for attr in window.Object.getOwnPropertyNames(q):
 		if not attr.startswith('_'):
 			try:
 				ns[attr] = getattr(q, attr)

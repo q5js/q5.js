@@ -2,7 +2,7 @@
 
 This folder contains unit tests that ensure the functionality of q5.js.
 
-These tests are setup to run with Bun.
+These tests are made to run with Bun.
 
 q5.js is compatible with Node.js, Bun, and Deno.
 

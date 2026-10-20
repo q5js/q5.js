@@ -1,4 +1,3 @@
-/* node testing */
 require('../q5-server.js');
 
 let log = console.log;
