@@ -56,7 +56,7 @@ struct Q5 {
 	$._customBindHandlers = {};
 
 	// colors used for each draw call
-	let colorStack = new Float32Array(1e6);
+	let colorStack = new Float32Array(Q5.MAX_COLORS * 4);
 
 	// prettier-ignore
 	colorStack.set([
@@ -359,9 +359,10 @@ fn fragMain(f: FragParams ) -> @location(0) vec4f {
 	$._doStroke = () => (doStroke = true);
 
 	const MAX_TRANSFORMS = $._isGraphics ? 1000 : Q5.MAX_TRANSFORMS,
-		MATRIX_SIZE = 16, // 4x4 matrix
-		MAX_TRANSFORM_BUFFER_SIZE = MAX_TRANSFORMS * MATRIX_SIZE * 4,
-		transforms = new Float32Array(MAX_TRANSFORMS * MATRIX_SIZE);
+		MATRIX_SIZE = 16, // 4x4 matrix = 16 floats
+		MAX_TRANSFORM_FLOATS = MAX_TRANSFORMS * MATRIX_SIZE,
+		MAX_TRANSFORM_BUFFER_SIZE = MAX_TRANSFORM_FLOATS * 4; // in bytes 4 bytes per float
+	let transforms = new Float32Array(MAX_TRANSFORM_FLOATS);
 
 	let matrix,
 		matrices = [],
@@ -1165,10 +1166,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._shapesShaderCode
 	});
 
-	let shapesVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
+	let shapesVertStack = new Float32Array($._isGraphics ? 1000 : Q5.MAX_SHAPE_VERTS * 4),
 		shapesVertIdx = 0;
-	const TAU = Math.PI * 2,
-		HALF_PI = Math.PI / 2;
 
 	let shapesVertBuffLayout = {
 		arrayStride: 16, // 4 floats * 4 bytes
@@ -2197,6 +2196,8 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		return ellipseModeCache;
 	}
 
+	const TAU = Math.PI * 2;
+
 	$.ellipse = (x, y, w, h) => {
 		let a, b;
 		[x, y, a, b] = applyEllipseMode(x, y, w, h);
@@ -2325,7 +2326,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 		code: $._videoShaderCode
 	});
 
-	let imgVertStack = new Float32Array($._isGraphics ? 1000 : 1e7),
+	let imgVertStack = new Float32Array($._isGraphics ? 1000 : Q5.MAX_IMAGES * 28),
 		imgVertIdx = 0;
 
 	let imgVertBuffLayout = {
@@ -3583,6 +3584,7 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 
 	const _remove = $.remove;
 	$.remove = () => {
+		if ($._removed) return;
 		$._frameA?.destroy();
 		$._frameB?.destroy();
 		uniformBuffer?.destroy();
@@ -3598,9 +3600,71 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 		ellipseIndexBuffer?.destroy();
 
 		for (let b of $._buffers) b.destroy();
-		$._buffers = [];
+		for (let t of $._texturesToDestroy) t.destroy();
 
-		return _remove();
+		$._buffers = $._texturesToDestroy = [];
+
+		let result = _remove();
+
+		colorStack =
+			transforms =
+			shapesVertStack =
+			imgVertStack =
+			rectStack =
+			ellipseStack =
+			charDataBuffer =
+			textDataBuffer =
+				new Float32Array(0);
+
+		drawStack.length =
+			matrices.length =
+			matricesIdxStack.length =
+			scaleStack.length =
+			styles.length =
+			sv.length =
+			curveVertices.length =
+			charStack.length =
+			textStack.length =
+			lineWidths.length =
+			fontsArr.length =
+			$._textureBindGroups.length =
+			$._pipelines.length =
+			$._pipelineConfigs.length =
+				0;
+
+		$._customDrawHandlers = $._customBindHandlers = {};
+
+		frameA =
+			frameB =
+			mainView =
+			frameBindGroup =
+			frameBindGroupA =
+			frameBindGroupB =
+			frameLayout =
+			frameSampler =
+			encoder =
+			pass =
+			uniformBuffer =
+			transformsBuffer =
+			colorsBuffer =
+			shapesVertBuff =
+			imgVertBuff =
+			charBuffer =
+			textBuffer =
+			rectBuffer =
+			rectIndexBuffer =
+			ellipseBuffer =
+			ellipseIndexBuffer =
+			mainBindGroup =
+			lastTransformsBuffer =
+			lastColorsBuffer =
+			$._frameA =
+			$._frameB =
+			$._texture =
+			$._g =
+				null;
+
+		return result;
 	};
 };
 
@@ -3613,11 +3677,13 @@ Q5.DILATE = 6;
 Q5.ERODE = 7;
 Q5.BLUR = 8;
 
-Q5.MAX_TRANSFORMS = 2097152;
-Q5.MAX_RECTS = 200200;
-Q5.MAX_ELLIPSES = 200200;
+Q5.MAX_COLORS = 250000;
+Q5.MAX_RECTS = Q5.MAX_ELLIPSES = 200200;
 Q5.MAX_CHARS = 100000;
 Q5.MAX_TEXTS = 10000;
+Q5.MAX_TRANSFORMS = 2097152; // * 64 bytes = 128 MB (the WebGPU default maximum per buffer)
+Q5.MAX_IMAGES = 350000;
+Q5.MAX_SHAPE_VERTS = 350000;
 
 Q5.initWebGPU = async () => {
 	Q5._gpuTask ??= Q5._requestGPU();
@@ -3651,17 +3717,22 @@ Q5._requestGPU = async () => {
 			return false;
 		}
 
-		// Update to fit device limits
-		const maxStorage = device.limits.maxStorageBufferBindingSize;
-
-		let min = Math.min,
+		// update to fit device limits
+		const maxStorage = device.limits.maxStorageBufferBindingSize, // 128 MB
+			maxBuffer = device.limits.maxBufferSize, // 256 MB
+			min = Math.min,
 			floor = Math.floor;
 
+		// takes the lower value between the requested limit
+		// and the actual max size divided by the bytes required for each item
+		Q5.MAX_COLORS = min(Q5.MAX_COLORS, floor(maxStorage / 16));
 		Q5.MAX_TRANSFORMS = min(Q5.MAX_TRANSFORMS, floor(maxStorage / 64));
 		Q5.MAX_RECTS = min(Q5.MAX_RECTS, floor(maxStorage / 64));
 		Q5.MAX_ELLIPSES = min(Q5.MAX_ELLIPSES, floor(maxStorage / 64));
 		Q5.MAX_CHARS = min(Q5.MAX_CHARS, floor(maxStorage / 16));
 		Q5.MAX_TEXTS = min(Q5.MAX_TEXTS, floor(maxStorage / 32));
+		Q5.MAX_IMAGES = min(Q5.MAX_IMAGES, floor(maxBuffer / 112));
+		Q5.MAX_SHAPE_VERTS = min(Q5.MAX_SHAPE_VERTS, floor(maxBuffer / 16));
 
 		device.lost.then((e) => {
 			// if purposefully destroyed, do nothing.

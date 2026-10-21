@@ -72,24 +72,21 @@ cualquier opción por lienzo que pases a `crearLienzo`.
 @default { alpha: false, colorSpace: 'display-p3' }
 ```
 
-## Q5.MAX_TRANSFORMACIONES
+## Q5.MAX_COLORES
 
-Un límite de asignación de memoria WebGPU.
-
-El número máximo de matrices de transformación
-que se pueden usar en una sola llamada de dibujo.
+El número máximo de colores de q5
+(creados mediante llamadas a `color`, `fondo`, `relleno`, `trazo` y `teñir`)
+que se pueden almacenar por fotograma con el renderizador WebGPU.
 
 ```
-@default 1000000
+@default 250000
 ```
 
-## Q5.MAX_RECTS
-
-Un límite de asignación de memoria WebGPU.
+## Q5.MAX_RECTANGULOS
 
 El número máximo de rectángulos
-(llamadas a `rect`, `cuadrado`, `cápsula`)
-que se pueden dibujar en una sola llamada de dibujo.
+(llamadas a `rect`, `cuadrado` y `cápsula`)
+que se pueden dibujar por fotograma con el renderizador WebGPU.
 
 ```
 @default 200200
@@ -97,11 +94,9 @@ que se pueden dibujar en una sola llamada de dibujo.
 
 ## Q5.MAX_ELIPSES
 
-Un límite de asignación de memoria WebGPU.
-
 El número máximo de elipses
-(llamadas a `elipse`, `circulo`, y `arco`)
-que se pueden dibujar en una sola llamada de dibujo.
+(llamadas a `elipse`, `círculo` y `arco`)
+que se pueden dibujar por fotograma con el renderizador WebGPU.
 
 ```
 @default 200200
@@ -109,10 +104,8 @@ que se pueden dibujar en una sola llamada de dibujo.
 
 ## Q5.MAX_CARACTERES
 
-Un límite de asignación de memoria WebGPU.
-
 El número máximo de caracteres de texto
-que se pueden dibujar en una sola llamada de dibujo.
+que se pueden dibujar por fotograma con el renderizador WebGPU.
 
 ```
 @default 100000
@@ -120,13 +113,41 @@ que se pueden dibujar en una sola llamada de dibujo.
 
 ## Q5.MAX_TEXTOS
 
-Un límite de asignación de memoria WebGPU.
-
-El número máximo de llamadas separadas a `texto`
-que se pueden dibujar en una sola llamada de dibujo.
+El número máximo de llamadas independientes a `texto`
+que se pueden dibujar por fotograma con el renderizador WebGPU.
 
 ```
 @default 10000
+```
+
+## Q5.MAX_TRANSFORMACIONES
+
+El número máximo de matrices de transformación
+que se pueden usar por fotograma con el renderizador WebGPU. De forma predeterminada, se establece para usar todo el límite de 128 MB de `maxStorageBufferBindingSize`.
+https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits
+
+```
+@default 2097152
+```
+
+## Q5.MAX_IMAGENES
+
+El número máximo de imágenes (llamadas a `imagen` e `imagenTexto`)
+que se pueden dibujar por fotograma con el renderizador WebGPU.
+
+```
+@default 350000
+```
+
+## Q5.MAX_VERTICES_FORMAS
+
+El número máximo de vértices en las formas
+(creados mediante llamadas a `terminarForma`,
+`triángulo`, `quad`, `curva` y `bezier`)
+que se pueden usar por fotograma con el renderizador WebGPU.
+
+```
+@default 350000
 ```
 
 ## Q5.WebGPU

@@ -183,9 +183,13 @@ function Q5(scope, parent, renderer) {
 		$._redraw = false;
 	};
 	$.remove = () => {
+		if ($._removed) return;
 		$._removed = true;
 		$.noLoop();
-		if ($.canvas.remove) $.canvas.remove();
+		$._removeInputListeners?.();
+		$.canvas?.remove();
+		let i = Q5.instances.indexOf($);
+		if (i !== -1) Q5.instances.splice(i, 1);
 		return runHooks('remove');
 	};
 
@@ -338,7 +342,7 @@ function Q5(scope, parent, renderer) {
 						resolve();
 					} else if (!$._setupDone) {
 						// render during loading
-						if ($.canvas?.ready && $._render) {
+						if ($.canvas?.ready && $._render && !$._removed) {
 							$._beginRender();
 							$._render();
 							$._finishRender();
@@ -488,7 +492,7 @@ if (typeof window == 'object') {
 	window.WEBGPU = 'webgpu';
 
 	const cleanup = () => {
-		for (let inst of Q5.instances) {
+		for (let inst of [...Q5.instances]) {
 			try {
 				inst.remove();
 			} catch (e) {}

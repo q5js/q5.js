@@ -706,15 +706,21 @@ declare global {
 
 		static canvasOptions: object;
 
+		static MAX_COLORS: number;
+
 		static MAX_RECTS: number;
 
 		static MAX_ELLIPSES: number;
 
-		static MAX_TRANSFORMS: number;
-
 		static MAX_CHARS: number;
 
 		static MAX_TEXTS: number;
+
+		static MAX_TRANSFORMS: number;
+
+		static MAX_IMAGES: number;
+
+		static MAX_SHAPE_VERTS: number;
 
 		static WebGPU(): Q5;
 

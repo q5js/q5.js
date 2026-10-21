@@ -80,6 +80,12 @@ function coreTest(resolve) {
 	if (Q5.WebGPU) {
 		expect(typeof Q5.WebGPU).toBe('function');
 	}
+
+	expect(Q5.instances).toContain(q);
+	q.remove();
+	expect(Q5.instances).not.toContain(q);
+	expect(q._removed).toBe(true);
+	q.remove();
 }
 
 test('q5-core', () => new Promise(coreTest));

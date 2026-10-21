@@ -126,5 +126,13 @@ test('q5-input', () => {
 	expect(keyReleasedCalled).toBe(true);
 	expect(q.keyIsDown('a')).toBe(false);
 
-	q.noLoop();
+	mousePressedCalled = false;
+	keyPressedCalled = false;
+	q.remove();
+
+	let afterRemoveKeyDown = new window.KeyboardEvent('keydown', { key: 'b', keyCode: 66, bubbles: true });
+	window.dispatchEvent(afterRemoveKeyDown);
+	dispatchCanvasPointer('down', { clientX: 10, clientY: 10, button: 0 });
+	expect(keyPressedCalled).toBe(false);
+	expect(mousePressedCalled).toBe(false);
 });

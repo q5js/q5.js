@@ -681,15 +681,21 @@ declare global {
 
 		static opcionesLienzo: object;
 
-		static MAX_RECTS: number;
+		static MAX_COLORES: number;
+
+		static MAX_RECTANGULOS: number;
 
 		static MAX_ELIPSES: number;
-
-		static MAX_TRANSFORMACIONES: number;
 
 		static MAX_CARACTERES: number;
 
 		static MAX_TEXTOS: number;
+
+		static MAX_TRANSFORMACIONES: number;
+
+		static MAX_IMAGENES: number;
+
+		static MAX_VERTICES_FORMAS: number;
 
 		static WebGPU(): Q5;
 

@@ -536,13 +536,14 @@ No aplicable a lienzos WebGPU.
 ### webgpu
 
 ```js
+await Lienzo(200);
 frecuenciaRefresco(5);
 let icono = cargarImagen('/q5js_icon.png');
 
 q5.dibujar = function () {
 	icono.cargarPixeles();
 	for (let i = 0; i < icono.pixeles.length; i += 16) {
-		icono.pixeles[i + 1] = aleatorio(1);
+		icono.pixeles[i + 1] = aleatorio(255);
 	}
 	icono.actualizarPixeles();
 	fondo(icono);
@@ -552,6 +553,7 @@ q5.dibujar = function () {
 ### c2d
 
 ```js
+crearLienzo(200);
 frecuenciaRefresco(5);
 let icono = cargarImagen('/q5js_icon.png');
 

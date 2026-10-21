@@ -696,7 +696,7 @@ let icon = load('/q5js_icon.png');
 q5.draw = function () {
 	icon.loadPixels();
 	for (let i = 0; i < icon.pixels.length; i += 16) {
-		icon.pixels[i + 1] = random(1);
+		icon.pixels[i + 1] = random(255);
 	}
 	icon.updatePixels();
 	background(icon);

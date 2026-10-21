@@ -4,12 +4,6 @@
  * AI was used to generate parts of this script.
  */
 
-// reduce WebGPU memory usage per Q5 instance
-// since these pages use a lot of them
-Q5.MAX_TRANSFORMS = 1000;
-Q5.MAX_RECTS = 10000;
-Q5.MAX_ELLIPSES = 1000;
-
 // Q5.online = false;
 
 toggleNavButton.addEventListener('pointerup', () => {
@@ -623,20 +617,33 @@ function generateHeadings() {
 	});
 }
 
-async function executeDataScripts() {
+async function createMiniEditors() {
 	MiniEditor.host = 'q5';
 	await Q5.initWebGPU();
+
 	let scripts = contentArea.querySelectorAll('script[type="mini"]');
 	for (let script of scripts) {
 		script.setAttribute('horiz', true);
 		let mie = new MiniEditor(script);
+		window.miniEditors.push(mie);
 		mie.showLineNumbers = true;
 		mie.fontSize = 16;
+
+		// reduce WebGPU memory usage per Q5 instance
+		// since these pages use a lot of them
+		Q5.MAX_TRANSFORMS = Q5.MAX_RECTS = Q5.MAX_ELLIPSES = 1000;
+		Q5.MAX_IMAGES = Q5.MAX_COLORS = Q5.MAX_SHAPE_VERTS = 100;
+
+		if (script.innerHTML.includes('for (')) {
+			Q5.MAX_RECTS = Q5.MAX_COLORS = 100000;
+		}
+
 		await mie.init();
 	}
 }
 
 let contentArea = document.getElementById('content');
+window.miniEditors = [];
 
 async function populateContentArea() {
 	contentArea.classList.remove('fade-in');
@@ -668,7 +675,7 @@ async function populateContentArea() {
 		subDiv.innerHTML = marked.marked(subsection.content);
 		contentArea.append(subDiv);
 
-		// Mini editors will be initialized later by `executeDataScripts`
+		// Mini editors will be initialized later by `createMiniEditors`
 		// to avoid initializing the same scripts multiple times.
 	}
 
@@ -724,12 +731,14 @@ function finalizeFormatting() {
 // `currentSectionId` and `currentLoadedSectionId` are declared earlier
 
 async function updateMainContent(sectionId) {
+	await Promise.all(window.miniEditors.map((editor) => editor.remove()));
+	window.miniEditors = [];
 	scrollBehavior = 'instant';
 	currentSectionId = sectionId;
 
 	await populateContentArea();
 	generateHeadings();
-	await executeDataScripts();
+	await createMiniEditors();
 	finalizeFormatting();
 
 	await new Promise((resolve) => requestAnimationFrame(resolve));

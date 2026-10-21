@@ -31,8 +31,24 @@ Q5.modules.input = ($, q) => {
 
 	let keysHeld = {};
 	let mouseBtns = [Q5.LEFT, Q5.CENTER, Q5.RIGHT];
+	let listeners = [];
 
 	let c = $.canvas;
+
+	$._removeInputListeners = () => {
+		for (let [target, type, listener, options] of listeners) {
+			target.removeEventListener(type, listener, options);
+		}
+		listeners.length = 0;
+	};
+
+	function addListener(target, type, handler, options) {
+		let listener = (e) => {
+			if (!$._removed) handler(e);
+		};
+		target.addEventListener(type, listener, options);
+		listeners.push([target, type, listener, options]);
+	}
 
 	$._startAudio = () => {
 		if (!Q5.aud || Q5.aud?.state != 'running') $.userStartAudio();
@@ -270,40 +286,39 @@ Q5.modules.input = ($, q) => {
 	};
 
 	if (window) {
-		let l = window.addEventListener;
-		l('keydown', (e) => $._onkeydown(e), false);
-		l('keyup', (e) => $._onkeyup(e), false);
+		let t = window;
+		addListener(t, 'keydown', (e) => $._onkeydown(e), false);
+		addListener(t, 'keyup', (e) => $._onkeyup(e), false);
 
 		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
-		l(pointer + 'move', (e) => $._onpointermove(e), false);
-		l(pointer + 'up', (e) => $._onpointerup(e));
-		l(pointer + 'cancel', (e) => $._onpointerup(e));
-		l(pointer + 'leave', (e) => $._onpointerleave(e));
-		l('touchstart', (e) => $._updateTouches(e));
-		l('touchmove', (e) => $._updateTouches(e));
-		l('touchend', (e) => $._updateTouches(e));
-		l('touchcancel', (e) => $._updateTouches(e));
+		addListener(t, pointer + 'move', (e) => $._onpointermove(e), false);
+		addListener(t, pointer + 'up', (e) => $._onpointerup(e));
+		addListener(t, pointer + 'cancel', (e) => $._onpointerup(e));
+		addListener(t, pointer + 'leave', (e) => $._onpointerleave(e));
+		addListener(t, 'touchstart', (e) => $._updateTouches(e));
+		addListener(t, 'touchmove', (e) => $._updateTouches(e));
+		addListener(t, 'touchend', (e) => $._updateTouches(e));
+		addListener(t, 'touchcancel', (e) => $._updateTouches(e));
 
-		if (c) c.addEventListener('wheel', (e) => $._onwheel(e));
+		if (c) addListener(c, 'wheel', (e) => $._onwheel(e));
 
 		if (!$._isGlobal && c) {
 			// If not global, only trigger pointer events when pointer is locked or over canvas
-			l(pointer + 'down', (e) => !document.pointerLockElement || $._onpointerdown(e));
-			l('click', (e) => !document.pointerLockElement || $._onclick(e));
-			l('dblclick', (e) => !document.pointerLockElement || $._ondblclick(e));
-
-			l = c.addEventListener.bind(c);
+			addListener(t, pointer + 'down', (e) => !document.pointerLockElement || $._onpointerdown(e));
+			addListener(t, 'click', (e) => !document.pointerLockElement || $._onclick(e));
+			addListener(t, 'dblclick', (e) => !document.pointerLockElement || $._ondblclick(e));
+			t = c;
 		}
 
-		l(pointer + 'down', (e) => $._onpointerdown(e));
-		l('click', (e) => $._onclick(e));
-		l('dblclick', (e) => $._ondblclick(e));
+		addListener(t, pointer + 'down', (e) => $._onpointerdown(e));
+		addListener(t, 'click', (e) => $._onclick(e));
+		addListener(t, 'dblclick', (e) => $._ondblclick(e));
 
-		if (c) l = c.addEventListener.bind(c);
+		if (c) t = c;
 
-		l('touchstart', (e) => $._ontouchstart(e));
-		l('touchmove', (e) => $._ontouchmove(e));
-		l('touchend', (e) => $._ontouchend(e));
-		l('touchcancel', (e) => $._ontouchend(e));
+		addListener(t, 'touchstart', (e) => $._ontouchstart(e));
+		addListener(t, 'touchmove', (e) => $._ontouchmove(e));
+		addListener(t, 'touchend', (e) => $._ontouchend(e));
+		addListener(t, 'touchcancel', (e) => $._ontouchend(e));
 	}
 };

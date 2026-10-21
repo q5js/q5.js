@@ -570,7 +570,7 @@ declare global {
 	 * q5.draw = function () {
 	 * 	icon.loadPixels();
 	 * 	for (let i = 0; i < icon.pixels.length; i += 16) {
-	 * 		icon.pixels[i + 1] = random(1);
+	 * 		icon.pixels[i + 1] = random(255);
 	 * 	}
 	 * 	icon.updatePixels();
 	 * 	background(icon);
@@ -4289,46 +4289,60 @@ declare global {
 		static canvasOptions: object;
 
 		/** ⚙
-		 * A WebGPU memory allocation limit.
-		 * 
-		 * The maximum number of transformation matrixes
-		 * that can be used per frame.
+		 * The maximum number of q5 colors
+		 * (created by calls to `color`, `background`, `fill`, `stroke`, and `tint`)
+		 * that can be stored per frame, with the WebGPU renderer.
 		 */
-		static MAX_TRANSFORMS: number;
+		static MAX_COLORS: number;
 
 		/** ⚙
-		 * A WebGPU memory allocation limit.
-		 * 
 		 * The maximum number of rectangles
 		 * (calls to `rect`, `square`, `capsule`)
-		 * that can be drawn per frame.
+		 * that can be drawn per frame, with the WebGPU renderer.
 		 */
 		static MAX_RECTS: number;
 
 		/** ⚙
-		 * A WebGPU memory allocation limit.
-		 * 
 		 * The maximum number of ellipses
 		 * (calls to `ellipse`, `circle`, and `arc`)
-		 * that can be drawn per frame.
+		 * that can be drawn per frame, with the WebGPU renderer.
 		 */
 		static MAX_ELLIPSES: number;
 
 		/** ⚙
-		 * A WebGPU memory allocation limit.
-		 * 
 		 * The maximum number of text characters
-		 * that can be drawn per frame.
+		 * that can be drawn per frame, with the WebGPU renderer.
 		 */
 		static MAX_CHARS: number;
 
 		/** ⚙
-		 * A WebGPU memory allocation limit.
-		 * 
 		 * The maximum number of separate calls to `text`
-		 * that can be drawn per frame.
+		 * that can be drawn per frame, with the WebGPU renderer.
 		 */
 		static MAX_TEXTS: number;
+
+		/** ⚙
+		 * The maximum number of transformation matrices
+		 * that can be used per frame, with the WebGPU renderer.
+		 * 
+		 * By default, it's set to use the entire 128 MB default limit of `maxStorageBufferBindingSize`.  
+		 * https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits
+		 */
+		static MAX_TRANSFORMS: number;
+
+		/** ⚙
+		 * The maximum number of images (calls to `image` and `textImage`)
+		 * that can be drawn per frame, with the WebGPU renderer.
+		 */
+		static MAX_IMAGES: number;
+
+		/** ⚙
+		 * The maximum number of vertices in shapes
+		 * (created by calls to `endShape`,
+		 * `triangle`, `quad`, `curve`, and `bezier`)
+		 * that can be used per frame, with the WebGPU renderer.
+		 */
+		static MAX_SHAPE_VERTS: number;
 
 		/** ⚙
 		 * Creates a new Q5 instance that uses [q5's WebGPU renderer](https://github.com/q5js/q5.js/wiki/q5-WebGPU-renderer).

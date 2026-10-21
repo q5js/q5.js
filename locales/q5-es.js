@@ -295,10 +295,14 @@ Q5.addLang({
 			errorTolerant: 'toleranteErrores',
 			supportsHDR: 'soportaHDR',
 			canvasOptions: 'opcionesLienzo',
+			MAX_COLORS: 'MAX_COLORES',
+			MAX_RECTS: 'MAX_RECTANGULOS',
 			MAX_ELLIPSES: 'MAX_ELIPSES',
 			MAX_TRANSFORMS: 'MAX_TRANSFORMACIONES',
 			MAX_CHARS: 'MAX_CARACTERES',
-			MAX_TEXTS: 'MAX_TEXTOS'
+			MAX_TEXTS: 'MAX_TEXTOS',
+			MAX_IMAGES: 'MAX_IMAGENES',
+			MAX_SHAPE_VERTS: 'MAX_VERTICES_FORMAS'
 		},
 		Vector: {
 			add: 'sumar',

@@ -84,24 +84,21 @@ per-canvas options you pass to `Canvas`.
 @default { alpha: false, colorSpace: 'display-p3' }
 ```
 
-## Q5.MAX_TRANSFORMS
+## Q5.MAX_COLORS
 
-A WebGPU memory allocation limit.
-
-The maximum number of transformation matrixes
-that can be used per frame.
+The maximum number of q5 colors
+(created by calls to `color`, `background`, `fill`, `stroke`, and `tint`)
+that can be stored per frame, with the WebGPU renderer.
 
 ```
-@default 1000000
+@default 250000
 ```
 
 ## Q5.MAX_RECTS
 
-A WebGPU memory allocation limit.
-
 The maximum number of rectangles
 (calls to `rect`, `square`, `capsule`)
-that can be drawn per frame.
+that can be drawn per frame, with the WebGPU renderer.
 
 ```
 @default 200200
@@ -109,11 +106,9 @@ that can be drawn per frame.
 
 ## Q5.MAX_ELLIPSES
 
-A WebGPU memory allocation limit.
-
 The maximum number of ellipses
 (calls to `ellipse`, `circle`, and `arc`)
-that can be drawn per frame.
+that can be drawn per frame, with the WebGPU renderer.
 
 ```
 @default 200200
@@ -121,10 +116,8 @@ that can be drawn per frame.
 
 ## Q5.MAX_CHARS
 
-A WebGPU memory allocation limit.
-
 The maximum number of text characters
-that can be drawn per frame.
+that can be drawn per frame, with the WebGPU renderer.
 
 ```
 @default 100000
@@ -132,13 +125,43 @@ that can be drawn per frame.
 
 ## Q5.MAX_TEXTS
 
-A WebGPU memory allocation limit.
-
 The maximum number of separate calls to `text`
-that can be drawn per frame.
+that can be drawn per frame, with the WebGPU renderer.
 
 ```
 @default 10000
+```
+
+## Q5.MAX_TRANSFORMS
+
+The maximum number of transformation matrices
+that can be used per frame, with the WebGPU renderer.
+
+By default, it's set to use the entire 128 MB default limit of `maxStorageBufferBindingSize`.  
+https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits
+
+```
+@default 2097152
+```
+
+## Q5.MAX_IMAGES
+
+The maximum number of images (calls to `image` and `textImage`)
+that can be drawn per frame, with the WebGPU renderer.
+
+```
+@default 350000
+```
+
+## Q5.MAX_SHAPE_VERTS
+
+The maximum number of vertices in shapes
+(created by calls to `endShape`,
+`triangle`, `quad`, `curve`, and `bezier`)
+that can be used per frame, with the WebGPU renderer.
+
+```
+@default 350000
 ```
 
 ## Q5.WebGPU

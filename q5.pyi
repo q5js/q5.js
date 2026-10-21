@@ -4338,37 +4338,45 @@ class Q5:
 canvases and internal graphics. These options are overwritten by any
 per-canvas options you pass to Canvas."""
 
-	MAX_TRANSFORMS: float
-	"""⚙ A WebGPU memory allocation limit.
-
-The maximum number of transformation matrixes
-that can be used per frame."""
+	MAX_COLORS: float
+	"""⚙ The maximum number of q5 colors
+(created by calls to color, background, fill, stroke, and tint)
+that can be stored per frame, with the WebGPU renderer."""
 
 	MAX_RECTS: float
-	"""⚙ A WebGPU memory allocation limit.
-
-The maximum number of rectangles
+	"""⚙ The maximum number of rectangles
 (calls to rect, square, capsule)
-that can be drawn per frame."""
+that can be drawn per frame, with the WebGPU renderer."""
 
 	MAX_ELLIPSES: float
-	"""⚙ A WebGPU memory allocation limit.
-
-The maximum number of ellipses
+	"""⚙ The maximum number of ellipses
 (calls to ellipse, circle, and arc)
-that can be drawn per frame."""
+that can be drawn per frame, with the WebGPU renderer."""
 
 	MAX_CHARS: float
-	"""⚙ A WebGPU memory allocation limit.
-
-The maximum number of text characters
-that can be drawn per frame."""
+	"""⚙ The maximum number of text characters
+that can be drawn per frame, with the WebGPU renderer."""
 
 	MAX_TEXTS: float
-	"""⚙ A WebGPU memory allocation limit.
+	"""⚙ The maximum number of separate calls to text
+that can be drawn per frame, with the WebGPU renderer."""
 
-The maximum number of separate calls to text
-that can be drawn per frame."""
+	MAX_TRANSFORMS: float
+	"""⚙ The maximum number of transformation matrices
+that can be used per frame, with the WebGPU renderer.
+
+By default, it's set to use the entire 128 MB default limit of maxStorageBufferBindingSize.  
+https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits"""
+
+	MAX_IMAGES: float
+	"""⚙ The maximum number of images (calls to image and textImage)
+that can be drawn per frame, with the WebGPU renderer."""
+
+	MAX_SHAPE_VERTS: float
+	"""⚙ The maximum number of vertices in shapes
+(created by calls to endShape,
+triangle, quad, curve, and bezier)
+that can be used per frame, with the WebGPU renderer."""
 
 	def WebGPU(self) -> Q5:
 		"""⚙ Creates a new Q5 instance that uses q5's WebGPU renderer."""
