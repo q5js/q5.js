@@ -187,7 +187,7 @@ function Q5(scope, parent, renderer) {
 		$._removed = true;
 		$.noLoop();
 		$._removeInputListeners?.();
-		$.canvas?.remove();
+		if ($.canvas?.remove) $.canvas.remove();
 		let i = Q5.instances.indexOf($);
 		if (i !== -1) Q5.instances.splice(i, 1);
 		return runHooks('remove');
@@ -9054,38 +9054,6 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			$._pipelines.length =
 			$._pipelineConfigs.length =
 				0;
-
-		$._customDrawHandlers = $._customBindHandlers = {};
-
-		frameA =
-			frameB =
-			mainView =
-			frameBindGroup =
-			frameBindGroupA =
-			frameBindGroupB =
-			frameLayout =
-			frameSampler =
-			encoder =
-			pass =
-			uniformBuffer =
-			transformsBuffer =
-			colorsBuffer =
-			shapesVertBuff =
-			imgVertBuff =
-			charBuffer =
-			textBuffer =
-			rectBuffer =
-			rectIndexBuffer =
-			ellipseBuffer =
-			ellipseIndexBuffer =
-			mainBindGroup =
-			lastTransformsBuffer =
-			lastColorsBuffer =
-			$._frameA =
-			$._frameB =
-			$._texture =
-			$._g =
-				null;
 
 		return result;
 	};

@@ -3632,38 +3632,6 @@ fn fragMain(f : FragParams) -> @location(0) vec4f {
 			$._pipelineConfigs.length =
 				0;
 
-		$._customDrawHandlers = $._customBindHandlers = {};
-
-		frameA =
-			frameB =
-			mainView =
-			frameBindGroup =
-			frameBindGroupA =
-			frameBindGroupB =
-			frameLayout =
-			frameSampler =
-			encoder =
-			pass =
-			uniformBuffer =
-			transformsBuffer =
-			colorsBuffer =
-			shapesVertBuff =
-			imgVertBuff =
-			charBuffer =
-			textBuffer =
-			rectBuffer =
-			rectIndexBuffer =
-			ellipseBuffer =
-			ellipseIndexBuffer =
-			mainBindGroup =
-			lastTransformsBuffer =
-			lastColorsBuffer =
-			$._frameA =
-			$._frameB =
-			$._texture =
-			$._g =
-				null;
-
 		return result;
 	};
 };

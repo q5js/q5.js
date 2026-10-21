@@ -187,7 +187,7 @@ function Q5(scope, parent, renderer) {
 		$._removed = true;
 		$.noLoop();
 		$._removeInputListeners?.();
-		$.canvas?.remove();
+		if ($.canvas?.remove) $.canvas.remove();
 		let i = Q5.instances.indexOf($);
 		if (i !== -1) Q5.instances.splice(i, 1);
 		return runHooks('remove');
