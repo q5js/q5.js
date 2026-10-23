@@ -11,7 +11,7 @@ const indent = '  ';
 // Lines the runtime wrappers add above the user's first line. Used to map
 // error line numbers back to what the person sees in the editor.
 const JS_WRAPPER_LINES = 7; // `new Function` header + our async/with wrapper, as reported by V8
-const PY_WRAPPER_LINES = 2; // blank line + `async def __run(q):`
+const PY_WRAPPER_LINES = 3; // blank line + `async def __run(q):` + global declarations / pass
 
 let monacoPromise,
 	brythonPromise,
@@ -798,10 +798,12 @@ def _sync_state(q, ns):
 				ns[alias] = val
 
 def _sync_and_call(q, fn, ns):
+	code = getattr(fn, '__code__', None)
+	pass_args = code is None or code.co_argcount > 0 or code.co_flags & 4
 	def _wrapper(*args):
 		try:
 			_sync_state(q, ns)
-			return fn(*args)
+			return fn(*args) if pass_args else fn()
 		except Exception as e:
 			window._pyErr(_err(), None, q)
 			if not window.Q5.errorTolerant: q.noLoop()
@@ -899,10 +901,23 @@ window._runPy = _run_py
 
 	// Wrap user code in an async function so it can use `await` at the top level
 	wrapPy(code) {
+		const parts = code.split(/("""[\s\S]*?"""|\'\'\'[\s\S]*?''')/g);
+
+		const globalNames = new Set();
+		for (let i = 0; i < parts.length; i += 2) {
+			for (const m of parts[i].matchAll(/^[ \t]*global[ \t]+([^\n#;]*)/gm)) {
+				for (const name of m[1].split(',')) {
+					const n = name.trim();
+					if (n != 'q' && /^[\p{L}_][\p{L}\p{M}\p{N}_]*$/u.test(n)) globalNames.add(n);
+				}
+			}
+		}
+
 		code = MiniEditor.indentPy(code, indent);
 
 		return `
 async def __run(q):
+${indent}${globalNames.size ? 'global ' + [...globalNames].join(', ') : 'pass'}
 ${indent}${code}
 
 ${indent}_wrap_fns(q, locals(), ns)

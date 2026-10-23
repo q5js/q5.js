@@ -87,6 +87,7 @@ def dibujar():
 	shader(wobble)
 	plano(0, 0, 100)
 ```
+
 ```py
 Lienzo(200)
 
@@ -311,6 +312,7 @@ def dibujar():
 	shader(grate)
 	imagen(logo, 0, 0, 180, 180)
 
+#
 ```
 
 ## crearShaderVideo

@@ -171,6 +171,7 @@ Canvas(200)
 gray = 0.4
 
 def mousePressed():
+	global gray
 	background(gray % 1)
 	gray += 0.1
 ```
@@ -210,6 +211,7 @@ Canvas(200)
 gray = 0.4
 
 def mouseReleased():
+	global gray
 	background(gray % 1)
 	gray += 0.1
 ```
@@ -252,6 +254,7 @@ Canvas(200)
 gray = 0.4
 
 def mouseMoved():
+	global gray
 	background(gray % 1)
 	gray += 0.005
 ```
@@ -294,6 +297,7 @@ Canvas(200)
 gray = 0.4
 
 def mouseDragged():
+	global gray
 	background(gray % 1)
 	gray += 0.005
 ```
@@ -333,6 +337,7 @@ Canvas(200)
 gray = 0.4
 
 def doubleClicked():
+	global gray
 	background(gray % 1)
 	gray += 0.1
 ```
@@ -440,7 +445,7 @@ q5.draw = function () {
 def draw():
 	background(0.8)
 
-	if keyIsDown('f': && keyIsDown('j'))
+	if keyIsDown('f') and keyIsDown('j'):
 		rect(-50, -50, 100, 100)
 ```
 
@@ -479,6 +484,7 @@ Canvas(200)
 gray = 0.4
 
 def keyPressed():
+	global gray
 	background(gray % 1)
 	gray += 0.1
 ```
@@ -518,6 +524,7 @@ Canvas(200)
 gray = 0.4
 
 def keyReleased():
+	global gray
 	background(gray % 1)
 	gray += 0.1
 ```
@@ -559,7 +566,7 @@ q5.draw = function () {
 ```py
 def draw():
 	background(0.8)
-	for (let pt of pointers)
+	for pt in pointers:
 		circle(pt.x, pt.y, 100)
 ```
 
@@ -601,6 +608,7 @@ Canvas(200)
 gray = 0.4
 
 def touchStarted():
+	global gray
 	background(gray % 1)
 	gray += 0.1
 ```
@@ -644,6 +652,7 @@ Canvas(200)
 gray = 0.4
 
 def touchEnded():
+	global gray
 	background(gray % 1)
 	gray += 0.1
 ```
@@ -687,6 +696,7 @@ Canvas(200)
 gray = 0.4
 
 def touchMoved():
+	global gray
 	background(gray % 1)
 	gray += 0.005
 ```
@@ -792,7 +802,9 @@ x = 0
 y = 0
 def draw():
 	circle(x, y, 10)
+
 def mouseWheel(e):
+	global x, y
 	x += e.deltaX
 	y += e.deltaY
 	return False
@@ -895,10 +907,10 @@ def draw():
 	circle(mouseX / 10, mouseY / 10, 10)
 
 def doubleClicked():
-	if !document.pointerLockElement:
+	if not document.pointerLockElement:
 		pointerLock()
-		} else
-			document.exitPointerLock()
+	else:
+		document.exitPointerLock()
 ```
 
 ### c2d

@@ -362,6 +362,7 @@ pausar()
 
 def dibujar():
 	circulo(cuadroActual * 5 - 100, 0, 80)
+
 def alPresionarRatón():
 	redibujar(10)
 ```
@@ -406,6 +407,7 @@ pausar()
 
 def dibujar():
 	circulo(cuadroActual * 5 - 100, 0, 80)
+
 def alPresionarRatón():
 	reanudar()
 ```
@@ -470,6 +472,7 @@ def dibujar():
 
 	circulo((cuadroActual % 200) - 100, 0, 80)
 ```
+
 ```py
 def dibujar():
 	fondo(0.8)
@@ -721,12 +724,13 @@ def dibujar():
 	fondo(0.8)
 	texto(deltaTiempo, -90, 6)
 ```
+
 ```py
 x = -100
 def dibujar():
 	global x
 	fondo(0.8)
-
+	# simular caídas de frecuencia de fotogramas
 	frecuenciaRefresco(aleatorio(30, 60))
 
 	x += deltaTiempo * 0.2

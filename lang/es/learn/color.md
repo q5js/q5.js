@@ -38,7 +38,7 @@ Aquí hay algunos ejemplos de uso válido:
 await Lienzo(200);
 rect(-100, -100, 100, 200);
 
-//                ( r,   g,   b,   a)
+//                 (   r,    g, b,   a)
 let botella = color(0.35, 0.39, 1, 0.4);
 relleno(botella);
 trazo(botella);
@@ -76,16 +76,17 @@ q5.dibujar = function () {
 Lienzo(200)
 rect(-100, -100, 100, 200)
 
-
+#              (   r,    g, b,   a)
 botella = color(0.35, 0.39, 1, 0.4)
 relleno(botella)
 trazo(botella)
 grosorTrazo(30)
 circulo(0, 0, 155)
 ```
+
 ```py
 Lienzo(200)
-
+#        (gris, alfa)
 c = color(0.8, 0.2)
 
 def dibujar():
@@ -93,10 +94,11 @@ def dibujar():
 	circulo(ratonX, ratonY, 50)
 	c.g = (c.g + 0.005) % 1
 ```
+
 ```py
 Lienzo(200)
 
-
+#        (r, g, b,   a)
 c = color(0, 1, 1, 0.2)
 
 def dibujar():
@@ -209,6 +211,7 @@ rect(-34, -100, 67, 200)
 relleno(0, 0, 1)
 rect(33, -100, 67, 200)
 ```
+
 ```py
 Lienzo(200)
 
@@ -341,6 +344,7 @@ modoColor(OKLCH)
 
 fondo(0.64, 0.3, 30)
 ```
+
 ```py
 Lienzo(200)
 modoColor(OKLCH)
@@ -421,13 +425,14 @@ modoColor(HSL)
 
 fondo(0, 100, 50)
 ```
+
 ```py
 Lienzo(200, 220)
 sinTrazo()
 
 modoColor(HSL)
 for h in range(0, 360, 10):
-	for l in range(0, (100) + 1, 10):
+	for l in range(0, 101, 10):
 		relleno(h, 100, l)
 		rect(h * (11 / 20) - 100, l * 2 - 110, 6, 20)
 ```
@@ -502,13 +507,14 @@ modoColor(HSB)
 
 fondo(0, 100, 100)
 ```
+
 ```py
 Lienzo(200, 220)
 sinTrazo()
 
 modoColor(HSB)
 for h in range(0, 360, 10):
-	for b in range(0, (100) + 1, 10):
+	for b in range(0, 101, 10):
 		relleno(h, 100, b)
 		rect(h * (11 / 20) - 100, b * 2 - 110, 6, 20)
 ```
@@ -645,6 +651,7 @@ q5.dibujar = function () {
 Lienzo(200, 100)
 fondo('crimson')
 ```
+
 ```py
 def dibujar():
 	fondo(0.5, 0.2)

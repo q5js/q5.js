@@ -445,7 +445,7 @@ q5.dibujar = function () {
 def dibujar():
 	fondo(0.8)
 
-	if teclaEstaPresionada('f')  and  teclaEstaPresionada('j'):
+	if teclaEstaPresionada('f') and teclaEstaPresionada('j'):
 		rect(-50, -50, 100, 100)
 ```
 
@@ -796,11 +796,12 @@ q5.ruedaRaton = function (e) {
 ### python
 
 ```py
-x = (y := 0)
+x = (y = 0)
 def dibujar():
 	circulo(x, y, 10)
+
 def ruedaRaton(e):
-	global x, y
+	global x
 	x += e.deltaX
 	y += e.deltaY
 	return False

@@ -55,7 +55,8 @@ const runPython = async function () {
 	}
 
 	// strip `from q5 import *` — it's only used for type hints (q5.pyi)
-	code = code.startsWith('from q5') ? code.slice(code.indexOf('\n') + 1) : code;
+	const removedLines = code.startsWith('from q5') ? 1 : 0;
+	if (removedLines) code = code.slice(code.indexOf('\n') + 1);
 
 	const useWebGPU = !code.slice(0, code.indexOf('\n')).includes('C2D'),
 		q = useWebGPU ? await Q5.WebGPU() : new Q5();
@@ -65,15 +66,34 @@ const runPython = async function () {
 	let pyReady;
 	q._loaders.push(new Promise((res) => (pyReady = res)));
 
+	// split the code into parts, the odd ones are triple-quoted strings
+	const parts = code.split(/("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')/g);
+
+	// Find the names the code declares with the `global` keyword, like in
+	// `def draw(): global score`. The code is nested inside the __run function
+	// (so `await` works at the top level), which makes its top-level variables
+	// locals of __run instead of module globals, so `global score` in a function
+	// wouldn't find `score = 0` from the top level. Declaring these names global
+	// in __run too makes them the same variable in every scope, like they
+	// would be in a regular Python module.
+	const globalNames = new Set();
+	for (let i = 0; i < parts.length; i += 2) {
+		for (const m of parts[i].matchAll(/^[ \t]*global[ \t]+([^\n#;]*)/gm)) {
+			for (const name of m[1].split(',')) {
+				const n = name.trim();
+				// q is the parameter of __run, a parameter can't also be global
+				if (n != 'q' && /^[\p{L}_][\p{L}\p{M}\p{N}_]*$/u.test(n)) globalNames.add(n);
+			}
+		}
+	}
+
 	// add a tab before each line of code to nest it inside the __run function
 	// but not within triple-quoted strings
-	code = code
-		.split(/("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')/g)
-		.map((part, i) => (i % 2 === 0 ? part.replaceAll('\n', '\n\t') : part))
-		.join('');
+	code = parts.map((part, i) => (i % 2 === 0 ? part.replaceAll('\n', '\n\t') : part)).join('');
 
 	code = `
 async def __run(q):
+	${globalNames.size ? 'global ' + [...globalNames].join(', ') : 'pass'}
 	${code}
 
 	_wrap_fns(q, locals(), ns)
@@ -107,7 +127,10 @@ async def __run(q):
 		let file = scripts[0].src || scripts[0]['data-filename'] || 'sketch.py';
 		file = file.split('/').at(-1);
 
-		lineNum -= 2; // adjust for the wrapper code lines
+		// adjust for the 3 wrapper code lines (blank, `async def`, `global`)
+		// and for the `from q5 import *` line if it was removed
+		lineNum -= 3 - removedLines;
+
 		if (Q5.friendlyError) Q5.friendlyError(file, lineNum, err);
 		else console.error(`Error in ${file} on line ${lineNum}:\n\n${err}`);
 	};
@@ -144,10 +167,12 @@ def _sync_state(q, ns):
 				ns[alias] = val
 
 def _sync_and_call(q, fn, ns):
+	code = getattr(fn, '__code__', None)
+	pass_args = code is None or code.co_argcount > 0 or code.co_flags & 4
 	def _wrapper(*args):
 		try:
 			_sync_state(q, ns)
-			return fn(*args)
+			return fn(*args) if pass_args else fn()
 		except Exception as e:
 			window._pyErr(_err(), None, q)
 			if not window.Q5.errorTolerant: q.noLoop()

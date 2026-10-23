@@ -197,7 +197,7 @@ logo = load('/q5js_logo.avif')
 def draw():
 	imageMode(CORNER)
 
-	# ( img,   x,   y,   w,   h)
+	#    ( img,   x,   y,   w,   h)
 	image(logo, -50, -50, 100, 100)
 ```
 
@@ -208,7 +208,7 @@ logo = load('/q5js_logo.avif')
 def draw():
 	imageMode(CENTER)
 
-	# (img, cX, cY,  w,   h)
+	#    (img, cX, cY,  w,   h)
 	image(logo, 0, 0, 100, 100)
 ```
 
@@ -219,7 +219,7 @@ logo = load('/q5js_logo.avif')
 def draw():
 	imageMode(CORNERS)
 
-	# ( img,  x1,  y1, x2, y2)
+	#    ( img,  x1,  y1, x2, y2)
 	image(logo, -50, -50, 50, 50)
 ```
 
@@ -712,8 +712,9 @@ icon = load('/q5js_icon.png')
 
 def draw():
 	icon.loadPixels()
-	for i in range(0, icon.pixels.length, 16):
-		icon.pixels[i + 1] = random(1)
+	for i in range(0, len(icon.pixels), 16):
+		icon.pixels[i + 1] = random(255)
+
 	icon.updatePixels()
 	background(icon)
 ```
@@ -768,6 +769,7 @@ img = createImage(50, 50)
 for x in range(0, 50, 3):
 	for y in range(0, 50, 3):
 		img.set(x, y, c)
+
 img.updatePixels()
 
 background(img)

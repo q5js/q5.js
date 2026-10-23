@@ -360,7 +360,7 @@ Canvas(200, 100)
 background(0.8)
 rectMode(CORNER)
 
-# (  x,   y,   w,  h)
+#   (  x,   y,   w,  h)
 rect(-50, -25, 100, 50)
 ```
 
@@ -369,7 +369,7 @@ Canvas(200, 100)
 background(0.8)
 rectMode(CENTER)
 
-# (cX, cY, w,  h)
+#   (cX, cY, w,  h)
 rect(0, 0, 100, 50)
 ```
 
@@ -378,7 +378,7 @@ Canvas(200, 100)
 background(0.8)
 rectMode(RADIUS)
 
-# (cX, cY, rX, rY)
+#   (cX, cY, rX, rY)
 rect(0, 0, 50, 25)
 ```
 
@@ -387,7 +387,7 @@ Canvas(200, 100)
 background(0.8)
 rectMode(CORNERS)
 
-# ( x1,  y1, x2, y2)
+#   ( x1,  y1, x2, y2)
 rect(-50, -25, 50, 25)
 ```
 
@@ -485,7 +485,7 @@ Canvas(200, 100)
 background(0.8)
 ellipseMode(CENTER)
 
-# (x, y,   w,  h)
+#      (x, y,   w,  h)
 ellipse(0, 0, 100, 50)
 ```
 
@@ -494,7 +494,7 @@ Canvas(200, 100)
 background(0.8)
 ellipseMode(RADIUS)
 
-# (x, y, rX, rY)
+#      (x, y, rX, rY)
 ellipse(0, 0, 50, 25)
 ```
 
@@ -503,7 +503,7 @@ Canvas(200, 100)
 background(0.8)
 ellipseMode(CORNER)
 
-# ( lX,  tY,   w,  h)
+#      ( lX,  tY,   w,  h)
 ellipse(-50, -25, 100, 50)
 ```
 
@@ -512,7 +512,7 @@ Canvas(200, 100)
 background(0.8)
 ellipseMode(CORNERS)
 
-# ( x1,  y1, x2, y2)
+#      ( x1,  y1, x2, y2)
 ellipse(-50, -25, 50, 25)
 ```
 

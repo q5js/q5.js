@@ -104,7 +104,7 @@ def draw():
 	square(mouseX, jit(100), 10)
 
 def mousePressed():
-	if !recording: record()
+	if not recording: record()
 	else: saveRecording('squares')
 ```
 

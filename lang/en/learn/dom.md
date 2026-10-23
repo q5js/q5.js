@@ -105,9 +105,10 @@ link = createA('https://q5js.org', 'q5.js')
 link.position(16, 42)
 link.style.fontSize = '80px'
 
-link.addEventListener('mouseover', () =>
+def cb0():
 	background('cyan')
-	})
+
+link.addEventListener('mouseover', cb0)
 ```
 
 ### c2d
@@ -151,9 +152,10 @@ Canvas(200, 100)
 
 btn = createButton('Click me!')
 
-btn.addEventListener('click', () =>
+def cb0():
 	background(random(0.4, 1))
-	})
+
+btn.addEventListener('click', cb0)
 ```
 
 ### c2d
@@ -203,10 +205,11 @@ Canvas(200, 100)
 box = createCheckbox('Check me!')
 box.label.style.color = 'lime'
 
-box.addEventListener('input', () =>
+def cb0():
 	if box.checked: background('lime')
 	else: background('black')
-	})
+
+box.addEventListener('input', cb0)
 ```
 
 ### c2d
@@ -348,10 +351,11 @@ input = createInput()
 input.placeholder = 'Type here!'
 input.size(200, 32)
 
-input.addEventListener('input', () =>
+def cb0():
 	background('orange')
 	text(input.value, -90, 30)
-	})
+
+input.addEventListener('input', cb0)
 ```
 
 ### c2d
@@ -509,9 +513,10 @@ sel = createSelect('Select an option')
 sel.option('Red', '#f55')
 sel.option('Green', '#5f5')
 
-sel.addEventListener('change', () =>
+def cb0():
 	background(sel.value)
-	})
+
+sel.addEventListener('change', cb0)
 ```
 
 ### c2d
@@ -640,6 +645,7 @@ vid.hide()
 def mousePressed():
 	vid.currentTime = 0
 	vid.play()
+
 def draw():
 	rotate(mouseX / 55)
 	image(vid, -100, -75, 200, 150)
@@ -735,8 +741,9 @@ def mousePressed():
 ```
 
 ```py
-cap
+cap = None
 def mousePressed():
+	global cap
 	cap = createCapture(VIDEO)
 	cap.hide()
 
@@ -747,11 +754,11 @@ def draw():
 
 ```py
 def mousePressed():
-	cap = createCapture(
-		video: { width: 640, height: 480 }
-		})
-		cap.size(200, 150)
-		canvas.remove()
+	cap = createCapture({
+		'video': { 'width': 640, 'height': 480 }
+	})
+	cap.size(200, 150)
+	canvas.remove()
 ```
 
 ### c2d

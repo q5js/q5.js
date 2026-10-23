@@ -40,6 +40,7 @@ logo = cargarImagen('/q5js_logo.avif')
 def dibujar():
 	fondo(logo)
 ```
+
 ```py
 Lienzo(200)
 
@@ -107,6 +108,7 @@ logo = cargarImagen('/q5js_logo.avif')
 def dibujar():
 	imagen(logo, -100, -100, 200, 200)
 ```
+
 ```py
 Lienzo(200)
 
@@ -195,9 +197,10 @@ logo = cargarImagen('/q5js_logo.avif')
 def dibujar():
 	modoImagen(CORNER)
 
-
+	#     ( img,  x,  y,   w,   h)
 	imagen(logo, -50, -50, 100, 100)
 ```
+
 ```py
 Lienzo(200)
 logo = cargarImagen('/q5js_logo.avif')
@@ -205,9 +208,10 @@ logo = cargarImagen('/q5js_logo.avif')
 def dibujar():
 	modoImagen(CENTER)
 
-
+	#     ( img,  cX,  cY,   w,   h)
 	imagen(logo, 0, 0, 100, 100)
 ```
+
 ```py
 Lienzo(200)
 logo = cargarImagen('/q5js_logo.avif')
@@ -215,7 +219,7 @@ logo = cargarImagen('/q5js_logo.avif')
 def dibujar():
 	modoImagen(CORNERS)
 
-
+	#     ( img, x1, y1,  x2,  y2)
 	imagen(logo, -50, -50, 50, 50)
 ```
 
@@ -706,8 +710,9 @@ icono = cargarImagen('/q5js_icon.png')
 
 def dibujar():
 	icono.cargarPixeles()
-	for i in range(0, icono.pixeles.length, 16):
+	for i in range(0, len(icono.pixeles), 16):
 		icono.pixeles[i + 1] = aleatorio(255)
+
 	icono.actualizarPixeles()
 	fondo(icono)
 ```
@@ -762,6 +767,7 @@ img = crearImagen(50, 50)
 for x in range(0, 50, 3):
 	for y in range(0, 50, 3):
 		img.establecer(x, y, c)
+
 img.actualizarPixeles()
 
 fondo(img)

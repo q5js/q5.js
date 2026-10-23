@@ -360,6 +360,7 @@ noLoop()
 
 def draw():
 	circle(frameCount * 5 - 100, 0, 80)
+
 def mousePressed():
 	redraw(10)
 ```
@@ -404,6 +405,7 @@ noLoop()
 
 def draw():
 	circle(frameCount * 5 - 100, 0, 80)
+
 def mousePressed():
 	loop()
 ```
@@ -724,6 +726,7 @@ def draw():
 ```py
 x = -100
 def draw():
+	global x
 	background(0.8)
 	# simulate frame rate drops
 	frameRate(random(30, 60))

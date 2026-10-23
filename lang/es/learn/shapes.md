@@ -267,6 +267,7 @@ fondo(0.8)
 grosorTrazo(5)
 capsula(-60, -10, 60, 10, 10)
 ```
+
 ```py
 def dibujar():
 	fondo(0.8)
@@ -349,31 +350,34 @@ Lienzo(200, 100)
 fondo(0.8)
 modoRect(ESQUINA)
 
-
+#   ( x,  y,   w,  h)
 rect(-50, -25, 100, 50)
 ```
+
 ```py
 Lienzo(200, 100)
 fondo(0.8)
 modoRect(CENTRO)
 
-
+#   ( cX, cY,   w,  h)
 rect(0, 0, 100, 50)
 ```
+
 ```py
 Lienzo(200, 100)
 fondo(0.8)
 modoRect(RADIO)
 
-
+#   ( cX, cY, rX, rY)
 rect(0, 0, 50, 25)
 ```
+
 ```py
 Lienzo(200, 100)
 fondo(0.8)
 modoRect(ESQUINAS)
 
-
+#   ( x1, y1, x2, y2)
 rect(-50, -25, 50, 25)
 ```
 
@@ -471,31 +475,34 @@ Lienzo(200, 100)
 fondo(0.8)
 modoEliptico(CENTRO)
 
-
+#     (  x,  y,   w,  h)
 elipse(0, 0, 100, 50)
 ```
+
 ```py
 Lienzo(200, 100)
 fondo(0.8)
 modoEliptico(RADIO)
 
-
+#     (  x,  y, rX, rY)
 elipse(0, 0, 50, 25)
 ```
+
 ```py
 Lienzo(200, 100)
 fondo(0.8)
 modoEliptico(ESQUINA)
 
-
+#     (lX, tY,   w,  h)
 elipse(-50, -25, 100, 50)
 ```
+
 ```py
 Lienzo(200, 100)
 fondo(0.8)
 modoEliptico(ESQUINAS)
 
-
+#     ( x1, y1, x2, y2)
 elipse(-50, -25, 50, 25)
 ```
 

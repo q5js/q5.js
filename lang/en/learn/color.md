@@ -76,7 +76,7 @@ q5.draw = function () {
 Canvas(200)
 rect(-100, -100, 100, 200)
 
-# ( r,   g,   b,   a)
+#             ( r,   g,   b,   a)
 bottle = color(0.35, 0.39, 1, 0.4)
 fill(bottle)
 stroke(bottle)
@@ -86,7 +86,7 @@ circle(0, 0, 155)
 
 ```py
 Canvas(200)
-# (gray, alpha)
+#        (gray, alpha)
 c = color(0.8, 0.2)
 
 def draw():
@@ -98,7 +98,7 @@ def draw():
 ```py
 Canvas(200)
 
-# (r, g, b,   a)
+#        (r, g, b,   a)
 c = color(0, 1, 1, 0.2)
 
 def draw():

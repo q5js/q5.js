@@ -50,9 +50,12 @@ Canvas(200)
 background(0.8)
 textSize(20)
 
-info = 'q5.js was designed to make creative coding fun and accessible for artists, designers, educators, and beginners.'
+info =
+	'q5.js was designed to make creative coding fun and accessible for artists, designers, educators, and beginners.'
 
 text(info, -88, -70, 20)
+#
+#
 ```
 
 ### c2d
@@ -155,12 +158,14 @@ def draw():
 	fill('hotpink')
 	textSize(68)
 	text('Hello!', -98, 31)
+
+#
 ```
 
 ```py
 Canvas(200, 74)
 
-await loadFont('sans-serif');  # msdf
+await loadFont('sans-serif') # msdf
 
 fill('white')
 textSize(68)
@@ -788,7 +793,7 @@ textAlign(CENTER, CENTER)
 
 points = textToPoints('5')
 
-for (let pt of points)
+for pt in points:
 	rect(pt.x, pt.y, 5, 20)
 ```
 
@@ -802,7 +807,7 @@ strokeWeight(8)
 pts = textToPoints('q', -100, 56)
 
 strokeWeight(1)
-for (let pt of pts)
+for pt in pts:
 	ellipse(pt.x, pt.y, 10, 0.1)
 ```
 

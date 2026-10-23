@@ -69,39 +69,39 @@ q5.draw = function () {
 ```py
 Canvas(200)
 
-wobble = createShader(`
+wobble = createShader("""
 @vertex
-fn vertexMain(v: VertexParams) -> FragParams
-	vert = transformVertex(v.pos, v.matrixIndex)
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
 
-	i = f32(v.vertexIndex) % 4 * 100
-	vert.x += cos((q.time + i) * 0.01) * 0.1
+  let i = f32(v.vertexIndex) % 4 * 100;
+  vert.x += cos((q.time + i) * 0.01) * 0.1;
 
-	f: FragParams
-	f.position = vert
-	f.color = vec4f(1, 0, 0, 1)
-	return f
-	}`)
+	var f: FragParams;
+	f.position = vert;
+	f.color = vec4f(1, 0, 0, 1);
+	return f;
+}""")
 
-	def draw():
-		clear()
-		shader(wobble)
-		plane(0, 0, 100)
+def draw():
+	clear()
+	shader(wobble)
+	plane(0, 0, 100)
 ```
 
 ```py
 Canvas(200)
 
-stripes = createShader(`
+stripes = createShader("""
 @fragment
-fn fragMain(f: FragParams) -> @location(0) vec4f
-	r = cos((q.mouseY + f.position.y) * 0.2)
-	return vec4(r, 0.0, 1, 1)
-	}`)
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let r = cos((q.mouseY + f.position.y) * 0.2);
+	return vec4(r, 0.0, 1, 1);
+}""")
 
-	def draw():
-		shader(stripes)
-		triangle(-50, -50, 0, 50, 50, -50)
+def draw():
+	shader(stripes)
+	triangle(-50, -50, 0, 50, 50, -50)
 ```
 
 ## plane
@@ -167,19 +167,19 @@ q5.draw = function () {
 ```py
 Canvas(200)
 
-stripes = createShader(`
+stripes = createShader("""
 @fragment
-fn fragMain(f: FragParams) -> @location(0) vec4f
-	g = cos((q.mouseY + f.position.y) * 0.05)
-	return vec4(1, g, 0, 1)
-	}`)
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let g = cos((q.mouseY + f.position.y) * 0.05);
+	return vec4(1, g, 0, 1);
+}""")
 
-	def draw():
-		shader(stripes)
-		plane(0, 0, width, height)
+def draw():
+	shader(stripes)
+	plane(0, 0, width, height)
 
-		resetShader()
-		triangle(-50, -50, 0, 50, 50, -50)
+	resetShader()
+	triangle(-50, -50, 0, 50, 50, -50)
 ```
 
 ## resetFrameShader
@@ -240,18 +240,18 @@ stroke(1)
 strokeWeight(8)
 strokeCap(PROJECT)
 
-boxy = createFrameShader(`
+boxy = createFrameShader("""
 @fragment
-fn fragMain(f: FragParams) -> @location(0) vec4f
-	x = sin(f.texCoord.y * 4 + q.time * 0.002)
-	y = cos(f.texCoord.x * 4 + q.time * 0.002)
-	uv = f.texCoord + vec2f(x, y)
-	return textureSample(tex, samp, uv)
-	}`)
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let x = sin(f.texCoord.y * 4 + q.time * 0.002);
+	let y = cos(f.texCoord.x * 4 + q.time * 0.002);
+	let uv = f.texCoord + vec2f(x, y);
+	return textureSample(tex, samp, uv);
+}""")
 
-	def draw():
-		line(mouseX, mouseY, pmouseX, pmouseY)
-		mouseIsPressed ? resetShaders() : shader(boxy)
+def draw():
+	line(mouseX, mouseY, pmouseX, pmouseY)
+	resetShaders() if mouseIsPressed else shader(boxy)
 ```
 
 ## createImageShader
@@ -298,18 +298,20 @@ imageMode(CENTER)
 
 logo = loadImage('/q5js_logo.avif')
 
-grate = createImageShader(`
+grate = createImageShader("""
 @fragment
-fn fragMain(f: FragParams) -> @location(0) vec4f
-	texColor = textureSample(tex, samp, f.texCoord)
-	texColor.b += (q.mouseX + f.position.x) % 20 / 10
-	return texColor
-	}`)
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor = textureSample(tex, samp, f.texCoord);
+	texColor.b += (q.mouseX + f.position.x) % 20 / 10;
+	return texColor;
+}""")
 
-	def draw():
-		background(0.7)
-		shader(grate)
-		image(logo, 0, 0, 180, 180)
+def draw():
+	background(0.7)
+	shader(grate)
+	image(logo, 0, 0, 180, 180)
+
+#
 ```
 
 ## createVideoShader
@@ -371,32 +373,34 @@ Canvas(200, 600)
 vid = createVideo('/assets/apollo4.mp4')
 vid.hide()
 
-flipper = createVideoShader(`
+flipper = createVideoShader("""
 @vertex
-fn vertexMain(v: VertexParams) -> FragParams
-	vert = transformVertex(v.pos, v.matrixIndex)
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
 
-	vi = f32(v.vertexIndex)
-	vert.y *= cos((q.frameCount + vi * 10) * 0.03)
+	var vi = f32(v.vertexIndex);
+	vert.y *= cos((q.frameCount + vi * 10) * 0.03);
 
-	f: FragParams
-	f.position = vert
-	f.texCoord = v.texCoord
-	return f
+	var f: FragParams;
+	f.position = vert;
+	f.texCoord = v.texCoord;
+	return f;
+}
 
 @fragment
-fn fragMain(f: FragParams) -> @location(0) vec4f
-	texColor = textureSampleBaseClampToEdge(tex, samp, f.texCoord)
-	texColor.r = 0
-	texColor.b *= 2
-	return texColor
-	}`)
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor =
+		textureSampleBaseClampToEdge(tex, samp, f.texCoord);
+	texColor.r = 0;
+	texColor.b *= 2;
+	return texColor;
+}""")
 
-	def draw():
-		clear()
-		if mouseIsPressed: vid.play()
-		shader(flipper)
-		image(vid, -100, 150, 200, 150)
+def draw():
+	clear()
+	if mouseIsPressed: vid.play()
+	shader(flipper)
+	image(vid, -100, 150, 200, 150)
 ```
 
 ## createTextShader
@@ -455,33 +459,33 @@ q5.draw = function () {
 Canvas(200)
 textAlign(CENTER, CENTER)
 
-spin = createTextShader(`
+spin = createTextShader("""
 @vertex
-fn vertexMain(v : VertexParams) -> FragParams
-	char = textChars[v.instanceIndex]
-	text = textMetadata[i32(char.w)]
-	fontChar = fontChars[i32(char.z)]
-	pos = calcPos(v.vertexIndex, char, fontChar, text)
+fn vertexMain(v : VertexParams) -> FragParams {
+	let char = textChars[v.instanceIndex];
+	let text = textMetadata[i32(char.w)];
+	let fontChar = fontChars[i32(char.z)];
+	let pos = calcPos(v.vertexIndex, char, fontChar, text);
 
-	vert = transformVertex(pos, text.matrixIndex)
+	var vert = transformVertex(pos, text.matrixIndex);
 
-	i = f32(v.instanceIndex + 1)
-	vert.y *= cos((q.frameCount - 5 * i) * 0.05)
+	let i = f32(v.instanceIndex + 1);
+	vert.y *= cos((q.frameCount - 5 * i) * 0.05);
 
-	f : FragParams
-	f.position = vert
-	f.texCoord = calcUV(v.vertexIndex, fontChar)
-	f.fillColor = colors[i32(text.fillIndex)]
-	f.strokeColor = colors[i32(text.strokeIndex)]
-	f.strokeWeight = text.strokeWeight
-	f.edge = text.edge
-	return f
-	}`)
+	var f : FragParams;
+	f.position = vert;
+	f.texCoord = calcUV(v.vertexIndex, fontChar);
+	f.fillColor = colors[i32(text.fillIndex)];
+	f.strokeColor = colors[i32(text.strokeIndex)];
+	f.strokeWeight = text.strokeWeight;
+	f.edge = text.edge;
+	return f;
+}""")
 
-	def draw():
-		clear()
-		shader(spin)
-		fill(1, 0, 1)
-		textSize(32)
-		text('Hello, World!', 0, 0)
+def draw():
+	clear()
+	shader(spin)
+	fill(1, 0, 1)
+	textSize(32)
+	text('Hello, World!', 0, 0)
 ```

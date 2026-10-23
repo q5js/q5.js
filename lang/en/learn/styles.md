@@ -643,7 +643,7 @@ q5.draw = function () {
 ### python
 
 ```py
-Canvas(200, { alpha: True })
+Canvas(200, { 'alpha': True })
 
 def draw():
 	clear()

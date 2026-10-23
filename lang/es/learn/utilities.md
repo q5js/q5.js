@@ -69,6 +69,7 @@ logo = cargar('/q5js_logo.avif')
 def dibujar():
 	imagen(logo, -100, -100, 200, 200)
 ```
+
 ```py
 Lienzo(200)
 fondo(0.8)
@@ -78,6 +79,7 @@ await cargar('/assets/Robotica.ttf')
 tamañoTexto(28)
 texto('Hello, world!', -97, 100)
 ```
+
 ```py
 Lienzo(200)
 
@@ -86,6 +88,7 @@ Lienzo(200)
 def alPresionarRatón():
 	salto.reproducir() if botónRatón == 'left' else retro.reproducir()
 ```
+
 ```py
 Lienzo(200)
 fondo(0.8)
@@ -95,7 +98,7 @@ miXML = await cargar('/assets/animals.xml')
 mamiferos = miXML.getElementsByTagName('mammal')
 y = -100
 for mamifero in mamiferos:
-	texto(mamifero.textContent, -100, (y := y + 32))
+	texto(mamifero.textContent, -100, (y += 32))
 ```
 
 ### c2d
@@ -157,6 +160,7 @@ circulo(0, 0, 50)
 def alPresionarRatón():
 	guardar('circle.png')
 ```
+
 ```py
 Lienzo(200)
 fondo(0.8)
@@ -264,7 +268,7 @@ animales = await cargarXML('/assets/animals.xml')
 mamiferos = animales.getElementsByTagName('mammal')
 y = 64
 for mamifero in mamiferos:
-	texto(mamifero.textContent, 20, (y := y + 32))
+	texto(mamifero.textContent, 20, (y += 32))
 ```
 
 ## cargarTodo

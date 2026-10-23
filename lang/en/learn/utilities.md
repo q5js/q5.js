@@ -78,8 +78,8 @@ background(0.8)
 
 await load('/assets/Robotica.ttf')
 
-textSize(28)
-text('Hello, world!', -97, 100)
+textSize(64)
+text('Hello!', -97, 97)
 ```
 
 ```py
@@ -90,6 +90,8 @@ Canvas(200)
 def mousePressed():
 	if mouseButton == 'left': jump.play()
 	if mouseButton == 'right': retro.play()
+
+#
 ```
 
 ```py
@@ -100,7 +102,7 @@ textSize(32)
 xml = await load('/assets/animals.xml')
 mammals = xml.querySelectorAll('mammal')
 y = -90
-for (let mammal of mammals)
+for mammal in mammals:
 	text(mammal.textContent, -90, (y += 32))
 ```
 
@@ -229,7 +231,7 @@ Canvas(200)
 def draw():
 	background(0.8)
 
-	if millis(: > 2000)
+	if millis() > 2000:
 		text('Hello, world!', -90, 0)
 ```
 
@@ -302,7 +304,7 @@ textSize(32)
 xml = await load('/assets/animals.xml')
 mammals = xml.querySelectorAll('mammal')
 y = -90
-for (let mammal of mammals)
+for mammal in mammals:
 	text(mammal.textContent, -90, (y += 32))
 ```
 

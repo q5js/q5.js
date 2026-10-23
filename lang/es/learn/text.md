@@ -47,16 +47,18 @@ fondo('silver')
 tamañoTexto(32)
 texto('Hello, world!', -88, 10)
 ```
+
 ```py
 Lienzo(200)
 fondo(0.8)
 tamañoTexto(20)
 
-info = 'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.'
+info =
+	'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.'
 
 texto(info, -88, -70, 20, 6)
-
-
+#
+#
 ```
 
 ### c2d
@@ -151,6 +153,7 @@ relleno('skyblue')
 tamañoTexto(64)
 imagenTexto('Hello!', -98, 24)
 ```
+
 ```py
 Lienzo(200, 74)
 
@@ -161,10 +164,11 @@ def dibujar():
 	tamañoTexto(68)
 	imagenTexto('Hello!', -98, 31)
 ```
+
 ```py
 Lienzo(200, 74)
 
-await cargarFuente('sans-serif')
+await cargarFuente('sans-serif') # msdf
 
 relleno('white')
 tamañoTexto(68)
@@ -245,6 +249,7 @@ def dibujar():
 	tamañoTexto(32)
 	texto('Hello, world!', -96, 10)
 ```
+
 ```py
 Lienzo(200)
 fondo(0.8)
@@ -738,6 +743,7 @@ alineacionTexto(CENTRO, CENTRO)
 
 imagenTexto('🐶', 0, 0)
 ```
+
 ```py
 Lienzo(200)
 

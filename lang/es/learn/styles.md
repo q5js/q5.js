@@ -611,7 +611,7 @@ q5.dibujar = function () {
 ### python
 
 ```py
-Lienzo(200, { "alpha": True })
+Lienzo(200, { 'alpha': True })
 
 def dibujar():
 	limpiar()

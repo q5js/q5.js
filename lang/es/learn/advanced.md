@@ -182,10 +182,11 @@ q.dibujar = () => {
 q = await Q5.WebGPU('namespace')
 q.crearLienzo(200, 100)
 
-def dibujar():
+def q_dibujar():
 	q.fondo(0.8)
 	q.circulo(q.ratonX, 0, 80)
-q.dibujar = dibujar
+
+q.dibujar = q_dibujar
 ```
 
 ## Q5.addHook

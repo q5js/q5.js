@@ -43,6 +43,7 @@ frecuenciaRefresco(5)
 def dibujar():
 	circulo(0, 0, aleatorio(200))
 ```
+
 ```py
 def dibujar():
 	circulo(aleatorio(-100, 100), aleatorio(-100, 100), 10)
@@ -101,6 +102,7 @@ q5.dibujar = function () {
 def dibujar():
 	circulo(ratonX + flu(3), ratonY + flu(3), 5)
 ```
+
 ```py
 Lienzo(200)
 
@@ -180,6 +182,7 @@ def dibujar():
 	n = ruido(frameCount * 0.01)
 	circulo(0, 0, n * 200)
 ```
+
 ```py
 def dibujar():
 	fondo(0.8)
@@ -188,6 +191,7 @@ def dibujar():
 		n = ruido(t, x * 0.1)
 		circulo(x - 100, 0, n * 40)
 ```
+
 ```py
 def dibujar():
 	sinTrazo()

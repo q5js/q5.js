@@ -105,9 +105,10 @@ enlace = crearA('https://q5js.org', 'q5.js')
 enlace.position(16, 42)
 enlace.style.fontSize = '80px'
 
-def __q5_callback_0():
+def cb0():
 	fondo('cyan')
-enlace.addEventListener('mouseover', __q5_callback_0)
+
+enlace.addEventListener('mouseover', cb0)
 ```
 
 ### c2d
@@ -151,9 +152,10 @@ Lienzo(200, 100)
 
 btn = crearBoton('¡Clic aqui!')
 
-def __q5_callback_0():
+def cb0():
 	fondo(aleatorio(0.4, 1))
-btn.addEventListener('click', __q5_callback_0)
+
+btn.addEventListener('click', cb0)
 ```
 
 ### c2d
@@ -203,10 +205,11 @@ Lienzo(200, 100)
 casilla = crearCasilla('¡Marca aquí!')
 casilla.label.style.color = 'lime'
 
-def __q5_callback_0():
+def cb0():
 	if casilla.checked: fondo('lime')
 	else: fondo('black')
-casilla.addEventListener('input', __q5_callback_0)
+
+casilla.addEventListener('input', cb0)
 ```
 
 ### c2d
@@ -348,10 +351,11 @@ entrada = crearEntrada()
 entrada.placeholder = '¡Teclea aquí!'
 entrada.size(200, 32)
 
-def __q5_callback_0():
+def cb0():
 	fondo('orange')
 	texto(entrada.value, -90, 30)
-entrada.addEventListener('input', __q5_callback_0)
+
+entrada.addEventListener('input', cb0)
 ```
 
 ### c2d
@@ -505,9 +509,10 @@ Lienzo(200, 100)
 sel = crearSeleccion('Seleccionar un opcion')
 sel.option('Red', '#f55').option('Green', '#5f5')
 
-def __q5_callback_0():
+def cb0():
 	fondo(sel.value)
-sel.addEventListener('change', __q5_callback_0)
+
+sel.addEventListener('change', cb0)
 ```
 
 ### c2d
@@ -627,6 +632,7 @@ vid.size(200, 150)
 vid.autoplay = vid.muted = vid.loop = True
 vid.controls = True
 ```
+
 ```py
 Lienzo(200, 150)
 vid = crearVideo('/assets/apollo4.mp4')
@@ -635,9 +641,10 @@ vid.hide()
 def alPresionarRatón():
 	vid.currentTime = 0
 	vid.play()
+
 def dibujar():
 	imagen(vid, -100, -75, 200, 150)
-
+	# filtro(HUE_ROTATE, 90);
 ```
 
 ### c2d
@@ -728,6 +735,7 @@ def alPresionarRatón():
 	cap.size(200, 112.5)
 	canvas.remove()
 ```
+
 ```py
 cap = None
 def alPresionarRatón():
@@ -739,10 +747,11 @@ def dibujar():
 	y = (frameCount % 200) - 100
 	imagen(cap, -100, y, 200, 200)
 ```
+
 ```py
 def alPresionarRatón():
 	cap = crearCaptura({
-		"video": { "width": 640, "height": 480 }
+		'video': { 'width': 640, 'height': 480 }
 	})
 	cap.size(200, 150)
 	canvas.remove()

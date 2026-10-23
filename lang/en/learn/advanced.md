@@ -186,9 +186,11 @@ q.draw = () => {
 q = await Q5.WebGPU('namespace')
 q.Canvas(200, 100)
 
-q.draw = () =>
+def q_draw():
 	q.background(0.8)
 	q.circle(q.mouseX, 0, 80)
+
+q.draw = q_draw
 ```
 
 ## Q5.addHook
