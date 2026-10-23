@@ -36,6 +36,18 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+grab = crearGrabadora()
+grab.bitrate = 10
+
+def dibujar():
+	circulo(ratonX, flu(medioAlto), 10)
+```
+
 ### c2d
 
 ```js
@@ -82,6 +94,17 @@ q5.alPresionarRatón = function () {
 	if (!grabando) grabar();
 	else guardarGrabacion('squares');
 };
+```
+
+### python
+
+```py
+def dibujar():
+	cuadrado(ratonX, flu(100), 10)
+
+def alPresionarRatón():
+	if not grabando: grabar()
+	else: guardarGrabacion('squares')
 ```
 
 ### c2d

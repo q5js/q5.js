@@ -37,6 +37,16 @@ alineaciónTexto(CENTRO, CENTRO);
 texto('v' + Q5.version, 0, 0);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+tamañoTexto(64)
+alineaciónTexto(CENTRO, CENTRO)
+texto('v' + Q5.version, 0, 0)
+```
+
 ## Q5.addLang
 
 Añadir traducciones de la API. Más información:
@@ -164,6 +174,18 @@ q.dibujar = () => {
 	q.fondo(0.8);
 	q.circulo(q.ratonX, 0, 80);
 };
+```
+
+### python
+
+```py
+q = await Q5.WebGPU('namespace')
+q.crearLienzo(200, 100)
+
+def dibujar():
+	q.fondo(0.8)
+	q.circulo(q.ratonX, 0, 80)
+q.dibujar = dibujar
 ```
 
 ## Q5.addHook

@@ -18,7 +18,11 @@ let monacoPromise,
 	q5TypeDefs = '',
 	q5LocaleTypeDefs = '',
 	q5playTypeDefs = '',
-	areTypeDefsLoaded = false;
+	q5playLocaleTypeDefs = '',
+	typeDefsLoaded = {}, // codeLang -> true once its type definitions were requested
+	pyGlobals = new Map(), // name -> symbol, parsed from the .pyi stubs
+	pyMembers = new Map(), // name -> [symbols of classes], for `obj.name`
+	pyProvidersRegistered = false;
 
 class MiniEditor {
 	constructor(scriptEl) {
@@ -191,6 +195,20 @@ class MiniEditor {
 			.join('');
 	}
 
+	// The names of the q5 API in the active locale (see q5-lang.js), as
+	// {translated: english} tables for the Python bridge. Locales with accents
+	// have two spellings of each name, like ratónX and ratonX.
+	static langTables() {
+		const invert = (maps = []) => {
+			const table = {};
+			for (let map of maps) {
+				for (let name in map) table[map[name]] = name;
+			}
+			return table;
+		};
+		return JSON.stringify({ members: invert(Q5.lang?.members), hooks: invert(Q5.lang?.hooks) });
+	}
+
 	static escapeRegExp(str) {
 		return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	}
@@ -312,41 +330,261 @@ class MiniEditor {
 	}
 
 	async loadTypeDefs() {
-		// the q5 type definitions are JavaScript only
-		if (this.codeLang != 'javascript' || areTypeDefsLoaded) return;
-		areTypeDefsLoaded = true;
+		// each language's definitions only need to be loaded once
+		if (typeDefsLoaded[this.codeLang]) return;
+		typeDefsLoaded[this.codeLang] = true;
 
 		let baseURL = '';
 		if (MiniEditor.host != 'q5') {
 			baseURL = 'https://q5js.org';
 		}
 
+		if (this.codeLang == 'python') return MiniEditor.loadPyDefs(baseURL);
+
 		// fetch a .d.ts file and hand it to Monaco; a failure only costs autocomplete
-		const addLib = async (url, filePath) => {
+		const addLib = async (url) => {
 			try {
 				let res = await fetch(url);
 				if (!res.ok) return '';
 				let text = await res.text();
-				monaco.languages.typescript.javascriptDefaults.addExtraLib(text, filePath);
+				monaco.languages.typescript.javascriptDefaults.addExtraLib(text, url);
 				return text;
 			} catch (e) {
 				return '';
 			}
 		};
 
-		if (!q5TypeDefs) {
-			q5TypeDefs = await addLib(baseURL + '/defs/q5.d.ts', baseURL + '/defs/q5.d.ts');
-		}
+		let locale = MiniEditor.locale;
 
-		if (!q5playTypeDefs && MiniEditor.host == 'q5play') {
-			q5playTypeDefs = await addLib('/q5play.d.ts', '/q5play.d.ts');
+		if (locale == 'en') {
+			if (!q5TypeDefs) {
+				q5TypeDefs = await addLib(baseURL + '/q5.d.ts');
+			}
+			if (MiniEditor.host == 'q5play' && !q5playTypeDefs) {
+				q5playTypeDefs = await addLib('/q5play.d.ts');
+			}
+		} else {
+			if (!q5LocaleTypeDefs) {
+				let path = `${baseURL}/defs/q5-${locale}.d.ts`;
+				q5LocaleTypeDefs = await addLib(path, path);
+			}
+			if (MiniEditor.host == 'q5play' && !q5playLocaleTypeDefs) {
+				let path = `${baseURL}/defs/q5play-${locale}.d.ts`;
+				q5playLocaleTypeDefs = await addLib(path, path);
+			}
 		}
+	}
+
+	static async loadPyDefs(baseURL) {
+		const fetchPyi = async (url) => {
+			try {
+				let res = await fetch(url);
+				if (!res.ok) return '';
+				return await res.text();
+			} catch (e) {
+				return '';
+			}
+		};
 
 		let locale = MiniEditor.locale;
-		if (locale != 'en' && !q5LocaleTypeDefs) {
-			let path = `${baseURL}/defs/q5-${locale}.d.ts`;
-			q5LocaleTypeDefs = await addLib(path, path);
+		let q5Url, q5playUrl;
+
+		if (locale == 'en') {
+			q5Url = baseURL + '/q5.pyi';
+			q5playUrl = '/q5play.pyi';
+		} else {
+			q5Url = `${baseURL}/defs/q5-${locale}.pyi`;
+			q5playUrl = `/defs/q5play-${locale}.pyi`;
 		}
+
+		let q5Text = await fetchPyi(q5Url);
+		if (q5Text) {
+			if (locale == 'en') {
+				q5TypeDefs = q5Text;
+			} else {
+				q5LocaleTypeDefs = q5Text;
+			}
+			MiniEditor.parsePyi(q5Text);
+		}
+
+		if (MiniEditor.host == 'q5play') {
+			let q5playText = await fetchPyi(q5playUrl);
+			if (q5playText) {
+				if (locale == 'en') {
+					q5playTypeDefs = q5playText;
+				} else {
+					q5playLocaleTypeDefs = q5playText;
+				}
+				MiniEditor.parsePyi(q5playText);
+			}
+		}
+
+		MiniEditor.registerPyProviders();
+	}
+
+	static parsePyi(text) {
+		let lines = text.split('\n');
+		let currentClass = null;
+		let i = 0;
+
+		while (i < lines.length) {
+			let line = lines[i];
+			let trimmed = line.trim();
+
+			// Check for class definition
+			let classMatch = trimmed.match(/^class\s+(\w+)(?:\(([^)]+)\))?:/);
+			if (classMatch) {
+				currentClass = classMatch[1];
+				pyGlobals.set(currentClass, {
+					name: currentClass,
+					kind: monaco.languages.CompletionItemKind.Class,
+					detail: `class ${currentClass}`,
+					documentation: ''
+				});
+				if (!pyMembers.has(currentClass)) {
+					pyMembers.set(currentClass, new Map());
+				}
+				i++;
+				continue;
+			}
+
+			// Check for function or method definition
+			let defMatch = trimmed.match(/^(?:async\s+)?def\s+(\w+)\s*\(([^)]*)\)(?:\s*->\s*([^:]+))?:/);
+			if (defMatch) {
+				let name = defMatch[1];
+				let args = defMatch[2];
+				let ret = defMatch[3] ? ` -> ${defMatch[3].trim()}` : '';
+				let detail = `def ${name}(${args})${ret}`;
+
+				// Look ahead for docstring
+				let doc = '';
+				if (i + 1 < lines.length) {
+					let nextLine = lines[i + 1].trim();
+					if (nextLine.startsWith('"""') || nextLine.startsWith("'''")) {
+						let quote = nextLine.slice(0, 3);
+						let docLines = [nextLine.slice(3)];
+						i++;
+						while (i + 1 < lines.length) {
+							let dLine = lines[i + 1];
+							if (dLine.trim().endsWith(quote) || dLine.includes(quote)) {
+								docLines.push(dLine.replace(quote, ''));
+								i++;
+								break;
+							}
+							docLines.push(dLine);
+							i++;
+						}
+						doc = docLines.join('\n').trim();
+					}
+				}
+
+				let symbol = {
+					name,
+					kind: currentClass
+						? monaco.languages.CompletionItemKind.Method
+						: monaco.languages.CompletionItemKind.Function,
+					detail,
+					documentation: doc
+				};
+
+				if (currentClass) {
+					pyMembers.get(currentClass).set(name, symbol);
+				} else {
+					pyGlobals.set(name, symbol);
+				}
+				i++;
+				continue;
+			}
+
+			// Reset currentClass if indentation returns to 0 and line is not empty/comment
+			if (trimmed && !line.startsWith(' ') && !line.startsWith('\t')) {
+				currentClass = null;
+			}
+
+			i++;
+		}
+	}
+
+	static registerPyProviders() {
+		if (pyProvidersRegistered) return;
+		pyProvidersRegistered = true;
+
+		monaco.languages.registerCompletionItemProvider('python', {
+			provideCompletionItems(model, position) {
+				let word = model.getWordUntilPosition(position);
+				let range = {
+					startLineNumber: position.lineNumber,
+					endLineNumber: position.lineNumber,
+					startColumn: word.startColumn,
+					endColumn: word.endColumn
+				};
+
+				let suggestions = [];
+
+				// Check if this is member access (e.g. obj.method)
+				let lineContent = model.getLineContent(position.lineNumber);
+				let textBefore = lineContent.slice(0, position.column - 1);
+				let memberMatch = textBefore.match(/(\w+)\s*\.\s*$/);
+
+				if (memberMatch) {
+					let objName = memberMatch[1];
+					let members = pyMembers.get(objName);
+					if (members) {
+						for (let [name, sym] of members) {
+							suggestions.push({
+								label: name,
+								kind: sym.kind,
+								detail: sym.detail,
+								documentation: { value: sym.documentation },
+								insertText: name,
+								range
+							});
+						}
+					}
+				} else {
+					for (let [name, sym] of pyGlobals) {
+						suggestions.push({
+							label: name,
+							kind: sym.kind,
+							detail: sym.detail,
+							documentation: { value: sym.documentation },
+							insertText: name,
+							range
+						});
+					}
+				}
+
+				return { suggestions };
+			}
+		});
+
+		monaco.languages.registerHoverProvider('python', {
+			provideHover(model, position) {
+				let word = model.getWordAtPosition(position);
+				if (!word) return null;
+
+				let name = word.word;
+				let sym = pyGlobals.get(name);
+
+				if (!sym) {
+					for (let [clsName, members] of pyMembers) {
+						if (members.has(name)) {
+							sym = members.get(name);
+							break;
+						}
+					}
+				}
+
+				if (sym) {
+					return {
+						range: new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn),
+						contents: [{ value: `\`\`\`python\n${sym.detail}\n\`\`\`` }, { value: sym.documentation }]
+					};
+				}
+
+				return null;
+			}
+		});
 	}
 
 	// q5play examples can build on a shared "base" script. Returns the full
@@ -519,8 +757,9 @@ ${userCode}
 
 		window._pyErr = (err, lineNum, q) => q?._mie?.pyErr(err, lineNum);
 
-		// With a non-English locale, q5 also hooks up the localized names of
-		// the user functions, so the Python bridge has to know about them too.
+		// Localized names of the state variables, canvas functions, and user
+		// functions are passed to _run_py on every run (MiniEditor.langTables),
+		// because the locale can change after this bridge was created.
 		let hooks = Q5._hooks || Q5._userFns || [];
 
 		// Q5 state variables that are copied into the Python namespace before
@@ -537,6 +776,7 @@ ${userCode}
 from browser import window, aio
 import traceback
 import io
+import json
 
 _state_vars = ${JSON.stringify(PY_STATE_VARS)}
 
@@ -548,9 +788,14 @@ def _err():
 	return f.getvalue()
 
 def _sync_state(q, ns):
+	aliases = ns['_state_aliases']
 	for var in _state_vars:
 		if hasattr(q, var):
-			ns[var] = getattr(q, var)
+			val = getattr(q, var)
+			ns[var] = val
+			# localized spellings, like ratónX and ratonX for mouseX
+			for alias in aliases.get(var, ()):
+				ns[alias] = val
 
 def _sync_and_call(q, fn, ns):
 	def _wrapper(*args):
@@ -566,11 +811,26 @@ def _wrap_fns(q, locs, ns):
 	for fn_name in _usr_fns:
 		if fn_name in locs:
 			setattr(q, fn_name, _sync_and_call(q, locs[fn_name], ns))
+	# localized names of the user functions, like dibujar for draw
+	for alias, fn_name in ns['_hook_aliases'].items():
+		if alias in locs:
+			setattr(q, fn_name, _sync_and_call(q, locs[alias], ns))
 
-async def _run_py(q, code):
+async def _run_py(q, code, lang_tables='{}'):
+	lang = json.loads(lang_tables)
 	ns = globals().copy()
 	ns['ns'] = ns
 	ns['Q5'] = window.Q5
+
+	# localized names (from a locale file like q5-es.js) of the state
+	# variables, canvas functions, and user functions
+	state_aliases = {}
+	for alias, name in lang['members'].items():
+		if name in _state_vars:
+			state_aliases.setdefault(name, []).append(alias)
+	ns['_state_aliases'] = state_aliases
+	ns['_canvas_aliases'] = [a for a, n in lang['members'].items() if n in ('Canvas', 'createCanvas')]
+	ns['_hook_aliases'] = {a: n for a, n in lang['hooks'].items() if n in _usr_fns}
 
 	for attr in window.Object.getOwnPropertyNames(q):
 		if not attr.startswith('_'):
@@ -585,6 +845,9 @@ async def _run_py(q, code):
 		_sync_state(q, ns)
 		return result
 	ns['Canvas'] = ns['createCanvas'] = _canvas_wrapper
+	for alias in ns['_canvas_aliases']:
+		if alias in ns:
+			ns[alias] = _canvas_wrapper
 
 	try:
 		exec(code, ns)
@@ -662,7 +925,7 @@ ${indent}_wrap_fns(q, locals(), ns)
 		q._py = true;
 
 		try {
-			await window._runPy(q, code);
+			await window._runPy(q, code, MiniEditor.langTables());
 		} catch (e) {
 			this.handleError(e);
 		}

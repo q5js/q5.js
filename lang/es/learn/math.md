@@ -33,6 +33,21 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+frecuenciaRefresco(5)
+
+def dibujar():
+	circulo(0, 0, aleatorio(200))
+```
+```py
+def dibujar():
+	circulo(aleatorio(-100, 100), aleatorio(-100, 100), 10)
+```
+
 ### c2d
 
 ```js
@@ -78,6 +93,19 @@ await Lienzo(200);
 q5.dibujar = function () {
 	circulo(flu(50), 0, aleatorio(50));
 };
+```
+
+### python
+
+```py
+def dibujar():
+	circulo(ratonX + flu(3), ratonY + flu(3), 5)
+```
+```py
+Lienzo(200)
+
+def dibujar():
+	circulo(flu(50), 0, aleatorio(50))
 ```
 
 ### c2d
@@ -144,6 +172,32 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	n = ruido(frameCount * 0.01)
+	circulo(0, 0, n * 200)
+```
+```py
+def dibujar():
+	fondo(0.8)
+	t = (frameCount + ratonX) * 0.02
+	for x in range(-5, 220, 10):
+		n = ruido(t, x * 0.1)
+		circulo(x - 100, 0, n * 40)
+```
+```py
+def dibujar():
+	sinTrazo()
+	t = millis() * 0.002
+	for x in range(-100, 100, 5):
+		for y in range(-100, 100, 5):
+			relleno(ruido(t, (ratonX + x) * 0.05, y * 0.05))
+			cuadrado(x, y, 5)
+```
+
 ### c2d
 
 ```js
@@ -189,6 +243,17 @@ q5.dibujar = function () {
 	let d = dist(0, 0, ratonX, ratonY);
 	texto(redondear(d), -80, -80);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	linea(0, 0, ratonX, ratonY)
+
+	d = dist(0, 0, ratonX, ratonY)
+	texto(redondear(d), -80, -80)
 ```
 
 ### c2d
@@ -313,6 +378,15 @@ tamañoTexto(32);
 texto(redondear(PI, 5), -90, 10);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+tamañoTexto(32)
+texto(redondear(PI, 5), -90, 10)
+```
+
 ### c2d
 
 ```js
@@ -338,6 +412,15 @@ await Lienzo(200, 100);
 fondo(0.8);
 tamañoTexto(32);
 texto(techo(PI), -90, 10);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+tamañoTexto(32)
+texto(techo(PI), -90, 10)
 ```
 
 ### c2d
@@ -367,6 +450,15 @@ tamañoTexto(32);
 texto(piso(-PI), -90, 10);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+tamañoTexto(32)
+texto(piso(-PI), -90, 10)
+```
+
 ### c2d
 
 ```js
@@ -394,6 +486,14 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(min(-ratonX / 100, 0.5))
+	circulo(min(ratonX, 0), 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -419,6 +519,14 @@ q5.dibujar = function () {
 	fondo(max(-ratonX / 100, 0.5));
 	circulo(max(ratonX, 0), 0, 80);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(max(-ratonX / 100, 0.5))
+	circulo(max(ratonX, 0), 0, 80)
 ```
 
 ### c2d

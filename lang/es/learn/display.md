@@ -20,6 +20,16 @@ modoVisualizacion(CENTRO, PIXELADO, 4);
 circulo(0, 0, 16);
 ```
 
+### python
+
+```py
+Lienzo(50, 25)
+
+modoVisualizacion(CENTRO, PIXELADO, 4)
+
+circulo(0, 0, 16)
+```
+
 ### c2d
 
 ```js
@@ -72,6 +82,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+	alineaciónTexto(CENTRO, CENTRO)
+	texto(anchoVentana, 0, 0)
+```
+
 ### c2d
 
 ```js
@@ -98,6 +118,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+	alineaciónTexto(CENTRO, CENTRO)
+	texto(altoVentana, 0, 0)
+```
+
 ### c2d
 
 ```js
@@ -120,6 +150,13 @@ await Lienzo(200, 120);
 circulo(0, 0, ancho);
 ```
 
+### python
+
+```py
+Lienzo(200, 120)
+circulo(0, 0, ancho)
+```
+
 ## alto
 
 El alto del lienzo.
@@ -129,6 +166,13 @@ El alto del lienzo.
 ```js
 await Lienzo(200, 80);
 circulo(0, 0, alto);
+```
+
+### python
+
+```py
+Lienzo(200, 80)
+circulo(0, 0, alto)
 ```
 
 ## medioAncho
@@ -142,6 +186,13 @@ await Lienzo(200, 80);
 circulo(0, 0, medioAncho);
 ```
 
+### python
+
+```py
+Lienzo(200, 80)
+circulo(0, 0, medioAncho)
+```
+
 ## medioAlto
 
 La mitad del alto del lienzo.
@@ -151,6 +202,13 @@ La mitad del alto del lienzo.
 ```js
 await Lienzo(200, 80);
 circulo(0, 0, medioAlto);
+```
+
+### python
+
+```py
+Lienzo(200, 80)
+circulo(0, 0, medioAlto)
 ```
 
 ## lienzo
@@ -182,6 +240,18 @@ q5.alPresionarRatón = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+
+def dibujar():
+	fondo(0.8)
+
+def alPresionarRatón():
+	redimensionarLienzo(200, 200)
+```
+
 ### c2d
 
 ```js
@@ -210,6 +280,15 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+	texto(cuadroActual, -92, 20)
+```
+
 ### c2d
 
 ```js
@@ -231,6 +310,14 @@ q5.dibujar = function () {
 	circulo(cuadroActual * 5 - 100, 0, 80);
 	pausar();
 };
+```
+
+### python
+
+```py
+def dibujar():
+	circulo(cuadroActual * 5 - 100, 0, 80)
+	pausar()
 ```
 
 ### c2d
@@ -267,6 +354,18 @@ q5.alPresionarRatón = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+pausar()
+
+def dibujar():
+	circulo(cuadroActual * 5 - 100, 0, 80)
+def alPresionarRatón():
+	redibujar(10)
+```
+
 ### c2d
 
 ```js
@@ -297,6 +396,18 @@ q5.dibujar = function () {
 q5.alPresionarRatón = function () {
 	reanudar();
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+pausar()
+
+def dibujar():
+	circulo(cuadroActual * 5 - 100, 0, 80)
+def alPresionarRatón():
+	reanudar()
 ```
 
 ### c2d
@@ -348,6 +459,24 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	if ratonPresionado: frecuenciaRefresco(10)
+	else: frecuenciaRefresco(60)
+
+	circulo((cuadroActual % 200) - 100, 0, 80)
+```
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+	texto(redondear(frecuenciaRefresco()), -35, 20)
+```
+
 ### c2d
 
 ```js
@@ -388,6 +517,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+
+	texto(obtenerTasaFotogramasObjetivo(), -35, 20)
+```
+
 ### c2d
 
 ```js
@@ -421,6 +560,17 @@ q5.dibujar = function () {
 
 	texto(obtenerFPS(), -92, 20);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	frecuenciaRefresco(1)
+	tamañoTexto(64)
+
+	texto(obtenerFPS(), -92, 20)
 ```
 
 ### c2d
@@ -475,6 +625,15 @@ densidadPixeles(1);
 circulo(0, 0, 80);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+densidadPixeles(1)
+circulo(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -501,6 +660,15 @@ await Lienzo(200, 100);
 fondo(0.8);
 tamañoTexto(64);
 texto(densidadVisualizacion(), -90, 6);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+tamañoTexto(64)
+texto(densidadVisualizacion(), -90, 6)
 ```
 
 ### c2d
@@ -544,6 +712,26 @@ q5.dibujar = function () {
 	if (x > 100) x = -100;
 	circulo(x, 0, 20);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	texto(deltaTiempo, -90, 6)
+```
+```py
+x = -100
+def dibujar():
+	global x
+	fondo(0.8)
+
+	frecuenciaRefresco(aleatorio(30, 60))
+
+	x += deltaTiempo * 0.2
+	if x > 100: x = -100
+	circulo(x, 0, 20)
 ```
 
 ### c2d

@@ -30,6 +30,23 @@ let logo = await cargarImagen('/q5js_logo.avif');
 fondo(logo);
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+logo = cargarImagen('/q5js_logo.avif')
+
+def dibujar():
+	fondo(logo)
+```
+```py
+Lienzo(200)
+
+logo = await cargarImagen('/q5js_logo.avif')
+fondo(logo)
+```
+
 ### c2d
 
 ```js
@@ -78,6 +95,25 @@ let logo = cargarImagen('/q5js_logo.avif');
 q5.dibujar = function () {
 	imagen(logo, -100, -100, 200, 200, 256, 256, 512, 512);
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+
+logo = cargarImagen('/q5js_logo.avif')
+
+def dibujar():
+	imagen(logo, -100, -100, 200, 200)
+```
+```py
+Lienzo(200)
+
+logo = cargarImagen('/q5js_logo.avif')
+
+def dibujar():
+	imagen(logo, -100, -100, 200, 200, 256, 256, 512, 512)
 ```
 
 ### c2d
@@ -148,6 +184,39 @@ q5.dibujar = function () {
 	//   ( img, x1, y1,  x2,  y2)
 	imagen(logo, -50, -50, 50, 50);
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+logo = cargarImagen('/q5js_logo.avif')
+
+def dibujar():
+	modoImagen(CORNER)
+
+
+	imagen(logo, -50, -50, 100, 100)
+```
+```py
+Lienzo(200)
+logo = cargarImagen('/q5js_logo.avif')
+
+def dibujar():
+	modoImagen(CENTER)
+
+
+	imagen(logo, 0, 0, 100, 100)
+```
+```py
+Lienzo(200)
+logo = cargarImagen('/q5js_logo.avif')
+
+def dibujar():
+	modoImagen(CORNERS)
+
+
+	imagen(logo, -50, -50, 50, 50)
 ```
 
 ### c2d
@@ -225,6 +294,17 @@ logo.redimensionar(64, 64);
 imagen(logo, -100, -100, 200, 200);
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+logo = await cargar('/q5js_logo.avif')
+
+logo.redimensionar(64, 64)
+imagen(logo, -100, -100, 200, 200)
+```
+
 ### c2d
 
 ```js
@@ -260,6 +340,14 @@ let icono = await cargar('/q5js_icon.png');
 imagen(icono, -100, -100, 200, 200);
 ```
 
+### python
+
+```py
+Lienzo(200)
+icono = await cargar('/q5js_icon.png')
+imagen(icono, -100, -100, 200, 200)
+```
+
 ### c2d
 
 ```js
@@ -285,6 +373,17 @@ let icono = await cargar('/q5js_icon.png');
 
 noSuavizar();
 imagen(icono, -100, -100, 200, 200);
+```
+
+### python
+
+```py
+Lienzo(200)
+
+icono = await cargar('/q5js_icon.png')
+
+noSuavizar()
+imagen(icono, -100, -100, 200, 200)
 ```
 
 ### c2d
@@ -333,6 +432,17 @@ let logo = await cargar('/q5js_logo.avif');
 
 teñir(1, 0, 0, 0.5);
 imagen(logo, -100, -100, 200, 200);
+```
+
+### python
+
+```py
+Lienzo(200)
+
+logo = await cargar('/q5js_logo.avif')
+
+teñir(1, 0, 0, 0.5)
+imagen(logo, -100, -100, 200, 200)
 ```
 
 ### c2d
@@ -395,6 +505,17 @@ logo.insertado(256, 256, 512, 512, 0, 0, 256, 256);
 imagen(logo, -100, -100, 200, 200);
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+logo = await cargar('/q5js_logo.avif')
+
+logo.insertado(256, 256, 512, 512, 0, 0, 256, 256)
+imagen(logo, -100, -100, 200, 200)
+```
+
 ### c2d
 
 ```js
@@ -439,6 +560,17 @@ let logo = await cargar('/q5js_logo.avif');
 
 let recortada = logo.obtener(256, 256, 512, 512);
 imagen(recortada, -100, -100, 200, 200);
+```
+
+### python
+
+```py
+Lienzo(200)
+
+logo = await cargar('/q5js_logo.avif')
+
+recortada = logo.obtener(256, 256, 512, 512)
+imagen(recortada, -100, -100, 200, 200)
 ```
 
 ### c2d
@@ -499,6 +631,21 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+c = color('lime')
+img = crearImagen(50, 50)
+
+def dibujar():
+	img.establecer(aleatorio(50), aleatorio(50), c)
+	img.actualizarPixeles()
+
+	fondo(img)
+```
+
 ### c2d
 
 ```js
@@ -550,6 +697,21 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+frecuenciaRefresco(5)
+icono = cargarImagen('/q5js_icon.png')
+
+def dibujar():
+	icono.cargarPixeles()
+	for i in range(0, icono.pixeles.length, 16):
+		icono.pixeles[i + 1] = aleatorio(255)
+	icono.actualizarPixeles()
+	fondo(icono)
+```
+
 ### c2d
 
 ```js
@@ -590,6 +752,21 @@ img.actualizarPixeles();
 fondo(img);
 ```
 
+### python
+
+```py
+Lienzo(200)
+c = color('pink')
+
+img = crearImagen(50, 50)
+for x in range(0, 50, 3):
+	for y in range(0, 50, 3):
+		img.establecer(x, y, c)
+img.actualizarPixeles()
+
+fondo(img)
+```
+
 ### c2d
 
 ```js
@@ -626,6 +803,15 @@ await Lienzo(200);
 let logo = await cargar('/q5js_logo.avif');
 logo.filtro(INVERTIR);
 imagen(logo, -100, -100, 200, 200);
+```
+
+### python
+
+```py
+Lienzo(200)
+logo = await cargar('/q5js_logo.avif')
+logo.filtro(INVERTIR)
+imagen(logo, -100, -100, 200, 200)
 ```
 
 ### c2d

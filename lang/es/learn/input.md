@@ -26,6 +26,15 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+	texto(redondear(ratonX), -50, 20)
+```
+
 ### c2d
 
 ```js
@@ -47,6 +56,14 @@ q5.dibujar = function () {
 	fondo(0.8);
 	circulo(0, ratonY, 100);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	circulo(0, ratonY, 100)
 ```
 
 ### c2d
@@ -82,6 +99,15 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+	texto(botonRaton, -80, 20)
+```
+
 ### c2d
 
 ```js
@@ -103,6 +129,14 @@ q5.dibujar = function () {
 	if (ratonPresionado) fondo(0.4);
 	else fondo(0.8);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	if ratonPresionado: fondo(0.4)
+	else: fondo(0.8)
 ```
 
 ### c2d
@@ -128,6 +162,18 @@ q5.alPresionarRaton = function () {
 	fondo(gris);
 	gris = (gris + 0.1) % 1;
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alPresionarRaton():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.1) % 1
 ```
 
 ### c2d
@@ -156,6 +202,18 @@ q5.alSoltarRaton = function () {
 	fondo(gris);
 	gris = (gris + 0.1) % 1;
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alSoltarRaton():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.1) % 1
 ```
 
 ### c2d
@@ -189,6 +247,18 @@ q5.alMoverRaton = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alMoverRaton():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.005) % 1
+```
+
 ### c2d
 
 ```js
@@ -220,6 +290,18 @@ q5.alArrastrarRaton = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alArrastrarRaton():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.005) % 1
+```
+
 ### c2d
 
 ```js
@@ -248,6 +330,18 @@ q5.dobleClic = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def dobleClic():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.1) % 1
+```
+
 ### c2d
 
 ```js
@@ -274,6 +368,15 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	tamañoTexto(64)
+	texto(tecla, -80, 20)
+```
+
 ### c2d
 
 ```js
@@ -295,6 +398,14 @@ q5.dibujar = function () {
 	if (teclaPresionada) fondo(0.4);
 	else fondo(0.8);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	if teclaPresionada: fondo(0.4)
+	else: fondo(0.8)
 ```
 
 ### c2d
@@ -328,6 +439,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	if teclaEstaPresionada('f')  and  teclaEstaPresionada('j'):
+		rect(-50, -50, 100, 100)
+```
+
 ### c2d
 
 ```js
@@ -356,6 +477,18 @@ q5.alPresionarTecla = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alPresionarTecla():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.1) % 1
+```
+
 ### c2d
 
 ```js
@@ -382,6 +515,18 @@ q5.alSoltarTecla = function () {
 	fondo(gris);
 	gris = (gris + 0.1) % 1;
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alSoltarTecla():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.1) % 1
 ```
 
 ### c2d
@@ -415,6 +560,15 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	for pt in punteros:
+		circulo(pt.x, pt.y, 100)
+```
+
 ### c2d
 
 ```js
@@ -444,6 +598,18 @@ q5.alEmpezarToque = function () {
 	fondo(gris);
 	gris = (gris + 0.1) % 1;
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alEmpezarToque():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.1) % 1
 ```
 
 ### c2d
@@ -478,6 +644,18 @@ q5.alTerminarToque = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alTerminarToque():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.1) % 1
+```
+
 ### c2d
 
 ```js
@@ -508,6 +686,18 @@ q5.alMoverToque = function () {
 	fondo(gris);
 	gris = (gris + 0.005) % 1;
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+gris = 0.4
+
+def alMoverToque():
+	global gris
+	fondo(gris)
+	gris = (gris + 0.005) % 1
 ```
 
 ### c2d
@@ -541,6 +731,13 @@ await Lienzo(200, 100);
 cursor('pointer');
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+cursor('pointer')
+```
+
 ### c2d
 
 ```js
@@ -557,6 +754,13 @@ Oculta el cursor dentro de los límites del lienzo.
 ```js
 await Lienzo(200, 100);
 sinCursor();
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+sinCursor()
 ```
 
 ### c2d
@@ -589,6 +793,19 @@ q5.ruedaRaton = function (e) {
 };
 ```
 
+### python
+
+```py
+x = (y := 0)
+def dibujar():
+	circulo(x, y, 10)
+def ruedaRaton(e):
+	global x, y
+	x += e.deltaX
+	y += e.deltaY
+	return False
+```
+
 ### c2d
 
 ```js
@@ -617,6 +834,15 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	if movidoX > 0: texto('>>', 0, 0)
+	if movidoX < 0: texto('<<', 0, 0)
+```
+
 ## movidoY
 
 Distancia que el ratón ha recorrido desde el último fotograma en la dirección vertical.
@@ -629,6 +855,15 @@ q5.dibujar = function () {
 	if (movidoY > 0) texto('vv', 0, 0);
 	if (movidoY < 0) texto('^^', 0, 0);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+	if movidoY > 0: texto('vv', 0, 0)
+	if movidoY < 0: texto('^^', 0, 0)
 ```
 
 ## bloqueoPuntero
@@ -658,6 +893,19 @@ q5.dobleClic = function () {
 		document.exitPointerLock();
 	}
 };
+```
+
+### python
+
+```py
+def dibujar():
+	circulo(ratonX / 10, ratonY / 10, 10)
+
+def dobleClic():
+	if not document.pointerLockElement:
+		bloqueoPuntero()
+	else:
+		document.exitPointerLock()
 ```
 
 ### c2d

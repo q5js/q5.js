@@ -5,11 +5,14 @@ class Image: ...
 # ⭐ core
 
 """⭐
-Welcome to q5's documentation! 🤩
+Welcome to q5's documentation! 🤩 Now available in
+JavaScript or
+Python. 🐍
 
-First time coding? Check out the q5 Beginner's Brief.
+First time coding? Check out the
+q5 Beginner's Brief. 😅
 
-On these Learn pages, you can experiment with editing the
+Experiment with editing the
 interactive mini examples. Have fun! 😎
 
 ![](https://notbyai.fyi/)

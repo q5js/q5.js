@@ -38,6 +38,27 @@ texto(info, -88, -70, 20, 6);
 //
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+fondo('silver')
+
+tamañoTexto(32)
+texto('Hello, world!', -88, 10)
+```
+```py
+Lienzo(200)
+fondo(0.8)
+tamañoTexto(20)
+
+info = 'q5.js was designed to make creative coding fun and accessible for a new generation of artists, designers, educators, and beginners.'
+
+texto(info, -88, -70, 20, 6)
+
+
+```
+
 ### c2d
 
 ```js
@@ -119,6 +140,37 @@ tamañoTexto(68);
 imagenTexto('Hello!', -98, 31);
 ```
 
+### python
+
+```py
+Lienzo(200, 56)
+
+await cargarFuente('/assets/Robotica.ttf')
+
+relleno('skyblue')
+tamañoTexto(64)
+imagenTexto('Hello!', -98, 24)
+```
+```py
+Lienzo(200, 74)
+
+cargarFuente('fonts.googleapis.com/css2?family=Pacifico')
+
+def dibujar():
+	relleno('hotpink')
+	tamañoTexto(68)
+	imagenTexto('Hello!', -98, 31)
+```
+```py
+Lienzo(200, 74)
+
+await cargarFuente('sans-serif')
+
+relleno('white')
+tamañoTexto(68)
+imagenTexto('Hello!', -98, 31)
+```
+
 ### c2d
 
 ```js
@@ -181,6 +233,28 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200, 160)
+fondo(0.8)
+
+fuenteTexto('serif')
+
+def dibujar():
+	tamañoTexto(32)
+	texto('Hello, world!', -96, 10)
+```
+```py
+Lienzo(200)
+fondo(0.8)
+
+fuenteTexto('monospace')
+
+def dibujar():
+	texto('Hello, world!', -68, 10)
+```
+
 ### c2d
 
 ```js
@@ -223,6 +297,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	tamañoTexto(abs(ratonX))
+	texto('A', -90, 90)
+```
+
 ### c2d
 
 ```js
@@ -253,6 +337,17 @@ q5.dibujar = function () {
 	texto('A', -90, 90);
 	rect(-90, 90, 5, -interlineado());
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	tamañoTexto(abs(ratonX))
+	texto('A', -90, 90)
+	rect(-90, 90, 5, -interlineado())
 ```
 
 ### c2d
@@ -289,6 +384,18 @@ tamañoTexto(32);
 texto('Hello, world!', -88, 6);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+estiloTexto(CURSIVA)
+
+tamañoTexto(32)
+texto('Hello, world!', -88, 6)
+```
+
 ### c2d
 
 ```js
@@ -319,6 +426,17 @@ tamañoTexto(32);
 
 alineacionTexto(CENTRO, MEDIO);
 texto('Hello, world!', 0, 0);
+```
+
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+tamañoTexto(32)
+
+alineacionTexto(CENTRO, MEDIO)
+texto('Hello, world!', 0, 0)
 ```
 
 ### c2d
@@ -362,6 +480,18 @@ pesoTexto(100);
 texto('Hello, world!', 0, 0);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+tamañoTexto(32)
+alineacionTexto(CENTRO, MEDIO)
+
+pesoTexto(100)
+texto('Hello, world!', 0, 0)
+```
+
 ### c2d
 
 ```js
@@ -393,6 +523,17 @@ q5.dibujar = function () {
 	rect(-90, 90, anchoTexto('A'), -interlineado());
 	texto('A', -90, 90);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	tamañoTexto(abs(ratonX))
+	rect(-90, 90, anchoTexto('A'), -interlineado())
+	texto('A', -90, 90)
 ```
 
 ### c2d
@@ -428,6 +569,17 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	tamañoTexto(abs(ratonX))
+	rect(-90, 90, anchoTexto('A'), -ascensoTexto())
+	texto('A', -90, 90)
+```
+
 ### c2d
 
 ```js
@@ -458,6 +610,17 @@ tamañoTexto(64);
 
 rect(-100, 0, 200, descensoTexto('q5'));
 texto('q5', -90, 0);
+```
+
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+tamañoTexto(64)
+
+rect(-100, 0, 200, descensoTexto('q5'))
+texto('q5', -90, 0)
 ```
 
 ### c2d
@@ -494,6 +657,19 @@ img.filtro(INVERTIR);
 q5.dibujar = function () {
 	imagen(img, -45, -90);
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+tamañoTexto(96)
+
+img = crearImagenTexto('🐶')
+img.filtro(INVERTIR)
+
+def dibujar():
+	imagen(img, -45, -90)
 ```
 
 ### c2d
@@ -552,6 +728,26 @@ tamañoTexto(66);
 imagenTexto('Hello!', -100, 100);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+tamañoTexto(96)
+alineacionTexto(CENTRO, CENTRO)
+
+imagenTexto('🐶', 0, 0)
+```
+```py
+Lienzo(200)
+
+await cargar('/assets/Robotica.ttf')
+
+fondo(0.8)
+tamañoTexto(66)
+imagenTexto('Hello!', -100, 100)
+```
+
 ### c2d
 
 ```js
@@ -596,6 +792,16 @@ fondo(0.8);
 
 tamañoTexto(32);
 texto(nf(PI, 4, 5), -90, 10);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+
+tamañoTexto(32)
+texto(nf(PI, 4, 5), -90, 10)
 ```
 
 ### c2d

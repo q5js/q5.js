@@ -834,14 +834,14 @@ function jsTypeToPython(jsType) {
  * Parses a JSDoc @param line into { name, pyType, optional, description }
  */
 function parseJsDocParam(paramLine) {
-	const opt = paramLine.match(/@param\s+\{([^}]+)\}\s+\[(\w+)\](?:\s+(.*))?/);
+	const opt = paramLine.match(/@param\s+\{([^}]+)\}\s+\[([\w\u00A0-\uFFFF]+)\](?:\s+(.*))?/);
 	if (opt) {
 		const rawType = opt[1];
 		const isRest = rawType.startsWith('...');
 		const jsType = isRest ? rawType.slice(3) : rawType;
 		return { name: opt[2], pyType: jsTypeToPython(jsType), optional: true, isRest, description: opt[3] || '' };
 	}
-	const req = paramLine.match(/@param\s+\{([^}]+)\}\s+(\w+)(?:\s+(.*))?/);
+	const req = paramLine.match(/@param\s+\{([^}]+)\}\s+([\w\u00A0-\uFFFF]+)(?:\s+(.*))?/);
 	if (req) {
 		const rawType = req[1];
 		const isRest = rawType.startsWith('...');
@@ -972,14 +972,14 @@ function extractClassMemberSignatures(className, baseContent) {
 		if (bare.startsWith('constructor')) continue;
 
 		// Method: name(...): returnType;
-		const methodMatch = bare.match(/^(\w+)\s*\([^)]*\)\s*:\s*(.+?)\s*;?\s*$/);
+		const methodMatch = bare.match(/^([\w\u00A0-\uFFFF]+)\s*\([^)]*\)\s*:\s*(.+?)\s*;?\s*$/);
 		if (methodMatch) {
 			sigs[methodMatch[1]] = { isProperty: false, jsReturnType: methodMatch[2].trim() };
 			continue;
 		}
 
 		// Property: name: type;
-		const propMatch = bare.match(/^(\w+)\s*:\s*(.+?)\s*;?\s*$/);
+		const propMatch = bare.match(/^([\w\u00A0-\uFFFF]+)\s*:\s*(.+?)\s*;?\s*$/);
 		if (propMatch) {
 			sigs[propMatch[1]] = { isProperty: true, jsType: propMatch[2].trim() };
 		}
@@ -1103,8 +1103,8 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 
 				if (baseLine) {
 					// It's a typed variable or constant — generate annotation + docstring
-					const constMatch = baseLine.match(/\bconst\s+\w+:\s*(.+?);/);
-					const letMatch = baseLine.match(/\blet\s+\w+:\s*(.+?);/);
+					const constMatch = baseLine.match(/\bconst\s+[\w\u00A0-\uFFFF]+:\s*(.+?);/);
+					const letMatch = baseLine.match(/\blet\s+[\w\u00A0-\uFFFF]+:\s*(.+?);/);
 					const tsType = (constMatch || letMatch)?.[1]?.trim();
 					const pyType = tsType ? jsTypeToPython(tsType) : 'Any';
 					output.push(`${func.name}: ${pyType}`);
@@ -1179,38 +1179,37 @@ function buildLang(lang) {
 	// copy webgpu d.ts to root
 	if (lang === 'en') {
 		const destFile = path.join(rootDir, `q5.d.ts`);
-		fs.copyFileSync(file, destFile);
+		fs.renameSync(file, destFile);
 	}
 
 	// Build q5-c2d.d.ts with C2D examples
 	file = path.join(defsDir, `q5-c2d${langSuffix}.d.ts`);
 	buildDtsFile({ ...sections }, baseDtsPath, file, true, 'c2d');
 
-	// Build q5.pyi Python stub (all sections)
-	if (lang === 'en') {
-		const pyiSectionOrder = [
-			'core',
-			'shapes',
-			'image',
-			'text',
-			'input',
-			'color',
-			'styles',
-			'transforms',
-			'display',
-			'math',
-			'sound',
-			'dom',
-			'record',
-			'utilities',
-			'vector',
-			'shaping',
-			'shaders',
-			'advanced'
-		];
-		const pyiPath = path.join(rootDir, 'q5.pyi');
-		buildPyiFile(sections, baseDtsPath, pyiPath, pyiSectionOrder);
-	}
+	// Build q5.pyi (en) / q5-es.pyi (es) Python stubs (all sections)
+	const pyiSectionOrder = [
+		'core',
+		'shapes',
+		'image',
+		'text',
+		'input',
+		'color',
+		'styles',
+		'transforms',
+		'display',
+		'math',
+		'sound',
+		'dom',
+		'record',
+		'utilities',
+		'vector',
+		'shaping',
+		'shaders',
+		'advanced'
+	];
+	// English stays at the repo root (next to q5.d.ts); other languages go in defs/ (next to q5-es.d.ts)
+	const pyiPath = path.join(lang === 'en' ? rootDir : defsDir, `q5${langSuffix}.pyi`);
+	buildPyiFile(sections, baseDtsPath, pyiPath, pyiSectionOrder);
 }
 
 /**

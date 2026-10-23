@@ -32,6 +32,14 @@ fondo('silver');
 circulo(0, 0, 80);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+fondo('silver')
+circulo(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -51,6 +59,14 @@ q5.dibujar = function () {
 	fondo('silver');
 	circulo(ratonX, ratonY, 80);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo('silver')
+	circulo(ratonX, ratonY, 80)
 ```
 
 ### c2d
@@ -79,6 +95,14 @@ q5.dibujar = function () {
 	circulo(ratonX, ratonY, 80);
 	log('El ratón está en:', ratonX, ratonY);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	circulo(ratonX, ratonY, 80)
+	log('El ratón está en:', ratonX, ratonY)
 ```
 
 ### c2d

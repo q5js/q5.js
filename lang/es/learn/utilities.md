@@ -59,6 +59,45 @@ for (let mamifero of mamiferos) {
 }
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+logo = cargar('/q5js_logo.avif')
+
+def dibujar():
+	imagen(logo, -100, -100, 200, 200)
+```
+```py
+Lienzo(200)
+fondo(0.8)
+
+await cargar('/assets/Robotica.ttf')
+
+tamañoTexto(28)
+texto('Hello, world!', -97, 100)
+```
+```py
+Lienzo(200)
+
+[salto, retro] = await cargar('/assets/jump.wav', '/assets/retro.flac')
+
+def alPresionarRatón():
+	salto.reproducir() if botónRatón == 'left' else retro.reproducir()
+```
+```py
+Lienzo(200)
+fondo(0.8)
+tamañoTexto(32)
+
+miXML = await cargar('/assets/animals.xml')
+mamiferos = miXML.getElementsByTagName('mammal')
+y = -100
+for mamifero in mamiferos:
+	texto(mamifero.textContent, -100, (y := y + 32))
+```
+
 ### c2d
 
 ```js
@@ -106,6 +145,27 @@ let rayo = crearImagenTexto('⚡️');
 q5.alPresionarRatón = function () {
 	guardar(rayo, 'bolt.png');
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+circulo(0, 0, 50)
+
+def alPresionarRatón():
+	guardar('circle.png')
+```
+```py
+Lienzo(200)
+fondo(0.8)
+texto('save me?', -90, 0)
+tamañoTexto(180)
+rayo = crearImagenTexto('⚡️')
+
+def alPresionarRatón():
+	guardar(rayo, 'bolt.png')
 ```
 
 ### c2d
@@ -192,6 +252,21 @@ for (let mamifero of mamiferos) {
 }
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(200)
+tamañoTexto(32)
+
+animales = await cargarXML('/assets/animals.xml')
+
+mamiferos = animales.getElementsByTagName('mammal')
+y = 64
+for mamifero in mamiferos:
+	texto(mamifero.textContent, 20, (y := y + 32))
+```
+
 ## cargarTodo
 
 Espera a que cualquier recurso que comenzó a cargarse termine de cargarse. Por defecto q5 ejecuta esto antes de hacer bucle en dibujar (lo cual se llama precarga), pero se puede usar incluso después de que dibujar comience a hacer bucle.
@@ -223,6 +298,16 @@ fondo(0.8);
 
 tamañoTexto(32);
 texto(nf(PI, 4, 5), -90, 10);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+
+tamañoTexto(32)
+texto(nf(PI, 4, 5), -90, 10)
 ```
 
 ## barajar

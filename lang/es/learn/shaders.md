@@ -63,6 +63,45 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+wobble = crearShader("""
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
+
+  let i = f32(v.vertexIndex) % 4 * 100;
+  vert.x += cos((q.time + i) * 0.01) * 0.1;
+
+	var f: FragParams;
+	f.position = vert;
+	f.color = vec4f(1, 0, 0, 1);
+	return f;
+}""")
+
+def dibujar():
+	limpiar()
+	shader(wobble)
+	plano(0, 0, 100)
+```
+```py
+Lienzo(200)
+
+stripes = crearShader("""
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let r = cos((q.mouseY + f.position.y) * 0.2);
+	return vec4(r, 0.0, 1, 1);
+}""")
+
+def dibujar():
+	shader(stripes)
+	triángulo(-50, -50, 0, 50, 50, -50)
+```
+
 ## plano
 
 Un plano es un rectángulo centrado sin trazo.
@@ -79,6 +118,13 @@ Un plano es un rectángulo centrado sin trazo.
 ```js
 await Lienzo(200);
 plano(0, 0, 100);
+```
+
+### python
+
+```py
+Lienzo(200)
+plano(0, 0, 100)
 ```
 
 ## shader
@@ -112,6 +158,26 @@ q5.dibujar = function () {
 	reiniciarShader();
 	triángulo(-50, -50, 0, 50, 50, -50);
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+
+stripes = crearShader("""
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let g = cos((q.mouseY + f.position.y) * 0.05);
+	return vec4(1, g, 0, 1);
+}""")
+
+def dibujar():
+	shader(stripes)
+	plano(0, 0, ancho, alto)
+
+	reiniciarShader()
+	triángulo(-50, -50, 0, 50, 50, -50)
 ```
 
 ## reiniciarShaderFotograma
@@ -166,6 +232,28 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200, 400)
+trazo(1)
+grosorTrazo(8)
+terminacionTrazo(PROJECT)
+
+boxy = crearShaderFotograma("""
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	let x = sin(f.texCoord.y * 4 + q.time * 0.002);
+	let y = cos(f.texCoord.x * 4 + q.time * 0.002);
+	let uv = f.texCoord + vec2f(x, y);
+	return textureSample(tex, samp, uv);
+}""")
+
+def dibujar():
+	linea(ratonX, ratonY, pRatonX, pRatonY)
+	reiniciarShaders() if ratonPresionado else shader(boxy)
+```
+
 ## crearShaderImagen
 
 Crea un shader que q5 puede usar para dibujar imágenes.
@@ -200,6 +288,29 @@ q5.dibujar = function () {
 	imagen(logo, 0, 0, 180, 180);
 };
 //
+```
+
+### python
+
+```py
+Lienzo(200, 400)
+modoImagen(CENTER)
+
+logo = cargarImagen('/q5js_logo.avif')
+
+grate = crearShaderImagen("""
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor = textureSample(tex, samp, f.texCoord);
+	texColor.b += (q.mouseX + f.position.x) % 20 / 10;
+	return texColor;
+}""")
+
+def dibujar():
+	fondo(0.7)
+	shader(grate)
+	imagen(logo, 0, 0, 180, 180)
+
 ```
 
 ## crearShaderVideo
@@ -253,6 +364,44 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200, 600)
+
+vid = crearVideo('/assets/apollo4.mp4')
+vid.hide()
+
+flipper = crearShaderVideo("""
+@vertex
+fn vertexMain(v: VertexParams) -> FragParams {
+	var vert = transformVertex(v.pos, v.matrixIndex);
+
+	var vi = f32(v.vertexIndex);
+	vert.y *= cos((q.frameCount + vi * 10) * 0.03);
+
+	var f: FragParams;
+	f.position = vert;
+	f.texCoord = v.texCoord;
+	return f;
+}
+
+@fragment
+fn fragMain(f: FragParams) -> @location(0) vec4f {
+	var texColor =
+		textureSampleBaseClampToEdge(tex, samp, f.texCoord);
+	texColor.r = 0;
+	texColor.b *= 2;
+	return texColor;
+}""")
+
+def dibujar():
+	limpiar()
+	if ratonPresionado: vid.play()
+	shader(flipper)
+	imagen(vid, -100, 150, 200, 150)
+```
+
 ## crearShaderTexto
 
 Crea un shader que q5 puede usar para dibujar texto.
@@ -301,4 +450,41 @@ q5.dibujar = function () {
 	tamañoTexto(32);
 	texto('Hello, World!', 0, 0);
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+alineaciónTexto(CENTER, CENTER)
+
+spin = crearShaderTexto("""
+@vertex
+fn vertexMain(v : VertexParams) -> FragParams {
+	let char = textChars[v.instanceIndex];
+	let text = textMetadata[i32(char.w)];
+	let fontChar = fontChars[i32(char.z)];
+	let pos = calcPos(v.vertexIndex, char, fontChar, text);
+
+	var vert = transformVertex(pos, text.matrixIndex);
+
+	let i = f32(v.instanceIndex + 1);
+	vert.y *= cos((q.frameCount - 5 * i) * 0.05);
+
+	var f : FragParams;
+	f.position = vert;
+	f.texCoord = calcUV(v.vertexIndex, fontChar);
+	f.fillColor = colors[i32(text.fillIndex)];
+	f.strokeColor = colors[i32(text.strokeIndex)];
+	f.strokeWeight = text.strokeWeight;
+	f.edge = text.edge;
+	return f;
+}""")
+
+def dibujar():
+	limpiar()
+	shader(spin)
+	relleno(1, 0, 1)
+	tamañoTexto(32)
+	texto('Hello, World!', 0, 0)
 ```

@@ -27,6 +27,15 @@ fondo(0.8);
 arco(0, 0, 160, 160, 0.8, -0.8);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+arco(0, 0, 160, 160, 0.8, -0.8)
+```
+
 ### c2d
 
 ```js
@@ -52,6 +61,15 @@ fondo(0.8);
 curva(-100, -200, -50, 0, 50, 0, 100, -200);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+
+curva(-100, -200, -50, 0, 50, 0, 100, -200)
+```
+
 ## detalleCurva
 
 Establece la cantidad de segmentos de línea recta usados para hacer una curva.
@@ -72,6 +90,18 @@ detalleCurva(4);
 grosorTrazo(10);
 trazo(0, 1, 1);
 curva(-100, -200, -50, 0, 50, 0, 100, -200);
+```
+
+### python
+
+```py
+Lienzo(200)
+
+detalleCurva(4)
+
+grosorTrazo(10)
+trazo(0, 1, 1)
+curva(-100, -200, -50, 0, 50, 0, 100, -200)
 ```
 
 ## empezarForma
@@ -109,6 +139,24 @@ relleno(0, 0, 1);
 vertice(80, 60);
 vertice(-60, 80);
 terminarForma(true);
+```
+
+### python
+
+```py
+Lienzo(200)
+
+trazo(1, 0.5)
+grosorTrazo(20)
+
+empezarForma()
+relleno(1, 0, 0)
+vertice(-80, -80)
+vertice(40, -60)
+relleno(0, 0, 1)
+vertice(80, 60)
+vertice(-60, 80)
+terminarForma(True)
 ```
 
 ## verticeBezier

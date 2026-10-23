@@ -70,6 +70,40 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+rect(-100, -100, 100, 200)
+
+
+botella = color(0.35, 0.39, 1, 0.4)
+relleno(botella)
+trazo(botella)
+grosorTrazo(30)
+circulo(0, 0, 155)
+```
+```py
+Lienzo(200)
+
+c = color(0.8, 0.2)
+
+def dibujar():
+	fondo(c)
+	circulo(ratonX, ratonY, 50)
+	c.g = (c.g + 0.005) % 1
+```
+```py
+Lienzo(200)
+
+
+c = color(0, 1, 1, 0.2)
+
+def dibujar():
+	relleno(c)
+	circulo(ratonX, ratonY, 50)
+```
+
 ### c2d
 
 El formato de color por defecto es "entero" ("integer"),
@@ -162,6 +196,31 @@ relleno(0.75, 0.15, 0);
 rect(0, -100, 100, 200);
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+modoColor(RGB, 1)
+relleno(1, 0, 0)
+rect(-100, -100, 66, 200)
+relleno(0, 1, 0)
+rect(-34, -100, 67, 200)
+relleno(0, 0, 1)
+rect(33, -100, 67, 200)
+```
+```py
+Lienzo(200)
+
+modoColor(OKLCH)
+
+relleno(0.25, 0.15, 0)
+rect(-100, -100, 100, 200)
+
+relleno(0.75, 0.15, 0)
+rect(0, -100, 100, 200)
+```
+
 ### c2d
 
 El modo de color por defecto es RGB en formato entero legado.
@@ -207,6 +266,16 @@ await Lienzo(200, 100);
 modoColor(RGB);
 
 fondo(1, 0, 0);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+
+modoColor(RGB)
+
+fondo(1, 0, 0)
 ```
 
 ### c2d
@@ -261,6 +330,23 @@ modoColor(OKLCH);
 q5.dibujar = function () {
 	fondo(0.7, 0.16, cuadroActual % 360);
 };
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+
+modoColor(OKLCH)
+
+fondo(0.64, 0.3, 30)
+```
+```py
+Lienzo(200)
+modoColor(OKLCH)
+
+def dibujar():
+	fondo(0.7, 0.16, cuadroActual % 360)
 ```
 
 ### c2d
@@ -326,6 +412,26 @@ for (let h = 0; h < 360; h += 10) {
 }
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+
+modoColor(HSL)
+
+fondo(0, 100, 50)
+```
+```py
+Lienzo(200, 220)
+sinTrazo()
+
+modoColor(HSL)
+for h in range(0, 360, 10):
+	for l in range(0, (100) + 1, 10):
+		relleno(h, 100, l)
+		rect(h * (11 / 20) - 100, l * 2 - 110, 6, 20)
+```
+
 ### c2d
 
 ```js
@@ -387,6 +493,26 @@ for (let h = 0; h < 360; h += 10) {
 }
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+
+modoColor(HSB)
+
+fondo(0, 100, 100)
+```
+```py
+Lienzo(200, 220)
+sinTrazo()
+
+modoColor(HSB)
+for h in range(0, 360, 10):
+	for b in range(0, (100) + 1, 10):
+		relleno(h, 100, b)
+		rect(h * (11 / 20) - 100, b * 2 - 110, 6, 20)
+```
+
 ### c2d
 
 ```js
@@ -428,6 +554,16 @@ modoColor(RGB, 1, SRGB);
 fondo(1, 0, 0);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+
+modoColor(RGB, 1, SRGB)
+
+fondo(1, 0, 0)
+```
+
 ### c2d
 
 ```js
@@ -455,6 +591,16 @@ await Lienzo(200, 100);
 modoColor(RGB, 1, DISPLAY_P3);
 
 fondo(1, 0, 0);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+
+modoColor(RGB, 1, DISPLAY_P3)
+
+fondo(1, 0, 0)
 ```
 
 ### c2d
@@ -491,6 +637,18 @@ q5.dibujar = function () {
 	fondo(0.5, 0.2);
 	circulo(ratonX, ratonY, 20);
 };
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo('crimson')
+```
+```py
+def dibujar():
+	fondo(0.5, 0.2)
+	circulo(ratonX, ratonY, 20)
 ```
 
 ### c2d

@@ -20,6 +20,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	trasladar(50, 50)
+	circulo(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -50,6 +60,18 @@ q5.dibujar = function () {
 	modoRect(CENTER);
 	cuadrado(0, 0, 120);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	rotar(ratonX / 50)
+
+	modoRect(CENTER)
+	cuadrado(0, 0, 120)
 ```
 
 ### c2d
@@ -89,6 +111,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	escalar(ratonX / 10)
+	circulo(0, 0, 20)
+```
+
 ### c2d
 
 ```js
@@ -118,6 +150,17 @@ q5.dibujar = function () {
 	cizallarX(ratonX / 100);
 	cuadrado(0, 0, 80);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	trasladar(-75, -40)
+	cizallarX(ratonX / 100)
+	cuadrado(0, 0, 80)
 ```
 
 ### c2d
@@ -150,6 +193,17 @@ q5.dibujar = function () {
 	cizallarY(ratonX / 100);
 	cuadrado(0, 0, 80);
 };
+```
+
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	trasladar(-75, -40)
+	cizallarY(ratonX / 100)
+	cuadrado(0, 0, 80)
 ```
 
 ### c2d
@@ -194,6 +248,16 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+def dibujar():
+	fondo(0.8)
+
+	aplicarMatriz(2, -1, 1, -1)
+	circulo(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -225,6 +289,19 @@ reiniciarMatriz();
 cuadrado(0, 0, 50);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+trasladar(50, 50)
+circulo(0, 0, 80)
+
+reiniciarMatriz()
+cuadrado(0, 0, 50)
+```
+
 ### c2d
 
 ```js
@@ -254,6 +331,20 @@ elipse(0, 0, 120, 40);
 recuperarMatriz();
 
 elipse(0, 0, 120, 40);
+```
+
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+guardarMatriz()
+rotar(CUARTO_PI)
+elipse(0, 0, 120, 40)
+recuperarMatriz()
+
+elipse(0, 0, 120, 40)
 ```
 
 ### c2d
@@ -289,6 +380,20 @@ recuperarMatriz();
 elipse(0, 0, 120, 40);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+guardarMatriz()
+rotar(CUARTO_PI)
+elipse(0, 0, 120, 40)
+recuperarMatriz()
+
+elipse(0, 0, 120, 40)
+```
+
 ### c2d
 
 ```js
@@ -322,6 +427,20 @@ desapilar();
 cuadrado(0, 0, 50);
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+apilar()
+relleno('blue')
+trasladar(50, 50)
+circulo(0, 0, 80)
+desapilar()
+
+cuadrado(0, 0, 50)
+```
+
 ### c2d
 
 ```js
@@ -352,6 +471,20 @@ circulo(0, 0, 80);
 desapilar();
 
 cuadrado(0, 0, 50);
+```
+
+### python
+
+```py
+Lienzo(200)
+
+apilar()
+relleno('blue')
+trasladar(50, 50)
+circulo(0, 0, 80)
+desapilar()
+
+cuadrado(0, 0, 50)
 ```
 
 ### c2d

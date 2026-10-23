@@ -22,6 +22,16 @@ let v = crearVector(0, 0);
 circulo(v.x, v.y, 50);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+v = crearVector(0, 0)
+circulo(v.x, v.y, 50)
+```
+
 ## Vector.constructor
 
 Una clase para describir un vector bidimensional o tridimensional, específicamente un vector euclidiano (también conocido como geométrico). Un vector es una entidad que tiene tanto magnitud como dirección. El tipo de datos almacena los componentes del vector (x, y para 2D, y z para 3D). La magnitud y dirección se pueden acceder a través de los métodos `mag()` y `heading()`.

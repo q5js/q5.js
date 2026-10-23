@@ -17,6 +17,13 @@ await Lienzo(200, 100);
 circulo(0, 0, 80);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+circulo(0, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -40,6 +47,13 @@ Dibuja una elipse.
 ```js
 await Lienzo(200, 100);
 elipse(0, 0, 160, 80);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+elipse(0, 0, 160, 80)
 ```
 
 ### c2d
@@ -70,6 +84,17 @@ fondo(0.8);
 rect(-70, -80, 40, 60);
 rect(-20, -30, 40, 60, 10);
 rect(30, 20, 40, 60, 30);
+```
+
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+rect(-70, -80, 40, 60)
+rect(-20, -30, 40, 60, 10)
+rect(30, 20, 40, 60, 30)
 ```
 
 ### c2d
@@ -105,6 +130,17 @@ cuadrado(-20, -20, 40, 10);
 cuadrado(30, 30, 40, 30);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+cuadrado(-70, -70, 40)
+cuadrado(-20, -20, 40, 10)
+cuadrado(30, 30, 40, 30)
+```
+
 ### c2d
 
 ```js
@@ -136,6 +172,17 @@ grosorTrazo(10);
 punto(25, 0);
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+trazo('white')
+punto(-25, 0)
+
+grosorTrazo(10)
+punto(25, 0)
+```
+
 ### c2d
 
 ```js
@@ -164,6 +211,14 @@ Dibuja una línea en el lienzo.
 await Lienzo(200, 100);
 trazo('lime');
 linea(-80, -30, 80, 30);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+trazo('lime')
+linea(-80, -30, 80, 30)
 ```
 
 ### c2d
@@ -202,6 +257,22 @@ q5.dibujar = function () {
 	grosorTrazo(10);
 	capsula(0, 0, ratonX, ratonY, 20);
 };
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+grosorTrazo(5)
+capsula(-60, -10, 60, 10, 10)
+```
+```py
+def dibujar():
+	fondo(0.8)
+	relleno('cyan')
+	grosorTrazo(10)
+	capsula(0, 0, ratonX, ratonY, 20)
 ```
 
 ### c2d
@@ -269,6 +340,41 @@ modoRect(ESQUINAS);
 
 //  ( x1, y1, x2, y2)
 rect(-50, -25, 50, 25);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoRect(ESQUINA)
+
+
+rect(-50, -25, 100, 50)
+```
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoRect(CENTRO)
+
+
+rect(0, 0, 100, 50)
+```
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoRect(RADIO)
+
+
+rect(0, 0, 50, 25)
+```
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoRect(ESQUINAS)
+
+
+rect(-50, -25, 50, 25)
 ```
 
 ### c2d
@@ -356,6 +462,41 @@ modoEliptico(ESQUINAS);
 
 //     ( x1, y1, x2, y2)
 elipse(-50, -25, 50, 25);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoEliptico(CENTRO)
+
+
+elipse(0, 0, 100, 50)
+```
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoEliptico(RADIO)
+
+
+elipse(0, 0, 50, 25)
+```
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoEliptico(ESQUINA)
+
+
+elipse(-50, -25, 100, 50)
+```
+```py
+Lienzo(200, 100)
+fondo(0.8)
+modoEliptico(ESQUINAS)
+
+
+elipse(-50, -25, 50, 25)
 ```
 
 ### c2d

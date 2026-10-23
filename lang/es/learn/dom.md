@@ -44,6 +44,20 @@ el.style.backgroundColor = 'blue';
 el.style.color = 'white';
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+el = crearElemento('div', '*')
+el.position(50, 50)
+el.size(100, 100)
+el.style.fontSize = '136px'
+el.style.textAlign = 'center'
+el.style.backgroundColor = 'blue'
+el.style.color = 'white'
+```
+
 ### c2d
 
 ```js
@@ -82,6 +96,20 @@ enlace.addEventListener('mouseover', () => {
 });
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+enlace = crearA('https://q5js.org', 'q5.js')
+enlace.position(16, 42)
+enlace.style.fontSize = '80px'
+
+def __q5_callback_0():
+	fondo('cyan')
+enlace.addEventListener('mouseover', __q5_callback_0)
+```
+
 ### c2d
 
 ```js
@@ -114,6 +142,18 @@ let btn = crearBoton('¡Clic aqui!');
 btn.addEventListener('click', () => {
 	fondo(aleatorio(0.4, 1));
 });
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+
+btn = crearBoton('¡Clic aqui!')
+
+def __q5_callback_0():
+	fondo(aleatorio(0.4, 1))
+btn.addEventListener('click', __q5_callback_0)
 ```
 
 ### c2d
@@ -155,6 +195,20 @@ casilla.addEventListener('input', () => {
 });
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+
+casilla = crearCasilla('¡Marca aquí!')
+casilla.label.style.color = 'lime'
+
+def __q5_callback_0():
+	if casilla.checked: fondo('lime')
+	else: fondo('black')
+casilla.addEventListener('input', __q5_callback_0)
+```
+
 ### c2d
 
 ```js
@@ -192,6 +246,18 @@ q5.dibujar = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+
+selección = crearSelectorColor()
+selección.value = '#fd7575'
+
+def dibujar():
+	fondo(selección.value)
+```
+
 ### c2d
 
 ```js
@@ -220,6 +286,15 @@ await Lienzo(200, 100);
 
 let img = crearImg('/assets/q5play_logo.avif');
 img.position(0, 0).size(100, 100);
+```
+
+### python
+
+```py
+Lienzo(200, 100)
+
+img = crearImg('/assets/q5play_logo.avif')
+img.position(0, 0).size(100, 100)
 ```
 
 ### c2d
@@ -263,6 +338,22 @@ entrada.addEventListener('input', () => {
 });
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+tamañoTexto(64)
+
+entrada = crearEntrada()
+entrada.placeholder = '¡Teclea aquí!'
+entrada.size(200, 32)
+
+def __q5_callback_0():
+	fondo('orange')
+	texto(entrada.value, -90, 30)
+entrada.addEventListener('input', __q5_callback_0)
+```
+
 ### c2d
 
 ```js
@@ -295,6 +386,16 @@ fondo('coral');
 
 let p = crearP('¡Hola, mundo!');
 p.style.color = 'pink';
+```
+
+### python
+
+```py
+Lienzo(200, 50)
+fondo('coral')
+
+p = crearP('¡Hola, mundo!')
+p.style.color = 'pink'
 ```
 
 ### c2d
@@ -333,6 +434,20 @@ q5.dibujar = function () {
 	if (radio.value == '1') cuadrado(-40, -40, 80);
 	if (radio.value == '2') circulo(0, 0, 80);
 };
+```
+
+### python
+
+```py
+Lienzo(200, 160)
+
+radio = crearOpciones()
+radio.option('cuadrado', '1').option('círculo', '2')
+
+def dibujar():
+	fondo(0.8)
+	if radio.value == '1': cuadrado(-40, -40, 80)
+	if radio.value == '2': circulo(0, 0, 80)
 ```
 
 ### c2d
@@ -382,6 +497,19 @@ sel.addEventListener('change', () => {
 });
 ```
 
+### python
+
+```py
+Lienzo(200, 100)
+
+sel = crearSeleccion('Seleccionar un opcion')
+sel.option('Red', '#f55').option('Green', '#5f5')
+
+def __q5_callback_0():
+	fondo(sel.value)
+sel.addEventListener('change', __q5_callback_0)
+```
+
 ### c2d
 
 ```js
@@ -421,6 +549,18 @@ deslizador.position(10, 10).size(180);
 q5.dibujar = function () {
 	fondo(deslizador.val());
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+
+deslizador = crearDeslizador(0, 1, 0.5, 0.1)
+deslizador.position(10, 10).size(180)
+
+def dibujar():
+	fondo(deslizador.val())
 ```
 
 ### c2d
@@ -475,6 +615,29 @@ q5.dibujar = function () {
 	imagen(vid, -100, -75, 200, 150);
 	// filtro(HUE_ROTATE, 90);
 };
+```
+
+### python
+
+```py
+Lienzo(1)
+
+vid = crearVideo('/assets/apollo4.mp4')
+vid.size(200, 150)
+vid.autoplay = vid.muted = vid.loop = True
+vid.controls = True
+```
+```py
+Lienzo(200, 150)
+vid = crearVideo('/assets/apollo4.mp4')
+vid.hide()
+
+def alPresionarRatón():
+	vid.currentTime = 0
+	vid.play()
+def dibujar():
+	imagen(vid, -100, -75, 200, 150)
+
 ```
 
 ### c2d
@@ -555,6 +718,34 @@ q5.alPresionarRatón = function () {
 	cap.size(200, 150);
 	canvas.remove();
 };
+```
+
+### python
+
+```py
+def alPresionarRatón():
+	cap = crearCaptura(VIDEO)
+	cap.size(200, 112.5)
+	canvas.remove()
+```
+```py
+cap = None
+def alPresionarRatón():
+	global cap
+	cap = crearCaptura(VIDEO)
+	cap.hide()
+
+def dibujar():
+	y = (frameCount % 200) - 100
+	imagen(cap, -100, y, 200, 200)
+```
+```py
+def alPresionarRatón():
+	cap = crearCaptura({
+		"video": { "width": 640, "height": 480 }
+	})
+	cap.size(200, 150)
+	canvas.remove()
 ```
 
 ### c2d

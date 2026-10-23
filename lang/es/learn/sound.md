@@ -40,6 +40,18 @@ q5.alPresionarRatón = function () {
 };
 ```
 
+### python
+
+```py
+Lienzo(200)
+
+sonido = cargarSonido('/assets/jump.wav')
+sonido.volumen = 0.3
+
+def alPresionarRatón():
+	sonido.reproducir()
+```
+
 ### c2d
 
 ```js
@@ -78,6 +90,18 @@ audio.volume = 0.4;
 q5.alPresionarRatón = function () {
 	audio.play();
 };
+```
+
+### python
+
+```py
+Lienzo(200)
+
+audio = cargarAudio('/assets/retro.flac')
+audio.volume = 0.4
+
+def alPresionarRatón():
+	audio.play()
 ```
 
 ### c2d

@@ -1,5 +1,5 @@
 /**
- * q5/lang/build.js
+ * q5/learn/build.js
  *
  * AI was used to generate parts of this script.
  */
@@ -22,214 +22,9 @@ winResized();
 window.addEventListener('resize', winResized);
 
 function stripParams(params) {
-	return params
-		.split(',')
+	return splitTypeScriptParams(params)
 		.map((param) => param.split(':')[0].trim())
 		.join(', ');
-}
-
-function convertTSDefToMarkdown(data) {
-	data = data.replaceAll('https://q5js.org/learn', '.');
-
-	let markdownCode = '';
-
-	// Start parsing from the first section comment (e.g. `// 🔥 core`) so sections
-	// like "core" are not accidentally sliced off by fixed offsets.
-	const allLines = data.split('\n');
-	const firstSectionIdx = allLines.findIndex((l) => l.trim().startsWith('// '));
-	const lines = allLines.slice(firstSectionIdx >= 0 ? firstSectionIdx : 0);
-	let insideJSDoc = false,
-		insideParams = false,
-		insideProps = false,
-		insideExample = false,
-		hasExample = false,
-		jsDocBuffer = '',
-		inClassDef = false,
-		currentClassName = '',
-		curEmoji = '';
-
-	// track when we are skipping over a namespace/interface block
-	let skippingBlock = false;
-	let skipDepth = 0;
-
-	for (let i = 0; i < lines.length; i++) {
-		let line = lines[i];
-		// if we're currently skipping a namespace/interface block, consume
-		// lines until the block's braces are balanced again
-		if (skippingBlock) {
-			if (!insideExample) line = line.trim();
-			const opens = (line.match(/{/g) || []).length;
-			const closes = (line.match(/}/g) || []).length;
-			skipDepth += opens - closes;
-			if (skipDepth <= 0) {
-				skippingBlock = false;
-				skipDepth = 0;
-			}
-			continue;
-		}
-		if (!insideExample) line = line.trim();
-
-		if (line.startsWith('/**')) {
-			insideJSDoc = true;
-			jsDocBuffer = '';
-		} else if (insideJSDoc) {
-			if (line.endsWith('*/')) {
-				if (insideExample) {
-					line = jsDocBuffer += '```';
-					insideExample = false;
-				}
-				insideJSDoc = insideParams = insideProps = false;
-			} else {
-				line = line.replace(/^\s*\* {0,1}/, '');
-				let isParam = line.startsWith('@param');
-				if (isParam) {
-					if (!insideParams) jsDocBuffer += '### Params\n\n';
-					insideParams = true;
-				}
-				let isProp = line.startsWith('@prop');
-				if (isProp) {
-					if (!insideProps) jsDocBuffer += '### Properties\n\n';
-					insideProps = true;
-				}
-				if (isParam || isProp) {
-					let pMatch = line.match(/@(param|prop|property) \{([^\}]+)\} (\S+) *-* *(.*)/);
-					if (pMatch) {
-						let [_0, _1, pType, pName, pDesc] = pMatch;
-						let optional = '';
-						if (pName[0] === '[') {
-							pName = pName.slice(1, -1);
-							optional = '(optional)';
-						}
-						if (pName.includes('.')) line = '  ';
-						else line = '';
-						line += `- \`${pName}\` \`<${pType}>\` ${optional}`;
-						if (pDesc) line += ` - ${pDesc}`;
-					}
-				} else if (line.startsWith('@returns')) {
-					let returnMatch = line.match(/@returns \{([^\}]+)\} *-* *(.*)/);
-					if (returnMatch) {
-						let [_, returnType, returnDesc] = returnMatch;
-						line = `### Returns\n\n- \`<${returnType}>\``;
-						if (returnDesc) line += ` - ${returnDesc}`;
-					}
-				} else if (line.startsWith('@example')) {
-					line = '```js';
-					if (insideExample) {
-						line = '```\n\n' + line;
-					}
-					insideExample = hasExample = true;
-				}
-				jsDocBuffer += line + '\n';
-			}
-		} else if (!line) {
-			if (jsDocBuffer.length > 0) markdownCode += jsDocBuffer;
-			markdownCode += '\n';
-		} else if (line.startsWith('//')) {
-			let sectionTitle = line.slice(3);
-			curEmoji = sectionTitle.slice(0, sectionTitle.indexOf(' '));
-			markdownCode += `# ${sectionTitle}\n\n`;
-		} else if (line.startsWith('class ')) {
-			// Start of a class definition. Do not treat a 'class' token inside
-			// another class as a nested class declaration — nested types inside
-			// classes are represented in .d.ts as properties (e.g. `static Image: { ... }`)
-			// which are handled elsewhere. So always treat 'class' as a top-level
-			// class beginning and update currentClassName.
-			let classMatch = line.match(/class\s+([a-zA-Z0-9_\u00C0-\u00FF]+)/);
-			currentClassName = classMatch ? classMatch[1] : '';
-			inClassDef = true;
-		} else if (inClassDef && line.startsWith('constructor')) {
-			let params = stripParams(line.slice(12, -2));
-			markdownCode += `## ${curEmoji} ${currentClassName}(${params}) &lt;class&gt;\n\n`;
-			markdownCode += jsDocBuffer + '\n\n';
-			jsDocBuffer = '';
-			hasExample = false;
-		} else if (line.startsWith('new')) {
-			continue;
-		} else if (line.endsWith('//-')) {
-			jsDocBuffer = '';
-			return;
-		} else if (line.includes('(')) {
-			// capture a function/method name, its params, and any return/type (allow complex types)
-			let funcMatch = line.match(/([a-zA-Z0-9_\u00C0-\u00FF]+)\s*\(([^)]*)\)\s*:\s*([^;]+)/);
-			if (funcMatch) {
-				let [_, funcName, funcParams, funcType] = funcMatch;
-				if (!line.startsWith('function ')) {
-					const isStatic = line.startsWith('static');
-					if (!isStatic) funcName = currentClassName.toLowerCase() + '.' + funcName;
-					else funcName = currentClassName + '.' + funcName; // keep class capitalization for static members
-				}
-				funcParams = stripParams(funcParams);
-				let funcHeader = `## ${curEmoji} ${funcName}(${funcParams}) &lt;${funcType.trim()}&gt;\n\n`;
-				markdownCode += funcHeader + jsDocBuffer + '\n\n';
-				jsDocBuffer = '';
-				hasExample = false;
-			}
-		} else if (
-			/^\s*static\s+[a-zA-Z0-9_\u00C0-\u00FF]+\s*:\s*\{/.test(line) ||
-			(/^\s*static\s+[a-zA-Z0-9_\u00C0-\u00FF]+\s*:\s*$/.test(line) &&
-				i + 1 < lines.length &&
-				lines[i + 1].trim().startsWith('{'))
-		) {
-			// Skip nested static type blocks inside classes e.g. `static Image: { ... }`.
-			// If the brace is on the next line, we detect it and begin skipping.
-			const opens = (line.match(/{/g) || []).length || (lines[i + 1] && lines[i + 1].trim().startsWith('{') ? 1 : 0);
-			const closes = (line.match(/}/g) || []).length;
-			skipDepth = opens - closes;
-			skippingBlock = true;
-			if (skipDepth <= 0) {
-				skippingBlock = false;
-				skipDepth = 0;
-			}
-			continue;
-		} else if (line.includes(':')) {
-			let l = line.split(':');
-			let varName = l[0].split(' ').at(-1).trim();
-
-			// if var is a class property
-			if (!line.match(/^(var|let|const)/)) {
-				const isStatic = line.startsWith('static');
-				if (!isStatic) varName = currentClassName.toLowerCase() + '.' + varName;
-				else varName = currentClassName + '.' + varName; // preserve capitalization for static
-			}
-			// support complex types (may contain ':' characters) - rejoin and trim ';'
-			let type = l.slice(1).join(':').trim().replace(/;$/, '');
-			let varHeader = `## ${curEmoji} ${varName} &lt;${type}&gt;\n\n`;
-			markdownCode += varHeader + jsDocBuffer + '\n\n';
-			jsDocBuffer = '';
-			hasExample = false;
-		} else if (line.startsWith('namespace') || line.startsWith('interface')) {
-			// skip entire namespace/interface blocks (including their inner contents)
-			// compute initial brace depth on this line and begin skipping
-			const opens = (line.match(/{/g) || []).length;
-			const closes = (line.match(/}/g) || []).length;
-			skipDepth = opens - closes;
-			// if there are no braces on this line we still want to start skipping
-			// until we encounter the matching closing brace
-			skippingBlock = true;
-			// if the block opened and closed on the same line (unlikely), end skipping
-			if (skipDepth <= 0) {
-				skippingBlock = false;
-				skipDepth = 0;
-			}
-			continue;
-		} else if (line !== '}' && !line.includes(':')) {
-			markdownCode += line + '\n';
-		}
-	}
-	return markdownCode;
-}
-
-// Strip JSDoc asterisks and common indent from ```js code blocks
-// so code injected into the mini editors is clean and properly left-aligned.
-function cleanJSDocExamples(markdownCode) {
-	return markdownCode.replace(/```js([\s\S]*?)```/g, (match, code) => {
-		code = code.trim();
-		let lines = code.split('\n');
-		// Remove leading optional JSDoc asterisk and one following space from each line
-		lines = lines.map((l) => l.replace(/^\s*\*\s?/, ''));
-
-		return '```js\n' + lines.join('\n') + '\n```';
-	});
 }
 
 let sections = {};
@@ -237,6 +32,362 @@ let sections = {};
 let currentSectionId = '';
 let currentLoadedSectionId = '';
 let currentSubsectionId = '';
+
+const learnPages = [
+	'core',
+	'shapes',
+	'image',
+	'text',
+	'input',
+	'color',
+	'styles',
+	'transforms',
+	'display',
+	'math',
+	'sound',
+	'dom',
+	'record',
+	'utilities',
+	'vector',
+	'shaping',
+	'shaders',
+	'advanced'
+];
+
+function splitTypeScriptParams(params) {
+	const result = [];
+	let start = 0;
+	let depth = 0;
+
+	for (let i = 0; i < params.length; i++) {
+		const char = params[i];
+		if (char === '(' || char === '[' || char === '{' || char === '<') depth++;
+		else if (char === ')' || char === ']' || char === '}' || char === '>') depth--;
+		else if (char === ',' && depth === 0) {
+			result.push(params.slice(start, i).trim());
+			start = i + 1;
+		}
+	}
+
+	if (params.slice(start).trim()) result.push(params.slice(start).trim());
+	return result;
+}
+
+function parseBaseDtsMetadata(data) {
+	const bySection = {};
+	const byName = {};
+	const classStack = [];
+	let section = '';
+	let braceDepth = 0;
+
+	function addRecord(record) {
+		if (!section || !record.fullName) return;
+		if (!bySection[section]) bySection[section] = [];
+		if (bySection[section].some((existing) => existing.fullName === record.fullName)) return;
+		record.emoji = bySection[section][0]?.emoji || currentEmoji;
+		bySection[section].push(record);
+		byName[record.fullName.toLowerCase()] ||= record;
+		byName[record.name.toLowerCase()] ||= record;
+	}
+
+	let currentEmoji = '';
+	const lines = data.split('\n');
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i];
+		const trimmed = line.trim();
+		const sectionMatch = trimmed.match(/^\/\/\s+([^\w\s]+)\s+([\w-]+)\s*$/);
+		if (sectionMatch) {
+			currentEmoji = sectionMatch[1].replace(/\uFE0F/g, '');
+			section = sectionMatch[2];
+		}
+
+		const classMatch = trimmed.match(/^(?:declare\s+)?(?:class|interface)\s+([\w$]+)\b.*\{/);
+		if (classMatch) {
+			const name = classMatch[1];
+			addRecord({ name, fullName: name, kind: 'class', type: 'class' });
+		}
+
+		const functionMatch = trimmed.match(/^(?:static\s+)?(?:function\s+)?([\w$]+)\s*\(/);
+		const isFunctionDeclaration = trimmed.startsWith('function ') || classStack.length > 0;
+		if (functionMatch && isFunctionDeclaration) {
+			const name = functionMatch[1];
+			let end = i;
+			while (end < lines.length - 1 && !/;\s*$/.test(lines[end].trim())) end++;
+			const signature = lines
+				.slice(i, end + 1)
+				.join(' ')
+				.replace(/\s+/g, ' ')
+				.trim()
+				.replace(/;\s*$/, '');
+			const openIndex = signature.indexOf('(', functionMatch.index || 0);
+			let depth = 0;
+			let closeIndex = -1;
+			for (let j = openIndex; j < signature.length; j++) {
+				if (signature[j] === '(') depth++;
+				else if (signature[j] === ')' && --depth === 0) {
+					closeIndex = j;
+					break;
+				}
+			}
+
+			if (closeIndex !== -1) {
+				const params = signature.slice(openIndex + 1, closeIndex);
+				const returnType = signature
+					.slice(closeIndex + 1)
+					.replace(/^\s*:\s*/, '')
+					.trim();
+				const className = classStack.at(-1)?.name || '';
+				const fullName = className ? `${className}.${name}` : name;
+				addRecord({
+					name,
+					fullName,
+					kind: name === 'constructor' ? 'constructor' : 'function',
+					params,
+					returnType: name === 'constructor' ? 'class' : returnType || 'void',
+					parsedParams: splitTypeScriptParams(params).map((param) => {
+						const match = param.match(/^(\.\.\.)?([\w$]+)(\?)?\s*:\s*(.+)$/);
+						return match
+							? { name: match[2], optional: Boolean(match[3]), type: match[4] }
+							: { name: param, optional: false, type: '' };
+					})
+				});
+			}
+
+			while (i < end) {
+				braceDepth += (lines[i].match(/{/g) || []).length - (lines[i].match(/}/g) || []).length;
+				while (classStack.length && braceDepth < classStack.at(-1).depth) classStack.pop();
+				i++;
+			}
+		} else {
+			const variableMatch = trimmed.match(
+				/^(?:(?:static\s+)?(?:let|const|var)\s+|(?:static\s+)?)([\w$]+)\??\s*:\s*(.+);$/
+			);
+			if (variableMatch && !trimmed.startsWith('function ')) {
+				const className = classStack.at(-1)?.name || '';
+				const name = variableMatch[1];
+				addRecord({
+					name,
+					fullName: className ? `${className}.${name}` : name,
+					kind: 'property',
+					type: variableMatch[2].trim()
+				});
+			}
+		}
+
+		braceDepth += (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+		if (classMatch) {
+			const depth = braceDepth;
+			if (depth > 0) classStack.push({ name: classMatch[1], depth });
+		}
+		while (classStack.length && braceDepth < classStack.at(-1).depth) classStack.pop();
+	}
+
+	return { bySection, byName };
+}
+
+function parseLocaleAliases(data) {
+	const membersMatch = data.match(/members:\s*\{([\s\S]*?)^\s*\},/m);
+	if (!membersMatch) throw new Error('Could not parse Spanish API translations');
+
+	const aliases = {};
+	for (const match of membersMatch[1].matchAll(/^\s*([\w$]+):\s*'([^']+)'/gm)) {
+		aliases[match[2].toLowerCase()] = match[1];
+	}
+	return aliases;
+}
+
+function formatTypeMetadataBlock(lines, record) {
+	const meaningfulLines = lines.filter((line) => line.trim());
+	if (
+		!meaningfulLines.some((line) => /^@\w+/.test(line)) ||
+		meaningfulLines.some((line) => !/^(?:@\w+|\s)/.test(line))
+	) {
+		return null;
+	}
+
+	const output = [];
+	const paramCount = lines.filter((line) => line.startsWith('@param ')).length;
+	let paramIndex = 0;
+	let hasParamsHeading = false;
+
+	for (const line of lines) {
+		const paramMatch = line.match(/^@param\s+\{([^}]+)\}\s+(\[[^\]]+\]|\S+)\s*-?\s*(.*)$/);
+		if (paramMatch) {
+			if (!hasParamsHeading) {
+				output.push('### Params', '');
+				hasParamsHeading = true;
+			}
+			const [, markdownType, rawName, description] = paramMatch;
+			const optionalName = rawName.startsWith('[');
+			const name = optionalName ? rawName.slice(1, -1) : rawName;
+			const declared =
+				record?.parsedParams?.find((param) => param.name === name) ||
+				(record?.parsedParams?.length === paramCount ? record.parsedParams[paramIndex] : null);
+			const type = declared?.type || markdownType;
+			const optional = declared ? declared.optional : optionalName;
+			output.push(
+				`- \`${name}\` \`<${type}>\`${optional ? ' (optional)' : ''}${description ? ` - ${description}` : ''}`
+			);
+			paramIndex++;
+			continue;
+		}
+
+		const returnMatch = line.match(/^@returns?\s+\{([^}]+)\}\s*-?\s*(.*)$/);
+		if (returnMatch) {
+			const type = record?.returnType || returnMatch[1];
+			output.push('### Returns', '', `- \`<${type}>\`${returnMatch[2] ? ` - ${returnMatch[2]}` : ''}`);
+			continue;
+		}
+
+		const typeMatch = line.match(/^@type\s+\{([^}]+)\}\s*-?\s*(.*)$/);
+		if (typeMatch) {
+			const type = record?.type || typeMatch[1];
+			output.push(`- \`<${type}>\`${typeMatch[2] ? ` - ${typeMatch[2]}` : ''}`);
+			continue;
+		}
+
+		const defaultMatch = line.match(/^@default\s*(.*)$/);
+		if (defaultMatch) {
+			output.push(`- Default: \`${defaultMatch[1]}\``);
+			continue;
+		}
+
+		if (/^\s+/.test(line) && output.length) output.push(`  ${line.trim()}`);
+		else if (line.trim()) output.push(line);
+	}
+
+	return output.join('\n');
+}
+
+function enrichMarkdownPage(markdownText, metadata, locale, englishMarkdownText = markdownText, aliases = {}) {
+	const lines = markdownText.split('\n');
+	const sectionHeading = lines.find((line) => line.startsWith('# '));
+	const englishSectionHeading = englishMarkdownText.split('\n').find((line) => line.startsWith('# '));
+	const sectionName = (englishSectionHeading || sectionHeading)?.slice(2).trim().toLowerCase();
+	const sectionEmoji = metadata.bySection[sectionName]?.[0]?.emoji;
+	const getHeadings = (text) => {
+		const headings = [];
+		let inFence = false;
+		for (const line of text.split('\n')) {
+			if (line.startsWith('````')) {
+				if (inFence) inFence = false;
+				continue;
+			}
+			if (!inFence && line.startsWith('## ')) headings.push(line);
+			if (line.startsWith('```')) inFence = !inFence;
+		}
+		return headings;
+	};
+	const headings = getHeadings(markdownText);
+	const englishHeadings = getHeadings(englishMarkdownText);
+	const englishRecords = englishHeadings.map((heading) => {
+		const name = heading.slice(3).trim().split(/\s+/)[0].split('(')[0];
+		return metadata.byName[name.toLowerCase()] || metadata.byName[aliases[name.toLowerCase()]?.toLowerCase()] || null;
+	});
+	const canMatchByOrder = locale !== 'en' && headings.length === englishRecords.length;
+
+	const enriched = [];
+	let currentRecord = null;
+	let inFence = false;
+	let headingIndex = 0;
+	let inOuterFence = false;
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i];
+		if (i === 0 && line.startsWith('# ') && sectionEmoji) {
+			enriched.push(`# ${sectionEmoji} ${line.slice(2)}`);
+			continue;
+		}
+		if (line.startsWith('````')) {
+			inOuterFence = !inOuterFence;
+			if (!inOuterFence && inFence) {
+				enriched.push('```');
+				inFence = false;
+			}
+			continue;
+		}
+		if (!inFence && line.startsWith('## ')) {
+			const title = line.slice(3).trim();
+			const name = title.split(/\s+/)[0].split('(')[0];
+			const record =
+				metadata.byName[name.toLowerCase()] ||
+				metadata.byName[aliases[name.toLowerCase()]?.toLowerCase()] ||
+				(canMatchByOrder ? englishRecords[headingIndex] : null);
+			headingIndex++;
+			currentRecord = record || null;
+
+			if (record) {
+				const emoji = record.emoji ? `${record.emoji} ` : '';
+				if (record.kind === 'function' || record.kind === 'constructor') {
+					const params = stripParams(record.params);
+					const type = record.returnType || 'void';
+					enriched.push(`## ${emoji}${title.split(/\s+/)[0]}(${params}) &lt;${type}&gt;`);
+				} else {
+					enriched.push(`## ${emoji}${title} &lt;${record.type || 'class'}&gt;`);
+				}
+			} else {
+				enriched.push(line);
+			}
+			continue;
+		}
+
+		if (!inFence && line.trim() === '```') {
+			let end = i + 1;
+			while (end < lines.length && lines[end].trim() !== '```') end++;
+			if (end < lines.length) {
+				const formatted = formatTypeMetadataBlock(lines.slice(i + 1, end), currentRecord);
+				if (formatted !== null) {
+					enriched.push(formatted);
+					i = end;
+					continue;
+				}
+			}
+		}
+
+		if (!inFence && /^@(?:param|returns?|type)\b/.test(line)) {
+			let end = i + 1;
+			while (end < lines.length && (/^@(?:param|returns?|type)\b/.test(lines[end]) || /^\s+-/.test(lines[end]))) end++;
+			const formatted = formatTypeMetadataBlock(lines.slice(i, end), currentRecord);
+			if (formatted !== null) {
+				enriched.push(formatted);
+				i = end - 1;
+				continue;
+			}
+		}
+
+		enriched.push(line);
+		if (line.startsWith('```') && !line.startsWith('````')) inFence = !inFence;
+	}
+
+	return enriched.join('\n');
+}
+
+function filterMarkdownExamples(markdownText, exampleMode) {
+	let activeMode = null;
+	let insideCodeFence = false;
+	const filteredLines = [];
+
+	for (const line of markdownText.split('\n')) {
+		if (line.startsWith('````')) continue;
+		if (!insideCodeFence) {
+			const headingMatch = line.match(/^###\s+(\S+)/);
+			if (headingMatch) {
+				const heading = headingMatch[1].toLowerCase();
+				if (['webgpu', 'python', 'c2d'].includes(heading)) {
+					activeMode = heading;
+					continue;
+				}
+				activeMode = null;
+			} else if (/^#{1,2}\s/.test(line)) {
+				activeMode = null;
+			}
+		}
+
+		if (!activeMode || activeMode === exampleMode) filteredLines.push(line);
+		if (line.startsWith('```') && !line.startsWith('````')) insideCodeFence = !insideCodeFence;
+	}
+
+	return filteredLines.join('\n');
+}
 
 // Current section state (must be declared before loader functions)
 // (declared earlier)
@@ -246,19 +397,24 @@ function parseMarkdownIntoSections(markdownText) {
 	sections = {};
 
 	let codeBlockCount = 0;
-	// make script tags (use captured group to extract the JS content)
-	markdownText = markdownText.replace(/```js([\s\S]*?)```/g, (match, js) => {
-		js = js.replace(/^\n+|\n+$/g, '');
-		return `\n<script id="ex${codeBlockCount++}" type="mini">\n${js}\n</script>`;
+	// make script tags (use captured group to extract the example content)
+	markdownText = markdownText.replace(/```(js|py|python)([\s\S]*?)```/g, (match, language, code) => {
+		code = code.replace(/^\n+|\n+$/g, '');
+		const type = language === 'python' || language === 'py' ? 'mini/python' : 'mini';
+		return `\n<script id="ex${codeBlockCount++}" type="${type}">\n${code}\n</script>`;
 	});
 
 	let lines = markdownText.split('\n'),
 		currentSectionId = '',
 		currentSubsectionId = '',
-		insideCodeBlock = false;
+		insideCodeBlock = false,
+		insideMiniScript = false;
 
 	for (let line of lines) {
-		if (line.startsWith('```')) {
+		if (line.startsWith('<script id="ex')) insideMiniScript = true;
+		else if (line === '</script>') insideMiniScript = false;
+
+		if (line.startsWith('```') && !line.startsWith('````')) {
 			insideCodeBlock = !insideCodeBlock;
 		}
 
@@ -270,7 +426,7 @@ function parseMarkdownIntoSections(markdownText) {
 			id = '',
 			attributes = {};
 
-		if (!insideCodeBlock) {
+		if (!insideCodeBlock && !insideMiniScript) {
 			if (line.startsWith('# ')) {
 				title = line.substring(2);
 				isMarkdownH1 = true;
@@ -301,7 +457,8 @@ function parseMarkdownIntoSections(markdownText) {
 			currentSubsectionId = '';
 			sections[id] = { title: title, content: line, subsections: {} };
 		} else if ((isMarkdownH2 || isHTMLH2) && currentSectionId) {
-			title = title.split(' ')[1].split('(')[0];
+			const titleParts = title.trim().split(/\s+/);
+			title = (titleParts.length > 1 ? titleParts[1] : titleParts[0]).split('(')[0];
 			id = title.replace(/\s+/g, '-');
 			currentSubsectionId = id;
 			sections[currentSectionId].subsections[id] = { title: title, content: line, ...attributes };
@@ -317,24 +474,27 @@ function parseMarkdownIntoSections(markdownText) {
 	return sections;
 }
 
-// get args from url
-let urlParams = new URLSearchParams(window.location.search);
-// Build a queryString but render any renderer flags as key-only (no '=')
-let rawQSInit = urlParams.toString();
-rawQSInit = rawQSInit.replace(/(?:^|&)(webgpu)(?:=[^&]*)?(?=$|&)/g, '$1');
-rawQSInit = rawQSInit.replace(/(?:^|&)(c2d)(?:=[^&]*)?(?=$|&)/g, '$1');
-let queryString = rawQSInit ? '?' + rawQSInit : '';
+// Renderer selection remains controlled by the legacy URL flags.
+const urlParams = new URLSearchParams(window.location.search);
+let queryString = window.location.search;
 
-// Renderer mode is read from the explicit `renderer` url param
-// Allowed values: 'webgpu' or 'c2d' (defaults to 'webgpu')
-// Detection: prefer explicit flags `?webgpu` or `?c2d` in the URL.
-// If none are present, default to webgpu (isWebGPU=true).
-let isWebGPU = urlParams.has('c2d') ? false : true;
+// `?c2d` continues to select the legacy Canvas2D documentation.
+const isWebGPU = !urlParams.has('c2d');
 // Language selection is saved in localStorage. Fallback to any URL param
 // for backward compatibility, then default to English `en`.
 let locale = localStorage.getItem('locale') || urlParams.get('locale') || 'en';
+let codeLang = urlParams.has('python') ? 'py' : 'js';
 
-async function loadDtsAndRender(useWebGPU) {
+function updateCodeLangUrl() {
+	if (codeLang === 'py') urlParams.set('python', '');
+	else urlParams.delete('python');
+
+	queryString = urlParams.toString().replace(/(^|&)(webgpu|c2d|python)=(?=&|$)/g, '$1$2');
+	queryString = queryString ? `?${queryString}` : '';
+	history.replaceState(null, '', `${location.pathname}${queryString}${location.hash}`);
+}
+
+async function loadDocsAndRender() {
 	MiniEditor.locale = locale;
 
 	// Snapshot everything needed BEFORE data or language changes.
@@ -349,46 +509,46 @@ async function loadDtsAndRender(useWebGPU) {
 		prevSubsectionIndex = subKeys.indexOf(prevSubId);
 	}
 
-	// Build file name according to renderer + language. English (en) is default and has no suffix.
-	const baseName = useWebGPU ? 'q5' : 'q5-c2d';
-	const langSuffix = locale && locale !== 'en' ? `-${locale}` : '';
+	const exampleMode = codeLang === 'py' ? 'python' : isWebGPU ? 'webgpu' : 'c2d';
+	const [baseDtsResponse, pageResponses, englishPageResponses, localeAliasesResponse] = await Promise.all([
+		fetch('/lang/en/learn/en.d.ts'),
+		Promise.all(learnPages.map((page) => fetch(`/lang/${locale}/learn/${page}.md`))),
+		locale === 'en' ? Promise.resolve(null) : Promise.all(learnPages.map((page) => fetch(`/lang/en/learn/${page}.md`))),
+		locale === 'es' ? fetch('/locales/q5-es.js') : Promise.resolve(null)
+	]);
+	if (!baseDtsResponse.ok) throw new Error(`Failed to load base declarations: ${baseDtsResponse.url}`);
+	if (localeAliasesResponse && !localeAliasesResponse.ok) {
+		throw new Error(`Failed to load Spanish API translations: ${localeAliasesResponse.url}`);
+	}
+	for (const response of pageResponses) {
+		if (!response.ok) throw new Error(`Failed to load learn documentation: ${response.url}`);
+	}
+	for (const response of englishPageResponses || []) {
+		if (!response.ok) throw new Error(`Failed to load English learn documentation: ${response.url}`);
+	}
 
-	const dir = locale == 'en' && useWebGPU ? '/' : `/defs/`;
-
-	// const dir = `/defs/`;
-	const dtsFile = `${dir}${baseName}${langSuffix}.d.ts`;
-	// load the d.ts file for the requested renderer + language
-	const data = await fetch(dtsFile).then((res) => res.text());
-	let markdownText = convertTSDefToMarkdown(data);
-	// Clean JSDoc example blocks (remove leading '*' and common indent)
-	markdownText = cleanJSDocExamples(markdownText);
+	const [baseDts, pageContents, englishPageContents, localeAliasesText] = await Promise.all([
+		baseDtsResponse.text(),
+		Promise.all(pageResponses.map((response) => response.text())),
+		englishPageResponses ? Promise.all(englishPageResponses.map((response) => response.text())) : null,
+		localeAliasesResponse ? localeAliasesResponse.text() : null
+	]);
+	const metadata = parseBaseDtsMetadata(baseDts);
+	const localeAliases = localeAliasesText ? parseLocaleAliases(localeAliasesText) : {};
+	const markdownText = filterMarkdownExamples(
+		pageContents
+			.map((content, index) => {
+				const englishContent = englishPageContents?.[index] || content;
+				return enrichMarkdownPage(content, metadata, locale, englishContent, localeAliases);
+			})
+			.join('\n\n'),
+		exampleMode
+	);
 	sections = parseMarkdownIntoSections(markdownText);
 	populateNavigation();
 
-	// always write an explicit renderer flag using `?webgpu` or `?c2d`
-	if (useWebGPU) {
-		urlParams.set('webgpu', '');
-		urlParams.delete('c2d');
-	} else {
-		urlParams.set('c2d', '');
-		urlParams.delete('webgpu');
-	}
-	// persist language to localStorage; do NOT write language into the URL
+	// Keep the selected documentation edition across visits without changing renderer URL flags.
 	localStorage.setItem('locale', locale);
-	// Serialize params but keep renderer flags as key-only (no '=')
-	let rawQS = urlParams.toString();
-	// Remove any `=...` for the renderer flags so they become key-only like `webgpu` or `c2d`.
-	rawQS = rawQS.replace(/(?:^|&)(webgpu)(?:=[^&]*)?(?=$|&)/g, '$1');
-	rawQS = rawQS.replace(/(?:^|&)(c2d)(?:=[^&]*)?(?=$|&)/g, '$1');
-	queryString = rawQS ? '?' + rawQS : '';
-
-	// Update the browser URL with the new query string
-	const newUrl = `${location.pathname}${queryString}${location.hash}`;
-	history.replaceState(null, '', newUrl);
-
-	// update code select (if present) to reflect active renderer
-	const codeModeSelectEl = document.getElementById('codeModeSelect');
-	if (codeModeSelectEl) codeModeSelectEl.value = useWebGPU ? 'webgpu' : 'c2d';
 
 	// Force content reload by resetting currentLoadedSectionId
 	currentLoadedSectionId = '';
@@ -413,13 +573,14 @@ async function loadDtsAndRender(useWebGPU) {
 	}
 }
 
-// wire up code toggle button
+// Wire up the documentation programming-language selector.
 const codeModeSelect = document.getElementById('codeModeSelect');
 if (codeModeSelect) {
-	codeModeSelect.value = isWebGPU ? 'webgpu' : 'c2d';
+	codeModeSelect.value = codeLang;
 	codeModeSelect.addEventListener('change', async (e) => {
-		isWebGPU = e.target.value === 'webgpu';
-		await loadDtsAndRender(isWebGPU);
+		codeLang = e.target.value;
+		updateCodeLangUrl();
+		await loadDocsAndRender();
 	});
 }
 
@@ -430,7 +591,7 @@ if (langSelect) {
 		locale = e.target.value;
 		// Persist language choice to localStorage and reload docs
 		localStorage.setItem('locale', locale);
-		await loadDtsAndRender(isWebGPU);
+		await loadDocsAndRender();
 	});
 }
 
@@ -459,7 +620,7 @@ if (settingsToggle && selectorsContainer) {
 }
 
 // initial load
-loadDtsAndRender(isWebGPU);
+loadDocsAndRender();
 
 function populateNavigation() {
 	let navbar = document.getElementById('navbar');
@@ -582,6 +743,16 @@ function generateHeadings() {
 				if (funcParams.length > 0) {
 					funcParams = funcParams.replaceAll('?', '');
 					varName = varName.slice(0, parenIndex + 1);
+					if (codeLang == 'py') {
+						funcParams = funcParams
+							.split(',')
+							.map((param) => {
+								// Isolate the parameter name by splitting at ':' and '='
+								return param.split(':')[0].split('=')[0].trim();
+							})
+							.filter(Boolean) // Remove any empty results
+							.join(', ');
+					}
 					header = `<span class="params">${funcParams}</span><span class="var">)</span>`;
 				}
 			}
@@ -621,7 +792,7 @@ async function createMiniEditors() {
 	MiniEditor.host = 'q5';
 	await Q5.initWebGPU();
 
-	let scripts = contentArea.querySelectorAll('script[type="mini"]');
+	let scripts = contentArea.querySelectorAll('script[type^="mini"]');
 	for (let script of scripts) {
 		script.setAttribute('horiz', true);
 		let mie = new MiniEditor(script);
@@ -634,7 +805,7 @@ async function createMiniEditors() {
 		Q5.MAX_TRANSFORMS = Q5.MAX_RECTS = Q5.MAX_ELLIPSES = 1000;
 		Q5.MAX_IMAGES = Q5.MAX_COLORS = Q5.MAX_SHAPE_VERTS = 100;
 
-		if (script.innerHTML.includes('for (')) {
+		if (script.innerHTML.includes('for ')) {
 			Q5.MAX_RECTS = Q5.MAX_COLORS = 100000;
 		}
 

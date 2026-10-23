@@ -25,6 +25,19 @@ relleno('lime');
 cuadrado(-20, -20, 80);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+relleno('red')
+circulo(-20, -20, 80)
+
+relleno('lime')
+cuadrado(-20, -20, 80)
+```
+
 ### c2d
 
 ```js
@@ -64,6 +77,20 @@ trazo('lime');
 cuadrado(-20, -20, 80);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+relleno(0.14)
+
+trazo('red')
+circulo(-20, -20, 80)
+
+trazo('lime')
+cuadrado(-20, -20, 80)
+```
+
 ### c2d
 
 ```js
@@ -96,6 +123,20 @@ trazo('lime');
 cuadrado(-20, -20, 80);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+sinRelleno()
+
+trazo('red')
+circulo(-20, -20, 80)
+trazo('lime')
+cuadrado(-20, -20, 80)
+```
+
 ### c2d
 
 ```js
@@ -125,6 +166,19 @@ circulo(-20, -20, 80);
 
 sinTrazo();
 cuadrado(-20, -20, 80);
+```
+
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+relleno(0.14)
+trazo('red')
+circulo(-20, -20, 80)
+
+sinTrazo()
+cuadrado(-20, -20, 80)
 ```
 
 ### c2d
@@ -160,6 +214,18 @@ grosorTrazo(12);
 circulo(50, 0, 80);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+trazo('red')
+circulo(-50, 0, 80)
+
+grosorTrazo(12)
+circulo(50, 0, 80)
+```
+
 ### c2d
 
 ```js
@@ -193,6 +259,19 @@ circulo(-20, -20, 80);
 
 opacidad(0.2);
 cuadrado(-20, -20, 80);
+```
+
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+opacidad(1)
+circulo(-20, -20, 80)
+
+opacidad(0.2)
+cuadrado(-20, -20, 80)
 ```
 
 ### c2d
@@ -338,6 +417,20 @@ terminacionTrazo(PROJECT);
 linea(-50, 25, 50, 25);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+grosorTrazo(20)
+
+terminacionTrazo(SQUARE)
+linea(-50, -25, 50, -25)
+
+terminacionTrazo(PROJECT)
+linea(-50, 25, 50, 25)
+```
+
 ### c2d
 
 Establece el estilo de terminación de línea a `ROUND`, `SQUARE`, o `PROJECT`.
@@ -424,6 +517,20 @@ recuperarEstilos();
 circulo(50, 50, 80);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+guardarEstilos()
+relleno('blue')
+circulo(-50, -50, 80)
+
+recuperarEstilos()
+circulo(50, 50, 80)
+```
+
 ### c2d
 
 ```js
@@ -456,6 +563,20 @@ recuperarEstilos();
 circulo(50, 50, 80);
 ```
 
+### python
+
+```py
+Lienzo(200)
+fondo(0.8)
+
+guardarEstilos()
+relleno('blue')
+circulo(-50, -50, 80)
+
+recuperarEstilos()
+circulo(50, 50, 80)
+```
+
 ### c2d
 
 ```js
@@ -485,6 +606,16 @@ q5.dibujar = function () {
 	limpiar();
 	circulo((frameCount % 200) - 100, 0, 80);
 };
+```
+
+### python
+
+```py
+Lienzo(200, { "alpha": True })
+
+def dibujar():
+	limpiar()
+	circulo((frameCount % 200) - 100, 0, 80)
 ```
 
 ### c2d

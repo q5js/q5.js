@@ -7,11 +7,14 @@ declare global {
 	// ⭐ core
 
 	/**
-	 * Welcome to q5's documentation! 🤩
+	 * Welcome to q5's documentation! 🤩 Now available in
+	 * [JavaScript](https://q5js.org/learn) or
+	 * [Python](https://q5js.org/learn?python). 🐍
 	 * 
-	 * First time coding? Check out the [q5 Beginner's Brief](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief).
+	 * First time coding? Check out the
+	 * [q5 Beginner's Brief](https://github.com/q5js/q5.js/wiki/q5-Beginner's-Brief). 😅
 	 * 
-	 * On these Learn pages, you can experiment with editing the
+	 * Experiment with editing the
 	 * interactive mini examples. Have fun! 😎
 	 * 
 	 * [![](/assets/Authored-By-Humans-Not-By-AI-Badge.png)](https://notbyai.fyi/)
@@ -26,7 +29,7 @@ declare global {
 	 * Note that in this example, the circle is located at position [0, 0], the origin of the canvas.
 	 * @param {number} [w] width or side lengths of the canvas
 	 * @param {number} [h] height of the canvas
-	 * @param {object} [opt] [options](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes)
+	 * @param {object} [opt] [options](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/getContextAttributes)
 	 * @returns {Promise<HTMLCanvasElement>} canvas element
 	 * @example
 	 * await Canvas(200, 100);

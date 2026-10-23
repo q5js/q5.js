@@ -9293,6 +9293,20 @@ Q5.WebGPU = async function (scope, parent) {
 		if (lang.active && !Q5._esm) Q5.localize(this, q);
 	});
 }
+// The names of the q5 API in the active locale (see q5-lang.js), as
+// {translated: english} tables for the Python side. Locales with accents
+// have two spellings of each name, like ratónX and ratonX.
+const getLangTables = () => {
+	const invert = (maps = []) => {
+		const table = {};
+		for (let map of maps) {
+			for (let name in map) table[map[name]] = name;
+		}
+		return table;
+	};
+	return JSON.stringify({ members: invert(Q5.lang?.members), hooks: invert(Q5.lang?.hooks) });
+};
+
 const runPython = async function () {
 	let scripts = [...document.getElementsByTagName('script')].filter(
 		(s) => s.type == 'q5-python' || s.type == 'text/q5-python'
@@ -9403,6 +9417,7 @@ async def __run(q):
 from browser import window, aio
 import traceback
 import io
+import json
 
 _state_vars = ["frameCount", "deltaTime", "width", "height", "halfWidth", "halfHeight", "windowWidth", "windowHeight", "mouseX", "mouseY", "pmouseX", "pmouseY", "movedX", "movedY", "mouseIsPressed", "mouseButton", "keyIsPressed", "key", "keyCode", "touches", "recording"]
 
@@ -9414,9 +9429,14 @@ def _err():
 	return f.getvalue()
 
 def _sync_state(q, ns):
+	aliases = ns['_state_aliases']
 	for var in _state_vars:
 		if hasattr(q, var):
-			ns[var] = getattr(q, var)
+			val = getattr(q, var)
+			ns[var] = val
+			# localized spellings, like ratónX and ratonX for mouseX
+			for alias in aliases.get(var, ()):
+				ns[alias] = val
 
 def _sync_and_call(q, fn, ns):
 	def _wrapper(*args):
@@ -9432,11 +9452,26 @@ def _wrap_fns(q, locs, ns):
 	for fn_name in _usr_fns:
 		if fn_name in locs:
 			setattr(q, fn_name, _sync_and_call(q, locs[fn_name], ns))
+	# localized names of the user functions, like dibujar for draw
+	for alias, fn_name in ns['_hook_aliases'].items():
+		if alias in locs:
+			setattr(q, fn_name, _sync_and_call(q, locs[alias], ns))
 
-async def _run_py(q, code):
+async def _run_py(q, code, lang_tables='{}'):
+	lang = json.loads(lang_tables)
 	ns = globals().copy()
 	ns['ns'] = ns
 	ns['Q5'] = window.Q5
+
+	# localized names (from a locale file like q5-es.js) of the state
+	# variables, canvas functions, and user functions
+	state_aliases = {}
+	for alias, name in lang['members'].items():
+		if name in _state_vars:
+			state_aliases.setdefault(name, []).append(alias)
+	ns['_state_aliases'] = state_aliases
+	ns['_canvas_aliases'] = [a for a, n in lang['members'].items() if n in ('Canvas', 'createCanvas')]
+	ns['_hook_aliases'] = {a: n for a, n in lang['hooks'].items() if n in _usr_fns}
 
 	for attr in window.Object.getOwnPropertyNames(q):
 		if not attr.startswith('_'):
@@ -9451,6 +9486,9 @@ async def _run_py(q, code):
 		_sync_state(q, ns)
 		return result
 	ns['Canvas'] = ns['createCanvas'] = _canvas_wrapper
+	for alias in ns['_canvas_aliases']:
+		if alias in ns:
+			ns[alias] = _canvas_wrapper
 
 	try:
 		exec(code, ns)
@@ -9471,7 +9509,7 @@ window._runPy = _run_py
 
 	pyReady();
 
-	await window._runPy(q, code);
+	await window._runPy(q, code, getLangTables());
 };
 
 if (typeof document == 'object') {
