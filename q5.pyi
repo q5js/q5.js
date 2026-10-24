@@ -223,7 +223,7 @@ def rectMode(mode: str) -> None:
 		background(0.8)
 		rectMode(CORNER)
 		
-		# (  x,   y,   w,  h)
+		#   (  x,   y,   w,  h)
 		rect(-50, -25, 100, 50)
 	"""
 	...
@@ -243,7 +243,7 @@ def ellipseMode(mode: str) -> None:
 		background(0.8)
 		ellipseMode(CENTER)
 		
-		# (x, y,   w,  h)
+		#      (x, y,   w,  h)
 		ellipse(0, 0, 100, 50)
 	"""
 	...
@@ -326,7 +326,7 @@ def imageMode(mode: str) -> None:
 		def draw():
 			imageMode(CORNER)
 		
-			# ( img,   x,   y,   w,   h)
+			#    ( img,   x,   y,   w,   h)
 			image(logo, -50, -50, 100, 100)
 	"""
 	...
@@ -570,8 +570,9 @@ def loadPixels() -> None:
 		
 		def draw():
 			icon.loadPixels()
-			for i in range(0, icon.pixels.length, 16):
-				icon.pixels[i + 1] = random(1)
+			for i in range(0, len(icon.pixels), 16):
+				icon.pixels[i + 1] = random(255)
+		
 			icon.updatePixels()
 			background(icon)
 	"""
@@ -592,6 +593,7 @@ def updatePixels() -> None:
 		for x in range(0, 50, 3):
 			for y in range(0, 50, 3):
 				img.set(x, y, c)
+		
 		img.updatePixels()
 		
 		background(img)
@@ -987,7 +989,7 @@ def textToPoints(str: str) -> None:
 		
 		points = textToPoints('5')
 		
-		for (let pt of points)
+		for pt in points:
 			rect(pt.x, pt.y, 5, 20)
 	"""
 	...
@@ -1152,6 +1154,7 @@ def mousePressed() -> None:
 		gray = 0.4
 		
 		def mousePressed():
+			global gray
 			background(gray % 1)
 			gray += 0.1
 	"""
@@ -1167,6 +1170,7 @@ def mouseReleased() -> None:
 		gray = 0.4
 		
 		def mouseReleased():
+			global gray
 			background(gray % 1)
 			gray += 0.1
 	"""
@@ -1185,6 +1189,7 @@ def mouseMoved() -> None:
 		gray = 0.4
 		
 		def mouseMoved():
+			global gray
 			background(gray % 1)
 			gray += 0.005
 	"""
@@ -1203,6 +1208,7 @@ def mouseDragged() -> None:
 		gray = 0.4
 		
 		def mouseDragged():
+			global gray
 			background(gray % 1)
 			gray += 0.005
 	"""
@@ -1218,6 +1224,7 @@ def doubleClicked() -> None:
 		gray = 0.4
 		
 		def doubleClicked():
+			global gray
 			background(gray % 1)
 			gray += 0.1
 	"""
@@ -1259,7 +1266,7 @@ def keyIsDown(key: str) -> bool:
 		def draw():
 			background(0.8)
 		
-			if keyIsDown('f': && keyIsDown('j'))
+			if keyIsDown('f') and keyIsDown('j'):
 				rect(-50, -50, 100, 100)
 	"""
 	...
@@ -1274,6 +1281,7 @@ def keyPressed() -> None:
 		gray = 0.4
 		
 		def keyPressed():
+			global gray
 			background(gray % 1)
 			gray += 0.1
 	"""
@@ -1289,6 +1297,7 @@ def keyReleased() -> None:
 		gray = 0.4
 		
 		def keyReleased():
+			global gray
 			background(gray % 1)
 			gray += 0.1
 	"""
@@ -1307,7 +1316,7 @@ Example::
 
 	def draw():
 		background(0.8)
-		for (let pt of pointers)
+		for pt in pointers:
 			circle(pt.x, pt.y, 100)
 """
 
@@ -1325,6 +1334,7 @@ def touchStarted() -> None:
 		gray = 0.4
 		
 		def touchStarted():
+			global gray
 			background(gray % 1)
 			gray += 0.1
 	"""
@@ -1344,6 +1354,7 @@ def touchEnded() -> None:
 		gray = 0.4
 		
 		def touchEnded():
+			global gray
 			background(gray % 1)
 			gray += 0.1
 	"""
@@ -1363,6 +1374,7 @@ def touchMoved() -> None:
 		gray = 0.4
 		
 		def touchMoved():
+			global gray
 			background(gray % 1)
 			gray += 0.005
 	"""
@@ -1411,7 +1423,9 @@ def mouseWheel() -> None:
 		y = 0
 		def draw():
 			circle(x, y, 10)
+		
 		def mouseWheel(e):
+			global x, y
 			x += e.deltaX
 			y += e.deltaY
 			return False
@@ -1459,10 +1473,10 @@ def pointerLock(unadjustedMovement: bool) -> None:
 			circle(mouseX / 10, mouseY / 10, 10)
 		
 		def doubleClicked():
-			if !document.pointerLockElement:
+			if not document.pointerLockElement:
 				pointerLock()
-				} else
-					document.exitPointerLock()
+			else:
+				document.exitPointerLock()
 	"""
 	...
 
@@ -1490,7 +1504,7 @@ def color(c0: str | float | Color | list[float], c1: float = ..., c2: float = ..
 		Canvas(200)
 		rect(-100, -100, 100, 200)
 		
-		# ( r,   g,   b,   a)
+		#             ( r,   g,   b,   a)
 		bottle = color(0.35, 0.39, 1, 0.4)
 		fill(bottle)
 		stroke(bottle)
@@ -1986,7 +2000,7 @@ def clear() -> None:
 	
 	Example::
 	
-		Canvas(200, { alpha: True })
+		Canvas(200, { 'alpha': True })
 		
 		def draw():
 			clear()
@@ -2414,6 +2428,7 @@ def redraw(n: float = ...) -> None:
 		
 		def draw():
 			circle(frameCount * 5 - 100, 0, 80)
+		
 		def mousePressed():
 			redraw(10)
 	"""
@@ -2430,6 +2445,7 @@ def loop() -> None:
 		
 		def draw():
 			circle(frameCount * 5 - 100, 0, 80)
+		
 		def mousePressed():
 			loop()
 	"""
@@ -3163,9 +3179,10 @@ def createA(href: str, text: str = ..., newTab: bool = ...) -> None:
 		link.position(16, 42)
 		link.style.fontSize = '80px'
 		
-		link.addEventListener('mouseover', () =>
+		def cb0():
 			background('cyan')
-			})
+		
+		link.addEventListener('mouseover', cb0)
 	"""
 	...
 
@@ -3181,9 +3198,10 @@ def createButton(content: str = ...) -> None:
 		
 		btn = createButton('Click me!')
 		
-		btn.addEventListener('click', () =>
+		def cb0():
 			background(random(0.4, 1))
-			})
+		
+		btn.addEventListener('click', cb0)
 	"""
 	...
 
@@ -3205,10 +3223,11 @@ def createCheckbox(label: str = ..., checked: bool = ...) -> None:
 		box = createCheckbox('Check me!')
 		box.label.style.color = 'lime'
 		
-		box.addEventListener('input', () =>
+		def cb0():
 			if box.checked: background('lime')
 			else: background('black')
-			})
+		
+		box.addEventListener('input', cb0)
 	"""
 	...
 
@@ -3270,10 +3289,11 @@ def createInput(value: str = ..., type: str = ...) -> None:
 		input.placeholder = 'Type here!'
 		input.size(200, 32)
 		
-		input.addEventListener('input', () =>
+		def cb0():
 			background('orange')
 			text(input.value, -90, 30)
-			})
+		
+		input.addEventListener('input', cb0)
 	"""
 	...
 
@@ -3344,9 +3364,10 @@ def createSelect(placeholder: str = ...) -> None:
 		sel.option('Red', '#f55')
 		sel.option('Green', '#5f5')
 		
-		sel.addEventListener('change', () =>
+		def cb0():
 			background(sel.value)
-			})
+		
+		sel.addEventListener('change', cb0)
 	"""
 	...
 
@@ -3516,7 +3537,7 @@ def saveRecording(fileName: str) -> None:
 			square(mouseX, jit(100), 10)
 		
 		def mousePressed():
-			if !recording: record()
+			if not recording: record()
 			else: saveRecording('squares')
 	"""
 	...
@@ -3586,7 +3607,7 @@ def millis() -> float:
 		def draw():
 			background(0.8)
 		
-			if millis(: > 2000)
+			if millis() > 2000:
 				text('Hello, world!', -90, 0)
 	"""
 	...
@@ -3642,7 +3663,7 @@ def loadXML(url: str) -> Any:
 		xml = await load('/assets/animals.xml')
 		mammals = xml.querySelectorAll('mammal')
 		y = -90
-		for (let mammal of mammals)
+		for mammal in mammals:
 			text(mammal.textContent, -90, (y += 32))
 	"""
 	...
@@ -4055,24 +4076,24 @@ def createShader(code: str, type: str = ..., data: list[float] = ...) -> Any:
 	
 		Canvas(200)
 		
-		wobble = createShader(`
+		wobble = createShader("""
 		@vertex
-		fn vertexMain(v: VertexParams) -> FragParams
-			vert = transformVertex(v.pos, v.matrixIndex)
+		fn vertexMain(v: VertexParams) -> FragParams {
+			var vert = transformVertex(v.pos, v.matrixIndex);
 		
-			i = f32(v.vertexIndex) % 4 * 100
-			vert.x += cos((q.time + i) * 0.01) * 0.1
+		  let i = f32(v.vertexIndex) % 4 * 100;
+		  vert.x += cos((q.time + i) * 0.01) * 0.1;
 		
-			f: FragParams
-			f.position = vert
-			f.color = vec4f(1, 0, 0, 1)
-			return f
-			}`)
+			var f: FragParams;
+			f.position = vert;
+			f.color = vec4f(1, 0, 0, 1);
+			return f;
+		}""")
 		
-			def draw():
-				clear()
-				shader(wobble)
-				plane(0, 0, 100)
+		def draw():
+			clear()
+			shader(wobble)
+			plane(0, 0, 100)
 	"""
 	...
 
@@ -4108,19 +4129,19 @@ def resetShader() -> None:
 	
 		Canvas(200)
 		
-		stripes = createShader(`
+		stripes = createShader("""
 		@fragment
-		fn fragMain(f: FragParams) -> @location(0) vec4f
-			g = cos((q.mouseY + f.position.y) * 0.05)
-			return vec4(1, g, 0, 1)
-			}`)
+		fn fragMain(f: FragParams) -> @location(0) vec4f {
+			let g = cos((q.mouseY + f.position.y) * 0.05);
+			return vec4(1, g, 0, 1);
+		}""")
 		
-			def draw():
-				shader(stripes)
-				plane(0, 0, width, height)
+		def draw():
+			shader(stripes)
+			plane(0, 0, width, height)
 		
-				resetShader()
-				triangle(-50, -50, 0, 50, 50, -50)
+			resetShader()
+			triangle(-50, -50, 0, 50, 50, -50)
 	"""
 	...
 
@@ -4168,18 +4189,18 @@ def createFrameShader() -> None:
 		strokeWeight(8)
 		strokeCap(PROJECT)
 		
-		boxy = createFrameShader(`
+		boxy = createFrameShader("""
 		@fragment
-		fn fragMain(f: FragParams) -> @location(0) vec4f
-			x = sin(f.texCoord.y * 4 + q.time * 0.002)
-			y = cos(f.texCoord.x * 4 + q.time * 0.002)
-			uv = f.texCoord + vec2f(x, y)
-			return textureSample(tex, samp, uv)
-			}`)
+		fn fragMain(f: FragParams) -> @location(0) vec4f {
+			let x = sin(f.texCoord.y * 4 + q.time * 0.002);
+			let y = cos(f.texCoord.x * 4 + q.time * 0.002);
+			let uv = f.texCoord + vec2f(x, y);
+			return textureSample(tex, samp, uv);
+		}""")
 		
-			def draw():
-				line(mouseX, mouseY, pmouseX, pmouseY)
-				mouseIsPressed ? resetShaders() : shader(boxy)
+		def draw():
+			line(mouseX, mouseY, pmouseX, pmouseY)
+			resetShaders() if mouseIsPressed else shader(boxy)
 	"""
 	...
 
@@ -4200,18 +4221,20 @@ def createImageShader(code: str) -> Any:
 		
 		logo = loadImage('/q5js_logo.avif')
 		
-		grate = createImageShader(`
+		grate = createImageShader("""
 		@fragment
-		fn fragMain(f: FragParams) -> @location(0) vec4f
-			texColor = textureSample(tex, samp, f.texCoord)
-			texColor.b += (q.mouseX + f.position.x) % 20 / 10
-			return texColor
-			}`)
+		fn fragMain(f: FragParams) -> @location(0) vec4f {
+			var texColor = textureSample(tex, samp, f.texCoord);
+			texColor.b += (q.mouseX + f.position.x) % 20 / 10;
+			return texColor;
+		}""")
 		
-			def draw():
-				background(0.7)
-				shader(grate)
-				image(logo, 0, 0, 180, 180)
+		def draw():
+			background(0.7)
+			shader(grate)
+			image(logo, 0, 0, 180, 180)
+		
+		#
 	"""
 	...
 
@@ -4232,32 +4255,34 @@ def createVideoShader(code: str) -> Any:
 		vid = createVideo('/assets/apollo4.mp4')
 		vid.hide()
 		
-		flipper = createVideoShader(`
+		flipper = createVideoShader("""
 		@vertex
-		fn vertexMain(v: VertexParams) -> FragParams
-			vert = transformVertex(v.pos, v.matrixIndex)
+		fn vertexMain(v: VertexParams) -> FragParams {
+			var vert = transformVertex(v.pos, v.matrixIndex);
 		
-			vi = f32(v.vertexIndex)
-			vert.y *= cos((q.frameCount + vi * 10) * 0.03)
+			var vi = f32(v.vertexIndex);
+			vert.y *= cos((q.frameCount + vi * 10) * 0.03);
 		
-			f: FragParams
-			f.position = vert
-			f.texCoord = v.texCoord
-			return f
+			var f: FragParams;
+			f.position = vert;
+			f.texCoord = v.texCoord;
+			return f;
+		}
 		
 		@fragment
-		fn fragMain(f: FragParams) -> @location(0) vec4f
-			texColor = textureSampleBaseClampToEdge(tex, samp, f.texCoord)
-			texColor.r = 0
-			texColor.b *= 2
-			return texColor
-			}`)
+		fn fragMain(f: FragParams) -> @location(0) vec4f {
+			var texColor =
+				textureSampleBaseClampToEdge(tex, samp, f.texCoord);
+			texColor.r = 0;
+			texColor.b *= 2;
+			return texColor;
+		}""")
 		
-			def draw():
-				clear()
-				if mouseIsPressed: vid.play()
-				shader(flipper)
-				image(vid, -100, 150, 200, 150)
+		def draw():
+			clear()
+			if mouseIsPressed: vid.play()
+			shader(flipper)
+			image(vid, -100, 150, 200, 150)
 	"""
 	...
 
@@ -4276,35 +4301,35 @@ def createTextShader(code: str) -> Any:
 		Canvas(200)
 		textAlign(CENTER, CENTER)
 		
-		spin = createTextShader(`
+		spin = createTextShader("""
 		@vertex
-		fn vertexMain(v : VertexParams) -> FragParams
-			char = textChars[v.instanceIndex]
-			text = textMetadata[i32(char.w)]
-			fontChar = fontChars[i32(char.z)]
-			pos = calcPos(v.vertexIndex, char, fontChar, text)
+		fn vertexMain(v : VertexParams) -> FragParams {
+			let char = textChars[v.instanceIndex];
+			let text = textMetadata[i32(char.w)];
+			let fontChar = fontChars[i32(char.z)];
+			let pos = calcPos(v.vertexIndex, char, fontChar, text);
 		
-			vert = transformVertex(pos, text.matrixIndex)
+			var vert = transformVertex(pos, text.matrixIndex);
 		
-			i = f32(v.instanceIndex + 1)
-			vert.y *= cos((q.frameCount - 5 * i) * 0.05)
+			let i = f32(v.instanceIndex + 1);
+			vert.y *= cos((q.frameCount - 5 * i) * 0.05);
 		
-			f : FragParams
-			f.position = vert
-			f.texCoord = calcUV(v.vertexIndex, fontChar)
-			f.fillColor = colors[i32(text.fillIndex)]
-			f.strokeColor = colors[i32(text.strokeIndex)]
-			f.strokeWeight = text.strokeWeight
-			f.edge = text.edge
-			return f
-			}`)
+			var f : FragParams;
+			f.position = vert;
+			f.texCoord = calcUV(v.vertexIndex, fontChar);
+			f.fillColor = colors[i32(text.fillIndex)];
+			f.strokeColor = colors[i32(text.strokeIndex)];
+			f.strokeWeight = text.strokeWeight;
+			f.edge = text.edge;
+			return f;
+		}""")
 		
-			def draw():
-				clear()
-				shader(spin)
-				fill(1, 0, 1)
-				textSize(32)
-				text('Hello, World!', 0, 0)
+		def draw():
+			clear()
+			shader(spin)
+			fill(1, 0, 1)
+			textSize(32)
+			text('Hello, World!', 0, 0)
 	"""
 	...
 

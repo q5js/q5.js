@@ -1406,7 +1406,7 @@ declare global {
 	 * await Lienzo(200);
 	 * rect(-100, -100, 100, 200);
 	 * 
-	 * //                ( r,   g,   b,   a)
+	 * //                 (   r,    g, b,   a)
 	 * let botella = color(0.35, 0.39, 1, 0.4);
 	 * relleno(botella);
 	 * trazo(botella);

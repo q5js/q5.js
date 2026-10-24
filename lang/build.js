@@ -1,17 +1,14 @@
 /**
- * q5/lang/build.js
- *
- * AI was used to generate parts of this script.
+ * q5/lang/build.js (Bun optimized)
  */
 
-const log = console.log;
-const fs = require('fs/promises');
-const path = require('path');
-const marked = require('./marked.min.js');
-const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
+import { readdir } from 'node:fs/promises';
+import path from 'node:path';
+import marked from './marked.min.js';
+import { JSDOM } from 'jsdom';
 
-let pageGroups = ['home'];
+const log = console.log;
+const pageGroups = ['home'];
 
 async function main() {
 	for (let pageGroup of pageGroups) {
@@ -25,7 +22,7 @@ async function main() {
 }
 
 async function getPagesInDirectory(dir) {
-	let files = await fs.readdir(`./lang/en/${dir}`);
+	let files = await readdir(`./lang/en/${dir}`);
 	log(files);
 	const fileNames = [];
 	for (const file of files) {
@@ -39,12 +36,13 @@ async function getPagesInDirectory(dir) {
 
 async function buildPage(pageGroup, page) {
 	let htmlFilePath = `./${pageGroup}/${page}.html`;
-	let html = await fs.readFile(htmlFilePath, 'utf8');
+	// Using Bun's fast native file reading API
+	let html = await Bun.file(htmlFilePath).text();
 	let dom = new JSDOM(html);
 	let document = dom.window.document;
 
 	let mdFilePath = `./lang/en/${pageGroup}/${page}.md`;
-	let mdContent = await fs.readFile(mdFilePath, 'utf8');
+	let mdContent = await Bun.file(mdFilePath).text();
 	mdContent = mdContent.split('\n# ');
 	mdContent[0] = mdContent[0].slice(2);
 
@@ -69,7 +67,8 @@ async function buildPage(pageGroup, page) {
 
 	html = dom.serialize();
 
-	await fs.writeFile(htmlFilePath, html);
+	// Using Bun's fast native file writing API
+	await Bun.write(htmlFilePath, html);
 	log(path.resolve(htmlFilePath));
 }
 

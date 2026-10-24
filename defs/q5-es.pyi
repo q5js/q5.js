@@ -207,7 +207,7 @@ def modoRect(modo: str) -> None:
 		fondo(0.8)
 		modoRect(ESQUINA)
 		
-		
+		#   ( x,  y,   w,  h)
 		rect(-50, -25, 100, 50)
 	"""
 	...
@@ -227,7 +227,7 @@ def modoEliptico(modo: str) -> None:
 		fondo(0.8)
 		modoEliptico(CENTRO)
 		
-		
+		#     (  x,  y,   w,  h)
 		elipse(0, 0, 100, 50)
 	"""
 	...
@@ -310,7 +310,7 @@ def modoImagen(modo: str) -> None:
 		def dibujar():
 			modoImagen(CORNER)
 		
-		
+			#     ( img,  x,  y,   w,   h)
 			imagen(logo, -50, -50, 100, 100)
 	"""
 	...
@@ -555,8 +555,9 @@ def cargarPixeles() -> None:
 		
 		def dibujar():
 			icono.cargarPixeles()
-			for i in range(0, icono.pixeles.length, 16):
+			for i in range(0, len(icono.pixeles), 16):
 				icono.pixeles[i + 1] = aleatorio(255)
+		
 			icono.actualizarPixeles()
 			fondo(icono)
 	"""
@@ -577,6 +578,7 @@ def actualizarPixeles() -> None:
 		for x in range(0, 50, 3):
 			for y in range(0, 50, 3):
 				img.establecer(x, y, c)
+		
 		img.actualizarPixeles()
 		
 		fondo(img)
@@ -1222,7 +1224,7 @@ def teclaEstaPresionada(tecla: str) -> bool:
 		def dibujar():
 			fondo(0.8)
 		
-			if teclaEstaPresionada('f')  and  teclaEstaPresionada('j'):
+			if teclaEstaPresionada('f') and teclaEstaPresionada('j'):
 				rect(-50, -50, 100, 100)
 	"""
 	...
@@ -1374,11 +1376,12 @@ def ruedaRaton() -> None:
 	
 	Example::
 	
-		x = (y := 0)
+		x = (y = 0)
 		def dibujar():
 			circulo(x, y, 10)
+		
 		def ruedaRaton(e):
-			global x, y
+			global x
 			x += e.deltaX
 			y += e.deltaY
 			return False
@@ -1457,7 +1460,7 @@ def color(c0: str | float | Color | list[float], c1: float = ..., c2: float = ..
 		Lienzo(200)
 		rect(-100, -100, 100, 200)
 		
-		
+		#              (   r,    g, b,   a)
 		botella = color(0.35, 0.39, 1, 0.4)
 		relleno(botella)
 		trazo(botella)
@@ -1946,7 +1949,7 @@ def limpiar() -> None:
 	
 	Example::
 	
-		Lienzo(200, { "alpha": True })
+		Lienzo(200, { 'alpha': True })
 		
 		def dibujar():
 			limpiar()
@@ -2374,6 +2377,7 @@ def redibujar(n: float = ...) -> None:
 		
 		def dibujar():
 			circulo(cuadroActual * 5 - 100, 0, 80)
+		
 		def alPresionarRatón():
 			redibujar(10)
 	"""
@@ -2390,6 +2394,7 @@ def reanudar() -> None:
 		
 		def dibujar():
 			circulo(cuadroActual * 5 - 100, 0, 80)
+		
 		def alPresionarRatón():
 			reanudar()
 	"""
@@ -3107,9 +3112,10 @@ def crearA(href: str, texto: str = ..., nuevaPestaña: bool = ...) -> None:
 		enlace.position(16, 42)
 		enlace.style.fontSize = '80px'
 		
-		def __q5_callback_0():
+		def cb0():
 			fondo('cyan')
-		enlace.addEventListener('mouseover', __q5_callback_0)
+		
+		enlace.addEventListener('mouseover', cb0)
 	"""
 	...
 
@@ -3125,9 +3131,10 @@ def crearBoton(contenido: str = ...) -> None:
 		
 		btn = crearBoton('¡Clic aqui!')
 		
-		def __q5_callback_0():
+		def cb0():
 			fondo(aleatorio(0.4, 1))
-		btn.addEventListener('click', __q5_callback_0)
+		
+		btn.addEventListener('click', cb0)
 	"""
 	...
 
@@ -3149,10 +3156,11 @@ def crearCasilla(etiqueta: str = ..., marcado: bool = ...) -> None:
 		casilla = crearCasilla('¡Marca aquí!')
 		casilla.label.style.color = 'lime'
 		
-		def __q5_callback_0():
+		def cb0():
 			if casilla.checked: fondo('lime')
 			else: fondo('black')
-		casilla.addEventListener('input', __q5_callback_0)
+		
+		casilla.addEventListener('input', cb0)
 	"""
 	...
 
@@ -3214,10 +3222,11 @@ def crearEntrada(valor: str = ..., tipo: str = ...) -> None:
 		entrada.placeholder = '¡Teclea aquí!'
 		entrada.size(200, 32)
 		
-		def __q5_callback_0():
+		def cb0():
 			fondo('orange')
 			texto(entrada.value, -90, 30)
-		entrada.addEventListener('input', __q5_callback_0)
+		
+		entrada.addEventListener('input', cb0)
 	"""
 	...
 
@@ -3286,9 +3295,10 @@ def crearSeleccion(placeholder: str = ...) -> None:
 		sel = crearSeleccion('Seleccionar un opcion')
 		sel.option('Red', '#f55').option('Green', '#5f5')
 		
-		def __q5_callback_0():
+		def cb0():
 			fondo(sel.value)
-		sel.addEventListener('change', __q5_callback_0)
+		
+		sel.addEventListener('change', cb0)
 	"""
 	...
 
@@ -3565,7 +3575,7 @@ def cargarXML(url: str) -> Any:
 		mamiferos = animales.getElementsByTagName('mammal')
 		y = 64
 		for mamifero in mamiferos:
-			texto(mamifero.textContent, 20, (y := y + 32))
+			texto(mamifero.textContent, 20, (y += 32))
 	"""
 	...
 
@@ -4182,6 +4192,7 @@ def crearShaderImagen(codigo: str) -> Any:
 			shader(grate)
 			imagen(logo, 0, 0, 180, 180)
 		
+		#
 	"""
 	...
 
