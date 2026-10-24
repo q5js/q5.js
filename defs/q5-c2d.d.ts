@@ -316,7 +316,7 @@ declare global {
 	 * 	image(logo, 0, 0, 200, 200, 256, 256, 512, 512);
 	 * }
 	 */
-	function image(): void;
+	function image(img: Q5.Image | HTMLVideoElement, dx: number, dy: number, dw?: number, dh?: number, sx?: number, sy?: number, sw?: number, sh?: number): void;
 
 	/** 🌆
 	 * Set to `CORNER` (default), `CORNERS`, or `CENTER`.
@@ -944,7 +944,7 @@ declare global {
 	 * 
 	 * textImage('🐶', 100, 100);
 	 */
-	function textImage(img: Q5.Image | String, x: number, y: number): void;
+	function textImage(img: Q5.Image | string, x: number, y: number): void;
 
 	/** 📘
 	 * Converts a string of text to an array of points.
@@ -976,6 +976,14 @@ declare global {
 	 * 
 	 * textSize(32);
 	 * text(nf(PI, 4, 5), 10, 60);
+	 */
+	function nf(n: number, l: number, r: number): string;
+
+	/** 📘
+	 * Number formatter, can be used to display a number as a string with
+	 * a specified number of digits before and after the decimal point,
+	 * optionally adding padding with zeros.
+	 * @returns {string} a string representation of the number, formatted accordingly
 	 */
 	function nf(num: number, digits: number): string;
 
@@ -1650,6 +1658,15 @@ declare global {
 	 * 	circle(mouseX, mouseY, 20);
 	 * }
 	 */
+	function background(filler: string | number | Color | Q5.Image): void;
+
+	/** 🎨
+	 * Draws over the entire canvas with a color or image.
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function,
+	 * this function can accept colors in a wide range of formats:
+	 * CSS color string, grayscale value, and color component values.
+	 */
 	function background(c0: number, c1: number, c2: number, c3: number): void;
 
 	class Color {
@@ -1704,6 +1721,15 @@ declare global {
 	 * fill('lime');
 	 * square(80, 80, 80);
 	 */
+	function fill(color: string | number | Color): void;
+
+	/** 💅
+	 * Sets the fill color. The default is white.
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
+	 * can accept colors in a wide range of formats: as a CSS color string,
+	 * a `Color` object, grayscale value, or color component values.
+	 */
 	function fill(c0: number, c1: number, c2: number, c3: number): void;
 
 	/** 💅
@@ -1723,6 +1749,15 @@ declare global {
 	 * 
 	 * stroke('lime');
 	 * square(80, 80, 80);
+	 */
+	function stroke(color: string | number | Color): void;
+
+	/** 💅
+	 * Sets the stroke (outline) color. The default is black.
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
+	 * can accept colors in a wide range of formats: as a CSS color string,
+	 * a `Color` object, grayscale value, or color component values.
 	 */
 	function stroke(c0: number, c1: number, c2: number, c3: number): void;
 
@@ -1815,7 +1850,21 @@ declare global {
 	 * 	image(logo, 36, 36, 128, 128);
 	 * }
 	 */
-	function shadow(color: string | Color): void;
+	function shadow(color: string | number | Color): void;
+
+	/** 💅
+	 * Sets the shadow color. The default is transparent (no shadow).
+	 * 
+	 * Shadows apply to anything drawn to the canvas, including filled
+	 * shapes, strokes, text, and images.
+	 * 
+	 * Like the [`color`](https://q5js.org/learn/#color) function, this function
+	 * can accept colors in a wide range of formats: as a CSS color string,
+	 * a `Color` object, grayscale value, or color component values.
+	 * 
+	 * Not available in q5 WebGPU.
+	 */
+	function shadow(c0: number, c1: number, c2: number, c3: number): void;
 
 	/** 💅
 	 * Disables the shadow effect.
@@ -3510,6 +3559,13 @@ declare global {
 	 * to a string with a specified number of digits.
 	 * @param {number} num number to format
 	 * @param {number} digits number of digits to format to
+	 * @returns {string} formatted number
+	 */
+	function nf(n: number, l: number, r: number): string;
+
+	/** 🛠
+	 * nf is short for number format. It formats a number
+	 * to a string with a specified number of digits.
 	 * @returns {string} formatted number
 	 */
 	function nf(num: number, digits: number): string;

@@ -652,7 +652,7 @@ Establece el nivel de detalle para la generación de ruido.
 @param {number} caida tasa de caída para cada octava
 ```
 
-## DOS_PI
+## PI
 
 La relación de la circunferencia de un círculo a su diámetro.
 Aproximadamente 3.14159.

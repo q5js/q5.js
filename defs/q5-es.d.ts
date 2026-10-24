@@ -305,7 +305,7 @@ declare global {
 	 * 	imagen(logo, -100, -100, 200, 200, 256, 256, 512, 512);
 	 * };
 	 */
-	function imagen(): void;
+	function imagen( img: Q5.Imagen | HTMLVideoElement, dx: number, dy: number, dw?: number, dh?: number, sx?: number, sy?: number, sw?: number, sh?: number): void;
 
 	/** 🌆
 	 * Establecer a `CORNER` (por defecto), `CORNERS`, o `CENTER`.
@@ -468,7 +468,7 @@ declare global {
 	 * logo.insertado(256, 256, 512, 512, 0, 0, 256, 256);
 	 * imagen(logo, -100, -100, 200, 200);
 	 */
-	function insertado(): void;
+	function insertado(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
 
 	/** 🌆
 	 * Recupera una subsección de una imagen o lienzo como una nueva Imagen Q5
@@ -947,7 +947,7 @@ declare global {
 	 * tamañoTexto(66);
 	 * imagenTexto('Hello!', -100, 100);
 	 */
-	function imagenTexto(img: Q5.Imagen | String, x: number, y: number): void;
+	function imagenTexto(img: Q5.Imagen | string, x: number, y: number): void;
 
 	/** 📘
 	 * Formateador de números, se puede usar para mostrar un número como una cadena con
@@ -963,6 +963,14 @@ declare global {
 	 * 
 	 * tamañoTexto(32);
 	 * texto(nf(PI, 4, 5), -90, 10);
+	 */
+	function nf(n: number, l: number, r: number): string;
+
+	/** 📘
+	 * Formateador de números, se puede usar para mostrar un número como una cadena con
+	 * un número especificado de dígitos antes y después del punto decimal,
+	 * opcionalmente añadiendo relleno con ceros.
+	 * @returns {string} una representación de cadena del número, formateada en consecuencia
 	 */
 	function nf(num: number, digitos: number): string;
 
@@ -1642,7 +1650,7 @@ declare global {
 	 * 	circulo(ratonX, ratonY, 20);
 	 * };
 	 */
-	function fondo(relleno: Color | Q5.Imagen): void;
+	function fondo(relleno: string | number | Color | Q5.Imagen): void;
 
 	class Color {
 
@@ -1698,7 +1706,16 @@ declare global {
 	 * relleno('lime');
 	 * cuadrado(-20, -20, 80);
 	 */
-	function relleno(color: Color): void;
+	function relleno(color: string | number | Color): void;
+
+	/** 💅
+	 * Establece el color de relleno. El defecto es blanco.
+	 * 
+	 * Como la función [`color`](https://q5js.org/learn/#color), esta función
+	 * puede aceptar colores en una amplia gama de formatos: como una cadena de color CSS,
+	 * un objeto `Color`, valor de escala de grises, o valores de componentes de color.
+	 */
+	function relleno(c0: number, c1: number, c2: number, c3: number): void;
 
 	/** 💅
 	 * Establece el color del trazo (contorno). El defecto es negro.
@@ -1718,7 +1735,16 @@ declare global {
 	 * trazo('lime');
 	 * cuadrado(-20, -20, 80);
 	 */
-	function trazo(color: Color): void;
+	function trazo(color: string | number | Color): void;
+
+	/** 💅
+	 * Establece el color del trazo (contorno). El defecto es negro.
+	 * 
+	 * Como la función [`color`](https://q5js.org/learn/#color), esta función
+	 * puede aceptar colores en una amplia gama de formatos: como una cadena de color CSS,
+	 * un objeto `Color`, valor de escala de grises, o valores de componentes de color.
+	 */
+	function trazo(c0: number, c1: number, c2: number, c3: number): void;
 
 	/** 💅
 	 * Después de llamar a esta función, el dibujo no será rellenado.
@@ -1793,7 +1819,7 @@ declare global {
 	 * No disponible en q5 WebGPU.
 	 * @param {Color} color color de sombra
 	 */
-	function sombra(color: string | Color): void;
+	function sombra(color: string | number | Color): void;
 
 	/** 💅
 	 * Deshabilita el efecto de sombra.
@@ -2751,7 +2777,7 @@ declare global {
 	 * La relación de la circunferencia de un círculo a su diámetro.
 	 * Aproximadamente 3.14159.
 	 */
-	const DOS_PI: number;
+	const PI: number;
 
 	/** 🧮
 	 * 2 \* PI.
@@ -2763,7 +2789,7 @@ declare global {
 	 * 2 \* PI.
 	 * Aproximadamente 6.28319.
 	 */
-	function TAU(): void;
+	const TAU: number;
 
 	/** 🧮
 	 * Mitad de PI.
@@ -3382,6 +3408,16 @@ declare global {
 	 * 	guardar(rayo, 'bolt.png');
 	 * };
 	 */
+	function guardar(): void;
+
+	/** 🛠
+	 * Guarda datos en un archivo.
+	 * 
+	 * Si no se especifican datos, se guardará el lienzo.
+	 * 
+	 * Si no se proporcionan argumentos, el lienzo se guardará como
+	 * un archivo de imagen llamado "untitled.png".
+	 */
 	function guardar(datos?: object, nombreArchivo?: string): void;
 
 	/** 🛠
@@ -3455,6 +3491,13 @@ declare global {
 	 * 
 	 * tamañoTexto(32);
 	 * texto(nf(PI, 4, 5), -90, 10);
+	 */
+	function nf(n: number, l: number, r: number): string;
+
+	/** 🛠
+	 * nf es la abreviatura de formato de número. Formatea un número
+	 * a una cadena con un número especificado de dígitos.
+	 * @returns {string} número formateado
 	 */
 	function nf(num: number, digitos: number): string;
 

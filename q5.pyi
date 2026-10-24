@@ -1,4 +1,5 @@
-from typing import Any, Callable, Literal
+from __future__ import annotations
+from typing import Any, Callable, Literal, overload
 
 class Image: ...
 
@@ -18,7 +19,7 @@ interactive mini examples. Have fun! 😎
 ![](https://notbyai.fyi/)
 """
 
-def Canvas(w: float = ..., h: float = ..., opt: dict = ...) -> object:
+def Canvas(w: float | int = ..., h: float | int = ..., opt: dict = ...) -> object:
 	"""⭐
 	Creates a canvas element, a section of the screen your program
 	can draw on.
@@ -74,7 +75,7 @@ def log(message: Any) -> None:
 
 # 🧑‍🎨 shapes
 
-def circle(x: float, y: float, diameter: float) -> None:
+def circle(x: float | int, y: float | int, diameter: float | int) -> None:
 	"""🧑‍🎨
 	Draws a circle.
 	
@@ -89,7 +90,7 @@ def circle(x: float, y: float, diameter: float) -> None:
 	"""
 	...
 
-def ellipse(x: float, y: float, width: float, height: float) -> None:
+def ellipse(x: float | int, y: float | int, width: float | int, height: float | int) -> None:
 	"""🧑‍🎨
 	Draws an ellipse.
 	
@@ -105,7 +106,7 @@ def ellipse(x: float, y: float, width: float, height: float) -> None:
 	"""
 	...
 
-def rect(x: float, y: float, w: float, h: float, rounded: float = ...) -> None:
+def rect(x: float | int, y: float | int, w: float | int, h: float | int, rounded: float | int = ...) -> None:
 	"""🧑‍🎨
 	Draws a rectangle or a rounded rectangle.
 	
@@ -130,7 +131,7 @@ def rect(x: float, y: float, w: float, h: float, rounded: float = ...) -> None:
 	"""
 	...
 
-def square(x: float, y: float, size: float, rounded: float = ...) -> None:
+def square(x: float | int, y: float | int, size: float | int, rounded: float | int = ...) -> None:
 	"""🧑‍🎨
 	Draws a square or a rounded square.
 	
@@ -154,7 +155,7 @@ def square(x: float, y: float, size: float, rounded: float = ...) -> None:
 	"""
 	...
 
-def point(x: float, y: float) -> None:
+def point(x: float | int, y: float | int) -> None:
 	"""🧑‍🎨
 	Draws a point on the canvas.
 	
@@ -172,7 +173,7 @@ def point(x: float, y: float) -> None:
 	"""
 	...
 
-def line(x1: float, y1: float, x2: float, y2: float) -> None:
+def line(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> None:
 	"""🧑‍🎨
 	Draws a line on the canvas.
 	
@@ -189,7 +190,7 @@ def line(x1: float, y1: float, x2: float, y2: float) -> None:
 	"""
 	...
 
-def capsule(x1: float, y1: float, x2: float, y2: float, r: float) -> None:
+def capsule(x1: float | int, y1: float | int, x2: float | int, y2: float | int, r: float | int) -> None:
 	"""🧑‍🎨
 	Draws a capsule.
 	
@@ -285,7 +286,7 @@ def loadImage(url: str) -> Image:
 	"""
 	...
 
-def image(img: Image | object, dx: float, dy: float, dw: float = ..., dh: float = ..., sx: float = ..., sy: float = ..., sw: float = ..., sh: float = ...) -> None:
+def image(img: Image | object, dx: float | int, dy: float | int, dw: float | int = ..., dh: float | int = ..., sx: float | int = ..., sy: float | int = ..., sw: float | int = ..., sh: float | int = ...) -> None:
 	"""🌆
 	Draws an image or video frame to the canvas.
 	
@@ -331,7 +332,7 @@ def imageMode(mode: str) -> None:
 	"""
 	...
 
-def defaultImageScale(scale: float) -> float:
+def defaultImageScale(scale: float | int) -> float | int:
 	"""🌆
 	Sets the default image scale, which is applied to images when
 	they are drawn without a specified width or height.
@@ -348,7 +349,7 @@ def defaultImageScale(scale: float) -> float:
 	"""
 	...
 
-def resize(w: float, h: float) -> None:
+def resize(w: float | int, h: float | int) -> None:
 	"""🌆
 	Resizes the image.
 	
@@ -402,7 +403,7 @@ def noSmooth() -> None:
 	"""
 	...
 
-def tint(color: str | float) -> None:
+def tint(color: str | float | int) -> None:
 	"""🌆
 	Applies a tint (color overlay) to the drawing.
 	
@@ -455,7 +456,7 @@ def copy() -> Image:
 	"""
 	...
 
-def inset(sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: float, dh: float) -> None:
+def inset(sx: float | int, sy: float | int, sw: float | int, sh: float | int, dx: float | int, dy: float | int, dw: float | int, dh: float | int) -> None:
 	"""🌆
 	Displays a region of the image on another region of the image.
 	Can be used to create a detail inset, aka a magnifying glass effect.
@@ -480,7 +481,7 @@ def inset(sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: 
 	"""
 	...
 
-def get(x: float, y: float, w: float = ..., h: float = ...) -> Image | list[float]:
+def get(x: float | int, y: float | int, w: float | int = ..., h: float | int = ...) -> Image | list[float | int]:
 	"""🌆
 	Retrieves a subsection of an image or canvas as a new Q5 Image
 	or the color of a pixel in the image or canvas.
@@ -510,7 +511,7 @@ def get(x: float, y: float, w: float = ..., h: float = ...) -> Image | list[floa
 	"""
 	...
 
-def set(x: float, y: float, val: Any) -> None:
+def set(x: float | int, y: float | int, val: Any) -> None:
 	"""🌆
 	Sets a pixel's color in the image or canvas. Color mode must be RGB.
 	
@@ -539,7 +540,7 @@ def set(x: float, y: float, val: Any) -> None:
 	"""
 	...
 
-pixels: list[float]
+pixels: list[float | int]
 """🌆
 Array of pixel color data from a canvas or image.
 
@@ -600,7 +601,7 @@ def updatePixels() -> None:
 	"""
 	...
 
-def filter(type: str, value: float = ...) -> None:
+def filter(type: str, value: float | int = ...) -> None:
 	"""🌆
 	Applies a filter to the image.
 	
@@ -663,7 +664,7 @@ BLUR: Literal[8]
 Applies a Gaussian blur to the image.
 """
 
-def createImage(w: float, h: float, opt: Any = ...) -> Image:
+def createImage(w: float | int, h: float | int, opt: Any = ...) -> Image:
 	"""🌆
 	Creates a new image.
 	
@@ -673,7 +674,7 @@ def createImage(w: float, h: float, opt: Any = ...) -> Image:
 	"""
 	...
 
-def createGraphics(w: float, h: float, opt: dict = ...) -> Q5:
+def createGraphics(w: float | int, h: float | int, opt: dict = ...) -> Q5:
 	"""🌆
 	Creates a graphics buffer.
 	
@@ -701,7 +702,7 @@ def createGraphics(w: float, h: float, opt: dict = ...) -> Q5:
 
 # 📘 text
 
-def text(str: str, x: float, y: float, wrapWidth: float = ..., lineLimit: float = ...) -> None:
+def text(str: str, x: float | int, y: float | int, wrapWidth: float | int = ..., lineLimit: float | int = ...) -> None:
 	"""📘
 	Renders text on the canvas.
 	
@@ -767,7 +768,7 @@ def textFont(fontName: str) -> None:
 	"""
 	...
 
-def textSize(size: float = ...) -> float | None:
+def textSize(size: float | int = ...) -> float | int | None:
 	"""📘
 	Sets or gets the current font size. If no argument is provided, returns the current font size.
 	
@@ -784,7 +785,7 @@ def textSize(size: float = ...) -> float | None:
 	"""
 	...
 
-def textLeading(leading: float = ...) -> float | None:
+def textLeading(leading: float | int = ...) -> float | int | None:
 	"""📘
 	Sets or gets the current line height. If no argument is provided, returns the current line height.
 	
@@ -840,7 +841,7 @@ def textAlign(horiz: Literal['left'] | Literal['center'] | Literal['right'], ver
 	"""
 	...
 
-def textWeight(weight: float | str) -> None:
+def textWeight(weight: float | int | str) -> None:
 	"""📘
 	Sets the text weight.
 	
@@ -868,7 +869,7 @@ def textWeight(weight: float | str) -> None:
 	"""
 	...
 
-def textWidth(str: str) -> float:
+def textWidth(str: str) -> float | int:
 	"""📘
 	Calculates and returns the width of a given string of text.
 	
@@ -886,7 +887,7 @@ def textWidth(str: str) -> float:
 	"""
 	...
 
-def textAscent(str: str) -> float:
+def textAscent(str: str) -> float | int:
 	"""📘
 	Calculates and returns the ascent (the distance from the baseline to the top of the highest character) of the current font.
 	
@@ -904,7 +905,7 @@ def textAscent(str: str) -> float:
 	"""
 	...
 
-def textDescent(str: str) -> float:
+def textDescent(str: str) -> float | int:
 	"""📘
 	Calculates and returns the descent (the distance from the baseline to the bottom of the lowest character) of the current font.
 	
@@ -922,7 +923,7 @@ def textDescent(str: str) -> float:
 	"""
 	...
 
-def createTextImage(str: str, wrapWidth: float = ..., lineLimit: float = ...) -> Image:
+def createTextImage(str: str, wrapWidth: float | int = ..., lineLimit: float | int = ...) -> Image:
 	"""📘
 	Creates an image from a string of text.
 	
@@ -944,7 +945,7 @@ def createTextImage(str: str, wrapWidth: float = ..., lineLimit: float = ...) ->
 	"""
 	...
 
-def textImage(img: Image | str, x: float, y: float) -> None:
+def textImage(img: Image | str, x: float | int, y: float | int) -> None:
 	"""📘
 	Renders an image generated from text onto the canvas.
 	
@@ -994,7 +995,8 @@ def textToPoints(str: str) -> None:
 	"""
 	...
 
-def nf(n: float, l: float, r: float) -> str:
+@overload
+def nf(n: float | int, l: float | int, r: float | int) -> str: 
 	"""📘
 	Number formatter, can be used to display a number as a string with
 	a specified number of digits before and after the decimal point,
@@ -1014,6 +1016,8 @@ def nf(n: float, l: float, r: float) -> str:
 		text(nf(PI, 4, 5), -90, 10)
 	"""
 	...
+@overload
+def nf(num: float | int, digits: float | int) -> str: ...
 
 NORMAL: Literal['normal']
 """📘
@@ -1086,7 +1090,7 @@ by responding to input events inside functions like
 mousePressed and keyPressed.
 """
 
-mouseX: float
+mouseX: float | int
 """🖲
 Current X position of the mouse.
 
@@ -1098,7 +1102,7 @@ Example::
 		text(round(mouseX), -50, 20)
 """
 
-mouseY: float
+mouseY: float | int
 """🖲
 Current Y position of the mouse.
 
@@ -1109,12 +1113,12 @@ Example::
 		circle(0, mouseY, 100)
 """
 
-pmouseX: float
+pmouseX: float | int
 """🖲
 Previous X position of the mouse.
 """
 
-pmouseY: float
+pmouseY: float | int
 """🖲
 Previous Y position of the mouse.
 """
@@ -1380,7 +1384,7 @@ def touchMoved() -> None:
 	"""
 	...
 
-def cursor(name: str, x: float = ..., y: float = ...) -> None:
+def cursor(name: str, x: float | int = ..., y: float | int = ...) -> None:
 	"""🖲
 	Sets the cursor to a CSS cursor type or image.
 	If an image is provided, optional x and y coordinates can
@@ -1432,7 +1436,7 @@ def mouseWheel() -> None:
 	"""
 	...
 
-movedX: float
+movedX: float | int
 """🖲
 Distance the mouse has moved since the last frame in the horizontal direction.
 
@@ -1444,7 +1448,7 @@ Example::
 		if movedX < 0: text('<<', 0, 0)
 """
 
-movedY: float
+movedY: float | int
 """🖲
 Distance the mouse has moved since the last frame in the vertical direction.
 
@@ -1482,7 +1486,7 @@ def pointerLock(unadjustedMovement: bool) -> None:
 
 # 🎨 color
 
-def color(c0: str | float | Color | list[float], c1: float = ..., c2: float = ..., c3: float = ...) -> Color:
+def color(c0: str | float | int | Color | list[float | int], c1: float | int = ..., c2: float | int = ..., c3: float | int = ...) -> Color:
 	"""🎨
 	Creates a new Color object, which is primarily useful for storing
 	a color that your sketch will reuse or modify later.
@@ -1679,7 +1683,8 @@ Example::
 	background(1, 0, 0)
 """
 
-def background(filler: str | Color | Image) -> None:
+@overload
+def background(filler: str | float | int | Color | Image) -> None: 
 	"""🎨
 	Draws over the entire canvas with a color or image.
 	
@@ -1695,6 +1700,8 @@ def background(filler: str | Color | Image) -> None:
 		background('crimson')
 	"""
 	...
+@overload
+def background(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
 
 class Color:
 	"""🎨
@@ -1719,12 +1726,13 @@ disregarding their alpha values."""
 		"""🎨 Produces a CSS color string representation."""
 		...
 
-	levels: list[float]
+	levels: list[float | int]
 	"""🎨 An array of the color's components."""
 
 # 💅 styles
 
-def fill(color: str | Color) -> None:
+@overload
+def fill(color: str | float | int | Color) -> None: 
 	"""💅
 	Sets the fill color. The default is white.
 	
@@ -1746,8 +1754,11 @@ def fill(color: str | Color) -> None:
 		square(-20, -20, 80)
 	"""
 	...
+@overload
+def fill(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
 
-def stroke(color: str | Color) -> None:
+@overload
+def stroke(color: str | float | int | Color) -> None: 
 	"""💅
 	Sets the stroke (outline) color. The default is black.
 	
@@ -1770,6 +1781,8 @@ def stroke(color: str | Color) -> None:
 		square(-20, -20, 80)
 	"""
 	...
+@overload
+def stroke(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
 
 def noFill() -> None:
 	"""💅
@@ -1806,7 +1819,7 @@ def noStroke() -> None:
 	"""
 	...
 
-def strokeWeight(weight: float) -> None:
+def strokeWeight(weight: float | int) -> None:
 	"""💅
 	Sets the size of the stroke used for lines and the border around drawings.
 	
@@ -1824,7 +1837,7 @@ def strokeWeight(weight: float) -> None:
 	"""
 	...
 
-def opacity(alpha: float) -> None:
+def opacity(alpha: float | int) -> None:
 	"""💅
 	Sets the global opacity, which affects all subsequent drawing operations, except background. Default is 1, fully opaque.
 	
@@ -1845,7 +1858,8 @@ def opacity(alpha: float) -> None:
 	"""
 	...
 
-def shadow(color: str | Color) -> None:
+@overload
+def shadow(color: str | float | int | Color) -> None: 
 	"""💅
 	Sets the shadow color. The default is transparent (no shadow).
 	
@@ -1861,6 +1875,8 @@ def shadow(color: str | Color) -> None:
 	:param color: shadow color
 	"""
 	...
+@overload
+def shadow(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
 
 def noShadow() -> None:
 	"""💅
@@ -1870,7 +1886,7 @@ def noShadow() -> None:
 	"""
 	...
 
-def shadowBox(offsetX: float, offsetY: float, blur: float) -> None:
+def shadowBox(offsetX: float | int, offsetY: float | int, blur: float | int) -> None:
 	"""💅
 	Sets the shadow offset and blur radius.
 	
@@ -1932,7 +1948,7 @@ def strokeJoin(val: str) -> None:
 	"""
 	...
 
-def erase(fillAlpha: float = ..., strokeAlpha: float = ...) -> None:
+def erase(fillAlpha: float | int = ..., strokeAlpha: float | int = ...) -> None:
 	"""💅
 	Sets the canvas to erase mode, where shapes will erase what's
 	underneath them instead of drawing over it.
@@ -2018,7 +2034,7 @@ other advanced drawing features.
 Not available in q5 WebGPU.
 """
 
-def inFill(x: float, y: float) -> bool:
+def inFill(x: float | int, y: float | int) -> bool:
 	"""💅
 	Checks if a given point is within the current path's fill area.
 	
@@ -2030,7 +2046,7 @@ def inFill(x: float, y: float) -> bool:
 	"""
 	...
 
-def inStroke(x: float, y: float) -> bool:
+def inStroke(x: float | int, y: float | int) -> bool:
 	"""💅
 	Checks if a given point is within the current path's stroke.
 	
@@ -2044,7 +2060,7 @@ def inStroke(x: float, y: float) -> bool:
 
 # 🦋 transforms
 
-def translate(x: float, y: float) -> None:
+def translate(x: float | int, y: float | int) -> None:
 	"""🦋
 	Translates the origin of the drawing context.
 	
@@ -2061,7 +2077,7 @@ def translate(x: float, y: float) -> None:
 	"""
 	...
 
-def rotate(angle: float) -> None:
+def rotate(angle: float | int) -> None:
 	"""🦋
 	Rotates the drawing context.
 	
@@ -2079,7 +2095,7 @@ def rotate(angle: float) -> None:
 	"""
 	...
 
-def scale(x: float, y: float = ...) -> None:
+def scale(x: float | int, y: float | int = ...) -> None:
 	"""🦋
 	Scales the drawing context.
 	
@@ -2099,7 +2115,7 @@ def scale(x: float, y: float = ...) -> None:
 	"""
 	...
 
-def shearX(angle: float) -> None:
+def shearX(angle: float | int) -> None:
 	"""🦋
 	Shears the drawing context along the x-axis.
 	
@@ -2116,7 +2132,7 @@ def shearX(angle: float) -> None:
 	"""
 	...
 
-def shearY(angle: float) -> None:
+def shearY(angle: float | int) -> None:
 	"""🦋
 	Shears the drawing context along the y-axis.
 	
@@ -2133,7 +2149,7 @@ def shearY(angle: float) -> None:
 	"""
 	...
 
-def applyMatrix(a: float, b: float, c: float, d: float, e: float, f: float) -> None:
+def applyMatrix(a: float | int, b: float | int, c: float | int, d: float | int, e: float | int, f: float | int) -> None:
 	"""🦋
 	Applies a transformation matrix.
 	
@@ -2250,7 +2266,7 @@ def pop() -> None:
 
 # 💻 display
 
-def displayMode(mode: str, renderQuality: str, scale: float) -> None:
+def displayMode(mode: str, renderQuality: str, scale: float | int) -> None:
 	"""💻
 	Customize how your canvas is presented.
 	
@@ -2298,7 +2314,7 @@ def fullscreen(v: bool = ...) -> None:
 	"""
 	...
 
-windowWidth: float
+windowWidth: float | int
 """💻
 The width of the window.
 
@@ -2311,7 +2327,7 @@ Example::
 		text(windowWidth, 0, 0)
 """
 
-windowHeight: float
+windowHeight: float | int
 """💻
 The height of the window.
 
@@ -2324,7 +2340,7 @@ Example::
 		text(windowHeight, 0, 0)
 """
 
-width: float
+width: float | int
 """💻
 The width of the canvas.
 
@@ -2334,7 +2350,7 @@ Example::
 	circle(0, 0, width)
 """
 
-height: float
+height: float | int
 """💻
 The height of the canvas.
 
@@ -2344,7 +2360,7 @@ Example::
 	circle(0, 0, height)
 """
 
-halfWidth: float
+halfWidth: float | int
 """💻
 Half the width of the canvas.
 
@@ -2354,7 +2370,7 @@ Example::
 	circle(0, 0, halfWidth)
 """
 
-halfHeight: float
+halfHeight: float | int
 """💻
 Half the height of the canvas.
 
@@ -2369,7 +2385,7 @@ canvas: object
 The canvas element associated with the Q5 instance.
 """
 
-def resizeCanvas(w: float, h: float) -> None:
+def resizeCanvas(w: float | int, h: float | int) -> None:
 	"""💻
 	Resizes the canvas to the specified width and height.
 	
@@ -2388,7 +2404,7 @@ def resizeCanvas(w: float, h: float) -> None:
 	"""
 	...
 
-frameCount: float
+frameCount: float | int
 """💻
 The number of frames that have been displayed since the program started.
 
@@ -2412,7 +2428,7 @@ def noLoop() -> None:
 	"""
 	...
 
-def redraw(n: float = ...) -> None:
+def redraw(n: float | int = ...) -> None:
 	"""💻
 	Redraws the canvas n times. If no input parameter is provided,
 	it calls the draw function once.
@@ -2451,7 +2467,7 @@ def loop() -> None:
 	"""
 	...
 
-def frameRate(hertz: float = ...) -> float:
+def frameRate(hertz: float | int = ...) -> float | int:
 	"""💻
 	Sets the target frame rate or gets an approximation of the
 	sketch's current frame rate.
@@ -2475,7 +2491,7 @@ def frameRate(hertz: float = ...) -> float:
 	"""
 	...
 
-def getTargetFrameRate() -> float:
+def getTargetFrameRate() -> float | int:
 	"""💻
 	The desired frame rate of the sketch.
 	:returns: target frame rate
@@ -2490,7 +2506,7 @@ def getTargetFrameRate() -> float:
 	"""
 	...
 
-def getFPS() -> float:
+def getFPS() -> float | int:
 	"""💻
 	Gets the current FPS, in terms of how many frames could be generated
 	in one second, which can be higher than the target frame rate.
@@ -2521,7 +2537,7 @@ def postProcess() -> None:
 	"""
 	...
 
-def pixelDensity(v: float) -> float:
+def pixelDensity(v: float | int) -> float | int:
 	"""💻
 	Sets the pixel density of the canvas.
 	
@@ -2537,7 +2553,7 @@ def pixelDensity(v: float) -> float:
 	"""
 	...
 
-def displayDensity() -> float:
+def displayDensity() -> float | int:
 	"""💻
 	Returns the current display density.
 	
@@ -2553,7 +2569,7 @@ def displayDensity() -> float:
 	"""
 	...
 
-deltaTime: float
+deltaTime: float | int
 """💻
 The time passed since the last frame was drawn.
 
@@ -2598,7 +2614,7 @@ Example::
 
 # 🧮 math
 
-def random(low: float | list[Any] = ..., high: float = ...) -> float | Any:
+def random(low: float | int | list[Any] = ..., high: float | int = ...) -> float | int | Any:
 	"""🧮
 	Generates a random value.
 	
@@ -2624,7 +2640,7 @@ def random(low: float | list[Any] = ..., high: float = ...) -> float | Any:
 	"""
 	...
 
-def jit(amount: float = ...) -> float:
+def jit(amount: float | int = ...) -> float | int:
 	"""🧮
 	Generates a random number within a symmetric range around zero.
 	
@@ -2642,7 +2658,7 @@ def jit(amount: float = ...) -> float:
 	"""
 	...
 
-def noise(x: float = ..., y: float = ..., z: float = ...) -> float:
+def noise(x: float | int = ..., y: float | int = ..., z: float | int = ...) -> float | int:
 	"""🧮
 	Generates a noise value based on the x, y, and z inputs.
 	
@@ -2662,7 +2678,7 @@ def noise(x: float = ..., y: float = ..., z: float = ...) -> float:
 	"""
 	...
 
-def dist(x1: float, y1: float, x2: float, y2: float) -> float:
+def dist(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> float | int:
 	"""🧮
 	Calculates the distance between two points.
 	
@@ -2685,7 +2701,7 @@ def dist(x1: float, y1: float, x2: float, y2: float) -> float:
 	"""
 	...
 
-def map(val: float, start1: float, stop1: float, start2: float, stop2: float) -> float:
+def map(val: float | int, start1: float | int, stop1: float | int, start2: float | int, stop2: float | int) -> float | int:
 	"""🧮
 	Maps a number from one range to another.
 	
@@ -2706,7 +2722,7 @@ def angleMode(mode: Literal['degrees'] | Literal['radians']) -> None:
 	"""
 	...
 
-def radians(degrees: float) -> float:
+def radians(degrees: float | int) -> float | int:
 	"""🧮
 	Converts degrees to radians.
 	
@@ -2715,7 +2731,7 @@ def radians(degrees: float) -> float:
 	"""
 	...
 
-def degrees(radians: float) -> float:
+def degrees(radians: float | int) -> float | int:
 	"""🧮
 	Converts radians to degrees.
 	
@@ -2724,7 +2740,7 @@ def degrees(radians: float) -> float:
 	"""
 	...
 
-def lerp(start: float, stop: float, amt: float) -> float:
+def lerp(start: float | int, stop: float | int, amt: float | int) -> float | int:
 	"""🧮
 	Calculates a number between two numbers at a specific increment.
 	
@@ -2735,7 +2751,7 @@ def lerp(start: float, stop: float, amt: float) -> float:
 	"""
 	...
 
-def constrain(n: float, low: float, high: float) -> float:
+def constrain(n: float | int, low: float | int, high: float | int) -> float | int:
 	"""🧮
 	Constrains a value between a minimum and maximum value.
 	
@@ -2746,7 +2762,7 @@ def constrain(n: float, low: float, high: float) -> float:
 	"""
 	...
 
-def norm(n: float, start: float, stop: float) -> float:
+def norm(n: float | int, start: float | int, stop: float | int) -> float | int:
 	"""🧮
 	Normalizes a number from another range into a value between 0 and 1.
 	
@@ -2757,7 +2773,7 @@ def norm(n: float, start: float, stop: float) -> float:
 	"""
 	...
 
-def fract(n: float) -> float:
+def fract(n: float | int) -> float | int:
 	"""🧮
 	Calculates the fractional part of a number.
 	
@@ -2766,7 +2782,7 @@ def fract(n: float) -> float:
 	"""
 	...
 
-def abs(n: float) -> float:
+def abs(n: float | int) -> float | int:
 	"""🧮
 	Calculates the absolute value of a number.
 	
@@ -2775,7 +2791,7 @@ def abs(n: float) -> float:
 	"""
 	...
 
-def round(n: float, d: float = ...) -> float:
+def round(n: float | int, d: float | int = ...) -> float | int:
 	"""🧮
 	Rounds a number.
 	
@@ -2792,7 +2808,7 @@ def round(n: float, d: float = ...) -> float:
 	"""
 	...
 
-def ceil(n: float) -> float:
+def ceil(n: float | int) -> float | int:
 	"""🧮
 	Rounds a number up.
 	
@@ -2808,7 +2824,7 @@ def ceil(n: float) -> float:
 	"""
 	...
 
-def floor(n: float) -> float:
+def floor(n: float | int) -> float | int:
 	"""🧮
 	Rounds a number down.
 	
@@ -2824,7 +2840,7 @@ def floor(n: float) -> float:
 	"""
 	...
 
-def min(*args: float) -> float:
+def min(*args: float | int) -> float | int:
 	"""🧮
 	Returns the smallest value in a sequence of numbers.
 	
@@ -2839,7 +2855,7 @@ def min(*args: float) -> float:
 	"""
 	...
 
-def max(*args: float) -> float:
+def max(*args: float | int) -> float | int:
 	"""🧮
 	Returns the largest value in a sequence of numbers.
 	
@@ -2854,7 +2870,7 @@ def max(*args: float) -> float:
 	"""
 	...
 
-def pow(base: float, exponent: float) -> float:
+def pow(base: float | int, exponent: float | int) -> float | int:
 	"""🧮
 	Calculates the value of a base raised to a power.
 	
@@ -2866,7 +2882,7 @@ def pow(base: float, exponent: float) -> float:
 	"""
 	...
 
-def sq(n: float) -> float:
+def sq(n: float | int) -> float | int:
 	"""🧮
 	Calculates the square of a number.
 	
@@ -2875,7 +2891,7 @@ def sq(n: float) -> float:
 	"""
 	...
 
-def sqrt(n: float) -> float:
+def sqrt(n: float | int) -> float | int:
 	"""🧮
 	Calculates the square root of a number.
 	
@@ -2884,7 +2900,7 @@ def sqrt(n: float) -> float:
 	"""
 	...
 
-def loge(n: float) -> float:
+def loge(n: float | int) -> float | int:
 	"""🧮
 	Calculates the natural logarithm (base e) of a number.
 	
@@ -2893,7 +2909,7 @@ def loge(n: float) -> float:
 	"""
 	...
 
-def exp(exponent: float) -> float:
+def exp(exponent: float | int) -> float | int:
 	"""🧮
 	Calculates e raised to the power of a number.
 	
@@ -2902,7 +2918,7 @@ def exp(exponent: float) -> float:
 	"""
 	...
 
-def randomSeed(seed: float) -> None:
+def randomSeed(seed: float | int) -> None:
 	"""🧮
 	Sets the seed for the random number generator.
 	
@@ -2918,7 +2934,7 @@ def randomGenerator(method: Any) -> None:
 	"""
 	...
 
-def randomGaussian(mean: float, std: float) -> float:
+def randomGaussian(mean: float | int, std: float | int) -> float | int:
 	"""🧮
 	Generates a random number following a Gaussian (normal) distribution.
 	
@@ -2928,7 +2944,7 @@ def randomGaussian(mean: float, std: float) -> float:
 	"""
 	...
 
-def randomExponential() -> float:
+def randomExponential() -> float | int:
 	"""🧮
 	Generates a random number following an exponential distribution.
 	:returns: a random number following an exponential distribution
@@ -2946,7 +2962,7 @@ def noiseMode(mode: Literal['perlin'] | Literal['simplex'] | Literal['blocky']) 
 	"""
 	...
 
-def noiseSeed(seed: float) -> None:
+def noiseSeed(seed: float | int) -> None:
 	"""🧮
 	Sets the seed value for noise generation.
 	
@@ -2954,7 +2970,7 @@ def noiseSeed(seed: float) -> None:
 	"""
 	...
 
-def noiseDetail(lod: float, falloff: float) -> None:
+def noiseDetail(lod: float | int, falloff: float | int) -> None:
 	"""🧮
 	Sets the level of detail for noise generation.
 	
@@ -2963,31 +2979,31 @@ def noiseDetail(lod: float, falloff: float) -> None:
 	"""
 	...
 
-PI: float
+PI: float | int
 """🧮
 The ratio of a circle's circumference to its diameter.
 Approximately 3.14159.
 """
 
-TWO_PI: float
+TWO_PI: float | int
 """🧮
 2 * PI.
 Approximately 6.28319.
 """
 
-TAU: float
+TAU: float | int
 """🧮
 2 * PI.
 Approximately 6.28319.
 """
 
-HALF_PI: float
+HALF_PI: float | int
 """🧮
 Half of PI.
 Approximately 1.5708.
 """
 
-QUARTER_PI: float
+QUARTER_PI: float | int
 """🧮
 A quarter of PI.
 Approximately 0.7854.
@@ -3075,11 +3091,11 @@ class Sound:
 	"""
 
 
-	volume: float
+	volume: float | int
 	"""🔊 Set the sound's volume to a value between
 0 (silent) and 1 (full volume)."""
 
-	pan: float
+	pan: float | int
 	"""🔊 Set the sound's stereo position between -1 (left) and 1 (right)."""
 
 	loop: bool
@@ -3371,7 +3387,7 @@ def createSelect(placeholder: str = ...) -> None:
 	"""
 	...
 
-def createSlider(min: float, max: float, value: float = ..., step: float = ...) -> None:
+def createSlider(min: float | int, max: float | int, value: float | int = ..., step: float | int = ...) -> None:
 	"""📑
 	Creates a slider element.
 	
@@ -3595,7 +3611,7 @@ def save(data: dict = ..., fileName: str = ...) -> None:
 	"""
 	...
 
-def millis() -> float:
+def millis() -> float | int:
 	"""🛠
 	Returns the number of milliseconds since the program started.
 	:returns: milliseconds since the program started
@@ -3681,7 +3697,8 @@ def disablePreload() -> None:
 	"""
 	...
 
-def nf(num: float, digits: float) -> str:
+@overload
+def nf(n: float | int, l: float | int, r: float | int) -> str: 
 	"""🛠
 	nf is short for number format. It formats a number
 	to a string with a specified number of digits.
@@ -3699,6 +3716,8 @@ def nf(num: float, digits: float) -> str:
 		text(nf(PI, 4, 5), -90, 10)
 	"""
 	...
+@overload
+def nf(num: float | int, digits: float | int) -> str: ...
 
 def shuffle(arr: list[Any], modify: bool = ...) -> list[Any]:
 	"""🛠
@@ -3742,35 +3761,35 @@ def clearStorage() -> None:
 	"""
 	...
 
-def year() -> float:
+def year() -> float | int:
 	"""🛠
 	Returns the current year.
 	:returns: current year
 	"""
 	...
 
-def day() -> float:
+def day() -> float | int:
 	"""🛠
 	Returns the current day of the month.
 	:returns: current day
 	"""
 	...
 
-def hour() -> float:
+def hour() -> float | int:
 	"""🛠
 	Returns the current hour.
 	:returns: current hour
 	"""
 	...
 
-def minute() -> float:
+def minute() -> float | int:
 	"""🛠
 	Returns the current minute.
 	:returns: current minute
 	"""
 	...
 
-def second() -> float:
+def second() -> float | int:
 	"""🛠
 	Returns the current second.
 	:returns: current second
@@ -3785,13 +3804,13 @@ class Vector:
 	"""
 
 
-	x: float
+	x: float | int
 	"""↗ The x component of the vector."""
 
-	y: float
+	y: float | int
 	"""↗ The y component of the vector."""
 
-	z: float
+	z: float | int
 	"""↗ The z component of the vector, if applicable."""
 
 	def add(self, v: Vector) -> Vector:
@@ -3802,15 +3821,15 @@ class Vector:
 		"""↗ Subtracts a vector from this vector."""
 		...
 
-	def mult(self, n: float | Vector) -> Vector:
+	def mult(self, n: float | int | Vector) -> Vector:
 		"""↗ Multiplies this vector by a scalar or element-wise by another vector."""
 		...
 
-	def div(self, n: float | Vector) -> Vector:
+	def div(self, n: float | int | Vector) -> Vector:
 		"""↗ Divides this vector by a scalar or element-wise by another vector."""
 		...
 
-	def mag(self) -> float:
+	def mag(self) -> float | int:
 		"""↗ Calculates the magnitude (length) of the vector."""
 		...
 
@@ -3818,11 +3837,11 @@ class Vector:
 		"""↗ Normalizes the vector to a length of 1 (making it a unit vector)."""
 		...
 
-	def setMag(self, len: float) -> Vector:
+	def setMag(self, len: float | int) -> Vector:
 		"""↗ Sets the magnitude of the vector to the specified length."""
 		...
 
-	def dot(self, v: Vector) -> float:
+	def dot(self, v: Vector) -> float | int:
 		"""↗ Calculates the dot product of this vector and another vector."""
 		...
 
@@ -3830,7 +3849,7 @@ class Vector:
 		"""↗ Calculates the cross product of this vector and another vector."""
 		...
 
-	def dist(self, v: Vector) -> float:
+	def dist(self, v: Vector) -> float | int:
 		"""↗ Calculates the distance between this vector and another vector."""
 		...
 
@@ -3838,37 +3857,37 @@ class Vector:
 		"""↗ Copies this vector."""
 		...
 
-	def set(self, x: float, y: float, z: float = ...) -> None:
+	def set(self, x: float | int, y: float | int, z: float | int = ...) -> None:
 		"""↗ Sets the components of the vector."""
 		...
 
-	def limit(self, max: float) -> Vector:
+	def limit(self, max: float | int) -> Vector:
 		"""↗ Limits the magnitude of the vector to the value used for the max parameter."""
 		...
 
-	def heading(self) -> float:
+	def heading(self) -> float | int:
 		"""↗ Calculates the angle of rotation for this vector (only 2D vectors)."""
 		...
 
-	def setHeading(self, angle: float) -> Vector:
+	def setHeading(self, angle: float | int) -> Vector:
 		"""↗ Rotates the vector to a specific angle without changing its magnitude."""
 		...
 
-	def rotate(self, angle: float) -> Vector:
+	def rotate(self, angle: float | int) -> Vector:
 		"""↗ Rotates the vector by the given angle (only 2D vectors)."""
 		...
 
-	def lerp(self, v: Vector, amt: float) -> Vector:
+	def lerp(self, v: Vector, amt: float | int) -> Vector:
 		"""↗ Linearly interpolates between this vector and another vector."""
 		...
 
-	def slerp(self, v: Vector, amt: float) -> Vector:
+	def slerp(self, v: Vector, amt: float | int) -> Vector:
 		"""↗ Linearly interpolates between this vector and another vector, including the magnitude."""
 		...
 
 # 🖌 shaping
 
-def arc(x: float, y: float, w: float, h: float, start: float, stop: float, mode: float = ...) -> None:
+def arc(x: float | int, y: float | int, w: float | int, h: float | int, start: float | int, stop: float | int, mode: float | int = ...) -> None:
 	"""🖌
 	Draws an arc, which is a section of an ellipse.
 	
@@ -3906,7 +3925,7 @@ def curve() -> None:
 	"""
 	...
 
-def curveDetail(val: float) -> None:
+def curveDetail(val: float | int) -> None:
 	"""🖌
 	Sets the amount of straight line segments used to make a curve.
 	
@@ -3940,7 +3959,7 @@ def endShape(close: bool = ...) -> None:
 	"""
 	...
 
-def vertex(x: float, y: float) -> None:
+def vertex(x: float | int, y: float | int) -> None:
 	"""🖌
 	Specifies a vertex in a shape.
 	
@@ -3965,7 +3984,7 @@ def vertex(x: float, y: float) -> None:
 	"""
 	...
 
-def bezierVertex(cp1x: float, cp1y: float, cp2x: float, cp2y: float, x: float, y: float) -> None:
+def bezierVertex(cp1x: float | int, cp1y: float | int, cp2x: float | int, cp2y: float | int, x: float | int, y: float | int) -> None:
 	"""🖌
 	Specifies a Bezier vertex in a shape.
 	
@@ -3978,7 +3997,7 @@ def bezierVertex(cp1x: float, cp1y: float, cp2x: float, cp2y: float, x: float, y
 	"""
 	...
 
-def quadraticVertex(cp1x: float, cp1y: float, x: float, y: float) -> None:
+def quadraticVertex(cp1x: float | int, cp1y: float | int, x: float | int, y: float | int) -> None:
 	"""🖌
 	Specifies a quadratic Bezier vertex in a shape.
 	
@@ -3989,7 +4008,7 @@ def quadraticVertex(cp1x: float, cp1y: float, x: float, y: float) -> None:
 	"""
 	...
 
-def bezier(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
+def bezier(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
 	"""🖌
 	Draws a Bezier curve.
 	
@@ -4004,7 +4023,7 @@ def bezier(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4:
 	"""
 	...
 
-def triangle(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> None:
+def triangle(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int) -> None:
 	"""🖌
 	Draws a triangle.
 	
@@ -4017,7 +4036,7 @@ def triangle(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -
 	"""
 	...
 
-def quad(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
+def quad(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
 	"""🖌
 	Draws a quadrilateral.
 	
@@ -4076,7 +4095,7 @@ def createShader(code: str, type: str = ..., data: list[float] = ...) -> Any:
 	
 		Canvas(200)
 		
-		wobble = createShader("""
+		wobble = createShader('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
@@ -4088,7 +4107,7 @@ def createShader(code: str, type: str = ..., data: list[float] = ...) -> Any:
 			f.position = vert;
 			f.color = vec4f(1, 0, 0, 1);
 			return f;
-		}""")
+		}''')
 		
 		def draw():
 			clear()
@@ -4097,7 +4116,7 @@ def createShader(code: str, type: str = ..., data: list[float] = ...) -> Any:
 	"""
 	...
 
-def plane(x: float, y: float, w: float, h: float = ...) -> None:
+def plane(x: float | int, y: float | int, w: float | int, h: float | int = ...) -> None:
 	"""⚡
 	A plane is a centered rectangle with no stroke.
 	
@@ -4129,12 +4148,12 @@ def resetShader() -> None:
 	
 		Canvas(200)
 		
-		stripes = createShader("""
+		stripes = createShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let g = cos((q.mouseY + f.position.y) * 0.05);
 			return vec4(1, g, 0, 1);
-		}""")
+		}''')
 		
 		def draw():
 			shader(stripes)
@@ -4189,14 +4208,14 @@ def createFrameShader() -> None:
 		strokeWeight(8)
 		strokeCap(PROJECT)
 		
-		boxy = createFrameShader("""
+		boxy = createFrameShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let x = sin(f.texCoord.y * 4 + q.time * 0.002);
 			let y = cos(f.texCoord.x * 4 + q.time * 0.002);
 			let uv = f.texCoord + vec2f(x, y);
 			return textureSample(tex, samp, uv);
-		}""")
+		}''')
 		
 		def draw():
 			line(mouseX, mouseY, pmouseX, pmouseY)
@@ -4221,13 +4240,13 @@ def createImageShader(code: str) -> Any:
 		
 		logo = loadImage('/q5js_logo.avif')
 		
-		grate = createImageShader("""
+		grate = createImageShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			var texColor = textureSample(tex, samp, f.texCoord);
 			texColor.b += (q.mouseX + f.position.x) % 20 / 10;
 			return texColor;
-		}""")
+		}''')
 		
 		def draw():
 			background(0.7)
@@ -4255,7 +4274,7 @@ def createVideoShader(code: str) -> Any:
 		vid = createVideo('/assets/apollo4.mp4')
 		vid.hide()
 		
-		flipper = createVideoShader("""
+		flipper = createVideoShader('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
@@ -4276,7 +4295,7 @@ def createVideoShader(code: str) -> Any:
 			texColor.r = 0;
 			texColor.b *= 2;
 			return texColor;
-		}""")
+		}''')
 		
 		def draw():
 			clear()
@@ -4301,7 +4320,7 @@ def createTextShader(code: str) -> Any:
 		Canvas(200)
 		textAlign(CENTER, CENTER)
 		
-		spin = createTextShader("""
+		spin = createTextShader('''
 		@vertex
 		fn vertexMain(v : VertexParams) -> FragParams {
 			let char = textChars[v.instanceIndex];
@@ -4322,7 +4341,7 @@ def createTextShader(code: str) -> Any:
 			f.strokeWeight = text.strokeWeight;
 			f.edge = text.edge;
 			return f;
-		}""")
+		}''')
 		
 		def draw():
 			clear()
@@ -4366,41 +4385,41 @@ class Q5:
 canvases and internal graphics. These options are overwritten by any
 per-canvas options you pass to Canvas."""
 
-	MAX_COLORS: float
+	MAX_COLORS: float | int
 	"""⚙ The maximum number of q5 colors
 (created by calls to color, background, fill, stroke, and tint)
 that can be stored per frame, with the WebGPU renderer."""
 
-	MAX_RECTS: float
+	MAX_RECTS: float | int
 	"""⚙ The maximum number of rectangles
 (calls to rect, square, capsule)
 that can be drawn per frame, with the WebGPU renderer."""
 
-	MAX_ELLIPSES: float
+	MAX_ELLIPSES: float | int
 	"""⚙ The maximum number of ellipses
 (calls to ellipse, circle, and arc)
 that can be drawn per frame, with the WebGPU renderer."""
 
-	MAX_CHARS: float
+	MAX_CHARS: float | int
 	"""⚙ The maximum number of text characters
 that can be drawn per frame, with the WebGPU renderer."""
 
-	MAX_TEXTS: float
+	MAX_TEXTS: float | int
 	"""⚙ The maximum number of separate calls to text
 that can be drawn per frame, with the WebGPU renderer."""
 
-	MAX_TRANSFORMS: float
+	MAX_TRANSFORMS: float | int
 	"""⚙ The maximum number of transformation matrices
 that can be used per frame, with the WebGPU renderer.
 
 By default, it's set to use the entire 128 MB default limit of maxStorageBufferBindingSize.  
 https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits"""
 
-	MAX_IMAGES: float
+	MAX_IMAGES: float | int
 	"""⚙ The maximum number of images (calls to image and textImage)
 that can be drawn per frame, with the WebGPU renderer."""
 
-	MAX_SHAPE_VERTS: float
+	MAX_SHAPE_VERTS: float | int
 	"""⚙ The maximum number of vertices in shapes
 (created by calls to endShape,
 triangle, quad, curve, and bezier)

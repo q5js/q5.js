@@ -286,7 +286,7 @@ function extractEmojiMappings(baseDtsPath) {
 	const mappings = {};
 
 	for (const line of lines) {
-		const match = line.match(/^\s*\/\/\s+([^\w\s]+)\s+([\w\u00A0-\uFFFFu00A0-\uFFFF]+)\s*$/);
+		const match = line.match(/^\s*\/\/\s+([^\w\s]+)\s+([\w\u00A0-\uFFFF]+)\s*$/);
 		if (match) {
 			const emoji = match[1].replace(/\uFE0F/g, '');
 			const section = match[2];
@@ -298,7 +298,7 @@ function extractEmojiMappings(baseDtsPath) {
 }
 
 /**
- * Reads the base en.d.ts to extract function signatures and type information
+ * Reads the base en.d.ts to extract function signatures (including overloads) and type information
  */
 function extractBaseSignatures(baseDtsPath) {
 	const content = fs.readFileSync(baseDtsPath, 'utf8');
@@ -309,14 +309,18 @@ function extractBaseSignatures(baseDtsPath) {
 	while (i < lines.length) {
 		const line = lines[i];
 
-		// Look for function declarations
-		const funcMatch = line.match(/^\s*function\s+([\w\u00A0-\uFFFF]+)\s*\([^)]*\)/);
+		const funcMatch = line.match(/^\s*function\s+([\w\u00A0-\uFFFF]+)\s*\(/);
 		const varMatch = line.match(/^\s*(?:var|let|const)\s+([\w\u00A0-\uFFFF]+)\s*:/);
 		const classMatch = line.match(/^\s*class\s+([\w\u00A0-\uFFFF]+)/);
 
-		if (funcMatch || varMatch || classMatch) {
-			const name = (funcMatch || varMatch || classMatch)[1];
-			signatures[name] = line.trim();
+		if (funcMatch) {
+			const name = funcMatch[1];
+			if (!signatures[name]) signatures[name] = [];
+			signatures[name].push(line.trim());
+		} else if (varMatch || classMatch) {
+			const name = (varMatch || classMatch)[1];
+			if (!signatures[name]) signatures[name] = [];
+			signatures[name].push(line.trim());
 		}
 
 		i++;
@@ -326,9 +330,9 @@ function extractBaseSignatures(baseDtsPath) {
 }
 
 /**
- * Generates JSDoc comment from function data
+ * Generates JSDoc comment from function data supporting overload states
  */
-function generateJSDoc(func, emoji, includeExamples = true, exampleType = 'c2d', indent = '\t') {
+function generateJSDoc(func, emoji, includeExamples = true, exampleType = 'c2d', indent = '\t', isFirst = true) {
 	const lines = [];
 
 	lines.push(`${indent}/** ${emoji}`);
@@ -359,11 +363,13 @@ function generateJSDoc(func, emoji, includeExamples = true, exampleType = 'c2d',
 
 	if (func.params && func.params.length > 0) {
 		func.params.forEach((param) => {
-			lines.push(`${indent} * ${param}`);
+			if (isFirst || !param.startsWith('@param')) {
+				lines.push(`${indent} * ${param}`);
+			}
 		});
 	}
 
-	if (includeExamples) {
+	if (includeExamples && isFirst) {
 		const examples = exampleType === 'webgpu' ? func.webgpuExamples : func.c2dExamples;
 		if (examples && examples.length > 0) {
 			examples.forEach((example) => {
@@ -381,33 +387,17 @@ function generateJSDoc(func, emoji, includeExamples = true, exampleType = 'c2d',
 }
 
 /**
- * Generates TypeScript declaration from base signature
- */
-function generateDeclaration(funcName, baseSignatures) {
-	if (baseSignatures[funcName]) {
-		return `\t${baseSignatures[funcName]}`;
-	}
-
-	// Fallback if signature not found
-	return `\tfunction ${funcName}(): void;`;
-}
-
-/**
  * Builds a complete .d.ts file
  */
 function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true, exampleType = 'c2d') {
 	const emojiMappings = extractEmojiMappings(baseDtsPath);
 	const baseSignatures = extractBaseSignatures(baseDtsPath);
 
-	// Read the entire base file and extract top-level declarations (inside `declare global { ... }`).
 	const baseContent = fs.readFileSync(baseDtsPath, 'utf8');
 	const globalMatch = baseContent.match(/declare global\s*{([\s\S]*?)}\s*export\s*{\s*}/m);
 	let baseGlobalBlock = '';
 	if (globalMatch) baseGlobalBlock = globalMatch[1];
 
-	// Parse top-level declarations from the base global block. We keep class/namespace blocks and single-line
-	// declarations for functions/vars/constants. This ensures we copy any signatures that don't exist in
-	// the parsed markdown-derived sections.
 	const baseDecls = [];
 	if (baseGlobalBlock) {
 		const blines = baseGlobalBlock.split('\n');
@@ -416,16 +406,13 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 			if (!line || !line.trim()) continue;
 			const t = line.trim();
 
-			// skip top-level comments
 			if (t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')) continue;
 
-			// class or namespace blocks (multi-line)
 			let classMatch = t.match(/^class\s+(\w+)\s*\{/);
 			let nsMatch = t.match(/^namespace\s+(\w+)\s*\{/);
 			if (classMatch || nsMatch) {
 				const name = (classMatch || nsMatch)[1];
 				let block = [t];
-				// count braces to find end of block
 				let braceCount = (t.match(/{/g) || []).length - (t.match(/}/g) || []).length;
 				while (braceCount > 0 && ++i < blines.length) {
 					const ln = blines[i];
@@ -436,7 +423,6 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 				continue;
 			}
 
-			// single-line declarations: function / var/let/const
 			let funcMatch = t.match(/^function\s+(\w+)\s*\(/);
 			let varMatch = t.match(/^(?:var|let|const)\s+(\w+)\s*[:=]/);
 			if (funcMatch) {
@@ -450,15 +436,11 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 		}
 	}
 
-	// Exclude certain sections for specific output types
 	if (exampleType === 'c2d') {
-		// Shaders are WebGPU-only; exclude from Canvas2D type definitions
 		if (sections['shaders']) delete sections['shaders'];
 	}
 
-	// Build the output content
 	const output = [];
-	// helper to append a line while avoiding duplicate blank lines
 	const push = (ln) => {
 		if (ln === '') {
 			if (output.length === 0 || output[output.length - 1] !== '') output.push('');
@@ -467,13 +449,8 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 		}
 	};
 	let moduleName = outputPath.slice(outputPath.lastIndexOf('/') + 1, -5).replaceAll('-', '/');
-	push(`/**
- * @module ${moduleName}
- */
+	push(`/**\n * @module ${moduleName}\n */\n\ndeclare global {`);
 
-declare global {`);
-
-	// Determine which names are already included via markdown-derived sections
 	const existingNames = new Set();
 	for (const s of Object.values(sections)) {
 		for (const f of s.functions) {
@@ -484,9 +461,6 @@ declare global {`);
 		}
 	}
 
-	// Partition the baseGlobalBlock into blocks by section comment so we can
-	// place missing declarations into their correct section instead of dumping
-	// them at the top of the file.
 	const baseSectionBlocks = {};
 	if (baseGlobalBlock) {
 		let currentSec = null;
@@ -499,11 +473,9 @@ declare global {`);
 				baseSectionBlocks[currentSec] = baseSectionBlocks[currentSec] || [];
 				continue;
 			}
-
 			if (currentSec) baseSectionBlocks[currentSec].push(line);
 		}
 
-		// annotate each baseDecl with which section it belongs to (best-effort)
 		for (const d of baseDecls) {
 			d._section = null;
 			for (const [sec, lines] of Object.entries(baseSectionBlocks)) {
@@ -516,7 +488,6 @@ declare global {`);
 		}
 	}
 
-	// Sort sections to match the order in base file
 	const sectionOrder = Object.keys(emojiMappings).map((section) => section);
 
 	for (const sectionName of sectionOrder) {
@@ -524,13 +495,11 @@ declare global {`);
 
 		const section = sections[sectionName];
 		const emoji = emojiMappings[sectionName];
-
 		const displaySectionName = section.sectionName || sectionName;
 
 		push('');
 		output.push(`\t// ${emoji} ${displaySectionName}`);
 
-		// Add section description if available (as block comment)
 		if (section.sectionDescription) {
 			const descLines = section.sectionDescription.split('\n');
 			if (descLines.length > 0) {
@@ -545,25 +514,18 @@ declare global {`);
 
 		push('');
 
-		// Add functions and classes
 		for (const func of section.functions) {
 			if (func.isClass) {
-				// Class declaration has no JSDoc - only members have comments
 				output.push(`\tclass ${func.name} {`);
 
-				// Add class members
 				if (func.members && func.members.length > 0) {
 					for (const member of func.members) {
 						output.push('');
 						output.push(generateJSDoc(member, emoji, includeExamples, exampleType, '\t\t'));
 
-						// Try to find signature in base file
 						const memberKey = `${func.name}.${member.name}`;
-						let memberSig = baseSignatures[memberKey];
+						let memberSig = baseSignatures[memberKey]?.[0];
 
-						// If we don't have an exact member signature in baseSignatures,
-						// look inside any class declaration block we parsed from the base .d.ts
-						// (this can contain static property declarations like "static MAX_TRANSFORMS: number;")
 						if (!memberSig) {
 							const baseClassDecl = baseDecls.find((d) => d.name === func.name && d.text.trim().startsWith('class'));
 							if (baseClassDecl) {
@@ -574,11 +536,9 @@ declare global {`);
 						}
 
 						if (memberSig) {
-							// Ensure the signature line ends with a semicolon
 							const sigLine = memberSig.trim().replace(/;?\s*$/, ';');
 							output.push(`\t\t${sigLine}`);
 						} else {
-							// Generate based on member type
 							if (member.name === 'constructor') {
 								output.push(`\t\tconstructor();`);
 							} else {
@@ -588,15 +548,13 @@ declare global {`);
 					}
 				}
 
-				// Merge in any class members found only in the base .d.ts (preserve their JSDoc)
 				const baseClassDecl = baseDecls.find((d) => d.name === func.name && d.text.startsWith('class'));
 				if (baseClassDecl) {
 					const existingMemberNames = new Set((func.members || []).map((m) => m.name));
-					const inner = baseClassDecl.text.split('\n').slice(1, -1); // inside class
+					const inner = baseClassDecl.text.split('\n').slice(1, -1);
 					let chunk = [];
 					const commitChunk = () => {
 						if (chunk.length === 0) return;
-						// find signature line (first non-comment line)
 						const sigLine = chunk.find((l) => l.trim() && !l.trim().startsWith('*') && !l.trim().startsWith('/'));
 						if (!sigLine) {
 							chunk = [];
@@ -609,30 +567,14 @@ declare global {`);
 						}
 						const mname = m[1];
 						if (!existingMemberNames.has(mname)) {
-							// compute minimal indent for chunk lines to preserve relative formatting
-							const nonEmpty = chunk.filter((l) => l.trim());
-							let minIndent = null;
-							nonEmpty.forEach((l) => {
-								const mm = l.match(/^\s*/);
-								if (mm) {
-									const len = mm[0].length;
-									if (minIndent === null || len < minIndent) minIndent = len;
-								}
-							});
-							if (minIndent === null) minIndent = 0;
-
 							chunk.forEach((ln, idx) => {
 								if (!ln || !ln.trim()) {
 									push('');
 									return;
 								}
 								const content = ln.trimStart();
-								if (idx === 0) {
-									output.push('\t\t' + content);
-								} else {
-									// inner lines should be indented one level deeper than the header
-									output.push('\t\t\t' + content);
-								}
+								if (idx === 0) output.push('\t\t' + content);
+								else output.push('\t\t\t' + content);
 							});
 							push('');
 						}
@@ -640,77 +582,63 @@ declare global {`);
 					};
 					for (let li = 0; li < inner.length; li++) {
 						const ln = inner[li];
-						if (!ln.trim()) {
-							commitChunk();
-						} else {
-							chunk.push(ln);
-						}
+						if (!ln.trim()) commitChunk();
+						else chunk.push(ln);
 					}
 					commitChunk();
 				}
 
 				output.push('\t}');
 			} else {
-				// Regular function or variable
-				output.push(generateJSDoc(func, emoji, includeExamples, exampleType));
-				output.push(generateDeclaration(func.name, baseSignatures));
+				const sigs = baseSignatures[func.name];
+				if (sigs && sigs.length > 0) {
+					sigs.forEach((sig, index) => {
+						output.push(generateJSDoc(func, emoji, includeExamples, exampleType, '\t', index === 0));
+						output.push(`\t${sig}`);
+						push('');
+					});
+				} else {
+					output.push(generateJSDoc(func, emoji, includeExamples, exampleType, '\t', true));
+					output.push(`\tfunction ${func.name}(): void;`);
+					push('');
+				}
 			}
 
 			push('');
 		}
 
-		// append any missing declarations from the base .d.ts that belong to this section
-		// Note: baseDecls may include `namespace Foo` blocks even when a `class Foo` exists
-		// in the markdown-derived sections. We should include namespace blocks if they are
-		// not already present in the output. existingNames only tracks names, so a class
-		// with the same name would previously prevent adding the namespace. Fix that by
-		// allowing namespace blocks through when the actual `namespace <name>` text is
-		// still missing from the generated output.
 		const missingInSection = baseDecls.filter((d) => {
 			if (d._section !== sectionName) return false;
-
-			// If this base declaration is a namespace, include it if the output does
-			// not already contain the namespace declaration for this name.
 			const isNamespace = d.text.trim().startsWith('namespace');
 			if (isNamespace) {
 				const namespaceHeader = `namespace ${d.name}`;
 				const alreadyHasNamespace = output.some((ln) => typeof ln === 'string' && ln.indexOf(namespaceHeader) !== -1);
 				return !alreadyHasNamespace;
 			}
-
-			// otherwise, include only when it is actually missing by name
 			return !existingNames.has(d.name);
 		});
-		if (missingInSection.length > 0) {
-			// ensure single blank line before additions
-			push('');
 
+		if (missingInSection.length > 0) {
+			push('');
 			for (const d of missingInSection) {
 				const lines = d.text.split('\n');
-
-				// If this is a class/namespace, render with our consistent formatting
 				if (d.text.trim().startsWith('class') || d.text.trim().startsWith('namespace')) {
 					const header = lines[0].trim();
-					// write header with one tab
 					push('\t' + header);
-					// inner lines
 					const inner = lines.slice(1, -1);
 					for (const ln of inner) {
-						if (!ln || !ln.trim()) {
-							push('');
-						} else {
+						if (!ln || !ln.trim()) push('');
+						else {
 							const t = ln.trim();
 							if (t.startsWith('*')) push('\t\t ' + t);
 							else push('\t\t' + t);
 						}
 					}
-					// closing brace
 					push('\t}');
 					push('');
 					continue;
 				}
 
-				// Normal non-class block: normalize indentation
 				const nonEmpty = lines.filter((l) => l.trim());
 				let minIndent = null;
 				nonEmpty.forEach((l) => {
@@ -727,33 +655,23 @@ declare global {`);
 						push('');
 						continue;
 					}
-					const normalized = ln.slice(minIndent);
-					push('\t' + normalized);
+					push('\t' + ln.slice(minIndent));
 				}
 				push('');
 			}
 		}
 	}
 
-	output.push('}');
-	output.push('');
-	output.push('export {};');
-	output.push('');
+	output.push('}', '', 'export {};', '');
 
-	// Normalize indentation for blocks: for every opening-brace line, ensure
-	// all lines up to the corresponding immediate closing brace are indented
-	// at least one level deeper than the opener.
 	for (let i = 0; i < output.length; i++) {
 		const cur = output[i];
-		if (!cur) continue;
-		if (!cur.trim().endsWith('{')) continue;
+		if (!cur || !cur.trim().endsWith('{')) continue;
 
-		// find matching immediate closing brace (first '}' after this opener)
 		let closeIndex = -1;
 		for (let k = i + 1; k < output.length; k++) {
 			if (output[k]) {
 				const t = output[k].trim();
-				// match a closing brace line: '}' or '};' or '},' etc.
 				if (/^}\s*[;,]?$/.test(t)) {
 					closeIndex = k;
 					break;
@@ -785,7 +703,7 @@ function jsTypeToPython(jsType) {
 	if (!jsType) return 'Any';
 	const t = jsType.replace(/[{}]/g, '').trim();
 	const typeMap = {
-		number: 'float',
+		number: 'float | int',
 		string: 'str',
 		boolean: 'bool',
 		bool: 'bool',
@@ -804,20 +722,15 @@ function jsTypeToPython(jsType) {
 	};
 	const lower = t.toLowerCase();
 	if (typeMap[lower]) return typeMap[lower];
-	// typeof X -> type[X]
 	if (t.startsWith('typeof ')) return `type[${t.slice(7)}]`;
-	// Numeric literal types like 1, 2, 3
 	if (/^\d+$/.test(t)) return `Literal[${t}]`;
-	// Union types T | U — must check before string literal to avoid greedily matching 'a' | 'b'
 	if (t.includes('|')) {
 		return t
 			.split('|')
 			.map((p) => jsTypeToPython(p.trim()))
 			.join(' | ');
 	}
-	// String literal types like 'corner', 'center'
 	if (/^['"].*['"]$/.test(t)) return `Literal[${t.replace(/"/g, "'")}]`;
-	// Intersection types T & U — take first non-Promise part
 	if (t.includes('&')) {
 		const parts = t.split('&').map((p) => p.trim());
 		const base = parts.find((p) => !p.includes('Promise') && !p.includes('PromiseLike'));
@@ -830,54 +743,85 @@ function jsTypeToPython(jsType) {
 	return t;
 }
 
-/**
- * Parses a JSDoc @param line into { name, pyType, optional, description }
- */
 function parseJsDocParam(paramLine) {
 	const opt = paramLine.match(/@param\s+\{([^}]+)\}\s+\[([\w\u00A0-\uFFFF]+)\](?:\s+(.*))?/);
 	if (opt) {
 		const rawType = opt[1];
 		const isRest = rawType.startsWith('...');
-		const jsType = isRest ? rawType.slice(3) : rawType;
-		return { name: opt[2], pyType: jsTypeToPython(jsType), optional: true, isRest, description: opt[3] || '' };
+		return {
+			name: opt[2],
+			pyType: jsTypeToPython(isRest ? rawType.slice(3) : rawType),
+			optional: true,
+			isRest,
+			description: opt[3] || ''
+		};
 	}
 	const req = paramLine.match(/@param\s+\{([^}]+)\}\s+([\w\u00A0-\uFFFF]+)(?:\s+(.*))?/);
 	if (req) {
 		const rawType = req[1];
 		const isRest = rawType.startsWith('...');
-		const jsType = isRest ? rawType.slice(3) : rawType;
-		return { name: req[2], pyType: jsTypeToPython(jsType), optional: false, isRest, description: req[3] || '' };
+		return {
+			name: req[2],
+			pyType: jsTypeToPython(isRest ? rawType.slice(3) : rawType),
+			optional: false,
+			isRest,
+			description: req[3] || ''
+		};
 	}
 	return null;
 }
 
-/**
- * Parses a JSDoc @returns line into { pyType, description }
- */
 function parseJsDocReturn(returnLine) {
 	const m = returnLine.match(/@returns?\s+\{([^}]+)\}(?:\s+(.*))?/);
 	if (m) return { pyType: jsTypeToPython(m[1]), description: m[2] || '' };
 	return null;
 }
 
-/**
- * Strips markdown links [text](url) -> text and inline code `x` -> x from a string
- */
 function stripMarkdown(str) {
+	if (!str) return '';
 	return str
 		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
 		.replace(/`([^`]+)`/g, '$1')
 		.replace(/\*\*([^*]+)\*\*/g, '$1')
-		.replace(/\\([*|_{}\[\]()+.!#^-])/g, '$1'); // un-escape markdown escape sequences
+		.replace(/\\([*|_{}\[\]()+.!#^-])/g, '$1');
 }
 
-/**
- * Generates a Python .pyi stub entry for a function or variable
- */
-function generatePyiEntry(func, emoji, indent = '') {
-	const lines = [];
+function tsSigToPython(tsSig) {
+	const match = tsSig.match(/^function\s+([\w\u00A0-\uFFFF]+)\s*\(([^)]*)\)\s*:\s*(.+);$/);
+	if (!match) return null;
+	const name = match[1];
+	const paramsStr = match[2].trim();
+	const retType = jsTypeToPython(match[3].trim());
 
-	// Parse params and return
+	if (!paramsStr) return `def ${name}() -> ${retType}: ...`;
+
+	const paramParts = paramsStr
+		.split(',')
+		.map((p) => p.trim())
+		.filter(Boolean);
+	const paramStrs = paramParts.map((part) => {
+		const isRest = part.startsWith('...');
+		const cleanPart = isRest ? part.slice(3) : part;
+		const colonIdx = cleanPart.indexOf(':');
+		if (colonIdx === -1) return cleanPart;
+
+		let pName = cleanPart.slice(0, colonIdx).trim();
+		let pTypeStr = cleanPart.slice(colonIdx + 1).trim();
+
+		const isOptional = pName.endsWith('?');
+		if (isOptional) pName = pName.slice(0, -1);
+
+		const pyType = jsTypeToPython(pTypeStr);
+		if (isRest) return `*${pName}: ${pyType}`;
+		if (isOptional) return `${pName}: ${pyType} = ...`;
+		return `${pName}: ${pyType}`;
+	});
+
+	return `def ${name}(${paramStrs.join(', ')}) -> ${retType}: ...`;
+}
+
+function generatePyiOverloads(func, sigs, emoji, indent = '') {
+	const lines = [];
 	const parsedParams = func.params
 		.filter((p) => p.startsWith('@param'))
 		.map(parseJsDocParam)
@@ -885,65 +829,72 @@ function generatePyiEntry(func, emoji, indent = '') {
 	const returnParam = func.params.find((p) => p.startsWith('@return'));
 	const parsedReturn = returnParam ? parseJsDocReturn(returnParam) : null;
 
-	// Determine if async (returns a true Promise, not just PromiseLike)
-	// Canvas/createCanvas are treated as sync in Python because q5-python.js handles async loading.
-	const rawReturn = returnParam ? (returnParam.match(/@returns?\s+\{([^}]+)\}/) || [])[1] || '' : '';
-	const isAsync = /^Promise</.test(rawReturn.trim()) && func.name !== 'Canvas' && func.name !== 'createCanvas';
+	sigs.forEach((sig, index) => {
+		const isFirst = index === 0;
+		const pySig = tsSigToPython(sig);
+		if (!pySig) return;
 
-	// Build Python signature
-	const paramStrs = parsedParams.map((p) => {
-		if (p.isRest) return `*${p.name}: ${p.pyType}`;
-		return p.optional ? `${p.name}: ${p.pyType} = ...` : `${p.name}: ${p.pyType}`;
+		lines.push(`${indent}@overload`);
+		if (isFirst) {
+			lines.push(`${indent}${pySig.replace(/\.\.\.$/, '')}`);
+			const docLines = [`${indent}\t"""${emoji}`];
+			if (func.description)
+				stripMarkdown(func.description)
+					.split('\n')
+					.forEach((l) => docLines.push(`${indent}\t${l}`));
+			if (parsedParams.length > 0) {
+				docLines.push(`${indent}\t`);
+				parsedParams.forEach((p) => docLines.push(`${indent}\t:param ${p.name}: ${stripMarkdown(p.description)}`));
+			}
+			if (parsedReturn?.description) docLines.push(`${indent}\t:returns: ${stripMarkdown(parsedReturn.description)}`);
+			if (func.pythonExamples?.[0]) {
+				docLines.push(`${indent}\t`, `${indent}\tExample::`, `${indent}\t`);
+				func.pythonExamples[0].split('\n').forEach((l) => docLines.push(`${indent}\t\t${l}`));
+			}
+			docLines.push(`${indent}\t"""`, `${indent}\t...`);
+			lines.push(...docLines);
+		} else {
+			lines.push(`${indent}${pySig}`);
+		}
 	});
-
-	let retType = 'None';
-	if (parsedReturn) {
-		retType = parsedReturn.pyType;
-	}
-
-	const asyncPrefix = isAsync ? 'async ' : '';
-	const sigLine = `${indent}${asyncPrefix}def ${func.name}(${paramStrs.join(', ')}) -> ${retType}:`;
-	lines.push(sigLine);
-
-	// Build docstring
-	const docLines = [];
-	docLines.push(`${indent}\t"""${emoji}`);
-
-	if (func.description) {
-		const cleaned = stripMarkdown(func.description);
-		cleaned.split('\n').forEach((l) => docLines.push(`${indent}\t${l}`));
-	}
-
-	if (parsedParams.length > 0) {
-		docLines.push(`${indent}\t`);
-		parsedParams.forEach((p) => {
-			const desc = stripMarkdown(p.description);
-			docLines.push(`${indent}\t:param ${p.name}: ${desc}`);
-		});
-	}
-
-	if (parsedReturn && parsedReturn.description) {
-		docLines.push(`${indent}\t:returns: ${stripMarkdown(parsedReturn.description)}`);
-	}
-
-	if (func.pythonExamples && func.pythonExamples.length > 0) {
-		docLines.push(`${indent}\t`);
-		docLines.push(`${indent}\tExample::`);
-		docLines.push(`${indent}\t`);
-		func.pythonExamples[0].split('\n').forEach((l) => docLines.push(`${indent}\t\t${l}`));
-	}
-
-	docLines.push(`${indent}\t"""`);
-	docLines.push(`${indent}\t...`);
-	lines.push(...docLines);
-
 	return lines.join('\n');
 }
 
-/**
- * Extracts property/method signatures from a class in the base .d.ts content.
- * Returns a map of member name → { isProperty, jsType? (for properties), jsReturnType? (for methods) }
- */
+function generatePyiEntry(func, emoji, indent = '') {
+	const parsedParams = func.params
+		.filter((p) => p.startsWith('@param'))
+		.map(parseJsDocParam)
+		.filter(Boolean);
+	const returnParam = func.params.find((p) => p.startsWith('@return'));
+	const parsedReturn = returnParam ? parseJsDocReturn(returnParam) : null;
+	const isAsync =
+		/^Promise</.test(returnParam?.match(/@returns?\s+\{([^}]+)\}/)?.[1]?.trim() || '') && func.name !== 'Canvas';
+
+	const paramStrs = parsedParams.map((p) =>
+		p.isRest ? `*${p.name}: ${p.pyType}` : p.optional ? `${p.name}: ${p.pyType} = ...` : `${p.name}: ${p.pyType}`
+	);
+	const retType = parsedReturn ? parsedReturn.pyType : 'None';
+
+	const lines = [`${indent}${isAsync ? 'async ' : ''}def ${func.name}(${paramStrs.join(', ')}) -> ${retType}:`];
+	const docLines = [`${indent}\t"""${emoji}`];
+	if (func.description)
+		stripMarkdown(func.description)
+			.split('\n')
+			.forEach((l) => docLines.push(`${indent}\t${l}`));
+	if (parsedParams.length > 0) {
+		docLines.push(`${indent}\t`);
+		parsedParams.forEach((p) => docLines.push(`${indent}\t:param ${p.name}: ${stripMarkdown(p.description)}`));
+	}
+	if (parsedReturn?.description) docLines.push(`${indent}\t:returns: ${stripMarkdown(parsedReturn.description)}`);
+	if (func.pythonExamples?.[0]) {
+		docLines.push(`${indent}\t`, `${indent}\tExample::`, `${indent}\t`);
+		func.pythonExamples[0].split('\n').forEach((l) => docLines.push(`${indent}\t\t${l}`));
+	}
+	docLines.push(`${indent}\t"""`, `${indent}\t...`);
+	lines.push(...docLines);
+	return lines.join('\n');
+}
+
 function extractClassMemberSignatures(className, baseContent) {
 	const lines = baseContent.split('\n');
 	const sigs = {};
@@ -971,14 +922,12 @@ function extractClassMemberSignatures(className, baseContent) {
 		const bare = t.replace(/^static\s+/, '');
 		if (bare.startsWith('constructor')) continue;
 
-		// Method: name(...): returnType;
 		const methodMatch = bare.match(/^([\w\u00A0-\uFFFF]+)\s*\([^)]*\)\s*:\s*(.+?)\s*;?\s*$/);
 		if (methodMatch) {
 			sigs[methodMatch[1]] = { isProperty: false, jsReturnType: methodMatch[2].trim() };
 			continue;
 		}
 
-		// Property: name: type;
 		const propMatch = bare.match(/^([\w\u00A0-\uFFFF]+)\s*:\s*(.+?)\s*;?\s*$/);
 		if (propMatch) {
 			sigs[propMatch[1]] = { isProperty: true, jsType: propMatch[2].trim() };
@@ -988,12 +937,8 @@ function extractClassMemberSignatures(className, baseContent) {
 	return sigs;
 }
 
-/**
- * Generates a Python .pyi stub entry for a class
- */
 function generatePyiClass(cls, emoji, classMemberSigs = {}) {
-	const lines = [];
-	lines.push(`class ${cls.name}:`);
+	const lines = [`class ${cls.name}:`];
 
 	if (cls.description) {
 		lines.push(`\t"""${emoji}`);
@@ -1008,29 +953,23 @@ function generatePyiClass(cls, emoji, classMemberSigs = {}) {
 	if (cls.members && cls.members.length > 0) {
 		for (const member of cls.members) {
 			lines.push('');
-			if (member.name === 'constructor') continue; // skip JS constructors
+			if (member.name === 'constructor') continue;
 			if (cls.name === 'Q5' && ['addLang', 'registerLang'].includes(member.name)) continue;
 
-			// @type tag (explicit override) → property
 			const typeParam = member.params.find((p) => p.startsWith('@type'));
 			if (typeParam) {
 				const tm = typeParam.match(/@type\s+\{([^}]+)\}/);
 				const pyType = tm ? jsTypeToPython(tm[1]) : 'Any';
 				lines.push(`\t${member.name}: ${pyType}`);
-				if (member.description) {
-					lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
-				}
+				if (member.description) lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
 				continue;
 			}
 
-			// Auto-detect property vs method from TypeScript signature
 			const sig = classMemberSigs[member.name];
 			if (sig && sig.isProperty) {
 				const pyType = jsTypeToPython(sig.jsType);
 				lines.push(`\t${member.name}: ${pyType}`);
-				if (member.description) {
-					lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
-				}
+				if (member.description) lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
 				continue;
 			}
 
@@ -1043,13 +982,12 @@ function generatePyiClass(cls, emoji, classMemberSigs = {}) {
 			const paramStrs = parsedParams.map((p) =>
 				p.optional ? `${p.name}: ${p.pyType} = ...` : `${p.name}: ${p.pyType}`
 			);
-			// Use TypeScript signature return type as fallback when @returns is absent
-			let retType = 'None';
-			if (parsedReturn) {
-				retType = parsedReturn.pyType;
-			} else if (sig && sig.jsReturnType) {
-				retType = jsTypeToPython(sig.jsReturnType);
-			}
+			let retType = parsedReturn
+				? parsedReturn.pyType
+				: sig && sig.jsReturnType
+					? jsTypeToPython(sig.jsReturnType)
+					: 'None';
+
 			lines.push(`\tdef ${member.name}(self${paramStrs.length ? ', ' + paramStrs.join(', ') : ''}) -> ${retType}:`);
 			lines.push(`\t\t"""${emoji} ${stripMarkdown(member.description || member.name)}"""`);
 			lines.push('\t\t...');
@@ -1059,21 +997,19 @@ function generatePyiClass(cls, emoji, classMemberSigs = {}) {
 	return lines.join('\n');
 }
 
-/**
- * Builds a Python .pyi stub file from parsed markdown sections
- */
 function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 	const emojiMappings = extractEmojiMappings(baseDtsPath);
+	const baseSignatures = extractBaseSignatures(baseDtsPath);
 	const baseContent = fs.readFileSync(baseDtsPath, 'utf8');
-
-	const output = [];
-
-	output.push('from typing import Any, Callable, Literal');
-	output.push('');
-	output.push('class Image: ...');
-	output.push('');
-
 	const baseLines = baseContent.split('\n');
+
+	const output = [
+		'from __future__ import annotations',
+		'from typing import Any, Callable, Literal, overload',
+		'',
+		'class Image: ...',
+		''
+	];
 
 	for (const sectionName of pyiSectionOrder) {
 		if (!sections[sectionName]) continue;
@@ -1083,14 +1019,12 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 		output.push(`# ${emoji} ${section.sectionName || sectionName}`);
 		output.push('');
 
-		// Section description as a module-level docstring block
 		if (section.sectionDescription) {
-			const cleaned = stripMarkdown(section.sectionDescription);
-			const descLines = cleaned.split('\n');
 			output.push(`"""${emoji}`);
-			descLines.forEach((l) => output.push(l));
-			output.push('"""');
-			output.push('');
+			stripMarkdown(section.sectionDescription)
+				.split('\n')
+				.forEach((l) => output.push(l));
+			output.push('"""', '');
 		}
 
 		for (const func of section.functions) {
@@ -1098,33 +1032,29 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 				const classMemberSigs = extractClassMemberSignatures(func.name, baseContent);
 				output.push(generatePyiClass(func, emoji, classMemberSigs));
 			} else {
-				// Look up the base TypeScript declaration for type hints on constants/vars
 				const baseLine = baseLines.find((l) => l.includes(`const ${func.name}:`) || l.includes(`let ${func.name}:`));
-
 				if (baseLine) {
-					// It's a typed variable or constant — generate annotation + docstring
-					const constMatch = baseLine.match(/\bconst\s+[\w\u00A0-\uFFFF]+:\s*(.+?);/);
-					const letMatch = baseLine.match(/\blet\s+[\w\u00A0-\uFFFF]+:\s*(.+?);/);
-					const tsType = (constMatch || letMatch)?.[1]?.trim();
-					const pyType = tsType ? jsTypeToPython(tsType) : 'Any';
-					output.push(`${func.name}: ${pyType}`);
-					if (func.description || (func.pythonExamples && func.pythonExamples.length > 0)) {
+					const tsType = (baseLine.match(/\b(?:const|let)\s+[\w\u00A0-\uFFFF]+:\s*(.+?);/) || [])[1]?.trim();
+					output.push(`${func.name}: ${jsTypeToPython(tsType)}`);
+					if (func.description || func.pythonExamples?.length > 0) {
 						output.push(`"""${emoji}`);
-						if (func.description) {
-							const cleaned = stripMarkdown(func.description);
-							cleaned.split('\n').forEach((l) => output.push(l));
-						}
-						if (func.pythonExamples && func.pythonExamples.length > 0) {
-							output.push('');
-							output.push('Example::');
-							output.push('');
+						if (func.description)
+							stripMarkdown(func.description)
+								.split('\n')
+								.forEach((l) => output.push(l));
+						if (func.pythonExamples?.[0]) {
+							output.push('', 'Example::', '');
 							func.pythonExamples[0].split('\n').forEach((l) => output.push(`\t${l}`));
 						}
 						output.push('"""');
 					}
 				} else {
-					// It's a function
-					output.push(generatePyiEntry(func, emoji));
+					const sigs = baseSignatures[func.name];
+					if (sigs && sigs.length > 1) {
+						output.push(generatePyiOverloads(func, sigs, emoji));
+					} else {
+						output.push(generatePyiEntry(func, emoji));
+					}
 				}
 			}
 			output.push('');
@@ -1136,9 +1066,7 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 }
 
 function buildLang(lang) {
-	// sanitize to two-letter lowercase code
 	lang = (lang || 'en').toLowerCase().slice(0, 2);
-
 	const rootDir = path.join(__dirname, '..');
 	const defsDir = path.join(__dirname, '..', 'defs');
 	const learnDir = path.join(__dirname, '..', 'lang', lang, 'learn');
@@ -1149,16 +1077,9 @@ function buildLang(lang) {
 		return;
 	}
 
-	// Find all markdown files and parse them once
-	const files = fs.readdirSync(learnDir);
-	let markdownFiles = files.filter((f) => f.endsWith('.md')).map((f) => path.join(learnDir, f));
-
-	// Parse each markdown file once and build a sections map
 	const sections = {};
-	for (const mdFile of markdownFiles) {
-		const parsed = parseMarkdownFile(mdFile);
-		const key = path.basename(mdFile, '.md');
-		sections[key] = parsed;
+	for (const mdFile of fs.readdirSync(learnDir).filter((f) => f.endsWith('.md'))) {
+		sections[path.basename(mdFile, '.md')] = parseMarkdownFile(path.join(learnDir, mdFile));
 	}
 
 	if (!fs.existsSync(baseDtsPath)) {
@@ -1167,26 +1088,13 @@ function buildLang(lang) {
 	}
 
 	console.log(`📘 Building type definitions for language: ${lang}`);
+	const langSuffix = lang === 'en' ? '' : `-${lang}`;
 
-	let langSuffix = lang == 'en' ? '' : `-${lang}`;
+	buildDtsFile({ ...sections }, baseDtsPath, path.join(defsDir, `q5${langSuffix}.d.ts`), true, 'webgpu');
+	if (lang === 'en') fs.renameSync(path.join(defsDir, `q5.d.ts`), path.join(rootDir, `q5.d.ts`));
 
-	// Build q5.d.ts with WebGPU examples
-	// let dir = lang == 'en' ? rootDir : defsDir;
-	let dir = defsDir;
-	let file = path.join(dir, `q5${langSuffix}.d.ts`);
-	buildDtsFile({ ...sections }, baseDtsPath, file, true, 'webgpu');
+	buildDtsFile({ ...sections }, baseDtsPath, path.join(defsDir, `q5-c2d${langSuffix}.d.ts`), true, 'c2d');
 
-	// copy webgpu d.ts to root
-	if (lang === 'en') {
-		const destFile = path.join(rootDir, `q5.d.ts`);
-		fs.renameSync(file, destFile);
-	}
-
-	// Build q5-c2d.d.ts with C2D examples
-	file = path.join(defsDir, `q5-c2d${langSuffix}.d.ts`);
-	buildDtsFile({ ...sections }, baseDtsPath, file, true, 'c2d');
-
-	// Build q5.pyi (en) / q5-es.pyi (es) Python stubs (all sections)
 	const pyiSectionOrder = [
 		'core',
 		'shapes',
@@ -1207,36 +1115,22 @@ function buildLang(lang) {
 		'shaders',
 		'advanced'
 	];
-	// English stays at the repo root (next to q5.d.ts); other languages go in defs/ (next to q5-es.d.ts)
-	const pyiPath = path.join(lang === 'en' ? rootDir : defsDir, `q5${langSuffix}.pyi`);
-	buildPyiFile(sections, baseDtsPath, pyiPath, pyiSectionOrder);
+	buildPyiFile(
+		sections,
+		baseDtsPath,
+		path.join(lang === 'en' ? rootDir : defsDir, `q5${langSuffix}.pyi`),
+		pyiSectionOrder
+	);
 }
 
-/**
- * Main function
- */
 function main() {
-	// support a language code argument (two-letter), default to 'en' & 'es'
-	// usage: node types.js [lang] or node types.js --lang=fr
-	const argv = process.argv.slice(2);
 	let langs = ['en', 'es'];
-
+	const argv = process.argv.slice(2);
 	for (const a of argv) {
-		if (a === '-h' || a === '--help') {
-			console.log('Usage: types.js [lang]  OR  types.js --lang=<two-letter-code>\nDefault: en, es');
-			process.exit(0);
-		}
-		if (a.startsWith('--lang=')) {
-			langs = [a.split('=')[1]];
-		} else if (!a.startsWith('-')) {
-			// positional arg: language code
-			langs = [a];
-		}
+		if (a.startsWith('--lang=')) langs = [a.split('=')[1]];
+		else if (!a.startsWith('-')) langs = [a];
 	}
-
-	for (const lang of langs) {
-		buildLang(lang);
-	}
+	langs.forEach(buildLang);
 }
 
 main();

@@ -1,4 +1,5 @@
-from typing import Any, Callable, Literal
+from __future__ import annotations
+from typing import Any, Callable, Literal, overload
 
 class Image: ...
 
@@ -14,7 +15,7 @@ En estas páginas de "Aprender" puedes experimentar editando los mini ejemplos. 
 ![](https://notbyai.fyi/)
 """
 
-async def Lienzo(ancho: float = ..., alto: float = ..., opciones: dict = ...) -> object:
+async def Lienzo(ancho: float | int = ..., alto: float | int = ..., opciones: dict = ...) -> object:
 	"""⭐
 	Crea un elemento de lienzo, una sección de la pantalla donde tu programa
 	puede dibujar.
@@ -66,7 +67,7 @@ def log(mensaje: Any) -> None:
 
 # 🧑‍🎨 formas
 
-def circulo(x: float, y: float, diámetro: float) -> None:
+def circulo(x: float | int, y: float | int, diámetro: float | int) -> None:
 	"""🧑‍🎨
 	Dibuja un círculo en la posición (x, y) con el diámetro especificado.
 	
@@ -81,7 +82,7 @@ def circulo(x: float, y: float, diámetro: float) -> None:
 	"""
 	...
 
-def elipse(x: float, y: float, ancho: float, alto: float = ...) -> None:
+def elipse(x: float | int, y: float | int, ancho: float | int, alto: float | int = ...) -> None:
 	"""🧑‍🎨
 	Dibuja una elipse.
 	
@@ -97,7 +98,7 @@ def elipse(x: float, y: float, ancho: float, alto: float = ...) -> None:
 	"""
 	...
 
-def rect(x: float, y: float, w: float, h: float = ..., redondeado: float = ...) -> None:
+def rect(x: float | int, y: float | int, w: float | int, h: float | int = ..., redondeado: float | int = ...) -> None:
 	"""🧑‍🎨
 	Dibuja un rectángulo o un rectángulo redondeado.
 	
@@ -118,7 +119,7 @@ def rect(x: float, y: float, w: float, h: float = ..., redondeado: float = ...) 
 	"""
 	...
 
-def cuadrado(x: float, y: float, tamaño: float, redondeado: float = ...) -> None:
+def cuadrado(x: float | int, y: float | int, tamaño: float | int, redondeado: float | int = ...) -> None:
 	"""🧑‍🎨
 	Dibuja un cuadrado o un cuadrado redondeado.
 	
@@ -138,7 +139,7 @@ def cuadrado(x: float, y: float, tamaño: float, redondeado: float = ...) -> Non
 	"""
 	...
 
-def punto(x: float, y: float) -> None:
+def punto(x: float | int, y: float | int) -> None:
 	"""🧑‍🎨
 	Dibuja un punto en el lienzo.
 	
@@ -156,7 +157,7 @@ def punto(x: float, y: float) -> None:
 	"""
 	...
 
-def linea(x1: float, y1: float, x2: float, y2: float) -> None:
+def linea(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> None:
 	"""🧑‍🎨
 	Dibuja una línea en el lienzo.
 	
@@ -173,7 +174,7 @@ def linea(x1: float, y1: float, x2: float, y2: float) -> None:
 	"""
 	...
 
-def capsula(x1: float, y1: float, x2: float, y2: float, r: float) -> None:
+def capsula(x1: float | int, y1: float | int, x2: float | int, y2: float | int, r: float | int) -> None:
 	"""🧑‍🎨
 	Dibuja una cápsula.
 	
@@ -269,7 +270,7 @@ def cargarImagen(url: str) -> Image:
 	"""
 	...
 
-def imagen(img: Image | object, dx: float, dy: float, dw: float = ..., dh: float = ..., sx: float = ..., sy: float = ..., sw: float = ..., sh: float = ...) -> None:
+def imagen(img: Image | object, dx: float | int, dy: float | int, dw: float | int = ..., dh: float | int = ..., sx: float | int = ..., sy: float | int = ..., sw: float | int = ..., sh: float | int = ...) -> None:
 	"""🌆
 	Dibuja una imagen o fotograma de video en el lienzo.
 	
@@ -315,7 +316,7 @@ def modoImagen(modo: str) -> None:
 	"""
 	...
 
-def escalaImagenPorDefecto(escala: float) -> float:
+def escalaImagenPorDefecto(escala: float | int) -> float | int:
 	"""🌆
 	Establece la escala de imagen por defecto, que se aplica a las imágenes cuando
 	se dibujan sin un ancho o alto especificado.
@@ -332,7 +333,7 @@ def escalaImagenPorDefecto(escala: float) -> float:
 	"""
 	...
 
-def redimensionar(w: float, h: float) -> None:
+def redimensionar(w: float | int, h: float | int) -> None:
 	"""🌆
 	Redimensiona la imagen.
 	
@@ -385,7 +386,7 @@ def noSuavizar() -> None:
 	"""
 	...
 
-def teñir(color: str | float) -> None:
+def teñir(color: str | float | int) -> None:
 	"""🌆
 	Aplica un tinte (superposición de color) al dibujo.
 	
@@ -438,7 +439,7 @@ def copiar() -> Image:
 	"""
 	...
 
-def insertado(sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: float, dh: float) -> None:
+def insertado(sx: float | int, sy: float | int, sw: float | int, sh: float | int, dx: float | int, dy: float | int, dw: float | int, dh: float | int) -> None:
 	"""🌆
 	Muestra una región de la imagen en otra región de la imagen.
 	Se puede usar para crear un detalle insertado, también conocido como efecto de lupa.
@@ -463,7 +464,7 @@ def insertado(sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, 
 	"""
 	...
 
-def obtener(x: float, y: float, w: float = ..., h: float = ...) -> Image | list[float]:
+def obtener(x: float | int, y: float | int, w: float | int = ..., h: float | int = ...) -> Image | list[float | int]:
 	"""🌆
 	Recupera una subsección de una imagen o lienzo como una nueva Imagen Q5
 	o el color de un píxel en la imagen o lienzo.
@@ -493,7 +494,7 @@ def obtener(x: float, y: float, w: float = ..., h: float = ...) -> Image | list[
 	"""
 	...
 
-def establecer(x: float, y: float, val: Any) -> None:
+def establecer(x: float | int, y: float | int, val: Any) -> None:
 	"""🌆
 	Establece el color de un píxel en la imagen o lienzo. El modo de color debe ser RGB.
 	
@@ -585,7 +586,7 @@ def actualizarPixeles() -> None:
 	"""
 	...
 
-def filtro(tipo: str, valor: float = ...) -> None:
+def filtro(tipo: str, valor: float | int = ...) -> None:
 	"""🌆
 	Aplica un filtro a la imagen.
 	
@@ -648,7 +649,7 @@ DESENFOCAR: Literal[8]
 Aplica un desenfoque gaussiano a la imagen.
 """
 
-def crearImagen(w: float, h: float, opt: Any = ...) -> Image:
+def crearImagen(w: float | int, h: float | int, opt: Any = ...) -> Image:
 	"""🌆
 	Crea una nueva imagen.
 	
@@ -658,7 +659,7 @@ def crearImagen(w: float, h: float, opt: Any = ...) -> Image:
 	"""
 	...
 
-def crearGraficos(w: float, h: float, opt: dict = ...) -> Q5:
+def crearGraficos(w: float | int, h: float | int, opt: dict = ...) -> Q5:
 	"""🌆
 	Crea un búfer de gráficos.
 	
@@ -674,7 +675,7 @@ def crearGraficos(w: float, h: float, opt: dict = ...) -> Q5:
 
 # 📘 texto
 
-def texto(str: str, x: float, y: float, anchoEnvoltura: float = ..., limiteLineas: float = ...) -> None:
+def texto(str: str, x: float | int, y: float | int, anchoEnvoltura: float | int = ..., limiteLineas: float | int = ...) -> None:
 	"""📘
 	Renderiza texto en el lienzo.
 	
@@ -750,7 +751,7 @@ def fuenteTexto(nombreFuente: str) -> None:
 	"""
 	...
 
-def tamañoTexto(tamaño: float = ...) -> float | None:
+def tamañoTexto(tamaño: float | int = ...) -> float | int | None:
 	"""📘
 	Establece u obtiene el tamaño de fuente actual. Si no se proporciona argumento, devuelve el tamaño de fuente actual.
 	
@@ -767,7 +768,7 @@ def tamañoTexto(tamaño: float = ...) -> float | None:
 	"""
 	...
 
-def interlineado(interlineado: float = ...) -> float | None:
+def interlineado(interlineado: float | int = ...) -> float | int | None:
 	"""📘
 	Establece u obtiene la altura de línea actual. Si no se proporciona argumento, devuelve la altura de línea actual.
 	
@@ -823,7 +824,7 @@ def alineacionTexto(horiz: Literal['left'] | Literal['center'] | Literal['right'
 	"""
 	...
 
-def pesoTexto(peso: float | str) -> None:
+def pesoTexto(peso: float | int | str) -> None:
 	"""📘
 	Establece el peso del texto.
 	
@@ -851,7 +852,7 @@ def pesoTexto(peso: float | str) -> None:
 	"""
 	...
 
-def anchoTexto(str: str) -> float:
+def anchoTexto(str: str) -> float | int:
 	"""📘
 	Calcula y devuelve el ancho de una cadena de texto dada.
 	
@@ -869,7 +870,7 @@ def anchoTexto(str: str) -> float:
 	"""
 	...
 
-def ascensoTexto(str: str) -> float:
+def ascensoTexto(str: str) -> float | int:
 	"""📘
 	Calcula y devuelve el ascenso (la distancia desde la línea base hasta la parte superior del carácter más alto) de la fuente actual.
 	
@@ -887,7 +888,7 @@ def ascensoTexto(str: str) -> float:
 	"""
 	...
 
-def descensoTexto(str: str) -> float:
+def descensoTexto(str: str) -> float | int:
 	"""📘
 	Calcula y devuelve el descenso (la distancia desde la línea base hasta la parte inferior del carácter más bajo) de la fuente actual.
 	
@@ -905,7 +906,7 @@ def descensoTexto(str: str) -> float:
 	"""
 	...
 
-def crearImagenTexto(str: str, anchoEnvoltura: float = ..., limiteLineas: float = ...) -> Image:
+def crearImagenTexto(str: str, anchoEnvoltura: float | int = ..., limiteLineas: float | int = ...) -> Image:
 	"""📘
 	Crea una imagen a partir de una cadena de texto.
 	
@@ -927,7 +928,7 @@ def crearImagenTexto(str: str, anchoEnvoltura: float = ..., limiteLineas: float 
 	"""
 	...
 
-def imagenTexto(img: Image | str, x: float, y: float) -> None:
+def imagenTexto(img: Image | str, x: float | int, y: float | int) -> None:
 	"""📘
 	Renderiza una imagen generada a partir de texto en el lienzo.
 	
@@ -957,7 +958,8 @@ def imagenTexto(img: Image | str, x: float, y: float) -> None:
 	"""
 	...
 
-def nf(n: float, l: float, r: float) -> str:
+@overload
+def nf(n: float | int, l: float | int, r: float | int) -> str: 
 	"""📘
 	Formateador de números, se puede usar para mostrar un número como una cadena con
 	un número especificado de dígitos antes y después del punto decimal,
@@ -977,6 +979,8 @@ def nf(n: float, l: float, r: float) -> str:
 		texto(nf(PI, 4, 5), -90, 10)
 	"""
 	...
+@overload
+def nf(num: float | int, digitos: float | int) -> str: ...
 
 NORMAL: Literal['normal']
 """📘
@@ -1044,7 +1048,7 @@ respondiendo a eventos de entrada dentro de funciones como
 alPresionarRaton y alPresionarTecla.
 """
 
-ratonX: float
+ratonX: float | int
 """🖲
 Posición X actual del ratón.
 
@@ -1056,7 +1060,7 @@ Example::
 		texto(redondear(ratonX), -50, 20)
 """
 
-ratonY: float
+ratonY: float | int
 """🖲
 Posición Y actual del ratón.
 
@@ -1067,12 +1071,12 @@ Example::
 		circulo(0, ratonY, 100)
 """
 
-pRatonX: float
+pRatonX: float | int
 """🖲
 Posición X previa del ratón.
 """
 
-pRatonY: float
+pRatonY: float | int
 """🖲
 Posición Y previa del ratón.
 """
@@ -1337,7 +1341,7 @@ def alMoverToque() -> None:
 	"""
 	...
 
-def cursor(nombre: str, x: float = ..., y: float = ...) -> None:
+def cursor(nombre: str, x: float | int = ..., y: float | int = ...) -> None:
 	"""🖲
 	Establece el cursor a un tipo de cursor CSS o imagen.
 	Si se proporciona una imagen, las coordenadas x e y opcionales pueden
@@ -1388,7 +1392,7 @@ def ruedaRaton() -> None:
 	"""
 	...
 
-movidoX: float
+movidoX: float | int
 """🖲
 Distancia que el ratón ha recorrido desde el último fotograma en la dirección horizontal.
 
@@ -1400,7 +1404,7 @@ Example::
 		if movidoX < 0: texto('<<', 0, 0)
 """
 
-movidoY: float
+movidoY: float | int
 """🖲
 Distancia que el ratón ha recorrido desde el último fotograma en la dirección vertical.
 
@@ -1438,7 +1442,7 @@ def bloqueoPuntero(movimientoNoAjustado: bool) -> None:
 
 # 🎨 color
 
-def color(c0: str | float | Color | list[float], c1: float = ..., c2: float = ..., c3: float = ...) -> Color:
+def color(c0: str | float | int | Color | list[float | int], c1: float | int = ..., c2: float | int = ..., c3: float | int = ...) -> Color:
 	"""🎨
 	Crea un nuevo objeto Color, el cual es útil principalmente para almacenar
 	un color que tu sketch reutilizará o modificará más tarde.
@@ -1677,12 +1681,13 @@ ignorando sus valores alfa."""
 		"""🎨 Produce una representación de cadena de color CSS."""
 		...
 
-	niveles: list[float]
+	niveles: list[float | int]
 	"""🎨 Un array de los componentes del color."""
 
 # 💅 estilos
 
-def relleno(color: Color) -> None:
+@overload
+def relleno(color: str | float | int | Color) -> None: 
 	"""💅
 	Establece el color de relleno. El defecto es blanco.
 	
@@ -1704,8 +1709,11 @@ def relleno(color: Color) -> None:
 		cuadrado(-20, -20, 80)
 	"""
 	...
+@overload
+def relleno(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
 
-def trazo(color: Color) -> None:
+@overload
+def trazo(color: str | float | int | Color) -> None: 
 	"""💅
 	Establece el color del trazo (contorno). El defecto es negro.
 	
@@ -1728,6 +1736,8 @@ def trazo(color: Color) -> None:
 		cuadrado(-20, -20, 80)
 	"""
 	...
+@overload
+def trazo(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
 
 def sinRelleno() -> None:
 	"""💅
@@ -1764,7 +1774,7 @@ def sinTrazo() -> None:
 	"""
 	...
 
-def grosorTrazo(grosor: float) -> None:
+def grosorTrazo(grosor: float | int) -> None:
 	"""💅
 	Establece el tamaño del trazo usado para líneas y el borde alrededor de dibujos.
 	
@@ -1782,7 +1792,7 @@ def grosorTrazo(grosor: float) -> None:
 	"""
 	...
 
-def opacidad(alfa: float) -> None:
+def opacidad(alfa: float | int) -> None:
 	"""💅
 	Establece la opacidad global, que afecta a todas las operaciones de dibujo posteriores, excepto fondo. El defecto es 1, totalmente opaco.
 	
@@ -1828,7 +1838,7 @@ def sinSombra() -> None:
 	"""
 	...
 
-def cajaSombra(offsetX: float, offsetY: float, desenfoque: float) -> None:
+def cajaSombra(offsetX: float | int, offsetY: float | int, desenfoque: float | int) -> None:
 	"""💅
 	Establece el desplazamiento de la sombra y el radio de desenfoque.
 	
@@ -1881,7 +1891,7 @@ def unionTrazo(val: str) -> None:
 	"""
 	...
 
-def borrar(rellenoAlfa: float = ..., trazoAlfa: float = ...) -> None:
+def borrar(rellenoAlfa: float | int = ..., trazoAlfa: float | int = ...) -> None:
 	"""💅
 	Establece el lienzo en modo borrar, donde las formas borrarán lo que está
 	debajo de ellas en lugar de dibujar sobre ello.
@@ -1957,7 +1967,7 @@ def limpiar() -> None:
 	"""
 	...
 
-def enRelleno(x: float, y: float) -> bool:
+def enRelleno(x: float | int, y: float | int) -> bool:
 	"""💅
 	Comprueba si un punto dado está dentro del área de relleno del camino actual.
 	
@@ -1969,7 +1979,7 @@ def enRelleno(x: float, y: float) -> bool:
 	"""
 	...
 
-def enTrazo(x: float, y: float) -> bool:
+def enTrazo(x: float | int, y: float | int) -> bool:
 	"""💅
 	Comprueba si un punto dado está dentro del trazo del camino actual.
 	
@@ -1983,7 +1993,7 @@ def enTrazo(x: float, y: float) -> bool:
 
 # 🦋 transformaciones
 
-def trasladar(x: float, y: float) -> None:
+def trasladar(x: float | int, y: float | int) -> None:
 	"""🦋
 	Traslada el origen del contexto de dibujo.
 	
@@ -2000,7 +2010,7 @@ def trasladar(x: float, y: float) -> None:
 	"""
 	...
 
-def rotar(angulo: float) -> None:
+def rotar(angulo: float | int) -> None:
 	"""🦋
 	Rota el contexto de dibujo.
 	
@@ -2018,7 +2028,7 @@ def rotar(angulo: float) -> None:
 	"""
 	...
 
-def escalar(x: float, y: float = ...) -> None:
+def escalar(x: float | int, y: float | int = ...) -> None:
 	"""🦋
 	Escala el contexto de dibujo.
 	
@@ -2038,7 +2048,7 @@ def escalar(x: float, y: float = ...) -> None:
 	"""
 	...
 
-def cizallarX(angulo: float) -> None:
+def cizallarX(angulo: float | int) -> None:
 	"""🦋
 	Cizalla el contexto de dibujo a lo largo del eje x.
 	
@@ -2055,7 +2065,7 @@ def cizallarX(angulo: float) -> None:
 	"""
 	...
 
-def cizallarY(angulo: float) -> None:
+def cizallarY(angulo: float | int) -> None:
 	"""🦋
 	Cizalla el contexto de dibujo a lo largo del eje y.
 	
@@ -2072,7 +2082,7 @@ def cizallarY(angulo: float) -> None:
 	"""
 	...
 
-def aplicarMatriz(a: float, b: float, c: float, d: float, e: float, f: float) -> None:
+def aplicarMatriz(a: float | int, b: float | int, c: float | int, d: float | int, e: float | int, f: float | int) -> None:
 	"""🦋
 	Aplica una matriz de transformación.
 	
@@ -2189,7 +2199,7 @@ def desapilar() -> None:
 
 # 💻 visualización
 
-def modoVisualizacion(modo: str, calidadRenderizado: str, escala: float) -> None:
+def modoVisualizacion(modo: str, calidadRenderizado: str, escala: float | int) -> None:
 	"""💻
 	Personaliza cómo se presenta tu lienzo.
 	
@@ -2317,7 +2327,7 @@ def lienzo() -> None:
 	"""
 	...
 
-def redimensionarLienzo(w: float, h: float) -> None:
+def redimensionarLienzo(w: float | int, h: float | int) -> None:
 	"""💻
 	Redimensiona el lienzo al ancho y alto especificados.
 	
@@ -2361,7 +2371,7 @@ def pausar() -> None:
 	"""
 	...
 
-def redibujar(n: float = ...) -> None:
+def redibujar(n: float | int = ...) -> None:
 	"""💻
 	Redibuja el lienzo n veces. Si no se proporciona ningún parámetro de entrada,
 	llama a la función de dibujo una vez.
@@ -2400,7 +2410,7 @@ def reanudar() -> None:
 	"""
 	...
 
-def frecuenciaRefresco(hertz: float = ...) -> float:
+def frecuenciaRefresco(hertz: float | int = ...) -> float | int:
 	"""💻
 	Establece la frecuencia de fotogramas objetivo u obtiene una aproximación de la
 	frecuencia de fotogramas actual del sketch.
@@ -2424,7 +2434,7 @@ def frecuenciaRefresco(hertz: float = ...) -> float:
 	"""
 	...
 
-def obtenerTasaFotogramasObjetivo() -> float:
+def obtenerTasaFotogramasObjetivo() -> float | int:
 	"""💻
 	La frecuencia de fotogramas deseada del sketch.
 	:returns: frecuencia de fotogramas objetivo
@@ -2439,7 +2449,7 @@ def obtenerTasaFotogramasObjetivo() -> float:
 	"""
 	...
 
-def obtenerFPS() -> float:
+def obtenerFPS() -> float | int:
 	"""💻
 	Obtiene los FPS actuales, en términos de cuántos fotogramas podrían generarse
 	en un segundo, lo cual puede ser más alto que la frecuencia de fotogramas objetivo.
@@ -2470,7 +2480,7 @@ def postProcesar() -> None:
 	"""
 	...
 
-def densidadPixeles(v: float) -> float:
+def densidadPixeles(v: float | int) -> float | int:
 	"""💻
 	Establece la densidad de píxeles del lienzo.
 	
@@ -2486,7 +2496,7 @@ def densidadPixeles(v: float) -> float:
 	"""
 	...
 
-def densidadVisualizacion() -> float:
+def densidadVisualizacion() -> float | int:
 	"""💻
 	Devuelve la densidad de visualización actual.
 	
@@ -2531,7 +2541,7 @@ def contextoDibujo() -> None:
 
 # 🧮 matemáticas
 
-def aleatorio(bajo: float | list[Any] = ..., alto: float = ...) -> float | Any:
+def aleatorio(bajo: float | int | list[Any] = ..., alto: float | int = ...) -> float | int | Any:
 	"""🧮
 	Genera un valor aleatorio.
 	
@@ -2555,7 +2565,7 @@ def aleatorio(bajo: float | list[Any] = ..., alto: float = ...) -> float | Any:
 	"""
 	...
 
-def flu(cantidad: float) -> float:
+def flu(cantidad: float | int) -> float | int:
 	"""🧮
 	Genera un número aleatorio dentro de un rango simétrico alrededor de cero.
 	
@@ -2573,7 +2583,7 @@ def flu(cantidad: float) -> float:
 	"""
 	...
 
-def ruido(x: float = ..., y: float = ..., z: float = ...) -> float:
+def ruido(x: float | int = ..., y: float | int = ..., z: float | int = ...) -> float | int:
 	"""🧮
 	Genera un valor de ruido basado en las entradas x, y, y z.
 	
@@ -2593,7 +2603,7 @@ def ruido(x: float = ..., y: float = ..., z: float = ...) -> float:
 	"""
 	...
 
-def dist(x1: float, y1: float, x2: float, y2: float) -> float:
+def dist(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> float | int:
 	"""🧮
 	Calcula la distancia entre dos puntos.
 	
@@ -2616,7 +2626,7 @@ def dist(x1: float, y1: float, x2: float, y2: float) -> float:
 	"""
 	...
 
-def mapa(val: float, inicio1: float, fin1: float, inicio2: float, fin2: float) -> float:
+def mapa(val: float | int, inicio1: float | int, fin1: float | int, inicio2: float | int, fin2: float | int) -> float | int:
 	"""🧮
 	Mapea un número de un rango a otro.
 	
@@ -2637,7 +2647,7 @@ def modoAngulo(modo: Literal['degrees'] | Literal['radians']) -> None:
 	"""
 	...
 
-def radianes(grados: float) -> float:
+def radianes(grados: float | int) -> float | int:
 	"""🧮
 	Convierte grados a radianes.
 	
@@ -2646,7 +2656,7 @@ def radianes(grados: float) -> float:
 	"""
 	...
 
-def grados(radianes: float) -> float:
+def grados(radianes: float | int) -> float | int:
 	"""🧮
 	Convierte radianes a grados.
 	
@@ -2655,7 +2665,7 @@ def grados(radianes: float) -> float:
 	"""
 	...
 
-def interpolar(inicio: float, fin: float, cant: float) -> float:
+def interpolar(inicio: float | int, fin: float | int, cant: float | int) -> float | int:
 	"""🧮
 	Calcula un número entre dos números en un incremento específico.
 	
@@ -2666,7 +2676,7 @@ def interpolar(inicio: float, fin: float, cant: float) -> float:
 	"""
 	...
 
-def constreñir(n: float, bajo: float, alto: float) -> float:
+def constreñir(n: float | int, bajo: float | int, alto: float | int) -> float | int:
 	"""🧮
 	Restringe un valor entre un valor mínimo y máximo.
 	
@@ -2677,7 +2687,7 @@ def constreñir(n: float, bajo: float, alto: float) -> float:
 	"""
 	...
 
-def norm(n: float, inicio: float, fin: float) -> float:
+def norm(n: float | int, inicio: float | int, fin: float | int) -> float | int:
 	"""🧮
 	Normaliza un número de otro rango en un valor entre 0 y 1.
 	
@@ -2688,7 +2698,7 @@ def norm(n: float, inicio: float, fin: float) -> float:
 	"""
 	...
 
-def frac(n: float) -> float:
+def frac(n: float | int) -> float | int:
 	"""🧮
 	Calcula la parte fraccionaria de un número.
 	
@@ -2697,7 +2707,7 @@ def frac(n: float) -> float:
 	"""
 	...
 
-def abs(n: float) -> float:
+def abs(n: float | int) -> float | int:
 	"""🧮
 	Calcula el valor absoluto de un número.
 	
@@ -2706,7 +2716,7 @@ def abs(n: float) -> float:
 	"""
 	...
 
-def redondear(n: float, d: float = ...) -> float:
+def redondear(n: float | int, d: float | int = ...) -> float | int:
 	"""🧮
 	Redondea un número.
 	
@@ -2723,7 +2733,7 @@ def redondear(n: float, d: float = ...) -> float:
 	"""
 	...
 
-def techo(n: float) -> float:
+def techo(n: float | int) -> float | int:
 	"""🧮
 	Redondea un número hacia arriba.
 	
@@ -2739,7 +2749,7 @@ def techo(n: float) -> float:
 	"""
 	...
 
-def piso(n: float) -> float:
+def piso(n: float | int) -> float | int:
 	"""🧮
 	Redondea un número hacia abajo.
 	
@@ -2755,7 +2765,7 @@ def piso(n: float) -> float:
 	"""
 	...
 
-def min(*args: float) -> float:
+def min(*args: float | int) -> float | int:
 	"""🧮
 	Devuelve el valor más pequeño en una secuencia de números.
 	
@@ -2770,7 +2780,7 @@ def min(*args: float) -> float:
 	"""
 	...
 
-def max(*args: float) -> float:
+def max(*args: float | int) -> float | int:
 	"""🧮
 	Devuelve el valor más grande en una secuencia de números.
 	
@@ -2785,7 +2795,7 @@ def max(*args: float) -> float:
 	"""
 	...
 
-def pot(base: float, exponente: float) -> float:
+def pot(base: float | int, exponente: float | int) -> float | int:
 	"""🧮
 	Calcula el valor de una base elevada a una potencia.
 	
@@ -2797,7 +2807,7 @@ def pot(base: float, exponente: float) -> float:
 	"""
 	...
 
-def cuad(n: float) -> float:
+def cuad(n: float | int) -> float | int:
 	"""🧮
 	Calcula el cuadrado de un número.
 	
@@ -2806,7 +2816,7 @@ def cuad(n: float) -> float:
 	"""
 	...
 
-def raiz(n: float) -> float:
+def raiz(n: float | int) -> float | int:
 	"""🧮
 	Calcula la raíz cuadrada de un número.
 	
@@ -2815,7 +2825,7 @@ def raiz(n: float) -> float:
 	"""
 	...
 
-def loge(n: float) -> float:
+def loge(n: float | int) -> float | int:
 	"""🧮
 	Calcula el logaritmo natural (base e) de un número.
 	
@@ -2824,7 +2834,7 @@ def loge(n: float) -> float:
 	"""
 	...
 
-def exp(exponente: float) -> float:
+def exp(exponente: float | int) -> float | int:
 	"""🧮
 	Calcula e elevado a la potencia de un número.
 	
@@ -2833,7 +2843,7 @@ def exp(exponente: float) -> float:
 	"""
 	...
 
-def semillaAleatoria(semilla: float) -> None:
+def semillaAleatoria(semilla: float | int) -> None:
 	"""🧮
 	Establece la semilla para el generador de números aleatorios.
 	
@@ -2849,7 +2859,7 @@ def generadorAleatorio(metodo: Any) -> None:
 	"""
 	...
 
-def aleatorioGaussiano(media: float, std: float) -> float:
+def aleatorioGaussiano(media: float | int, std: float | int) -> float | int:
 	"""🧮
 	Genera un número aleatorio siguiendo una distribución Gaussiana (normal).
 	
@@ -2859,7 +2869,7 @@ def aleatorioGaussiano(media: float, std: float) -> float:
 	"""
 	...
 
-def aleatorioExponencial() -> float:
+def aleatorioExponencial() -> float | int:
 	"""🧮
 	Genera un número aleatorio siguiendo una distribución exponencial.
 	:returns: un número aleatorio siguiendo una distribución exponencial
@@ -2877,7 +2887,7 @@ def modoRuido(modo: Literal['perlin'] | Literal['simplex'] | Literal['blocky']) 
 	"""
 	...
 
-def semillaRuido(semilla: float) -> None:
+def semillaRuido(semilla: float | int) -> None:
 	"""🧮
 	Establece el valor de la semilla para la generación de ruido.
 	
@@ -2885,7 +2895,7 @@ def semillaRuido(semilla: float) -> None:
 	"""
 	...
 
-def detalleRuido(lod: float, caida: float) -> None:
+def detalleRuido(lod: float | int, caida: float | int) -> None:
 	"""🧮
 	Establece el nivel de detalle para la generación de ruido.
 	
@@ -2894,32 +2904,31 @@ def detalleRuido(lod: float, caida: float) -> None:
 	"""
 	...
 
-DOS_PI: float
+PI: float | int
 """🧮
 La relación de la circunferencia de un círculo a su diámetro.
 Aproximadamente 3.14159.
 """
 
-DOS_PI: float
+DOS_PI: float | int
 """🧮
 2 * PI.
 Aproximadamente 6.28319.
 """
 
-def TAU() -> None:
-	"""🧮
-	2 * PI.
-	Aproximadamente 6.28319.
-	"""
-	...
+TAU: float | int
+"""🧮
+2 * PI.
+Aproximadamente 6.28319.
+"""
 
-MEDIO_PI: float
+MEDIO_PI: float | int
 """🧮
 Mitad de PI.
 Aproximadamente 1.5708.
 """
 
-CUARTO_PI: float
+CUARTO_PI: float | int
 """🧮
 Un cuarto de PI.
 Aproximadamente 0.7854.
@@ -3008,11 +3017,11 @@ class Sonido:
 	"""
 
 
-	volumen: float
+	volumen: float | int
 	"""🔊 Establece el volumen del sonido a un valor entre
 0 (silencio) y 1 (volumen completo)."""
 
-	pan: float
+	pan: float | int
 	"""🔊 Establece la posición estéreo del sonido entre -1 (izquierda) y 1 (derecha)."""
 
 	bucle: bool
@@ -3302,7 +3311,7 @@ def crearSeleccion(placeholder: str = ...) -> None:
 	"""
 	...
 
-def crearDeslizador(min: float, max: float, valor: float = ..., paso: float = ...) -> None:
+def crearDeslizador(min: float | int, max: float | int, valor: float | int = ..., paso: float | int = ...) -> None:
 	"""📑
 	Crea un elemento deslizador (slider).
 	
@@ -3499,7 +3508,8 @@ async def cargar(*urls: str) -> object:
 	"""
 	...
 
-def guardar(datos: dict = ..., nombreArchivo: str = ...) -> None:
+@overload
+def guardar() -> None: 
 	"""🛠
 	Guarda datos en un archivo.
 	
@@ -3521,6 +3531,8 @@ def guardar(datos: dict = ..., nombreArchivo: str = ...) -> None:
 			guardar('circle.png')
 	"""
 	...
+@overload
+def guardar(datos: dict = ..., nombreArchivo: str = ...) -> None: ...
 
 def cargarTexto(url: str) -> dict:
 	"""🛠
@@ -3592,7 +3604,8 @@ def deshabilitarPrecarga() -> None:
 	"""
 	...
 
-def nf(num: float, digitos: float) -> str:
+@overload
+def nf(n: float | int, l: float | int, r: float | int) -> str: 
 	"""🛠
 	nf es la abreviatura de formato de número. Formatea un número
 	a una cadena con un número especificado de dígitos.
@@ -3610,6 +3623,8 @@ def nf(num: float, digitos: float) -> str:
 		texto(nf(PI, 4, 5), -90, 10)
 	"""
 	...
+@overload
+def nf(num: float | int, digitos: float | int) -> str: ...
 
 def barajar(arr: list[Any], modificar: bool = ...) -> list[Any]:
 	"""🛠
@@ -3653,35 +3668,35 @@ def limpiarAlmacenamiento() -> None:
 	"""
 	...
 
-def año() -> float:
+def año() -> float | int:
 	"""🛠
 	Devuelve el año actual.
 	:returns: año actual
 	"""
 	...
 
-def dia() -> float:
+def dia() -> float | int:
 	"""🛠
 	Devuelve el día actual del mes.
 	:returns: día actual
 	"""
 	...
 
-def hora() -> float:
+def hora() -> float | int:
 	"""🛠
 	Devuelve la hora actual.
 	:returns: hora actual
 	"""
 	...
 
-def minuto() -> float:
+def minuto() -> float | int:
 	"""🛠
 	Devuelve el minuto actual.
 	:returns: minuto actual
 	"""
 	...
 
-def segundo() -> float:
+def segundo() -> float | int:
 	"""🛠
 	Devuelve el segundo actual.
 	:returns: segundo actual
@@ -3690,7 +3705,7 @@ def segundo() -> float:
 
 # ↗ vector
 
-def crearVector(x: float = ..., y: float = ..., z: float = ..., w: float = ...) -> Vector:
+def crearVector(x: float | int = ..., y: float | int = ..., z: float | int = ..., w: float | int = ...) -> Vector:
 	"""↗
 	Crea un nuevo objeto Vector.
 	
@@ -3716,20 +3731,20 @@ class Vector:
 	"""
 
 
-	x: float
+	x: float | int
 	"""↗ El componente x del vector."""
 
-	y: float
+	y: float | int
 	"""↗ El componente y del vector."""
 
-	z: float
+	z: float | int
 	"""↗ El componente z del vector."""
 
 	def w(self) -> None:
 		"""↗ El componente w del vector."""
 		...
 
-	def set(self, x: float = ..., y: float = ..., z: float = ..., w: float = ...) -> Vector:
+	def set(self, x: float | int = ..., y: float | int = ..., z: float | int = ..., w: float | int = ...) -> Vector:
 		"""↗ Establece los componentes x, y, y z del vector."""
 		...
 
@@ -3737,31 +3752,31 @@ class Vector:
 		"""↗ Devuelve una copia del vector."""
 		...
 
-	def add(self, x: float | Vector, y: float = ..., z: float = ...) -> Vector:
+	def add(self, x: float | int | Vector, y: float | int = ..., z: float | int = ...) -> Vector:
 		"""↗ Suma x, y, y z componentes a un vector, suma un vector a otro, o suma dos vectores independientes."""
 		...
 
-	def sub(self, x: float | Vector, y: float = ..., z: float = ...) -> Vector:
+	def sub(self, x: float | int | Vector, y: float | int = ..., z: float | int = ...) -> Vector:
 		"""↗ Resta x, y, y z componentes de un vector, resta un vector de otro, o resta dos vectores independientes."""
 		...
 
-	def mult(self, n: float) -> Vector:
+	def mult(self, n: float | int) -> Vector:
 		"""↗ Multiplica el vector por un escalar."""
 		...
 
-	def div(self, n: float) -> Vector:
+	def div(self, n: float | int) -> Vector:
 		"""↗ Divide el vector por un escalar."""
 		...
 
-	def mag(self) -> float:
+	def mag(self) -> float | int:
 		"""↗ Calcula la magnitud (longitud) del vector y devuelve el resultado como un flotante (esto es simplemente la ecuación sqrt(x*x + y*y + z*z))."""
 		...
 
-	def magSq(self) -> float:
+	def magSq(self) -> float | int:
 		"""↗ Calcula la magnitud (longitud) del vector al cuadrado y devuelve el resultado como un flotante (esto es simplemente la ecuación x*x + y*y + z*z)."""
 		...
 
-	def dot(self, v: Vector) -> float:
+	def dot(self, v: Vector) -> float | int:
 		"""↗ Calcula el producto punto de dos vectores."""
 		...
 
@@ -3769,7 +3784,7 @@ class Vector:
 		"""↗ Calcula el producto cruz de dos vectores."""
 		...
 
-	def dist(self, v: Vector) -> float:
+	def dist(self, v: Vector) -> float | int:
 		"""↗ Calcula la distancia euclidiana entre dos puntos (considerando un punto como un objeto vector)."""
 		...
 
@@ -3777,27 +3792,27 @@ class Vector:
 		"""↗ Normaliza el vector a longitud 1 (hace que sea un vector unitario)."""
 		...
 
-	def limit(self, max: float) -> Vector:
+	def limit(self, max: float | int) -> Vector:
 		"""↗ Limita la magnitud de este vector al valor usado para el parámetro max."""
 		...
 
-	def setMag(self, len: float) -> Vector:
+	def setMag(self, len: float | int) -> Vector:
 		"""↗ Establece la magnitud de este vector al valor usado para el parámetro len."""
 		...
 
-	def heading(self) -> float:
+	def heading(self) -> float | int:
 		"""↗ Calcula el ángulo de rotación para este vector (solo vectores 2D)."""
 		...
 
-	def rotate(self, ángulo: float) -> Vector:
+	def rotate(self, ángulo: float | int) -> Vector:
 		"""↗ Rota el vector por un ángulo (solo vectores 2D), la magnitud permanece igual."""
 		...
 
-	def angleBetween(self, v: Vector) -> float:
+	def angleBetween(self, v: Vector) -> float | int:
 		"""↗ Calcula y devuelve el ángulo entre dos vectores."""
 		...
 
-	def lerp(self, v: Vector, amt: float) -> Vector:
+	def lerp(self, v: Vector, amt: float | int) -> Vector:
 		"""↗ Interpola linealmente el vector a otro vector."""
 		...
 
@@ -3805,7 +3820,7 @@ class Vector:
 		"""↗ Refleja el vector entrante sobre una normal al muro."""
 		...
 
-	def array(self) -> list[float]:
+	def array(self) -> list[float | int]:
 		"""↗ Devuelve una representación de este vector como un array de flotantes."""
 		...
 
@@ -3813,7 +3828,7 @@ class Vector:
 		"""↗ Comprueba si los componentes x, y, y z del vector son iguales a los componentes x, y, y z de otro vector."""
 		...
 
-	def fromAngle(self, ángulo: float, longitud: float = ...) -> Vector:
+	def fromAngle(self, ángulo: float | int, longitud: float | int = ...) -> Vector:
 		"""↗ Hace un nuevo vector 2D desde un ángulo de longitud 1."""
 		...
 
@@ -3827,7 +3842,7 @@ class Vector:
 
 # 🖌 modelado
 
-def arco(x: float, y: float, w: float, h: float, inicio: float, fin: float, modo: float = ...) -> None:
+def arco(x: float | int, y: float | int, w: float | int, h: float | int, inicio: float | int, fin: float | int, modo: float | int = ...) -> None:
 	"""🖌
 	Dibuja un arco, que es una sección de una elipse.
 	
@@ -3865,7 +3880,7 @@ def curva() -> None:
 	"""
 	...
 
-def detalleCurva(val: float) -> None:
+def detalleCurva(val: float | int) -> None:
 	"""🖌
 	Establece la cantidad de segmentos de línea recta usados para hacer una curva.
 	
@@ -3897,7 +3912,7 @@ def terminarForma() -> None:
 	"""
 	...
 
-def vertice(x: float, y: float) -> None:
+def vertice(x: float | int, y: float | int) -> None:
 	"""🖌
 	Especifica un vértice en una forma.
 	
@@ -3922,7 +3937,7 @@ def vertice(x: float, y: float) -> None:
 	"""
 	...
 
-def verticeBezier(cp1x: float, cp1y: float, cp2x: float, cp2y: float, x: float, y: float) -> None:
+def verticeBezier(cp1x: float | int, cp1y: float | int, cp2x: float | int, cp2y: float | int, x: float | int, y: float | int) -> None:
 	"""🖌
 	Especifica un vértice Bezier en una forma.
 	
@@ -3935,7 +3950,7 @@ def verticeBezier(cp1x: float, cp1y: float, cp2x: float, cp2y: float, x: float, 
 	"""
 	...
 
-def verticeCuadratico(cp1x: float, cp1y: float, x: float, y: float) -> None:
+def verticeCuadratico(cp1x: float | int, cp1y: float | int, x: float | int, y: float | int) -> None:
 	"""🖌
 	Especifica un vértice Bezier cuadrático en una forma.
 	
@@ -3946,7 +3961,7 @@ def verticeCuadratico(cp1x: float, cp1y: float, x: float, y: float) -> None:
 	"""
 	...
 
-def bezier(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
+def bezier(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
 	"""🖌
 	Dibuja una curva Bezier.
 	
@@ -3961,7 +3976,7 @@ def bezier(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4:
 	"""
 	...
 
-def triangulo(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> None:
+def triangulo(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int) -> None:
 	"""🖌
 	Dibuja un triángulo.
 	
@@ -3974,7 +3989,7 @@ def triangulo(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) 
 	"""
 	...
 
-def quad(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
+def quad(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
 	"""🖌
 	Dibuja un cuadrilátero.
 	
@@ -4032,7 +4047,7 @@ def crearShader(codigo: str, tipo: str = ..., datos: list[float] = ...) -> Any:
 	
 		Lienzo(200)
 		
-		wobble = crearShader("""
+		wobble = crearShader('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
@@ -4044,7 +4059,7 @@ def crearShader(codigo: str, tipo: str = ..., datos: list[float] = ...) -> Any:
 			f.position = vert;
 			f.color = vec4f(1, 0, 0, 1);
 			return f;
-		}""")
+		}''')
 		
 		def dibujar():
 			limpiar()
@@ -4053,7 +4068,7 @@ def crearShader(codigo: str, tipo: str = ..., datos: list[float] = ...) -> Any:
 	"""
 	...
 
-def plano(x: float, y: float, w: float, h: float = ...) -> None:
+def plano(x: float | int, y: float | int, w: float | int, h: float | int = ...) -> None:
 	"""⚡
 	Un plano es un rectángulo centrado sin trazo.
 	
@@ -4085,12 +4100,12 @@ def reiniciarShader() -> None:
 	
 		Lienzo(200)
 		
-		stripes = crearShader("""
+		stripes = crearShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let g = cos((q.mouseY + f.position.y) * 0.05);
 			return vec4(1, g, 0, 1);
-		}""")
+		}''')
 		
 		def dibujar():
 			shader(stripes)
@@ -4147,14 +4162,14 @@ def crearShaderFotograma() -> None:
 		grosorTrazo(8)
 		terminacionTrazo(PROJECT)
 		
-		boxy = crearShaderFotograma("""
+		boxy = crearShaderFotograma('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let x = sin(f.texCoord.y * 4 + q.time * 0.002);
 			let y = cos(f.texCoord.x * 4 + q.time * 0.002);
 			let uv = f.texCoord + vec2f(x, y);
 			return textureSample(tex, samp, uv);
-		}""")
+		}''')
 		
 		def dibujar():
 			linea(ratonX, ratonY, pRatonX, pRatonY)
@@ -4179,13 +4194,13 @@ def crearShaderImagen(codigo: str) -> Any:
 		
 		logo = cargarImagen('/q5js_logo.avif')
 		
-		grate = crearShaderImagen("""
+		grate = crearShaderImagen('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			var texColor = textureSample(tex, samp, f.texCoord);
 			texColor.b += (q.mouseX + f.position.x) % 20 / 10;
 			return texColor;
-		}""")
+		}''')
 		
 		def dibujar():
 			fondo(0.7)
@@ -4213,7 +4228,7 @@ def crearShaderVideo(codigo: str) -> Any:
 		vid = crearVideo('/assets/apollo4.mp4')
 		vid.hide()
 		
-		flipper = crearShaderVideo("""
+		flipper = crearShaderVideo('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
@@ -4234,7 +4249,7 @@ def crearShaderVideo(codigo: str) -> Any:
 			texColor.r = 0;
 			texColor.b *= 2;
 			return texColor;
-		}""")
+		}''')
 		
 		def dibujar():
 			limpiar()
@@ -4259,7 +4274,7 @@ def crearShaderTexto(codigo: str) -> Any:
 		Lienzo(200)
 		alineaciónTexto(CENTER, CENTER)
 		
-		spin = crearShaderTexto("""
+		spin = crearShaderTexto('''
 		@vertex
 		fn vertexMain(v : VertexParams) -> FragParams {
 			let char = textChars[v.instanceIndex];
@@ -4280,7 +4295,7 @@ def crearShaderTexto(codigo: str) -> Any:
 			f.strokeWeight = text.strokeWeight;
 			f.edge = text.edge;
 			return f;
-		}""")
+		}''')
 		
 		def dibujar():
 			limpiar()
@@ -4322,39 +4337,39 @@ class Q5:
 lienzos recién creados y gráficos internos. Estas opciones son sobrescritas por
 cualquier opción por lienzo que pases a crearLienzo."""
 
-	MAX_COLORES: float
+	MAX_COLORES: float | int
 	"""⚙ El número máximo de colores de q5
 (creados mediante llamadas a color, fondo, relleno, trazo y teñir)
 que se pueden almacenar por fotograma con el renderizador WebGPU."""
 
-	MAX_RECTANGULOS: float
+	MAX_RECTANGULOS: float | int
 	"""⚙ El número máximo de rectángulos
 (llamadas a rect, cuadrado y cápsula)
 que se pueden dibujar por fotograma con el renderizador WebGPU."""
 
-	MAX_ELIPSES: float
+	MAX_ELIPSES: float | int
 	"""⚙ El número máximo de elipses
 (llamadas a elipse, círculo y arco)
 que se pueden dibujar por fotograma con el renderizador WebGPU."""
 
-	MAX_CARACTERES: float
+	MAX_CARACTERES: float | int
 	"""⚙ El número máximo de caracteres de texto
 que se pueden dibujar por fotograma con el renderizador WebGPU."""
 
-	MAX_TEXTOS: float
+	MAX_TEXTOS: float | int
 	"""⚙ El número máximo de llamadas independientes a texto
 que se pueden dibujar por fotograma con el renderizador WebGPU."""
 
-	MAX_TRANSFORMACIONES: float
+	MAX_TRANSFORMACIONES: float | int
 	"""⚙ El número máximo de matrices de transformación
 que se pueden usar por fotograma con el renderizador WebGPU. De forma predeterminada, se establece para usar todo el límite de 128 MB de maxStorageBufferBindingSize.
 https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits"""
 
-	MAX_IMAGENES: float
+	MAX_IMAGENES: float | int
 	"""⚙ El número máximo de imágenes (llamadas a imagen e imagenTexto)
 que se pueden dibujar por fotograma con el renderizador WebGPU."""
 
-	MAX_VERTICES_FORMAS: float
+	MAX_VERTICES_FORMAS: float | int
 	"""⚙ El número máximo de vértices en las formas
 (creados mediante llamadas a terminarForma,
 triángulo, quad, curva y bezier)

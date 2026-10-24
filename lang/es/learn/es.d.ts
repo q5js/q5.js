@@ -39,17 +39,7 @@ declare global {
 
 	function cargarImagen(url: string): Q5.Imagen & PromiseLike<Q5.Imagen>;
 
-	function imagen(
-		img: Q5.Imagen | HTMLVideoElement,
-		dx: number,
-		dy: number,
-		dw?: number,
-		dh?: number,
-		sx?: number,
-		sy?: number,
-		sw?: number,
-		sh?: number
-	): void;
+	function imagen( img: Q5.Imagen | HTMLVideoElement, dx: number, dy: number, dw?: number, dh?: number, sx?: number, sy?: number, sw?: number, sh?: number): void;
 
 	function modoImagen(modo: string): void;
 
@@ -71,16 +61,7 @@ declare global {
 
 	function copiar(): Q5.Imagen;
 
-	function insertado(
-		sx: number,
-		sy: number,
-		sw: number,
-		sh: number,
-		dx: number,
-		dy: number,
-		dw: number,
-		dh: number
-	): void;
+	function insertado(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
 
 	function obtener(x: number, y: number, w?: number, h?: number): Q5.Imagen | number[];
 
@@ -140,7 +121,7 @@ declare global {
 
 	function crearImagenTexto(str: string, anchoEnvoltura: number, limiteLineas: number): Q5.Imagen;
 
-	function imagenTexto(img: Q5.Imagen | String, x: number, y: number): void;
+	function imagenTexto(img: Q5.Imagen | string, x: number, y: number): void;
 
 	function nf(n: number, l: number, r: number): string;
 
@@ -236,7 +217,7 @@ declare global {
 
 	const DISPLAY_P3: 'display-p3';
 
-	function fondo(relleno: Color | Q5.Imagen): void;
+	function fondo(relleno: string | number | Color | Q5.Imagen): void;
 
 	class Color {
 		constructor(c0: number, c1: number, c2: number, c3: number);
@@ -252,9 +233,13 @@ declare global {
 
 	// 💅 styles
 
-	function relleno(color: Color): void;
+	function relleno(color: string | number | Color): void;
 
-	function trazo(color: Color): void;
+	function relleno(c0: number, c1: number, c2: number, c3: number): void;
+
+	function trazo(color: string | number | Color): void;
+
+	function trazo(c0: number, c1: number, c2: number, c3: number): void;
 
 	function sinRelleno(): void;
 
@@ -264,7 +249,7 @@ declare global {
 
 	function opacidad(alfa: number): void;
 
-	function sombra(color: string | Color): void;
+	function sombra(color: string | number | Color): void;
 
 	function sinSombra(): void;
 
@@ -432,7 +417,11 @@ declare global {
 
 	function detalleRuido(lod: number, caida: number): void;
 
+	const PI: number;
+
 	const DOS_PI: number;
+
+	const TAU: number;
 
 	const MEDIO_PI: number;
 

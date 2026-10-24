@@ -68,7 +68,7 @@ q5.dibujar = function () {
 ```py
 Lienzo(200)
 
-wobble = crearShader("""
+wobble = crearShader('''
 @vertex
 fn vertexMain(v: VertexParams) -> FragParams {
 	var vert = transformVertex(v.pos, v.matrixIndex);
@@ -80,7 +80,7 @@ fn vertexMain(v: VertexParams) -> FragParams {
 	f.position = vert;
 	f.color = vec4f(1, 0, 0, 1);
 	return f;
-}""")
+}''')
 
 def dibujar():
 	limpiar()
@@ -91,12 +91,12 @@ def dibujar():
 ```py
 Lienzo(200)
 
-stripes = crearShader("""
+stripes = crearShader('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let r = cos((q.mouseY + f.position.y) * 0.2);
 	return vec4(r, 0.0, 1, 1);
-}""")
+}''')
 
 def dibujar():
 	shader(stripes)
@@ -166,12 +166,12 @@ q5.dibujar = function () {
 ```py
 Lienzo(200)
 
-stripes = crearShader("""
+stripes = crearShader('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let g = cos((q.mouseY + f.position.y) * 0.05);
 	return vec4(1, g, 0, 1);
-}""")
+}''')
 
 def dibujar():
 	shader(stripes)
@@ -241,14 +241,14 @@ trazo(1)
 grosorTrazo(8)
 terminacionTrazo(PROJECT)
 
-boxy = crearShaderFotograma("""
+boxy = crearShaderFotograma('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let x = sin(f.texCoord.y * 4 + q.time * 0.002);
 	let y = cos(f.texCoord.x * 4 + q.time * 0.002);
 	let uv = f.texCoord + vec2f(x, y);
 	return textureSample(tex, samp, uv);
-}""")
+}''')
 
 def dibujar():
 	linea(ratonX, ratonY, pRatonX, pRatonY)
@@ -299,13 +299,13 @@ modoImagen(CENTER)
 
 logo = cargarImagen('/q5js_logo.avif')
 
-grate = crearShaderImagen("""
+grate = crearShaderImagen('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	var texColor = textureSample(tex, samp, f.texCoord);
 	texColor.b += (q.mouseX + f.position.x) % 20 / 10;
 	return texColor;
-}""")
+}''')
 
 def dibujar():
 	fondo(0.7)
@@ -374,7 +374,7 @@ Lienzo(200, 600)
 vid = crearVideo('/assets/apollo4.mp4')
 vid.hide()
 
-flipper = crearShaderVideo("""
+flipper = crearShaderVideo('''
 @vertex
 fn vertexMain(v: VertexParams) -> FragParams {
 	var vert = transformVertex(v.pos, v.matrixIndex);
@@ -395,7 +395,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	texColor.r = 0;
 	texColor.b *= 2;
 	return texColor;
-}""")
+}''')
 
 def dibujar():
 	limpiar()
@@ -460,7 +460,7 @@ q5.dibujar = function () {
 Lienzo(200)
 alineaciónTexto(CENTER, CENTER)
 
-spin = crearShaderTexto("""
+spin = crearShaderTexto('''
 @vertex
 fn vertexMain(v : VertexParams) -> FragParams {
 	let char = textChars[v.instanceIndex];
@@ -481,7 +481,7 @@ fn vertexMain(v : VertexParams) -> FragParams {
 	f.strokeWeight = text.strokeWeight;
 	f.edge = text.edge;
 	return f;
-}""")
+}''')
 
 def dibujar():
 	limpiar()

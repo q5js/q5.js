@@ -69,7 +69,7 @@ q5.draw = function () {
 ```py
 Canvas(200)
 
-wobble = createShader("""
+wobble = createShader('''
 @vertex
 fn vertexMain(v: VertexParams) -> FragParams {
 	var vert = transformVertex(v.pos, v.matrixIndex);
@@ -81,7 +81,7 @@ fn vertexMain(v: VertexParams) -> FragParams {
 	f.position = vert;
 	f.color = vec4f(1, 0, 0, 1);
 	return f;
-}""")
+}''')
 
 def draw():
 	clear()
@@ -92,12 +92,12 @@ def draw():
 ```py
 Canvas(200)
 
-stripes = createShader("""
+stripes = createShader('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let r = cos((q.mouseY + f.position.y) * 0.2);
 	return vec4(r, 0.0, 1, 1);
-}""")
+}''')
 
 def draw():
 	shader(stripes)
@@ -167,12 +167,12 @@ q5.draw = function () {
 ```py
 Canvas(200)
 
-stripes = createShader("""
+stripes = createShader('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let g = cos((q.mouseY + f.position.y) * 0.05);
 	return vec4(1, g, 0, 1);
-}""")
+}''')
 
 def draw():
 	shader(stripes)
@@ -240,14 +240,14 @@ stroke(1)
 strokeWeight(8)
 strokeCap(PROJECT)
 
-boxy = createFrameShader("""
+boxy = createFrameShader('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	let x = sin(f.texCoord.y * 4 + q.time * 0.002);
 	let y = cos(f.texCoord.x * 4 + q.time * 0.002);
 	let uv = f.texCoord + vec2f(x, y);
 	return textureSample(tex, samp, uv);
-}""")
+}''')
 
 def draw():
 	line(mouseX, mouseY, pmouseX, pmouseY)
@@ -298,13 +298,13 @@ imageMode(CENTER)
 
 logo = loadImage('/q5js_logo.avif')
 
-grate = createImageShader("""
+grate = createImageShader('''
 @fragment
 fn fragMain(f: FragParams) -> @location(0) vec4f {
 	var texColor = textureSample(tex, samp, f.texCoord);
 	texColor.b += (q.mouseX + f.position.x) % 20 / 10;
 	return texColor;
-}""")
+}''')
 
 def draw():
 	background(0.7)
@@ -373,7 +373,7 @@ Canvas(200, 600)
 vid = createVideo('/assets/apollo4.mp4')
 vid.hide()
 
-flipper = createVideoShader("""
+flipper = createVideoShader('''
 @vertex
 fn vertexMain(v: VertexParams) -> FragParams {
 	var vert = transformVertex(v.pos, v.matrixIndex);
@@ -394,7 +394,7 @@ fn fragMain(f: FragParams) -> @location(0) vec4f {
 	texColor.r = 0;
 	texColor.b *= 2;
 	return texColor;
-}""")
+}''')
 
 def draw():
 	clear()
@@ -459,7 +459,7 @@ q5.draw = function () {
 Canvas(200)
 textAlign(CENTER, CENTER)
 
-spin = createTextShader("""
+spin = createTextShader('''
 @vertex
 fn vertexMain(v : VertexParams) -> FragParams {
 	let char = textChars[v.instanceIndex];
@@ -480,7 +480,7 @@ fn vertexMain(v : VertexParams) -> FragParams {
 	f.strokeWeight = text.strokeWeight;
 	f.edge = text.edge;
 	return f;
-}""")
+}''')
 
 def draw():
 	clear()

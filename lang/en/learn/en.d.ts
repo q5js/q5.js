@@ -39,17 +39,7 @@ declare global {
 
 	function loadImage(url: string): Q5.Image & PromiseLike<Q5.Image>;
 
-	function image(
-		img: Q5.Image | HTMLVideoElement,
-		dx: number,
-		dy: number,
-		dw?: number,
-		dh?: number,
-		sx?: number,
-		sy?: number,
-		sw?: number,
-		sh?: number
-	): void;
+	function image(img: Q5.Image | HTMLVideoElement, dx: number, dy: number, dw?: number, dh?: number, sx?: number, sy?: number, sw?: number, sh?: number): void;
 
 	function imageMode(mode: string): void;
 
@@ -131,7 +121,7 @@ declare global {
 
 	function createTextImage(str: string, wrapWidth: number, lineLimit: number): Q5.Image;
 
-	function textImage(img: Q5.Image | String, x: number, y: number): void;
+	function textImage(img: Q5.Image | string, x: number, y: number): void;
 
 	function textToPoints(str: string, x?: number, y?: number, sampleRate?: number, density?: number): [];
 
@@ -231,7 +221,7 @@ declare global {
 
 	const DISPLAY_P3: 'display-p3';
 
-	function background(filler: string | Color | Q5.Image): void;
+	function background(filler: string | number | Color | Q5.Image): void;
 
 	function background(c0: number, c1: number, c2: number, c3: number): void;
 
@@ -249,11 +239,11 @@ declare global {
 
 	// 💅 styles
 
-	function fill(color: string | Color): void;
+	function fill(color: string | number | Color): void;
 
 	function fill(c0: number, c1: number, c2: number, c3: number): void;
 
-	function stroke(color: string | Color): void;
+	function stroke(color: string | number | Color): void;
 
 	function stroke(c0: number, c1: number, c2: number, c3: number): void;
 
@@ -265,7 +255,9 @@ declare global {
 
 	function opacity(alpha: number): void;
 
-	function shadow(color: string | Color): void;
+	function shadow(color: string | number | Color): void;
+
+	function shadow(c0: number, c1: number, c2: number, c3: number): void;
 
 	function noShadow(): void;
 
