@@ -207,7 +207,7 @@ declare global {
 
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
 
-	function colorMode(mode: 'rgb' | 'oklch', format: 1 | 255, gamut: 'srgb' | 'display-p3'): void;
+	function colorMode(mode: 'rgb' | 'oklch', format?: 1 | 255, gamut?: 'srgb' | 'display-p3'): void;
 
 	const RGB: 'rgb';
 
@@ -223,7 +223,7 @@ declare global {
 
 	function background(filler: string | number | Color | Q5.Image): void;
 
-	function background(c0: number, c1: number, c2: number, c3: number): void;
+	function background(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	class Color {
 		constructor(c0: number, c1: number, c2: number, c3: number);
@@ -241,11 +241,11 @@ declare global {
 
 	function fill(color: string | number | Color): void;
 
-	function fill(c0: number, c1: number, c2: number, c3: number): void;
+	function fill(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	function stroke(color: string | number | Color): void;
 
-	function stroke(c0: number, c1: number, c2: number, c3: number): void;
+	function stroke(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	function noFill(): void;
 
@@ -257,11 +257,11 @@ declare global {
 
 	function shadow(color: string | number | Color): void;
 
-	function shadow(c0: number, c1: number, c2: number, c3: number): void;
+	function shadow(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	function noShadow(): void;
 
-	function shadowBox(offsetX: number, offsetY: number, blur: number): void;
+	function shadowBox(offsetX: number, offsetY: number, blur?: number): void;
 
 	function blendMode(val: string): void;
 
@@ -311,7 +311,7 @@ declare global {
 
 	// 💻 display
 
-	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
+	function displayMode(mode: string, renderQuality?: string, scale?: string | number): void;
 
 	const MAXED: 'maxed';
 
@@ -633,7 +633,7 @@ declare global {
 
 	function beginShape(): void;
 
-	function endShape(): void;
+	function endShape(close?: boolean): void;
 
 	function beginContour(): void;
 

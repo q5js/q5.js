@@ -1,7 +1,7 @@
 /**
  * q5/lang/types.js
  *
- * AI was used to generate this entire script.
+ * AI was used to generate this script.
  */
 
 const fs = require('fs');
@@ -697,13 +697,106 @@ function buildDtsFile(sections, baseDtsPath, outputPath, includeExamples = true,
 }
 
 /**
- * Converts a JSDoc type string to a Python type annotation
+ * Python keywords can't be used as parameter names in a stub file
+ */
+const PY_KEYWORDS = new Set([
+	'False',
+	'None',
+	'True',
+	'and',
+	'as',
+	'assert',
+	'async',
+	'await',
+	'break',
+	'class',
+	'continue',
+	'def',
+	'del',
+	'elif',
+	'else',
+	'except',
+	'finally',
+	'for',
+	'from',
+	'global',
+	'if',
+	'import',
+	'in',
+	'is',
+	'lambda',
+	'nonlocal',
+	'not',
+	'or',
+	'pass',
+	'raise',
+	'return',
+	'try',
+	'while',
+	'with',
+	'yield'
+]);
+const pyName = (n) => (PY_KEYWORDS.has(n) ? n + '_' : n);
+
+/**
+ * Members that are intentionally left out of the Python stubs
+ */
+const PYI_SKIPPED_MEMBERS = { Q5: ['registerLang'] };
+
+/**
+ * Splits a string on a separator, ignoring separators nested inside
+ * <>, (), [], {} or quotes. Used for unions, intersections and param lists.
+ */
+function splitTopLevel(str, sep) {
+	const parts = [];
+	let depth = 0;
+	let quote = null;
+	let cur = '';
+	for (let i = 0; i < str.length; i++) {
+		const ch = str[i];
+		if (quote) {
+			cur += ch;
+			if (ch === quote) quote = null;
+			continue;
+		}
+		if (ch === "'" || ch === '"') {
+			quote = ch;
+			cur += ch;
+			continue;
+		}
+		if ('<([{'.includes(ch)) depth++;
+		else if ('>)]}'.includes(ch) && !(ch === '>' && str[i - 1] === '=')) depth--;
+		if (ch === sep && depth === 0) {
+			parts.push(cur);
+			cur = '';
+		} else cur += ch;
+	}
+	parts.push(cur);
+	return parts;
+}
+
+/**
+ * Merges Literal['a'] | Literal['b'] into Literal['a', 'b']
+ */
+function mergeLiterals(parts) {
+	const literals = [];
+	const rest = [];
+	for (const p of parts) {
+		const m = p.match(/^Literal\[(.+)\]$/);
+		if (m) literals.push(m[1]);
+		else rest.push(p);
+	}
+	return literals.length ? [`Literal[${literals.join(', ')}]`, ...rest] : rest;
+}
+
+/**
+ * Converts a JSDoc/TypeScript type string to a Python type annotation
  */
 function jsTypeToPython(jsType) {
 	if (!jsType) return 'Any';
 	const t = jsType.replace(/[{}]/g, '').trim();
 	const typeMap = {
-		number: 'float | int',
+		number: 'float',
 		string: 'str',
 		boolean: 'bool',
 		bool: 'bool',
@@ -711,45 +804,69 @@ function jsTypeToPython(jsType) {
 		any: 'Any',
 		'*': 'Any',
 		void: 'None',
+		undefined: 'None',
+		null: 'None',
 		float32array: 'list[float]',
 		canvaslinecap: 'str',
 		canvaslinejoin: 'str',
-		canvasrenderingcontext2d: 'Any',
-		audiocontext: 'Any',
-		element: 'Any',
-		gpushadermodule: 'Any',
 		function: 'Callable[..., Any]'
 	};
 	const lower = t.toLowerCase();
-	if (typeMap[lower]) return typeMap[lower];
+	if (Object.prototype.hasOwnProperty.call(typeMap, lower)) return typeMap[lower];
+
+	if (/^(?:HTML\w*Element|Element|FontFace|AudioContext|CanvasRenderingContext2D|GPU\w+)$/.test(t)) return 'Any';
+
+	if (t === '[]') return 'list[Any]';
 	if (t.startsWith('typeof ')) return `type[${t.slice(7)}]`;
-	if (/^\d+$/.test(t)) return `Literal[${t}]`;
-	if (t.includes('|')) {
-		return t
-			.split('|')
-			.map((p) => jsTypeToPython(p.trim()))
-			.join(' | ');
-	}
+	if (/^-?\d+$/.test(t)) return `Literal[${t}]`;
+
+	const union = splitTopLevel(t, '|')
+		.map((p) => p.trim())
+		.filter(Boolean);
+	if (union.length > 1) return mergeLiterals([...new Set(union.map((p) => jsTypeToPython(p)))]).join(' | ');
+
 	if (/^['"].*['"]$/.test(t)) return `Literal[${t.replace(/"/g, "'")}]`;
-	if (t.includes('&')) {
-		const parts = t.split('&').map((p) => p.trim());
-		const base = parts.find((p) => !p.includes('Promise') && !p.includes('PromiseLike'));
-		return base ? jsTypeToPython(base) : 'object';
+
+	const inter = splitTopLevel(t, '&').map((p) => p.trim());
+	if (inter.length > 1) {
+		const base = inter.find((p) => !/^Promise(?:Like)?</.test(p));
+		return jsTypeToPython(base || inter[0]);
 	}
+
 	if (t.endsWith('[]')) return `list[${jsTypeToPython(t.slice(0, -2))}]`;
-	if (t.startsWith('Q5.')) return t.slice(3);
-	if (/Promise|PromiseLike|HTMLCanvasElement|FontFace|HTMLVideoElement|HTMLElement|HTMLAudioElement/.test(t))
-		return 'object';
+
+	const promise = t.match(/^(?:Promise|PromiseLike)<(.+)>$/);
+	if (promise) return `Awaitable[${jsTypeToPython(promise[1])}]`;
+
 	return t;
 }
 
+/**
+ * Works out the Python return type of a function, and whether it should be `async`.
+ */
+function resolveReturnType(jsRet, funcName) {
+	if (!jsRet) return { pyType: 'None', isAsync: false };
+	const t = jsRet.replace(/[{}]/g, '').trim();
+
+	const inter = splitTopLevel(t, '&').map((p) => p.trim());
+	if (inter.length > 1) {
+		const prom = inter.find((p) => /^PromiseLike<.+>$/.test(p));
+		if (prom) return { pyType: jsTypeToPython(prom.match(/^PromiseLike<(.+)>$/)[1]), isAsync: false };
+	}
+
+	const promise = t.match(/^(?:Promise|PromiseLike)<(.+)>$/);
+	if (promise) return { pyType: jsTypeToPython(promise[1]), isAsync: funcName !== 'Canvas' };
+
+	return { pyType: jsTypeToPython(t), isAsync: false };
+}
+
 function parseJsDocParam(paramLine) {
-	const opt = paramLine.match(/@param\s+\{([^}]+)\}\s+\[([\w\u00A0-\uFFFF]+)\](?:\s+(.*))?/);
+	const opt = paramLine.match(/@param\s+\{([^}]+)\}\s+\[([\w\u00A0-\uFFFF]+)(?:=[^\]]*)?\](?:\s+(.*))?/);
 	if (opt) {
 		const rawType = opt[1];
 		const isRest = rawType.startsWith('...');
 		return {
-			name: opt[2],
+			name: pyName(opt[2]),
 			pyType: jsTypeToPython(isRest ? rawType.slice(3) : rawType),
 			optional: true,
 			isRest,
@@ -761,7 +878,7 @@ function parseJsDocParam(paramLine) {
 		const rawType = req[1];
 		const isRest = rawType.startsWith('...');
 		return {
-			name: req[2],
+			name: pyName(req[2]),
 			pyType: jsTypeToPython(isRest ? rawType.slice(3) : rawType),
 			optional: false,
 			isRest,
@@ -773,225 +890,411 @@ function parseJsDocParam(paramLine) {
 
 function parseJsDocReturn(returnLine) {
 	const m = returnLine.match(/@returns?\s+\{([^}]+)\}(?:\s+(.*))?/);
-	if (m) return { pyType: jsTypeToPython(m[1]), description: m[2] || '' };
+	if (m) return { jsType: m[1], pyType: jsTypeToPython(m[1]), description: m[2] || '' };
 	return null;
 }
 
 function stripMarkdown(str) {
 	if (!str) return '';
 	return str
+		.replace(/\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)/g, '')
+		.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
 		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
 		.replace(/`([^`]+)`/g, '$1')
 		.replace(/\*\*([^*]+)\*\*/g, '$1')
-		.replace(/\\([*|_{}\[\]()+.!#^-])/g, '$1');
+		.replace(/\\([*|_{}\[\]()+.!#^-])/g, '$1')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim();
 }
 
-function tsSigToPython(tsSig) {
-	const match = tsSig.match(/^function\s+([\w\u00A0-\uFFFF]+)\s*\(([^)]*)\)\s*:\s*(.+);$/);
-	if (!match) return null;
-	const name = match[1];
-	const paramsStr = match[2].trim();
-	const retType = jsTypeToPython(match[3].trim());
+function escapeDoc(s) {
+	return s.replace(/\\/g, '\\\\').replace(/"""/g, '\\"\\"\\"');
+}
 
-	if (!paramsStr) return `def ${name}() -> ${retType}: ...`;
+function buildDocLines({ emoji, description, params = [], returns = '', example = '' }, indent) {
+	const body = [];
+	const desc = escapeDoc(stripMarkdown(description));
+	if (desc) body.push(...desc.split('\n'));
 
-	const paramParts = paramsStr
-		.split(',')
-		.map((p) => p.trim())
-		.filter(Boolean);
-	const paramStrs = paramParts.map((part) => {
-		const isRest = part.startsWith('...');
-		const cleanPart = isRest ? part.slice(3) : part;
-		const colonIdx = cleanPart.indexOf(':');
-		if (colonIdx === -1) return cleanPart;
+	const fields = [];
+	params
+		.filter((p) => p.description)
+		.forEach((p) => fields.push(`:param ${p.name}: ${escapeDoc(stripMarkdown(p.description))}`));
+	if (returns) fields.push(`:returns: ${escapeDoc(stripMarkdown(returns))}`);
+	if (fields.length) {
+		if (body.length) body.push('');
+		body.push(...fields);
+	}
 
-		let pName = cleanPart.slice(0, colonIdx).trim();
-		let pTypeStr = cleanPart.slice(colonIdx + 1).trim();
+	if (example) {
+		if (body.length) body.push('');
+		body.push('Example::', '');
+		example.split('\n').forEach((l) => body.push('\t' + escapeDoc(l)));
+	}
 
-		const isOptional = pName.endsWith('?');
-		if (isOptional) pName = pName.slice(0, -1);
+	return [`${indent}"""${emoji}`, ...body.map((l) => (l ? indent + l : '')), `${indent}"""`];
+}
 
-		const pyType = jsTypeToPython(pTypeStr);
-		if (isRest) return `*${pName}: ${pyType}`;
-		if (isOptional) return `${pName}: ${pyType} = ...`;
-		return `${pName}: ${pyType}`;
+function buildInlineDoc(emoji, text, indent) {
+	const t = escapeDoc(stripMarkdown(text));
+	if (!t) return [];
+	if (!t.includes('\n')) return [`${indent}"""${emoji} ${t.endsWith('"') ? t.slice(0, -1) + '\\"' : t}"""`];
+	return [`${indent}"""${emoji}`, ...t.split('\n').map((l) => (l ? indent + l : '')), `${indent}"""`];
+}
+
+function parseTsParamList(str) {
+	return splitTopLevel(str, ',')
+		.map((s) => s.trim())
+		.filter(Boolean)
+		.map((p) => {
+			const isRest = p.startsWith('...');
+			const body = isRest ? p.slice(3) : p;
+			const ci = body.indexOf(':');
+			let name = (ci === -1 ? body : body.slice(0, ci)).trim();
+			let jsType = ci === -1 ? 'any' : body.slice(ci + 1).trim();
+			const optional = name.endsWith('?');
+			if (optional) name = name.slice(0, -1);
+			if (isRest && jsType.endsWith('[]')) jsType = jsType.slice(0, -2);
+			return { name: pyName(name), pyType: jsTypeToPython(jsType), optional, isRest, description: '' };
+		});
+}
+
+function parseTsCallable(str) {
+	let depth = 0;
+	let end = -1;
+	for (let i = 0; i < str.length; i++) {
+		if (str[i] === '(') depth++;
+		else if (str[i] === ')') {
+			depth--;
+			if (depth === 0) {
+				end = i;
+				break;
+			}
+		}
+	}
+	if (end === -1) return null;
+	const params = parseTsParamList(str.slice(1, end));
+	const rm = str
+		.slice(end + 1)
+		.trim()
+		.match(/^:\s*(.+?)\s*;?\s*$/);
+	return { params, ret: rm ? rm[1] : 'void' };
+}
+
+function parseTsFunction(line) {
+	const m = line.match(/^function\s+([\w\u00A0-\uFFFF]+)\s*\(/);
+	if (!m) return null;
+	const callable = parseTsCallable(line.slice(m[0].length - 1));
+	return callable ? { name: m[1], ...callable } : null;
+}
+
+function mergeParams(mdParams, tsParams) {
+	if (!tsParams) return mdParams;
+	if (mdParams.length === 0) return tsParams;
+
+	// Merge JSDoc markdown info with TypeScript parameter types
+	const merged = [];
+	const len = Math.max(mdParams.length, tsParams.length);
+	for (let i = 0; i < len; i++) {
+		const md = mdParams[i];
+		const ts = tsParams[i];
+		if (md && ts) {
+			// If TS signature defines a union (e.g. scale: string | number), prefer TS type
+			const pyType = ts.pyType.includes('|') ? ts.pyType : md.pyType;
+			merged.push({
+				...md,
+				pyType,
+				optional: md.optional || ts.optional
+			});
+		} else if (md) {
+			merged.push(md);
+		} else if (ts) {
+			merged.push(ts);
+		}
+	}
+	return merged;
+}
+
+function normalizeParams(params) {
+	let seenOptional = false;
+	return params.map((p) => {
+		if (p.isRest) return p;
+		if (p.optional) seenOptional = true;
+		else if (seenOptional) return { ...p, optional: true };
+		return p;
 	});
-
-	return `def ${name}(${paramStrs.join(', ')}) -> ${retType}: ...`;
 }
 
-function generatePyiOverloads(func, sigs, emoji, indent = '') {
+const pyParamStr = (p) =>
+	p.isRest ? `*${p.name}: ${p.pyType}` : p.optional ? `${p.name}: ${p.pyType} = ...` : `${p.name}: ${p.pyType}`;
+
+function mdParamsOf(entry) {
+	return (entry.params || [])
+		.filter((p) => p.startsWith('@param'))
+		.map(parseJsDocParam)
+		.filter(Boolean);
+}
+
+function resolveFunction(entry, tsSig) {
+	const mdParams = mdParamsOf(entry);
+	const returnLine = (entry.params || []).find((p) => p.startsWith('@return'));
+	const mdReturn = returnLine ? parseJsDocReturn(returnLine) : null;
+	const params = normalizeParams(mergeParams(mdParams, tsSig ? tsSig.params : []));
+	const rawRet = mdReturn ? mdReturn.jsType : tsSig ? tsSig.ret : null;
+	const { pyType, isAsync } = resolveReturnType(rawRet, entry.name);
+	return { params, ret: pyType, isAsync, mdReturn };
+}
+
+function buildFunctionModels(func, tsSigs) {
+	if (tsSigs.length > 1) {
+		return tsSigs.map((sig) => {
+			const { pyType, isAsync } = resolveReturnType(sig.ret, func.name);
+			return { params: normalizeParams(sig.params), ret: pyType, isAsync };
+		});
+	}
+	const { params, ret, isAsync, mdReturn } = resolveFunction(func, tsSigs[0]);
+	return [{ params, ret, isAsync, mdReturn }];
+}
+
+function generatePyiFunction(func, models, emoji, { documented = true, indent = '', self = false } = {}) {
 	const lines = [];
-	const parsedParams = func.params
-		.filter((p) => p.startsWith('@param'))
-		.map(parseJsDocParam)
-		.filter(Boolean);
-	const returnParam = func.params.find((p) => p.startsWith('@return'));
-	const parsedReturn = returnParam ? parseJsDocReturn(returnParam) : null;
+	const isOverloaded = models.length > 1;
+	models.forEach((model, index) => {
+		const paramStrs = [...(self ? ['self'] : []), ...model.params.map(pyParamStr)];
+		const head = `${indent}${model.isAsync ? 'async ' : ''}def ${func.name}(${paramStrs.join(', ')}) -> ${model.ret}:`;
+		if (isOverloaded) lines.push(`${indent}@overload`);
 
-	sigs.forEach((sig, index) => {
-		const isFirst = index === 0;
-		const pySig = tsSigToPython(sig);
-		if (!pySig) return;
-
-		lines.push(`${indent}@overload`);
-		if (isFirst) {
-			lines.push(`${indent}${pySig.replace(/\.\.\.$/, '')}`);
-			const docLines = [`${indent}\t"""${emoji}`];
-			if (func.description)
-				stripMarkdown(func.description)
-					.split('\n')
-					.forEach((l) => docLines.push(`${indent}\t${l}`));
-			if (parsedParams.length > 0) {
-				docLines.push(`${indent}\t`);
-				parsedParams.forEach((p) => docLines.push(`${indent}\t:param ${p.name}: ${stripMarkdown(p.description)}`));
-			}
-			if (parsedReturn?.description) docLines.push(`${indent}\t:returns: ${stripMarkdown(parsedReturn.description)}`);
-			if (func.pythonExamples?.[0]) {
-				docLines.push(`${indent}\t`, `${indent}\tExample::`, `${indent}\t`);
-				func.pythonExamples[0].split('\n').forEach((l) => docLines.push(`${indent}\t\t${l}`));
-			}
-			docLines.push(`${indent}\t"""`, `${indent}\t...`);
-			lines.push(...docLines);
-		} else {
-			lines.push(`${indent}${pySig}`);
+		if (!documented || index > 0) {
+			lines.push(`${head} ...`);
+			return;
 		}
+
+		lines.push(head);
+		const mdParams = mdParamsOf(func);
+		lines.push(
+			...buildDocLines(
+				{
+					emoji,
+					description: func.description,
+					params: mdParams,
+					returns: (model.mdReturn || parseJsDocReturnFrom(func))?.description,
+					example: func.pythonExamples?.[0]
+				},
+				indent + '\t'
+			)
+		);
+		lines.push(`${indent}\t...`);
 	});
 	return lines.join('\n');
 }
 
-function generatePyiEntry(func, emoji, indent = '') {
-	const parsedParams = func.params
-		.filter((p) => p.startsWith('@param'))
-		.map(parseJsDocParam)
-		.filter(Boolean);
-	const returnParam = func.params.find((p) => p.startsWith('@return'));
-	const parsedReturn = returnParam ? parseJsDocReturn(returnParam) : null;
-	const isAsync =
-		/^Promise</.test(returnParam?.match(/@returns?\s+\{([^}]+)\}/)?.[1]?.trim() || '') && func.name !== 'Canvas';
-
-	const paramStrs = parsedParams.map((p) =>
-		p.isRest ? `*${p.name}: ${p.pyType}` : p.optional ? `${p.name}: ${p.pyType} = ...` : `${p.name}: ${p.pyType}`
-	);
-	const retType = parsedReturn ? parsedReturn.pyType : 'None';
-
-	const lines = [`${indent}${isAsync ? 'async ' : ''}def ${func.name}(${paramStrs.join(', ')}) -> ${retType}:`];
-	const docLines = [`${indent}\t"""${emoji}`];
-	if (func.description)
-		stripMarkdown(func.description)
-			.split('\n')
-			.forEach((l) => docLines.push(`${indent}\t${l}`));
-	if (parsedParams.length > 0) {
-		docLines.push(`${indent}\t`);
-		parsedParams.forEach((p) => docLines.push(`${indent}\t:param ${p.name}: ${stripMarkdown(p.description)}`));
-	}
-	if (parsedReturn?.description) docLines.push(`${indent}\t:returns: ${stripMarkdown(parsedReturn.description)}`);
-	if (func.pythonExamples?.[0]) {
-		docLines.push(`${indent}\t`, `${indent}\tExample::`, `${indent}\t`);
-		func.pythonExamples[0].split('\n').forEach((l) => docLines.push(`${indent}\t\t${l}`));
-	}
-	docLines.push(`${indent}\t"""`, `${indent}\t...`);
-	lines.push(...docLines);
-	return lines.join('\n');
+function parseJsDocReturnFrom(entry) {
+	const line = (entry.params || []).find((p) => p.startsWith('@return'));
+	return line ? parseJsDocReturn(line) : null;
 }
 
-function extractClassMemberSignatures(className, baseContent) {
-	const lines = baseContent.split('\n');
-	const sigs = {};
+function extractTypeMembers(kind, name, content) {
+	const lines = content.split('\n');
+	const start = lines.findIndex((l) => new RegExp(`^\\s*(?:declare\\s+)?${kind}\\s+${name}[\\s{]`).test(l));
+	if (start === -1) return [];
 
-	let classStart = -1;
-	for (let i = 0; i < lines.length; i++) {
-		if (new RegExp(`^\\s*class\\s+${className}[\\s{]`).test(lines[i])) {
-			classStart = i;
-			break;
-		}
-	}
-	if (classStart === -1) return sigs;
+	const members = [];
+	let depth = 0;
+	let nested = null;
 
-	let braceCount = 0;
-	for (let i = classStart; i < lines.length; i++) {
+	for (let i = start; i < lines.length; i++) {
 		const line = lines[i];
-		braceCount += (line.match(/{/g) || []).length;
-		braceCount -= (line.match(/}/g) || []).length;
-		if (i === classStart) continue;
-		if (braceCount <= 0) break;
+		const before = depth;
+		depth += (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+		if (i === start) {
+			if (depth <= 0) break;
+			continue;
+		}
+		if (depth <= 0) break;
 
 		const t = line.trim();
-		if (!t || t.startsWith('//') || t.startsWith('*') || t.startsWith('/*')) continue;
+		if (!t || /^(\/\/|\/\*|\*)/.test(t)) continue;
 
-		const bare = t.replace(/^static\s+/, '');
-		if (bare.startsWith('constructor')) continue;
-
-		const methodMatch = bare.match(/^([\w\u00A0-\uFFFF]+)\s*\([^)]*\)\s*:\s*(.+?)\s*;?\s*$/);
-		if (methodMatch) {
-			sigs[methodMatch[1]] = { isProperty: false, jsReturnType: methodMatch[2].trim() };
+		if (before >= 2) {
+			if (nested && /^new\s*\(/.test(t)) nested.ctor = parseTsCallable(t.slice(t.indexOf('(')));
 			continue;
 		}
 
-		const propMatch = bare.match(/^([\w\u00A0-\uFFFF]+)\s*:\s*(.+?)\s*;?\s*$/);
-		if (propMatch) {
-			sigs[propMatch[1]] = { isProperty: true, jsType: propMatch[2].trim() };
+		const m = t.match(/^(static\s+)?([\w\u00A0-\uFFFF]+)(\?)?\s*(\(|:)/);
+		if (!m) continue;
+		const isStatic = Boolean(m[1]);
+		const mname = m[2];
+
+		if (m[4] === '(') {
+			const callable = parseTsCallable(t.slice(m[0].length - 1));
+			if (!callable) continue;
+			members.push({
+				name: mname,
+				kind: mname === 'constructor' ? 'constructor' : 'method',
+				isStatic,
+				params: callable.params,
+				ret: callable.ret
+			});
+			continue;
+		}
+
+		const type = t.slice(m[0].length).replace(/;\s*$/, '').trim();
+		const mirror = type.match(/^typeof\s+([\w\u00A0-\uFFFF]+)$/);
+		if (type === '{') {
+			nested = { name: mname, kind: 'nested', isStatic };
+			members.push(nested);
+		} else if (mirror) {
+			members.push({ name: mname, kind: 'mirror', isStatic, target: mirror[1] });
+		} else {
+			members.push({ name: mname, kind: 'property', isStatic, jsType: type });
 		}
 	}
 
-	return sigs;
+	return members;
 }
 
-function generatePyiClass(cls, emoji, classMemberSigs = {}) {
+function extractMembersOf(name, content) {
+	const members = extractTypeMembers('class', name, content);
+	return members.length ? members : extractTypeMembers('interface', name, content);
+}
+
+function extractBaseVariables(baseContent) {
+	const vars = {};
+	for (const line of baseContent.split('\n')) {
+		const m = line.match(/^\s*(?:var|let|const)\s+([\w\u00A0-\uFFFF]+)\s*:\s*(.+?);\s*$/);
+		if (m) vars[m[1]] = m[2].trim();
+	}
+	return vars;
+}
+
+function extractBaseGlobals(baseContent) {
+	const globals = [];
+	let section = null;
+	for (const line of baseContent.split('\n')) {
+		const sec = line.match(/^\t\/\/\s*[^\w\s]+\s+([a-z]+)\s*$/);
+		if (sec) {
+			section = sec[1];
+			continue;
+		}
+		const m = line.match(/^\t(function|const|let|var|class)\s+([\w\u00A0-\uFFFF]+)/);
+		if (m && section) {
+			globals.push({
+				section,
+				name: m[2],
+				kind: m[1] === 'function' ? 'function' : m[1] === 'class' ? 'class' : 'variable'
+			});
+		}
+	}
+	return globals;
+}
+
+function generatePyiClass(cls, emoji, baseMembers = [], registry = {}, nestedClasses = []) {
 	const lines = [`class ${cls.name}:`];
 
 	if (cls.description) {
-		lines.push(`\t"""${emoji}`);
-		stripMarkdown(cls.description)
-			.split('\n')
-			.forEach((l) => lines.push(`\t${l}`));
-		lines.push('\t"""');
+		lines.push(...buildDocLines({ emoji, description: cls.description }, '\t'));
 	} else {
 		lines.push(`\t"""${emoji} ${cls.name}"""`);
 	}
 
-	if (cls.members && cls.members.length > 0) {
-		for (const member of cls.members) {
-			lines.push('');
-			if (member.name === 'constructor') continue;
-			if (cls.name === 'Q5' && ['addLang', 'registerLang'].includes(member.name)) continue;
+	const skipped = PYI_SKIPPED_MEMBERS[cls.name] || [];
+	const emitted = new Set();
+	const mdMembers = cls.members || [];
 
-			const typeParam = member.params.find((p) => p.startsWith('@type'));
-			if (typeParam) {
-				const tm = typeParam.match(/@type\s+\{([^}]+)\}/);
-				const pyType = tm ? jsTypeToPython(tm[1]) : 'Any';
-				lines.push(`\t${member.name}: ${pyType}`);
-				if (member.description) lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
-				continue;
-			}
+	const ctorBase = baseMembers.find((b) => b.kind === 'constructor');
+	const ctorMd = mdMembers.find((m) => m.name === 'constructor');
+	if (ctorBase || ctorMd) {
+		const params = normalizeParams(mergeParams(ctorMd ? mdParamsOf(ctorMd) : [], ctorBase ? ctorBase.params : []));
+		lines.push('', `\tdef __init__(${['self', ...params.map(pyParamStr)].join(', ')}) -> None: ...`);
+	}
 
-			const sig = classMemberSigs[member.name];
-			if (sig && sig.isProperty) {
-				const pyType = jsTypeToPython(sig.jsType);
-				lines.push(`\t${member.name}: ${pyType}`);
-				if (member.description) lines.push(`\t"""${emoji} ${stripMarkdown(member.description)}"""`);
-				continue;
-			}
+	const findBase = (name) =>
+		baseMembers.find((b) => b.name === name && !b.isStatic && b.kind !== 'constructor') ||
+		baseMembers.find((b) => b.name === name && b.kind !== 'constructor');
 
-			const parsedParams = member.params
-				.filter((p) => p.startsWith('@param'))
-				.map(parseJsDocParam)
-				.filter(Boolean);
-			const returnParam = member.params.find((p) => p.startsWith('@return'));
-			const parsedReturn = returnParam ? parseJsDocReturn(returnParam) : null;
-			const paramStrs = parsedParams.map((p) =>
-				p.optional ? `${p.name}: ${p.pyType} = ...` : `${p.name}: ${p.pyType}`
-			);
-			let retType = parsedReturn
-				? parsedReturn.pyType
-				: sig && sig.jsReturnType
-					? jsTypeToPython(sig.jsReturnType)
-					: 'None';
+	const signatureOf = (base) => {
+		if (!base) return null;
+		if (base.kind === 'method') return base;
+		if (base.kind === 'mirror' && registry[base.target]) return registry[base.target][0];
+		return null;
+	};
 
-			lines.push(`\tdef ${member.name}(self${paramStrs.length ? ', ' + paramStrs.join(', ') : ''}) -> ${retType}:`);
-			lines.push(`\t\t"""${emoji} ${stripMarkdown(member.description || member.name)}"""`);
-			lines.push('\t\t...');
+	for (const member of mdMembers) {
+		if (member.name === 'constructor' || skipped.includes(member.name) || emitted.has(member.name)) continue;
+		emitted.add(member.name);
+		lines.push('');
+
+		const base = findBase(member.name);
+		const isStatic = Boolean(base && base.isStatic);
+		const typeParam = member.params.find((p) => p.startsWith('@type'));
+
+		if (typeParam || (base && base.kind === 'property')) {
+			const jsType = typeParam ? (typeParam.match(/@type\s+\{([^}]+)\}/) || [])[1] : base.jsType;
+			const pyType = jsType ? jsTypeToPython(jsType) : 'Any';
+			lines.push(`\t${member.name}: ${isStatic ? `ClassVar[${pyType}]` : pyType}`);
+			lines.push(...buildInlineDoc(emoji, member.description, '\t'));
+			continue;
 		}
+
+		const sig = signatureOf(base);
+		const { params, ret, isAsync, mdReturn } = resolveFunction(member, sig);
+		if (isStatic) lines.push('\t@staticmethod');
+		const paramStrs = [...(isStatic ? [] : ['self']), ...params.map(pyParamStr)];
+		lines.push(`\t${isAsync ? 'async ' : ''}def ${member.name}(${paramStrs.join(', ')}) -> ${ret}:`);
+		const hasFields = mdParamsOf(member).some((p) => p.description) || mdReturn?.description;
+		lines.push(
+			...(hasFields
+				? buildDocLines(
+						{
+							emoji,
+							description: member.description || member.name,
+							params: mdParamsOf(member),
+							returns: mdReturn?.description
+						},
+						'\t\t'
+					)
+				: buildInlineDoc(emoji, member.description || member.name, '\t\t'))
+		);
+		lines.push('\t\t...');
+	}
+
+	const undocumented = [];
+	for (const b of baseMembers) {
+		if (b.kind === 'constructor' || b.kind === 'nested') continue;
+		if (b !== findBase(b.name)) continue;
+		if (skipped.includes(b.name) || emitted.has(b.name)) continue;
+		emitted.add(b.name);
+
+		if (b.kind === 'property') {
+			const pyType = jsTypeToPython(b.jsType);
+			undocumented.push(`\t${b.name}: ${b.isStatic ? `ClassVar[${pyType}]` : pyType}`);
+			continue;
+		}
+
+		const models =
+			b.kind === 'mirror'
+				? registry[b.target]
+				: [
+						(() => {
+							const { pyType, isAsync } = resolveReturnType(b.ret, b.name);
+							return { params: normalizeParams(b.params), ret: pyType, isAsync };
+						})()
+					];
+
+		if (!models) {
+			undocumented.push(`\tdef ${b.name}(self, *args: Any, **kwargs: Any) -> Any: ...`);
+			continue;
+		}
+		if (b.isStatic) undocumented.push('\t@staticmethod');
+		undocumented.push(
+			generatePyiFunction({ name: b.name }, models, emoji, { documented: false, indent: '\t', self: !b.isStatic })
+		);
+	}
+	if (undocumented.length) lines.push('', ...undocumented);
+
+	if (nestedClasses.length) {
+		lines.push('');
+		lines.push(...nestedClasses);
 	}
 
 	return lines.join('\n');
@@ -1001,15 +1304,30 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 	const emojiMappings = extractEmojiMappings(baseDtsPath);
 	const baseSignatures = extractBaseSignatures(baseDtsPath);
 	const baseContent = fs.readFileSync(baseDtsPath, 'utf8');
-	const baseLines = baseContent.split('\n');
+	const baseVars = extractBaseVariables(baseContent);
+	const baseGlobals = extractBaseGlobals(baseContent);
 
 	const output = [
 		'from __future__ import annotations',
-		'from typing import Any, Callable, Literal, overload',
-		'',
-		'class Image: ...',
+		'from typing import Any, Awaitable, Callable, ClassVar, Literal, overload',
 		''
 	];
+
+	const emitted = new Set();
+	const registry = {};
+
+	const tsSigsOf = (name) =>
+		(baseSignatures[name] || [])
+			.filter((l) => l.startsWith('function'))
+			.map(parseTsFunction)
+			.filter(Boolean);
+
+	// Extract Image members from the Q5 nested definition in base .d.ts or interface
+	const imageMembers = extractTypeMembers('interface', 'Image', baseContent);
+	const nestedCtor = extractTypeMembers('class', 'Q5', baseContent).find(
+		(m) => m.name === 'Image' && m.kind === 'nested'
+	)?.ctor;
+	if (nestedCtor) imageMembers.unshift({ name: 'constructor', kind: 'constructor', params: nestedCtor.params });
 
 	for (const sectionName of pyiSectionOrder) {
 		if (!sections[sectionName]) continue;
@@ -1020,48 +1338,84 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 		output.push('');
 
 		if (section.sectionDescription) {
-			output.push(`"""${emoji}`);
-			stripMarkdown(section.sectionDescription)
-				.split('\n')
-				.forEach((l) => output.push(l));
-			output.push('"""', '');
+			const desc = stripMarkdown(section.sectionDescription);
+			if (desc) output.push(...buildDocLines({ emoji, description: desc }, ''), '');
 		}
 
 		for (const func of section.functions) {
+			if (emitted.has(func.name)) continue;
+			emitted.add(func.name);
+
 			if (func.isClass) {
-				const classMemberSigs = extractClassMemberSignatures(func.name, baseContent);
-				output.push(generatePyiClass(func, emoji, classMemberSigs));
-			} else {
-				const baseLine = baseLines.find((l) => l.includes(`const ${func.name}:`) || l.includes(`let ${func.name}:`));
-				if (baseLine) {
-					const tsType = (baseLine.match(/\b(?:const|let)\s+[\w\u00A0-\uFFFF]+:\s*(.+?);/) || [])[1]?.trim();
-					output.push(`${func.name}: ${jsTypeToPython(tsType)}`);
-					if (func.description || func.pythonExamples?.length > 0) {
-						output.push(`"""${emoji}`);
-						if (func.description)
-							stripMarkdown(func.description)
-								.split('\n')
-								.forEach((l) => output.push(l));
-						if (func.pythonExamples?.[0]) {
-							output.push('', 'Example::', '');
-							func.pythonExamples[0].split('\n').forEach((l) => output.push(`\t${l}`));
-						}
-						output.push('"""');
-					}
-				} else {
-					const sigs = baseSignatures[func.name];
-					if (sigs && sigs.length > 1) {
-						output.push(generatePyiOverloads(func, sigs, emoji));
-					} else {
-						output.push(generatePyiEntry(func, emoji));
-					}
+				const baseMembers = extractMembersOf(func.name, baseContent);
+				let nestedImageLines = [];
+
+				if (func.name === 'Q5') {
+					const imageMembers = extractTypeMembers('interface', 'Image', baseContent);
+					const nestedCtor = extractTypeMembers('class', 'Q5', baseContent).find(
+						(m) => m.name === 'Image' && m.kind === 'nested'
+					)?.ctor;
+					if (nestedCtor) imageMembers.unshift({ name: 'constructor', kind: 'constructor', params: nestedCtor.params });
+
+					nestedImageLines = generatePyiClass(
+						{ name: 'Image', description: '🌆 Image', members: [] },
+						emoji,
+						imageMembers,
+						registry
+					)
+						.split('\n')
+						.map((l) => '\t' + l);
 				}
+
+				output.push(generatePyiClass(func, emoji, baseMembers, registry, nestedImageLines));
+			} else if (baseVars[func.name] !== undefined) {
+				output.push(`${func.name}: ${jsTypeToPython(baseVars[func.name])}`);
+				if (func.description || func.pythonExamples?.length > 0) {
+					output.push(
+						buildDocLines({ emoji, description: func.description, example: func.pythonExamples?.[0] }, '').join('\n')
+					);
+				}
+			} else {
+				const tsSigs = tsSigsOf(func.name);
+				const models = buildFunctionModels(func, tsSigs);
+				registry[func.name] = models;
+				output.push(generatePyiFunction(func, models, emoji));
+			}
+			output.push('');
+		}
+
+		for (const g of baseGlobals.filter((g) => g.section === sectionName)) {
+			if (emitted.has(g.name)) continue;
+			emitted.add(g.name);
+
+			if (g.kind === 'function') {
+				const models = buildFunctionModels({ name: g.name, params: [] }, tsSigsOf(g.name));
+				registry[g.name] = models;
+				output.push(generatePyiFunction({ name: g.name }, models, emoji, { documented: false }));
+			} else if (g.kind === 'class') {
+				output.push(
+					generatePyiClass(
+						{ name: g.name, description: '', members: [] },
+						emoji,
+						extractMembersOf(g.name, baseContent),
+						registry
+					)
+				);
+			} else {
+				output.push(`${g.name}: ${jsTypeToPython(baseVars[g.name])}`);
 			}
 			output.push('');
 		}
 	}
 
-	fs.writeFileSync(outputPath, output.join('\n'));
+	const text =
+		output
+			.join('\n')
+			.replace(/[ \t]+$/gm, '')
+			.replace(/\n{3,}/g, '\n\n')
+			.trimEnd() + '\n';
+
+	fs.writeFileSync(outputPath, text);
 	console.log(`✅ Generated ${path.basename(outputPath)}`);
 }
 

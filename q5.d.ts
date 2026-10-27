@@ -1512,7 +1512,7 @@ declare global {
 	 *
 	 * The default color mode is RGB in float format.
 	 * @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} mode color mode
-	 * @param {1 | 255} format color format (1 for float, 255 for integer)
+	 * @param {1 | 255} [format] color format (1 for float, 255 for integer)
 	 * @param {'srgb' | 'display-p3'} [gamut] color gamut
 	 * @example
 	 * await Canvas(200);
@@ -1535,7 +1535,7 @@ declare global {
 	 * fill(0.75, 0.15, 0);
 	 * rect(0, -100, 100, 200);
 	 */
-	function colorMode(mode: 'rgb' | 'oklch', format: 1 | 255, gamut: 'srgb' | 'display-p3'): void;
+	function colorMode(mode: 'rgb' | 'oklch', format?: 1 | 255, gamut?: 'srgb' | 'display-p3'): void;
 
 	/** 🎨
 	 * RGB colors have components `r`/`red`, `g`/`green`, `b`/`blue`,
@@ -1720,7 +1720,7 @@ declare global {
 	 * this function can accept colors in a wide range of formats:
 	 * CSS color string, grayscale value, and color component values.
 	 */
-	function background(c0: number, c1: number, c2: number, c3: number): void;
+	function background(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	class Color {
 
@@ -1783,7 +1783,7 @@ declare global {
 	 * can accept colors in a wide range of formats: as a CSS color string,
 	 * a `Color` object, grayscale value, or color component values.
 	 */
-	function fill(c0: number, c1: number, c2: number, c3: number): void;
+	function fill(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	/** 💅
 	 * Sets the stroke (outline) color. The default is black.
@@ -1812,7 +1812,7 @@ declare global {
 	 * can accept colors in a wide range of formats: as a CSS color string,
 	 * a `Color` object, grayscale value, or color component values.
 	 */
-	function stroke(c0: number, c1: number, c2: number, c3: number): void;
+	function stroke(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	/** 💅
 	 * After calling this function, drawing will not be filled.
@@ -1901,7 +1901,7 @@ declare global {
 	 * 
 	 * Not available in q5 WebGPU.
 	 */
-	function shadow(c0: number, c1: number, c2: number, c3: number): void;
+	function shadow(c0: number, c1?: number, c2?: number, c3?: number): void;
 
 	/** 💅
 	 * Disables the shadow effect.
@@ -1920,7 +1920,7 @@ declare global {
 	 * @param {number} offsetY vertical offset of the shadow, defaults to be the same as offsetX
 	 * @param {number} blur blur radius of the shadow, defaults to 0
 	 */
-	function shadowBox(offsetX: number, offsetY: number, blur: number): void;
+	function shadowBox(offsetX: number, offsetY: number, blur?: number): void;
 
 	/** 💅
 	 * Set the global composite operation for the canvas context.
@@ -2241,8 +2241,8 @@ declare global {
 	/** 💻
 	 * Customize how your canvas is presented.
 	 * @param {string} mode NORMAL, CENTER, or MAXED
-	 * @param {string} renderQuality SMOOTH or PIXELATED
-	 * @param {number} scale can also be given as a string (for example "x2")
+	 * @param {string} [renderQuality] SMOOTH or PIXELATED
+	 * @param {number} [scale] can also be given as a string (for example "x2")
 	 * @example
 	 * await Canvas(50, 25);
 	 * 
@@ -2250,7 +2250,7 @@ declare global {
 	 * 
 	 * circle(0, 0, 16);
 	 */
-	function displayMode(mode: string, renderQuality: string, scale: string | number): void;
+	function displayMode(mode: string, renderQuality?: string, scale?: string | number): void;
 
 	/** 💻
 	 * A `displayMode` setting.
@@ -3922,7 +3922,7 @@ declare global {
 	 * Ends storing vertices for a shape.
 	 * @param {boolean} [close] whether to close the shape by connecting the last vertex to the first vertex, default is false
 	 */
-	function endShape(): void;
+	function endShape(close?: boolean): void;
 
 	/** 🖌
 	 * Specifies a vertex in a shape.

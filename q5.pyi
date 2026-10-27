@@ -1,7 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, Literal, overload
-
-class Image: ...
+from typing import Any, Awaitable, Callable, ClassVar, Literal, overload
 
 # ⭐ core
 
@@ -15,26 +13,24 @@ q5 Beginner's Brief. 😅
 
 Experiment with editing the
 interactive mini examples. Have fun! 😎
-
-![](https://notbyai.fyi/)
 """
 
-def Canvas(w: float | int = ..., h: float | int = ..., opt: dict = ...) -> object:
+def Canvas(w: float = ..., h: float = ..., opt: dict = ...) -> Any:
 	"""⭐
 	Creates a canvas element, a section of the screen your program
 	can draw on.
-	
+
 	Run this function to start using q5!
-	
+
 	Note that in this example, the circle is located at position [0, 0], the origin of the canvas.
-	
+
 	:param w: width or side lengths of the canvas
 	:param h: height of the canvas
 	:param opt: options
 	:returns: canvas element
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background('silver')
 		circle(0, 0, 80)
@@ -44,9 +40,9 @@ def Canvas(w: float | int = ..., h: float | int = ..., opt: dict = ...) -> objec
 def draw() -> None:
 	"""⭐
 	The q5 draw function is run 60 times per second by default.
-	
+
 	Example::
-	
+
 		def draw():
 			background('silver')
 			circle(mouseX, mouseY, 80)
@@ -56,17 +52,15 @@ def draw() -> None:
 def log(message: Any) -> None:
 	"""⭐
 	Logs a message to the JavaScript console.
-	
+
 	To view the console, open your browser's web developer tools
 	via the keyboard shortcut Ctrl + Shift + i or command + option + i,
 	then click the "Console" tab.
-	
+
 	Use log when you're curious about what your code is doing!
-	
-	:param message: 
-	
+
 	Example::
-	
+
 		def draw():
 			circle(mouseX, mouseY, 80)
 			log('The mouse is at:', mouseX, mouseY)
@@ -75,133 +69,133 @@ def log(message: Any) -> None:
 
 # 🧑‍🎨 shapes
 
-def circle(x: float | int, y: float | int, diameter: float | int) -> None:
+def circle(x: float, y: float, diameter: float) -> None:
 	"""🧑‍🎨
 	Draws a circle.
-	
+
 	:param x: x-coordinate
 	:param y: y-coordinate
 	:param diameter: diameter of the circle
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		circle(0, 0, 80)
 	"""
 	...
 
-def ellipse(x: float | int, y: float | int, width: float | int, height: float | int) -> None:
+def ellipse(x: float, y: float, width: float, height: float) -> None:
 	"""🧑‍🎨
 	Draws an ellipse.
-	
+
 	:param x: x-coordinate
 	:param y: y-coordinate
 	:param width: width of the ellipse
 	:param height: height of the ellipse
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		ellipse(0, 0, 160, 80)
 	"""
 	...
 
-def rect(x: float | int, y: float | int, w: float | int, h: float | int, rounded: float | int = ...) -> None:
+def rect(x: float, y: float, w: float, h: float, rounded: float = ...) -> None:
 	"""🧑‍🎨
 	Draws a rectangle or a rounded rectangle.
-	
+
 	Also accepts 8 parameters to specify a
 	corner radius for each corner, in the order:
 	top-left, top-right, bottom-right, bottom-left.
-	
+
 	:param x: x-coordinate
 	:param y: y-coordinate
 	:param w: width of the rectangle
 	:param h: height of the rectangle
 	:param rounded: radius for all corners
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		rect(-70, -80, 40, 60)
 		rect(-20, -30, 40, 60, 10)
 		rect(30, 20, 40, 60, 20, 4, 0, 8)
 	"""
 	...
 
-def square(x: float | int, y: float | int, size: float | int, rounded: float | int = ...) -> None:
+def square(x: float, y: float, size: float, rounded: float = ...) -> None:
 	"""🧑‍🎨
 	Draws a square or a rounded square.
-	
+
 	Also accepts 7 parameters to specify a
 	corner radius for each corner, in the order:
 	top-left, top-right, bottom-right, bottom-left.
-	
+
 	:param x: x-coordinate
 	:param y: y-coordinate
 	:param size: size of the sides of the square
 	:param rounded: radius for all corners
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		square(-70, -70, 40)
 		square(-20, -20, 40, 10)
 		square(30, 30, 40, 20, 4, 0, 8)
 	"""
 	...
 
-def point(x: float | int, y: float | int) -> None:
+def point(x: float, y: float) -> None:
 	"""🧑‍🎨
 	Draws a point on the canvas.
-	
+
 	:param x: x-coordinate
 	:param y: y-coordinate
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		stroke('white')
 		point(-25, 0)
-		
+
 		strokeWeight(10)
 		point(25, 0)
 	"""
 	...
 
-def line(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> None:
+def line(x1: float, y1: float, x2: float, y2: float) -> None:
 	"""🧑‍🎨
 	Draws a line on the canvas.
-	
+
 	:param x1: x-coordinate of the first point
 	:param y1: y-coordinate of the first point
 	:param x2: x-coordinate of the second point
 	:param y2: y-coordinate of the second point
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		stroke('lime')
 		line(-80, -30, 80, 30)
 	"""
 	...
 
-def capsule(x1: float | int, y1: float | int, x2: float | int, y2: float | int, r: float | int) -> None:
+def capsule(x1: float, y1: float, x2: float, y2: float, r: float) -> None:
 	"""🧑‍🎨
 	Draws a capsule.
-	
+
 	:param x1: x-coordinate of the first point
 	:param y1: y-coordinate of the first point
 	:param x2: x-coordinate of the second point
 	:param y2: y-coordinate of the second point
 	:param r: radius of the capsule semi-circle ends
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		strokeWeight(5)
@@ -212,18 +206,16 @@ def capsule(x1: float | int, y1: float | int, x2: float | int, y2: float | int, 
 def rectMode(mode: str) -> None:
 	"""🧑‍🎨
 	Set to CORNER (default), CENTER, RADIUS, or CORNERS.
-	
+
 	Changes how the first four inputs to
 	rect and square are interpreted.
-	
-	:param mode: 
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		rectMode(CORNER)
-		
+
 		#   (  x,   y,   w,  h)
 		rect(-50, -25, 100, 50)
 	"""
@@ -232,18 +224,16 @@ def rectMode(mode: str) -> None:
 def ellipseMode(mode: str) -> None:
 	"""🧑‍🎨
 	Set to CENTER (default), RADIUS, CORNER, or CORNERS.
-	
+
 	Changes how the first four inputs to
 	ellipse, circle, and arc are interpreted.
-	
-	:param mode: 
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		ellipseMode(CENTER)
-		
+
 		#      (x, y,   w,  h)
 		ellipse(0, 0, 100, 50)
 	"""
@@ -266,30 +256,30 @@ Shape alignment mode, for use in rectMode and ellipseMode.
 
 # 🌆 image
 
-def loadImage(url: str) -> Image:
+def loadImage(url: str) -> Q5.Image:
 	"""🌆
 	Loads an image from a URL.
-	
+
 	By default, assets are loaded in parallel before q5 runs draw. Use await to wait for an image to load.
-	
+
 	:param url: url of the image to load
 	:returns: image
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		logo = loadImage('/q5js_logo.avif')
-		
+
 		def draw():
 			background(logo)
 	"""
 	...
 
-def image(img: Image | object, dx: float | int, dy: float | int, dw: float | int = ..., dh: float | int = ..., sx: float | int = ..., sy: float | int = ..., sw: float | int = ..., sh: float | int = ...) -> None:
+def image(img: Q5.Image | Any, dx: float, dy: float, dw: float = ..., dh: float = ..., sx: float = ..., sy: float = ..., sw: float = ..., sh: float = ...) -> None:
 	"""🌆
 	Draws an image or video frame to the canvas.
-	
+
 	:param img: image or video to draw
 	:param dx: x position to draw the image at
 	:param dy: y position to draw the image at
@@ -299,13 +289,13 @@ def image(img: Image | object, dx: float | int, dy: float | int, dw: float | int
 	:param sy: y position in the source to start clipping a subsection from
 	:param sw: width of the subsection of the source image
 	:param sh: height of the subsection of the source image
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		logo = load('/q5js_logo.avif')
-		
+
 		def draw():
 			image(logo, -100, -100, 200, 200)
 	"""
@@ -314,60 +304,57 @@ def image(img: Image | object, dx: float | int, dy: float | int, dw: float | int
 def imageMode(mode: str) -> None:
 	"""🌆
 	Set to CORNER (default), CORNERS, or CENTER.
-	
+
 	Changes how inputs to image are interpreted.
-	
-	:param mode: 
-	
+
 	Example::
-	
+
 		Canvas(200)
 		logo = load('/q5js_logo.avif')
-		
+
 		def draw():
 			imageMode(CORNER)
-		
+
 			#    ( img,   x,   y,   w,   h)
 			image(logo, -50, -50, 100, 100)
 	"""
 	...
 
-def defaultImageScale(scale: float | int) -> float | int:
+def defaultImageScale(scale: float) -> float:
 	"""🌆
 	Sets the default image scale, which is applied to images when
 	they are drawn without a specified width or height.
-	
+
 	By default it is 0.5 so images appear at their actual size
 	when pixel density is 2. Images will be drawn at a consistent
 	default size relative to the canvas regardless of pixel density.
-	
+
 	This function must be called before images are loaded to
 	have an effect.
-	
-	:param scale: 
+
 	:returns: default image scale
 	"""
 	...
 
-def resize(w: float | int, h: float | int) -> None:
+def resize(w: float, h: float) -> None:
 	"""🌆
 	Resizes the image.
-	
+
 	:param w: new width
 	:param h: new height
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		logo = await load('/q5js_logo.avif')
-		
+
 		logo.resize(64, 64)
 		image(logo, -100, -100, 200, 200)
 	"""
 	...
 
-def trim() -> Image:
+def trim() -> Q5.Image:
 	"""🌆
 	Returns a trimmed image, cropping out transparent pixels from the edges.
 	"""
@@ -378,12 +365,12 @@ def smooth() -> None:
 	Enables smooth rendering of images displayed larger than
 	their actual size. This is the default setting, so running this
 	function only has an effect if noSmooth has been called.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		smooth()
-		
+
 		icon = await load('/q5js_icon.png')
 		image(icon, -100, -100, 200, 200)
 	"""
@@ -392,45 +379,45 @@ def smooth() -> None:
 def noSmooth() -> None:
 	"""🌆
 	Disables smooth image rendering for a pixelated look.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		noSmooth()
-		
+
 		icon = await load('/q5js_icon.png')
 		image(icon, -100, -100, 200, 200)
 	"""
 	...
 
-def tint(color: str | float | int) -> None:
+def tint(color: str | float) -> None:
 	"""🌆
 	Applies a tint (color overlay) to the drawing.
-	
+
 	The alpha value of the tint color determines the
 	strength of the tint. To change an image's opacity,
 	use the opacity function.
-	
+
 	Tinting affects all subsequent images drawn. The tint
 	color is applied to images using the "multiply" blend mode.
-	
+
 	Since the tinting process is performance intensive, each time
 	an image is tinted, q5 caches the result. image will draw the
 	cached tinted image unless the tint color has changed or the
 	image being tinted was edited.
-	
+
 	If you need to draw an image multiple times each frame with
 	different tints, consider making copies of the image and tinting
 	each copy separately.
-	
+
 	:param color: tint color
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		logo = await load('/q5js_logo.avif')
-		
+
 		tint(1, 0, 0, 0.5)
 		image(logo, -100, -100, 200, 200)
 	"""
@@ -442,25 +429,25 @@ def noTint() -> None:
 	"""
 	...
 
-def mask(img: Image) -> None:
+def mask(img: Q5.Image) -> None:
 	"""🌆
 	Masks the image with another image.
-	
+
 	:param img: image to use as a mask
 	"""
 	...
 
-def copy() -> Image:
+def copy() -> Q5.Image:
 	"""🌆
 	Returns a copy of the image.
 	"""
 	...
 
-def inset(sx: float | int, sy: float | int, sw: float | int, sh: float | int, dx: float | int, dy: float | int, dw: float | int, dh: float | int) -> None:
+def inset(sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: float, dh: float) -> None:
 	"""🌆
 	Displays a region of the image on another region of the image.
 	Can be used to create a detail inset, aka a magnifying glass effect.
-	
+
 	:param sx: x-coordinate of the source region
 	:param sy: y-coordinate of the source region
 	:param sw: width of the source region
@@ -469,70 +456,66 @@ def inset(sx: float | int, sy: float | int, sw: float | int, sh: float | int, dx
 	:param dy: y-coordinate of the destination region
 	:param dw: width of the destination region
 	:param dh: height of the destination region
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		logo = await load('/q5js_logo.avif')
-		
+
 		logo.inset(256, 256, 512, 512, 0, 0, 256, 256)
 		image(logo, -100, -100, 200, 200)
 	"""
 	...
 
-def get(x: float | int, y: float | int, w: float | int = ..., h: float | int = ...) -> Image | list[float | int]:
+def get(x: float, y: float, w: float = ..., h: float = ...) -> Q5.Image | list[float]:
 	"""🌆
 	Retrieves a subsection of an image or canvas as a new Q5 Image
 	or the color of a pixel in the image or canvas.
-	
+
 	If only x and y are specified, this function returns the color of the pixel
 	at the given coordinate in [R, G, B, A] array format. If loadPixels
 	has never been run, it's run by this function.
-	
+
 	If you make changes to the canvas or image, you must call loadPixels
 	before using this function to get current color data.
-	
+
 	Not applicable to WebGPU canvases.
-	
-	:param x: 
-	:param y: 
+
 	:param w: width of the area, default is 1
 	:param h: height of the area, default is 1
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		logo = await load('/q5js_logo.avif')
-		
+
 		cropped = logo.get(256, 256, 512, 512)
 		image(cropped, -100, -100, 200, 200)
 	"""
 	...
 
-def set(x: float | int, y: float | int, val: Any) -> None:
+def set(x: float, y: float, val: Any) -> None:
 	"""🌆
 	Sets a pixel's color in the image or canvas. Color mode must be RGB.
-	
+
 	Or if a canvas or image is provided, it's drawn on top of the
 	destination image or canvas, ignoring its tint setting.
-	
+
 	Run updatePixels to apply the changes.
-	
+
 	Not applicable to WebGPU canvases.
-	
-	:param x: 
-	:param y: 
+
 	:param val: color, canvas, or image
-	
+
 	Example::
-	
+
 		Canvas(200)
 		noSmooth()
 		c = color('lime')
 		img = createImage(50, 50)
-		
+
 		def draw():
 			img.set(random(50), random(50), c)
 			img.updatePixels()
@@ -540,7 +523,7 @@ def set(x: float | int, y: float | int, val: Any) -> None:
 	"""
 	...
 
-pixels: list[float | int]
+pixels: list[float]
 """🌆
 Array of pixel color data from a canvas or image.
 
@@ -557,23 +540,23 @@ left to right and top to bottom.
 def loadPixels() -> None:
 	"""🌆
 	Loads pixel data into pixels from the canvas or image.
-	
+
 	The example below sets some pixels' green channel
 	to a random value.
-	
+
 	Not applicable to WebGPU canvases.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		frameRate(5)
 		icon = load('/q5js_icon.png')
-		
+
 		def draw():
 			icon.loadPixels()
 			for i in range(0, len(icon.pixels), 16):
 				icon.pixels[i + 1] = random(255)
-		
+
 			icon.updatePixels()
 			background(icon)
 	"""
@@ -582,41 +565,41 @@ def loadPixels() -> None:
 def updatePixels() -> None:
 	"""🌆
 	Applies changes in the pixels array to the canvas or image.
-	
+
 	Not applicable to WebGPU canvases.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		c = color('pink')
-		
+
 		img = createImage(50, 50)
 		for x in range(0, 50, 3):
 			for y in range(0, 50, 3):
 				img.set(x, y, c)
-		
+
 		img.updatePixels()
-		
+
 		background(img)
 	"""
 	...
 
-def filter(type: str, value: float | int = ...) -> None:
+def filter(type: str, value: float = ...) -> None:
 	"""🌆
 	Applies a filter to the image.
-	
+
 	See the documentation for q5's filter constants below for more info.
-	
+
 	A CSS filter string can also be used.
 	https://developer.mozilla.org/docs/Web/CSS/filter
-	
+
 	Not applicable to WebGPU canvases.
-	
+
 	:param type: filter type or a CSS filter string
 	:param value: optional value, depends on filter type
-	
+
 	Example::
-	
+
 		Canvas(200)
 		logo = await load('/q5js_logo.avif')
 		logo.filter(INVERT)
@@ -664,84 +647,84 @@ BLUR: Literal[8]
 Applies a Gaussian blur to the image.
 """
 
-def createImage(w: float | int, h: float | int, opt: Any = ...) -> Image:
+def createImage(w: float, h: float, opt: Any = ...) -> Q5.Image:
 	"""🌆
 	Creates a new image.
-	
+
 	:param w: width
 	:param h: height
 	:param opt: optional settings for the image
 	"""
 	...
 
-def createGraphics(w: float | int, h: float | int, opt: dict = ...) -> Q5:
+def createGraphics(w: float, h: float, opt: dict = ...) -> Q5:
 	"""🌆
 	Creates a graphics buffer.
-	
+
 	Graphics looping is disabled by default in q5 WebGPU.
 	See issue #104 for details.
-	
+
 	:param w: width
 	:param h: height
 	:param opt: options
 	:returns: a new Q5 graphics buffer
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		g = createGraphics(100)
 		g.noLoop()
 		g.stroke('pink')
 		g.fill('red')
 		g.circle(50, 50, 120)
-		
+
 		image(g, -50, -50, 100, 100)
 	"""
 	...
 
 # 📘 text
 
-def text(str: str, x: float | int, y: float | int, wrapWidth: float | int = ..., lineLimit: float | int = ...) -> None:
+def text(str: str, x: float, y: float, wrapWidth: float = ..., lineLimit: float = ...) -> None:
 	"""📘
 	Renders text on the canvas.
-	
+
 	:param str: string of text to display
 	:param x: x-coordinate of the text's position
 	:param y: y-coordinate of the text's position
 	:param wrapWidth: maximum line width in characters
 	:param lineLimit: maximum number of lines
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background('silver')
-		
+
 		textSize(32)
 		text('Hello, world!', -88, 10)
 	"""
 	...
 
-def loadFont(url: str) -> object:
+def loadFont(url: str) -> Any:
 	"""📘
 	Loads a font from a URL.
-	
+
 	The first example below loads Robotica.
-	
+
 	The second example loads
 	Pacifico from Google fonts.
-	
+
 	By default, assets are loaded in parallel before q5 runs draw. Use await to wait for a font to load.
-	
+
 	:param url: URL of the font to load
 	:returns: font
-	
+
 	Example::
-	
+
 		Canvas(200, 56)
-		
+
 		await loadFont('/assets/Robotica.ttf')
-		
+
 		fill('skyblue')
 		textSize(64)
 		text('Hello!', -98, 24)
@@ -751,100 +734,100 @@ def loadFont(url: str) -> object:
 def textFont(fontName: str) -> None:
 	"""📘
 	Sets the current font to be used for rendering text.
-	
+
 	By default, the font is set to the CSS font family
 	"sans-serif" or the last font loaded.
-	
+
 	:param fontName: name of the font family or a FontFace object
-	
+
 	Example::
-	
+
 		Canvas(200, 160)
 		background(0.8)
-		
+
 		textFont('serif')
-		
+
 		text('Hello, world!', -96, 10)
 	"""
 	...
 
-def textSize(size: float | int = ...) -> float | int | None:
+def textSize(size: float = ...) -> float | None:
 	"""📘
 	Sets or gets the current font size. If no argument is provided, returns the current font size.
-	
+
 	:param size: size of the font in pixels
 	:returns: current font size when no argument is provided
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			textSize(abs(mouseX))
 			text('A', -90, 90)
 	"""
 	...
 
-def textLeading(leading: float | int = ...) -> float | int | None:
+def textLeading(leading: float = ...) -> float | None:
 	"""📘
 	Sets or gets the current line height. If no argument is provided, returns the current line height.
-	
+
 	:param leading: line height in pixels
 	:returns: current line height when no argument is provided
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			textSize(abs(mouseX))
 			text('A', -90, 90)
 			rect(-90, 90, 5, -textLeading())
 	"""
 	...
 
-def textStyle(style: Literal['normal'] | Literal['italic'] | Literal['bold'] | Literal['bolditalic']) -> None:
+def textStyle(style: Literal['normal', 'italic', 'bold', 'bolditalic']) -> None:
 	"""📘
 	Sets the current text style.
-	
+
 	:param style: font style
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		textStyle(ITALIC)
-		
+
 		textSize(32)
 		text('Hello, world!', -88, 6)
 	"""
 	...
 
-def textAlign(horiz: Literal['left'] | Literal['center'] | Literal['right'], vert: Literal['top'] | Literal['middle'] | Literal['bottom'] | Literal['alphabetic'] = ...) -> None:
+def textAlign(horiz: Literal['left', 'center', 'right'], vert: Literal['top', 'middle', 'bottom', 'alphabetic'] = ...) -> None:
 	"""📘
 	Sets the horizontal and vertical alignment of text.
-	
+
 	Alignment constants like CENTER can be used with this function.
-	
+
 	:param horiz: horizontal alignment
 	:param vert: vertical alignment
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		textSize(32)
-		
+
 		textAlign(CENTER, CENTER)
 		text('Hello, world!', 0, 0)
 	"""
 	...
 
-def textWeight(weight: float | int | str) -> None:
+def textWeight(weight: float | str) -> None:
 	"""📘
 	Sets the text weight.
-	
+
 	- 100: thin
 	- 200: extra-light
 	- 300: light
@@ -854,170 +837,174 @@ def textWeight(weight: float | int | str) -> None:
 	- 700: bold
 	- 800: bolder/extra-bold
 	- 900: black/heavy
-	
+
 	:param weight: font weight
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		textSize(32)
 		textAlign(CENTER, CENTER)
-		
+
 		textWeight(100)
 		text('Hello, world!', 0, 0)
 	"""
 	...
 
-def textWidth(str: str) -> float | int:
+def textWidth(str: str) -> float:
 	"""📘
 	Calculates and returns the width of a given string of text.
-	
+
 	:param str: string to measure
 	:returns: width of the text in pixels
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			textSize(abs(mouseX))
 			rect(-90, 90, textWidth('A'), -textLeading())
 			text('A', -90, 90)
 	"""
 	...
 
-def textAscent(str: str) -> float | int:
+def textAscent(str: str) -> float:
 	"""📘
 	Calculates and returns the ascent (the distance from the baseline to the top of the highest character) of the current font.
-	
+
 	:param str: string to measure
 	:returns: ascent of the text in pixels
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			textSize(abs(mouseX))
 			rect(-90, 90, textWidth('A'), -textAscent())
 			text('A', -90, 90)
 	"""
 	...
 
-def textDescent(str: str) -> float | int:
+def textDescent(str: str) -> float:
 	"""📘
 	Calculates and returns the descent (the distance from the baseline to the bottom of the lowest character) of the current font.
-	
+
 	:param str: string to measure
 	:returns: descent of the text in pixels
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		textSize(64)
-		
+
 		rect(-100, 0, 200, textDescent('q5'))
 		text('q5', -90, 0)
 	"""
 	...
 
-def createTextImage(str: str, wrapWidth: float | int = ..., lineLimit: float | int = ...) -> Image:
+def createTextImage(str: str, wrapWidth: float = ..., lineLimit: float = ...) -> Q5.Image:
 	"""📘
 	Creates an image from a string of text.
-	
+
 	:param str: string of text
 	:param wrapWidth: maximum line width in characters
 	:param lineLimit: maximum number of lines
 	:returns: an image object representing the rendered text
-	
+
 	Example::
-	
+
 		Canvas(200)
 		textSize(96)
-		
+
 		img = createTextImage('🐶')
 		img.filter(INVERT)
-		
+
 		def draw():
 			image(img, -45, -90)
 	"""
 	...
 
-def textImage(img: Image | str, x: float | int, y: float | int) -> None:
+def textImage(img: Q5.Image | str, x: float, y: float) -> None:
 	"""📘
 	Renders an image generated from text onto the canvas.
-	
+
 	If the first parameter is a string, an image of the text will be
 	created and cached automatically.
-	
+
 	The positioning of the image is affected by the current text
 	alignment and baseline settings.
-	
+
 	:param img: image or text
 	:param x: x-coordinate where the image should be placed
 	:param y: y-coordinate where the image should be placed
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		textSize(96)
 		textAlign(CENTER, CENTER)
-		
+
 		textImage('🐶', 0, 0)
 	"""
 	...
 
-def textToPoints(str: str) -> None:
+def textToPoints(str: str, x: float = ..., y: float = ..., sampleRate: float = ..., density: float = ...) -> list[Any]:
 	"""📘
 	Converts a string of text to an array of points.
-	
+
 	Samples opaque pixels in a text image made with createTextImage.
-	
+
 	It's influenced by text settings, such as font, size, and alignment.
-	
+
 	Uses a Z-order curve to improve spatial distribution, which preserves the shape of text better than purely random sampling.
-	
+
 	:param str: string of text
-	
+	:param x: x coordinate of the text position
+	:param y: y coordinate of the text position
+	:param sampleRate: lower values increase dithering (1 = all points, 0.1 = ~10% of points)
+	:param density: pixel density of the text
+
 	Example::
-	
+
 		Canvas(200)
 		textSize(220)
 		textAlign(CENTER, CENTER)
-		
+
 		points = textToPoints('5')
-		
+
 		for pt in points:
 			rect(pt.x, pt.y, 5, 20)
 	"""
 	...
 
 @overload
-def nf(n: float | int, l: float | int, r: float | int) -> str: 
+def nf(n: float, l: float, r: float) -> str:
 	"""📘
 	Number formatter, can be used to display a number as a string with
 	a specified number of digits before and after the decimal point,
 	optionally adding padding with zeros.
-	
+
 	:param n: number to format
 	:param l: minimum number of digits to appear before the decimal point; the number is padded with zeros if necessary
 	:param r: number of digits to appear after the decimal point
 	:returns: a string representation of the number, formatted accordingly
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
-		
+
 		textSize(32)
 		text(nf(PI, 4, 5), -90, 10)
 	"""
 	...
 @overload
-def nf(num: float | int, digits: float | int) -> str: ...
+def nf(num: float, digits: float) -> str: ...
 
 NORMAL: Literal['normal']
 """📘
@@ -1090,7 +1077,7 @@ by responding to input events inside functions like
 mousePressed and keyPressed.
 """
 
-mouseX: float | int
+mouseX: float
 """🖲
 Current X position of the mouse.
 
@@ -1102,7 +1089,7 @@ Example::
 		text(round(mouseX), -50, 20)
 """
 
-mouseY: float | int
+mouseY: float
 """🖲
 Current Y position of the mouse.
 
@@ -1113,12 +1100,12 @@ Example::
 		circle(0, mouseY, 100)
 """
 
-pmouseX: float | int
+pmouseX: float
 """🖲
 Previous X position of the mouse.
 """
 
-pmouseY: float | int
+pmouseY: float
 """🖲
 Previous Y position of the mouse.
 """
@@ -1151,12 +1138,12 @@ Example::
 def mousePressed() -> None:
 	"""🖲
 	Define this function to respond to mouse down events.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def mousePressed():
 			global gray
 			background(gray % 1)
@@ -1167,12 +1154,12 @@ def mousePressed() -> None:
 def mouseReleased() -> None:
 	"""🖲
 	Define this function to respond to mouse up events.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def mouseReleased():
 			global gray
 			background(gray % 1)
@@ -1183,15 +1170,15 @@ def mouseReleased() -> None:
 def mouseMoved() -> None:
 	"""🖲
 	Define this function to respond to mouse move events.
-	
+
 	On touchscreen devices this function is not called
 	when the user drags their finger on the screen.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def mouseMoved():
 			global gray
 			background(gray % 1)
@@ -1202,15 +1189,15 @@ def mouseMoved() -> None:
 def mouseDragged() -> None:
 	"""🖲
 	Define this function to respond to mouse drag events.
-	
+
 	Dragging the mouse is defined as moving the mouse
 	while a mouse button is pressed.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def mouseDragged():
 			global gray
 			background(gray % 1)
@@ -1221,12 +1208,12 @@ def mouseDragged() -> None:
 def doubleClicked() -> None:
 	"""🖲
 	Define this function to respond to mouse double click events.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def doubleClicked():
 			global gray
 			background(gray % 1)
@@ -1261,15 +1248,15 @@ def keyIsDown(key: str) -> bool:
 	"""🖲
 	Returns true if the user is pressing the specified key, false
 	otherwise. Accepts case-insensitive key names.
-	
+
 	:param key: key to check
 	:returns: true if the key is pressed, false otherwise
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			if keyIsDown('f') and keyIsDown('j'):
 				rect(-50, -50, 100, 100)
 	"""
@@ -1278,12 +1265,12 @@ def keyIsDown(key: str) -> bool:
 def keyPressed() -> None:
 	"""🖲
 	Define this function to respond to key down events.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def keyPressed():
 			global gray
 			background(gray % 1)
@@ -1294,12 +1281,12 @@ def keyPressed() -> None:
 def keyReleased() -> None:
 	"""🖲
 	Define this function to respond to key up events.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def keyReleased():
 			global gray
 			background(gray % 1)
@@ -1328,15 +1315,15 @@ def touchStarted() -> None:
 	"""🖲
 	Define this function to respond to touch down events
 	on the canvas.
-	
+
 	Return true to enable touch gestures like pinch-to-zoom
 	and scroll, which q5 disables on the canvas by default.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def touchStarted():
 			global gray
 			background(gray % 1)
@@ -1348,15 +1335,15 @@ def touchEnded() -> None:
 	"""🖲
 	Define this function to respond to touch down events
 	on the canvas.
-	
+
 	Return true to enable touch gestures like pinch-to-zoom
 	and scroll, which q5 disables on the canvas by default.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def touchEnded():
 			global gray
 			background(gray % 1)
@@ -1368,15 +1355,15 @@ def touchMoved() -> None:
 	"""🖲
 	Define this function to respond to touch move events
 	on the canvas.
-	
+
 	Return true to enable touch gestures like pinch-to-zoom
 	and scroll, which q5 disables on the canvas by default.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		gray = 0.4
-		
+
 		def touchMoved():
 			global gray
 			background(gray % 1)
@@ -1384,18 +1371,18 @@ def touchMoved() -> None:
 	"""
 	...
 
-def cursor(name: str, x: float | int = ..., y: float | int = ...) -> None:
+def cursor(name: str, x: float = ..., y: float = ...) -> None:
 	"""🖲
 	Sets the cursor to a CSS cursor type or image.
 	If an image is provided, optional x and y coordinates can
 	specify the active point of the cursor.
-	
+
 	:param name: name of the cursor or the url to an image
 	:param x: x-coordinate of the cursor's point
 	:param y: y-coordinate of the cursor's point
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		cursor('pointer')
 	"""
@@ -1404,30 +1391,30 @@ def cursor(name: str, x: float | int = ..., y: float | int = ...) -> None:
 def noCursor() -> None:
 	"""🖲
 	Hides the cursor within the bounds of the canvas.
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		noCursor()
 	"""
 	...
 
-def mouseWheel() -> None:
+def mouseWheel(event: Any) -> None:
 	"""🖲
 	Define this function to respond to mouse wheel events.
-	
+
 	event.deltaX and event.deltaY are the horizontal and vertical
 	scroll amounts, respectively.
-	
+
 	Return true to allow the default behavior of scrolling the page.
-	
+
 	Example::
-	
+
 		x = 0
 		y = 0
 		def draw():
 			circle(x, y, 10)
-		
+
 		def mouseWheel(e):
 			global x, y
 			x += e.deltaX
@@ -1436,7 +1423,7 @@ def mouseWheel() -> None:
 	"""
 	...
 
-movedX: float | int
+movedX: float
 """🖲
 Distance the mouse has moved since the last frame in the horizontal direction.
 
@@ -1448,7 +1435,7 @@ Example::
 		if movedX < 0: text('<<', 0, 0)
 """
 
-movedY: float | int
+movedY: float
 """🖲
 Distance the mouse has moved since the last frame in the vertical direction.
 
@@ -1464,18 +1451,18 @@ def pointerLock(unadjustedMovement: bool) -> None:
 	"""🖲
 	Requests that the pointer be locked to the document body, hiding
 	the cursor and allowing for unlimited movement.
-	
+
 	Operating systems enable mouse acceleration by default, which is useful when you sometimes want slow precise movement (think about you might use a graphics package), but also want to move great distances with a faster mouse movement (think about scrolling, and selecting several files). For some games however, raw mouse input data is preferred for controlling camera rotation — where the same distance movement, fast or slow, results in the same rotation.
-	
+
 	To exit pointer lock mode, call document.exitPointerLock().
-	
+
 	:param unadjustedMovement: set to true to disable OS-level mouse acceleration and access raw mouse input
-	
+
 	Example::
-	
+
 		def draw():
 			circle(mouseX / 10, mouseY / 10, 10)
-		
+
 		def doubleClicked():
 			if not document.pointerLockElement:
 				pointerLock()
@@ -1486,28 +1473,28 @@ def pointerLock(unadjustedMovement: bool) -> None:
 
 # 🎨 color
 
-def color(c0: str | float | int | Color | list[float | int], c1: float | int = ..., c2: float | int = ..., c3: float | int = ...) -> Color:
+def color(c0: str | float | Color | list[float], c1: float = ..., c2: float = ..., c3: float = ...) -> Color:
 	"""🎨
 	Creates a new Color object, which is primarily useful for storing
 	a color that your sketch will reuse or modify later.
-	
+
 	With the default color mode, RGB, colors have r/red, g/green,
 	b/blue, and a/alpha components.
-	
+
 	The fill, stroke, and background
 	functions accept the same wide range of color representations as this function.
-	
+
 	:param c0: color or first color component
 	:param c1: second color component
 	:param c2: third color component
 	:param c3: fourth color component (alpha)
 	:returns: a new Color object
-	
+
 	Example::
-	
+
 		Canvas(200)
 		rect(-100, -100, 100, 200)
-		
+
 		#             ( r,   g,   b,   a)
 		bottle = color(0.35, 0.39, 1, 0.4)
 		fill(bottle)
@@ -1517,21 +1504,21 @@ def color(c0: str | float | int | Color | list[float | int], c1: float | int = .
 	"""
 	...
 
-def colorMode(mode: Literal['rgb'] | Literal['oklch'] | Literal['hsl'] | Literal['hsb'], format: Literal[1] | Literal[255], gamut: Literal['srgb'] | Literal['display-p3'] = ...) -> None:
+def colorMode(mode: Literal['rgb', 'oklch', 'hsl', 'hsb'], format: Literal[1, 255] = ..., gamut: Literal['srgb', 'display-p3'] = ...) -> None:
 	"""🎨
 	Sets the color mode for the sketch, which changes how colors are
 	interpreted and displayed.
-	
+
 	Color gamut is 'display-p3' by default, if the device supports HDR.
-	
+
 	:param mode: color mode
 	:param format: color format (1 for float, 255 for integer)
 	:param gamut: color gamut
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		colorMode(RGB, 1)
 		fill(1, 0, 0)
 		rect(-100, -100, 66, 200)
@@ -1554,9 +1541,9 @@ legacy integer 0-255 format.
 Example::
 
 	Canvas(200, 100)
-	
+
 	colorMode(RGB)
-	
+
 	background(1, 0, 0)
 """
 
@@ -1588,9 +1575,9 @@ in-gamut colors.
 Example::
 
 	Canvas(200, 100)
-	
+
 	colorMode(OKLCH)
-	
+
 	background(0.64, 0.3, 30)
 """
 
@@ -1618,9 +1605,9 @@ using the "display-p3" color space.
 Example::
 
 	Canvas(200, 100)
-	
+
 	colorMode(HSL)
-	
+
 	background(0, 100, 50)
 """
 
@@ -1642,9 +1629,9 @@ to 100 and saturation to 0.
 Example::
 
 	Canvas(200, 100)
-	
+
 	colorMode(HSB)
-	
+
 	background(0, 100, 100)
 """
 
@@ -1659,9 +1646,9 @@ an SDR display.
 Example::
 
 	Canvas(200, 100)
-	
+
 	colorMode(RGB, 1, SRGB)
-	
+
 	background(1, 0, 0)
 """
 
@@ -1677,124 +1664,127 @@ fully saturated and bright in the following example.
 Example::
 
 	Canvas(200, 100)
-	
+
 	colorMode(RGB, 1, DISPLAY_P3)
-	
+
 	background(1, 0, 0)
 """
 
 @overload
-def background(filler: str | float | int | Color | Image) -> None: 
+def background(filler: str | float | Color | Q5.Image) -> None:
 	"""🎨
 	Draws over the entire canvas with a color or image.
-	
+
 	Like the color function,
 	this function can accept colors in a wide range of formats:
 	CSS color string, grayscale value, and color component values.
-	
+
 	:param filler: color or image
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background('crimson')
 	"""
 	...
 @overload
-def background(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
+def background(c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
 
 class Color:
 	"""🎨
 	This constructor strictly accepts 4 numbers, which are the color
 	components.
-	
+
 	Use the color function for greater flexibility, it runs
 	this constructor internally.
 	"""
 
+	def __init__(self, c0: float, c1: float, c2: float, c3: float) -> None: ...
 
-	def equals(self) -> bool:
+	def equals(self, other: Color) -> bool:
 		"""🎨 Checks if this color is exactly equal to another color."""
 		...
 
-	def isSameColor(self) -> bool:
-		"""🎨 Checks if the color is the same as another color,
-disregarding their alpha values."""
+	def isSameColor(self, other: Color) -> bool:
+		"""🎨
+		Checks if the color is the same as another color,
+		disregarding their alpha values.
+		"""
 		...
 
 	def toString(self) -> str:
 		"""🎨 Produces a CSS color string representation."""
 		...
 
-	levels: list[float | int]
+	levels: list[float]
 	"""🎨 An array of the color's components."""
 
 # 💅 styles
 
 @overload
-def fill(color: str | float | int | Color) -> None: 
+def fill(color: str | float | Color) -> None:
 	"""💅
 	Sets the fill color. The default is white.
-	
+
 	Like the color function, this function
 	can accept colors in a wide range of formats: as a CSS color string,
 	a Color object, grayscale value, or color component values.
-	
+
 	:param color: fill color
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		fill('red')
 		circle(-20, -20, 80)
-		
+
 		fill('lime')
 		square(-20, -20, 80)
 	"""
 	...
 @overload
-def fill(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
+def fill(c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
 
 @overload
-def stroke(color: str | float | int | Color) -> None: 
+def stroke(color: str | float | Color) -> None:
 	"""💅
 	Sets the stroke (outline) color. The default is black.
-	
+
 	Like the color function, this function
 	can accept colors in a wide range of formats: as a CSS color string,
 	a Color object, grayscale value, or color component values.
-	
+
 	:param color: stroke color
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		fill(0.14)
-		
+
 		stroke('red')
 		circle(-20, -20, 80)
-		
+
 		stroke('lime')
 		square(-20, -20, 80)
 	"""
 	...
 @overload
-def stroke(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
+def stroke(c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
 
 def noFill() -> None:
 	"""💅
 	After calling this function, drawing will not be filled.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		noFill()
-		
+
 		stroke('red')
 		circle(-20, -20, 80)
 		stroke('lime')
@@ -1805,95 +1795,95 @@ def noFill() -> None:
 def noStroke() -> None:
 	"""💅
 	After calling this function, drawing will not have a stroke (outline).
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		fill(0.14)
 		stroke('red')
 		circle(-20, -20, 80)
-		
+
 		noStroke()
 		square(-20, -20, 80)
 	"""
 	...
 
-def strokeWeight(weight: float | int) -> None:
+def strokeWeight(weight: float) -> None:
 	"""💅
 	Sets the size of the stroke used for lines and the border around drawings.
-	
+
 	:param weight: size of the stroke in pixels
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		stroke('red')
 		circle(-50, 0, 80)
-		
+
 		strokeWeight(12)
 		circle(50, 0, 80)
 	"""
 	...
 
-def opacity(alpha: float | int) -> None:
+def opacity(alpha: float) -> None:
 	"""💅
 	Sets the global opacity, which affects all subsequent drawing operations, except background. Default is 1, fully opaque.
-	
+
 	In q5 WebGPU this function only affects images.
-	
+
 	:param alpha: opacity level, ranging from 0 to 1
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		opacity(1)
 		circle(-20, -20, 80)
-		
+
 		opacity(0.2)
 		square(-20, -20, 80)
 	"""
 	...
 
 @overload
-def shadow(color: str | float | int | Color) -> None: 
+def shadow(color: str | float | Color) -> None:
 	"""💅
 	Sets the shadow color. The default is transparent (no shadow).
-	
+
 	Shadows apply to anything drawn to the canvas, including filled
 	shapes, strokes, text, and images.
-	
+
 	Like the color function, this function
 	can accept colors in a wide range of formats: as a CSS color string,
 	a Color object, grayscale value, or color component values.
-	
+
 	Not available in q5 WebGPU.
-	
+
 	:param color: shadow color
 	"""
 	...
 @overload
-def shadow(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
+def shadow(c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
 
 def noShadow() -> None:
 	"""💅
 	Disables the shadow effect.
-	
+
 	Not available in q5 WebGPU.
 	"""
 	...
 
-def shadowBox(offsetX: float | int, offsetY: float | int, blur: float | int) -> None:
+def shadowBox(offsetX: float, offsetY: float, blur: float = ...) -> None:
 	"""💅
 	Sets the shadow offset and blur radius.
-	
+
 	When q5 starts, shadow offset is (10, 10) with a blur of 10.
-	
+
 	Not available in q5 WebGPU.
-	
+
 	:param offsetX: horizontal offset of the shadow
 	:param offsetY: vertical offset of the shadow, defaults to be the same as offsetX
 	:param blur: blur radius of the shadow, defaults to 0
@@ -1903,27 +1893,26 @@ def shadowBox(offsetX: float | int, offsetY: float | int, blur: float | int) -> 
 def blendMode(val: str) -> None:
 	"""💅
 	Set the global composite operation for the canvas context.
-	
+
 	Not available in q5 WebGPU.
-	
+
 	:param val: composite operation
 	"""
 	...
 
 def strokeCap(val: str) -> None:
 	"""💅
-	
 	:param val: line cap style
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		strokeWeight(20)
-		
+
 		strokeCap(SQUARE)
 		line(-50, -25, 50, -25)
-		
+
 		strokeCap(PROJECT)
 		line(-50, 25, 50, 25)
 	"""
@@ -1931,30 +1920,29 @@ def strokeCap(val: str) -> None:
 
 def strokeJoin(val: str) -> None:
 	"""💅
-	
 	:param val: line join style
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		strokeWeight(10)
-		
+
 		strokeJoin(ROUND)
 		triangle(-50, -30, 50, -30, -50, 20)
-		
+
 		strokeJoin(MITER)
 		triangle(50, 0, -50, 50, 50, 50)
 	"""
 	...
 
-def erase(fillAlpha: float | int = ..., strokeAlpha: float | int = ...) -> None:
+def erase(fillAlpha: float = ..., strokeAlpha: float = ...) -> None:
 	"""💅
 	Sets the canvas to erase mode, where shapes will erase what's
 	underneath them instead of drawing over it.
-	
+
 	Not available in q5 WebGPU.
-	
+
 	:param fillAlpha: opacity level of the fill color
 	:param strokeAlpha: opacity level of the stroke color
 	"""
@@ -1963,7 +1951,7 @@ def erase(fillAlpha: float | int = ..., strokeAlpha: float | int = ...) -> None:
 def noErase() -> None:
 	"""💅
 	Resets the canvas from erase mode to normal drawing mode.
-	
+
 	Not available in q5 WebGPU.
 	"""
 	...
@@ -1971,20 +1959,20 @@ def noErase() -> None:
 def pushStyles() -> None:
 	"""💅
 	Saves the current drawing style settings.
-	
+
 	This includes the fill, stroke, stroke weight, tint, image mode,
 	rect mode, ellipse mode, text size, text align, text baseline, and
 	shadow settings.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		pushStyles()
 		fill('blue')
 		circle(-50, -50, 80)
-		
+
 		popStyles()
 		circle(50, 50, 80)
 	"""
@@ -1993,16 +1981,16 @@ def pushStyles() -> None:
 def popStyles() -> None:
 	"""💅
 	Restores the previously saved drawing style settings.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		pushStyles()
 		fill('blue')
 		circle(-50, -50, 80)
-		
+
 		popStyles()
 		circle(50, 50, 80)
 	"""
@@ -2011,13 +1999,13 @@ def popStyles() -> None:
 def clear() -> None:
 	"""💅
 	Clears the canvas, making every pixel completely transparent.
-	
+
 	Note that the canvas can only be seen through if it has an alpha channel.
-	
+
 	Example::
-	
+
 		Canvas(200, { 'alpha': True })
-		
+
 		def draw():
 			clear()
 			circle((frameCount % 200) - 100, 0, 80)
@@ -2034,24 +2022,24 @@ other advanced drawing features.
 Not available in q5 WebGPU.
 """
 
-def inFill(x: float | int, y: float | int) -> bool:
+def inFill(x: float, y: float) -> bool:
 	"""💅
 	Checks if a given point is within the current path's fill area.
-	
+
 	Not available in q5 WebGPU.
-	
+
 	:param x: x-coordinate of the point
 	:param y: y-coordinate of the point
 	:returns: true if the point is within the fill area, false otherwise
 	"""
 	...
 
-def inStroke(x: float | int, y: float | int) -> bool:
+def inStroke(x: float, y: float) -> bool:
 	"""💅
 	Checks if a given point is within the current path's stroke.
-	
+
 	Not available in q5 WebGPU.
-	
+
 	:param x: x-coordinate of the point
 	:param y: y-coordinate of the point
 	:returns: true if the point is within the stroke, false otherwise
@@ -2060,113 +2048,106 @@ def inStroke(x: float | int, y: float | int) -> bool:
 
 # 🦋 transforms
 
-def translate(x: float | int, y: float | int) -> None:
+def translate(x: float, y: float) -> None:
 	"""🦋
 	Translates the origin of the drawing context.
-	
+
 	:param x: translation along the x-axis
 	:param y: translation along the y-axis
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			translate(50, 50)
 			circle(0, 0, 80)
 	"""
 	...
 
-def rotate(angle: float | int) -> None:
+def rotate(angle: float) -> None:
 	"""🦋
 	Rotates the drawing context.
-	
+
 	:param angle: rotation angle in radians
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			rotate(mouseX / 50)
-		
+
 			rectMode(CENTER)
 			square(0, 0, 120)
 	"""
 	...
 
-def scale(x: float | int, y: float | int = ...) -> None:
+def scale(x: float, y: float = ...) -> None:
 	"""🦋
 	Scales the drawing context.
-	
+
 	If only one input parameter is provided,
 	the drawing context will be scaled uniformly.
-	
+
 	:param x: scaling factor along the x-axis
 	:param y: scaling factor along the y-axis
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			scale(mouseX / 10)
 			circle(0, 0, 20)
 	"""
 	...
 
-def shearX(angle: float | int) -> None:
+def shearX(angle: float) -> None:
 	"""🦋
 	Shears the drawing context along the x-axis.
-	
+
 	:param angle: shear angle in radians
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			translate(-75, -40)
 			shearX(mouseX / 100)
 			square(0, 0, 80)
 	"""
 	...
 
-def shearY(angle: float | int) -> None:
+def shearY(angle: float) -> None:
 	"""🦋
 	Shears the drawing context along the y-axis.
-	
+
 	:param angle: shear angle in radians
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			translate(-75, -40)
 			shearY(mouseX / 100)
 			square(0, 0, 80)
 	"""
 	...
 
-def applyMatrix(a: float | int, b: float | int, c: float | int, d: float | int, e: float | int, f: float | int) -> None:
+def applyMatrix(a: float, b: float, c: float, d: float, e: float, f: float) -> None:
 	"""🦋
 	Applies a transformation matrix.
-	
+
 	Accepts a 3x3 matrix as either an array or multiple arguments.
-	
-	:param a: 
-	:param b: 
-	:param c: 
-	:param d: 
-	:param e: 
-	:param f: 
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			applyMatrix(2, -1, 1, -1)
 			circle(0, 0, 80)
 	"""
@@ -2175,18 +2156,18 @@ def applyMatrix(a: float | int, b: float | int, c: float | int, d: float | int, 
 def resetMatrix() -> None:
 	"""🦋
 	Resets the transformation matrix.
-	
+
 	q5 runs this function before every time the draw function is run,
 	so that transformations don't carry over to the next frame.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		translate(50, 50)
 		circle(0, 0, 80)
-		
+
 		resetMatrix()
 		square(0, 0, 50)
 	"""
@@ -2195,17 +2176,17 @@ def resetMatrix() -> None:
 def pushMatrix() -> None:
 	"""🦋
 	Saves the current transformation matrix.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		pushMatrix()
 		rotate(QUARTER_PI)
 		ellipse(0, 0, 120, 40)
 		popMatrix()
-		
+
 		ellipse(0, 0, 120, 40)
 	"""
 	...
@@ -2213,17 +2194,17 @@ def pushMatrix() -> None:
 def popMatrix() -> None:
 	"""🦋
 	Restores the previously saved transformation matrix.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		pushMatrix()
 		rotate(QUARTER_PI)
 		ellipse(0, 0, 120, 40)
 		popMatrix()
-		
+
 		ellipse(0, 0, 120, 40)
 	"""
 	...
@@ -2231,17 +2212,17 @@ def popMatrix() -> None:
 def push() -> None:
 	"""🦋
 	Saves the current drawing style settings and transformations.
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		push()
 		fill('blue')
 		translate(50, 50)
 		circle(0, 0, 80)
 		pop()
-		
+
 		square(0, 0, 50)
 	"""
 	...
@@ -2249,37 +2230,37 @@ def push() -> None:
 def pop() -> None:
 	"""🦋
 	Restores the previously saved drawing style settings and transformations.
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		push()
 		fill('blue')
 		translate(50, 50)
 		circle(0, 0, 80)
 		pop()
-		
+
 		square(0, 0, 50)
 	"""
 	...
 
 # 💻 display
 
-def displayMode(mode: str, renderQuality: str, scale: float | int) -> None:
+def displayMode(mode: str, renderQuality: str = ..., scale: str | float = ...) -> None:
 	"""💻
 	Customize how your canvas is presented.
-	
+
 	:param mode: NORMAL, CENTER, or MAXED
 	:param renderQuality: SMOOTH or PIXELATED
 	:param scale: can also be given as a string (for example "x2")
-	
+
 	Example::
-	
+
 		Canvas(50, 25)
-		
+
 		displayMode(CENTER, PIXELATED, 4)
-		
+
 		circle(0, 0, 16)
 	"""
 	...
@@ -2309,12 +2290,12 @@ Pixels are rendered as sharp squares if the canvas is scaled.
 def fullscreen(v: bool = ...) -> None:
 	"""💻
 	Enables or disables fullscreen mode.
-	
+
 	:param v: boolean indicating whether to enable or disable fullscreen mode
 	"""
 	...
 
-windowWidth: float | int
+windowWidth: float
 """💻
 The width of the window.
 
@@ -2327,7 +2308,7 @@ Example::
 		text(windowWidth, 0, 0)
 """
 
-windowHeight: float | int
+windowHeight: float
 """💻
 The height of the window.
 
@@ -2340,7 +2321,7 @@ Example::
 		text(windowHeight, 0, 0)
 """
 
-width: float | int
+width: float
 """💻
 The width of the canvas.
 
@@ -2350,7 +2331,7 @@ Example::
 	circle(0, 0, width)
 """
 
-height: float | int
+height: float
 """💻
 The height of the canvas.
 
@@ -2360,7 +2341,7 @@ Example::
 	circle(0, 0, height)
 """
 
-halfWidth: float | int
+halfWidth: float
 """💻
 Half the width of the canvas.
 
@@ -2370,7 +2351,7 @@ Example::
 	circle(0, 0, halfWidth)
 """
 
-halfHeight: float | int
+halfHeight: float
 """💻
 Half the height of the canvas.
 
@@ -2380,31 +2361,31 @@ Example::
 	circle(0, 0, halfHeight)
 """
 
-canvas: object
+canvas: Any
 """💻
 The canvas element associated with the Q5 instance.
 """
 
-def resizeCanvas(w: float | int, h: float | int) -> None:
+def resizeCanvas(w: float, h: float) -> None:
 	"""💻
 	Resizes the canvas to the specified width and height.
-	
+
 	:param w: width of the canvas
 	:param h: height of the canvas
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
-		
+
 		def draw():
 			background(0.8)
-		
+
 		def mousePressed():
 			resizeCanvas(200, 200)
 	"""
 	...
 
-frameCount: float | int
+frameCount: float
 """💻
 The number of frames that have been displayed since the program started.
 
@@ -2419,32 +2400,32 @@ Example::
 def noLoop() -> None:
 	"""💻
 	Stops the draw loop.
-	
+
 	Example::
-	
+
 		def draw():
 			circle(frameCount * 5 - 100, 0, 80)
 			noLoop()
 	"""
 	...
 
-def redraw(n: float | int = ...) -> None:
+async def redraw(n: float = ...) -> None:
 	"""💻
 	Redraws the canvas n times. If no input parameter is provided,
 	it calls the draw function once.
-	
+
 	This is an async function.
-	
+
 	:param n: number of times to redraw the canvas, default is 1
-	
+
 	Example::
-	
+
 		Canvas(200)
 		noLoop()
-		
+
 		def draw():
 			circle(frameCount * 5 - 100, 0, 80)
-		
+
 		def mousePressed():
 			redraw(10)
 	"""
@@ -2453,75 +2434,77 @@ def redraw(n: float | int = ...) -> None:
 def loop() -> None:
 	"""💻
 	Starts the draw loop again if it was stopped.
-	
+
 	Example::
-	
+
 		Canvas(200)
 		noLoop()
-		
+
 		def draw():
 			circle(frameCount * 5 - 100, 0, 80)
-		
+
 		def mousePressed():
 			loop()
 	"""
 	...
 
-def frameRate(hertz: float | int = ...) -> float | int:
+def frameRate(hertz: float = ...) -> float:
 	"""💻
 	Sets the target frame rate or gets an approximation of the
 	sketch's current frame rate.
-	
+
 	Even when the sketch is running at a consistent frame rate,
 	the current frame rate value will fluctuate. Use your web browser's
 	developer tools for more accurate performance analysis.
-	
+
 	:param hertz: target frame rate, default is 60
 	:returns: current frame rate
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
-		
+
 			if mouseIsPressed: frameRate(10)
 			else: frameRate(60)
-		
+
 			circle((frameCount % 200) - 100, 0, 80)
 	"""
 	...
 
-def getTargetFrameRate() -> float | int:
+def getTargetFrameRate() -> float:
 	"""💻
 	The desired frame rate of the sketch.
+
 	:returns: target frame rate
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
 			textSize(64)
-		
+
 			text(getTargetFrameRate(), -35, 20)
 	"""
 	...
 
-def getFPS() -> float | int:
+def getFPS() -> float:
 	"""💻
 	Gets the current FPS, in terms of how many frames could be generated
 	in one second, which can be higher than the target frame rate.
-	
+
 	Use your web browser's developer tools for more in-depth
 	performance analysis.
+
 	:returns: frames per second
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
 			frameRate(1)
 			textSize(64)
-		
+
 			text(getFPS(), -92, 20)
 	"""
 	...
@@ -2529,7 +2512,7 @@ def getFPS() -> float | int:
 def postProcess() -> None:
 	"""💻
 	Runs after each draw function call and post-draw q5 addon processes, if any.
-	
+
 	Useful for adding post-processing effects when it's not possible
 	to do so at the end of the draw function, such as when using
 	addons like q5play that auto-draw to the canvas after the draw
@@ -2537,15 +2520,15 @@ def postProcess() -> None:
 	"""
 	...
 
-def pixelDensity(v: float | int) -> float | int:
+def pixelDensity(v: float) -> float:
 	"""💻
 	Sets the pixel density of the canvas.
-	
+
 	:param v: pixel density value
 	:returns: pixel density
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		pixelDensity(1)
@@ -2553,15 +2536,16 @@ def pixelDensity(v: float | int) -> float | int:
 	"""
 	...
 
-def displayDensity() -> float | int:
+def displayDensity() -> float:
 	"""💻
 	Returns the current display density.
-	
+
 	On most modern displays, this value will be 2 or 3.
+
 	:returns: display density
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		textSize(64)
@@ -2569,7 +2553,7 @@ def displayDensity() -> float | int:
 	"""
 	...
 
-deltaTime: float | int
+deltaTime: float
 """💻
 The time passed since the last frame was drawn.
 
@@ -2612,65 +2596,67 @@ Example::
 	circle(0, 0, 80)
 """
 
+async def remove() -> None: ...
+
 # 🧮 math
 
-def random(low: float | int | list[Any] = ..., high: float | int = ...) -> float | int | Any:
+def random(low: float | list[Any] = ..., high: float = ...) -> float | Any:
 	"""🧮
 	Generates a random value.
-	
+
 	- If no inputs are provided, returns a number between 0 and 1.
 	- If one numerical input is provided, returns a number between 0 and the provided value.
 	- If two numerical inputs are provided, returns a number between the two values.
 	- If an array is provided, returns a random element from the array.
-	
+
 	Return value can be the lower bound but can never exactly be the upper bound.
-	
+
 	:param low: lower bound (inclusive) or an array
 	:param high: upper bound (exclusive)
 	:returns: a random number or element
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		frameRate(5)
-		
+
 		def draw():
 			circle(0, 0, random(200))
 	"""
 	...
 
-def jit(amount: float | int = ...) -> float | int:
+def jit(amount: float = ...) -> float:
 	"""🧮
 	Generates a random number within a symmetric range around zero.
-	
+
 	Can be used to create a jitter effect (random displacement).
-	
+
 	Equivalent to random(-amount, amount).
-	
+
 	:param amount: absolute maximum amount of jitter, default is 1
 	:returns: random number between -val and val
-	
+
 	Example::
-	
+
 		def draw():
 			circle(mouseX + jit(3), mouseY + jit(3), 5)
 	"""
 	...
 
-def noise(x: float | int = ..., y: float | int = ..., z: float | int = ...) -> float | int:
+def noise(x: float = ..., y: float = ..., z: float = ...) -> float:
 	"""🧮
 	Generates a noise value based on the x, y, and z inputs.
-	
+
 	Uses Perlin Noise by default.
-	
+
 	:param x: x-coordinate input
 	:param y: y-coordinate input
 	:param z: z-coordinate input
 	:returns: a noise value
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
 			n = noise(frameCount * 0.01)
@@ -2678,33 +2664,33 @@ def noise(x: float | int = ..., y: float | int = ..., z: float | int = ...) -> f
 	"""
 	...
 
-def dist(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> float | int:
+def dist(x1: float, y1: float, x2: float, y2: float) -> float:
 	"""🧮
 	Calculates the distance between two points.
-	
+
 	This function also accepts two objects with x and y properties.
-	
+
 	:param x1: x-coordinate of the first point
 	:param y1: y-coordinate of the first point
 	:param x2: x-coordinate of the second point
 	:param y2: y-coordinate of the second point
 	:returns: distance between the points
-	
+
 	Example::
-	
+
 		def draw():
 			background(0.8)
 			line(0, 0, mouseX, mouseY)
-		
+
 			d = dist(0, 0, mouseX, mouseY)
 			text(round(d), -80, -80)
 	"""
 	...
 
-def map(val: float | int, start1: float | int, stop1: float | int, start2: float | int, stop2: float | int) -> float | int:
+def map(val: float, start1: float, stop1: float, start2: float, stop2: float) -> float:
 	"""🧮
 	Maps a number from one range to another.
-	
+
 	:param val: incoming value to be converted
 	:param start1: lower bound of the value's current range
 	:param stop1: upper bound of the value's current range
@@ -2714,36 +2700,36 @@ def map(val: float | int, start1: float | int, stop1: float | int, start2: float
 	"""
 	...
 
-def angleMode(mode: Literal['degrees'] | Literal['radians']) -> None:
+def angleMode(mode: Literal['degrees', 'radians']) -> None:
 	"""🧮
 	Sets the mode for interpreting and drawing angles. Can be either 'degrees' or 'radians'.
-	
+
 	:param mode: mode to set for angle interpretation
 	"""
 	...
 
-def radians(degrees: float | int) -> float | int:
+def radians(degrees: float) -> float:
 	"""🧮
 	Converts degrees to radians.
-	
+
 	:param degrees: angle in degrees
 	:returns: angle in radians
 	"""
 	...
 
-def degrees(radians: float | int) -> float | int:
+def degrees(radians: float) -> float:
 	"""🧮
 	Converts radians to degrees.
-	
+
 	:param radians: angle in radians
 	:returns: angle in degrees
 	"""
 	...
 
-def lerp(start: float | int, stop: float | int, amt: float | int) -> float | int:
+def lerp(start: float, stop: float, amt: float) -> float:
 	"""🧮
 	Calculates a number between two numbers at a specific increment.
-	
+
 	:param start: first number
 	:param stop: second number
 	:param amt: amount to interpolate between the two values
@@ -2751,10 +2737,10 @@ def lerp(start: float | int, stop: float | int, amt: float | int) -> float | int
 	"""
 	...
 
-def constrain(n: float | int, low: float | int, high: float | int) -> float | int:
+def constrain(n: float, low: float, high: float) -> float:
 	"""🧮
 	Constrains a value between a minimum and maximum value.
-	
+
 	:param n: number to constrain
 	:param low: lower bound
 	:param high: upper bound
@@ -2762,10 +2748,10 @@ def constrain(n: float | int, low: float | int, high: float | int) -> float | in
 	"""
 	...
 
-def norm(n: float | int, start: float | int, stop: float | int) -> float | int:
+def norm(n: float, start: float, stop: float) -> float:
 	"""🧮
 	Normalizes a number from another range into a value between 0 and 1.
-	
+
 	:param n: number to normalize
 	:param start: lower bound of the range
 	:param stop: upper bound of the range
@@ -2773,34 +2759,34 @@ def norm(n: float | int, start: float | int, stop: float | int) -> float | int:
 	"""
 	...
 
-def fract(n: float | int) -> float | int:
+def fract(n: float) -> float:
 	"""🧮
 	Calculates the fractional part of a number.
-	
+
 	:param n: a number
 	:returns: fractional part of the number
 	"""
 	...
 
-def abs(n: float | int) -> float | int:
+def abs(n: float) -> float:
 	"""🧮
 	Calculates the absolute value of a number.
-	
+
 	:param n: a number
 	:returns: absolute value of the number
 	"""
 	...
 
-def round(n: float | int, d: float | int = ...) -> float | int:
+def round(n: float, d: float = ...) -> float:
 	"""🧮
 	Rounds a number.
-	
+
 	:param n: number to round
 	:param d: number of decimal places to round to
 	:returns: rounded number
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		textSize(32)
@@ -2808,15 +2794,15 @@ def round(n: float | int, d: float | int = ...) -> float | int:
 	"""
 	...
 
-def ceil(n: float | int) -> float | int:
+def ceil(n: float) -> float:
 	"""🧮
 	Rounds a number up.
-	
+
 	:param n: a number
 	:returns: rounded number
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		textSize(32)
@@ -2824,15 +2810,15 @@ def ceil(n: float | int) -> float | int:
 	"""
 	...
 
-def floor(n: float | int) -> float | int:
+def floor(n: float) -> float:
 	"""🧮
 	Rounds a number down.
-	
+
 	:param n: a number
 	:returns: rounded number
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
 		textSize(32)
@@ -2840,88 +2826,88 @@ def floor(n: float | int) -> float | int:
 	"""
 	...
 
-def min(*args: float | int) -> float | int:
+def min(*args: float) -> float:
 	"""🧮
 	Returns the smallest value in a sequence of numbers.
-	
+
 	:param args: numbers to compare
 	:returns: minimum
-	
+
 	Example::
-	
+
 		def draw():
 			background(min(-mouseX / 100, 0.5))
 			circle(min(mouseX, 0), 0, 80)
 	"""
 	...
 
-def max(*args: float | int) -> float | int:
+def max(*args: float) -> float:
 	"""🧮
 	Returns the largest value in a sequence of numbers.
-	
+
 	:param args: numbers to compare
 	:returns: maximum
-	
+
 	Example::
-	
+
 		def draw():
 			background(max(-mouseX / 100, 0.5))
 			circle(max(mouseX, 0), 0, 80)
 	"""
 	...
 
-def pow(base: float | int, exponent: float | int) -> float | int:
+def pow(base: float, exponent: float) -> float:
 	"""🧮
 	Calculates the value of a base raised to a power.
-	
+
 	For example, pow(2, 3) calculates 2 _ 2 _ 2 which is 8.
-	
+
 	:param base: base
 	:param exponent: exponent
 	:returns: base raised to the power of exponent
 	"""
 	...
 
-def sq(n: float | int) -> float | int:
+def sq(n: float) -> float:
 	"""🧮
 	Calculates the square of a number.
-	
+
 	:param n: number to square
 	:returns: square of the number
 	"""
 	...
 
-def sqrt(n: float | int) -> float | int:
+def sqrt(n: float) -> float:
 	"""🧮
 	Calculates the square root of a number.
-	
+
 	:param n: a number
 	:returns: square root of the number
 	"""
 	...
 
-def loge(n: float | int) -> float | int:
+def loge(n: float) -> float:
 	"""🧮
 	Calculates the natural logarithm (base e) of a number.
-	
+
 	:param n: a number
 	:returns: natural logarithm of the number
 	"""
 	...
 
-def exp(exponent: float | int) -> float | int:
+def exp(exponent: float) -> float:
 	"""🧮
 	Calculates e raised to the power of a number.
-	
+
 	:param exponent: power to raise e to
 	:returns: e raised to the power of exponent
 	"""
 	...
 
-def randomSeed(seed: float | int) -> None:
+def randomSeed(seed: float) -> None:
 	"""🧮
 	Sets the seed for the random number generator.
-	
+
 	:param seed: seed value
 	"""
 	...
@@ -2929,85 +2915,102 @@ def randomSeed(seed: float | int) -> None:
 def randomGenerator(method: Any) -> None:
 	"""🧮
 	Sets the random number generation method.
-	
+
 	:param method: method to use for random number generation
 	"""
 	...
 
-def randomGaussian(mean: float | int, std: float | int) -> float | int:
+def randomGaussian(mean: float, std: float) -> float:
 	"""🧮
 	Generates a random number following a Gaussian (normal) distribution.
-	
+
 	:param mean: mean (center) of the distribution
 	:param std: standard deviation (spread or "width") of the distribution
 	:returns: a random number following a Gaussian distribution
 	"""
 	...
 
-def randomExponential() -> float | int:
+def randomExponential() -> float:
 	"""🧮
 	Generates a random number following an exponential distribution.
+
 	:returns: a random number following an exponential distribution
 	"""
 	...
 
-def noiseMode(mode: Literal['perlin'] | Literal['simplex'] | Literal['blocky']) -> None:
+def noiseMode(mode: Literal['perlin', 'simplex', 'blocky']) -> None:
 	"""🧮
 	Sets the noise generation mode.
-	
+
 	Only the default mode, "perlin", is included in q5.js. Use of the
 	other modes requires the q5-noiser module.
-	
+
 	:param mode: noise generation mode
 	"""
 	...
 
-def noiseSeed(seed: float | int) -> None:
+def noiseSeed(seed: float) -> None:
 	"""🧮
 	Sets the seed value for noise generation.
-	
+
 	:param seed: seed value
 	"""
 	...
 
-def noiseDetail(lod: float | int, falloff: float | int) -> None:
+def noiseDetail(lod: float, falloff: float) -> None:
 	"""🧮
 	Sets the level of detail for noise generation.
-	
+
 	:param lod: level of detail (number of octaves)
 	:param falloff: falloff rate for each octave
 	"""
 	...
 
-PI: float | int
+PI: float
 """🧮
 The ratio of a circle's circumference to its diameter.
 Approximately 3.14159.
 """
 
-TWO_PI: float | int
+TWO_PI: float
 """🧮
 2 * PI.
 Approximately 6.28319.
 """
 
-TAU: float | int
+TAU: float
 """🧮
 2 * PI.
 Approximately 6.28319.
 """
 
-HALF_PI: float | int
+HALF_PI: float
 """🧮
 Half of PI.
 Approximately 1.5708.
 """
 
-QUARTER_PI: float | int
+QUARTER_PI: float
 """🧮
 A quarter of PI.
 Approximately 0.7854.
 """
+
+def sin(angle: float) -> float: ...
+
+def cos(angle: float) -> float: ...
+
+def tan(angle: float) -> float: ...
+
+def mag(val1: float, val2: float) -> float: ...
+
+def asin(n: float) -> float: ...
+
+def acos(n: float) -> float: ...
+
+def atan(n: float) -> float: ...
+
+def atan2(y: float, x: float) -> float: ...
 
 # 🔊 sound
 
@@ -3022,50 +3025,50 @@ p5.sound addon with q5.
 def loadSound(url: str) -> Sound:
 	"""🔊
 	Loads audio data from a file and returns a Sound object.
-	
+
 	Use functions like play, pause, and stop to
 	control playback. Note that sounds can only be played after the
 	first user interaction with the page!
-	
+
 	Set volume to a value between 0 (silent) and 1 (full volume).
 	Set pan to a value between -1 (left) and 1 (right) to adjust
 	the sound's stereo position. Set loop to true to loop the sound.
-	
+
 	Use loaded, paused, and ended to check the sound's status.
-	
+
 	The entire sound file must be loaded before playback can start, use await to wait for a sound to load. To stream larger audio files use the loadAudio function instead.
-	
+
 	:param url: sound file
 	:returns: sound
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		sound = loadSound('/assets/jump.wav')
 		sound.volume = 0.3
-		
+
 		def mousePressed():
 			sound.play()
 	"""
 	...
 
-def loadAudio() -> None:
+def loadAudio(url: str) -> Any:
 	"""🔊
 	Loads audio data from a file and returns an HTMLAudioElement.
-	
+
 	Audio is considered loaded when the canplaythrough event is fired.
-	
+
 	Note that audio can only be played after the first user
 	interaction with the page!
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		audio = loadAudio('/assets/retro.flac')
 		audio.volume = 0.4
-		
+
 		def mousePressed():
 			audio.play()
 	"""
@@ -3074,13 +3077,15 @@ def loadAudio() -> None:
 def getAudioContext() -> Any:
 	"""🔊
 	Returns the AudioContext in use or undefined if it doesn't exist.
+
 	:returns: AudioContext instance
 	"""
 	...
 
-async def userStartAudio() -> object:
+async def userStartAudio() -> None:
 	"""🔊
 	Creates a new AudioContext or resumes it if it was suspended.
+
 	:returns: a promise that resolves when the AudioContext is resumed
 	"""
 	...
@@ -3090,12 +3095,15 @@ class Sound:
 	Creates a new Q5.Sound object.
 	"""
 
+	def __init__(self) -> None: ...
 
-	volume: float | int
-	"""🔊 Set the sound's volume to a value between
-0 (silent) and 1 (full volume)."""
+	volume: float
+	"""🔊
+	Set the sound's volume to a value between
+	0 (silent) and 1 (full volume).
+	"""
 
-	pan: float | int
+	pan: float
 	"""🔊 Set the sound's stereo position between -1 (left) and 1 (right)."""
 
 	loop: bool
@@ -3110,16 +3118,20 @@ class Sound:
 	ended: bool
 	"""🔊 True if the sound has finished playing."""
 
-	def play(self) -> object:
-		"""🔊 Plays the sound.
+	async def play(self) -> None:
+		"""🔊
+		Plays the sound.
 
-If this function is run when the sound is already playing,
-a new playback will start, causing a layering effect.
+		If this function is run when the sound is already playing,
+		a new playback will start, causing a layering effect.
 
-If this function is run when the sound is paused,
-all playback instances will be resumed.
+		If this function is run when the sound is paused,
+		all playback instances will be resumed.
 
-Use await to wait for the sound to finish playing."""
+		Use await to wait for the sound to finish playing.
+
+		:returns: a promise that resolves when the sound finishes playing
+		"""
 		...
 
 	def pause(self) -> None:
@@ -3127,10 +3139,12 @@ Use await to wait for the sound to finish playing."""
 		...
 
 	def stop(self) -> None:
-		"""🔊 Stops the sound, resetting its playback position
-to the beginning.
+		"""🔊
+		Stops the sound, resetting its playback position
+		to the beginning.
 
-Removes all playback instances."""
+		Removes all playback instances.
+		"""
 		...
 
 # 📑 dom
@@ -3140,35 +3154,35 @@ The Document Object Model (DOM) is an interface for
 creating and editing web pages with JavaScript.
 """
 
-def createEl(tag: str, content: str = ...) -> object:
+def createEl(tag: str, content: str = ...) -> Any:
 	"""📑
 	Creates a new HTML element and adds it to the page. createElement is
 	an alias.
-	
+
 	Modify the element's CSS style to change its appearance.
-	
+
 	Use addEventListener to respond to events such as:
-	
+
 	- "click": when the element is clicked
 	- "mouseover": when the mouse hovers over the element
 	- "mouseout": when the mouse stops hovering over the element
 	- "input": when a form element's value changes
-	
+
 	q5 adds some extra functionality to the elements it creates:
-	
+
 	- the position function makes it easy to place the element
 	  relative to the canvas
 	- the size function sets the width and height of the element
 	- alternatively, use the element's x, y, width, and height properties
-	
+
 	:param tag: tag name of the element
 	:param content: content of the element
 	:returns: element
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		el = createEl('div', '*')
 		el.position(50, 50)
 		el.size(100, 100)
@@ -3179,175 +3193,173 @@ def createEl(tag: str, content: str = ...) -> object:
 	"""
 	...
 
-def createA(href: str, text: str = ..., newTab: bool = ...) -> None:
+def createA(href: str, text: str = ..., newTab: bool = ...) -> Any:
 	"""📑
 	Creates a link element.
-	
+
 	:param href: url
 	:param text: text content
 	:param newTab: whether to open the link in a new tab
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		link = createA('https://q5js.org', 'q5.js')
 		link.position(16, 42)
 		link.style.fontSize = '80px'
-		
+
 		def cb0():
 			background('cyan')
-		
+
 		link.addEventListener('mouseover', cb0)
 	"""
 	...
 
-def createButton(content: str = ...) -> None:
+def createButton(content: str = ...) -> Any:
 	"""📑
 	Creates a button element.
-	
+
 	:param content: text content
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
-		
+
 		btn = createButton('Click me!')
-		
+
 		def cb0():
 			background(random(0.4, 1))
-		
+
 		btn.addEventListener('click', cb0)
 	"""
 	...
 
-def createCheckbox(label: str = ..., checked: bool = ...) -> None:
+def createCheckbox(label: str = ..., checked: bool = ...) -> Any:
 	"""📑
 	Creates a checkbox element.
-	
+
 	Use the checked property to get or set the checkbox's state.
-	
+
 	The label property is the text label element next to the checkbox.
-	
+
 	:param label: text label placed next to the checkbox
 	:param checked: initial state
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
-		
+
 		box = createCheckbox('Check me!')
 		box.label.style.color = 'lime'
-		
+
 		def cb0():
 			if box.checked: background('lime')
 			else: background('black')
-		
+
 		box.addEventListener('input', cb0)
 	"""
 	...
 
-def createColorPicker(value: str = ...) -> None:
+def createColorPicker(value: str = ...) -> Any:
 	"""📑
 	Creates a color input element.
-	
+
 	Use the value property to get or set the color value.
-	
+
 	:param value: initial color value
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
-		
+
 		picker = createColorPicker()
 		picker.value = '#fd7575'
-		
+
 		def draw():
 			background(picker.value)
 	"""
 	...
 
-def createImg(src: str) -> None:
+def createImg(src: str) -> Any:
 	"""📑
 	Creates an image element.
-	
+
 	:param src: url of the image
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
-		
+
 		img = createImg('/assets/q5play_logo.avif')
 		img.position(0, 0).size(100, 100)
 	"""
 	...
 
-def createInput(value: str = ..., type: str = ...) -> None:
+def createInput(value: str = ..., type: str = ...) -> Any:
 	"""📑
 	Creates an input element.
-	
+
 	Use the value property to get or set the input's value.
-	
+
 	Use the placeholder property to set label text that appears
 	inside the input when it's empty.
-	
+
 	See MDN's input documentation for the full list of input types.
-	
+
 	:param value: initial value
 	:param type: text input type, can be 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		textSize(64)
-		
+
 		input = createInput()
 		input.placeholder = 'Type here!'
 		input.size(200, 32)
-		
+
 		def cb0():
 			background('orange')
 			text(input.value, -90, 30)
-		
+
 		input.addEventListener('input', cb0)
 	"""
 	...
 
-def createP(content: str = ...) -> None:
+def createP(content: str = ...) -> Any:
 	"""📑
 	Creates a paragraph element.
-	
+
 	:param content: text content
-	
+
 	Example::
-	
+
 		Canvas(200, 50)
 		background('coral')
-		
+
 		p = createP('Hello, world!')
 		p.style.color = 'pink'
 	"""
 	...
 
-def createRadio(groupName: str = ...) -> None:
+def createRadio(groupName: str = ...) -> Any:
 	"""📑
 	Creates a radio button group.
-	
+
 	Use the option(label, value) function to add new radio buttons
 	to the group.
-	
+
 	Use the value property to get or set the value of the selected radio button.
-	
-	:param groupName: 
-	
+
 	Example::
-	
+
 		Canvas(200, 160)
-		
+
 		radio = createRadio()
 		radio.option('square', '1')
 		radio.option('circle', '2')
-		
+
 		def draw():
 			background(0.8)
 			if radio.value == '1': square(-40, -40, 80)
@@ -3355,80 +3367,80 @@ def createRadio(groupName: str = ...) -> None:
 	"""
 	...
 
-def createSelect(placeholder: str = ...) -> None:
+def createSelect(placeholder: str = ...) -> Any:
 	"""📑
 	Creates a select element.
-	
+
 	Use the option(label, value) function to add new options to
 	the select element.
-	
+
 	Set multiple to true to allow multiple options to be selected.
-	
+
 	Use the value property to get or set the selected option value.
-	
+
 	Use the selected property get the labels of the selected
 	options or set the selected options by label. Can be a single
 	string or an array of strings.
-	
+
 	:param placeholder: optional placeholder text that appears before an option is selected
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
-		
+
 		sel = createSelect('Select an option')
 		sel.option('Red', '#f55')
 		sel.option('Green', '#5f5')
-		
+
 		def cb0():
 			background(sel.value)
-		
+
 		sel.addEventListener('change', cb0)
 	"""
 	...
 
-def createSlider(min: float | int, max: float | int, value: float | int = ..., step: float | int = ...) -> None:
+def createSlider(min: float, max: float, value: float = ..., step: float = ...) -> Any:
 	"""📑
 	Creates a slider element.
-	
+
 	Use the value property to get or set the slider's value.
-	
+
 	Use the val function to get the slider's value as a number.
-	
+
 	:param min: minimum value
 	:param max: maximum value
 	:param value: initial value
 	:param step: step size
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		slider = createSlider(0, 1, 0.5, 0.1)
 		slider.position(10, 10).size(180)
-		
+
 		def draw():
 			background(slider.val())
 	"""
 	...
 
-def createVideo(src: str) -> object:
+def createVideo(src: str) -> Any:
 	"""📑
 	Creates a video element.
-	
+
 	Note that videos must be muted to autoplay and the play and
 	pause functions can only be run after a user interaction.
-	
+
 	The video element can be hidden and its content can be
 	displayed on the canvas using the image function.
-	
+
 	:param src: url of the video
 	:returns: a new video element
-	
+
 	Example::
-	
+
 		Canvas(1)
-		
+
 		vid = createVideo('/assets/apollo4.mp4')
 		vid.size(200, 150)
 		vid.autoplay = vid.muted = vid.loop = True
@@ -3436,27 +3448,27 @@ def createVideo(src: str) -> object:
 	"""
 	...
 
-def createCapture(type: str = ..., flipped: bool = ...) -> object:
+def createCapture(type: str = ..., flipped: bool = ...) -> Any:
 	"""📑
 	Creates a capture from a connected camera, such as a webcam.
-	
+
 	The capture video element can be hidden and its content can be
 	displayed on the canvas using the image function.
-	
+
 	Can preload to ensure the capture is ready to use when your
 	sketch starts.
-	
+
 	Requests the highest video resolution from the user facing camera
 	by default. The first parameter to this function can be used to
 	specify the constraints for the capture. See getUserMedia
 	for more info.
-	
+
 	:param type: type of capture, can be only VIDEO or only AUDIO, the default is to use both video and audio
 	:param flipped: whether to mirror the video vertically, true by default
 	:returns: a new video element
-	
+
 	Example::
-	
+
 		def mousePressed():
 			cap = createCapture(VIDEO)
 			cap.size(200, 112.5)
@@ -3464,58 +3476,57 @@ def createCapture(type: str = ..., flipped: bool = ...) -> object:
 	"""
 	...
 
-def findEl(selector: str) -> object:
+def findEl(selector: str) -> Any:
 	"""📑
 	Finds the first element in the DOM that matches the given CSS selector.
-	
+
 	Alias for document.querySelector.
-	
-	:param selector: 
+
 	:returns: element
 	"""
 	...
 
-def findEls(selector: str) -> list[object]:
+def findEls(selector: str) -> list[Any]:
 	"""📑
 	Finds all elements in the DOM that match the given CSS selector.
-	
+
 	Alias for document.querySelectorAll.
-	
-	:param selector: 
+
 	:returns: elements
 	"""
 	...
 
 # 🎞 record
 
-def createRecorder() -> object:
+def createRecorder() -> Any:
 	"""🎞
 	Creates a recorder. Simply hit record to start recording!
-	
+
 	The following properties can be set via the recorder UI or
 	programmatically.
-	
+
 	- format is set to "H.264" by default.
 	- bitrate is a number in megabits per second (mbps). Its default
 	  value is determined by the height of the canvas. Increasing the
 	  bitrate will increase the quality and file size of the recording.
 	- captureAudio is set to true by default. Set to false to disable
 	  audio recording.
-	
+
 	Note that recordings are done at a variable frame rate (VFR), which
 	makes the output video incompatible with some editing software.
 	For more info, see the
 	"Recording the Canvas".
 	wiki page.
+
 	:returns: a recorder, q5 DOM element
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		rec = createRecorder()
 		rec.bitrate = 10
-		
+
 		def draw():
 			circle(mouseX, jit(halfHeight), 10)
 	"""
@@ -3524,7 +3535,7 @@ def createRecorder() -> object:
 def record() -> None:
 	"""🎞
 	Starts recording the canvas or resumes recording if it was paused.
-	
+
 	If no recorder exists, one is created but not displayed.
 	"""
 	...
@@ -3541,17 +3552,15 @@ def deleteRecording() -> None:
 	"""
 	...
 
-def saveRecording(fileName: str) -> None:
+async def saveRecording(fileName: str) -> None:
 	"""🎞
 	Saves the current recording as a video file.
-	
-	:param fileName: 
-	
+
 	Example::
-	
+
 		def draw():
 			square(mouseX, jit(100), 10)
-		
+
 		def mousePressed():
 			if not recording: record()
 			else: saveRecording('squares')
@@ -3565,75 +3574,75 @@ True if the canvas is currently being recorded.
 
 # 🛠 utilities
 
-async def load(*urls: str) -> object:
+async def load(*urls: str) -> list[Any]:
 	"""🛠
 	Loads a file or multiple files.
-	
+
 	File type is determined by file extension. q5 supports loading
 	text, json, csv, font, audio, and image files.
-	
+
 	By default, assets are loaded in parallel before q5 runs draw. Use await to wait for assets to load.
-	
-	:param urls: 
+
 	:returns: a promise that resolves with objects
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		logo = load('/q5js_logo.avif')
-		
+
 		def draw():
 			image(logo, -100, -100, 200, 200)
 	"""
 	...
 
-def save(data: dict = ..., fileName: str = ...) -> None:
+async def save(data: dict = ..., fileName: str = ...) -> None:
 	"""🛠
 	Saves data to a file.
-	
+
 	If data is not specified, the canvas will be saved.
-	
+
 	If no arguments are provided, the canvas will be saved as
 	an image file named "untitled.png".
-	
+
 	:param data: canvas, image, or JS object
 	:param fileName: filename to save as
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		circle(0, 0, 50)
-		
+
 		def mousePressed():
 			save('circle.png')
 	"""
 	...
 
-def millis() -> float | int:
+def millis() -> float:
 	"""🛠
 	Returns the number of milliseconds since the program started.
+
 	:returns: milliseconds since the program started
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		def draw():
 			background(0.8)
-		
+
 			if millis() > 2000:
 				text('Hello, world!', -90, 0)
 	"""
 	...
 
-def loadText(url: str) -> dict:
+def loadText(url: str) -> str:
 	"""🛠
 	Loads a text file from the specified url.
-	
+
 	Using await to get the loaded text as a string is recommended.
-	
+
 	:param url: text file
 	:returns: an object containing the loaded text in the property obj.text or use await to get the text string directly
 	"""
@@ -3642,9 +3651,9 @@ def loadText(url: str) -> dict:
 def loadJSON(url: str) -> Any:
 	"""🛠
 	Loads a JSON file from the specified url.
-	
+
 	Using await to get the loaded JSON object or array is recommended.
-	
+
 	:param url: JSON file
 	:returns: an object or array containing the loaded JSON
 	"""
@@ -3653,9 +3662,9 @@ def loadJSON(url: str) -> Any:
 def loadCSV(url: str) -> list[dict]:
 	"""🛠
 	Loads a CSV file from the specified url.
-	
+
 	Using await to get the loaded CSV as an array of objects is recommended.
-	
+
 	:param url: CSV file
 	:returns: an array of objects containing the loaded CSV
 	"""
@@ -3664,18 +3673,18 @@ def loadCSV(url: str) -> list[dict]:
 def loadXML(url: str) -> Any:
 	"""🛠
 	Loads an xml file from the specified url.
-	
+
 	Using await to get the loaded XML Element is recommended.
-	
+
 	:param url: xml file
 	:returns: an object containing the loaded XML Element in a property called obj.DOM or use await to get the XML Element directly
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
 		textSize(32)
-		
+
 		xml = await load('/assets/animals.xml')
 		mammals = xml.querySelectorAll('mammal')
 		y = -90
@@ -3684,9 +3693,10 @@ def loadXML(url: str) -> Any:
 	"""
 	...
 
-def loadAll() -> object:
+async def loadAll() -> list[Any]:
 	"""🛠
 	Wait for any assets that started loading to finish loading. By default q5 runs this before looping draw (which is called preloading), but it can be used even after draw starts looping.
+
 	:returns: a promise that resolves with loaded objects
 	"""
 	...
@@ -3697,32 +3707,10 @@ def disablePreload() -> None:
 	"""
 	...
 
-@overload
-def nf(n: float | int, l: float | int, r: float | int) -> str: 
-	"""🛠
-	nf is short for number format. It formats a number
-	to a string with a specified number of digits.
-	
-	:param num: number to format
-	:param digits: number of digits to format to
-	:returns: formatted number
-	
-	Example::
-	
-		Canvas(200, 100)
-		background(0.8)
-		
-		textSize(32)
-		text(nf(PI, 4, 5), -90, 10)
-	"""
-	...
-@overload
-def nf(num: float | int, digits: float | int) -> str: ...
-
 def shuffle(arr: list[Any], modify: bool = ...) -> list[Any]:
 	"""🛠
 	Shuffles the elements of an array.
-	
+
 	:param arr: array to shuffle
 	:param modify: whether to modify the original array, false by default which copies the array before shuffling
 	:returns: shuffled array
@@ -3732,7 +3720,7 @@ def shuffle(arr: list[Any], modify: bool = ...) -> list[Any]:
 def storeItem(key: str, val: str) -> None:
 	"""🛠
 	Stores an item in localStorage.
-	
+
 	:param key: key under which to store the item
 	:param val: value to store
 	"""
@@ -3741,7 +3729,7 @@ def storeItem(key: str, val: str) -> None:
 def getItem(key: str) -> str:
 	"""🛠
 	Retrieves an item from localStorage.
-	
+
 	:param key: key of the item to retrieve
 	:returns: value of the retrieved item
 	"""
@@ -3750,7 +3738,7 @@ def getItem(key: str) -> str:
 def removeItem(key: str) -> None:
 	"""🛠
 	Removes an item from localStorage.
-	
+
 	:param key: key of the item to remove
 	"""
 	...
@@ -3761,37 +3749,42 @@ def clearStorage() -> None:
 	"""
 	...
 
-def year() -> float | int:
+def year() -> float:
 	"""🛠
 	Returns the current year.
+
 	:returns: current year
 	"""
 	...
 
-def day() -> float | int:
+def day() -> float:
 	"""🛠
 	Returns the current day of the month.
+
 	:returns: current day
 	"""
 	...
 
-def hour() -> float | int:
+def hour() -> float:
 	"""🛠
 	Returns the current hour.
+
 	:returns: current hour
 	"""
 	...
 
-def minute() -> float | int:
+def minute() -> float:
 	"""🛠
 	Returns the current minute.
+
 	:returns: current minute
 	"""
 	...
 
-def second() -> float | int:
+def second() -> float:
 	"""🛠
 	Returns the current second.
+
 	:returns: current second
 	"""
 	...
@@ -3803,98 +3796,191 @@ class Vector:
 	Constructs a new Vector object.
 	"""
 
+	def __init__(self, x: float, y: float, z: float = ...) -> None: ...
 
-	x: float | int
+	x: float
 	"""↗ The x component of the vector."""
 
-	y: float | int
+	y: float
 	"""↗ The y component of the vector."""
 
-	z: float | int
+	z: float
 	"""↗ The z component of the vector, if applicable."""
 
 	def add(self, v: Vector) -> Vector:
-		"""↗ Adds a vector to this vector."""
+		"""↗
+		Adds a vector to this vector.
+
+		:param v: vector to add
+		:returns: resulting vector after addition
+		"""
 		...
 
 	def sub(self, v: Vector) -> Vector:
-		"""↗ Subtracts a vector from this vector."""
+		"""↗
+		Subtracts a vector from this vector.
+
+		:param v: vector to subtract
+		:returns: resulting vector after subtraction
+		"""
 		...
 
-	def mult(self, n: float | int | Vector) -> Vector:
-		"""↗ Multiplies this vector by a scalar or element-wise by another vector."""
+	def mult(self, n: float | Vector) -> Vector:
+		"""↗
+		Multiplies this vector by a scalar or element-wise by another vector.
+
+		:param n: scalar to multiply by, or a vector for element-wise multiplication
+		:returns: resulting vector after multiplication
+		"""
 		...
 
-	def div(self, n: float | int | Vector) -> Vector:
-		"""↗ Divides this vector by a scalar or element-wise by another vector."""
+	def div(self, n: float | Vector) -> Vector:
+		"""↗
+		Divides this vector by a scalar or element-wise by another vector.
+
+		:param n: scalar to divide by, or a vector for element-wise division
+		:returns: resulting vector after division
+		"""
 		...
 
-	def mag(self) -> float | int:
-		"""↗ Calculates the magnitude (length) of the vector."""
+	def mag(self) -> float:
+		"""↗
+		Calculates the magnitude (length) of the vector.
+
+		:returns: magnitude of the vector
+		"""
 		...
 
 	def normalize(self) -> Vector:
-		"""↗ Normalizes the vector to a length of 1 (making it a unit vector)."""
+		"""↗
+		Normalizes the vector to a length of 1 (making it a unit vector).
+
+		:returns: this vector after normalization
+		"""
 		...
 
-	def setMag(self, len: float | int) -> Vector:
-		"""↗ Sets the magnitude of the vector to the specified length."""
+	def setMag(self, len: float) -> Vector:
+		"""↗
+		Sets the magnitude of the vector to the specified length.
+
+		:param len: new length of the vector
+		:returns: this vector after setting magnitude
+		"""
 		...
 
-	def dot(self, v: Vector) -> float | int:
-		"""↗ Calculates the dot product of this vector and another vector."""
+	def dot(self, v: Vector) -> float:
+		"""↗
+		Calculates the dot product of this vector and another vector.
+
+		:param v: other vector
+		:returns: dot product
+		"""
 		...
 
 	def cross(self, v: Vector) -> Vector:
-		"""↗ Calculates the cross product of this vector and another vector."""
+		"""↗
+		Calculates the cross product of this vector and another vector.
+
+		:param v: other vector
+		:returns: a new vector that is the cross product of this vector and the given vector
+		"""
 		...
 
-	def dist(self, v: Vector) -> float | int:
-		"""↗ Calculates the distance between this vector and another vector."""
+	def dist(self, v: Vector) -> float:
+		"""↗
+		Calculates the distance between this vector and another vector.
+
+		:param v: other vector
+		:returns: distance
+		"""
 		...
 
 	def copy(self) -> Vector:
-		"""↗ Copies this vector."""
+		"""↗
+		Copies this vector.
+
+		:returns: a new vector with the same components as this one
+		"""
 		...
 
-	def set(self, x: float | int, y: float | int, z: float | int = ...) -> None:
-		"""↗ Sets the components of the vector."""
+	def set(self, x: float, y: float, z: float = ...) -> None:
+		"""↗
+		Sets the components of the vector.
+
+		:param x: x component
+		:param y: y component
+		:param z: optional. The z component
+		"""
 		...
 
-	def limit(self, max: float | int) -> Vector:
-		"""↗ Limits the magnitude of the vector to the value used for the max parameter."""
+	def limit(self, max: float) -> Vector:
+		"""↗
+		Limits the magnitude of the vector to the value used for the max parameter.
+
+		:param max: maximum magnitude for the vector
+		:returns: this vector after limiting
+		"""
 		...
 
-	def heading(self) -> float | int:
-		"""↗ Calculates the angle of rotation for this vector (only 2D vectors)."""
+	def heading(self) -> float:
+		"""↗
+		Calculates the angle of rotation for this vector (only 2D vectors).
+
+		:returns: angle of rotation
+		"""
 		...
 
-	def setHeading(self, angle: float | int) -> Vector:
-		"""↗ Rotates the vector to a specific angle without changing its magnitude."""
+	def setHeading(self, angle: float) -> Vector:
+		"""↗
+		Rotates the vector to a specific angle without changing its magnitude.
+
+		:param angle: angle in radians
+		:returns: this vector after setting the heading
+		"""
 		...
 
-	def rotate(self, angle: float | int) -> Vector:
-		"""↗ Rotates the vector by the given angle (only 2D vectors)."""
+	def rotate(self, angle: float) -> Vector:
+		"""↗
+		Rotates the vector by the given angle (only 2D vectors).
+
+		:param angle: angle of rotation in radians
+		:returns: this vector after rotation
+		"""
 		...
 
-	def lerp(self, v: Vector, amt: float | int) -> Vector:
-		"""↗ Linearly interpolates between this vector and another vector."""
+	def lerp(self, v: Vector, amt: float) -> Vector:
+		"""↗
+		Linearly interpolates between this vector and another vector.
+
+		:param v: vector to interpolate towards
+		:param amt: amount of interpolation; a number between 0.0 (close to the current vector) and 1.0 (close to the target vector)
+		:returns: this vector after interpolation
+		"""
 		...
 
-	def slerp(self, v: Vector, amt: float | int) -> Vector:
-		"""↗ Linearly interpolates between this vector and another vector, including the magnitude."""
+	def slerp(self, v: Vector, amt: float) -> Vector:
+		"""↗
+		Linearly interpolates between this vector and another vector, including the magnitude.
+
+		:param v: vector to interpolate towards
+		:param amt: amount of interpolation; a number between 0.0 (close to the current vector) and 1.0 (close to the target vector)
+		:returns: this vector after spherical interpolation
+		"""
 		...
+
+	@staticmethod
+	def fromAngle(angle: float, length: float = ...) -> Vector: ...
 
 # 🖌 shaping
 
-def arc(x: float | int, y: float | int, w: float | int, h: float | int, start: float | int, stop: float | int, mode: float | int = ...) -> None:
+def arc(x: float, y: float, w: float, h: float, start: float, stop: float, mode: float = ...) -> None:
 	"""🖌
 	Draws an arc, which is a section of an ellipse.
-	
+
 	ellipseMode affects how the arc is drawn.
-	
+
 	q5 WebGPU only supports the default PIE_OPEN mode.
-	
+
 	:param x: x-coordinate
 	:param y: y-coordinate
 	:param w: width of the ellipse
@@ -3902,43 +3988,43 @@ def arc(x: float | int, y: float | int, w: float | int, h: float | int, start: f
 	:param start: angle to start the arc
 	:param stop: angle to stop the arc
 	:param mode: shape and stroke style setting, default is PIE_OPEN for a pie shape with an unclosed stroke, can be PIE, CHORD, or CHORD_OPEN
-	
+
 	Example::
-	
+
 		Canvas(200)
 		background(0.8)
-		
+
 		arc(0, 0, 160, 160, 0.8, -0.8)
 	"""
 	...
 
-def curve() -> None:
+def curve(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
 	"""🖌
 	Draws a curve.
-	
+
 	Example::
-	
+
 		Canvas(200, 100)
 		background(0.8)
-		
+
 		curve(-100, -200, -50, 0, 50, 0, 100, -200)
 	"""
 	...
 
-def curveDetail(val: float | int) -> None:
+def curveDetail(val: float) -> None:
 	"""🖌
 	Sets the amount of straight line segments used to make a curve.
-	
+
 	Only takes effect in q5 WebGPU.
-	
+
 	:param val: curve detail level, default is 20
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		curveDetail(4)
-		
+
 		strokeWeight(10)
 		stroke(0, 1, 1)
 		curve(-100, -200, -50, 0, 50, 0, 100, -200)
@@ -3954,25 +4040,25 @@ def beginShape() -> None:
 def endShape(close: bool = ...) -> None:
 	"""🖌
 	Ends storing vertices for a shape.
-	
+
 	:param close: whether to close the shape by connecting the last vertex to the first vertex, default is false
 	"""
 	...
 
-def vertex(x: float | int, y: float | int) -> None:
+def vertex(x: float, y: float) -> None:
 	"""🖌
 	Specifies a vertex in a shape.
-	
+
 	:param x: x-coordinate
 	:param y: y-coordinate
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		stroke(1, 0.5)
 		strokeWeight(20)
-		
+
 		beginShape()
 		fill(1, 0, 0)
 		vertex(-80, -80)
@@ -3984,10 +4070,10 @@ def vertex(x: float | int, y: float | int) -> None:
 	"""
 	...
 
-def bezierVertex(cp1x: float | int, cp1y: float | int, cp2x: float | int, cp2y: float | int, x: float | int, y: float | int) -> None:
+def bezierVertex(cp1x: float, cp1y: float, cp2x: float, cp2y: float, x: float, y: float) -> None:
 	"""🖌
 	Specifies a Bezier vertex in a shape.
-	
+
 	:param cp1x: x-coordinate of the first control point
 	:param cp1y: y-coordinate of the first control point
 	:param cp2x: x-coordinate of the second control point
@@ -3997,10 +4083,10 @@ def bezierVertex(cp1x: float | int, cp1y: float | int, cp2x: float | int, cp2y: 
 	"""
 	...
 
-def quadraticVertex(cp1x: float | int, cp1y: float | int, x: float | int, y: float | int) -> None:
+def quadraticVertex(cp1x: float, cp1y: float, x: float, y: float) -> None:
 	"""🖌
 	Specifies a quadratic Bezier vertex in a shape.
-	
+
 	:param cp1x: x-coordinate of the control point
 	:param cp1y: y-coordinate of the control point
 	:param x: x-coordinate of the anchor point
@@ -4008,10 +4094,10 @@ def quadraticVertex(cp1x: float | int, cp1y: float | int, x: float | int, y: flo
 	"""
 	...
 
-def bezier(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
+def bezier(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
 	"""🖌
 	Draws a Bezier curve.
-	
+
 	:param x1: x-coordinate of the first anchor point
 	:param y1: y-coordinate of the first anchor point
 	:param x2: x-coordinate of the first control point
@@ -4023,10 +4109,10 @@ def bezier(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x
 	"""
 	...
 
-def triangle(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int) -> None:
+def triangle(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> None:
 	"""🖌
 	Draws a triangle.
-	
+
 	:param x1: x-coordinate of the first vertex
 	:param y1: y-coordinate of the first vertex
 	:param x2: x-coordinate of the second vertex
@@ -4036,10 +4122,10 @@ def triangle(x1: float | int, y1: float | int, x2: float | int, y2: float | int,
 	"""
 	...
 
-def quad(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
+def quad(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
 	"""🖌
 	Draws a quadrilateral.
-	
+
 	:param x1: x-coordinate of the first vertex
 	:param y1: y-coordinate of the first vertex
 	:param x2: x-coordinate of the second vertex
@@ -4054,7 +4140,7 @@ def quad(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3:
 def beginContour() -> None:
 	"""🖌
 	Starts storing vertices for a contour.
-	
+
 	Not available in q5 WebGPU.
 	"""
 	...
@@ -4062,7 +4148,7 @@ def beginContour() -> None:
 def endContour() -> None:
 	"""🖌
 	Ends storing vertices for a contour.
-	
+
 	Not available in q5 WebGPU.
 	"""
 	...
@@ -4074,41 +4160,41 @@ Custom shaders written in WGSL (WebGPU Shading Language) can be
 used to create advanced visual effects in q5!
 """
 
-def createShader(code: str, type: str = ..., data: list[float] = ...) -> Any:
+def createShader(code: str, type: str = ..., data: list[float] | dict = ...) -> Any:
 	"""⚡
 	Creates a shader that q5's WebGPU renderer can use.
-	
+
 	If type is not specified, this function customizes a copy of the default shapes shader, which affects these functions: plane, line, and endShape.
-	
+
 	For more information on the vertex and fragment function
 	input parameters, data, and helper functions made available for use
 	in your custom shader code, read the
 	"Custom Shaders in q5 WebGPU"
 	wiki page.
-	
+
 	:param code: WGSL shader code excerpt
 	:param type: defaults to "shapes"
 	:param data: only for use with fully custom shaders
 	:returns: a shader program
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		wobble = createShader('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
-		
+
 		  let i = f32(v.vertexIndex) % 4 * 100;
 		  vert.x += cos((q.time + i) * 0.01) * 0.1;
-		
+
 			var f: FragParams;
 			f.position = vert;
 			f.color = vec4f(1, 0, 0, 1);
 			return f;
 		}''')
-		
+
 		def draw():
 			clear()
 			shader(wobble)
@@ -4116,17 +4202,17 @@ def createShader(code: str, type: str = ..., data: list[float] = ...) -> Any:
 	"""
 	...
 
-def plane(x: float | int, y: float | int, w: float | int, h: float | int = ...) -> None:
+def plane(x: float, y: float, w: float, h: float = ...) -> None:
 	"""⚡
 	A plane is a centered rectangle with no stroke.
-	
+
 	:param x: center x
 	:param y: center y
 	:param w: width or side length
 	:param h: height
-	
+
 	Example::
-	
+
 		Canvas(200)
 		plane(0, 0, 100)
 	"""
@@ -4135,7 +4221,7 @@ def plane(x: float | int, y: float | int, w: float | int, h: float | int = ...) 
 def shader(shaderModule: Any) -> None:
 	"""⚡
 	Applies a shader.
-	
+
 	:param shaderModule: a shader program
 	"""
 	...
@@ -4143,22 +4229,22 @@ def shader(shaderModule: Any) -> None:
 def resetShader() -> None:
 	"""⚡
 	Make q5 use the default shapes shader.
-	
+
 	Example::
-	
+
 		Canvas(200)
-		
+
 		stripes = createShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let g = cos((q.mouseY + f.position.y) * 0.05);
 			return vec4(1, g, 0, 1);
 		}''')
-		
+
 		def draw():
 			shader(stripes)
 			plane(0, 0, width, height)
-		
+
 			resetShader()
 			triangle(-50, -50, 0, 50, 50, -50)
 	"""
@@ -4194,20 +4280,20 @@ def resetShaders() -> None:
 	"""
 	...
 
-def createFrameShader() -> None:
+def createFrameShader(code: str) -> Any:
 	"""⚡
 	Creates a shader that q5 can use to draw frames.
-	
+
 	Use this function to customize a copy of the
 	default frame shader.
-	
+
 	Example::
-	
+
 		Canvas(200, 400)
 		stroke(1)
 		strokeWeight(8)
 		strokeCap(PROJECT)
-		
+
 		boxy = createFrameShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
@@ -4216,7 +4302,7 @@ def createFrameShader() -> None:
 			let uv = f.texCoord + vec2f(x, y);
 			return textureSample(tex, samp, uv);
 		}''')
-		
+
 		def draw():
 			line(mouseX, mouseY, pmouseX, pmouseY)
 			resetShaders() if mouseIsPressed else shader(boxy)
@@ -4226,20 +4312,20 @@ def createFrameShader() -> None:
 def createImageShader(code: str) -> Any:
 	"""⚡
 	Creates a shader that q5 can use to draw images.
-	
+
 	Use this function to customize a copy of the
 	default image shader.
-	
+
 	:param code: WGSL shader code excerpt
 	:returns: a shader program
-	
+
 	Example::
-	
+
 		Canvas(200, 400)
 		imageMode(CENTER)
-		
+
 		logo = loadImage('/q5js_logo.avif')
-		
+
 		grate = createImageShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
@@ -4247,12 +4333,12 @@ def createImageShader(code: str) -> Any:
 			texColor.b += (q.mouseX + f.position.x) % 20 / 10;
 			return texColor;
 		}''')
-		
+
 		def draw():
 			background(0.7)
 			shader(grate)
 			image(logo, 0, 0, 180, 180)
-		
+
 		#
 	"""
 	...
@@ -4260,34 +4346,34 @@ def createImageShader(code: str) -> Any:
 def createVideoShader(code: str) -> Any:
 	"""⚡
 	Creates a shader that q5 can use to draw video frames.
-	
+
 	Use this function to customize a copy of the
 	default video shader.
-	
+
 	:param code: WGSL shader code excerpt
 	:returns: a shader program
-	
+
 	Example::
-	
+
 		Canvas(200, 600)
-		
+
 		vid = createVideo('/assets/apollo4.mp4')
 		vid.hide()
-		
+
 		flipper = createVideoShader('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
-		
+
 			var vi = f32(v.vertexIndex);
 			vert.y *= cos((q.frameCount + vi * 10) * 0.03);
-		
+
 			var f: FragParams;
 			f.position = vert;
 			f.texCoord = v.texCoord;
 			return f;
 		}
-		
+
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			var texColor =
@@ -4296,7 +4382,7 @@ def createVideoShader(code: str) -> Any:
 			texColor.b *= 2;
 			return texColor;
 		}''')
-		
+
 		def draw():
 			clear()
 			if mouseIsPressed: vid.play()
@@ -4308,18 +4394,18 @@ def createVideoShader(code: str) -> Any:
 def createTextShader(code: str) -> Any:
 	"""⚡
 	Creates a shader that q5 can use to draw text.
-	
+
 	Use this function to customize a copy of the
 	default text shader.
-	
+
 	:param code: WGSL shader code excerpt
 	:returns: a shader program
-	
+
 	Example::
-	
+
 		Canvas(200)
 		textAlign(CENTER, CENTER)
-		
+
 		spin = createTextShader('''
 		@vertex
 		fn vertexMain(v : VertexParams) -> FragParams {
@@ -4327,12 +4413,12 @@ def createTextShader(code: str) -> Any:
 			let text = textMetadata[i32(char.w)];
 			let fontChar = fontChars[i32(char.z)];
 			let pos = calcPos(v.vertexIndex, char, fontChar, text);
-		
+
 			var vert = transformVertex(pos, text.matrixIndex);
-		
+
 			let i = f32(v.instanceIndex + 1);
 			vert.y *= cos((q.frameCount - 5 * i) * 0.05);
-		
+
 			var f : FragParams;
 			f.position = vert;
 			f.texCoord = calcUV(v.vertexIndex, fontChar);
@@ -4342,7 +4428,7 @@ def createTextShader(code: str) -> Any:
 			f.edge = text.edge;
 			return f;
 		}''')
-		
+
 		def draw():
 			clear()
 			shader(spin)
@@ -4362,101 +4448,370 @@ Alias for Q5.
 class Q5:
 	"""⚙
 	Creates an instance of Q5.
-	
+
 	Used by the global Canvas function.
 	"""
 
+	def __init__(self, scope: str | Callable[..., Any] = ..., parent: Any = ...) -> None: ...
 
-	version: str
+	version: ClassVar[str]
 	"""⚙ The current minor version of q5."""
 
+	@staticmethod
+	def addLang(locale: dict) -> None:
+		"""⚙
+		Add API translations. More info:
+		https://github.com/q5js/q5.js/wiki/Translations
+		"""
+		...
 
-	disableFriendlyErrors: bool
+	disableFriendlyErrors: ClassVar[bool]
 	"""⚙ Turn off q5's friendly error messages."""
 
-	errorTolerant: bool
+	errorTolerant: ClassVar[bool]
 	"""⚙ Set to true to keep draw looping after an error."""
 
-	supportsHDR: bool
+	supportsHDR: ClassVar[bool]
 	"""⚙ True if the device supports HDR (the display-p3 colorspace)."""
 
-	canvasOptions: dict
-	"""⚙ Sets the default canvas context attributes used for newly created
-canvases and internal graphics. These options are overwritten by any
-per-canvas options you pass to Canvas."""
+	canvasOptions: ClassVar[dict]
+	"""⚙
+	Sets the default canvas context attributes used for newly created
+	canvases and internal graphics. These options are overwritten by any
+	per-canvas options you pass to Canvas.
+	"""
 
-	MAX_COLORS: float | int
-	"""⚙ The maximum number of q5 colors
-(created by calls to color, background, fill, stroke, and tint)
-that can be stored per frame, with the WebGPU renderer."""
+	MAX_COLORS: ClassVar[float]
+	"""⚙
+	The maximum number of q5 colors
+	(created by calls to color, background, fill, stroke, and tint)
+	that can be stored per frame, with the WebGPU renderer.
+	"""
 
-	MAX_RECTS: float | int
-	"""⚙ The maximum number of rectangles
-(calls to rect, square, capsule)
-that can be drawn per frame, with the WebGPU renderer."""
+	MAX_RECTS: ClassVar[float]
+	"""⚙
+	The maximum number of rectangles
+	(calls to rect, square, capsule)
+	that can be drawn per frame, with the WebGPU renderer.
+	"""
 
-	MAX_ELLIPSES: float | int
-	"""⚙ The maximum number of ellipses
-(calls to ellipse, circle, and arc)
-that can be drawn per frame, with the WebGPU renderer."""
+	MAX_ELLIPSES: ClassVar[float]
+	"""⚙
+	The maximum number of ellipses
+	(calls to ellipse, circle, and arc)
+	that can be drawn per frame, with the WebGPU renderer.
+	"""
 
-	MAX_CHARS: float | int
-	"""⚙ The maximum number of text characters
-that can be drawn per frame, with the WebGPU renderer."""
+	MAX_CHARS: ClassVar[float]
+	"""⚙
+	The maximum number of text characters
+	that can be drawn per frame, with the WebGPU renderer.
+	"""
 
-	MAX_TEXTS: float | int
-	"""⚙ The maximum number of separate calls to text
-that can be drawn per frame, with the WebGPU renderer."""
+	MAX_TEXTS: ClassVar[float]
+	"""⚙
+	The maximum number of separate calls to text
+	that can be drawn per frame, with the WebGPU renderer.
+	"""
 
-	MAX_TRANSFORMS: float | int
-	"""⚙ The maximum number of transformation matrices
-that can be used per frame, with the WebGPU renderer.
+	MAX_TRANSFORMS: ClassVar[float]
+	"""⚙
+	The maximum number of transformation matrices
+	that can be used per frame, with the WebGPU renderer.
 
-By default, it's set to use the entire 128 MB default limit of maxStorageBufferBindingSize.  
-https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits"""
+	By default, it's set to use the entire 128 MB default limit of maxStorageBufferBindingSize.
+	https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits
+	"""
 
-	MAX_IMAGES: float | int
-	"""⚙ The maximum number of images (calls to image and textImage)
-that can be drawn per frame, with the WebGPU renderer."""
+	MAX_IMAGES: ClassVar[float]
+	"""⚙
+	The maximum number of images (calls to image and textImage)
+	that can be drawn per frame, with the WebGPU renderer.
+	"""
 
-	MAX_SHAPE_VERTS: float | int
-	"""⚙ The maximum number of vertices in shapes
-(created by calls to endShape,
-triangle, quad, curve, and bezier)
-that can be used per frame, with the WebGPU renderer."""
+	MAX_SHAPE_VERTS: ClassVar[float]
+	"""⚙
+	The maximum number of vertices in shapes
+	(created by calls to endShape,
+	triangle, quad, curve, and bezier)
+	that can be used per frame, with the WebGPU renderer.
+	"""
 
-	def WebGPU(self) -> Q5:
+	@staticmethod
+	def WebGPU() -> Q5:
 		"""⚙ Creates a new Q5 instance that uses q5's WebGPU renderer."""
 		...
 
-	def addHook(self, lifecycle: str, fn: Callable[..., Any]) -> None:
-		"""⚙ Addons can augment q5 with new functionality by adding hooks,
-functions to be run at specific phases in the q5 lifecycle.
+	@staticmethod
+	def addHook(lifecycle: str, fn: Callable[..., Any]) -> None:
+		"""⚙
+		Addons can augment q5 with new functionality by adding hooks,
+		functions to be run at specific phases in the q5 lifecycle.
 
-Inside the function, this refers to the Q5 instance."""
+		Inside the function, this refers to the Q5 instance.
+
+		:param lifecycle: 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', or 'remove'
+		:param fn: The function to be run at the specified lifecycle phase.
+		"""
 		...
 
-	def registerAddon(self, addon: Callable[..., Any]) -> None:
-		"""⚙ p5.js v2 compatible way to register an addon with q5."""
+	@staticmethod
+	def registerAddon(addon: Callable[..., Any]) -> None:
+		"""⚙
+		p5.js v2 compatible way to register an addon with q5.
+
+		:param addon: A function that receives Q5, Q5.prototype, and a lifecycles object.
+		"""
 		...
 
-	modules: dict
-	"""⚙ An object containing q5's modules, functions that run when q5 loads.
+	modules: ClassVar[dict]
+	"""⚙
+	An object containing q5's modules, functions that run when q5 loads.
 
-Each function receives two input parameters:
+	Each function receives two input parameters:
 
-- the q5 instance
-- a proxy for editing the q5 instance and corresponding properties of the global scope"""
+	- the q5 instance
+	- a proxy for editing the q5 instance and corresponding properties of the global scope
+	"""
 
-	def draw(self) -> None | object:
+	def draw(self) -> None | Awaitable[None]:
 		"""⚙ The q5 draw function is run 60 times per second by default."""
 		...
 
-	def postProcess(self) -> None | object:
-		"""⚙ Runs after each draw function call and post-draw q5 addon processes, if any.
+	def postProcess(self) -> None | Awaitable[None]:
+		"""⚙
+		Runs after each draw function call and post-draw q5 addon processes, if any.
 
-Useful for adding post-processing effects when it's not possible
-to do so at the end of the draw function, such as when using
-addons like q5play that auto-draw to the canvas after the draw
-function is run."""
+		Useful for adding post-processing effects when it's not possible
+		to do so at the end of the draw function, such as when using
+		addons like q5play that auto-draw to the canvas after the draw
+		function is run.
+		"""
 		...
+
+	lang: ClassVar[dict]
+	def update(self) -> None: ...
+	def Canvas(self, w: float = ..., h: float = ..., opt: dict = ...) -> Any: ...
+	def log(self, message: Any) -> None: ...
+	def circle(self, x: float, y: float, diameter: float) -> None: ...
+	def ellipse(self, x: float, y: float, width: float, height: float) -> None: ...
+	def rect(self, x: float, y: float, w: float, h: float, rounded: float = ...) -> None: ...
+	def square(self, x: float, y: float, size: float, rounded: float = ...) -> None: ...
+	def point(self, x: float, y: float) -> None: ...
+	def line(self, x1: float, y1: float, x2: float, y2: float) -> None: ...
+	def capsule(self, x1: float, y1: float, x2: float, y2: float, r: float) -> None: ...
+	def rectMode(self, mode: str) -> None: ...
+	def ellipseMode(self, mode: str) -> None: ...
+	def loadImage(self, url: str) -> Q5.Image: ...
+	def image(self, img: Q5.Image | Any, dx: float, dy: float, dw: float = ..., dh: float = ..., sx: float = ..., sy: float = ..., sw: float = ..., sh: float = ...) -> None: ...
+	def imageMode(self, mode: str) -> None: ...
+	def defaultImageScale(self, scale: float) -> float: ...
+	def resize(self, w: float, h: float) -> None: ...
+	def trim(self) -> Q5.Image: ...
+	def smooth(self) -> None: ...
+	def noSmooth(self) -> None: ...
+	def tint(self, color: str | float) -> None: ...
+	def noTint(self) -> None: ...
+	def mask(self, img: Q5.Image) -> None: ...
+	def copy(self) -> Q5.Image: ...
+	def inset(self, sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: float, dh: float) -> None: ...
+	def get(self, x: float, y: float, w: float = ..., h: float = ...) -> Q5.Image | list[float]: ...
+	def set(self, x: float, y: float, val: Any) -> None: ...
+	def loadPixels(self) -> None: ...
+	def updatePixels(self) -> None: ...
+	def filter(self, type: str, value: float = ...) -> None: ...
+	def createImage(self, w: float, h: float, opt: Any = ...) -> Q5.Image: ...
+	def createGraphics(self, w: float, h: float, opt: dict = ...) -> Q5: ...
+	def text(self, str: str, x: float, y: float, wrapWidth: float = ..., lineLimit: float = ...) -> None: ...
+	def loadFont(self, url: str) -> Any: ...
+	def textFont(self, fontName: str) -> None: ...
+	def textSize(self, size: float = ...) -> float | None: ...
+	def textLeading(self, leading: float = ...) -> float | None: ...
+	def textStyle(self, style: Literal['normal', 'italic', 'bold', 'bolditalic']) -> None: ...
+	def textAlign(self, horiz: Literal['left', 'center', 'right'], vert: Literal['top', 'middle', 'bottom', 'alphabetic'] = ...) -> None: ...
+	def textWeight(self, weight: float | str) -> None: ...
+	def textWidth(self, str: str) -> float: ...
+	def textAscent(self, str: str) -> float: ...
+	def textDescent(self, str: str) -> float: ...
+	def createTextImage(self, str: str, wrapWidth: float = ..., lineLimit: float = ...) -> Q5.Image: ...
+	def textImage(self, img: Q5.Image | str, x: float, y: float) -> None: ...
+	def textToPoints(self, str: str, x: float = ..., y: float = ..., sampleRate: float = ..., density: float = ...) -> list[Any]: ...
+	@overload
+	def nf(self, n: float, l: float, r: float) -> str: ...
+	@overload
+	def nf(self, num: float, digits: float) -> str: ...
+	def mousePressed(self) -> None: ...
+	def mouseReleased(self) -> None: ...
+	def mouseMoved(self) -> None: ...
+	def mouseDragged(self) -> None: ...
+	def doubleClicked(self) -> None: ...
+	def keyIsDown(self, key: str) -> bool: ...
+	def keyPressed(self) -> None: ...
+	def keyReleased(self) -> None: ...
+	def touchStarted(self) -> None: ...
+	def touchEnded(self) -> None: ...
+	def touchMoved(self) -> None: ...
+	def cursor(self, name: str, x: float = ..., y: float = ...) -> None: ...
+	def noCursor(self) -> None: ...
+	def mouseWheel(self, event: Any) -> None: ...
+	def pointerLock(self, unadjustedMovement: bool) -> None: ...
+	def color(self, c0: str | float | Color | list[float], c1: float = ..., c2: float = ..., c3: float = ...) -> Color: ...
+	def colorMode(self, mode: Literal['rgb', 'oklch', 'hsl', 'hsb'], format: Literal[1, 255] = ..., gamut: Literal['srgb', 'display-p3'] = ...) -> None: ...
+	@overload
+	def background(self, filler: str | float | Color | Q5.Image) -> None: ...
+	@overload
+	def background(self, c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
+	@overload
+	def fill(self, color: str | float | Color) -> None: ...
+	@overload
+	def fill(self, c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
+	@overload
+	def stroke(self, color: str | float | Color) -> None: ...
+	@overload
+	def stroke(self, c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
+	def noFill(self) -> None: ...
+	def noStroke(self) -> None: ...
+	def strokeWeight(self, weight: float) -> None: ...
+	def opacity(self, alpha: float) -> None: ...
+	@overload
+	def shadow(self, color: str | float | Color) -> None: ...
+	@overload
+	def shadow(self, c0: float, c1: float = ..., c2: float = ..., c3: float = ...) -> None: ...
+	def noShadow(self) -> None: ...
+	def shadowBox(self, offsetX: float, offsetY: float, blur: float = ...) -> None: ...
+	def blendMode(self, val: str) -> None: ...
+	def strokeCap(self, val: str) -> None: ...
+	def strokeJoin(self, val: str) -> None: ...
+	def erase(self, fillAlpha: float = ..., strokeAlpha: float = ...) -> None: ...
+	def noErase(self) -> None: ...
+	def pushStyles(self) -> None: ...
+	def popStyles(self) -> None: ...
+	def clear(self) -> None: ...
+	def inFill(self, x: float, y: float) -> bool: ...
+	def inStroke(self, x: float, y: float) -> bool: ...
+	def translate(self, x: float, y: float) -> None: ...
+	def rotate(self, angle: float) -> None: ...
+	def scale(self, x: float, y: float = ...) -> None: ...
+	def shearX(self, angle: float) -> None: ...
+	def shearY(self, angle: float) -> None: ...
+	def applyMatrix(self, a: float, b: float, c: float, d: float, e: float, f: float) -> None: ...
+	def resetMatrix(self) -> None: ...
+	def pushMatrix(self) -> None: ...
+	def popMatrix(self) -> None: ...
+	def push(self) -> None: ...
+	def pop(self) -> None: ...
+	def displayMode(self, mode: str, renderQuality: str = ..., scale: str | float = ...) -> None: ...
+	def fullscreen(self, v: bool = ...) -> None: ...
+	def resizeCanvas(self, w: float, h: float) -> None: ...
+	def noLoop(self) -> None: ...
+	async def redraw(self, n: float = ...) -> None: ...
+	def loop(self) -> None: ...
+	def frameRate(self, hertz: float = ...) -> float: ...
+	def getTargetFrameRate(self) -> float: ...
+	def getFPS(self) -> float: ...
+	def pixelDensity(self, v: float) -> float: ...
+	def displayDensity(self) -> float: ...
+	def random(self, low: float | list[Any] = ..., high: float = ...) -> float | Any: ...
+	def jit(self, amount: float = ...) -> float: ...
+	def noise(self, x: float = ..., y: float = ..., z: float = ...) -> float: ...
+	def dist(self, x1: float, y1: float, x2: float, y2: float) -> float: ...
+	def map(self, val: float, start1: float, stop1: float, start2: float, stop2: float) -> float: ...
+	def angleMode(self, mode: Literal['degrees', 'radians']) -> None: ...
+	def radians(self, degrees: float) -> float: ...
+	def degrees(self, radians: float) -> float: ...
+	def lerp(self, start: float, stop: float, amt: float) -> float: ...
+	def constrain(self, n: float, low: float, high: float) -> float: ...
+	def norm(self, n: float, start: float, stop: float) -> float: ...
+	def abs(self, n: float) -> float: ...
+	def round(self, n: float, d: float = ...) -> float: ...
+	def ceil(self, n: float) -> float: ...
+	def floor(self, n: float) -> float: ...
+	def min(self, *args: float) -> float: ...
+	def max(self, *args: float) -> float: ...
+	def sin(self, angle: float) -> float: ...
+	def cos(self, angle: float) -> float: ...
+	def tan(self, angle: float) -> float: ...
+	def mag(self, val1: float, val2: float) -> float: ...
+	def asin(self, n: float) -> float: ...
+	def acos(self, n: float) -> float: ...
+	def atan(self, n: float) -> float: ...
+	def atan2(self, y: float, x: float) -> float: ...
+	def pow(self, base: float, exponent: float) -> float: ...
+	def fract(self, n: float) -> float: ...
+	def sq(self, n: float) -> float: ...
+	def sqrt(self, n: float) -> float: ...
+	def loge(self, n: float) -> float: ...
+	def exp(self, exponent: float) -> float: ...
+	def randomSeed(self, seed: float) -> None: ...
+	def randomGenerator(self, method: Any) -> None: ...
+	def randomGaussian(self, mean: float, std: float) -> float: ...
+	def randomExponential(self) -> float: ...
+	def noiseMode(self, mode: Literal['perlin', 'simplex', 'blocky']) -> None: ...
+	def noiseSeed(self, seed: float) -> None: ...
+	def noiseDetail(self, lod: float, falloff: float) -> None: ...
+	def loadSound(self, url: str) -> Sound: ...
+	def loadAudio(self, url: str) -> Any: ...
+	def getAudioContext(self) -> Any: ...
+	async def userStartAudio(self) -> None: ...
+	def createEl(self, tag: str, content: str = ...) -> Any: ...
+	def createA(self, href: str, text: str = ..., newTab: bool = ...) -> Any: ...
+	def createButton(self, content: str = ...) -> Any: ...
+	def createCheckbox(self, label: str = ..., checked: bool = ...) -> Any: ...
+	def createColorPicker(self, value: str = ...) -> Any: ...
+	def createImg(self, src: str) -> Any: ...
+	def createInput(self, value: str = ..., type: str = ...) -> Any: ...
+	def createP(self, content: str = ...) -> Any: ...
+	def createRadio(self, groupName: str = ...) -> Any: ...
+	def createSelect(self, placeholder: str = ...) -> Any: ...
+	def createSlider(self, min: float, max: float, value: float = ..., step: float = ...) -> Any: ...
+	def createVideo(self, src: str) -> Any: ...
+	def createCapture(self, type: str = ..., flipped: bool = ...) -> Any: ...
+	def findEl(self, selector: str) -> Any: ...
+	def findEls(self, selector: str) -> list[Any]: ...
+	def createRecorder(self) -> Any: ...
+	def record(self) -> None: ...
+	def pauseRecording(self) -> None: ...
+	def deleteRecording(self) -> None: ...
+	async def saveRecording(self, fileName: str) -> None: ...
+	async def load(self, *urls: str) -> list[Any]: ...
+	async def save(self, data: dict = ..., fileName: str = ...) -> None: ...
+	def loadText(self, url: str) -> str: ...
+	def loadJSON(self, url: str) -> Any: ...
+	def loadCSV(self, url: str) -> list[dict]: ...
+	def loadXML(self, url: str) -> Any: ...
+	async def loadAll(self) -> list[Any]: ...
+	def disablePreload(self) -> None: ...
+	def shuffle(self, arr: list[Any], modify: bool = ...) -> list[Any]: ...
+	def storeItem(self, key: str, val: str) -> None: ...
+	def getItem(self, key: str) -> str: ...
+	def removeItem(self, key: str) -> None: ...
+	def clearStorage(self) -> None: ...
+	def year(self) -> float: ...
+	def day(self) -> float: ...
+	def hour(self) -> float: ...
+	def minute(self) -> float: ...
+	def second(self) -> float: ...
+
+	class Image:
+		"""⚙
+		🌆 Image
+		"""
+
+		def __init__(self, w: float, h: float, opt: Any = ...) -> None: ...
+
+		width: float
+		height: float
+		defaultWidth: float
+		defaultHeight: float
+		mirrorX: bool
+		mirrorY: bool
+		def copy(self) -> Q5.Image: ...
+		def get(self, x: float, y: float, w: float = ..., h: float = ...) -> Q5.Image | list[float]: ...
+		def set(self, x: float, y: float, val: Any) -> None: ...
+		def resize(self, w: float, h: float) -> None: ...
+		def mask(self, img: Q5.Image) -> None: ...
+		def trim(self) -> Q5.Image: ...
+		def filter(self, type: str, value: float = ...) -> None: ...
+		def loadPixels(self) -> None: ...
+		def updatePixels(self) -> None: ...
+		def save(self, fileName: str = ...) -> None: ...

@@ -166,7 +166,7 @@ Color gamut is 'display-p3' by default, if the device supports HDR.
 
 ```
 @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} mode color mode
-@param {1 | 255} format color format (1 for float, 255 for integer)
+@param {1 | 255} [format] color format (1 for float, 255 for integer)
 @param {'srgb' | 'display-p3'} [gamut] color gamut
 ```
 

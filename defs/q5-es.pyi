@@ -1,7 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, Literal, overload
-
-class Image: ...
+from typing import Any, Awaitable, Callable, ClassVar, Literal, overload
 
 # ⭐ núcleo
 
@@ -11,26 +9,24 @@ Bienvenido al contenido de q5! 🤩
 ¿Primera vez programando? Revisa la guía para principiantes de q5.
 
 En estas páginas de "Aprender" puedes experimentar editando los mini ejemplos. ¡Diviértete! 😎
-
-![](https://notbyai.fyi/)
 """
 
-async def Lienzo(ancho: float | int = ..., alto: float | int = ..., opciones: dict = ...) -> object:
+async def Lienzo(ancho: float = ..., alto: float = ..., opciones: dict = ...) -> Any:
 	"""⭐
 	Crea un elemento de lienzo, una sección de la pantalla donde tu programa
 	puede dibujar.
-	
+
 	¡Ejecuta esta función para empezar a usar q5!
-	
+
 	Ten en cuenta que en este ejemplo, el círculo se encuentra en la posición [0, 0], el origen del lienzo.
-	
+
 	:param ancho: ancho del lienzo en píxeles
 	:param alto: alto del lienzo en píxeles
 	:param opciones: opciones para el contexto 2d
 	:returns: una promesa que se resuelve con el elemento canvas creado
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo('silver')
 		circulo(0, 0, 80)
@@ -40,9 +36,9 @@ async def Lienzo(ancho: float | int = ..., alto: float | int = ..., opciones: di
 def dibujar() -> None:
 	"""⭐
 	Función a declarar. Se ejecutará 60 veces por segundo de forma predeterminada. Tiene comportamiento de bucle, lo que permite hacer animaciones cuadro a cuadro.
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo('silver')
 			circulo(ratonX, ratonY, 80)
@@ -52,13 +48,13 @@ def dibujar() -> None:
 def log(mensaje: Any) -> None:
 	"""⭐
 	Imprime un mensaje en la consola de JavaScript. Atajo para console.log().
-	
+
 	Para acceder a las herramientas del navegador (DevTools) generalmente es con click derecho + "inspeccionar", o presionando las teclas ctrl + shift + i o command + option + i. La consola se encuentra en la pestaña "console".
-	
+
 	:param mensaje: a imprimir
-	
+
 	Example::
-	
+
 		def dibujar():
 			circulo(ratonX, ratonY, 80)
 			log('El ratón está en:', ratonX, ratonY)
@@ -67,125 +63,125 @@ def log(mensaje: Any) -> None:
 
 # 🧑‍🎨 formas
 
-def circulo(x: float | int, y: float | int, diámetro: float | int) -> None:
+def circulo(x: float, y: float, diámetro: float) -> None:
 	"""🧑‍🎨
 	Dibuja un círculo en la posición (x, y) con el diámetro especificado.
-	
+
 	:param x: posición x del centro del círculo
 	:param y: posición y del centro del círculo
 	:param diámetro: del círculo
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		circulo(0, 0, 80)
 	"""
 	...
 
-def elipse(x: float | int, y: float | int, ancho: float | int, alto: float | int = ...) -> None:
+def elipse(x: float, y: float, ancho: float, alto: float = ...) -> None:
 	"""🧑‍🎨
 	Dibuja una elipse.
-	
+
 	:param x: posición x
 	:param y: posición y
 	:param ancho: ancho de la elipse
 	:param alto: alto de la elipse
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		elipse(0, 0, 160, 80)
 	"""
 	...
 
-def rect(x: float | int, y: float | int, w: float | int, h: float | int = ..., redondeado: float | int = ...) -> None:
+def rect(x: float, y: float, w: float, h: float = ..., redondeado: float = ...) -> None:
 	"""🧑‍🎨
 	Dibuja un rectángulo o un rectángulo redondeado.
-	
+
 	:param x: posición x
 	:param y: posición y
 	:param w: ancho del rectángulo
 	:param h: alto del rectángulo
 	:param redondeado: radio para todas las esquinas
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		rect(-70, -80, 40, 60)
 		rect(-20, -30, 40, 60, 10)
 		rect(30, 20, 40, 60, 30)
 	"""
 	...
 
-def cuadrado(x: float | int, y: float | int, tamaño: float | int, redondeado: float | int = ...) -> None:
+def cuadrado(x: float, y: float, tamaño: float, redondeado: float = ...) -> None:
 	"""🧑‍🎨
 	Dibuja un cuadrado o un cuadrado redondeado.
-	
+
 	:param x: posición x
 	:param y: posición y
 	:param tamaño: tamaño de los lados del cuadrado
 	:param redondeado: radio para todas las esquinas
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		cuadrado(-70, -70, 40)
 		cuadrado(-20, -20, 40, 10)
 		cuadrado(30, 30, 40, 30)
 	"""
 	...
 
-def punto(x: float | int, y: float | int) -> None:
+def punto(x: float, y: float) -> None:
 	"""🧑‍🎨
 	Dibuja un punto en el lienzo.
-	
+
 	:param x: posición x
 	:param y: posición y
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		trazo('white')
 		punto(-25, 0)
-		
+
 		grosorTrazo(10)
 		punto(25, 0)
 	"""
 	...
 
-def linea(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> None:
+def linea(x1: float, y1: float, x2: float, y2: float) -> None:
 	"""🧑‍🎨
 	Dibuja una línea en el lienzo.
-	
+
 	:param x1: posición x del primer punto
 	:param y1: posición y del primer punto
 	:param x2: posición x del segundo punto
 	:param y2: posición y del segundo punto
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		trazo('lime')
 		linea(-80, -30, 80, 30)
 	"""
 	...
 
-def capsula(x1: float | int, y1: float | int, x2: float | int, y2: float | int, r: float | int) -> None:
+def capsula(x1: float, y1: float, x2: float, y2: float, r: float) -> None:
 	"""🧑‍🎨
 	Dibuja una cápsula.
-	
+
 	:param x1: posición x del primer punto
 	:param y1: posición y del primer punto
 	:param x2: posición x del segundo punto
 	:param y2: posición y del segundo punto
 	:param r: radio de los extremos semicirculares de la cápsula
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		grosorTrazo(5)
@@ -196,18 +192,16 @@ def capsula(x1: float | int, y1: float | int, x2: float | int, y2: float | int, 
 def modoRect(modo: str) -> None:
 	"""🧑‍🎨
 	Establecer a ESQUINA (por defecto), CENTRO, RADIO, o ESQUINAS.
-	
+
 	Cambia cómo se interpretan las primeras cuatro entradas para
 	rect y cuadrado.
-	
-	:param modo: 
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		modoRect(ESQUINA)
-		
+
 		#   ( x,  y,   w,  h)
 		rect(-50, -25, 100, 50)
 	"""
@@ -216,18 +210,16 @@ def modoRect(modo: str) -> None:
 def modoEliptico(modo: str) -> None:
 	"""🧑‍🎨
 	Establecer a CENTRO (por defecto), RADIO, ESQUINA, o ESQUINAS.
-	
+
 	Cambia cómo se interpretan las primeras cuatro entradas para
 	elipse, circulo, y arco.
-	
-	:param modo: 
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		modoEliptico(CENTRO)
-		
+
 		#     (  x,  y,   w,  h)
 		elipse(0, 0, 100, 50)
 	"""
@@ -250,30 +242,30 @@ Modo de alineación de forma, para usar en modoRect y modoEliptico.
 
 # 🌆 imagen
 
-def cargarImagen(url: str) -> Image:
+def cargarImagen(url: str) -> Q5.Image:
 	"""🌆
 	Carga una imagen desde una URL.
-	
+
 	Por defecto, los recursos se cargan en paralelo antes de que q5 ejecute dibujar. Usa await para esperar a que una imagen se cargue.
-	
+
 	:param url: url de la imagen a cargar
 	:returns: imagen
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		logo = cargarImagen('/q5js_logo.avif')
-		
+
 		def dibujar():
 			fondo(logo)
 	"""
 	...
 
-def imagen(img: Image | object, dx: float | int, dy: float | int, dw: float | int = ..., dh: float | int = ..., sx: float | int = ..., sy: float | int = ..., sw: float | int = ..., sh: float | int = ...) -> None:
+def imagen(img: Q5.Imagen | Any, dx: float, dy: float, dw: float = ..., dh: float = ..., sx: float = ..., sy: float = ..., sw: float = ..., sh: float = ...) -> None:
 	"""🌆
 	Dibuja una imagen o fotograma de video en el lienzo.
-	
+
 	:param img: imagen o video a dibujar
 	:param dx: posición x donde dibujar la imagen
 	:param dy: posición y donde dibujar la imagen
@@ -283,13 +275,13 @@ def imagen(img: Image | object, dx: float | int, dy: float | int, dw: float | in
 	:param sy: posición y en la fuente para empezar a recortar una subsección
 	:param sw: ancho de la subsección de la imagen fuente
 	:param sh: alto de la subsección de la imagen fuente
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		logo = cargarImagen('/q5js_logo.avif')
-		
+
 		def dibujar():
 			imagen(logo, -100, -100, 200, 200)
 	"""
@@ -298,60 +290,57 @@ def imagen(img: Image | object, dx: float | int, dy: float | int, dw: float | in
 def modoImagen(modo: str) -> None:
 	"""🌆
 	Establecer a CORNER (por defecto), CORNERS, o CENTER.
-	
+
 	Cambia cómo se interpretan las entradas a imagen.
-	
-	:param modo: 
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		logo = cargarImagen('/q5js_logo.avif')
-		
+
 		def dibujar():
 			modoImagen(CORNER)
-		
+
 			#     ( img,  x,  y,   w,   h)
 			imagen(logo, -50, -50, 100, 100)
 	"""
 	...
 
-def escalaImagenPorDefecto(escala: float | int) -> float | int:
+def escalaImagenPorDefecto(escala: float) -> float:
 	"""🌆
 	Establece la escala de imagen por defecto, que se aplica a las imágenes cuando
 	se dibujan sin un ancho o alto especificado.
-	
+
 	Por defecto es 0.5 para que las imágenes aparezcan en su tamaño real
 	cuando la densidad de píxeles es 2. Las imágenes se dibujarán a un tamaño
 	por defecto consistente relativo al lienzo independientemente de la densidad de píxeles.
-	
+
 	Esta función debe llamarse antes de que se carguen las imágenes para
 	tener efecto.
-	
-	:param escala: 
+
 	:returns: escala de imagen por defecto
 	"""
 	...
 
-def redimensionar(w: float | int, h: float | int) -> None:
+def redimensionar(w: float, h: float) -> None:
 	"""🌆
 	Redimensiona la imagen.
-	
+
 	:param w: nuevo ancho
 	:param h: nuevo alto
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		logo = await cargar('/q5js_logo.avif')
-		
+
 		logo.redimensionar(64, 64)
 		imagen(logo, -100, -100, 200, 200)
 	"""
 	...
 
-def recortar() -> Image:
+def recortar() -> Q5.Image:
 	"""🌆
 	Devuelve una imagen recortada, eliminando los píxeles transparentes de los bordes.
 	"""
@@ -362,9 +351,9 @@ def suavizar() -> None:
 	Habilita el renderizado suave de imágenes mostradas más grandes que
 	su tamaño real. Esta es la configuración por defecto, así que ejecutar esta
 	función solo tiene efecto si se ha llamado a noSuavizar.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		icono = await cargar('/q5js_icon.png')
 		imagen(icono, -100, -100, 200, 200)
@@ -374,46 +363,46 @@ def suavizar() -> None:
 def noSuavizar() -> None:
 	"""🌆
 	Deshabilita el renderizado suave de imágenes para un aspecto pixelado.
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		icono = await cargar('/q5js_icon.png')
-		
+
 		noSuavizar()
 		imagen(icono, -100, -100, 200, 200)
 	"""
 	...
 
-def teñir(color: str | float | int) -> None:
+def teñir(color: str | float) -> None:
 	"""🌆
 	Aplica un tinte (superposición de color) al dibujo.
-	
+
 	El valor alfa del color de tinte determina la
 	fuerza del tinte. Para cambiar la opacidad de una imagen,
 	usa la función opacidad.
-	
+
 	El teñido afecta a todas las imágenes dibujadas posteriormente. El color de tinte
 	se aplica a las imágenes usando el modo de mezcla "multiply".
-	
+
 	Dado que el proceso de teñido es intensivo en rendimiento, cada vez
 	que se tiñe una imagen, q5 almacena en caché el resultado. imagen dibujará la
 	imagen teñida en caché a menos que el color de tinte haya cambiado o la
 	imagen que se está tiñendo haya sido editada.
-	
+
 	Si necesitas dibujar una imagen múltiples veces cada fotograma con
 	diferentes tintes, considera hacer copias de la imagen y teñir
 	cada copia por separado.
-	
+
 	:param color: color de tinte
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		logo = await cargar('/q5js_logo.avif')
-		
+
 		teñir(1, 0, 0, 0.5)
 		imagen(logo, -100, -100, 200, 200)
 	"""
@@ -425,25 +414,25 @@ def noTeñir() -> None:
 	"""
 	...
 
-def enmascarar(img: Image) -> None:
+def enmascarar(img: Q5.Image) -> None:
 	"""🌆
 	Enmascara la imagen con otra imagen.
-	
+
 	:param img: imagen a usar como máscara
 	"""
 	...
 
-def copiar() -> Image:
+def copiar() -> Q5.Image:
 	"""🌆
 	Devuelve una copia de la imagen.
 	"""
 	...
 
-def insertado(sx: float | int, sy: float | int, sw: float | int, sh: float | int, dx: float | int, dy: float | int, dw: float | int, dh: float | int) -> None:
+def insertado(sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: float, dh: float) -> None:
 	"""🌆
 	Muestra una región de la imagen en otra región de la imagen.
 	Se puede usar para crear un detalle insertado, también conocido como efecto de lupa.
-	
+
 	:param sx: coordenada x de la región fuente
 	:param sy: coordenada y de la región fuente
 	:param sw: ancho de la región fuente
@@ -452,113 +441,108 @@ def insertado(sx: float | int, sy: float | int, sw: float | int, sh: float | int
 	:param dy: coordenada y de la región destino
 	:param dw: ancho de la región destino
 	:param dh: alto de la región destino
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		logo = await cargar('/q5js_logo.avif')
-		
+
 		logo.insertado(256, 256, 512, 512, 0, 0, 256, 256)
 		imagen(logo, -100, -100, 200, 200)
 	"""
 	...
 
-def obtener(x: float | int, y: float | int, w: float | int = ..., h: float | int = ...) -> Image | list[float | int]:
+def obtener(x: float, y: float, w: float = ..., h: float = ...) -> Q5.Image | list[float]:
 	"""🌆
 	Recupera una subsección de una imagen o lienzo como una nueva Imagen Q5
 	o el color de un píxel en la imagen o lienzo.
-	
+
 	Si solo se especifican x e y, esta función devuelve el color del píxel
 	en la coordenada dada en formato de array [R, G, B, A]. Si cargarPixeles
 	nunca se ha ejecutado, es ejecutado por esta función.
-	
+
 	Si haces cambios en el lienzo o imagen, debes llamar a cargarPixeles
 	antes de usar esta función para obtener los datos de color actuales.
-	
+
 	No aplicable a lienzos WebGPU.
-	
-	:param x: 
-	:param y: 
+
 	:param w: ancho del área, por defecto es 1
 	:param h: alto del área, por defecto es 1
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		logo = await cargar('/q5js_logo.avif')
-		
+
 		recortada = logo.obtener(256, 256, 512, 512)
 		imagen(recortada, -100, -100, 200, 200)
 	"""
 	...
 
-def establecer(x: float | int, y: float | int, val: Any) -> None:
+def establecer(x: float, y: float, val: Any) -> None:
 	"""🌆
 	Establece el color de un píxel en la imagen o lienzo. El modo de color debe ser RGB.
-	
+
 	O si se proporciona un lienzo o imagen, se dibuja encima de la
 	imagen o lienzo de destino, ignorando su configuración de tinte.
-	
+
 	Ejecuta actualizarPixeles para aplicar los cambios.
-	
+
 	No aplicable a lienzos WebGPU.
-	
-	:param x: 
-	:param y: 
+
 	:param val: color, lienzo, o imagen
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		c = color('lime')
 		img = crearImagen(50, 50)
-		
+
 		def dibujar():
 			img.establecer(aleatorio(50), aleatorio(50), c)
 			img.actualizarPixeles()
-		
+
 			fondo(img)
 	"""
 	...
 
-def pixeles() -> None:
-	"""🌆
-	Array de datos de color de píxeles de un lienzo o imagen.
-	
-	Vacío por defecto, obtener el dato ejecutando cargarPixeles.
-	
-	Cada píxel está representado por cuatro valores consecutivos en el array,
-	correspondientes a sus canales rojo, verde, azul y alfa.
-	
-	Los datos del píxel superior izquierdo están al principio del array
-	y los datos del píxel inferior derecho están al final, yendo de
-	izquierda a derecha y de arriba a abajo.
-	"""
-	...
+pixeles: list[float]
+"""🌆
+Array de datos de color de píxeles de un lienzo o imagen.
+
+Vacío por defecto, obtener el dato ejecutando cargarPixeles.
+
+Cada píxel está representado por cuatro valores consecutivos en el array,
+correspondientes a sus canales rojo, verde, azul y alfa.
+
+Los datos del píxel superior izquierdo están al principio del array
+y los datos del píxel inferior derecho están al final, yendo de
+izquierda a derecha y de arriba a abajo.
+"""
 
 def cargarPixeles() -> None:
 	"""🌆
 	Carga datos de píxeles en pixeles desde el lienzo o imagen.
-	
+
 	El ejemplo a continuación establece el canal verde de algunos píxeles
 	a un valor aleatorio.
-	
+
 	No aplicable a lienzos WebGPU.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		frecuenciaRefresco(5)
 		icono = cargarImagen('/q5js_icon.png')
-		
+
 		def dibujar():
 			icono.cargarPixeles()
 			for i in range(0, len(icono.pixeles), 16):
 				icono.pixeles[i + 1] = aleatorio(255)
-		
+
 			icono.actualizarPixeles()
 			fondo(icono)
 	"""
@@ -567,41 +551,41 @@ def cargarPixeles() -> None:
 def actualizarPixeles() -> None:
 	"""🌆
 	Aplica cambios en el array pixeles al lienzo o imagen.
-	
+
 	No aplicable a lienzos WebGPU.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		c = color('pink')
-		
+
 		img = crearImagen(50, 50)
 		for x in range(0, 50, 3):
 			for y in range(0, 50, 3):
 				img.establecer(x, y, c)
-		
+
 		img.actualizarPixeles()
-		
+
 		fondo(img)
 	"""
 	...
 
-def filtro(tipo: str, valor: float | int = ...) -> None:
+def filtro(tipo: str, valor: float = ...) -> None:
 	"""🌆
 	Aplica un filtro a la imagen.
-	
+
 	Mira la documentación de las constantes de filtro de q5 a continuación para más información.
-	
+
 	También se puede usar una cadena de filtro CSS.
 	https://developer.mozilla.org/docs/Web/CSS/filter
-	
+
 	No aplicable a lienzos WebGPU.
-	
+
 	:param tipo: tipo de filtro o una cadena de filtro CSS
 	:param valor: valor opcional, depende del tipo de filtro
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		logo = await cargar('/q5js_logo.avif')
 		logo.filtro(INVERTIR)
@@ -649,23 +633,23 @@ DESENFOCAR: Literal[8]
 Aplica un desenfoque gaussiano a la imagen.
 """
 
-def crearImagen(w: float | int, h: float | int, opt: Any = ...) -> Image:
+def crearImagen(w: float, h: float, opt: Any = ...) -> Q5.Image:
 	"""🌆
 	Crea una nueva imagen.
-	
+
 	:param w: ancho
 	:param h: alto
 	:param opt: configuraciones opcionales para la imagen
 	"""
 	...
 
-def crearGraficos(w: float | int, h: float | int, opt: dict = ...) -> Q5:
+def crearGraficos(w: float, h: float, opt: dict = ...) -> Q5:
 	"""🌆
 	Crea un búfer de gráficos.
-	
+
 	Deshabilitado por defecto en q5 WebGPU.
 	Mira el issue #104 para detalles.
-	
+
 	:param w: ancho
 	:param h: alto
 	:param opt: opciones
@@ -675,54 +659,54 @@ def crearGraficos(w: float | int, h: float | int, opt: dict = ...) -> Q5:
 
 # 📘 texto
 
-def texto(str: str, x: float | int, y: float | int, anchoEnvoltura: float | int = ..., limiteLineas: float | int = ...) -> None:
+def texto(str: str, x: float, y: float, anchoEnvoltura: float = ..., limiteLineas: float = ...) -> None:
 	"""📘
 	Renderiza texto en el lienzo.
-	
+
 	El texto se puede posicionar con los parámetros x e y
 	y opcionalmente se puede restringir.
-	
+
 	:param str: cadena de texto a mostrar
 	:param x: coordenada-x de la posición del texto
 	:param y: coordenada-y de la posición del texto
 	:param anchoEnvoltura: ancho máximo de línea en caracteres
 	:param limiteLineas: número máximo de líneas
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo('silver')
-		
+
 		tamañoTexto(32)
 		texto('Hello, world!', -88, 10)
 	"""
 	...
 
-def cargarFuente(url: str) -> object:
+def cargarFuente(url: str) -> Any:
 	"""📘
 	Carga una fuente desde una URL.
-	
+
 	El archivo de fuente puede estar en cualquier formato aceptado en CSS, como
 	archivos .ttf y .otf. El primer ejemplo a continuación carga
 	Robotica.
-	
+
 	También soporta cargar fuentes de Google.
 	El segundo ejemplo carga
 	Pacifico.
-	
+
 	Si no se cargan fuentes, se usa la fuente sans-serif por defecto.
-	
+
 	Por defecto, los recursos se cargan en paralelo antes de que q5 ejecute dibujar. Usa await para esperar a que una fuente se cargue.
-	
+
 	:param url: URL de la fuente a cargar
 	:returns: fuente
-	
+
 	Example::
-	
+
 		Lienzo(200, 56)
-		
+
 		await cargarFuente('/assets/Robotica.ttf')
-		
+
 		relleno('skyblue')
 		tamañoTexto(64)
 		imagenTexto('Hello!', -98, 24)
@@ -732,102 +716,102 @@ def cargarFuente(url: str) -> object:
 def fuenteTexto(nombreFuente: str) -> None:
 	"""📘
 	Establece la fuente actual a usar para renderizar texto.
-	
+
 	Por defecto, la fuente se establece a la familia de fuentes CSS
 	"sans-serif" o la última fuente cargada.
-	
+
 	:param nombreFuente: nombre de la familia de fuentes o un objeto FontFace
-	
+
 	Example::
-	
+
 		Lienzo(200, 160)
 		fondo(0.8)
-		
+
 		fuenteTexto('serif')
-		
+
 		def dibujar():
 			tamañoTexto(32)
 			texto('Hello, world!', -96, 10)
 	"""
 	...
 
-def tamañoTexto(tamaño: float | int = ...) -> float | int | None:
+def tamañoTexto(tamaño: float = ...) -> float | None:
 	"""📘
 	Establece u obtiene el tamaño de fuente actual. Si no se proporciona argumento, devuelve el tamaño de fuente actual.
-	
+
 	:param tamaño: tamaño de la fuente en píxeles
 	:returns: tamaño de fuente actual cuando no se proporciona argumento
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			tamañoTexto(abs(ratonX))
 			texto('A', -90, 90)
 	"""
 	...
 
-def interlineado(interlineado: float | int = ...) -> float | int | None:
+def interlineado(interlineado: float = ...) -> float | None:
 	"""📘
 	Establece u obtiene la altura de línea actual. Si no se proporciona argumento, devuelve la altura de línea actual.
-	
+
 	:param interlineado: altura de línea en píxeles
 	:returns: altura de línea actual cuando no se proporciona argumento
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			tamañoTexto(abs(ratonX))
 			texto('A', -90, 90)
 			rect(-90, 90, 5, -interlineado())
 	"""
 	...
 
-def estiloTexto(estilo: Literal['normal'] | Literal['italic'] | Literal['bold'] | Literal['bolditalic']) -> None:
+def estiloTexto(estilo: Literal['normal', 'italic', 'bold', 'bolditalic']) -> None:
 	"""📘
 	Establece el estilo de texto actual.
-	
+
 	No aplicable a WebGPU cuando se usan fuentes MSDF.
-	
+
 	:param estilo: estilo de fuente
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		estiloTexto(CURSIVA)
-		
+
 		tamañoTexto(32)
 		texto('Hello, world!', -88, 6)
 	"""
 	...
 
-def alineacionTexto(horiz: Literal['left'] | Literal['center'] | Literal['right'], vert: Literal['top'] | Literal['middle'] | Literal['bottom'] | Literal['alphabetic'] = ...) -> None:
+def alineacionTexto(horiz: Literal['left', 'center', 'right'], vert: Literal['top', 'middle', 'bottom', 'alphabetic'] = ...) -> None:
 	"""📘
 	Establece la alineación horizontal y vertical del texto.
-	
+
 	:param horiz: alineación horizontal
 	:param vert: alineación vertical
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		tamañoTexto(32)
-		
+
 		alineacionTexto(CENTRO, MEDIO)
 		texto('Hello, world!', 0, 0)
 	"""
 	...
 
-def pesoTexto(peso: float | int | str) -> None:
+def pesoTexto(peso: float | str) -> None:
 	"""📘
 	Establece el peso del texto.
-	
+
 	- 100: delgado
 	- 200: extra-ligero
 	- 300: ligero
@@ -837,150 +821,150 @@ def pesoTexto(peso: float | int | str) -> None:
 	- 700: negrita
 	- 800: más negrita/extra-negrita
 	- 900: negro/pesado
-	
+
 	:param peso: peso de la fuente
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		tamañoTexto(32)
 		alineacionTexto(CENTRO, MEDIO)
-		
+
 		pesoTexto(100)
 		texto('Hello, world!', 0, 0)
 	"""
 	...
 
-def anchoTexto(str: str) -> float | int:
+def anchoTexto(str: str) -> float:
 	"""📘
 	Calcula y devuelve el ancho de una cadena de texto dada.
-	
+
 	:param str: cadena a medir
 	:returns: ancho del texto en píxeles
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			tamañoTexto(abs(ratonX))
 			rect(-90, 90, anchoTexto('A'), -interlineado())
 			texto('A', -90, 90)
 	"""
 	...
 
-def ascensoTexto(str: str) -> float | int:
+def ascensoTexto(str: str) -> float:
 	"""📘
 	Calcula y devuelve el ascenso (la distancia desde la línea base hasta la parte superior del carácter más alto) de la fuente actual.
-	
+
 	:param str: cadena a medir
 	:returns: ascenso del texto en píxeles
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			tamañoTexto(abs(ratonX))
 			rect(-90, 90, anchoTexto('A'), -ascensoTexto())
 			texto('A', -90, 90)
 	"""
 	...
 
-def descensoTexto(str: str) -> float | int:
+def descensoTexto(str: str) -> float:
 	"""📘
 	Calcula y devuelve el descenso (la distancia desde la línea base hasta la parte inferior del carácter más bajo) de la fuente actual.
-	
+
 	:param str: cadena a medir
 	:returns: descenso del texto en píxeles
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		tamañoTexto(64)
-		
+
 		rect(-100, 0, 200, descensoTexto('q5'))
 		texto('q5', -90, 0)
 	"""
 	...
 
-def crearImagenTexto(str: str, anchoEnvoltura: float | int = ..., limiteLineas: float | int = ...) -> Image:
+def crearImagenTexto(str: str, anchoEnvoltura: float = ..., limiteLineas: float = ...) -> Q5.Image:
 	"""📘
 	Crea una imagen a partir de una cadena de texto.
-	
+
 	:param str: cadena de texto
 	:param anchoEnvoltura: ancho máximo de línea en caracteres
 	:param limiteLineas: número máximo de líneas
 	:returns: un objeto de imagen representando el texto renderizado
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		tamañoTexto(96)
-		
+
 		img = crearImagenTexto('🐶')
 		img.filtro(INVERTIR)
-		
+
 		def dibujar():
 			imagen(img, -45, -90)
 	"""
 	...
 
-def imagenTexto(img: Image | str, x: float | int, y: float | int) -> None:
+def imagenTexto(img: Q5.Imagen | str, x: float, y: float) -> None:
 	"""📘
 	Renderiza una imagen generada a partir de texto en el lienzo.
-	
+
 	Si el primer parámetro es una cadena, se creará y almacenará en caché automáticamente
 	una imagen del texto.
-	
+
 	El posicionamiento de la imagen se ve afectado por la configuración actual de
 	alineación de texto y línea base.
-	
+
 	En q5 WebGPU, esta función es la única forma de dibujar texto multicolor,
 	como emojis, y de usar fuentes que no están en formato MSDF.
 	Usar esta función para dibujar texto que cambia cada fotograma tiene
 	un costo de rendimiento muy alto.
-	
+
 	:param img: imagen o texto
 	:param x: coordenada-x donde se debe colocar la imagen
 	:param y: coordenada-y donde se debe colocar la imagen
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		tamañoTexto(96)
 		alineacionTexto(CENTRO, CENTRO)
-		
+
 		imagenTexto('🐶', 0, 0)
 	"""
 	...
 
 @overload
-def nf(n: float | int, l: float | int, r: float | int) -> str: 
+def nf(n: float, l: float, r: float) -> str:
 	"""📘
 	Formateador de números, se puede usar para mostrar un número como una cadena con
 	un número especificado de dígitos antes y después del punto decimal,
 	opcionalmente añadiendo relleno con ceros.
-	
+
 	:param n: número a formatear
 	:param l: número mínimo de dígitos que aparecen antes del punto decimal; el número se rellena con ceros si es necesario
 	:param r: número de dígitos que aparecen después del punto decimal
 	:returns: una representación de cadena del número, formateada en consecuencia
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
-		
+
 		tamañoTexto(32)
 		texto(nf(PI, 4, 5), -90, 10)
 	"""
 	...
 @overload
-def nf(num: float | int, digitos: float | int) -> str: ...
+def nf(num: float, digitos: float) -> str: ...
 
 NORMAL: Literal['normal']
 """📘
@@ -1048,7 +1032,7 @@ respondiendo a eventos de entrada dentro de funciones como
 alPresionarRaton y alPresionarTecla.
 """
 
-ratonX: float | int
+ratonX: float
 """🖲
 Posición X actual del ratón.
 
@@ -1060,7 +1044,7 @@ Example::
 		texto(redondear(ratonX), -50, 20)
 """
 
-ratonY: float | int
+ratonY: float
 """🖲
 Posición Y actual del ratón.
 
@@ -1071,12 +1055,12 @@ Example::
 		circulo(0, ratonY, 100)
 """
 
-pRatonX: float | int
+pRatonX: float
 """🖲
 Posición X previa del ratón.
 """
 
-pRatonY: float | int
+pRatonY: float
 """🖲
 Posición Y previa del ratón.
 """
@@ -1109,12 +1093,12 @@ Example::
 def alPresionarRaton() -> None:
 	"""🖲
 	Define esta función para responder a eventos de presionar el ratón.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alPresionarRaton():
 			global gris
 			fondo(gris)
@@ -1125,12 +1109,12 @@ def alPresionarRaton() -> None:
 def alSoltarRaton() -> None:
 	"""🖲
 	Define esta función para responder a eventos de soltar el ratón.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alSoltarRaton():
 			global gris
 			fondo(gris)
@@ -1141,15 +1125,15 @@ def alSoltarRaton() -> None:
 def alMoverRaton() -> None:
 	"""🖲
 	Define esta función para responder a eventos de mover el ratón.
-	
+
 	En dispositivos con pantalla táctil esta función no se llama
 	cuando el usuario arrastra su dedo en la pantalla.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alMoverRaton():
 			global gris
 			fondo(gris)
@@ -1160,15 +1144,15 @@ def alMoverRaton() -> None:
 def alArrastrarRaton() -> None:
 	"""🖲
 	Define esta función para responder a eventos de arrastrar el ratón.
-	
+
 	Arrastrar el ratón se define como mover el ratón
 	mientras un botón del ratón está presionado.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alArrastrarRaton():
 			global gris
 			fondo(gris)
@@ -1179,12 +1163,12 @@ def alArrastrarRaton() -> None:
 def dobleClic() -> None:
 	"""🖲
 	Define esta función para responder a eventos de doble clic del ratón.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def dobleClic():
 			global gris
 			fondo(gris)
@@ -1219,15 +1203,15 @@ def teclaEstaPresionada(tecla: str) -> bool:
 	"""🖲
 	Devuelve verdadero si el usuario está presionando la tecla especificada, falso
 	de lo contrario. Acepta nombres de teclas insensibles a mayúsculas.
-	
+
 	:param tecla: tecla a comprobar
 	:returns: verdadero si la tecla está presionada, falso de lo contrario
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			if teclaEstaPresionada('f') and teclaEstaPresionada('j'):
 				rect(-50, -50, 100, 100)
 	"""
@@ -1236,12 +1220,12 @@ def teclaEstaPresionada(tecla: str) -> bool:
 def alPresionarTecla() -> None:
 	"""🖲
 	Define esta función para responder a eventos de presionar tecla.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alPresionarTecla():
 			global gris
 			fondo(gris)
@@ -1252,12 +1236,12 @@ def alPresionarTecla() -> None:
 def alSoltarTecla() -> None:
 	"""🖲
 	Define esta función para responder a eventos de soltar tecla.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alSoltarTecla():
 			global gris
 			fondo(gris)
@@ -1285,15 +1269,15 @@ def alEmpezarToque() -> None:
 	"""🖲
 	Define esta función para responder a eventos de inicio de toque
 	en el lienzo.
-	
+
 	Devuelve true para habilitar gestos táctiles como pellizcar para hacer zoom
 	y desplazarse, que q5 deshabilita en el lienzo por defecto.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alEmpezarToque():
 			global gris
 			fondo(gris)
@@ -1305,15 +1289,15 @@ def alTerminarToque() -> None:
 	"""🖲
 	Define esta función para responder a eventos de fin de toque
 	en el lienzo.
-	
+
 	Devuelve true para habilitar gestos táctiles como pellizcar para hacer zoom
 	y desplazarse, que q5 deshabilita en el lienzo por defecto.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alTerminarToque():
 			global gris
 			fondo(gris)
@@ -1325,15 +1309,15 @@ def alMoverToque() -> None:
 	"""🖲
 	Define esta función para responder a eventos de movimiento de toque
 	en el lienzo.
-	
+
 	Devuelve true para habilitar gestos táctiles como pellizcar para hacer zoom
 	y desplazarse, que q5 deshabilita en el lienzo por defecto.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		gris = 0.4
-		
+
 		def alMoverToque():
 			global gris
 			fondo(gris)
@@ -1341,18 +1325,18 @@ def alMoverToque() -> None:
 	"""
 	...
 
-def cursor(nombre: str, x: float | int = ..., y: float | int = ...) -> None:
+def cursor(nombre: str, x: float = ..., y: float = ...) -> None:
 	"""🖲
 	Establece el cursor a un tipo de cursor CSS o imagen.
 	Si se proporciona una imagen, las coordenadas x e y opcionales pueden
 	especificar el punto activo del cursor.
-	
+
 	:param nombre: nombre del cursor o la url a una imagen
 	:param x: coordenada x del punto del cursor
 	:param y: coordenada y del punto del cursor
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		cursor('pointer')
 	"""
@@ -1361,29 +1345,29 @@ def cursor(nombre: str, x: float | int = ..., y: float | int = ...) -> None:
 def sinCursor() -> None:
 	"""🖲
 	Oculta el cursor dentro de los límites del lienzo.
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		sinCursor()
 	"""
 	...
 
-def ruedaRaton() -> None:
+def ruedaRaton(evento: Any) -> None:
 	"""🖲
 	Define esta función para responder a eventos de la rueda del ratón.
-	
+
 	event.deltaX y event.deltaY son las cantidades de desplazamiento horizontal y vertical,
 	respectivamente.
-	
+
 	Devuelve true para permitir el comportamiento por defecto de desplazar la página.
-	
+
 	Example::
-	
+
 		x = (y = 0)
 		def dibujar():
 			circulo(x, y, 10)
-		
+
 		def ruedaRaton(e):
 			global x
 			x += e.deltaX
@@ -1392,7 +1376,7 @@ def ruedaRaton() -> None:
 	"""
 	...
 
-movidoX: float | int
+movidoX: float
 """🖲
 Distancia que el ratón ha recorrido desde el último fotograma en la dirección horizontal.
 
@@ -1404,7 +1388,7 @@ Example::
 		if movidoX < 0: texto('<<', 0, 0)
 """
 
-movidoY: float | int
+movidoY: float
 """🖲
 Distancia que el ratón ha recorrido desde el último fotograma en la dirección vertical.
 
@@ -1420,18 +1404,18 @@ def bloqueoPuntero(movimientoNoAjustado: bool) -> None:
 	"""🖲
 	Solicita que el puntero se bloquee al cuerpo del documento, ocultando
 	el cursor y permitiendo un movimiento ilimitado.
-	
+
 	Los sistemas operativos habilitan la aceleración del ratón por defecto, lo cual es útil cuando a veces quieres un movimiento lento y preciso (piensa en cómo usarías un paquete de gráficos), pero también quieres moverte grandes distancias con un movimiento de ratón más rápido (piensa en desplazarte y seleccionar varios archivos). Para algunos juegos, sin embargo, se prefieren los datos de entrada de ratón sin procesar para controlar la rotación de la cámara — donde el mismo movimiento de distancia, rápido o lento, resulta en la misma rotación.
-	
+
 	Para salir del modo de bloqueo de puntero, llama a document.exitPointerLock().
-	
+
 	:param movimientoNoAjustado: establecer a true para deshabilitar la aceleración del ratón a nivel de SO y acceder a la entrada de ratón sin procesar
-	
+
 	Example::
-	
+
 		def dibujar():
 			circulo(ratonX / 10, ratonY / 10, 10)
-		
+
 		def dobleClic():
 			if not document.pointerLockElement:
 				bloqueoPuntero()
@@ -1442,28 +1426,28 @@ def bloqueoPuntero(movimientoNoAjustado: bool) -> None:
 
 # 🎨 color
 
-def color(c0: str | float | int | Color | list[float | int], c1: float | int = ..., c2: float | int = ..., c3: float | int = ...) -> Color:
+def color(c0: str | float | Color | list[float], c1: float = ..., c2: float = ..., c3: float = ...) -> Color:
 	"""🎨
 	Crea un nuevo objeto Color, el cual es útil principalmente para almacenar
 	un color que tu sketch reutilizará o modificará más tarde.
-	
+
 	Con el modo de color por defecto, RGB, los colores tienen componentes r/red (rojo), g/green (verde),
 	b/blue (azul), y a/alpha (alfa).
-	
+
 	Las funciones relleno, trazo, y fondo
 	aceptan la misma amplia gama de representaciones de color que esta función.
-	
+
 	:param c0: color o primer componente de color
 	:param c1: segundo componente de color
 	:param c2: tercer componente de color
 	:param c3: cuarto componente de color (alfa)
 	:returns: un nuevo objeto Color
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		rect(-100, -100, 100, 200)
-		
+
 		#              (   r,    g, b,   a)
 		botella = color(0.35, 0.39, 1, 0.4)
 		relleno(botella)
@@ -1473,21 +1457,21 @@ def color(c0: str | float | int | Color | list[float | int], c1: float | int = .
 	"""
 	...
 
-def modoColor(modo: Literal['rgb'] | Literal['oklch'] | Literal['hsl'] | Literal['hsb'], formato: Literal[1] | Literal[255], gama: Literal['srgb'] | Literal['display-p3'] = ...) -> None:
+def modoColor(modo: Literal['rgb', 'oklch', 'hsl', 'hsb'], formato: Literal[1, 255] = ..., gama: Literal['srgb', 'display-p3'] = ...) -> None:
 	"""🎨
 	Establece el modo de color para el sketch, lo cual cambia cómo se
 	interpretan y muestran los colores.
-	
+
 	La gama de color es 'display-p3' por defecto, si el dispositivo soporta HDR.
-	
+
 	:param modo: modo de color
 	:param formato: formato de color (1 para flotante, 255 para entero)
 	:param gama: gama de color
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		modoColor(RGB, 1)
 		relleno(1, 0, 0)
 		rect(-100, -100, 66, 200)
@@ -1510,9 +1494,9 @@ formato entero legado 0-255.
 Example::
 
 	Lienzo(200, 100)
-	
+
 	modoColor(RGB)
-	
+
 	fondo(1, 0, 0)
 """
 
@@ -1544,9 +1528,9 @@ colores dentro de la gama.
 Example::
 
 	Lienzo(200, 100)
-	
+
 	modoColor(OKLCH)
-	
+
 	fondo(0.64, 0.3, 30)
 """
 
@@ -1574,9 +1558,9 @@ se usa el espacio de color "display-p3".
 Example::
 
 	Lienzo(200, 100)
-	
+
 	modoColor(HSL)
-	
+
 	fondo(0, 100, 50)
 """
 
@@ -1598,9 +1582,9 @@ a 100 y la saturación a 0.
 Example::
 
 	Lienzo(200, 100)
-	
+
 	modoColor(HSB)
-	
+
 	fondo(0, 100, 100)
 """
 
@@ -1615,9 +1599,9 @@ una pantalla SDR.
 Example::
 
 	Lienzo(200, 100)
-	
+
 	modoColor(RGB, 1, SRGB)
-	
+
 	fondo(1, 0, 0)
 """
 
@@ -1633,24 +1617,24 @@ totalmente saturado y brillante en el siguiente ejemplo.
 Example::
 
 	Lienzo(200, 100)
-	
+
 	modoColor(RGB, 1, DISPLAY_P3)
-	
+
 	fondo(1, 0, 0)
 """
 
-def fondo(relleno: Color | Image) -> None:
+def fondo(relleno: str | float | Color | Q5.Imagen) -> None:
 	"""🎨
 	Dibuja sobre todo el lienzo con un color o una imagen.
-	
+
 	Al igual que la función color,
 	esta función puede aceptar colores en una amplia gama de formatos:
 	cadena de color CSS, valor de escala de grises y valores de componentes de color.
-	
+
 	:param relleno: un color o una imagen para dibujar
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo('crimson')
 	"""
@@ -1659,97 +1643,100 @@ def fondo(relleno: Color | Image) -> None:
 class Color:
 	"""🎨
 	Este constructor acepta estrictamente 4 números, que son los componentes del color.
-	
+
 	Usa la función color para mayor flexibilidad, ejecuta
 	este constructor internamente.
-	
+
 	Color no es realmente una clase en si misma, es una referencia a una
 	clase de color Q5 basada en el modo de color, formato y gama.
 	"""
 
+	def __init__(self, c0: float, c1: float, c2: float, c3: float) -> None: ...
 
-	def igual(self) -> bool:
+	def igual(self, otro: Color) -> bool:
 		"""🎨 Comprueba si este color es exactamente igual a otro color."""
 		...
 
-	def esMismoColor(self) -> bool:
-		"""🎨 Comprueba si el color es el mismo que otro color,
-ignorando sus valores alfa."""
+	def esMismoColor(self, otro: Color) -> bool:
+		"""🎨
+		Comprueba si el color es el mismo que otro color,
+		ignorando sus valores alfa.
+		"""
 		...
 
 	def toString(self) -> str:
 		"""🎨 Produce una representación de cadena de color CSS."""
 		...
 
-	niveles: list[float | int]
+	niveles: list[float]
 	"""🎨 Un array de los componentes del color."""
 
 # 💅 estilos
 
 @overload
-def relleno(color: str | float | int | Color) -> None: 
+def relleno(color: str | float | Color) -> None:
 	"""💅
 	Establece el color de relleno. El defecto es blanco.
-	
+
 	Como la función color, esta función
 	puede aceptar colores en una amplia gama de formatos: como una cadena de color CSS,
 	un objeto Color, valor de escala de grises, o valores de componentes de color.
-	
+
 	:param color: color de relleno
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		relleno('red')
 		circulo(-20, -20, 80)
-		
+
 		relleno('lime')
 		cuadrado(-20, -20, 80)
 	"""
 	...
 @overload
-def relleno(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
+def relleno(c0: float, c1: float, c2: float, c3: float) -> None: ...
 
 @overload
-def trazo(color: str | float | int | Color) -> None: 
+def trazo(color: str | float | Color) -> None:
 	"""💅
 	Establece el color del trazo (contorno). El defecto es negro.
-	
+
 	Como la función color, esta función
 	puede aceptar colores en una amplia gama de formatos: como una cadena de color CSS,
 	un objeto Color, valor de escala de grises, o valores de componentes de color.
-	
+
 	:param color: color de trazo
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		relleno(0.14)
-		
+
 		trazo('red')
 		circulo(-20, -20, 80)
-		
+
 		trazo('lime')
 		cuadrado(-20, -20, 80)
 	"""
 	...
 @overload
-def trazo(c0: float | int, c1: float | int, c2: float | int, c3: float | int) -> None: ...
+def trazo(c0: float, c1: float, c2: float, c3: float) -> None: ...
 
 def sinRelleno() -> None:
 	"""💅
 	Después de llamar a esta función, el dibujo no será rellenado.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		sinRelleno()
-		
+
 		trazo('red')
 		circulo(-20, -20, 80)
 		trazo('lime')
@@ -1760,72 +1747,72 @@ def sinRelleno() -> None:
 def sinTrazo() -> None:
 	"""💅
 	Después de llamar a esta función, el dibujo no tendrá un trazo (contorno).
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		relleno(0.14)
 		trazo('red')
 		circulo(-20, -20, 80)
-		
+
 		sinTrazo()
 		cuadrado(-20, -20, 80)
 	"""
 	...
 
-def grosorTrazo(grosor: float | int) -> None:
+def grosorTrazo(grosor: float) -> None:
 	"""💅
 	Establece el tamaño del trazo usado para líneas y el borde alrededor de dibujos.
-	
+
 	:param grosor: tamaño del trazo en píxeles
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		trazo('red')
 		circulo(-50, 0, 80)
-		
+
 		grosorTrazo(12)
 		circulo(50, 0, 80)
 	"""
 	...
 
-def opacidad(alfa: float | int) -> None:
+def opacidad(alfa: float) -> None:
 	"""💅
 	Establece la opacidad global, que afecta a todas las operaciones de dibujo posteriores, excepto fondo. El defecto es 1, totalmente opaco.
-	
+
 	En q5 WebGPU esta función solo afecta a imágenes.
-	
+
 	:param alfa: nivel de opacidad, variando de 0 a 1
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		opacidad(1)
 		circulo(-20, -20, 80)
-		
+
 		opacidad(0.2)
 		cuadrado(-20, -20, 80)
 	"""
 	...
 
-def sombra(color: Color) -> None:
+def sombra(color: str | float | Color) -> None:
 	"""💅
 	Establece el color de la sombra. El defecto es transparente (sin sombra).
-	
+
 	Las sombras se aplican a cualquier cosa dibujada en el lienzo, incluyendo formas rellenas,
 	trazos, texto, e imágenes.
-	
+
 	Como la función color, esta función
 	puede aceptar colores en una amplia gama de formatos: como una cadena de color CSS,
 	un objeto Color, valor de escala de grises, o valores de componentes de color.
-	
+
 	No disponible en q5 WebGPU.
-	
+
 	:param color: color de sombra
 	"""
 	...
@@ -1833,19 +1820,19 @@ def sombra(color: Color) -> None:
 def sinSombra() -> None:
 	"""💅
 	Deshabilita el efecto de sombra.
-	
+
 	No disponible en q5 WebGPU.
 	"""
 	...
 
-def cajaSombra(offsetX: float | int, offsetY: float | int, desenfoque: float | int) -> None:
+def cajaSombra(offsetX: float, offsetY: float, desenfoque: float) -> None:
 	"""💅
 	Establece el desplazamiento de la sombra y el radio de desenfoque.
-	
+
 	Cuando q5 comienza, el desplazamiento de la sombra es (10, 10) con un desenfoque de 10.
-	
+
 	No disponible en q5 WebGPU.
-	
+
 	:param offsetX: desplazamiento horizontal de la sombra
 	:param offsetY: desplazamiento vertical de la sombra, por defecto es el mismo que offsetX
 	:param desenfoque: radio de desenfoque de la sombra, por defecto es 0
@@ -1855,27 +1842,26 @@ def cajaSombra(offsetX: float | int, offsetY: float | int, desenfoque: float | i
 def modoMezcla(val: str) -> None:
 	"""💅
 	Establece la operación de composición global para el contexto del lienzo.
-	
+
 	No disponible en q5 WebGPU.
-	
+
 	:param val: operación de composición
 	"""
 	...
 
 def terminacionTrazo(val: str) -> None:
 	"""💅
-	
 	:param val: estilo de terminación de línea
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		grosorTrazo(20)
-		
+
 		terminacionTrazo(SQUARE)
 		linea(-50, -25, 50, -25)
-		
+
 		terminacionTrazo(PROJECT)
 		linea(-50, 25, 50, 25)
 	"""
@@ -1884,20 +1870,20 @@ def terminacionTrazo(val: str) -> None:
 def unionTrazo(val: str) -> None:
 	"""💅
 	Establece el estilo de unión de línea a ROUND, BEVEL, o MITER.
-	
+
 	No disponible en q5 WebGPU.
-	
+
 	:param val: estilo de unión de línea
 	"""
 	...
 
-def borrar(rellenoAlfa: float | int = ..., trazoAlfa: float | int = ...) -> None:
+def borrar(rellenoAlfa: float = ..., trazoAlfa: float = ...) -> None:
 	"""💅
 	Establece el lienzo en modo borrar, donde las formas borrarán lo que está
 	debajo de ellas en lugar de dibujar sobre ello.
-	
+
 	No disponible en q5 WebGPU.
-	
+
 	:param rellenoAlfa: nivel de opacidad del color de relleno
 	:param trazoAlfa: nivel de opacidad del color de trazo
 	"""
@@ -1906,7 +1892,7 @@ def borrar(rellenoAlfa: float | int = ..., trazoAlfa: float | int = ...) -> None
 def noBorrar() -> None:
 	"""💅
 	Reinicia el lienzo del modo borrar al modo de dibujo normal.
-	
+
 	No disponible en q5 WebGPU.
 	"""
 	...
@@ -1914,20 +1900,20 @@ def noBorrar() -> None:
 def guardarEstilos() -> None:
 	"""💅
 	Guarda la configuración de estilo de dibujo actual.
-	
+
 	Esto incluye el relleno, trazo, grosor de trazo, tinte, modo de imagen,
 	modo de rectángulo, modo de elipse, tamaño de texto, alineación de texto, línea base de texto, y
 	configuración de sombra.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		guardarEstilos()
 		relleno('blue')
 		circulo(-50, -50, 80)
-		
+
 		recuperarEstilos()
 		circulo(50, 50, 80)
 	"""
@@ -1936,16 +1922,16 @@ def guardarEstilos() -> None:
 def recuperarEstilos() -> None:
 	"""💅
 	Restaura la configuración de estilo de dibujo guardada previamente.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		guardarEstilos()
 		relleno('blue')
 		circulo(-50, -50, 80)
-		
+
 		recuperarEstilos()
 		circulo(50, 50, 80)
 	"""
@@ -1954,152 +1940,147 @@ def recuperarEstilos() -> None:
 def limpiar() -> None:
 	"""💅
 	Limpia el lienzo, haciendo que cada píxel sea completamente transparente.
-	
+
 	Ten en cuenta que el lienzo solo se puede ver a través si tiene un canal alfa.
-	
+
 	Example::
-	
+
 		Lienzo(200, { 'alpha': True })
-		
+
 		def dibujar():
 			limpiar()
 			circulo((frameCount % 200) - 100, 0, 80)
 	"""
 	...
 
-def enRelleno(x: float | int, y: float | int) -> bool:
+def enRelleno(x: float, y: float) -> bool:
 	"""💅
 	Comprueba si un punto dado está dentro del área de relleno del camino actual.
-	
+
 	No disponible en q5 WebGPU.
-	
+
 	:param x: coordenada-x del punto
 	:param y: coordenada-y del punto
 	:returns: verdadero si el punto está dentro del área de relleno, falso de lo contrario
 	"""
 	...
 
-def enTrazo(x: float | int, y: float | int) -> bool:
+def enTrazo(x: float, y: float) -> bool:
 	"""💅
 	Comprueba si un punto dado está dentro del trazo del camino actual.
-	
+
 	No disponible en q5 WebGPU.
-	
+
 	:param x: coordenada-x del punto
 	:param y: coordenada-y del punto
 	:returns: verdadero si el punto está dentro del trazo, falso de lo contrario
 	"""
 	...
 
+ctx: Any
+
 # 🦋 transformaciones
 
-def trasladar(x: float | int, y: float | int) -> None:
+def trasladar(x: float, y: float) -> None:
 	"""🦋
 	Traslada el origen del contexto de dibujo.
-	
+
 	:param x: traslación a lo largo del eje x
 	:param y: traslación a lo largo del eje y
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			trasladar(50, 50)
 			circulo(0, 0, 80)
 	"""
 	...
 
-def rotar(angulo: float | int) -> None:
+def rotar(angulo: float) -> None:
 	"""🦋
 	Rota el contexto de dibujo.
-	
+
 	:param angulo: ángulo de rotación en radianes
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			rotar(ratonX / 50)
-		
+
 			modoRect(CENTER)
 			cuadrado(0, 0, 120)
 	"""
 	...
 
-def escalar(x: float | int, y: float | int = ...) -> None:
+def escalar(x: float, y: float = ...) -> None:
 	"""🦋
 	Escala el contexto de dibujo.
-	
+
 	Si solo se proporciona un parámetro de entrada,
 	el contexto de dibujo se escalará uniformemente.
-	
+
 	:param x: factor de escala a lo largo del eje x
 	:param y: factor de escala a lo largo del eje y
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			escalar(ratonX / 10)
 			circulo(0, 0, 20)
 	"""
 	...
 
-def cizallarX(angulo: float | int) -> None:
+def cizallarX(angulo: float) -> None:
 	"""🦋
 	Cizalla el contexto de dibujo a lo largo del eje x.
-	
+
 	:param angulo: ángulo de cizallamiento en radianes
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			trasladar(-75, -40)
 			cizallarX(ratonX / 100)
 			cuadrado(0, 0, 80)
 	"""
 	...
 
-def cizallarY(angulo: float | int) -> None:
+def cizallarY(angulo: float) -> None:
 	"""🦋
 	Cizalla el contexto de dibujo a lo largo del eje y.
-	
+
 	:param angulo: ángulo de cizallamiento en radianes
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			trasladar(-75, -40)
 			cizallarY(ratonX / 100)
 			cuadrado(0, 0, 80)
 	"""
 	...
 
-def aplicarMatriz(a: float | int, b: float | int, c: float | int, d: float | int, e: float | int, f: float | int) -> None:
+def aplicarMatriz(a: float, b: float, c: float, d: float, e: float, f: float) -> None:
 	"""🦋
 	Aplica una matriz de transformación.
-	
+
 	Acepta una matriz de 3x3 como un array o múltiples argumentos.
-	
-	:param a: 
-	:param b: 
-	:param c: 
-	:param d: 
-	:param e: 
-	:param f: 
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			aplicarMatriz(2, -1, 1, -1)
 			circulo(0, 0, 80)
 	"""
@@ -2108,18 +2089,18 @@ def aplicarMatriz(a: float | int, b: float | int, c: float | int, d: float | int
 def reiniciarMatriz() -> None:
 	"""🦋
 	Reinicia la matriz de transformación.
-	
+
 	q5 ejecuta esta función antes de cada vez que se ejecuta la función dibujar,
 	para que las transformaciones no se trasladen al siguiente fotograma.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		trasladar(50, 50)
 		circulo(0, 0, 80)
-		
+
 		reiniciarMatriz()
 		cuadrado(0, 0, 50)
 	"""
@@ -2128,17 +2109,17 @@ def reiniciarMatriz() -> None:
 def guardarMatriz() -> None:
 	"""🦋
 	Guarda la matriz de transformación actual.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		guardarMatriz()
 		rotar(CUARTO_PI)
 		elipse(0, 0, 120, 40)
 		recuperarMatriz()
-		
+
 		elipse(0, 0, 120, 40)
 	"""
 	...
@@ -2146,17 +2127,17 @@ def guardarMatriz() -> None:
 def recuperarMatriz() -> None:
 	"""🦋
 	Restaura la matriz de transformación guardada previamente.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		guardarMatriz()
 		rotar(CUARTO_PI)
 		elipse(0, 0, 120, 40)
 		recuperarMatriz()
-		
+
 		elipse(0, 0, 120, 40)
 	"""
 	...
@@ -2164,17 +2145,17 @@ def recuperarMatriz() -> None:
 def apilar() -> None:
 	"""🦋
 	Guarda la configuración de estilo de dibujo y transformaciones actuales.
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		apilar()
 		relleno('blue')
 		trasladar(50, 50)
 		circulo(0, 0, 80)
 		desapilar()
-		
+
 		cuadrado(0, 0, 50)
 	"""
 	...
@@ -2182,37 +2163,44 @@ def apilar() -> None:
 def desapilar() -> None:
 	"""🦋
 	Restaura la configuración de estilo de dibujo y transformaciones guardadas previamente.
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		apilar()
 		relleno('blue')
 		trasladar(50, 50)
 		circulo(0, 0, 80)
 		desapilar()
-		
+
 		cuadrado(0, 0, 50)
 	"""
 	...
 
+@overload
+def guardar() -> None: ...
+@overload
+def guardar(datos: dict = ..., nombreArchivo: str = ...) -> None: ...
+
+def recuperar() -> None: ...
+
 # 💻 visualización
 
-def modoVisualizacion(modo: str, calidadRenderizado: str, escala: float | int) -> None:
+def modoVisualizacion(modo: str, calidadRenderizado: str = ..., escala: str | float = ...) -> None:
 	"""💻
 	Personaliza cómo se presenta tu lienzo.
-	
+
 	:param modo: NORMAL, CENTRO, o MAXIMIZADO
 	:param calidadRenderizado: SUAVE o PIXELADO
 	:param escala: también se puede dar como una cadena (por ejemplo "x2")
-	
+
 	Example::
-	
+
 		Lienzo(50, 25)
-		
+
 		modoVisualizacion(CENTRO, PIXELADO, 4)
-		
+
 		circulo(0, 0, 16)
 	"""
 	...
@@ -2242,152 +2230,144 @@ Los píxeles se renderizan como cuadrados nítidos si el lienzo se escala.
 def pantallaCompleta(v: bool = ...) -> None:
 	"""💻
 	Habilita o deshabilita el modo de pantalla completa.
-	
+
 	:param v: booleano indicando si habilitar o deshabilitar el modo de pantalla completa
 	"""
 	...
 
-def anchoVentana() -> None:
-	"""💻
-	El ancho de la ventana.
-	
-	Example::
-	
-		def dibujar():
-			fondo(0.8)
-			tamañoTexto(64)
-			alineaciónTexto(CENTRO, CENTRO)
-			texto(anchoVentana, 0, 0)
-	"""
-	...
+anchoVentana: float
+"""💻
+El ancho de la ventana.
 
-def altoVentana() -> None:
-	"""💻
-	El alto de la ventana.
-	
-	Example::
-	
-		def dibujar():
-			fondo(0.8)
-			tamañoTexto(64)
-			alineaciónTexto(CENTRO, CENTRO)
-			texto(altoVentana, 0, 0)
-	"""
-	...
+Example::
 
-def ancho() -> None:
-	"""💻
-	El ancho del lienzo.
-	
-	Example::
-	
-		Lienzo(200, 120)
-		circulo(0, 0, ancho)
-	"""
-	...
+	def dibujar():
+		fondo(0.8)
+		tamañoTexto(64)
+		alineaciónTexto(CENTRO, CENTRO)
+		texto(anchoVentana, 0, 0)
+"""
 
-def alto() -> None:
-	"""💻
-	El alto del lienzo.
-	
-	Example::
-	
-		Lienzo(200, 80)
-		circulo(0, 0, alto)
-	"""
-	...
+altoVentana: float
+"""💻
+El alto de la ventana.
 
-def medioAncho() -> None:
-	"""💻
-	La mitad del ancho del lienzo.
-	
-	Example::
-	
-		Lienzo(200, 80)
-		circulo(0, 0, medioAncho)
-	"""
-	...
+Example::
 
-def medioAlto() -> None:
-	"""💻
-	La mitad del alto del lienzo.
-	
-	Example::
-	
-		Lienzo(200, 80)
-		circulo(0, 0, medioAlto)
-	"""
-	...
+	def dibujar():
+		fondo(0.8)
+		tamañoTexto(64)
+		alineaciónTexto(CENTRO, CENTRO)
+		texto(altoVentana, 0, 0)
+"""
 
-def lienzo() -> None:
-	"""💻
-	El elemento lienzo asociado con la instancia Q5.
-	
-	Si no se crea un lienzo explícitamente con crearLienzo(), pero se define una función q5 como dibujar o alPresionarRatón, se creará automáticamente un lienzo por defecto de tamaño 200x200.
-	"""
-	...
+ancho: float
+"""💻
+El ancho del lienzo.
 
-def redimensionarLienzo(w: float | int, h: float | int) -> None:
+Example::
+
+	Lienzo(200, 120)
+	circulo(0, 0, ancho)
+"""
+
+alto: float
+"""💻
+El alto del lienzo.
+
+Example::
+
+	Lienzo(200, 80)
+	circulo(0, 0, alto)
+"""
+
+medioAncho: float
+"""💻
+La mitad del ancho del lienzo.
+
+Example::
+
+	Lienzo(200, 80)
+	circulo(0, 0, medioAncho)
+"""
+
+medioAlto: float
+"""💻
+La mitad del alto del lienzo.
+
+Example::
+
+	Lienzo(200, 80)
+	circulo(0, 0, medioAlto)
+"""
+
+lienzo: Any
+"""💻
+El elemento lienzo asociado con la instancia Q5.
+
+Si no se crea un lienzo explícitamente con crearLienzo(), pero se define una función q5 como dibujar o alPresionarRatón, se creará automáticamente un lienzo por defecto de tamaño 200x200.
+"""
+
+def redimensionarLienzo(w: float, h: float) -> None:
 	"""💻
 	Redimensiona el lienzo al ancho y alto especificados.
-	
+
 	:param w: ancho del lienzo
 	:param h: alto del lienzo
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
-		
+
 		def dibujar():
 			fondo(0.8)
-		
+
 		def alPresionarRatón():
 			redimensionarLienzo(200, 200)
 	"""
 	...
 
-def cuadroActual() -> None:
-	"""💻
-	El número de cuadros que se han mostrado desde que comenzó el programa.
-	
-	Example::
-	
-		def dibujar():
-			fondo(0.8)
-			tamañoTexto(64)
-			texto(cuadroActual, -92, 20)
-	"""
-	...
+cuadroActual: float
+"""💻
+El número de cuadros que se han mostrado desde que comenzó el programa.
+
+Example::
+
+	def dibujar():
+		fondo(0.8)
+		tamañoTexto(64)
+		texto(cuadroActual, -92, 20)
+"""
 
 def pausar() -> None:
 	"""💻
 	Detiene el bucle de dibujo.
-	
+
 	Example::
-	
+
 		def dibujar():
 			circulo(cuadroActual * 5 - 100, 0, 80)
 			pausar()
 	"""
 	...
 
-def redibujar(n: float | int = ...) -> None:
+def redibujar(n: float = ...) -> None:
 	"""💻
 	Redibuja el lienzo n veces. Si no se proporciona ningún parámetro de entrada,
 	llama a la función de dibujo una vez.
-	
+
 	Esta es una función asíncrona.
-	
+
 	:param n: número de veces para redibujar el lienzo, por defecto es 1
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		pausar()
-		
+
 		def dibujar():
 			circulo(cuadroActual * 5 - 100, 0, 80)
-		
+
 		def alPresionarRatón():
 			redibujar(10)
 	"""
@@ -2396,75 +2376,77 @@ def redibujar(n: float | int = ...) -> None:
 def reanudar() -> None:
 	"""💻
 	Inicia el bucle de dibujo de nuevo si estaba detenido.
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		pausar()
-		
+
 		def dibujar():
 			circulo(cuadroActual * 5 - 100, 0, 80)
-		
+
 		def alPresionarRatón():
 			reanudar()
 	"""
 	...
 
-def frecuenciaRefresco(hertz: float | int = ...) -> float | int:
+def frecuenciaRefresco(hertz: float = ...) -> float:
 	"""💻
 	Establece la frecuencia de fotogramas objetivo u obtiene una aproximación de la
 	frecuencia de fotogramas actual del sketch.
-	
+
 	Incluso cuando el sketch se está ejecutando a una frecuencia de fotogramas consistente,
 	el valor actual de la frecuencia de fotogramas fluctuará. Usa las herramientas de desarrollador
 	de tu navegador web para un análisis de rendimiento más preciso.
-	
+
 	:param hertz: frecuencia de fotogramas objetivo, por defecto es 60
 	:returns: frecuencia de fotogramas actual
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
-		
+
 			if ratonPresionado: frecuenciaRefresco(10)
 			else: frecuenciaRefresco(60)
-		
+
 			circulo((cuadroActual % 200) - 100, 0, 80)
 	"""
 	...
 
-def obtenerTasaFotogramasObjetivo() -> float | int:
+def obtenerTasaFotogramasObjetivo() -> float:
 	"""💻
 	La frecuencia de fotogramas deseada del sketch.
+
 	:returns: frecuencia de fotogramas objetivo
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
 			tamañoTexto(64)
-		
+
 			texto(obtenerTasaFotogramasObjetivo(), -35, 20)
 	"""
 	...
 
-def obtenerFPS() -> float | int:
+def obtenerFPS() -> float:
 	"""💻
 	Obtiene los FPS actuales, en términos de cuántos fotogramas podrían generarse
 	en un segundo, lo cual puede ser más alto que la frecuencia de fotogramas objetivo.
-	
+
 	Usa las herramientas de desarrollador de tu navegador web para un análisis
 	de rendimiento más profundo.
+
 	:returns: fotogramas por segundo
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
 			frecuenciaRefresco(1)
 			tamañoTexto(64)
-		
+
 			texto(obtenerFPS(), -92, 20)
 	"""
 	...
@@ -2472,7 +2454,7 @@ def obtenerFPS() -> float | int:
 def postProcesar() -> None:
 	"""💻
 	Se ejecuta después de cada llamada a la función dibujar y procesos de addons de q5 post-dibujo, si los hay.
-	
+
 	Útil para añadir efectos de post-procesamiento cuando no es posible
 	hacerlo al final de la función dibujar, como cuando se usan
 	addons como q5play que auto-dibujan al lienzo después de que
@@ -2480,15 +2462,15 @@ def postProcesar() -> None:
 	"""
 	...
 
-def densidadPixeles(v: float | int) -> float | int:
+def densidadPixeles(v: float) -> float:
 	"""💻
 	Establece la densidad de píxeles del lienzo.
-	
+
 	:param v: valor de densidad de píxeles
 	:returns: densidad de píxeles
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		densidadPixeles(1)
@@ -2496,15 +2478,16 @@ def densidadPixeles(v: float | int) -> float | int:
 	"""
 	...
 
-def densidadVisualizacion() -> float | int:
+def densidadVisualizacion() -> float:
 	"""💻
 	Devuelve la densidad de visualización actual.
-	
+
 	En la mayoría de pantallas modernas, este valor será 2 o 3.
+
 	:returns: densidad de visualización
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		tamañoTexto(64)
@@ -2512,25 +2495,24 @@ def densidadVisualizacion() -> float | int:
 	"""
 	...
 
-def deltaTiempo() -> None:
-	"""💻
-	El tiempo pasado desde que se dibujó el último fotograma.
-	
-	Con la frecuencia de fotogramas por defecto de 60, el tiempo delta será
-	aproximadamente 16.6
-	
-	Se puede usar para mantener movimientos atados al tiempo real si el sketch
-	a menudo cae por debajo de la frecuencia de fotogramas objetivo. Aunque si las frecuencias
-	de fotogramas son consistentemente bajas, considera reducir la frecuencia
-	de fotogramas objetivo.
-	
-	Example::
-	
-		def dibujar():
-			fondo(0.8)
-			texto(deltaTiempo, -90, 6)
-	"""
-	...
+deltaTiempo: float
+"""💻
+El tiempo pasado desde que se dibujó el último fotograma.
+
+Con la frecuencia de fotogramas por defecto de 60, el tiempo delta será
+aproximadamente 16.6
+
+Se puede usar para mantener movimientos atados al tiempo real si el sketch
+a menudo cae por debajo de la frecuencia de fotogramas objetivo. Aunque si las frecuencias
+de fotogramas son consistentemente bajas, considera reducir la frecuencia
+de fotogramas objetivo.
+
+Example::
+
+	def dibujar():
+		fondo(0.8)
+		texto(deltaTiempo, -90, 6)
+"""
 
 def contextoDibujo() -> None:
 	"""💻
@@ -2539,63 +2521,67 @@ def contextoDibujo() -> None:
 	"""
 	...
 
+C2D: Literal['c2d']
+
+WEBGPU: Literal['webgpu']
+
 # 🧮 matemáticas
 
-def aleatorio(bajo: float | int | list[Any] = ..., alto: float | int = ...) -> float | int | Any:
+def aleatorio(bajo: float | list[Any] = ..., alto: float = ...) -> float | Any:
 	"""🧮
 	Genera un valor aleatorio.
-	
+
 	- Si no se proporcionan entradas, devuelve un número entre 0 y 1.
 	- Si se proporciona una entrada numérica, devuelve un número entre 0 y el valor proporcionado.
 	- Si se proporcionan dos entradas numéricas, devuelve un número entre los dos valores.
 	- Si se proporciona un array, devuelve un elemento aleatorio del array.
-	
+
 	:param bajo: límite inferior (inclusivo) o un array
 	:param alto: límite superior (exclusivo)
 	:returns: un número o elemento aleatorio
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
 		frecuenciaRefresco(5)
-		
+
 		def dibujar():
 			circulo(0, 0, aleatorio(200))
 	"""
 	...
 
-def flu(cantidad: float | int) -> float | int:
+def flu(cantidad: float) -> float:
 	"""🧮
 	Genera un número aleatorio dentro de un rango simétrico alrededor de cero.
-	
+
 	Se puede usar para crear un efecto de fluctuación (desplazamiento aleatorio).
-	
+
 	Equivalente a aleatorio(-cantidad, cantidad).
-	
+
 	:param cantidad: cantidad máxima absoluta de fluctuación, por defecto es 1
 	:returns: número aleatorio entre -val y val
-	
+
 	Example::
-	
+
 		def dibujar():
 			circulo(ratonX + flu(3), ratonY + flu(3), 5)
 	"""
 	...
 
-def ruido(x: float | int = ..., y: float | int = ..., z: float | int = ...) -> float | int:
+def ruido(x: float = ..., y: float = ..., z: float = ...) -> float:
 	"""🧮
 	Genera un valor de ruido basado en las entradas x, y, y z.
-	
+
 	Usa Ruido Perlin por defecto.
-	
+
 	:param x: entrada coordenada-x
 	:param y: entrada coordenada-y
 	:param z: entrada coordenada-z
 	:returns: un valor de ruido
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
 			n = ruido(frameCount * 0.01)
@@ -2603,33 +2589,33 @@ def ruido(x: float | int = ..., y: float | int = ..., z: float | int = ...) -> f
 	"""
 	...
 
-def dist(x1: float | int, y1: float | int, x2: float | int, y2: float | int) -> float | int:
+def dist(x1: float, y1: float, x2: float, y2: float) -> float:
 	"""🧮
 	Calcula la distancia entre dos puntos.
-	
+
 	Esta función también acepta dos objetos con propiedades x e y.
-	
+
 	:param x1: coordenada-x del primer punto
 	:param y1: coordenada-y del primer punto
 	:param x2: coordenada-x del segundo punto
 	:param y2: coordenada-y del segundo punto
 	:returns: distancia entre los puntos
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(0.8)
 			linea(0, 0, ratonX, ratonY)
-		
+
 			d = dist(0, 0, ratonX, ratonY)
 			texto(redondear(d), -80, -80)
 	"""
 	...
 
-def mapa(val: float | int, inicio1: float | int, fin1: float | int, inicio2: float | int, fin2: float | int) -> float | int:
+def mapa(val: float, inicio1: float, fin1: float, inicio2: float, fin2: float) -> float:
 	"""🧮
 	Mapea un número de un rango a otro.
-	
+
 	:param val: valor entrante a convertir
 	:param inicio1: límite inferior del rango actual del valor
 	:param fin1: límite superior del rango actual del valor
@@ -2639,36 +2625,36 @@ def mapa(val: float | int, inicio1: float | int, fin1: float | int, inicio2: flo
 	"""
 	...
 
-def modoAngulo(modo: Literal['degrees'] | Literal['radians']) -> None:
+def modoAngulo(modo: Literal['degrees', 'radians']) -> None:
 	"""🧮
 	Establece el modo para interpretar y dibujar ángulos. Puede ser 'degrees' (grados) o 'radians' (radianes).
-	
+
 	:param modo: modo a establecer para la interpretación de ángulos
 	"""
 	...
 
-def radianes(grados: float | int) -> float | int:
+def radianes(grados: float) -> float:
 	"""🧮
 	Convierte grados a radianes.
-	
+
 	:param grados: ángulo en grados
 	:returns: ángulo en radianes
 	"""
 	...
 
-def grados(radianes: float | int) -> float | int:
+def grados(radianes: float) -> float:
 	"""🧮
 	Convierte radianes a grados.
-	
+
 	:param radianes: ángulo en radianes
 	:returns: ángulo en grados
 	"""
 	...
 
-def interpolar(inicio: float | int, fin: float | int, cant: float | int) -> float | int:
+def interpolar(inicio: float, fin: float, cant: float) -> float:
 	"""🧮
 	Calcula un número entre dos números en un incremento específico.
-	
+
 	:param inicio: primer número
 	:param fin: segundo número
 	:param cant: cantidad a interpolar entre los dos valores
@@ -2676,10 +2662,10 @@ def interpolar(inicio: float | int, fin: float | int, cant: float | int) -> floa
 	"""
 	...
 
-def constreñir(n: float | int, bajo: float | int, alto: float | int) -> float | int:
+def constreñir(n: float, bajo: float, alto: float) -> float:
 	"""🧮
 	Restringe un valor entre un valor mínimo y máximo.
-	
+
 	:param n: número a restringir
 	:param bajo: límite inferior
 	:param alto: límite superior
@@ -2687,10 +2673,10 @@ def constreñir(n: float | int, bajo: float | int, alto: float | int) -> float |
 	"""
 	...
 
-def norm(n: float | int, inicio: float | int, fin: float | int) -> float | int:
+def norm(n: float, inicio: float, fin: float) -> float:
 	"""🧮
 	Normaliza un número de otro rango en un valor entre 0 y 1.
-	
+
 	:param n: número a normalizar
 	:param inicio: límite inferior del rango
 	:param fin: límite superior del rango
@@ -2698,34 +2684,34 @@ def norm(n: float | int, inicio: float | int, fin: float | int) -> float | int:
 	"""
 	...
 
-def frac(n: float | int) -> float | int:
+def frac(n: float) -> float:
 	"""🧮
 	Calcula la parte fraccionaria de un número.
-	
+
 	:param n: un número
 	:returns: parte fraccionaria del número
 	"""
 	...
 
-def abs(n: float | int) -> float | int:
+def abs(n: float) -> float:
 	"""🧮
 	Calcula el valor absoluto de un número.
-	
+
 	:param n: un número
 	:returns: valor absoluto del número
 	"""
 	...
 
-def redondear(n: float | int, d: float | int = ...) -> float | int:
+def redondear(n: float, d: float = ...) -> float:
 	"""🧮
 	Redondea un número.
-	
+
 	:param n: número a redondear
 	:param d: número de lugares decimales a redondear
 	:returns: número redondeado
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		tamañoTexto(32)
@@ -2733,15 +2719,15 @@ def redondear(n: float | int, d: float | int = ...) -> float | int:
 	"""
 	...
 
-def techo(n: float | int) -> float | int:
+def techo(n: float) -> float:
 	"""🧮
 	Redondea un número hacia arriba.
-	
+
 	:param n: un número
 	:returns: número redondeado
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		tamañoTexto(32)
@@ -2749,15 +2735,15 @@ def techo(n: float | int) -> float | int:
 	"""
 	...
 
-def piso(n: float | int) -> float | int:
+def piso(n: float) -> float:
 	"""🧮
 	Redondea un número hacia abajo.
-	
+
 	:param n: un número
 	:returns: número redondeado
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
 		tamañoTexto(32)
@@ -2765,88 +2751,88 @@ def piso(n: float | int) -> float | int:
 	"""
 	...
 
-def min(*args: float | int) -> float | int:
+def min(*args: float) -> float:
 	"""🧮
 	Devuelve el valor más pequeño en una secuencia de números.
-	
+
 	:param args: números a comparar
 	:returns: mínimo
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(min(-ratonX / 100, 0.5))
 			circulo(min(ratonX, 0), 0, 80)
 	"""
 	...
 
-def max(*args: float | int) -> float | int:
+def max(*args: float) -> float:
 	"""🧮
 	Devuelve el valor más grande en una secuencia de números.
-	
+
 	:param args: números a comparar
 	:returns: máximo
-	
+
 	Example::
-	
+
 		def dibujar():
 			fondo(max(-ratonX / 100, 0.5))
 			circulo(max(ratonX, 0), 0, 80)
 	"""
 	...
 
-def pot(base: float | int, exponente: float | int) -> float | int:
+def pot(base: float, exponente: float) -> float:
 	"""🧮
 	Calcula el valor de una base elevada a una potencia.
-	
+
 	Por ejemplo, pot(2, 3) calcula 2 _ 2 _ 2 que es 8.
-	
+
 	:param base: base
 	:param exponente: exponente
 	:returns: base elevada a la potencia del exponente
 	"""
 	...
 
-def cuad(n: float | int) -> float | int:
+def cuad(n: float) -> float:
 	"""🧮
 	Calcula el cuadrado de un número.
-	
+
 	:param n: número a elevar al cuadrado
 	:returns: cuadrado del número
 	"""
 	...
 
-def raiz(n: float | int) -> float | int:
+def raiz(n: float) -> float:
 	"""🧮
 	Calcula la raíz cuadrada de un número.
-	
+
 	:param n: un número
 	:returns: raíz cuadrada del número
 	"""
 	...
 
-def loge(n: float | int) -> float | int:
+def loge(n: float) -> float:
 	"""🧮
 	Calcula el logaritmo natural (base e) de un número.
-	
+
 	:param n: un número
 	:returns: logaritmo natural del número
 	"""
 	...
 
-def exp(exponente: float | int) -> float | int:
+def exp(exponente: float) -> float:
 	"""🧮
 	Calcula e elevado a la potencia de un número.
-	
+
 	:param exponente: potencia a la que elevar e
 	:returns: e elevado a la potencia del exponente
 	"""
 	...
 
-def semillaAleatoria(semilla: float | int) -> None:
+def semillaAleatoria(semilla: float) -> None:
 	"""🧮
 	Establece la semilla para el generador de números aleatorios.
-	
+
 	:param semilla: valor de la semilla
 	"""
 	...
@@ -2854,81 +2840,82 @@ def semillaAleatoria(semilla: float | int) -> None:
 def generadorAleatorio(metodo: Any) -> None:
 	"""🧮
 	Establece el método de generación de números aleatorios.
-	
+
 	:param metodo: método a usar para la generación de números aleatorios
 	"""
 	...
 
-def aleatorioGaussiano(media: float | int, std: float | int) -> float | int:
+def aleatorioGaussiano(media: float, std: float) -> float:
 	"""🧮
 	Genera un número aleatorio siguiendo una distribución Gaussiana (normal).
-	
+
 	:param media: media (centro) de la distribución
 	:param std: desviación estándar (dispersión o "ancho") de la distribución
 	:returns: un número aleatorio siguiendo una distribución Gaussiana
 	"""
 	...
 
-def aleatorioExponencial() -> float | int:
+def aleatorioExponencial() -> float:
 	"""🧮
 	Genera un número aleatorio siguiendo una distribución exponencial.
+
 	:returns: un número aleatorio siguiendo una distribución exponencial
 	"""
 	...
 
-def modoRuido(modo: Literal['perlin'] | Literal['simplex'] | Literal['blocky']) -> None:
+def modoRuido(modo: Literal['perlin', 'simplex', 'blocky']) -> None:
 	"""🧮
 	Establece el modo de generación de ruido.
-	
+
 	Solo el modo por defecto, "perlin", está incluido en q5.js. El uso de los
 	otros modos requiere el módulo q5-noiser.
-	
+
 	:param modo: modo de generación de ruido
 	"""
 	...
 
-def semillaRuido(semilla: float | int) -> None:
+def semillaRuido(semilla: float) -> None:
 	"""🧮
 	Establece el valor de la semilla para la generación de ruido.
-	
+
 	:param semilla: valor de la semilla
 	"""
 	...
 
-def detalleRuido(lod: float | int, caida: float | int) -> None:
+def detalleRuido(lod: float, caida: float) -> None:
 	"""🧮
 	Establece el nivel de detalle para la generación de ruido.
-	
+
 	:param lod: nivel de detalle (número de octavas)
 	:param caida: tasa de caída para cada octava
 	"""
 	...
 
-PI: float | int
+PI: float
 """🧮
 La relación de la circunferencia de un círculo a su diámetro.
 Aproximadamente 3.14159.
 """
 
-DOS_PI: float | int
+DOS_PI: float
 """🧮
 2 * PI.
 Aproximadamente 6.28319.
 """
 
-TAU: float | int
+TAU: float
 """🧮
 2 * PI.
 Aproximadamente 6.28319.
 """
 
-MEDIO_PI: float | int
+MEDIO_PI: float
 """🧮
 Mitad de PI.
 Aproximadamente 1.5708.
 """
 
-CUARTO_PI: float | int
+CUARTO_PI: float
 """🧮
 Un cuarto de PI.
 Aproximadamente 0.7854.
@@ -2947,51 +2934,52 @@ addon p5.sound con q5.
 def cargarSonido(url: str) -> Sonido:
 	"""🔊
 	Carga datos de audio desde un archivo y devuelve un objeto Sonido.
-	
+
 	Usa funciones como reproducir, pausar, y detener para
 	controlar la reproducción. ¡Ten en cuenta que los sonidos solo pueden reproducirse después de la
 	primera interacción del usuario con la página!
-	
+
 	Establece volumen a un valor entre 0 (silencio) y 1 (volumen completo).
 	Establece pan a un valor entre -1 (izquierda) y 1 (derecha) para ajustar
 	la posición estéreo del sonido. Establece bucle a true para repetir el sonido.
-	
+
 	Usa cargado, pausado, y terminado para comprobar el estado del sonido.
-	
+
 	El archivo de sonido completo debe cargarse antes de que la reproducción pueda comenzar, usa await para esperar a que un sonido se cargue. Para transmitir archivos de audio más grandes usa la función cargarAudio en su lugar.
-	
+
 	:param url: archivo de sonido
 	:returns: sonido
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		sonido = cargarSonido('/assets/jump.wav')
 		sonido.volumen = 0.3
-		
+
 		def alPresionarRatón():
 			sonido.reproducir()
 	"""
 	...
 
-def cargarAudio() -> object:
+def cargarAudio(url: str) -> Any:
 	"""🔊
 	Carga datos de audio desde un archivo y devuelve un HTMLAudioElement.
-	
+
 	El audio se considera cargado cuando se dispara el evento canplaythrough.
-	
+
 	¡Ten en cuenta que el audio solo puede reproducirse después de la primera interacción
 	del usuario con la página!
+
 	:returns: un HTMLAudioElement
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		audio = cargarAudio('/assets/retro.flac')
 		audio.volume = 0.4
-		
+
 		def alPresionarRatón():
 			audio.play()
 	"""
@@ -3000,13 +2988,15 @@ def cargarAudio() -> object:
 def obtenerContextoAudio() -> Any:
 	"""🔊
 	Devuelve el AudioContext en uso o undefined si no existe.
+
 	:returns: instancia de AudioContext
 	"""
 	...
 
-async def iniciarAudioUsuario() -> object:
+async def iniciarAudioUsuario() -> None:
 	"""🔊
 	Crea un nuevo AudioContext o lo reanuda si estaba suspendido.
+
 	:returns: una promesa que se resuelve cuando el AudioContext se reanuda
 	"""
 	...
@@ -3016,12 +3006,15 @@ class Sonido:
 	Crea un nuevo objeto Q5.Sonido.
 	"""
 
+	def __init__(self) -> None: ...
 
-	volumen: float | int
-	"""🔊 Establece el volumen del sonido a un valor entre
-0 (silencio) y 1 (volumen completo)."""
+	volumen: float
+	"""🔊
+	Establece el volumen del sonido a un valor entre
+	0 (silencio) y 1 (volumen completo).
+	"""
 
-	pan: float | int
+	pan: float
 	"""🔊 Establece la posición estéreo del sonido entre -1 (izquierda) y 1 (derecha)."""
 
 	bucle: bool
@@ -3036,16 +3029,20 @@ class Sonido:
 	terminado: bool
 	"""🔊 Verdadero si el sonido ha terminado de reproducirse."""
 
-	def reproducir(self) -> object:
-		"""🔊 Reproduce el sonido.
+	async def reproducir(self) -> None:
+		"""🔊
+		Reproduce el sonido.
 
-Si esta función se ejecuta cuando el sonido ya se está reproduciendo,
-comenzará una nueva reproducción, causando un efecto de capas.
+		Si esta función se ejecuta cuando el sonido ya se está reproduciendo,
+		comenzará una nueva reproducción, causando un efecto de capas.
 
-Si esta función se ejecuta cuando el sonido está pausado,
-todas las instancias de reproducción se reanudarán.
+		Si esta función se ejecuta cuando el sonido está pausado,
+		todas las instancias de reproducción se reanudarán.
 
-Usa await para esperar a que el sonido termine de reproducirse."""
+		Usa await para esperar a que el sonido termine de reproducirse.
+
+		:returns: una promesa que se resuelve cuando el sonido termina de reproducirse
+		"""
 		...
 
 	def pausar(self) -> None:
@@ -3053,10 +3050,12 @@ Usa await para esperar a que el sonido termine de reproducirse."""
 		...
 
 	def detener(self) -> None:
-		"""🔊 Detiene el sonido, reiniciando su posición de reproducción
-al principio.
+		"""🔊
+		Detiene el sonido, reiniciando su posición de reproducción
+		al principio.
 
-Elimina todas las instancias de reproducción."""
+		Elimina todas las instancias de reproducción.
+		"""
 		...
 
 # 📑 dom
@@ -3066,35 +3065,35 @@ El Modelo de Objetos del Documento (DOM) es una interfaz para
 crear y editar páginas web con JavaScript.
 """
 
-def crearElemento(etiqueta: str, contenido: str = ...) -> object:
+def crearElemento(etiqueta: str, contenido: str = ...) -> Any:
 	"""📑
 	Crea un nuevo elemento HTML y lo añade a la página. createEl es
 	un alias.
-	
+
 	Modifica el style CSS del elemento para cambiar su apariencia.
-	
+
 	Usa addEventListener para responder a eventos como:
-	
+
 	- "click": cuando se hace clic en el elemento
 	- "mouseover": cuando el ratón pasa sobre el elemento
 	- "mouseout": cuando el ratón deja de pasar sobre el elemento
 	- "input": cuando el valor de un elemento de formulario cambia
-	
+
 	q5 añade alguna funcionalidad extra a los elementos que crea:
-	
+
 	- la función position facilita colocar el elemento
 	  relativo al lienzo
 	- la función size establece el ancho y alto del elemento
 	- alternativamente, usa las propiedades x, y, width, y height del elemento
-	
+
 	:param etiqueta: nombre de la etiqueta del elemento
 	:param contenido: contenido del elemento
 	:returns: elemento
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		el = crearElemento('div', '*')
 		el.position(50, 50)
 		el.size(100, 100)
@@ -3105,174 +3104,172 @@ def crearElemento(etiqueta: str, contenido: str = ...) -> object:
 	"""
 	...
 
-def crearA(href: str, texto: str = ..., nuevaPestaña: bool = ...) -> None:
+def crearA(href: str, texto: str = ..., nuevaPestaña: bool = ...) -> Any:
 	"""📑
 	Crea un elemento de enlace.
-	
+
 	:param href: url
 	:param texto: contenido de texto
 	:param nuevaPestaña: si abrir el enlace en una nueva pestaña
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		enlace = crearA('https://q5js.org', 'q5.js')
 		enlace.position(16, 42)
 		enlace.style.fontSize = '80px'
-		
+
 		def cb0():
 			fondo('cyan')
-		
+
 		enlace.addEventListener('mouseover', cb0)
 	"""
 	...
 
-def crearBoton(contenido: str = ...) -> None:
+def crearBoton(contenido: str = ...) -> Any:
 	"""📑
 	Crea un elemento de botón.
-	
+
 	:param contenido: contenido de texto
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
-		
+
 		btn = crearBoton('¡Clic aqui!')
-		
+
 		def cb0():
 			fondo(aleatorio(0.4, 1))
-		
+
 		btn.addEventListener('click', cb0)
 	"""
 	...
 
-def crearCasilla(etiqueta: str = ..., marcado: bool = ...) -> None:
+def crearCasilla(etiqueta: str = ..., marcado: bool = ...) -> Any:
 	"""📑
 	Crea un elemento de casilla de verificación (checkbox).
-	
+
 	Usa la propiedad checked para obtener o establecer el estado de la casilla.
-	
+
 	La propiedad label es el elemento de etiqueta de texto junto a la casilla.
-	
+
 	:param etiqueta: etiqueta de texto colocada junto a la casilla
 	:param marcado: estado inicial
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
-		
+
 		casilla = crearCasilla('¡Marca aquí!')
 		casilla.label.style.color = 'lime'
-		
+
 		def cb0():
 			if casilla.checked: fondo('lime')
 			else: fondo('black')
-		
+
 		casilla.addEventListener('input', cb0)
 	"""
 	...
 
-def crearSelectorColor(valor: str = ...) -> None:
+def crearSelectorColor(valor: str = ...) -> Any:
 	"""📑
 	Crea un elemento de entrada de color.
-	
+
 	Usa la propiedad value para obtener o establecer el valor del color.
-	
+
 	:param valor: valor de color inicial
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
-		
+
 		selección = crearSelectorColor()
 		selección.value = '#fd7575'
-		
+
 		def dibujar():
 			fondo(selección.value)
 	"""
 	...
 
-def crearImg(src: str) -> None:
+def crearImg(src: str) -> Any:
 	"""📑
 	Crea un elemento de imagen.
-	
+
 	:param src: url de la imagen
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
-		
+
 		img = crearImg('/assets/q5play_logo.avif')
 		img.position(0, 0).size(100, 100)
 	"""
 	...
 
-def crearEntrada(valor: str = ..., tipo: str = ...) -> None:
+def crearEntrada(valor: str = ..., tipo: str = ...) -> Any:
 	"""📑
 	Crea un elemento de entrada (input).
-	
+
 	Usa la propiedad value para obtener o establecer el valor de la entrada.
-	
+
 	Usa la propiedad placeholder para establecer el texto de etiqueta que aparece
 	dentro de la entrada cuando está vacía.
-	
+
 	Mira la documentación de input de MDN para la lista completa de tipos de entrada.
-	
+
 	:param valor: valor inicial
 	:param tipo: tipo de entrada de texto, puede ser 'text', 'password', 'email', 'number', 'range', 'search', 'tel', 'url'
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		tamañoTexto(64)
-		
+
 		entrada = crearEntrada()
 		entrada.placeholder = '¡Teclea aquí!'
 		entrada.size(200, 32)
-		
+
 		def cb0():
 			fondo('orange')
 			texto(entrada.value, -90, 30)
-		
+
 		entrada.addEventListener('input', cb0)
 	"""
 	...
 
-def crearP(contenido: str = ...) -> None:
+def crearP(contenido: str = ...) -> Any:
 	"""📑
 	Crea un elemento de párrafo.
-	
+
 	:param contenido: contenido de texto
-	
+
 	Example::
-	
+
 		Lienzo(200, 50)
 		fondo('coral')
-		
+
 		p = crearP('¡Hola, mundo!')
 		p.style.color = 'pink'
 	"""
 	...
 
-def crearOpciones(nombreGrupo: str = ...) -> None:
+def crearOpciones(nombreGrupo: str = ...) -> Any:
 	"""📑
 	Crea un grupo de botones de radio.
-	
+
 	Usa la función option(etiqueta, valor) para añadir nuevos botones de radio
 	al grupo.
-	
+
 	Usa la propiedad value para obtener o establecer el valor del botón de radio seleccionado.
-	
-	:param nombreGrupo: 
-	
+
 	Example::
-	
+
 		Lienzo(200, 160)
-		
+
 		radio = crearOpciones()
 		radio.option('cuadrado', '1').option('círculo', '2')
-		
+
 		def dibujar():
 			fondo(0.8)
 			if radio.value == '1': cuadrado(-40, -40, 80)
@@ -3280,79 +3277,79 @@ def crearOpciones(nombreGrupo: str = ...) -> None:
 	"""
 	...
 
-def crearSeleccion(placeholder: str = ...) -> None:
+def crearSeleccion(placeholder: str = ...) -> Any:
 	"""📑
 	Crea un elemento de selección (select).
-	
+
 	Usa la función option(etiqueta, valor) para añadir nuevas opciones al
 	elemento de selección.
-	
+
 	Establece multiple a true para permitir seleccionar múltiples opciones.
-	
+
 	Usa la propiedad value para obtener o establecer el valor de la opción seleccionada.
-	
+
 	Usa la propiedad selected para obtener las etiquetas de las opciones
 	seleccionadas o establecer las opciones seleccionadas por etiqueta. Puede ser una sola
 	cadena o un array de cadenas.
-	
+
 	:param placeholder: texto opcional que aparece antes de que se seleccione una opción
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
-		
+
 		sel = crearSeleccion('Seleccionar un opcion')
 		sel.option('Red', '#f55').option('Green', '#5f5')
-		
+
 		def cb0():
 			fondo(sel.value)
-		
+
 		sel.addEventListener('change', cb0)
 	"""
 	...
 
-def crearDeslizador(min: float | int, max: float | int, valor: float | int = ..., paso: float | int = ...) -> None:
+def crearDeslizador(min: float, max: float, valor: float = ..., paso: float = ...) -> Any:
 	"""📑
 	Crea un elemento deslizador (slider).
-	
+
 	Usa la propiedad value para obtener o establecer el valor del deslizador.
-	
+
 	Usa la función val para obtener el valor del deslizador como un número.
-	
+
 	:param min: valor mínimo
 	:param max: valor máximo
 	:param valor: valor inicial
 	:param paso: tamaño del paso
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		deslizador = crearDeslizador(0, 1, 0.5, 0.1)
 		deslizador.position(10, 10).size(180)
-		
+
 		def dibujar():
 			fondo(deslizador.val())
 	"""
 	...
 
-def crearVideo(src: str) -> object:
+def crearVideo(src: str) -> Any:
 	"""📑
 	Crea un elemento de video.
-	
+
 	Ten en cuenta que los videos deben estar silenciados para reproducirse automáticamente y las funciones play y
 	pause solo pueden ejecutarse después de una interacción del usuario.
-	
+
 	El elemento de video puede ocultarse y su contenido puede
 	mostrarse en el lienzo usando la función imagen.
-	
+
 	:param src: url del video
 	:returns: un nuevo elemento de video
-	
+
 	Example::
-	
+
 		Lienzo(1)
-		
+
 		vid = crearVideo('/assets/apollo4.mp4')
 		vid.size(200, 150)
 		vid.autoplay = vid.muted = vid.loop = True
@@ -3360,27 +3357,27 @@ def crearVideo(src: str) -> object:
 	"""
 	...
 
-def crearCaptura(tipo: str = ..., volteado: bool = ...) -> object:
+def crearCaptura(tipo: str = ..., volteado: bool = ...) -> Any:
 	"""📑
 	Crea una captura desde una cámara conectada, como una webcam.
-	
+
 	El elemento de video de captura puede ocultarse y su contenido puede
 	mostrarse en el lienzo usando la función imagen.
-	
+
 	Puede precargarse para asegurar que la captura esté lista para usar cuando tu
 	sketch comience.
-	
+
 	Solicita la resolución de video más alta de la cámara frontal del usuario
 	por defecto. El primer parámetro de esta función se puede usar para
 	especificar las restricciones para la captura. Mira getUserMedia
 	para más información.
-	
+
 	:param tipo: tipo de captura, puede ser solo VIDEO o solo AUDIO, el defecto es usar ambos video y audio
 	:param volteado: si reflejar el video verticalmente, true por defecto
 	:returns: un nuevo elemento de video
-	
+
 	Example::
-	
+
 		def alPresionarRatón():
 			cap = crearCaptura(VIDEO)
 			cap.size(200, 112.5)
@@ -3388,53 +3385,52 @@ def crearCaptura(tipo: str = ..., volteado: bool = ...) -> object:
 	"""
 	...
 
-def encontrarElemento(selector: str) -> object:
+def encontrarElemento(selector: str) -> Any:
 	"""📑
 	Encuentra el primer elemento en el DOM que coincide con el selector CSS dado.
-	
-	:param selector: 
+
 	:returns: elemento
 	"""
 	...
 
-def encontrarElementos(selector: str) -> list[object]:
+def encontrarElementos(selector: str) -> list[Any]:
 	"""📑
 	Encuentra todos los elementos en el DOM que coinciden con el selector CSS dado.
-	
-	:param selector: 
+
 	:returns: elementos
 	"""
 	...
 
 # 🎞 grabación
 
-def crearGrabadora() -> object:
+def crearGrabadora() -> Any:
 	"""🎞
 	Crea una grabadora. ¡Simplemente presiona grabar para empezar a grabar!
-	
+
 	Las siguientes propiedades se pueden establecer a través de la UI de la grabadora o
 	programáticamente.
-	
+
 	- format se establece a "H.264" por defecto.
 	- bitrate es un número en megabits por segundo (mbps). Su valor por defecto
 	  está determinado por la altura del lienzo. Aumentar la
 	  tasa de bits aumentará la calidad y el tamaño del archivo de la grabación.
 	- captureAudio se establece a true por defecto. Establecer a false para deshabilitar
 	  la grabación de audio.
-	
+
 	Ten en cuenta que las grabaciones se hacen a una tasa de fotogramas variable (VFR), lo que
 	hace que el video de salida sea incompatible con algún software de edición.
 	Para más información, mira la página wiki
 	"Recording the Canvas".
+
 	:returns: una grabadora, elemento DOM de q5
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		grab = crearGrabadora()
 		grab.bitrate = 10
-		
+
 		def dibujar():
 			circulo(ratonX, flu(medioAlto), 10)
 	"""
@@ -3443,7 +3439,7 @@ def crearGrabadora() -> object:
 def grabar() -> None:
 	"""🎞
 	Comienza a grabar el lienzo o reanuda la grabación si estaba pausada.
-	
+
 	Si no existe grabadora, se crea una pero no se muestra.
 	"""
 	...
@@ -3463,83 +3459,53 @@ def borrarGrabacion() -> None:
 def guardarGrabacion(nombreArchivo: str) -> None:
 	"""🎞
 	Guarda la grabación actual como un archivo de video.
-	
-	:param nombreArchivo: 
-	
+
 	Example::
-	
+
 		def dibujar():
 			cuadrado(ratonX, flu(100), 10)
-		
+
 		def alPresionarRatón():
 			if not grabando: grabar()
 			else: guardarGrabacion('squares')
 	"""
 	...
 
-def grabando() -> None:
-	"""🎞
-	Verdadero si el lienzo está siendo grabado actualmente.
-	"""
-	...
+grabando: bool
+"""🎞
+Verdadero si el lienzo está siendo grabado actualmente.
+"""
 
 # 🛠 utilidades
 
-async def cargar(*urls: str) -> object:
+async def cargar(*urls: str) -> list[Any]:
 	"""🛠
 	Carga un archivo o múltiples archivos.
-	
+
 	El tipo de archivo se determina por la extensión del archivo. q5 soporta cargar
 	archivos de texto, json, csv, fuente, audio, e imagen.
-	
+
 	Por defecto, los recursos se cargan en paralelo antes de que q5 ejecute dibujar. Usa await para esperar a que los recursos se carguen.
-	
-	:param urls: 
+
 	:returns: una promesa que se resuelve con objetos
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		logo = cargar('/q5js_logo.avif')
-		
+
 		def dibujar():
 			imagen(logo, -100, -100, 200, 200)
 	"""
 	...
 
-@overload
-def guardar() -> None: 
-	"""🛠
-	Guarda datos en un archivo.
-	
-	Si no se especifican datos, se guardará el lienzo.
-	
-	Si no se proporcionan argumentos, el lienzo se guardará como
-	un archivo de imagen llamado "untitled.png".
-	
-	:param datos: lienzo, imagen, u objeto JS
-	:param nombreArchivo: nombre de archivo para guardar como
-	
-	Example::
-	
-		Lienzo(200)
-		fondo(0.8)
-		circulo(0, 0, 50)
-		
-		def alPresionarRatón():
-			guardar('circle.png')
-	"""
-	...
-@overload
-def guardar(datos: dict = ..., nombreArchivo: str = ...) -> None: ...
-
-def cargarTexto(url: str) -> dict:
+def cargarTexto(url: str) -> str:
 	"""🛠
 	Carga un archivo de texto desde la url especificada.
-	
+
 	Se recomienda usar await para obtener el texto cargado como una cadena.
-	
+
 	:param url: archivo de texto
 	:returns: un objeto conteniendo el texto cargado en la propiedad obj.text o usa await para obtener la cadena de texto directamente
 	"""
@@ -3548,9 +3514,9 @@ def cargarTexto(url: str) -> dict:
 def cargarJSON(url: str) -> Any:
 	"""🛠
 	Carga un archivo JSON desde la url especificada.
-	
+
 	Se recomienda usar await para obtener el objeto o array JSON cargado.
-	
+
 	:param url: archivo JSON
 	:returns: un objeto o array conteniendo el JSON cargado
 	"""
@@ -3559,9 +3525,9 @@ def cargarJSON(url: str) -> Any:
 def cargarCSV(url: str) -> list[dict]:
 	"""🛠
 	Carga un archivo CSV desde la url especificada.
-	
+
 	Se recomienda usar await para obtener el CSV cargado como un array de objetos.
-	
+
 	:param url: archivo CSV
 	:returns: un array de objetos conteniendo el CSV cargado
 	"""
@@ -3570,20 +3536,20 @@ def cargarCSV(url: str) -> list[dict]:
 def cargarXML(url: str) -> Any:
 	"""🛠
 	Carga un archivo xml desde la url especificada.
-	
+
 	Se recomienda usar await para obtener el Elemento XML cargado.
-	
+
 	:param url: archivo xml
 	:returns: un objeto conteniendo el Elemento XML cargado en una propiedad llamada obj.DOM o usa await para obtener el Elemento XML directamente
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(200)
 		tamañoTexto(32)
-		
+
 		animales = await cargarXML('/assets/animals.xml')
-		
+
 		mamiferos = animales.getElementsByTagName('mammal')
 		y = 64
 		for mamifero in mamiferos:
@@ -3591,9 +3557,10 @@ def cargarXML(url: str) -> Any:
 	"""
 	...
 
-def cargarTodo() -> object:
+async def cargarTodo() -> list[Any]:
 	"""🛠
 	Espera a que cualquier recurso que comenzó a cargarse termine de cargarse. Por defecto q5 ejecuta esto antes de hacer bucle en dibujar (lo cual se llama precarga), pero se puede usar incluso después de que dibujar comience a hacer bucle.
+
 	:returns: una promesa que se resuelve con objetos cargados
 	"""
 	...
@@ -3604,32 +3571,10 @@ def deshabilitarPrecarga() -> None:
 	"""
 	...
 
-@overload
-def nf(n: float | int, l: float | int, r: float | int) -> str: 
-	"""🛠
-	nf es la abreviatura de formato de número. Formatea un número
-	a una cadena con un número especificado de dígitos.
-	
-	:param num: número a formatear
-	:param digitos: número de dígitos a formatear
-	:returns: número formateado
-	
-	Example::
-	
-		Lienzo(200, 100)
-		fondo(0.8)
-		
-		tamañoTexto(32)
-		texto(nf(PI, 4, 5), -90, 10)
-	"""
-	...
-@overload
-def nf(num: float | int, digitos: float | int) -> str: ...
-
 def barajar(arr: list[Any], modificar: bool = ...) -> list[Any]:
 	"""🛠
 	Baraja los elementos de un array.
-	
+
 	:param arr: array a barajar
 	:param modificar: si modificar el array original, falso por defecto lo cual copia el array antes de barajar
 	:returns: array barajado
@@ -3639,7 +3584,7 @@ def barajar(arr: list[Any], modificar: bool = ...) -> list[Any]:
 def guardarItem(clave: str, val: str) -> None:
 	"""🛠
 	Almacena un ítem en localStorage.
-	
+
 	:param clave: clave bajo la cual almacenar el ítem
 	:param val: valor a almacenar
 	"""
@@ -3648,7 +3593,7 @@ def guardarItem(clave: str, val: str) -> None:
 def obtenerItem(clave: str) -> str:
 	"""🛠
 	Recupera un ítem de localStorage.
-	
+
 	:param clave: clave del ítem a recuperar
 	:returns: valor del ítem recuperado
 	"""
@@ -3657,7 +3602,7 @@ def obtenerItem(clave: str) -> str:
 def eliminarItem(clave: str) -> None:
 	"""🛠
 	Elimina un ítem de localStorage.
-	
+
 	:param clave: clave del ítem a eliminar
 	"""
 	...
@@ -3668,58 +3613,63 @@ def limpiarAlmacenamiento() -> None:
 	"""
 	...
 
-def año() -> float | int:
+def año() -> float:
 	"""🛠
 	Devuelve el año actual.
+
 	:returns: año actual
 	"""
 	...
 
-def dia() -> float | int:
+def dia() -> float:
 	"""🛠
 	Devuelve el día actual del mes.
+
 	:returns: día actual
 	"""
 	...
 
-def hora() -> float | int:
+def hora() -> float:
 	"""🛠
 	Devuelve la hora actual.
+
 	:returns: hora actual
 	"""
 	...
 
-def minuto() -> float | int:
+def minuto() -> float:
 	"""🛠
 	Devuelve el minuto actual.
+
 	:returns: minuto actual
 	"""
 	...
 
-def segundo() -> float | int:
+def segundo() -> float:
 	"""🛠
 	Devuelve el segundo actual.
+
 	:returns: segundo actual
 	"""
 	...
 
 # ↗ vector
 
-def crearVector(x: float | int = ..., y: float | int = ..., z: float | int = ..., w: float | int = ...) -> Vector:
+def crearVector(x: float = ..., y: float = ..., z: float = ..., w: float = ...) -> Vector:
 	"""↗
 	Crea un nuevo objeto Vector.
-	
+
 	:param x: componente x del vector
 	:param y: componente y del vector
 	:param z: componente z del vector
 	:param w: componente w del vector
 	:returns: nuevo objeto Vector
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		v = crearVector(0, 0)
 		circulo(v.x, v.y, 50)
 	"""
@@ -3730,126 +3680,264 @@ class Vector:
 	Una clase para describir un vector bidimensional o tridimensional, específicamente un vector euclidiano (también conocido como geométrico). Un vector es una entidad que tiene tanto magnitud como dirección. El tipo de datos almacena los componentes del vector (x, y para 2D, y z para 3D). La magnitud y dirección se pueden acceder a través de los métodos mag() y heading().
 	"""
 
+	def __init__(self, x: float, y: float, z: float = ...) -> None: ...
 
-	x: float | int
+	x: float
 	"""↗ El componente x del vector."""
 
-	y: float | int
+	y: float
 	"""↗ El componente y del vector."""
 
-	z: float | int
+	z: float
 	"""↗ El componente z del vector."""
 
 	def w(self) -> None:
 		"""↗ El componente w del vector."""
 		...
 
-	def set(self, x: float | int = ..., y: float | int = ..., z: float | int = ..., w: float | int = ...) -> Vector:
-		"""↗ Establece los componentes x, y, y z del vector."""
+	def set(self, x: float = ..., y: float = ..., z: float = ..., w: float = ...) -> Vector:
+		"""↗
+		Establece los componentes x, y, y z del vector.
+
+		:param x: componente x del vector
+		:param y: componente y del vector
+		:param z: componente z del vector
+		:param w: componente w del vector
+		:returns: este vector
+		"""
 		...
 
 	def copy(self) -> Vector:
-		"""↗ Devuelve una copia del vector."""
+		"""↗
+		Devuelve una copia del vector.
+
+		:returns: copia del vector
+		"""
 		...
 
-	def add(self, x: float | int | Vector, y: float | int = ..., z: float | int = ...) -> Vector:
-		"""↗ Suma x, y, y z componentes a un vector, suma un vector a otro, o suma dos vectores independientes."""
+	def add(self, x: float | Vector, y: float = ..., z: float = ...) -> Vector:
+		"""↗
+		Suma x, y, y z componentes a un vector, suma un vector a otro, o suma dos vectores independientes.
+
+		:param x: componente x del vector o Vector a sumar
+		:param y: componente y del vector
+		:param z: componente z del vector
+		:returns: este vector
+		"""
 		...
 
-	def sub(self, x: float | int | Vector, y: float | int = ..., z: float | int = ...) -> Vector:
-		"""↗ Resta x, y, y z componentes de un vector, resta un vector de otro, o resta dos vectores independientes."""
+	def sub(self, x: float | Vector, y: float = ..., z: float = ...) -> Vector:
+		"""↗
+		Resta x, y, y z componentes de un vector, resta un vector de otro, o resta dos vectores independientes.
+
+		:param x: componente x del vector o Vector a restar
+		:param y: componente y del vector
+		:param z: componente z del vector
+		:returns: este vector
+		"""
 		...
 
-	def mult(self, n: float | int) -> Vector:
-		"""↗ Multiplica el vector por un escalar."""
+	def mult(self, n: float | Vector) -> Vector:
+		"""↗
+		Multiplica el vector por un escalar.
+
+		:param n: escalar por el cual multiplicar
+		:returns: este vector
+		"""
 		...
 
-	def div(self, n: float | int) -> Vector:
-		"""↗ Divide el vector por un escalar."""
+	def div(self, n: float | Vector) -> Vector:
+		"""↗
+		Divide el vector por un escalar.
+
+		:param n: escalar por el cual dividir
+		:returns: este vector
+		"""
 		...
 
-	def mag(self) -> float | int:
-		"""↗ Calcula la magnitud (longitud) del vector y devuelve el resultado como un flotante (esto es simplemente la ecuación sqrt(x*x + y*y + z*z))."""
+	def mag(self) -> float:
+		"""↗
+		Calcula la magnitud (longitud) del vector y devuelve el resultado como un flotante (esto es simplemente la ecuación sqrt(x*x + y*y + z*z)).
+
+		:returns: magnitud del vector
+		"""
 		...
 
-	def magSq(self) -> float | int:
-		"""↗ Calcula la magnitud (longitud) del vector al cuadrado y devuelve el resultado como un flotante (esto es simplemente la ecuación x*x + y*y + z*z)."""
+	def magSq(self) -> float:
+		"""↗
+		Calcula la magnitud (longitud) del vector al cuadrado y devuelve el resultado como un flotante (esto es simplemente la ecuación x*x + y*y + z*z).
+
+		:returns: magnitud del vector al cuadrado
+		"""
 		...
 
-	def dot(self, v: Vector) -> float | int:
-		"""↗ Calcula el producto punto de dos vectores."""
+	def dot(self, v: Vector) -> float:
+		"""↗
+		Calcula el producto punto de dos vectores.
+
+		:param v: vector con el cual hacer producto punto
+		:returns: producto punto
+		"""
 		...
 
 	def cross(self, v: Vector) -> Vector:
-		"""↗ Calcula el producto cruz de dos vectores."""
+		"""↗
+		Calcula el producto cruz de dos vectores.
+
+		:param v: vector con el cual hacer producto cruz
+		:returns: producto cruz
+		"""
 		...
 
-	def dist(self, v: Vector) -> float | int:
-		"""↗ Calcula la distancia euclidiana entre dos puntos (considerando un punto como un objeto vector)."""
+	def dist(self, v: Vector) -> float:
+		"""↗
+		Calcula la distancia euclidiana entre dos puntos (considerando un punto como un objeto vector).
+
+		:param v: vector al cual calcular distancia
+		:returns: distancia
+		"""
 		...
 
 	def normalize(self) -> Vector:
-		"""↗ Normaliza el vector a longitud 1 (hace que sea un vector unitario)."""
+		"""↗
+		Normaliza el vector a longitud 1 (hace que sea un vector unitario).
+
+		:returns: este vector
+		"""
 		...
 
-	def limit(self, max: float | int) -> Vector:
-		"""↗ Limita la magnitud de este vector al valor usado para el parámetro max."""
+	def limit(self, max: float) -> Vector:
+		"""↗
+		Limita la magnitud de este vector al valor usado para el parámetro max.
+
+		:param max: magnitud máxima
+		:returns: este vector
+		"""
 		...
 
-	def setMag(self, len: float | int) -> Vector:
-		"""↗ Establece la magnitud de este vector al valor usado para el parámetro len."""
+	def setMag(self, len: float) -> Vector:
+		"""↗
+		Establece la magnitud de este vector al valor usado para el parámetro len.
+
+		:param len: nueva longitud para este vector
+		:returns: este vector
+		"""
 		...
 
-	def heading(self) -> float | int:
-		"""↗ Calcula el ángulo de rotación para este vector (solo vectores 2D)."""
+	def heading(self) -> float:
+		"""↗
+		Calcula el ángulo de rotación para este vector (solo vectores 2D).
+
+		:returns: el ángulo de rotación
+		"""
 		...
 
-	def rotate(self, ángulo: float | int) -> Vector:
-		"""↗ Rota el vector por un ángulo (solo vectores 2D), la magnitud permanece igual."""
+	def rotate(self, ángulo: float) -> Vector:
+		"""↗
+		Rota el vector por un ángulo (solo vectores 2D), la magnitud permanece igual.
+
+		:param ángulo: ángulo de rotación
+		:returns: este vector
+		"""
 		...
 
-	def angleBetween(self, v: Vector) -> float | int:
-		"""↗ Calcula y devuelve el ángulo entre dos vectores."""
+	def angleBetween(self, v: Vector) -> float:
+		"""↗
+		Calcula y devuelve el ángulo entre dos vectores.
+
+		:param v: el vector x, y, z
+		:returns: el ángulo entre
+		"""
 		...
 
-	def lerp(self, v: Vector, amt: float | int) -> Vector:
-		"""↗ Interpola linealmente el vector a otro vector."""
+	def lerp(self, v: Vector, amt: float) -> Vector:
+		"""↗
+		Interpola linealmente el vector a otro vector.
+
+		:param v: el vector x, y, z
+		:param amt: la cantidad de interpolación; 0.0 es el vector antiguo, 1.0 es el nuevo vector, 0.5 está a mitad de camino
+		:returns: este vector
+		"""
 		...
 
 	def reflect(self, superficieNormal: Vector) -> Vector:
-		"""↗ Refleja el vector entrante sobre una normal al muro."""
+		"""↗
+		Refleja el vector entrante sobre una normal al muro.
+
+		:param superficieNormal: el vector normal a la superficie
+		:returns: este vector
+		"""
 		...
 
-	def array(self) -> list[float | int]:
-		"""↗ Devuelve una representación de este vector como un array de flotantes."""
+	def array(self) -> list[float]:
+		"""↗
+		Devuelve una representación de este vector como un array de flotantes.
+
+		:returns: array de flotantes
+		"""
 		...
 
 	def equals(self, v: Vector) -> bool:
-		"""↗ Comprueba si los componentes x, y, y z del vector son iguales a los componentes x, y, y z de otro vector."""
+		"""↗
+		Comprueba si los componentes x, y, y z del vector son iguales a los componentes x, y, y z de otro vector.
+
+		:param v: el vector a comparar
+		:returns: verdadero si los vectores son iguales
+		"""
 		...
 
-	def fromAngle(self, ángulo: float | int, longitud: float | int = ...) -> Vector:
-		"""↗ Hace un nuevo vector 2D desde un ángulo de longitud 1."""
+	def fromAngle(self, ángulo: float, longitud: float = ...) -> Vector:
+		"""↗
+		Hace un nuevo vector 2D desde un ángulo de longitud 1.
+
+		:param ángulo: el ángulo deseado
+		:param longitud: longitud del nuevo vector (por defecto a 1)
+		:returns: nuevo objeto Vector
+		"""
 		...
 
 	def random2D(self) -> Vector:
-		"""↗ Hace un nuevo vector 2D aleatorio con una magnitud de 1."""
+		"""↗
+		Hace un nuevo vector 2D aleatorio con una magnitud de 1.
+
+		:returns: nuevo objeto Vector
+		"""
 		...
 
 	def random3D(self) -> Vector:
-		"""↗ Hace un nuevo vector 3D aleatorio con una magnitud de 1."""
+		"""↗
+		Hace un nuevo vector 3D aleatorio con una magnitud de 1.
+
+		:returns: nuevo objeto Vector
+		"""
 		...
+
+	def sumar(self, v: Vector) -> Vector: ...
+	def restar(self, v: Vector) -> Vector: ...
+	def normalizar(self) -> Vector: ...
+	def establecerMag(self, len: float) -> Vector: ...
+	def punto(self, v: Vector) -> float: ...
+	def cruz(self, v: Vector) -> Vector: ...
+	def copiar(self) -> Vector: ...
+	def establecer(self, x: float, y: float, z: float = ...) -> None: ...
+	def limitar(self, max: float) -> Vector: ...
+	def rumbo(self) -> float: ...
+	def establecerRumbo(self, angulo: float) -> Vector: ...
+	def rotar(self, angulo: float) -> Vector: ...
+	def slerp(self, v: Vector, amt: float) -> Vector: ...
+	@staticmethod
+	def desdeAngulo(angulo: float, longitud: float = ...) -> Vector: ...
 
 # 🖌 modelado
 
-def arco(x: float | int, y: float | int, w: float | int, h: float | int, inicio: float | int, fin: float | int, modo: float | int = ...) -> None:
+def arco(x: float, y: float, w: float, h: float, inicio: float, fin: float, modo: float = ...) -> None:
 	"""🖌
 	Dibuja un arco, que es una sección de una elipse.
-	
+
 	modoEliptico afecta cómo se dibuja el arco.
-	
+
 	q5 WebGPU solo soporta el modo por defecto PIE_OPEN.
-	
+
 	:param x: coordenada-x
 	:param y: coordenada-y
 	:param w: ancho de la elipse
@@ -3857,43 +3945,43 @@ def arco(x: float | int, y: float | int, w: float | int, h: float | int, inicio:
 	:param inicio: ángulo para empezar el arco
 	:param fin: ángulo para terminar el arco
 	:param modo: configuración de estilo de forma y trazo, por defecto es PIE_OPEN para una forma de pastel con un trazo no cerrado, puede ser PIE, CHORD, o CHORD_OPEN
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		fondo(0.8)
-		
+
 		arco(0, 0, 160, 160, 0.8, -0.8)
 	"""
 	...
 
-def curva() -> None:
+def curva(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
 	"""🖌
 	Dibuja una curva.
-	
+
 	Example::
-	
+
 		Lienzo(200, 100)
 		fondo(0.8)
-		
+
 		curva(-100, -200, -50, 0, 50, 0, 100, -200)
 	"""
 	...
 
-def detalleCurva(val: float | int) -> None:
+def detalleCurva(val: float) -> None:
 	"""🖌
 	Establece la cantidad de segmentos de línea recta usados para hacer una curva.
-	
+
 	Solo tiene efecto en q5 WebGPU.
-	
+
 	:param val: nivel de detalle de la curva, por defecto es 20
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		detalleCurva(4)
-		
+
 		grosorTrazo(10)
 		trazo(0, 1, 1)
 		curva(-100, -200, -50, 0, 50, 0, 100, -200)
@@ -3906,26 +3994,28 @@ def empezarForma() -> None:
 	"""
 	...
 
-def terminarForma() -> None:
+def terminarForma(cerrar: bool = ...) -> None:
 	"""🖌
 	Termina de almacenar vértices para una forma convexa.
+
+	:param cerrar: indica si se debe cerrar la forma conectando el último vértice con el primero; el valor predeterminado es false
 	"""
 	...
 
-def vertice(x: float | int, y: float | int) -> None:
+def vertice(x: float, y: float) -> None:
 	"""🖌
 	Especifica un vértice en una forma.
-	
+
 	:param x: coordenada-x
 	:param y: coordenada-y
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		trazo(1, 0.5)
 		grosorTrazo(20)
-		
+
 		empezarForma()
 		relleno(1, 0, 0)
 		vertice(-80, -80)
@@ -3937,10 +4027,10 @@ def vertice(x: float | int, y: float | int) -> None:
 	"""
 	...
 
-def verticeBezier(cp1x: float | int, cp1y: float | int, cp2x: float | int, cp2y: float | int, x: float | int, y: float | int) -> None:
+def verticeBezier(cp1x: float, cp1y: float, cp2x: float, cp2y: float, x: float, y: float) -> None:
 	"""🖌
 	Especifica un vértice Bezier en una forma.
-	
+
 	:param cp1x: coordenada-x del primer punto de control
 	:param cp1y: coordenada-y del primer punto de control
 	:param cp2x: coordenada-x del segundo punto de control
@@ -3950,10 +4040,10 @@ def verticeBezier(cp1x: float | int, cp1y: float | int, cp2x: float | int, cp2y:
 	"""
 	...
 
-def verticeCuadratico(cp1x: float | int, cp1y: float | int, x: float | int, y: float | int) -> None:
+def verticeCuadratico(cp1x: float, cp1y: float, x: float, y: float) -> None:
 	"""🖌
 	Especifica un vértice Bezier cuadrático en una forma.
-	
+
 	:param cp1x: coordenada-x del punto de control
 	:param cp1y: coordenada-y del punto de control
 	:param x: coordenada-x del punto de anclaje
@@ -3961,10 +4051,10 @@ def verticeCuadratico(cp1x: float | int, cp1y: float | int, x: float | int, y: f
 	"""
 	...
 
-def bezier(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
+def bezier(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
 	"""🖌
 	Dibuja una curva Bezier.
-	
+
 	:param x1: coordenada-x del primer punto de anclaje
 	:param y1: coordenada-y del primer punto de anclaje
 	:param x2: coordenada-x del primer punto de control
@@ -3976,10 +4066,10 @@ def bezier(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x
 	"""
 	...
 
-def triangulo(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int) -> None:
+def triangulo(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> None:
 	"""🖌
 	Dibuja un triángulo.
-	
+
 	:param x1: coordenada-x del primer vértice
 	:param y1: coordenada-y del primer vértice
 	:param x2: coordenada-x del segundo vértice
@@ -3989,10 +4079,10 @@ def triangulo(x1: float | int, y1: float | int, x2: float | int, y2: float | int
 	"""
 	...
 
-def quad(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3: float | int, y3: float | int, x4: float | int, y4: float | int) -> None:
+def quad(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float) -> None:
 	"""🖌
 	Dibuja un cuadrilátero.
-	
+
 	:param x1: coordenada-x del primer vértice
 	:param y1: coordenada-y del primer vértice
 	:param x2: coordenada-x del segundo vértice
@@ -4007,7 +4097,7 @@ def quad(x1: float | int, y1: float | int, x2: float | int, y2: float | int, x3:
 def empezarContorno() -> None:
 	"""🖌
 	Comienza a almacenar vértices para un contorno.
-	
+
 	No disponible en q5 WebGPU.
 	"""
 	...
@@ -4015,7 +4105,7 @@ def empezarContorno() -> None:
 def terminarContorno() -> None:
 	"""🖌
 	Termina de almacenar vértices para un contorno.
-	
+
 	No disponible en q5 WebGPU.
 	"""
 	...
@@ -4027,40 +4117,40 @@ def terminarContorno() -> None:
 usados para crear efectos visuales avanzados en q5!
 """
 
-def crearShader(codigo: str, tipo: str = ..., datos: list[float] = ...) -> Any:
+def crearShader(codigo: str, tipo: str = ..., datos: Float32Array | = ...) -> Any:
 	"""⚡
 	Crea un shader que el renderizador WebGPU de q5 puede usar.
-	
+
 	Si tipo no se especifica, esta función personaliza una copia del shader de formas por defecto, lo que afecta a las siguientes funciones: plano, linea, y terminarForma.
-	
+
 	Para más información sobre los parámetros de entrada de las funciones de vértice y fragmento,
 	los datos y las funciones auxiliares disponibles para usar
 	en tu código de shader personalizado, lee la página wiki
 	"Custom Shaders in q5 WebGPU".
-	
+
 	:param codigo: Extracto de código WGSL para el shader
 	:param tipo: por defecto "shapes"
 	:param datos: solo para usar con shaders totalmente personalizados
 	:returns: un programa shader
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		wobble = crearShader('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
-		
+
 		  let i = f32(v.vertexIndex) % 4 * 100;
 		  vert.x += cos((q.time + i) * 0.01) * 0.1;
-		
+
 			var f: FragParams;
 			f.position = vert;
 			f.color = vec4f(1, 0, 0, 1);
 			return f;
 		}''')
-		
+
 		def dibujar():
 			limpiar()
 			shader(wobble)
@@ -4068,17 +4158,17 @@ def crearShader(codigo: str, tipo: str = ..., datos: list[float] = ...) -> Any:
 	"""
 	...
 
-def plano(x: float | int, y: float | int, w: float | int, h: float | int = ...) -> None:
+def plano(x: float, y: float, w: float, h: float = ...) -> None:
 	"""⚡
 	Un plano es un rectángulo centrado sin trazo.
-	
+
 	:param x: centro x
 	:param y: centro y
 	:param w: ancho o longitud del lado
 	:param h: alto
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		plano(0, 0, 100)
 	"""
@@ -4087,7 +4177,7 @@ def plano(x: float | int, y: float | int, w: float | int, h: float | int = ...) 
 def shader(moduloShader: Any) -> None:
 	"""⚡
 	Aplica un shader.
-	
+
 	:param moduloShader: un programa shader
 	"""
 	...
@@ -4095,22 +4185,22 @@ def shader(moduloShader: Any) -> None:
 def reiniciarShader() -> None:
 	"""⚡
 	Hace que q5 use el shader de formas por defecto.
-	
+
 	Example::
-	
+
 		Lienzo(200)
-		
+
 		stripes = crearShader('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			let g = cos((q.mouseY + f.position.y) * 0.05);
 			return vec4(1, g, 0, 1);
 		}''')
-		
+
 		def dibujar():
 			shader(stripes)
 			plano(0, 0, ancho, alto)
-		
+
 			reiniciarShader()
 			triángulo(-50, -50, 0, 50, 50, -50)
 	"""
@@ -4146,22 +4236,22 @@ def reiniciarShaders() -> None:
 	"""
 	...
 
-def crearShaderFotograma() -> None:
+def crearShaderFotograma(codigo: str) -> Any:
 	"""⚡
 	Crea un shader que q5 puede usar para dibujar fotogramas.
-	
+
 	crearLienzo debe ejecutarse antes de usar esta función.
-	
+
 	Usa esta función para personalizar una copia del
 	shader de fotograma por defecto.
-	
+
 	Example::
-	
+
 		Lienzo(200, 400)
 		trazo(1)
 		grosorTrazo(8)
 		terminacionTrazo(PROJECT)
-		
+
 		boxy = crearShaderFotograma('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
@@ -4170,7 +4260,7 @@ def crearShaderFotograma() -> None:
 			let uv = f.texCoord + vec2f(x, y);
 			return textureSample(tex, samp, uv);
 		}''')
-		
+
 		def dibujar():
 			linea(ratonX, ratonY, pRatonX, pRatonY)
 			reiniciarShaders() if ratonPresionado else shader(boxy)
@@ -4180,20 +4270,20 @@ def crearShaderFotograma() -> None:
 def crearShaderImagen(codigo: str) -> Any:
 	"""⚡
 	Crea un shader que q5 puede usar para dibujar imágenes.
-	
+
 	Usa esta función para personalizar una copia del
 	shader de imagen por defecto.
-	
+
 	:param codigo: extracto de código shader WGSL
 	:returns: un programa shader
-	
+
 	Example::
-	
+
 		Lienzo(200, 400)
 		modoImagen(CENTER)
-		
+
 		logo = cargarImagen('/q5js_logo.avif')
-		
+
 		grate = crearShaderImagen('''
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
@@ -4201,12 +4291,12 @@ def crearShaderImagen(codigo: str) -> Any:
 			texColor.b += (q.mouseX + f.position.x) % 20 / 10;
 			return texColor;
 		}''')
-		
+
 		def dibujar():
 			fondo(0.7)
 			shader(grate)
 			imagen(logo, 0, 0, 180, 180)
-		
+
 		#
 	"""
 	...
@@ -4214,34 +4304,34 @@ def crearShaderImagen(codigo: str) -> Any:
 def crearShaderVideo(codigo: str) -> Any:
 	"""⚡
 	Crea un shader que q5 puede usar para dibujar fotogramas de video.
-	
+
 	Usa esta función para personalizar una copia del
 	shader de video por defecto.
-	
+
 	:param codigo: extracto de código shader WGSL
 	:returns: un programa shader
-	
+
 	Example::
-	
+
 		Lienzo(200, 600)
-		
+
 		vid = crearVideo('/assets/apollo4.mp4')
 		vid.hide()
-		
+
 		flipper = crearShaderVideo('''
 		@vertex
 		fn vertexMain(v: VertexParams) -> FragParams {
 			var vert = transformVertex(v.pos, v.matrixIndex);
-		
+
 			var vi = f32(v.vertexIndex);
 			vert.y *= cos((q.frameCount + vi * 10) * 0.03);
-		
+
 			var f: FragParams;
 			f.position = vert;
 			f.texCoord = v.texCoord;
 			return f;
 		}
-		
+
 		@fragment
 		fn fragMain(f: FragParams) -> @location(0) vec4f {
 			var texColor =
@@ -4250,7 +4340,7 @@ def crearShaderVideo(codigo: str) -> Any:
 			texColor.b *= 2;
 			return texColor;
 		}''')
-		
+
 		def dibujar():
 			limpiar()
 			if ratonPresionado: vid.play()
@@ -4262,18 +4352,18 @@ def crearShaderVideo(codigo: str) -> Any:
 def crearShaderTexto(codigo: str) -> Any:
 	"""⚡
 	Crea un shader que q5 puede usar para dibujar texto.
-	
+
 	Usa esta función para personalizar una copia del
 	shader de texto por defecto.
-	
+
 	:param codigo: extracto de código shader WGSL
 	:returns: un programa shader
-	
+
 	Example::
-	
+
 		Lienzo(200)
 		alineaciónTexto(CENTER, CENTER)
-		
+
 		spin = crearShaderTexto('''
 		@vertex
 		fn vertexMain(v : VertexParams) -> FragParams {
@@ -4281,12 +4371,12 @@ def crearShaderTexto(codigo: str) -> Any:
 			let text = textMetadata[i32(char.w)];
 			let fontChar = fontChars[i32(char.z)];
 			let pos = calcPos(v.vertexIndex, char, fontChar, text);
-		
+
 			var vert = transformVertex(pos, text.matrixIndex);
-		
+
 			let i = f32(v.instanceIndex + 1);
 			vert.y *= cos((q.frameCount - 5 * i) * 0.05);
-		
+
 			var f : FragParams;
 			f.position = vert;
 			f.texCoord = calcUV(v.vertexIndex, fontChar);
@@ -4296,7 +4386,7 @@ def crearShaderTexto(codigo: str) -> Any:
 			f.edge = text.edge;
 			return f;
 		}''')
-		
+
 		def dibujar():
 			limpiar()
 			shader(spin)
@@ -4318,95 +4408,334 @@ class Q5:
 	Funcion constructora. Crea una instancia de Q5.
 	"""
 
+	def __init__(self, ambito: str | Callable[..., Any] = ..., contenedor: Any = ...) -> None: ...
 
-	version: str
+	version: ClassVar[str]
 	"""⚙ La versión menor actual de q5."""
 
+	@staticmethod
+	def addLang(locale: dict) -> None:
+		"""⚙
+		Añadir traducciones de la API. Más información:
+		https://github.com/q5js/q5.js/wiki/Translations
+		"""
+		...
 
-	deshabilitarErroresAmigables: bool
+	deshabilitarErroresAmigables: ClassVar[bool]
 	"""⚙ Desactiva los mensajes de error amigables de q5."""
 
-	toleranteErrores: bool
+	toleranteErrores: ClassVar[bool]
 	"""⚙ Establecer en verdadero para mantener el bucle de dibujo después de un error."""
 
-	soportaHDR: bool
+	soportaHDR: ClassVar[bool]
 	"""⚙ Verdadero si el dispositivo soporta HDR (el espacio de color display-p3)."""
 
-	opcionesLienzo: dict
-	"""⚙ Establece los atributos de contexto de lienzo predeterminados utilizados para
-lienzos recién creados y gráficos internos. Estas opciones son sobrescritas por
-cualquier opción por lienzo que pases a crearLienzo."""
+	opcionesLienzo: ClassVar[dict]
+	"""⚙
+	Establece los atributos de contexto de lienzo predeterminados utilizados para
+	lienzos recién creados y gráficos internos. Estas opciones son sobrescritas por
+	cualquier opción por lienzo que pases a crearLienzo.
+	"""
 
-	MAX_COLORES: float | int
-	"""⚙ El número máximo de colores de q5
-(creados mediante llamadas a color, fondo, relleno, trazo y teñir)
-que se pueden almacenar por fotograma con el renderizador WebGPU."""
+	MAX_COLORES: ClassVar[float]
+	"""⚙
+	El número máximo de colores de q5
+	(creados mediante llamadas a color, fondo, relleno, trazo y teñir)
+	que se pueden almacenar por fotograma con el renderizador WebGPU.
+	"""
 
-	MAX_RECTANGULOS: float | int
-	"""⚙ El número máximo de rectángulos
-(llamadas a rect, cuadrado y cápsula)
-que se pueden dibujar por fotograma con el renderizador WebGPU."""
+	MAX_RECTANGULOS: ClassVar[float]
+	"""⚙
+	El número máximo de rectángulos
+	(llamadas a rect, cuadrado y cápsula)
+	que se pueden dibujar por fotograma con el renderizador WebGPU.
+	"""
 
-	MAX_ELIPSES: float | int
-	"""⚙ El número máximo de elipses
-(llamadas a elipse, círculo y arco)
-que se pueden dibujar por fotograma con el renderizador WebGPU."""
+	MAX_ELIPSES: ClassVar[float]
+	"""⚙
+	El número máximo de elipses
+	(llamadas a elipse, círculo y arco)
+	que se pueden dibujar por fotograma con el renderizador WebGPU.
+	"""
 
-	MAX_CARACTERES: float | int
-	"""⚙ El número máximo de caracteres de texto
-que se pueden dibujar por fotograma con el renderizador WebGPU."""
+	MAX_CARACTERES: ClassVar[float]
+	"""⚙
+	El número máximo de caracteres de texto
+	que se pueden dibujar por fotograma con el renderizador WebGPU.
+	"""
 
-	MAX_TEXTOS: float | int
-	"""⚙ El número máximo de llamadas independientes a texto
-que se pueden dibujar por fotograma con el renderizador WebGPU."""
+	MAX_TEXTOS: ClassVar[float]
+	"""⚙
+	El número máximo de llamadas independientes a texto
+	que se pueden dibujar por fotograma con el renderizador WebGPU.
+	"""
 
-	MAX_TRANSFORMACIONES: float | int
-	"""⚙ El número máximo de matrices de transformación
-que se pueden usar por fotograma con el renderizador WebGPU. De forma predeterminada, se establece para usar todo el límite de 128 MB de maxStorageBufferBindingSize.
-https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits"""
+	MAX_TRANSFORMACIONES: ClassVar[float]
+	"""⚙
+	El número máximo de matrices de transformación
+	que se pueden usar por fotograma con el renderizador WebGPU. De forma predeterminada, se establece para usar todo el límite de 128 MB de maxStorageBufferBindingSize.
+	https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits
+	"""
 
-	MAX_IMAGENES: float | int
-	"""⚙ El número máximo de imágenes (llamadas a imagen e imagenTexto)
-que se pueden dibujar por fotograma con el renderizador WebGPU."""
+	MAX_IMAGENES: ClassVar[float]
+	"""⚙
+	El número máximo de imágenes (llamadas a imagen e imagenTexto)
+	que se pueden dibujar por fotograma con el renderizador WebGPU.
+	"""
 
-	MAX_VERTICES_FORMAS: float | int
-	"""⚙ El número máximo de vértices en las formas
-(creados mediante llamadas a terminarForma,
-triángulo, quad, curva y bezier)
-que se pueden usar por fotograma con el renderizador WebGPU."""
+	MAX_VERTICES_FORMAS: ClassVar[float]
+	"""⚙
+	El número máximo de vértices en las formas
+	(creados mediante llamadas a terminarForma,
+	triángulo, quad, curva y bezier)
+	que se pueden usar por fotograma con el renderizador WebGPU.
+	"""
 
-	def WebGPU(self) -> Q5:
+	@staticmethod
+	def WebGPU() -> Q5:
 		"""⚙ Crea una nueva instancia de Q5 que usa el renderizador WebGPU de q5."""
 		...
 
 	def addHook(self, lifecycle: str, fn: Callable[..., Any]) -> None:
-		"""⚙ Los addons pueden aumentar q5 con nueva funcionalidad agregando hooks,
-funciones que se ejecutan en fases específicas del ciclo de vida de q5.
+		"""⚙
+		Los addons pueden aumentar q5 con nueva funcionalidad agregando hooks,
+		funciones que se ejecutan en fases específicas del ciclo de vida de q5.
 
-Dentro de la función, this se refiere a la instancia de Q5."""
+		Dentro de la función, this se refiere a la instancia de Q5.
+
+		:param lifecycle: 'init', 'presetup', 'postsetup', 'predraw', 'postdraw', o 'remove'
+		:param fn: La función que se ejecutará en la fase del ciclo de vida especificada.
+		"""
 		...
 
 	def registerAddon(self, addon: Callable[..., Any]) -> None:
-		"""⚙ Forma compatible con p5.js v2 de registrar un addon con q5."""
+		"""⚙
+		Forma compatible con p5.js v2 de registrar un addon con q5.
+
+		:param addon: Una función que recibe Q5, Q5.prototype, y un objeto lifecycles.
+		"""
 		...
 
-	modulos: dict
-	"""⚙ Un objeto que contiene los módulos de q5, funciones que se ejecutan cuando q5 carga.
+	modulos: ClassVar[dict]
+	"""⚙
+	Un objeto que contiene los módulos de q5, funciones que se ejecutan cuando q5 carga.
 
-Cada función recibe dos parámetros de entrada:
+	Cada función recibe dos parámetros de entrada:
 
-- la instancia de q5
-- un proxy para editar la instancia de q5 y las propiedades correspondientes del ámbito global"""
+	- la instancia de q5
+	- un proxy para editar la instancia de q5 y las propiedades correspondientes del ámbito global
+	"""
 
 	def dibujar(self) -> None:
 		"""⚙ La función de dibujo de q5 se ejecuta 60 veces por segundo por defecto."""
 		...
 
 	def postProcesar(self) -> None:
-		"""⚙ Se ejecuta después de cada llamada a la función dibujar y procesos de addons de q5 post-dibujo, si los hay.
+		"""⚙
+		Se ejecuta después de cada llamada a la función dibujar y procesos de addons de q5 post-dibujo, si los hay.
 
-Útil para agregar efectos de post-procesamiento cuando no es posible
-hacerlo al final de la función dibujar, como cuando se usan
-addons como q5play que dibujan automáticamente al lienzo después de que
-la función dibujar se ejecuta."""
+		Útil para agregar efectos de post-procesamiento cuando no es posible
+		hacerlo al final de la función dibujar, como cuando se usan
+		addons como q5play que dibujan automáticamente al lienzo después de que
+		la función dibujar se ejecuta.
+		"""
 		...
+
+	lang: ClassVar[dict]
+	@staticmethod
+	def agregarHook(cicloVida: str, fn: Callable[..., Any]) -> None: ...
+	@staticmethod
+	def registrarAddon(addon: Callable[..., Any]) -> None: ...
+	def actualizar(self) -> None: ...
+	async def Lienzo(self, ancho: float = ..., alto: float = ..., opciones: dict = ...) -> Any: ...
+	def log(self, mensaje: Any) -> None: ...
+	def circulo(self, x: float, y: float, diámetro: float) -> None: ...
+	def elipse(self, x: float, y: float, ancho: float, alto: float = ...) -> None: ...
+	def rect(self, x: float, y: float, w: float, h: float = ..., redondeado: float = ...) -> None: ...
+	def cuadrado(self, x: float, y: float, tamaño: float, redondeado: float = ...) -> None: ...
+	def punto(self, x: float, y: float) -> None: ...
+	def linea(self, x1: float, y1: float, x2: float, y2: float) -> None: ...
+	def capsula(self, x1: float, y1: float, x2: float, y2: float, r: float) -> None: ...
+	def modoRect(self, modo: str) -> None: ...
+	def modoEliptico(self, modo: str) -> None: ...
+	def cargarImagen(self, url: str) -> Q5.Image: ...
+	def imagen(self, img: Q5.Imagen | Any, dx: float, dy: float, dw: float = ..., dh: float = ..., sx: float = ..., sy: float = ..., sw: float = ..., sh: float = ...) -> None: ...
+	def modoImagen(self, modo: str) -> None: ...
+	def escalaImagenPorDefecto(self, escala: float) -> float: ...
+	def redimensionar(self, w: float, h: float) -> None: ...
+	def recortar(self) -> Q5.Image: ...
+	def suavizar(self) -> None: ...
+	def noSuavizar(self) -> None: ...
+	def teñir(self, color: str | float) -> None: ...
+	def noTeñir(self) -> None: ...
+	def enmascarar(self, img: Q5.Image) -> None: ...
+	def copiar(self) -> Q5.Image: ...
+	def insertado(self, sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: float, dh: float) -> None: ...
+	def obtener(self, x: float, y: float, w: float = ..., h: float = ...) -> Q5.Image | list[float]: ...
+	def establecer(self, x: float, y: float, val: Any) -> None: ...
+	def cargarPixeles(self) -> None: ...
+	def actualizarPixeles(self) -> None: ...
+	def filtro(self, tipo: str, valor: float = ...) -> None: ...
+	def crearImagen(self, w: float, h: float, opt: Any = ...) -> Q5.Image: ...
+	def crearGraficos(self, w: float, h: float, opt: dict = ...) -> Q5: ...
+	def texto(self, str: str, x: float, y: float, anchoEnvoltura: float = ..., limiteLineas: float = ...) -> None: ...
+	def cargarFuente(self, url: str) -> Any: ...
+	def fuenteTexto(self, nombreFuente: str) -> None: ...
+	def tamañoTexto(self, tamaño: float = ...) -> float | None: ...
+	def interlineado(self, interlineado: float = ...) -> float | None: ...
+	def estiloTexto(self, estilo: Literal['normal', 'italic', 'bold', 'bolditalic']) -> None: ...
+	def alineacionTexto(self, horiz: Literal['left', 'center', 'right'], vert: Literal['top', 'middle', 'bottom', 'alphabetic'] = ...) -> None: ...
+	def pesoTexto(self, peso: float | str) -> None: ...
+	def anchoTexto(self, str: str) -> float: ...
+	def ascensoTexto(self, str: str) -> float: ...
+	def descensoTexto(self, str: str) -> float: ...
+	def crearImagenTexto(self, str: str, anchoEnvoltura: float = ..., limiteLineas: float = ...) -> Q5.Image: ...
+	def imagenTexto(self, img: Q5.Imagen | str, x: float, y: float) -> None: ...
+	@overload
+	def nf(self, n: float, l: float, r: float) -> str: ...
+	@overload
+	def nf(self, num: float, digitos: float) -> str: ...
+	def alPresionarRaton(self) -> None: ...
+	def alSoltarRaton(self) -> None: ...
+	def alMoverRaton(self) -> None: ...
+	def alArrastrarRaton(self) -> None: ...
+	def dobleClic(self) -> None: ...
+	def teclaEstaPresionada(self, tecla: str) -> bool: ...
+	def alPresionarTecla(self) -> None: ...
+	def alSoltarTecla(self) -> None: ...
+	def alEmpezarToque(self) -> None: ...
+	def alTerminarToque(self) -> None: ...
+	def alMoverToque(self) -> None: ...
+	def cursor(self, nombre: str, x: float = ..., y: float = ...) -> None: ...
+	def sinCursor(self) -> None: ...
+	def ruedaRaton(self, evento: Any) -> None: ...
+	def bloqueoPuntero(self, movimientoNoAjustado: bool) -> None: ...
+	def color(self, c0: str | float | Color | list[float], c1: float = ..., c2: float = ..., c3: float = ...) -> Color: ...
+	def modoColor(self, modo: Literal['rgb', 'oklch', 'hsl', 'hsb'], formato: Literal[1, 255] = ..., gama: Literal['srgb', 'display-p3'] = ...) -> None: ...
+	def fondo(self, relleno: str | float | Color | Q5.Imagen) -> None: ...
+	@overload
+	def relleno(self, color: str | float | Color) -> None: ...
+	@overload
+	def relleno(self, c0: float, c1: float, c2: float, c3: float) -> None: ...
+	@overload
+	def trazo(self, color: str | float | Color) -> None: ...
+	@overload
+	def trazo(self, c0: float, c1: float, c2: float, c3: float) -> None: ...
+	def sinRelleno(self) -> None: ...
+	def sinTrazo(self) -> None: ...
+	def grosorTrazo(self, grosor: float) -> None: ...
+	def opacidad(self, alfa: float) -> None: ...
+	def sombra(self, color: str | float | Color) -> None: ...
+	def sinSombra(self) -> None: ...
+	def cajaSombra(self, offsetX: float, offsetY: float, desenfoque: float) -> None: ...
+	def modoMezcla(self, val: str) -> None: ...
+	def terminacionTrazo(self, val: str) -> None: ...
+	def unionTrazo(self, val: str) -> None: ...
+	def borrar(self, rellenoAlfa: float = ..., trazoAlfa: float = ...) -> None: ...
+	def noBorrar(self) -> None: ...
+	def guardarEstilos(self) -> None: ...
+	def recuperarEstilos(self) -> None: ...
+	def limpiar(self) -> None: ...
+	def enRelleno(self, x: float, y: float) -> bool: ...
+	def enTrazo(self, x: float, y: float) -> bool: ...
+	def trasladar(self, x: float, y: float) -> None: ...
+	def rotar(self, angulo: float) -> None: ...
+	def escalar(self, x: float, y: float = ...) -> None: ...
+	def cizallarX(self, angulo: float) -> None: ...
+	def cizallarY(self, angulo: float) -> None: ...
+	def aplicarMatriz(self, a: float, b: float, c: float, d: float, e: float, f: float) -> None: ...
+	def reiniciarMatriz(self) -> None: ...
+	def guardarMatriz(self) -> None: ...
+	def recuperarMatriz(self) -> None: ...
+	@overload
+	def guardar(self) -> None: ...
+	@overload
+	def guardar(self, datos: dict = ..., nombreArchivo: str = ...) -> None: ...
+	def recuperar(self) -> None: ...
+	def modoVisualizacion(self, modo: str, calidadRenderizado: str = ..., escala: str | float = ...) -> None: ...
+	def pantallaCompleta(self, v: bool = ...) -> None: ...
+	def redimensionarLienzo(self, w: float, h: float) -> None: ...
+	def pausar(self) -> None: ...
+	def redibujar(self, n: float = ...) -> None: ...
+	def reanudar(self) -> None: ...
+	def frecuenciaRefresco(self, hertz: float = ...) -> float: ...
+	def obtenerTasaFotogramasObjetivo(self) -> float: ...
+	def obtenerFPS(self) -> float: ...
+	def densidadPixeles(self, v: float) -> float: ...
+	def densidadVisualizacion(self) -> float: ...
+	def aleatorio(self, bajo: float | list[Any] = ..., alto: float = ...) -> float | Any: ...
+	def flu(self, cantidad: float) -> float: ...
+	def ruido(self, x: float = ..., y: float = ..., z: float = ...) -> float: ...
+	def dist(self, x1: float, y1: float, x2: float, y2: float) -> float: ...
+	def mapa(self, val: float, inicio1: float, fin1: float, inicio2: float, fin2: float) -> float: ...
+	def modoAngulo(self, modo: Literal['degrees', 'radians']) -> None: ...
+	def radianes(self, grados: float) -> float: ...
+	def grados(self, radianes: float) -> float: ...
+	def interpolar(self, inicio: float, fin: float, cant: float) -> float: ...
+	def constreñir(self, n: float, bajo: float, alto: float) -> float: ...
+	def norm(self, n: float, inicio: float, fin: float) -> float: ...
+	def frac(self, n: float) -> float: ...
+	def abs(self, n: float) -> float: ...
+	def redondear(self, n: float, d: float = ...) -> float: ...
+	def techo(self, n: float) -> float: ...
+	def piso(self, n: float) -> float: ...
+	def min(self, *args: float) -> float: ...
+	def max(self, *args: float) -> float: ...
+	def pot(self, base: float, exponente: float) -> float: ...
+	def cuad(self, n: float) -> float: ...
+	def raiz(self, n: float) -> float: ...
+	def loge(self, n: float) -> float: ...
+	def exp(self, exponente: float) -> float: ...
+	def semillaAleatoria(self, semilla: float) -> None: ...
+	def generadorAleatorio(self, metodo: Any) -> None: ...
+	def aleatorioGaussiano(self, media: float, std: float) -> float: ...
+	def aleatorioExponencial(self) -> float: ...
+	def modoRuido(self, modo: Literal['perlin', 'simplex', 'blocky']) -> None: ...
+	def semillaRuido(self, semilla: float) -> None: ...
+	def detalleRuido(self, lod: float, caida: float) -> None: ...
+	def cargarSonido(self, url: str) -> Sonido: ...
+	def cargarAudio(self, url: str) -> Any: ...
+	def obtenerContextoAudio(self) -> Any: ...
+	async def iniciarAudioUsuario(self) -> None: ...
+	def crearElemento(self, etiqueta: str, contenido: str = ...) -> Any: ...
+	def crearA(self, href: str, texto: str = ..., nuevaPestaña: bool = ...) -> Any: ...
+	def crearBoton(self, contenido: str = ...) -> Any: ...
+	def crearCasilla(self, etiqueta: str = ..., marcado: bool = ...) -> Any: ...
+	def crearSelectorColor(self, valor: str = ...) -> Any: ...
+	def crearImg(self, src: str) -> Any: ...
+	def crearEntrada(self, valor: str = ..., tipo: str = ...) -> Any: ...
+	def crearP(self, contenido: str = ...) -> Any: ...
+	def crearOpciones(self, nombreGrupo: str = ...) -> Any: ...
+	def crearSeleccion(self, placeholder: str = ...) -> Any: ...
+	def crearDeslizador(self, min: float, max: float, valor: float = ..., paso: float = ...) -> Any: ...
+	def crearVideo(self, src: str) -> Any: ...
+	def crearCaptura(self, tipo: str = ..., volteado: bool = ...) -> Any: ...
+	def encontrarElemento(self, selector: str) -> Any: ...
+	def encontrarElementos(self, selector: str) -> list[Any]: ...
+	def crearGrabadora(self) -> Any: ...
+	def recordar(self) -> None: ...
+	def pausarGrabacion(self) -> None: ...
+	def borrarGrabacion(self) -> None: ...
+	def guardarGrabacion(self, nombreArchivo: str) -> None: ...
+	async def cargar(self, *urls: str) -> list[Any]: ...
+	def cargarTexto(self, url: str) -> str: ...
+	def cargarJSON(self, url: str) -> Any: ...
+	def cargarCSV(self, url: str) -> list[dict]: ...
+	def cargarXML(self, url: str) -> Any: ...
+	async def cargarTodo(self) -> list[Any]: ...
+	def deshabilitarPrecarga(self) -> None: ...
+	def barajar(self, arr: list[Any], modificar: bool = ...) -> list[Any]: ...
+	def guardarItem(self, clave: str, val: str) -> None: ...
+	def obtenerItem(self, clave: str) -> str: ...
+	def eliminarItem(self, clave: str) -> None: ...
+	def limpiarAlmacenamiento(self) -> None: ...
+	def año(self) -> float: ...
+	def dia(self) -> float: ...
+	def hora(self) -> float: ...
+	def minuto(self) -> float: ...
+	def segundo(self) -> float: ...
+
+	class Image:
+		"""⚙
+		🌆 Image
+		"""

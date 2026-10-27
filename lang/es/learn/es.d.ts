@@ -203,7 +203,7 @@ declare global {
 
 	function color(c0: string | number | Color | number[], c1?: number, c2?: number, c3?: number): Color;
 
-	function modoColor(modo: 'rgb' | 'oklch', formato: 1 | 255, gama: 'srgb' | 'display-p3'): void;
+	function modoColor(modo: 'rgb' | 'oklch', formato?: 1 | 255, gama?: 'srgb' | 'display-p3'): void;
 
 	const RGB: 'rgb';
 
@@ -605,7 +605,7 @@ declare global {
 
 	function empezarForma(): void;
 
-	function terminarForma(): void;
+	function terminarForma(cerrar?: boolean): void;
 
 	function empezarContorno(): void;
 

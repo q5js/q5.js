@@ -1,5 +1,7 @@
 /**
  * q5/lang/build.js (Bun optimized)
+ *
+ * AI was used to generate this entire script.
  */
 
 import { readdir } from 'node:fs/promises';

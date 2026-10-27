@@ -6,8 +6,8 @@ Customize how your canvas is presented.
 
 ```
 @param {string} mode NORMAL, CENTER, or MAXED
-@param {string} renderQuality SMOOTH or PIXELATED
-@param {number} scale can also be given as a string (for example "x2")
+@param {string} [renderQuality] SMOOTH or PIXELATED
+@param {number} [scale] can also be given as a string (for example "x2")
 ```
 
 ### webgpu

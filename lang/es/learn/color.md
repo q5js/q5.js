@@ -166,7 +166,7 @@ La gama de color es 'display-p3' por defecto, si el dispositivo soporta HDR.
 
 ```
 @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} modo modo de color
-@param {1 | 255} formato formato de color (1 para flotante, 255 para entero)
+@param {1 | 255} [formato] formato de color (1 para flotante, 255 para entero)
 @param {'srgb' | 'display-p3'} [gama] gama de color
 ```
 

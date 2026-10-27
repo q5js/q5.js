@@ -6,8 +6,8 @@ Personaliza cómo se presenta tu lienzo.
 
 ```
 @param {string} modo NORMAL, CENTRO, o MAXIMIZADO
-@param {string} calidadRenderizado SUAVE o PIXELADO
-@param {number} escala también se puede dar como una cadena (por ejemplo "x2")
+@param {string} [calidadRenderizado] SUAVE o PIXELADO
+@param {number} [escala] también se puede dar como una cadena (por ejemplo "x2")
 ```
 
 ### webgpu

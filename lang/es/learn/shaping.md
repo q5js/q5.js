@@ -112,6 +112,10 @@ Comienza a almacenar vértices para una forma convexa.
 
 Termina de almacenar vértices para una forma convexa.
 
+```
+@param {boolean} [cerrar] indica si se debe cerrar la forma conectando el último vértice con el primero; el valor predeterminado es false
+```
+
 ## vertice
 
 Especifica un vértice en una forma.

@@ -1443,7 +1443,7 @@ declare global {
 	 *
 	 * El modo de color por defecto es RGB en formato entero legado.
 	 * @param {'rgb' | 'oklch' | 'hsl' | 'hsb'} modo modo de color
-	 * @param {1 | 255} formato formato de color (1 para flotante, 255 para entero)
+	 * @param {1 | 255} [formato] formato de color (1 para flotante, 255 para entero)
 	 * @param {'srgb' | 'display-p3'} [gama] gama de color
 	 * @example
 	 * crearLienzo(200);
@@ -1466,7 +1466,7 @@ declare global {
 	 * relleno(0.75, 0.15, 0);
 	 * rect(100, 0, 100, 200);
 	 */
-	function modoColor(modo: 'rgb' | 'oklch', formato: 1 | 255, gama: 'srgb' | 'display-p3'): void;
+	function modoColor(modo: 'rgb' | 'oklch', formato?: 1 | 255, gama?: 'srgb' | 'display-p3'): void;
 
 	/** 🎨
 	 * Los colores RGB tienen componentes `r`/`red` (rojo), `g`/`green` (verde), `b`/`blue` (azul),
@@ -2195,8 +2195,8 @@ declare global {
 	/** 💻
 	 * Personaliza cómo se presenta tu lienzo.
 	 * @param {string} modo NORMAL, CENTRO, o MAXIMIZADO
-	 * @param {string} calidadRenderizado SUAVE o PIXELADO
-	 * @param {number} escala también se puede dar como una cadena (por ejemplo "x2")
+	 * @param {string} [calidadRenderizado] SUAVE o PIXELADO
+	 * @param {number} [escala] también se puede dar como una cadena (por ejemplo "x2")
 	 * @example
 	 * crearLienzo(50, 25);
 	 * 
@@ -3840,8 +3840,9 @@ declare global {
 
 	/** 🖌
 	 * Termina de almacenar vértices para una forma convexa.
+	 * @param {boolean} [cerrar] indica si se debe cerrar la forma conectando el último vértice con el primero; el valor predeterminado es false
 	 */
-	function terminarForma(): void;
+	function terminarForma(cerrar?: boolean): void;
 
 	/** 🖌
 	 * Especifica un vértice en una forma.
