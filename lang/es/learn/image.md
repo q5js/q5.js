@@ -474,9 +474,9 @@ Enmascara la imagen con otra imagen.
 @param {Q5.Image} img imagen a usar como máscara
 ```
 
-## copiar
+## clonar
 
-Devuelve una copia de la imagen.
+Devuelve una clon (copia) de la imagen.
 
 ```
 @returns {Q5.Image}

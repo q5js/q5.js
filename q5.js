@@ -1683,14 +1683,14 @@ Q5.renderers.c2d.image = ($, q) => {
 		$.modified = $._retint = true;
 	};
 
-	$.inset = (x, y, w, h, dx, dy, dw, dh) => {
+	$.copy = $.inset = (x, y, w, h, dx, dy, dw, dh) => {
 		let pd = $._pixelDensity || 1;
 		$.ctx.drawImage(c, x * pd, y * pd, w * pd, h * pd, dx, dy, dw, dh);
 
 		$.modified = $._retint = true;
 	};
 
-	$.copy = () => {
+	$.clone = () => {
 		let img = $.get();
 		for (let prop in $) {
 			if (typeof $[prop] != 'function' && !/(canvas|ctx|texture)/.test(prop)) {

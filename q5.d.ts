@@ -465,10 +465,10 @@ declare global {
 	function mask(img: Q5.Image): void;
 
 	/** 🌆
-	 * Returns a copy of the image.
+	 * Returns a clone (copy) of the image.
 	 * @returns {Q5.Image}
 	 */
-	function copy(): Q5.Image;
+	function clone(): Q5.Image;
 
 	/** 🌆
 	 * Displays a region of the image on another region of the image.
@@ -4485,7 +4485,7 @@ declare global {
 			tint: typeof tint;
 			noTint: typeof noTint;
 			mask: typeof mask;
-			copy: typeof copy;
+			clone: typeof clone;
 			inset: typeof inset;
 			get: typeof get;
 			set: typeof set;
@@ -4662,7 +4662,7 @@ declare global {
 			defaultHeight: number;
 			mirrorX: boolean;
 			mirrorY: boolean;
-			copy(): Q5.Image;
+			clone(): Q5.Image;
 			get(x: number, y: number, w?: number, h?: number): Q5.Image | number[];
 			set(x: number, y: number, val: any): void;
 			resize(w: number, h: number): void;

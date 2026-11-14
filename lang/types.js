@@ -744,6 +744,12 @@ const pyName = (n) => (PY_KEYWORDS.has(n) ? n + '_' : n);
 const PYI_SKIPPED_MEMBERS = { Q5: ['registerLang'] };
 
 /**
+ * Global classes that are also exposed on Q5 as aliases (Q5.Color, Q5.Vector),
+ * mirroring `export import X = globalThis.X` in the d.ts namespace
+ */
+const Q5_CLASS_ALIASES = ['Color', 'Vector'];
+
+/**
  * Splits a string on a separator, ignoring separators nested inside
  * <>, (), [], {} or quotes. Used for unions, intersections and param lists.
  */
@@ -1365,6 +1371,14 @@ function buildPyiFile(sections, baseDtsPath, outputPath, pyiSectionOrder) {
 					)
 						.split('\n')
 						.map((l) => '\t' + l);
+
+					// Q5.Color and Q5.Vector are aliases of the global classes.
+					// A module level alias is used so the class attribute doesn't refer to itself.
+					const aliases = Q5_CLASS_ALIASES.filter((name) => emitted.has(name));
+					if (aliases.length) {
+						output.push(...aliases.map((name) => `_${name} = ${name}`), '');
+						nestedImageLines.push('', ...aliases.map((name) => `\t${name} = _${name}`));
+					}
 				}
 
 				output.push(generatePyiClass(func, emoji, baseMembers, registry, nestedImageLines));

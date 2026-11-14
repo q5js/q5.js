@@ -449,10 +449,10 @@ declare global {
 	function enmascarar(img: Q5.Imagen): void;
 
 	/** 🌆
-	 * Devuelve una copia de la imagen.
+	 * Devuelve una clon (copia) de la imagen.
 	 * @returns {Q5.Image}
 	 */
-	function copiar(): Q5.Imagen;
+	function clonar(): Q5.Imagen;
 
 	/** 🌆
 	 * Muestra una región de la imagen en otra región de la imagen.
@@ -4108,7 +4108,7 @@ declare global {
 			teñir: typeof teñir;
 			noTeñir: typeof noTeñir;
 			enmascarar: typeof enmascarar;
-			copiar: typeof copiar;
+			clonar: typeof clonar;
 			insertado: typeof insertado;
 			obtener: typeof obtener;
 			establecer: typeof establecer;
@@ -4275,7 +4275,7 @@ declare global {
 			defectoAlto: number;
 			espejoX: boolean;
 			espejoY: boolean;
-			copiar(): Q5.Imagen;
+			clonar(): Q5.Imagen;
 			obtener(x: number, y: number, w?: number, h?: number): Q5.Imagen | number[];
 			establecer(x: number, y: number, val: any): void;
 			redimensionar(w: number, h: number): void;

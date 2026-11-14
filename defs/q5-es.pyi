@@ -422,9 +422,9 @@ def enmascarar(img: Q5.Image) -> None:
 	"""
 	...
 
-def copiar() -> Q5.Image:
+def clonar() -> Q5.Image:
 	"""🌆
-	Devuelve una copia de la imagen.
+	Devuelve una clon (copia) de la imagen.
 	"""
 	...
 
@@ -4403,6 +4403,9 @@ q5: type[Q5]
 Alias para Q5.
 """
 
+_Color = Color
+_Vector = Vector
+
 class Q5:
 	"""⚙
 	Funcion constructora. Crea una instancia de Q5.
@@ -4569,7 +4572,7 @@ class Q5:
 	def teñir(self, color: str | float) -> None: ...
 	def noTeñir(self) -> None: ...
 	def enmascarar(self, img: Q5.Image) -> None: ...
-	def copiar(self) -> Q5.Image: ...
+	def clonar(self) -> Q5.Image: ...
 	def insertado(self, sx: float, sy: float, sw: float, sh: float, dx: float, dy: float, dw: float, dh: float) -> None: ...
 	def obtener(self, x: float, y: float, w: float = ..., h: float = ...) -> Q5.Image | list[float]: ...
 	def establecer(self, x: float, y: float, val: Any) -> None: ...
@@ -4739,3 +4742,6 @@ class Q5:
 		"""⚙
 		🌆 Image
 		"""
+
+	Color = _Color
+	Vector = _Vector

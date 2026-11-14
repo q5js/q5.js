@@ -478,9 +478,9 @@ Masks the image with another image.
 @param {Q5.Image} img image to use as a mask
 ```
 
-## copy
+## clone
 
-Returns a copy of the image.
+Returns a clone (copy) of the image.
 
 ```
 @returns {Q5.Image}

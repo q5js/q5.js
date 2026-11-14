@@ -59,7 +59,7 @@ declare global {
 
 	function mask(img: Q5.Image): void;
 
-	function copy(): Q5.Image;
+	function clone(): Q5.Image;
 
 	function inset(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
 
@@ -753,7 +753,7 @@ declare global {
 		tint: typeof tint;
 		noTint: typeof noTint;
 		mask: typeof mask;
-		copy: typeof copy;
+		clone: typeof clone;
 		inset: typeof inset;
 		get: typeof get;
 		set: typeof set;
@@ -929,7 +929,7 @@ declare global {
 			defaultHeight: number;
 			mirrorX: boolean;
 			mirrorY: boolean;
-			copy(): Q5.Image;
+			clone(): Q5.Image;
 			get(x: number, y: number, w?: number, h?: number): Q5.Image | number[];
 			set(x: number, y: number, val: any): void;
 			resize(w: number, h: number): void;
